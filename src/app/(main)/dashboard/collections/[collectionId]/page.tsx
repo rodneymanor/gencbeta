@@ -65,7 +65,12 @@ const mockItems = [
   },
 ];
 
-export default function CollectionDetailPage({ params }: { params: { collectionId: string } }) {
+interface PageProps {
+  params: { collectionId: string };
+  searchParams?: { [key: string]: string | string[] | undefined };
+}
+
+export default function CollectionDetailPage({ params }: PageProps) {
   const [items, setItems] = useState(mockItems);
 
   const renderItemContent = (item: (typeof mockItems)[0]) => {
