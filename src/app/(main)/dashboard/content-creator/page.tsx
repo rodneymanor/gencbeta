@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 import { PenTool, FileText, Inbox, Zap, Bot, Lightbulb, Film, Clock } from "lucide-react";
 
@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 // Mock data for demonstration
 const aiScriptIdeas = [
@@ -81,9 +82,16 @@ const quickActions = [
 export default function ContentCreatorPage() {
   const [scriptIdea, setScriptIdea] = useState("");
   const [isCreating, setIsCreating] = useState(false);
+  const [isInputActive, setIsInputActive] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Mock user name - in real app, this would come from auth context
   const userName = "Alex";
+
+  const handleNewScriptClick = () => {
+    setIsInputActive(true);
+    inputRef.current?.focus();
+  };
 
   const handleScriptCreation = async () => {
     if (!scriptIdea.trim()) return;
@@ -137,11 +145,17 @@ export default function ContentCreatorPage() {
           {/* Right side - Quick script creation */}
           <div className="flex w-full max-w-md gap-2 md:w-1/2">
             <Input
+              ref={inputRef}
               placeholder="Describe your idea for a guided script..."
               value={scriptIdea}
               onChange={(e) => setScriptIdea(e.target.value)}
               onKeyPress={handleKeyPress}
-              className="focus:border-primary focus:ring-primary flex-1 transition-colors"
+              onFocus={() => setIsInputActive(true)}
+              onBlur={() => setIsInputActive(false)}
+              className={cn(
+                "flex-1 transition-all",
+                isInputActive && "ring-2 ring-primary ring-offset-2 ring-offset-background"
+              )}
             />
             <Button
               onClick={handleScriptCreation}
@@ -168,7 +182,7 @@ export default function ContentCreatorPage() {
                 <Card
                   key={action.id}
                   className="group bg-card cursor-pointer border-0 transition-all duration-200 hover:shadow-lg"
-                  onClick={action.onClick}
+                  onClick={action.id === 1 ? handleNewScriptClick : action.onClick}
                 >
                   <CardHeader className="pb-4">
                     <div className="bg-primary/10 group-hover:bg-primary mb-3 flex h-12 w-12 items-center justify-center rounded-xl transition-colors">
