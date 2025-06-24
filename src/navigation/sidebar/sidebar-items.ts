@@ -15,6 +15,7 @@ import {
   Lock,
   Fingerprint,
   SquareArrowUpRight,
+  PenTool,
   type LucideIcon,
 } from "lucide-react";
 
@@ -52,6 +53,7 @@ export const sidebarItems: NavGroup[] = [
         icon: Home,
         subItems: [
           { title: "Default", url: "/dashboard/default", icon: ChartPie },
+          { title: "Content Creator", url: "/dashboard/content-creator", icon: PenTool },
           { title: "CRM", url: "/dashboard", icon: Grid2X2, comingSoon: true },
           { title: "Analytics", url: "/dashboard/analytics", icon: ChartLine, comingSoon: true },
           { title: "eCommerce", url: "/dashboard/e-commerce", icon: ShoppingBag, comingSoon: true },
