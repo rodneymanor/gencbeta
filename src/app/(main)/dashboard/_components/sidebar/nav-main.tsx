@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 import { Zap, Plus, ChevronRight, FolderPlus } from "lucide-react";
 
+import { CreateCollectionDialog } from "@/app/(main)/dashboard/collections/_components/create-collection-dialog";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
@@ -26,8 +27,6 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { type NavGroup, type NavMainItem } from "@/navigation/sidebar/sidebar-items";
-
-import { CreateCollectionDialog } from "../../collections/_components/create-collection-dialog";
 
 import { CreateDropdown } from "./create-dropdown";
 import { SpeedWriteDialog } from "./speed-write-dialog";

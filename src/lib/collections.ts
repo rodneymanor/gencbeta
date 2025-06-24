@@ -7,7 +7,6 @@ import {
   getDocs,
   getDoc,
   query,
-  orderBy,
   where,
   serverTimestamp,
   type Timestamp,
@@ -67,17 +66,22 @@ export class CollectionsService {
   static async getUserCollections(userId: string): Promise<Collection[]> {
     if (!db) throw new Error("Firebase not initialized");
 
-    const q = query(
-      collection(db, COLLECTIONS_COLLECTION),
-      where("userId", "==", userId),
-      orderBy("updatedAt", "desc"),
-    );
+    // Simplified query without orderBy to avoid composite index requirement
+    // We'll sort on the client side until the index is built
+    const q = query(collection(db, COLLECTIONS_COLLECTION), where("userId", "==", userId));
 
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => ({
+    const collections = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     })) as Collection[];
+
+    // Sort by updatedAt on the client side
+    return collections.sort((a, b) => {
+      const aTime = a.updatedAt instanceof Date ? a.updatedAt.getTime() : a.updatedAt.toMillis();
+      const bTime = b.updatedAt instanceof Date ? b.updatedAt.getTime() : b.updatedAt.toMillis();
+      return bTime - aTime; // desc order
+    });
   }
 
   // Get a specific collection
