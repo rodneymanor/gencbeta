@@ -1,46 +1,59 @@
 import Link from "next/link";
 
-import { Command } from "lucide-react";
+import { PenTool } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { RegisterFormV1 } from "./_components/register-form";
 
 export default function RegisterV1() {
   return (
-    <div className="flex h-dvh">
-      <div className="bg-background flex w-full items-center justify-center p-8 lg:w-2/3">
-        <div className="w-full max-w-md space-y-10 py-24 lg:py-32">
-          <div className="space-y-4 text-center">
-            <div className="text-foreground font-medium tracking-tight">Register</div>
-            <div className="text-muted-foreground mx-auto max-w-xl">
-              Fill in your details below. We promise not to quiz you about your first pet&apos;s name (this time).
+    <div className="from-background via-background to-muted/20 flex min-h-screen items-center justify-center bg-gradient-to-br p-4">
+      <div className="w-full max-w-md">
+        <Card className="bg-card/95 supports-[backdrop-filter]:bg-card/90 border-0 shadow-xl backdrop-blur">
+          <CardHeader className="space-y-4 pb-8">
+            <div className="flex justify-center">
+              <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-xl">
+                <PenTool className="text-primary h-6 w-6" />
+              </div>
             </div>
-          </div>
-          <div className="space-y-4">
-            <RegisterFormV1 />
-            <Button className="w-full" variant="outline">
-              Continue with Google
-            </Button>
-            <p className="text-muted-foreground text-center text-xs font-medium">
-              Already have an account?{" "}
-              <Link href="login" className="text-primary font-semibold">
-                Login
-              </Link>
-            </p>
-          </div>
-        </div>
-      </div>
+            <div className="space-y-2 text-center">
+              <CardTitle className="text-2xl font-semibold tracking-tight">Create your account</CardTitle>
+              <CardDescription className="text-muted-foreground text-base">
+                Join Script Writer today and start crafting your stories with powerful tools
+              </CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent className="pb-8">
+            <div className="space-y-6">
+              <RegisterFormV1 />
+              <div className="text-center">
+                <p className="text-muted-foreground text-sm">
+                  Already have an account?{" "}
+                  <Link
+                    href="login"
+                    className="text-primary hover:text-primary/80 font-semibold underline underline-offset-4 transition-colors"
+                  >
+                    Sign in
+                  </Link>
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-      <div className="bg-primary hidden lg:block lg:w-1/3">
-        <div className="flex h-full flex-col items-center justify-center p-12 text-center">
-          <div className="space-y-6">
-            <Command className="text-primary-foreground mx-auto size-12" />
-            <div className="space-y-2">
-              <h1 className="text-primary-foreground text-5xl font-light">Welcome!</h1>
-              <p className="text-primary-foreground/80 text-xl">You&apos;re in the right place.</p>
-            </div>
-          </div>
+        {/* Footer */}
+        <div className="mt-8 text-center">
+          <p className="text-muted-foreground text-xs">
+            By creating an account, you agree to our{" "}
+            <Link href="#" className="text-primary hover:text-primary/80 underline underline-offset-4">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link href="#" className="text-primary hover:text-primary/80 underline underline-offset-4">
+              Privacy Policy
+            </Link>
+          </p>
         </div>
       </div>
     </div>
