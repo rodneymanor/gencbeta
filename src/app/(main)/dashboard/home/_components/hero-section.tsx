@@ -192,7 +192,7 @@ export default function HeroSection() {
                 className="w-full bg-indigo-600 hover:bg-indigo-700"
               >
                 <Wand className="mr-2 h-4 w-4" />
-                Speed Write
+                Fast Write
               </Button>
               <Button
                 size="lg"
