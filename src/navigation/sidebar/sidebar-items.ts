@@ -57,7 +57,7 @@ export const sidebarItems: NavGroup[] = [
     items: [
       {
         title: "Dashboards",
-        url: "/dashboard",
+        url: "/dashboard/content-creator",
         icon: Home,
         subItems: [
           { title: "Home", url: "/dashboard/home", icon: Home },
