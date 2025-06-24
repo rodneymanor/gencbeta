@@ -1,7 +1,6 @@
 "use client";
 
-import { Command } from "lucide-react";
-
+import { GenCLogo } from "@/components/ui/gen-c-logo";
 import {
   Sidebar,
   SidebarContent,
@@ -11,7 +10,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { APP_CONFIG } from "@/config/app-config";
 import { useCollectionsSidebar } from "@/hooks/use-collections-sidebar";
 import { sidebarItems } from "@/navigation/sidebar/sidebar-items";
 
@@ -28,8 +26,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
               <a href="#">
-                <Command />
-                <span className="text-base font-semibold">{APP_CONFIG.name}</span>
+                <GenCLogo iconSize="sm" textSize="sm" />
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

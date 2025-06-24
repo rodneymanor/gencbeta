@@ -1,11 +1,11 @@
 import packageJson from "../../package.json";
 
 export const APP_CONFIG = {
-  name: "Studio Admin",
+  name: "Gen C",
   version: packageJson.version,
   meta: {
-    title: "Studio Admin - Modern Next.js Dashboard Starter Template",
+    title: "Gen C - Content Creation Platform",
     description:
-      "Studio Admin is a modern, open-source dashboard starter template built with Next.js 15, Tailwind CSS v4, and shadcn/ui. Perfect for SaaS apps, admin panels, and internal tools—fully customizable and production-ready.",
+      "Gen C is a modern content creation platform for script writers and content creators. Build, organize, and manage your creative content with powerful tools and seamless collaboration.",
   },
 };
