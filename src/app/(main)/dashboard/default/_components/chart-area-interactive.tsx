@@ -140,6 +140,12 @@ export function ChartAreaInteractive() {
     }
     const startDate = new Date(referenceDate);
     startDate.setDate(startDate.getDate() - daysToSubtract);
+
+    // Ensure chartData is available before filtering
+    if (!chartData) {
+      return [];
+    }
+
     return chartData.filter((item) => new Date(item.date) >= startDate);
   }, [timeRange]);
 
@@ -187,7 +193,7 @@ export function ChartAreaInteractive() {
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
         <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
-          <AreaChart data={filteredData || []}>
+          <AreaChart data={filteredData}>
             <defs>
               <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="var(--color-desktop)" stopOpacity={1.0} />
