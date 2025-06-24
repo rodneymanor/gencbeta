@@ -5,6 +5,7 @@ import { Inter } from "next/font/google";
 
 import { ThemeProvider } from "next-themes";
 
+import { ClipboardDetectionProvider } from "@/components/clipboard-detection-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { APP_CONFIG } from "@/config/app-config";
 import { AuthProvider } from "@/contexts/auth-context";
@@ -23,10 +24,10 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
     <html lang="en" className="light" suppressHydrationWarning>
       <body className={`${inter.className} min-h-screen antialiased`}>
         <AuthProvider>
-        <ThemeProvider attribute="class" defaultTheme="light" disableTransitionOnChange enableSystem={false}>
-          {children}
-          <Toaster />
-        </ThemeProvider>
+          <ThemeProvider attribute="class" defaultTheme="light" disableTransitionOnChange enableSystem={false}>
+            <ClipboardDetectionProvider>{children}</ClipboardDetectionProvider>
+            <Toaster />
+          </ThemeProvider>
         </AuthProvider>
       </body>
     </html>

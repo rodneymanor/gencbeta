@@ -5,15 +5,16 @@ import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 
-import { PlayCircle, Plus } from "lucide-react";
+import { PlayCircle, Plus, Download } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/auth-context";
 import { CollectionsService, type Collection, type Video } from "@/lib/collections";
 
 import { AddVideoDialog } from "./_components/add-video-dialog";
+import { ImportCreatorDialog } from "./_components/import-creator-dialog";
+import { VideoModal } from "./_components/video-modal";
 
 export default function CollectionsPage() {
   const [collections, setCollections] = useState<Collection[]>([]);
@@ -85,12 +86,20 @@ export default function CollectionsPage() {
           <h1 className="text-3xl font-bold">{pageTitle}</h1>
           <p className="text-muted-foreground mt-1">{pageDescription}</p>
         </div>
-        <AddVideoDialog collections={collections} onVideoAdded={loadCollections}>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Video
-          </Button>
-        </AddVideoDialog>
+        <div className="flex gap-2">
+          <ImportCreatorDialog collections={collections} onVideosImported={loadCollections}>
+            <Button variant="outline">
+              <Download className="mr-2 h-4 w-4" />
+              Import Creator
+            </Button>
+          </ImportCreatorDialog>
+          <AddVideoDialog collections={collections} onVideoAdded={loadCollections}>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Video
+            </Button>
+          </AddVideoDialog>
+        </div>
       </div>
 
       <Separator />
@@ -141,18 +150,11 @@ export default function CollectionsPage() {
       </div>
 
       {/* Video Modal */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>{selectedVideo?.title}</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <p className="text-muted-foreground text-center">
-              Video information and embedded video will be displayed here.
-            </p>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <VideoModal
+        video={selectedVideo}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 }
