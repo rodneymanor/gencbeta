@@ -19,6 +19,9 @@ import {
   FileText,
   Edit,
   Plus,
+  Mic,
+  StickyNote,
+  Archive,
   type LucideIcon,
 } from "lucide-react";
 
@@ -90,6 +93,27 @@ export const sidebarItems: NavGroup[] = [
   },
   {
     id: 3,
+    label: "Content Capture",
+    items: [
+      {
+        title: "Voice Recording",
+        url: "/dashboard/capture/voice",
+        icon: Mic,
+      },
+      {
+        title: "Notes Capture",
+        url: "/dashboard/capture/notes",
+        icon: StickyNote,
+      },
+      {
+        title: "Recordings Library",
+        url: "/dashboard/capture/recordings",
+        icon: Archive,
+      },
+    ],
+  },
+  {
+    id: 4,
     label: "Pages",
     items: [
       {
@@ -146,7 +170,7 @@ export const sidebarItems: NavGroup[] = [
     ],
   },
   {
-    id: 4,
+    id: 5,
     label: "Misc",
     items: [
       {
