@@ -11,45 +11,78 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface SpeedWriteDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  children: React.ReactNode;
 }
 
-export function SpeedWriteDialog({ open, onOpenChange }: SpeedWriteDialogProps) {
+export function SpeedWriteDialog({ children }: SpeedWriteDialogProps) {
   const [scriptIdea, setScriptIdea] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
 
-  const handleSubmit = () => {
-    console.log("Script Idea:", scriptIdea);
-    // Add logic to handle script submission, e.g., redirect to editor
-    onOpenChange(false);
+  const handleScriptCreation = async () => {
+    if (!scriptIdea.trim()) return;
+
+    setIsCreating(true);
+    console.log("Creating script from idea:", scriptIdea);
+
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    setIsCreating(false);
+    setScriptIdea("");
+
+    // TODO: Navigate to script creation or handle the script creation logic
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleScriptCreation();
+    }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>What would you like to write today?</DialogTitle>
-          <DialogDescription>Create engaging scripts that will grow your audience.</DialogDescription>
+    <Dialog>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader className="space-y-3">
+          <DialogTitle className="text-xl font-semibold">What would you like to write today?</DialogTitle>
+          <DialogDescription className="text-muted-foreground text-base">
+            Create engaging scripts that will grow your audience.
+          </DialogDescription>
         </DialogHeader>
-        <div className="py-4">
-          <Input
-            id="script-idea"
-            placeholder="Enter a script idea to get started..."
-            value={scriptIdea}
-            onChange={(e) => setScriptIdea(e.target.value)}
-          />
-        </div>
-        <DialogFooter>
-          <Button type="submit" onClick={handleSubmit} disabled={!scriptIdea.trim()}>
-            <Zap className="mr-2 h-4 w-4" />
-            Start Writing
+        <div className="space-y-4 pt-2">
+          <div className="space-y-2">
+            <Label htmlFor="script-idea" className="text-sm font-medium">
+              Script Idea
+            </Label>
+            <Input
+              id="script-idea"
+              placeholder="Describe your script idea..."
+              value={scriptIdea}
+              onChange={(e) => setScriptIdea(e.target.value)}
+              onKeyPress={handleKeyPress}
+              className="min-h-[44px]"
+            />
+          </div>
+          <Button
+            onClick={handleScriptCreation}
+            disabled={!scriptIdea.trim() || isCreating}
+            className="bg-primary hover:bg-primary/90 text-primary-foreground w-full"
+          >
+            {isCreating ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            ) : (
+              <Zap className="mr-2 h-4 w-4" />
+            )}
+            {isCreating ? "Creating..." : "Start Writing"}
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
