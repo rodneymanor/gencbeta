@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { Zap, MailIcon, ChevronRight } from "lucide-react";
+import { Zap, Plus, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/sidebar";
 import { type NavGroup, type NavMainItem } from "@/navigation/sidebar/sidebar-items";
 
+import { CreateDropdown } from "./create-dropdown";
 import { SpeedWriteDialog } from "./speed-write-dialog";
 
 interface NavMainProps {
@@ -183,14 +184,16 @@ export function NavMain({ items }: NavMainProps) {
                   <span>Speed Write</span>
                 </SidebarMenuButton>
               </SpeedWriteDialog>
-              <Button
-                size="icon"
-                className="h-9 w-9 shrink-0 group-data-[collapsible=icon]:opacity-0"
-                variant="outline"
-              >
-                <MailIcon />
-                <span className="sr-only">Inbox</span>
-              </Button>
+              <CreateDropdown>
+                <Button
+                  size="icon"
+                  className="h-9 w-9 shrink-0 group-data-[collapsible=icon]:opacity-0"
+                  variant="outline"
+                >
+                  <Plus />
+                  <span className="sr-only">Create</span>
+                </Button>
+              </CreateDropdown>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroupContent>
