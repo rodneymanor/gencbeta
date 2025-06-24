@@ -31,12 +31,6 @@ export function CreateDropdown({ children }: CreateDropdownProps) {
   const { user } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    if (user) {
-      loadCollections();
-    }
-  }, [user, loadCollections]);
-
   const loadCollections = useCallback(async () => {
     if (!user) return;
 
@@ -47,6 +41,12 @@ export function CreateDropdown({ children }: CreateDropdownProps) {
       console.error("Error loading collections:", error);
     }
   }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      loadCollections();
+    }
+  }, [user, loadCollections]);
 
   const handleCreateNote = () => {
     router.push("/dashboard/capture/notes");
