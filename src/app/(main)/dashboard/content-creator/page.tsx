@@ -153,7 +153,7 @@ export default function ContentCreatorPage() {
               onFocus={() => setIsInputActive(true)}
               onBlur={() => setIsInputActive(false)}
               className={cn(
-                "flex-1 transition-all",
+                "flex-1 transition-all border border-input",
                 isInputActive && "ring-2 ring-primary ring-offset-2 ring-offset-background"
               )}
             />
