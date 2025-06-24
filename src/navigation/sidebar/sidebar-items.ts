@@ -1,13 +1,14 @@
 import {
   Home,
+  Library,
   FileText,
-  Edit,
-  Plus,
   Mic,
   StickyNote,
-  Archive,
   Lightbulb,
   BookCopy,
+  Sparkles,
+  Wrench,
+  Edit,
   type LucideIcon,
 } from "lucide-react";
 
@@ -37,7 +38,6 @@ export interface NavGroup {
 export const sidebarItems: NavGroup[] = [
   {
     id: 1,
-    label: "Dashboards",
     items: [
       {
         title: "Home",
@@ -48,48 +48,27 @@ export const sidebarItems: NavGroup[] = [
   },
   {
     id: 2,
-    label: "Scripts",
+    label: "Library",
     items: [
       {
-        title: "Scripts Library",
+        title: "Scripts",
         url: "/dashboard/scripts",
         icon: FileText,
       },
       {
-        title: "Script Editor",
-        url: "/dashboard/scripts/editor",
-        icon: Edit,
+        title: "Recordings",
+        url: "/dashboard/capture/recordings",
+        icon: Mic,
       },
       {
-        title: "New Script",
-        url: "/dashboard/scripts/new",
-        icon: Plus,
+        title: "Notes",
+        url: "/dashboard/capture/notes",
+        icon: StickyNote,
       },
     ],
   },
   {
     id: 3,
-    label: "Content Capture",
-    items: [
-      {
-        title: "Voice Recording",
-        url: "/dashboard/capture/voice",
-        icon: Mic,
-      },
-      {
-        title: "Notes Capture",
-        url: "/dashboard/capture/notes",
-        icon: StickyNote,
-      },
-      {
-        title: "Recordings Library",
-        url: "/dashboard/capture/recordings",
-        icon: Archive,
-      },
-    ],
-  },
-  {
-    id: 4,
     label: "Inspiration",
     items: [
       {
@@ -98,9 +77,20 @@ export const sidebarItems: NavGroup[] = [
         icon: BookCopy,
       },
       {
-        title: "AI Inspiration",
+        title: "AI Ideas",
         url: "/dashboard/inspiration",
-        icon: Lightbulb,
+        icon: Sparkles,
+      },
+    ],
+  },
+  {
+    id: 4,
+    label: "Tools",
+    items: [
+      {
+        title: "Script Editor",
+        url: "/dashboard/scripts/editor",
+        icon: Edit,
       },
     ],
   },
