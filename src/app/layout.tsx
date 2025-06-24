@@ -28,7 +28,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
             defaultTheme="system"
             enableSystem
             disableTransitionOnChange
-            themes={['light', 'dark', 'tangerine', 'ocean', 'forest', 'sunset']}
+            themes={["light", "dark", "tangerine", "ocean", "forest", "sunset"]}
           >
             {children}
             <Toaster />

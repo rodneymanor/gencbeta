@@ -1,8 +1,8 @@
 "use client";
 
-import { Moon, Sun, Palette, Check } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Check, Moon, Palette, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -40,21 +40,21 @@ export function ThemeSwitcher() {
     );
   }
 
-  const currentIcon = resolvedTheme === 'dark' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />;
+  const currentIcon = resolvedTheme === "dark" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button size="icon" variant="ghost" className="relative">
           {currentIcon}
-          <Palette className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 text-muted-foreground" />
+          <Palette className="text-muted-foreground absolute -right-0.5 -bottom-0.5 h-2.5 w-2.5" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium">Theme Selector</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               Choose your preferred theme
             </p>
           </div>
@@ -65,19 +65,26 @@ export function ThemeSwitcher() {
           <DropdownMenuItem
             key={themeOption.name}
             onClick={() => setTheme(themeOption.name)}
-            className="flex items-center justify-between p-2 cursor-pointer"
+            className="cursor-pointer flex items-center justify-between p-2"
           >
             <div className="flex items-center space-x-3">
-               <div className="w-4 h-4 rounded-full border-2 border-border" style={{ backgroundColor: `hsl(var(--${themeOption.name}-primary))` }} />
+              <div
+                className="border-border h-4 w-4 rounded-full border-2"
+                style={{
+                  backgroundColor: `hsl(var(--${themeOption.name}-primary))`,
+                }}
+              />
               <div className="flex flex-col">
-                <span className="text-sm font-medium">{themeOption.label}</span>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-sm font-medium">
+                  {themeOption.label}
+                </span>
+                <span className="text-muted-foreground text-xs">
                   {themeOption.description}
                 </span>
               </div>
             </div>
             {theme === themeOption.name && (
-              <Check className="h-4 w-4 text-primary" />
+              <Check className="text-primary h-4 w-4" />
             )}
           </DropdownMenuItem>
         ))}
@@ -88,7 +95,7 @@ export function ThemeSwitcher() {
             href="https://tweakcn.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center space-x-2 text-xs text-muted-foreground cursor-pointer"
+            className="text-muted-foreground flex cursor-pointer items-center space-x-2 text-xs"
           >
             <Palette className="h-3 w-3" />
             <span>Create custom themes with TweakCN</span>

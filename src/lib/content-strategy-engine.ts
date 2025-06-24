@@ -1,8 +1,11 @@
 // Placeholder for Content Strategy Engine
 // This file is required to prevent build failures due to missing modules.
 
-export const generateContentStrategy = async (topic: string, keywords: string[]) => {
-  console.log('Generating content strategy for:', topic, keywords);
+export const generateContentStrategy = async (
+  topic: string,
+  keywords: string[],
+) => {
+  console.log("Generating content strategy for:", topic, keywords);
   // In a real implementation, this would involve complex logic,
   // API calls to generative AI models, and data processing.
   return {
