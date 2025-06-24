@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import LinkNext from "next/link";
 
@@ -14,7 +14,6 @@ import {
   GripVertical,
   Trash2,
   Share2,
-  Users,
   Copy,
 } from "lucide-react";
 
@@ -66,12 +65,19 @@ const mockItems = [
 ];
 
 interface PageProps {
-  params: { collectionId: string };
-  searchParams?: { [key: string]: string | string[] | undefined };
+  params: Promise<{ collectionId: string }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export default function CollectionDetailPage({ params }: PageProps) {
+  const [collectionId, setCollectionId] = useState<string>("");
   const [items, setItems] = useState(mockItems);
+
+  useEffect(() => {
+    params.then(({ collectionId }) => {
+      setCollectionId(collectionId);
+    });
+  }, [params]);
 
   const renderItemContent = (item: (typeof mockItems)[0]) => {
     switch (item.type) {
