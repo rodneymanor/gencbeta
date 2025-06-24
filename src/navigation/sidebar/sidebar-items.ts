@@ -56,18 +56,9 @@ export const sidebarItems: NavGroup[] = [
     label: "Dashboards",
     items: [
       {
-        title: "Dashboards",
+        title: "Home",
         url: "/dashboard/content-creator",
         icon: Home,
-        subItems: [
-          { title: "Home", url: "/dashboard/home", icon: Home },
-          { title: "Content Creator", url: "/dashboard/content-creator", icon: PenTool },
-          { title: "CRM", url: "/dashboard", icon: Grid2X2, comingSoon: true },
-          { title: "Analytics", url: "/dashboard/analytics", icon: ChartLine, comingSoon: true },
-          { title: "eCommerce", url: "/dashboard/e-commerce", icon: ShoppingBag, comingSoon: true },
-          { title: "Academy", url: "/dashboard/academy", icon: BookA, comingSoon: true },
-          { title: "Logistics", url: "/dashboard/logistics", icon: Forklift, comingSoon: true },
-        ],
       },
     ],
   },
