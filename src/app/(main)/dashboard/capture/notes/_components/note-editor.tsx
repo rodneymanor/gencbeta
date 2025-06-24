@@ -1,3 +1,5 @@
+import { Dispatch, SetStateAction } from "react";
+
 import { Edit3, FileText, Save, Copy, Trash2, Hash, Bold, Italic, List, Quote, Link } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +23,7 @@ interface NoteEditorProps {
   selectedNote: Note | null;
   isEditing: boolean;
   setIsEditing: (editing: boolean) => void;
-  setSelectedNote: (note: Note | null) => void;
+  setSelectedNote: Dispatch<SetStateAction<Note | null>>;
   saveNote: () => void;
   convertToScript: (note: Note) => void;
   getTagColor: (tagName: string) => string;
