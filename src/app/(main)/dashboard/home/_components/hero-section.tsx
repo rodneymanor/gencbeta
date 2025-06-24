@@ -155,8 +155,10 @@ export default function HeroSection() {
       <motion.div
         layout
         className={cn(
-          "mx-auto mt-16 grid max-w-7xl gap-8 px-6 lg:px-8",
-          isStoryPanelOpen ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"
+          "mx-auto mt-16 grid gap-8 px-6 lg:px-8",
+          isStoryPanelOpen
+            ? "max-w-7xl grid-cols-1 lg:grid-cols-2"
+            : "max-w-4xl grid-cols-1"
         )}
       >
         <motion.div layout className="flex flex-col gap-4">
