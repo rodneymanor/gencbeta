@@ -46,6 +46,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [accountLevel, setAccountLevel] = useState<AccountLevel>("free");
 
   useEffect(() => {
+    if (!auth) {
+      // Firebase not configured, set loading to false
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
 
@@ -64,6 +70,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    if (!auth) {
+      throw new Error("Firebase is not configured. Please set up Firebase environment variables.");
+    }
+
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
@@ -78,10 +88,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUp = async (email: string, password: string, displayName?: string) => {
+    if (!auth) {
+      throw new Error("Firebase is not configured. Please set up Firebase environment variables.");
+    }
+
     setLoading(true);
     try {
       const result = await createUserWithEmailAndPassword(auth, email, password);
-      if (displayName && result.user) {
+      if (displayName) {
         await updateProfile(result.user, { displayName });
       }
     } catch (err) {
@@ -95,6 +109,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithGoogle = async () => {
+    if (!auth) {
+      throw new Error("Firebase is not configured. Please set up Firebase environment variables.");
+    }
+
     setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
@@ -110,6 +128,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
+    if (!auth) {
+      throw new Error("Firebase is not configured. Please set up Firebase environment variables.");
+    }
+
     setLoading(true);
     try {
       await signOut(auth);
@@ -119,6 +141,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resetPassword = async (email: string) => {
+    if (!auth) {
+      throw new Error("Firebase is not configured. Please set up Firebase environment variables.");
+    }
+
     await sendPasswordResetEmail(auth, email);
   };
 
