@@ -141,7 +141,7 @@ export default function HeroSection() {
   };
 
   return (
-    <div className="py-20 sm:py-28">
+    <div className="py-16 sm:py-24">
       <div className="mx-auto max-w-7xl px-6 lg:px-8 text-center">
         <Sparkles className="mx-auto h-8 w-8 text-indigo-500" />
         <h1 className="mt-6 text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
@@ -155,7 +155,7 @@ export default function HeroSection() {
       <motion.div
         layout
         className={cn(
-          "mx-auto mt-16 grid gap-8 px-6 lg:px-8",
+          "mx-auto mt-12 grid gap-8 px-6 lg:px-8",
           isStoryPanelOpen
             ? "max-w-7xl grid-cols-1 lg:grid-cols-2"
             : "max-w-4xl grid-cols-1"
@@ -165,18 +165,18 @@ export default function HeroSection() {
            {customScript && (
             <Badge variant="secondary" className="flex items-center justify-between w-full p-2">
               <span className="font-semibold">Custom Script Template Active</span>
-              <Button variant="ghost" size="sm" className="h-auto px-2 py-0.5" onClick={() => setCustomScript(null)}>Clear</Button>
+              <Button variant="ghost" size="sm" className="h-auto px-2 py-1" onClick={() => setCustomScript(null)}>Clear</Button>
             </Badge>
           )}
           <Textarea
             value={videoIdea}
             onChange={(e) => setVideoIdea(e.target.value)}
             placeholder={inputModes[inputMode]}
-            className="min-h-[200px] text-base"
+            className="min-h-52 text-base"
           />
           <div className="flex flex-col sm:flex-row gap-4 justify-between">
             <Select value={inputMode} onValueChange={(v: InputMode) => setInputMode(v)}>
-              <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectTrigger className="w-full sm:w-44">
                 <SelectValue placeholder="Input Mode" />
               </SelectTrigger>
               <SelectContent>
@@ -223,11 +223,11 @@ export default function HeroSection() {
                     <X className="h-4 w-4" />
                   </Button>
                 </CardHeader>
-                <CardContent className="space-y-8 overflow-y-auto max-h-[60vh] p-6">
+                <CardContent className="space-y-6 overflow-y-auto max-h-[60vh] p-6">
                   {/* Step 1: Tone */}
                   <div className="space-y-4">
                     <h3 className="font-semibold">1. Choose a Tone of Voice</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       {tones.map((tone) => (
                         <Card
                           key={tone.id}
@@ -238,7 +238,7 @@ export default function HeroSection() {
                             selectedTone === tone.id && "border-indigo-500 ring-2 ring-indigo-500"
                           )}
                         >
-                          <CardContent className="p-4 text-center">
+                          <CardContent className="p-6 text-center">
                             <span className="text-2xl">{tone.emoji}</span>
                             <p className="font-bold">{tone.name}</p>
                             <p className="text-xs text-muted-foreground">{tone.description}</p>
@@ -268,7 +268,7 @@ export default function HeroSection() {
                                 selectedTemplate?.id === template.id && "border-indigo-500 bg-secondary"
                               )}
                             >
-                              <CardContent className="p-3">
+                              <CardContent className="p-6">
                                 <p className="font-bold">{template.name}</p>
                                 <p className="text-xs text-muted-foreground">{template.structure}</p>
                               </CardContent>
@@ -288,7 +288,7 @@ export default function HeroSection() {
                       className="space-y-4"
                     >
                       <h3 className="font-semibold">3. Fill in the Blanks</h3>
-                      <div className="space-y-4">
+                      <div className="space-y-8">
                         {templateVariables.map((variable: string) => (
                           <Input
                             key={variable}
