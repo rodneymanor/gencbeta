@@ -95,7 +95,7 @@ const inputModes = {
 
 type InputMode = keyof typeof inputModes;
 
-export function HeroSection() {
+export default function HeroSection() {
   const [videoIdea, setVideoIdea] = useState("");
   const [inputMode, setInputMode] = useState<InputMode>("original");
   const [isStoryPanelOpen, setIsStoryPanelOpen] = useState(false);
