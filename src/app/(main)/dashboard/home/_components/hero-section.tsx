@@ -1,291 +1,324 @@
 "use client";
 
-import React, { useState } from "react";
-
-import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, BookText, BrainCircuit, X, Zap } from "lucide-react";
+import { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Sparkles, Wand, Bot, X, CheckCircle2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
+// --- Data Mocks ---
 const tones = [
   {
+    id: "hormozi",
     name: "Alex Hormozi",
     description: "Direct, value-driven, and authoritative.",
-    style: "Bold claims, evidence-based, clear calls to action.",
+    style: "Uses strong claims, frameworks, and clear calls to action.",
+    emoji: "💪",
+  },
+  {
+    id: "garyvee",
+    name: "Gary Vaynerchuk",
+    description: "High-energy, motivational, and empathetic.",
+    style: "Focuses on passion, hustle, and audience connection.",
     emoji: "🚀",
   },
   {
-    name: "Gary Vaynerchuk",
-    description: "High-energy, motivational, and brutally honest.",
-    style: "Passionate delivery, raw language, focuses on hustle.",
-    emoji: "🔥",
-  },
-  {
+    id: "sinek",
     name: "Simon Sinek",
-    description: "Inspirational, purpose-driven, and optimistic.",
-    style: "Starts with 'Why', uses storytelling, focuses on vision.",
-    emoji: "💡",
+    description: "Inspirational, purpose-focused, and calm.",
+    style: "Starts with 'Why', tells stories, and builds to a concept.",
+    emoji: "🧠",
   },
 ];
 
-const templates = {
-  "Alex Hormozi": [
+interface Template {
+  id: string;
+  name: string;
+  structure: string;
+  template: string;
+}
+
+const templatesByTone: { [key: string]: Template[] } = {
+  hormozi: [
     {
-      name: "The Grand Slam Offer",
-      structure: "{Hook} → {Problem} → {Solution} → {Offer Stack} → {Urgency}",
-      variables: ["Hook", "Problem", "Solution", "Offer Stack", "Urgency"],
+      id: "hormozi-1",
+      name: "Grand Slam Offer",
+      structure: "Problem → Solution → Scarcity → CTA",
+      template:
+        "Struggling with {problem}? My {framework_name} framework helps you achieve {desired_outcome} without {pain_point}. For a limited time, get it for just {cost}. Click the link to start.",
     },
     {
-      name: "Value Proof Framework",
-      structure: "{Claim} → {Evidence Point 1} → {Evidence Point 2} → {Call to Action}",
-      variables: ["Claim", "Evidence Point 1", "Evidence Point 2", "Call to Action"],
+      id: "hormozi-2",
+      name: "Value Equation",
+      structure: "Dream Outcome → Likelihood → Time Delay → Effort",
+      template:
+        "Imagine achieving your {dream_outcome}. With my system, the likelihood is high, time delay is minimal, and the effort required is low. I'll show you how to get there.",
     },
   ],
-  "Gary Vaynerchuk": [
+  garyvee: [
     {
-      name: "The Content Model",
-      structure: "{Document, Don't Create} → {Jab, Jab, Jab} → {Right Hook}",
-      variables: ["Document, Don't Create", "Jab, Jab, Jab", "Right Hook"],
+      id: "garyvee-1",
+      name: "Jab, Jab, Jab, Right Hook",
+      structure: "Value → Value → Value → Ask",
+      template:
+        "Here's a free tip on {topic}. Another thing you can do is {free_tip_2}. And one more thing: {free_tip_3}. If you want to go deeper, check out my new {product_name}.",
     },
   ],
-  "Simon Sinek": [
+  sinek: [
     {
-      name: "The Golden Circle",
-      structure: "{Why} → {How} → {What}",
-      variables: ["Why", "How", "What"],
+      id: "sinek-1",
+      name: "Start With Why",
+      structure: "Why → How → What",
+      template:
+        "We believe that {core_belief}. The way we challenge the status quo is by {how_we_do_it}. We just happen to make great {product_or_service}. Want to learn more?",
     },
   ],
 };
 
-const scriptBuilderTemplates = {
-  Hooks: [
-    "You won't believe this one weird trick...",
-    "Everything you know about X is wrong.",
-    "This is the secret to unlocking...",
-  ],
-  Bridges: ["But that's not all, because...", "Now, you might be thinking...", "Here's where it gets interesting."],
-  "Golden Nuggets": [
-    "The key takeaway here is to always...",
-    "Remember this: ...",
-    "If you do one thing today, make it this: ...",
-  ],
-  WTAs: [
-    "So what are you waiting for? Click the link below.",
-    "Follow for more content like this.",
-    "Share this with someone who needs to hear it.",
-  ],
+const inputModes = {
+  original: "Start with a video idea, topic, or a question for your audience...",
+  fixer: "Paste your script here and I'll help you fix the flow, clarity, and impact...",
+  rewriter: "Paste your script here and I'll rewrite it in a different style or tone...",
 };
+
+type InputMode = keyof typeof inputModes;
 
 export function HeroSection() {
-  const [inputValue, setInputValue] = useState("");
-  const [inputMode, setInputMode] = useState("Original");
-  const [showCreateStory, setShowCreateStory] = useState(false);
-  const [selectedTone, setSelectedTone] = useState<string | null>(null);
-  const [selectedTemplate, setSelectedTemplate] = useState<{
-    name: string;
-    structure: string;
-    variables: string[];
-  } | null>(null);
-  const [templateInputs, setTemplateInputs] = useState<{ [key: string]: string }>({});
-  const [scriptBuilderContent, setScriptBuilderContent] = useState("");
+  const [videoIdea, setVideoIdea] = useState("");
+  const [inputMode, setInputMode] = useState<InputMode>("original");
+  const [isStoryPanelOpen, setIsStoryPanelOpen] = useState(false);
 
-  const handleTemplateInputChange = (variable: string, value: string) => {
-    setTemplateInputs((prev) => ({ ...prev, [variable]: value }));
+  // Story Panel State
+  const [selectedTone, setSelectedTone] = useState<string | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+  const [templateInputs, setTemplateInputs] = useState<{ [key: string]: string }>({});
+
+  // Custom Script State
+  const [customScript, setCustomScript] = useState<string | null>(null);
+
+  const templateVariables = useMemo(() => {
+    if (!selectedTemplate) return [];
+    const regex = /{(\w+)}/g;
+    // eslint-disable-next-line security/detect-object-injection
+    const matches = selectedTemplate.template.match(regex);
+    return matches ? matches.map((v: string) => v.slice(1, -1)) : [];
+  }, [selectedTemplate]);
+
+  const areAllTemplateInputsFilled = useMemo(() => {
+    if (templateVariables.length === 0) return false;
+    // eslint-disable-next-line security/detect-object-injection
+    return templateVariables.every((variable: string) => templateInputs[variable]?.trim() !== "");
+  }, [templateVariables, templateInputs]);
+  
+  const handleGenerateStory = () => {
+    if (!selectedTemplate) return;
+    let finalScript = selectedTemplate.template;
+    for (const key in templateInputs) {
+      finalScript = finalScript.replace(`{${key}}`, templateInputs[key]);
+    }
+    setCustomScript(finalScript);
+    setIsStoryPanelOpen(false);
+    setSelectedTone(null);
+    setSelectedTemplate(null);
+    setTemplateInputs({});
   };
 
-  const areAllTemplateInputsFilled =
-    selectedTemplate?.variables.every((variable: string) => templateInputs[variable]?.trim() !== "") ?? false;
-
-  const placeholderText = {
-    Original: "e.g., A video about the benefits of intermittent fasting...",
-    Fixer: "Paste your script here to fix grammar, pacing, and clarity...",
-    Rewriter: "Paste your script here to get a new version in a different style...",
-  }[inputMode];
-
-  const renderCreateStoryPanel = () => (
-    <motion.div
-      initial={{ opacity: 0, x: 100 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 100 }}
-      transition={{ duration: 0.3 }}
-      className="bg-card w-full rounded-lg border p-6 lg:w-1/2"
-    >
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Create Story</h3>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => {
-            setShowCreateStory(false);
-            setSelectedTone(null);
-            setSelectedTemplate(null);
-          }}
-        >
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
-
-      <p className="text-muted-foreground mb-2 text-sm">Step 1: Choose Tone of Voice</p>
-      <div className="mb-4 grid grid-cols-1 gap-2 md:grid-cols-3">
-        {tones.map((tone) => (
-          <div
-            key={tone.name}
-            className={cn(
-              "cursor-pointer rounded-md border p-3 transition-all",
-              selectedTone === tone.name ? "border-primary bg-primary/10" : "hover:bg-muted/50",
-            )}
-            onClick={() => {
-              setSelectedTone(tone.name);
-              setSelectedTemplate(null);
-            }}
-          >
-            <span className="text-2xl">{tone.emoji}</span>
-            <p className="mt-1 font-semibold">{tone.name}</p>
-            <p className="text-muted-foreground text-xs">{tone.description}</p>
-          </div>
-        ))}
-      </div>
-
-      {selectedTone && (
-        <>
-          <p className="text-muted-foreground mb-2 text-sm">Step 2: Select a Template</p>
-          <div className="mb-4 grid grid-cols-1 gap-2">
-            {templates[selectedTone as keyof typeof templates]?.map((template) => (
-              <div
-                key={template.name}
-                className={cn(
-                  "cursor-pointer rounded-md border p-3 transition-all",
-                  selectedTemplate?.name === template.name ? "border-primary bg-primary/10" : "hover:bg-muted/50",
-                )}
-                onClick={() => setSelectedTemplate(template)}
-              >
-                <p className="font-semibold">{template.name}</p>
-                <p className="text-muted-foreground text-xs">{template.structure}</p>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-
-      {selectedTemplate && (
-        <>
-          <p className="text-muted-foreground mb-2 text-sm">Step 3: Fill in the Blanks</p>
-          <div className="mb-4 space-y-2">
-            {selectedTemplate.variables.map((variable: string) => (
-              <Input
-                key={variable}
-                placeholder={variable}
-                onChange={(e) => handleTemplateInputChange(variable, e.target.value)}
-              />
-            ))}
-          </div>
-        </>
-      )}
-
-      <Button className="w-full bg-purple-600 text-white hover:bg-purple-700" disabled={!areAllTemplateInputsFilled}>
-        <BrainCircuit className="mr-2 h-4 w-4" />
-        Generate Story
-      </Button>
-    </motion.div>
-  );
+  const handleTemplateInputChange = (variable: string, value: string) => {
+    // eslint-disable-next-line security/detect-object-injection
+    setTemplateInputs(prev => ({ ...prev, [variable]: value }));
+  };
 
   return (
-    <div className="py-16 md:py-24">
-      <div className="mb-8 text-center">
-        <h1 className="text-4xl font-bold md:text-5xl">What will You Script Today?</h1>
-        <p className="text-muted-foreground mt-2">Start with an idea, a draft, or a proven template.</p>
+    <div className="py-16 sm:py-24">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8 text-center">
+        <Sparkles className="mx-auto h-8 w-8 text-indigo-500" />
+        <h1 className="mt-4 text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
+          What will You Script Today?
+        </h1>
+        <p className="mt-6 text-lg leading-8 text-muted-foreground">
+          Start with an idea, fix an existing script, or create a structured story from scratch.
+        </p>
       </div>
 
-      <div
+      <motion.div
+        layout
         className={cn(
-          "mx-auto flex max-w-5xl flex-col gap-4 transition-all duration-300 lg:flex-row",
-          showCreateStory ? "lg:max-w-7xl" : "lg:max-w-5xl",
+          "mx-auto mt-10 grid max-w-7xl gap-8 px-6 lg:px-8",
+          isStoryPanelOpen ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"
         )}
       >
-        <div className={cn("w-full transition-all duration-300", showCreateStory ? "lg:w-1/2" : "lg:w-full")}>
+        <motion.div layout className="flex flex-col gap-4">
+           {customScript && (
+            <Badge variant="secondary" className="flex items-center justify-between w-full p-2">
+              <span className="font-semibold">Custom Script Template Active</span>
+              <Button variant="ghost" size="sm" className="h-auto px-2 py-0.5" onClick={() => setCustomScript(null)}>Clear</Button>
+            </Badge>
+          )}
           <Textarea
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder={placeholderText}
-            className="h-40 text-base"
+            value={videoIdea}
+            onChange={(e) => setVideoIdea(e.target.value)}
+            placeholder={inputModes[inputMode]}
+            className="min-h-[200px] text-base"
           />
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <Select onValueChange={setInputMode} defaultValue={inputMode}>
-                <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Input Mode" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Original">Original</SelectItem>
-                  <SelectItem value="Fixer">Fixer</SelectItem>
-                  <SelectItem value="Rewriter">Rewriter</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button disabled={!inputValue} className="bg-indigo-600 text-white hover:bg-indigo-700">
-                <Zap className="mr-2 h-4 w-4" />
+          <div className="flex flex-col sm:flex-row gap-4 justify-between">
+            <Select value={inputMode} onValueChange={(v: InputMode) => setInputMode(v)}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Input Mode" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="original">Original</SelectItem>
+                <SelectItem value="fixer">Fixer</SelectItem>
+                <SelectItem value="rewriter">Rewriter</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="flex gap-4">
+              <Button
+                size="lg"
+                disabled={!videoIdea.trim()}
+                className="w-full bg-indigo-600 hover:bg-indigo-700"
+              >
+                <Wand className="mr-2 h-4 w-4" />
                 Speed Write
               </Button>
-              <Button variant="outline" disabled={!inputValue} onClick={() => setShowCreateStory(true)}>
+              <Button
+                size="lg"
+                variant="outline"
+                disabled={!videoIdea.trim()}
+                onClick={() => setIsStoryPanelOpen(true)}
+                className="w-full"
+              >
+                <Bot className="mr-2 h-4 w-4" />
                 Create Story
-                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
           </div>
-        </div>
-        <AnimatePresence>{showCreateStory && renderCreateStoryPanel()}</AnimatePresence>
-      </div>
+        </motion.div>
 
-      <div className="mt-8 text-center">
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="link" className="text-muted-foreground">
-              <BookText className="mr-2 h-4 w-4" />
-              Script Builder
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="h-[80vh] max-w-6xl">
-            <DialogHeader>
-              <DialogTitle>Script Builder</DialogTitle>
-            </DialogHeader>
-            <div className="grid h-full grid-cols-3 gap-6">
-              <div className="col-span-2 grid grid-cols-2 gap-4 overflow-y-auto pr-4">
-                {Object.entries(scriptBuilderTemplates).map(([category, items]) => (
-                  <div key={category}>
-                    <h4 className="mb-2 font-semibold">{category}</h4>
-                    <div className="space-y-2">
-                      {items.map((item) => (
-                        <div
-                          key={item}
-                          onClick={() => setScriptBuilderContent((prev) => `${prev} ${item}`)}
-                          className="hover:bg-muted/50 cursor-pointer rounded-md border p-3 text-sm"
+        <AnimatePresence>
+          {isStoryPanelOpen && (
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 50, transition: { duration: 0.2 } }}
+              transition={{ type: "spring", stiffness: 100, damping: 20 }}
+            >
+              <Card className="h-full">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle>Create Story</CardTitle>
+                  <Button variant="ghost" size="icon" onClick={() => setIsStoryPanelOpen(false)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </CardHeader>
+                <CardContent className="space-y-6 overflow-y-auto max-h-[60vh] p-4">
+                  {/* Step 1: Tone */}
+                  <div className="space-y-2">
+                    <h3 className="font-semibold">1. Choose a Tone of Voice</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                      {tones.map((tone) => (
+                        <Card
+                          key={tone.id}
+                          // eslint-disable-next-line security/detect-object-injection
+                          onClick={() => setSelectedTone(tone.id)}
+                          className={cn(
+                            "cursor-pointer transition-all",
+                            selectedTone === tone.id && "border-indigo-500 ring-2 ring-indigo-500"
+                          )}
                         >
-                          {item}
-                        </div>
+                          <CardContent className="p-4 text-center">
+                            <span className="text-2xl">{tone.emoji}</span>
+                            <p className="font-bold">{tone.name}</p>
+                            <p className="text-xs text-muted-foreground">{tone.description}</p>
+                          </CardContent>
+                        </Card>
                       ))}
                     </div>
                   </div>
-                ))}
-              </div>
-              <div className="col-span-1 flex flex-col">
-                <Textarea
-                  value={scriptBuilderContent}
-                  onChange={(e) => setScriptBuilderContent(e.target.value)}
-                  className="h-full flex-grow"
-                  placeholder="Assemble your script here..."
-                />
-                <Button className="mt-4">Submit Script</Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
+
+                  {/* Step 2: Template */}
+                  <AnimatePresence>
+                    {selectedTone && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        className="space-y-2"
+                      >
+                        <h3 className="font-semibold">2. Select a Template</h3>
+                        <div className="space-y-2">
+                          {/* eslint-disable-next-line security/detect-object-injection */}
+                          {(templatesByTone[selectedTone] || []).map((template: Template) => (
+                            <Card
+                              key={template.id}
+                              onClick={() => setSelectedTemplate(template)}
+                              className={cn(
+                                "cursor-pointer transition-all",
+                                selectedTemplate?.id === template.id && "border-indigo-500 bg-secondary"
+                              )}
+                            >
+                              <CardContent className="p-3">
+                                <p className="font-bold">{template.name}</p>
+                                <p className="text-xs text-muted-foreground">{template.structure}</p>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                  
+                  {/* Step 3: Fill Blanks */}
+                  <AnimatePresence>
+                  {selectedTemplate && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      className="space-y-4"
+                    >
+                      <h3 className="font-semibold">3. Fill in the Blanks</h3>
+                      <div className="space-y-2">
+                        {templateVariables.map((variable: string) => (
+                          <Input
+                            key={variable}
+                            placeholder={variable.replace(/_/g, " ")}
+                            // eslint-disable-next-line security/detect-object-injection
+                            value={templateInputs[variable] ?? ""}
+                            onChange={(e) => handleTemplateInputChange(variable, e.target.value)}
+                          />
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                  </AnimatePresence>
+
+                  {/* Step 4: Generate */}
+                   {selectedTemplate && (
+                     <Button 
+                       size="lg" 
+                       className="w-full bg-purple-600 hover:bg-purple-700"
+                       disabled={!areAllTemplateInputsFilled}
+                       onClick={handleGenerateStory}
+                      >
+                       <CheckCircle2 className="mr-2 h-4 w-4" />
+                       Generate Story
+                     </Button>
+                   )}
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
 }
