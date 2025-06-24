@@ -1,4 +1,4 @@
-import { Instagram, Twitter, Youtube, TikTok } from "lucide-react";
+import { Instagram, Twitter, Youtube, Smartphone } from "lucide-react";
 
 export const socialMetrics = [
   {
@@ -12,7 +12,7 @@ export const socialMetrics = [
   },
   {
     platform: "TikTok",
-    icon: TikTok,
+    icon: Smartphone,
     followers: "89.7K",
     engagement: "6.8%",
     growth: "+23.1%",
