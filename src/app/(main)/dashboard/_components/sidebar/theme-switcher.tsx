@@ -16,60 +16,12 @@ import {
 
 // Define available themes with TweakCN-inspired options
 const themes = [
-  {
-    name: "light",
-    label: "Light",
-    description: "Clean and bright",
-    colors: {
-      primary: "hsl(0 0% 9%)",
-      background: "hsl(0 0% 100%)",
-    }
-  },
-  {
-    name: "dark", 
-    label: "Dark",
-    description: "Easy on the eyes",
-    colors: {
-      primary: "hsl(0 0% 98%)",
-      background: "hsl(0 0% 3.9%)",
-    }
-  },
-  {
-    name: "tangerine",
-    label: "Tangerine",
-    description: "Warm and vibrant",
-    colors: {
-      primary: "hsl(24 100% 50%)",
-      background: "hsl(0 0% 100%)",
-    }
-  },
-  {
-    name: "ocean",
-    label: "Ocean",
-    description: "Cool and calming",
-    colors: {
-      primary: "hsl(200 100% 50%)",
-      background: "hsl(0 0% 100%)",
-    }
-  },
-  {
-    name: "forest",
-    label: "Forest",
-    description: "Natural and fresh",
-    colors: {
-      primary: "hsl(142 76% 36%)",
-      background: "hsl(0 0% 100%)",
-    }
-  },
-  {
-    name: "sunset",
-    label: "Sunset",
-    description: "Warm gradient feel",
-    colors: {
-      primary: "hsl(340 82% 52%)",
-      background: "hsl(0 0% 100%)",
-    }
-  }
+  { name: "light", label: "Light", description: "Clean and bright" },
+  { name: "dark", label: "Dark", description: "Easy on the eyes" },
+  { name: "tangerine", label: "Tangerine", description: "Warm and vibrant" },
+  { name: "ocean", label: "Ocean", description: "Cool and calming" },
+  { name: "forest", label: "Forest", description: "Natural and fresh" },
+  { name: "sunset", label: "Sunset", description: "Warm gradient feel" },
 ];
 
 export function ThemeSwitcher() {
@@ -80,38 +32,21 @@ export function ThemeSwitcher() {
     setMounted(true);
   }, []);
 
-  // Apply custom theme CSS variables
-  useEffect(() => {
-    if (mounted && theme) {
-      const selectedTheme = themes.find(t => t.name === theme);
-      if (selectedTheme && theme !== 'light' && theme !== 'dark') {
-        // Apply custom theme colors
-        document.documentElement.style.setProperty('--primary', selectedTheme.colors.primary);
-        // Add more custom properties as needed
-      } else {
-        // Reset to default for light/dark themes
-        document.documentElement.style.removeProperty('--primary');
-      }
-    }
-  }, [theme, mounted]);
-
   if (!mounted) {
     return (
-      <Button size="icon" variant="ghost">
+      <Button size="icon" variant="ghost" disabled>
         <Sun className="h-4 w-4" />
       </Button>
     );
   }
 
+  const currentIcon = resolvedTheme === 'dark' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button size="icon" variant="ghost" className="relative">
-          {resolvedTheme === "dark" ? (
-            <Moon className="h-4 w-4" />
-          ) : (
-            <Sun className="h-4 w-4" />
-          )}
+          {currentIcon}
           <Palette className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 text-muted-foreground" />
         </Button>
       </DropdownMenuTrigger>
@@ -133,13 +68,7 @@ export function ThemeSwitcher() {
             className="flex items-center justify-between p-2 cursor-pointer"
           >
             <div className="flex items-center space-x-3">
-              <div 
-                className="w-4 h-4 rounded-full border-2 border-border"
-                style={{ 
-                  backgroundColor: themeOption.colors.primary,
-                  borderColor: themeOption.colors.primary
-                }}
-              />
+               <div className="w-4 h-4 rounded-full border-2 border-border" style={{ backgroundColor: `hsl(var(--${themeOption.name}-primary))` }} />
               <div className="flex flex-col">
                 <span className="text-sm font-medium">{themeOption.label}</span>
                 <span className="text-xs text-muted-foreground">

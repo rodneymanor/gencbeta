@@ -20,15 +20,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en" className="light" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} min-h-screen antialiased`}>
         <AuthProvider>
-          <ThemeProvider 
-            attribute="class" 
-            defaultTheme="light" 
-            disableTransitionOnChange 
-            enableSystem={true}
-            themes={["light", "dark", "tangerine", "ocean", "forest", "sunset"]}
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+            themes={['light', 'dark', 'tangerine', 'ocean', 'forest', 'sunset']}
           >
             {children}
             <Toaster />
