@@ -22,6 +22,8 @@ import {
   Mic,
   StickyNote,
   Archive,
+  Lightbulb,
+  BookCopy,
   type LucideIcon,
 } from "lucide-react";
 
@@ -114,6 +116,22 @@ export const sidebarItems: NavGroup[] = [
   },
   {
     id: 4,
+    label: "Inspiration",
+    items: [
+      {
+        title: "Collections",
+        url: "/dashboard/collections",
+        icon: BookCopy,
+      },
+      {
+        title: "AI Inspiration",
+        url: "/dashboard/inspiration",
+        icon: Lightbulb,
+      },
+    ],
+  },
+  {
+    id: 5,
     label: "Pages",
     items: [
       {
@@ -170,7 +188,7 @@ export const sidebarItems: NavGroup[] = [
     ],
   },
   {
-    id: 5,
+    id: 6,
     label: "Misc",
     items: [
       {
