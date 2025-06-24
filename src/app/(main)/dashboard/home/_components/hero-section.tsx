@@ -141,13 +141,13 @@ export default function HeroSection() {
   };
 
   return (
-    <div className="py-16 sm:py-24">
+    <div className="py-20 sm:py-28">
       <div className="mx-auto max-w-7xl px-6 lg:px-8 text-center">
         <Sparkles className="mx-auto h-8 w-8 text-indigo-500" />
-        <h1 className="mt-4 text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
+        <h1 className="mt-6 text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
           What will You Script Today?
         </h1>
-        <p className="mt-6 text-lg leading-8 text-muted-foreground">
+        <p className="mt-8 text-lg leading-8 text-muted-foreground">
           Start with an idea, fix an existing script, or create a structured story from scratch.
         </p>
       </div>
@@ -155,7 +155,7 @@ export default function HeroSection() {
       <motion.div
         layout
         className={cn(
-          "mx-auto mt-10 grid max-w-7xl gap-8 px-6 lg:px-8",
+          "mx-auto mt-16 grid max-w-7xl gap-8 px-6 lg:px-8",
           isStoryPanelOpen ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"
         )}
       >
@@ -221,11 +221,11 @@ export default function HeroSection() {
                     <X className="h-4 w-4" />
                   </Button>
                 </CardHeader>
-                <CardContent className="space-y-6 overflow-y-auto max-h-[60vh] p-4">
+                <CardContent className="space-y-8 overflow-y-auto max-h-[60vh] p-6">
                   {/* Step 1: Tone */}
-                  <div className="space-y-2">
+                  <div className="space-y-4">
                     <h3 className="font-semibold">1. Choose a Tone of Voice</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {tones.map((tone) => (
                         <Card
                           key={tone.id}
@@ -252,7 +252,7 @@ export default function HeroSection() {
                       <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
-                        className="space-y-2"
+                        className="space-y-4"
                       >
                         <h3 className="font-semibold">2. Select a Template</h3>
                         <div className="space-y-2">
@@ -286,7 +286,7 @@ export default function HeroSection() {
                       className="space-y-4"
                     >
                       <h3 className="font-semibold">3. Fill in the Blanks</h3>
-                      <div className="space-y-2">
+                      <div className="space-y-4">
                         {templateVariables.map((variable: string) => (
                           <Input
                             key={variable}
