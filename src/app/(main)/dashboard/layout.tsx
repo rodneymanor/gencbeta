@@ -13,6 +13,7 @@ import { AccountSwitcher } from "./_components/sidebar/account-switcher";
 import { LayoutControls } from "./_components/sidebar/layout-controls";
 import { SearchDialog } from "./_components/sidebar/search-dialog";
 import { ThemeSwitcher } from "./_components/sidebar/theme-switcher";
+import DashboardClientLayout from "./dashboard-client-layout";
 
 export default async function Layout({ children }: Readonly<{ children: ReactNode }>) {
   const cookieStore = await cookies();
@@ -47,7 +48,9 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
             </div>
           </div>
         </header>
-        <div className="p-4 md:p-6">{children}</div>
+        <DashboardClientLayout>
+          <div className="p-4 md:p-6">{children}</div>
+        </DashboardClientLayout>
       </SidebarInset>
     </SidebarProvider>
   );
