@@ -3,6 +3,7 @@
 
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "demo-api-key",
@@ -19,5 +20,6 @@ const hasValidConfig =
 
 const app = hasValidConfig ? (getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]) : null;
 const auth = hasValidConfig && app ? getAuth(app) : null;
+const db = hasValidConfig && app ? getFirestore(app) : null;
 
-export { auth };
+export { auth, db };

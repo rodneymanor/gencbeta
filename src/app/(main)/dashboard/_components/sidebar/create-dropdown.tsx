@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 
-import { Plus, StickyNote, Mic, Link, FolderOpen, ChevronRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-import { Button } from "@/components/ui/button";
+import { Plus, StickyNote, Mic, Link, FolderOpen } from "lucide-react";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,30 +16,48 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/contexts/auth-context";
+import { CollectionsService, type Collection } from "@/lib/collections";
+
+import { AddVideoDialog } from "../../collections/_components/add-video-dialog";
+import { CreateCollectionDialog } from "../../collections/_components/create-collection-dialog";
 
 interface CreateDropdownProps {
   children: React.ReactNode;
 }
 
 export function CreateDropdown({ children }: CreateDropdownProps) {
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const { user } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (user) {
+      loadCollections();
+    }
+  }, [user, loadCollections]);
+
+  const loadCollections = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      const userCollections = await CollectionsService.getUserCollections(user.uid);
+      setCollections(userCollections);
+    } catch (error) {
+      console.error("Error loading collections:", error);
+    }
+  }, [user]);
+
   const handleCreateNote = () => {
-    console.log("Creating note...");
-    // TODO: Navigate to note creation or handle note creation logic
+    router.push("/dashboard/capture/notes");
   };
 
   const handleCreateRecording = () => {
-    console.log("Creating recording...");
-    // TODO: Navigate to recording creation or handle recording creation logic
-  };
-
-  const handleImportUrl = () => {
-    console.log("Importing from URL...");
-    // TODO: Handle URL import logic
+    router.push("/dashboard/capture/voice");
   };
 
   const handleCollections = () => {
-    console.log("Opening collections...");
-    // TODO: Navigate to collections or handle collections logic
+    router.push("/dashboard/collections");
   };
 
   return (
@@ -66,23 +85,28 @@ export function CreateDropdown({ children }: CreateDropdownProps) {
 
         <DropdownMenuSub>
           <DropdownMenuSubTrigger className="cursor-pointer">
-            <Link className="mr-2 h-4 w-4" />
-            <span>Import</span>
+            <FolderOpen className="mr-2 h-4 w-4" />
+            <span>Collections</span>
           </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="w-32">
-            <DropdownMenuItem onClick={handleImportUrl} className="cursor-pointer">
-              <Link className="mr-2 h-4 w-4" />
-              <span>URL</span>
+          <DropdownMenuSubContent className="w-48">
+            <CreateCollectionDialog onCollectionCreated={loadCollections}>
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer">
+                <Plus className="mr-2 h-4 w-4" />
+                <span>New Collection</span>
+              </DropdownMenuItem>
+            </CreateCollectionDialog>
+            <AddVideoDialog collections={collections} onVideoAdded={loadCollections}>
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer">
+                <Link className="mr-2 h-4 w-4" />
+                <span>Add Video</span>
+              </DropdownMenuItem>
+            </AddVideoDialog>
+            <DropdownMenuItem onClick={handleCollections} className="cursor-pointer">
+              <FolderOpen className="mr-2 h-4 w-4" />
+              <span>View All</span>
             </DropdownMenuItem>
           </DropdownMenuSubContent>
         </DropdownMenuSub>
-
-        <DropdownMenuSeparator />
-
-        <DropdownMenuItem onClick={handleCollections} className="cursor-pointer">
-          <FolderOpen className="mr-2 h-4 w-4" />
-          <span>Collections</span>
-        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

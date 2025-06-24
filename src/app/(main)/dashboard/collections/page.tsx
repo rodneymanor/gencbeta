@@ -1,134 +1,118 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Folder,
-  PlayCircle,
-  Plus,
-  Search,
-  BookCopy,
-} from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+
+import Image from "next/image";
+
+import { Folder, PlayCircle, Plus, Search, BookCopy } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/contexts/auth-context";
+import { CollectionsService, type Collection, type Video } from "@/lib/collections";
 import { cn } from "@/lib/utils";
 
-// --- Mock Data ---
-
-const mockCollections = [
-  {
-    id: 1,
-    title: "Viral Hooks & Intros",
-    itemCount: 42,
-    author: "Arham Khan",
-    avatar: "/avatars/arhamkhnz.png",
-  },
-  {
-    id: 2,
-    title: "Aesthetic B-Roll Shots",
-    itemCount: 112,
-    author: "Jane Doe",
-    avatar: "https://i.pravatar.cc/150?u=jane",
-  },
-  {
-    id: 3,
-    title: "Sound Design & Music",
-    itemCount: 78,
-    author: "John Smith",
-    avatar: "https://i.pravatar.cc/150?u=john",
-  },
-  {
-    id: 4,
-    title: "Killer CTAs",
-    itemCount: 25,
-    author: "Arham Khan",
-    avatar: "/avatars/arhamkhnz.png",
-  },
-];
-
-const mockVideos = {
-  1: Array.from({ length: 12 }, (_, i) => ({
-    id: `v${i + 1}`,
-    thumbnailUrl: `https://picsum.photos/seed/${i + 10}/400`,
-    title: `Viral Hook Idea ${i + 1}`,
-  })),
-  2: Array.from({ length: 8 }, (_, i) => ({
-    id: `v${i + 13}`,
-    thumbnailUrl: `https://picsum.photos/seed/${i + 22}/400`,
-    title: `Aesthetic Shot ${i + 1}`,
-  })),
-  3: Array.from({ length: 15 }, (_, i) => ({
-    id: `v${i + 21}`,
-    thumbnailUrl: `https://picsum.photos/seed/${i + 30}/400`,
-    title: `Audio Track ${i + 1}`,
-  })),
-  4: Array.from({ length: 7 }, (_, i) => ({
-    id: `v${i + 36}`,
-    thumbnailUrl: `https://picsum.photos/seed/${i + 45}/400`,
-    title: `CTA Example ${i + 1}`,
-  })),
-};
-
-type Collection = (typeof mockCollections)[0];
-type Video = (typeof mockVideos)[1][0];
+import { AddVideoDialog } from "./_components/add-video-dialog";
+import { CreateCollectionDialog } from "./_components/create-collection-dialog";
 
 export default function CollectionsPage() {
-  const [selectedCollection, setSelectedCollection] = useState<Collection>(
-    mockCollections[0]
-  );
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
+
+  const loadCollections = useCallback(async () => {
+    if (!user) return;
+
+    setIsLoading(true);
+    try {
+      const userCollections = await CollectionsService.getUserCollections(user.uid);
+      setCollections(userCollections);
+      if (userCollections.length > 0 && !selectedCollection) {
+        setSelectedCollection(userCollections[0]);
+      }
+    } catch (error) {
+      console.error("Error loading collections:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user, selectedCollection]);
+
+  useEffect(() => {
+    if (user) {
+      loadCollections();
+    }
+  }, [user, loadCollections]);
 
   const handleVideoClick = (video: Video) => {
     setSelectedVideo(video);
     setIsModalOpen(true);
   };
 
+  const filteredCollections = collections.filter((collection) =>
+    collection.title.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
   return (
     <div className="flex h-full">
       {/* Left Column: Collections List */}
-      <aside className="hidden lg:flex flex-col w-full max-w-xs p-4 border-r bg-background">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold flex items-center gap-2">
+      <aside className="bg-background hidden w-full max-w-xs flex-col border-r p-4 lg:flex">
+        <div className="mb-4 flex items-center justify-between">
+          <h1 className="flex items-center gap-2 text-2xl font-bold">
             <BookCopy className="h-6 w-6" />
             Collections
           </h1>
-          <Button size="icon" variant="ghost">
-            <Plus className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <AddVideoDialog collections={collections} onVideoAdded={loadCollections}>
+              <Button size="icon" variant="ghost">
+                <Plus className="h-5 w-5" />
+              </Button>
+            </AddVideoDialog>
+            <CreateCollectionDialog onCollectionCreated={loadCollections} />
+          </div>
         </div>
         <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search collections..." className="pl-10" />
+          <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+          <Input
+            placeholder="Search collections..."
+            className="pl-10"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
         <nav className="flex-1 space-y-1 overflow-y-auto">
-          {mockCollections.map((collection) => (
-            <button
-              key={collection.id}
-              onClick={() => setSelectedCollection(collection)}
-              className={cn(
-                "w-full text-left p-3 rounded-lg flex items-center gap-3 transition-colors",
-                selectedCollection.id === collection.id
-                  ? "bg-muted font-semibold"
-                  : "hover:bg-muted/50"
-              )}
-            >
-              <Folder className="h-5 w-5 text-muted-foreground" />
-              <div className="flex-1">
-                <p className="text-sm">{collection.title}</p>
-                <p className="text-xs text-muted-foreground">
-                  {collection.itemCount} items
-                </p>
-              </div>
-            </button>
-          ))}
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="border-primary h-6 w-6 animate-spin rounded-full border-2 border-t-transparent" />
+            </div>
+          ) : filteredCollections.length === 0 ? (
+            <div className="text-muted-foreground py-8 text-center">
+              <p>No collections found</p>
+              <p className="mt-1 text-sm">Create your first collection to get started</p>
+            </div>
+          ) : (
+            filteredCollections.map((collection) => (
+              <button
+                key={collection.id}
+                onClick={() => setSelectedCollection(collection)}
+                className={cn(
+                  "flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors",
+                  selectedCollection?.id === collection.id ? "bg-muted font-semibold" : "hover:bg-muted/50",
+                )}
+              >
+                <Folder className="text-muted-foreground h-5 w-5" />
+                <div className="flex-1">
+                  <p className="text-sm">{collection.title}</p>
+                  <p className="text-muted-foreground text-xs">{collection.videos.length} videos</p>
+                </div>
+              </button>
+            ))
+          )}
         </nav>
         <div className="mt-auto border-t pt-4">
           <div className="flex items-center gap-3">
@@ -137,45 +121,63 @@ export default function CollectionsPage() {
               <AvatarFallback>AK</AvatarFallback>
             </Avatar>
             <div>
-              <p className="font-semibold text-sm">Arham Khan</p>
-              <p className="text-xs text-muted-foreground">Pro Member</p>
+              <p className="text-sm font-semibold">Arham Khan</p>
+              <p className="text-muted-foreground text-xs">Pro Member</p>
             </div>
           </div>
         </div>
       </aside>
 
       {/* Right Column: Video Grid */}
-      <main className="flex-1 p-6 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto p-6">
         {selectedCollection && (
           <>
             <div className="mb-6">
               <h2 className="text-3xl font-bold">{selectedCollection.title}</h2>
               <p className="text-muted-foreground">
-                A collection of {selectedCollection.itemCount} items by{" "}
-                {selectedCollection.author}
+                {selectedCollection.description ?? `A collection of ${selectedCollection.videos.length} videos`}
               </p>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {(mockVideos as any)[selectedCollection.id]?.map((video: Video) => (
-                <div
-                  key={video.id}
-                  className="aspect-square bg-muted rounded-lg overflow-hidden relative group cursor-pointer"
-                  onClick={() => handleVideoClick(video)}
-                >
-                  <img
-                    src={video.thumbnailUrl}
-                    alt={video.title}
-                    className="w-full h-full object-cover transition-transform group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <PlayCircle className="h-12 w-12 text-white/80" />
-                  </div>
-                  <p className="absolute bottom-2 left-3 right-3 text-sm font-semibold text-white truncate">
-                    {video.title}
-                  </p>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
+              {selectedCollection.videos.length === 0 ? (
+                <div className="text-muted-foreground col-span-full py-12 text-center">
+                  <p>No videos in this collection yet</p>
+                  <p className="mt-1 text-sm">Add your first video to get started</p>
                 </div>
-              ))}
+              ) : (
+                selectedCollection.videos.map((video) => (
+                  <div
+                    key={video.id}
+                    className="bg-muted group relative aspect-square cursor-pointer overflow-hidden rounded-lg"
+                    onClick={() => handleVideoClick(video)}
+                  >
+                    {video.thumbnailUrl ? (
+                      <Image
+                        src={video.thumbnailUrl}
+                        alt={video.title}
+                        fill
+                        className="object-cover transition-transform group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="from-primary/20 to-primary/5 flex h-full w-full items-center justify-center bg-gradient-to-br">
+                        <PlayCircle className="text-primary/60 h-12 w-12" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+                      <PlayCircle className="h-12 w-12 text-white/80" />
+                    </div>
+                    <p className="absolute right-3 bottom-2 left-3 truncate text-sm font-semibold text-white">
+                      {video.title}
+                    </p>
+                    <div className="absolute top-2 right-2">
+                      <div className="rounded bg-black/50 px-2 py-1 text-xs text-white capitalize">
+                        {video.platform}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </>
         )}
@@ -188,7 +190,7 @@ export default function CollectionsPage() {
             <DialogTitle>{selectedVideo?.title}</DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            <p className="text-center text-muted-foreground">
+            <p className="text-muted-foreground text-center">
               Video information and embedded video will be displayed here.
             </p>
           </div>
