@@ -16,6 +16,9 @@ import {
   Fingerprint,
   SquareArrowUpRight,
   PenTool,
+  FileText,
+  Edit,
+  Plus,
   type LucideIcon,
 } from "lucide-react";
 
@@ -66,6 +69,27 @@ export const sidebarItems: NavGroup[] = [
   },
   {
     id: 2,
+    label: "Scripts",
+    items: [
+      {
+        title: "Scripts Library",
+        url: "/dashboard/scripts",
+        icon: FileText,
+      },
+      {
+        title: "Script Editor",
+        url: "/dashboard/scripts/editor",
+        icon: Edit,
+      },
+      {
+        title: "New Script",
+        url: "/dashboard/scripts/new",
+        icon: Plus,
+      },
+    ],
+  },
+  {
+    id: 3,
     label: "Pages",
     items: [
       {
@@ -122,7 +146,7 @@ export const sidebarItems: NavGroup[] = [
     ],
   },
   {
-    id: 3,
+    id: 4,
     label: "Misc",
     items: [
       {
