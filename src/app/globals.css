@@ -76,10 +76,16 @@
 
 @layer base {
   * {
-    border-color: hsl(var(--border));
+    @apply border-border;
   }
   body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
+    @apply bg-background text-foreground;
   }
+}
+
+@theme {
+  --tangerine-primary: 24 9.8% 10%;
+  --ocean-primary: 222.2 47.4% 11.2%;
+  --forest-primary: 142.1 76.2% 36.3%;
+  --sunset-primary: 346.8 77.2% 49.8%;
 }
