@@ -21,9 +21,10 @@ import { CollectionsService } from "@/lib/collections";
 
 interface CreateCollectionDialogProps {
   onCollectionCreated?: () => void;
+  children?: React.ReactNode;
 }
 
-export function CreateCollectionDialog({ onCollectionCreated }: CreateCollectionDialogProps) {
+export function CreateCollectionDialog({ onCollectionCreated, children }: CreateCollectionDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [title, setTitle] = useState("");
@@ -62,9 +63,11 @@ export function CreateCollectionDialog({ onCollectionCreated }: CreateCollection
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button size="icon" variant="ghost">
-          <Plus className="h-5 w-5" />
-        </Button>
+        {children ?? (
+          <Button size="icon" variant="ghost">
+            <Plus className="h-5 w-5" />
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="space-y-3">

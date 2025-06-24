@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { Zap, Plus, ChevronRight } from "lucide-react";
+import { Zap, Plus, ChevronRight, FolderPlus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -27,11 +27,14 @@ import {
 } from "@/components/ui/sidebar";
 import { type NavGroup, type NavMainItem } from "@/navigation/sidebar/sidebar-items";
 
+import { CreateCollectionDialog } from "../../collections/_components/create-collection-dialog";
+
 import { CreateDropdown } from "./create-dropdown";
 import { SpeedWriteDialog } from "./speed-write-dialog";
 
 interface NavMainProps {
   readonly items: readonly NavGroup[];
+  readonly onCollectionCreated?: () => void;
 }
 
 const IsComingSoon = () => (
@@ -42,10 +45,12 @@ const NavItemExpanded = ({
   item,
   isActive,
   isSubmenuOpen,
+  onCollectionCreated,
 }: {
   item: NavMainItem;
   isActive: (url: string, subItems?: NavMainItem["subItems"]) => boolean;
   isSubmenuOpen: (subItems?: NavMainItem["subItems"]) => boolean;
+  onCollectionCreated?: () => void;
 }) => {
   return (
     <Collapsible key={item.title} asChild defaultOpen={isSubmenuOpen(item.subItems)} className="group/collapsible">
@@ -91,6 +96,16 @@ const NavItemExpanded = ({
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>
               ))}
+              {item.title === "Collections" && item.subItems.length === 1 && (
+                <SidebarMenuSubItem>
+                  <CreateCollectionDialog onCollectionCreated={onCollectionCreated}>
+                    <SidebarMenuSubButton className="text-muted-foreground hover:text-foreground cursor-pointer">
+                      <FolderPlus className="h-4 w-4" />
+                      <span>Create your first collection</span>
+                    </SidebarMenuSubButton>
+                  </CreateCollectionDialog>
+                </SidebarMenuSubItem>
+              )}
             </SidebarMenuSub>
           </CollapsibleContent>
         )}
@@ -102,9 +117,11 @@ const NavItemExpanded = ({
 const NavItemCollapsed = ({
   item,
   isActive,
+  onCollectionCreated,
 }: {
   item: NavMainItem;
   isActive: (url: string, subItems?: NavMainItem["subItems"]) => boolean;
+  onCollectionCreated?: () => void;
 }) => {
   return (
     <SidebarMenuItem key={item.title}>
@@ -122,7 +139,7 @@ const NavItemCollapsed = ({
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-50 space-y-1" side="right" align="start">
-            {item.subItems?.map((subItem) => (
+            {item.subItems.map((subItem) => (
               <DropdownMenuItem key={subItem.title} asChild>
                 <SidebarMenuSubButton
                   key={subItem.title}
@@ -139,6 +156,16 @@ const NavItemCollapsed = ({
                 </SidebarMenuSubButton>
               </DropdownMenuItem>
             ))}
+            {item.title === "Collections" && item.subItems.length === 1 && (
+              <DropdownMenuItem asChild>
+                <CreateCollectionDialog onCollectionCreated={onCollectionCreated}>
+                  <SidebarMenuSubButton className="text-muted-foreground hover:text-foreground cursor-pointer focus-visible:ring-0">
+                    <FolderPlus className="h-4 w-4" />
+                    <span>Create your first collection</span>
+                  </SidebarMenuSubButton>
+                </CreateCollectionDialog>
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       ) : (
@@ -154,7 +181,7 @@ const NavItemCollapsed = ({
   );
 };
 
-export function NavMain({ items }: NavMainProps) {
+export function NavMain({ items, onCollectionCreated }: NavMainProps) {
   const path = usePathname();
   const { state, isMobile } = useSidebar();
 
@@ -205,9 +232,20 @@ export function NavMain({ items }: NavMainProps) {
             <SidebarMenu>
               {group.items.map((item) =>
                 state === "collapsed" && !isMobile ? (
-                  <NavItemCollapsed key={item.title} item={item} isActive={isItemActive} />
+                  <NavItemCollapsed
+                    key={item.title}
+                    item={item}
+                    isActive={isItemActive}
+                    onCollectionCreated={onCollectionCreated}
+                  />
                 ) : (
-                  <NavItemExpanded key={item.title} item={item} isActive={isItemActive} isSubmenuOpen={isSubmenuOpen} />
+                  <NavItemExpanded
+                    key={item.title}
+                    item={item}
+                    isActive={isItemActive}
+                    isSubmenuOpen={isSubmenuOpen}
+                    onCollectionCreated={onCollectionCreated}
+                  />
                 ),
               )}
             </SidebarMenu>
