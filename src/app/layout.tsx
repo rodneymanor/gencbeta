@@ -23,7 +23,13 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
     <html lang="en" className="light" suppressHydrationWarning>
       <body className={`${inter.className} min-h-screen antialiased`}>
         <AuthProvider>
-          <ThemeProvider attribute="class" defaultTheme="light" disableTransitionOnChange enableSystem={false}>
+          <ThemeProvider 
+            attribute="class" 
+            defaultTheme="light" 
+            disableTransitionOnChange 
+            enableSystem={true}
+            themes={["light", "dark", "tangerine", "ocean", "forest", "sunset"]}
+          >
             {children}
             <Toaster />
           </ThemeProvider>
