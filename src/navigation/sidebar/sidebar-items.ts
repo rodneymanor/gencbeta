@@ -60,7 +60,6 @@ export const sidebarItems: NavGroup[] = [
         url: "/dashboard",
         icon: Home,
         subItems: [
-          { title: "Default", url: "/dashboard/default", icon: ChartPie },
           { title: "Home", url: "/dashboard/home", icon: Home },
           { title: "Content Creator", url: "/dashboard/content-creator", icon: PenTool },
           { title: "CRM", url: "/dashboard", icon: Grid2X2, comingSoon: true },
