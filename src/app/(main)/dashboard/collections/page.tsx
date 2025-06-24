@@ -1,203 +1,199 @@
 "use client";
 
 import { useState } from "react";
-
-import { Plus, Search, LayoutGrid, List, Filter, Share2, User, MoreHorizontal } from "lucide-react";
+import {
+  Folder,
+  PlayCircle,
+  Plus,
+  Search,
+  BookCopy,
+} from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
-// Mock data for collections
+// --- Mock Data ---
+
 const mockCollections = [
   {
     id: 1,
     title: "Viral Hooks & Intros",
     itemCount: 42,
-    category: "Writing",
     author: "Arham Khan",
     avatar: "/avatars/arhamkhnz.png",
-    coverImages: [
-      "https://images.unsplash.com/photo-1516131206008-dd041a372dd4?w=400",
-      "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=400",
-      "https://images.unsplash.com/photo-1522199755839-a2bacb67c546?w=400",
-    ],
   },
   {
     id: 2,
     title: "Aesthetic B-Roll Shots",
     itemCount: 112,
-    category: "Visuals",
     author: "Jane Doe",
     avatar: "https://i.pravatar.cc/150?u=jane",
-    coverImages: [
-      "https://images.unsplash.com/photo-1511556820780-d912e42b4980?w=400",
-      "https://images.unsplash.com/photo-1542038784-56eD8DE09313?w=400",
-      "https://images.unsplash.com/photo-1607538205438-ac70d5a381e4?w=400",
-    ],
   },
   {
     id: 3,
     title: "Sound Design & Music",
     itemCount: 78,
-    category: "Audio",
     author: "John Smith",
     avatar: "https://i.pravatar.cc/150?u=john",
-    coverImages: [
-      "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400",
-      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400",
-      "https://images.unsplash.com/photo-1471478331744-80352b53dbde?w=400",
-    ],
   },
   {
     id: 4,
     title: "Killer CTAs",
     itemCount: 25,
-    category: "Writing",
     author: "Arham Khan",
     avatar: "/avatars/arhamkhnz.png",
-    coverImages: [
-      "https://images.unsplash.com/photo-1587614382346-4ec58e373a97?w=400",
-      "https://images.unsplash.com/photo-1556740738-b6a63e27c4df?w=400",
-      "https://images.unsplash.com/photo-1586953208448-b95a8e359439?w=400",
-    ],
   },
 ];
 
-export default function CollectionsPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
+const mockVideos = {
+  1: Array.from({ length: 12 }, (_, i) => ({
+    id: `v${i + 1}`,
+    thumbnailUrl: `https://picsum.photos/seed/${i + 10}/400`,
+    title: `Viral Hook Idea ${i + 1}`,
+  })),
+  2: Array.from({ length: 8 }, (_, i) => ({
+    id: `v${i + 13}`,
+    thumbnailUrl: `https://picsum.photos/seed/${i + 22}/400`,
+    title: `Aesthetic Shot ${i + 1}`,
+  })),
+  3: Array.from({ length: 15 }, (_, i) => ({
+    id: `v${i + 21}`,
+    thumbnailUrl: `https://picsum.photos/seed/${i + 30}/400`,
+    title: `Audio Track ${i + 1}`,
+  })),
+  4: Array.from({ length: 7 }, (_, i) => ({
+    id: `v${i + 36}`,
+    thumbnailUrl: `https://picsum.photos/seed/${i + 45}/400`,
+    title: `CTA Example ${i + 1}`,
+  })),
+};
 
-  const filteredCollections = mockCollections.filter((collection) => {
-    const matchesSearch = collection.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = categoryFilter === "all" || collection.category === categoryFilter;
-    return matchesSearch && matchesCategory;
-  });
+type Collection = (typeof mockCollections)[0];
+type Video = (typeof mockVideos)[1][0];
+
+export default function CollectionsPage() {
+  const [selectedCollection, setSelectedCollection] = useState<Collection>(
+    mockCollections[0]
+  );
+  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleVideoClick = (video: Video) => {
+    setSelectedVideo(video);
+    setIsModalOpen(true);
+  };
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Collections</h1>
-          <p className="text-muted-foreground">Your curated boards of inspiration and assets</p>
+    <div className="flex h-full">
+      {/* Left Column: Collections List */}
+      <aside className="hidden lg:flex flex-col w-full max-w-xs p-4 border-r bg-background">
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <BookCopy className="h-6 w-6" />
+            Collections
+          </h1>
+          <Button size="icon" variant="ghost">
+            <Plus className="h-5 w-5" />
+          </Button>
         </div>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              New Collection
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create New Collection</DialogTitle>
-              <DialogDescription>Start a new board to organize your ideas and assets.</DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="collection-name">Collection Name</Label>
-                <Input id="collection-name" placeholder="e.g., Viral Hooks & Intros" />
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Search collections..." className="pl-10" />
+        </div>
+        <nav className="flex-1 space-y-1 overflow-y-auto">
+          {mockCollections.map((collection) => (
+            <button
+              key={collection.id}
+              onClick={() => setSelectedCollection(collection)}
+              className={cn(
+                "w-full text-left p-3 rounded-lg flex items-center gap-3 transition-colors",
+                selectedCollection.id === collection.id
+                  ? "bg-muted font-semibold"
+                  : "hover:bg-muted/50"
+              )}
+            >
+              <Folder className="h-5 w-5 text-muted-foreground" />
+              <div className="flex-1">
+                <p className="text-sm">{collection.title}</p>
+                <p className="text-xs text-muted-foreground">
+                  {collection.itemCount} items
+                </p>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="collection-category">Category</Label>
-                <Select>
-                  <SelectTrigger id="collection-category">
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="writing">Writing</SelectItem>
-                    <SelectItem value="visuals">Visuals</SelectItem>
-                    <SelectItem value="audio">Audio</SelectItem>
-                    <SelectItem value="strategy">Strategy</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            </button>
+          ))}
+        </nav>
+        <div className="mt-auto border-t pt-4">
+          <div className="flex items-center gap-3">
+            <Avatar>
+              <AvatarImage src="/avatars/arhamkhnz.png" />
+              <AvatarFallback>AK</AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="font-semibold text-sm">Arham Khan</p>
+              <p className="text-xs text-muted-foreground">Pro Member</p>
             </div>
-            <DialogFooter>
-              <Button type="submit">Create Collection</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Search and Filters */}
-      <div className="flex flex-col gap-4 md:flex-row">
-        <div className="relative flex-1">
-          <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-          <Input
-            placeholder="Search collections..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
+          </div>
         </div>
-        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className="w-full md:w-48">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            <SelectItem value="writing">Writing</SelectItem>
-            <SelectItem value="visuals">Visuals</SelectItem>
-            <SelectItem value="audio">Audio</SelectItem>
-            <SelectItem value="strategy">Strategy</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      </aside>
 
-      {/* Collections Grid */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {filteredCollections.map((collection) => (
-          <div
-            key={collection.id}
-            className="group bg-card relative overflow-hidden rounded-lg border shadow-sm transition-all hover:shadow-lg"
-          >
-            <div className="flex h-40">
-              {collection.coverImages.map((src, index) => (
-                <div key={index} className="w-1/3 overflow-hidden">
+      {/* Right Column: Video Grid */}
+      <main className="flex-1 p-6 overflow-y-auto">
+        {selectedCollection && (
+          <>
+            <div className="mb-6">
+              <h2 className="text-3xl font-bold">{selectedCollection.title}</h2>
+              <p className="text-muted-foreground">
+                A collection of {selectedCollection.itemCount} items by{" "}
+                {selectedCollection.author}
+              </p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {(mockVideos as any)[selectedCollection.id]?.map((video: Video) => (
+                <div
+                  key={video.id}
+                  className="aspect-square bg-muted rounded-lg overflow-hidden relative group cursor-pointer"
+                  onClick={() => handleVideoClick(video)}
+                >
                   <img
-                    src={src}
-                    alt={`${collection.title} cover ${index + 1}`}
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    src={video.thumbnailUrl}
+                    alt={video.title}
+                    className="w-full h-full object-cover transition-transform group-hover:scale-110"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <PlayCircle className="h-12 w-12 text-white/80" />
+                  </div>
+                  <p className="absolute bottom-2 left-3 right-3 text-sm font-semibold text-white truncate">
+                    {video.title}
+                  </p>
                 </div>
               ))}
             </div>
-            <div className="p-4">
-              <div className="flex items-start justify-between">
-                <h3 className="text-lg font-semibold">{collection.title}</h3>
-                <Badge variant="secondary">{collection.category}</Badge>
-              </div>
-              <p className="text-muted-foreground text-sm">{collection.itemCount} items</p>
-              <div className="mt-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-6 w-6">
-                    <AvatarImage src={collection.avatar} />
-                    <AvatarFallback>{collection.author.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <span className="text-xs font-medium">{collection.author}</span>
-                </div>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <Share2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+          </>
+        )}
+      </main>
+
+      {/* Video Modal Placeholder */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>{selectedVideo?.title}</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-center text-muted-foreground">
+              Video information and embedded video will be displayed here.
+            </p>
           </div>
-        ))}
-      </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
