@@ -2,8 +2,9 @@
 
 import { useState, useRef } from "react";
 
-import { PenTool, FileText, Inbox, Zap, Bot, Lightbulb, Film, Clock } from "lucide-react";
+import { PenTool, FileText, Inbox, Zap, Bot, Lightbulb, Film, Clock, BrainCircuit } from "lucide-react";
 
+import RetroGrid from "@/components/magic-ui/retro-grid";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -79,6 +80,29 @@ const quickActions = [
   },
 ];
 
+const NewScriptCard = ({ onClick }: { onClick: () => void }) => {
+  return (
+    <Card
+      className="group bg-card text-card-foreground hover:bg-card/90 relative cursor-pointer overflow-hidden rounded-lg border transition-all duration-300 hover:shadow-lg"
+      onClick={onClick}
+    >
+      <RetroGrid className="opacity-20 transition-opacity duration-300 group-hover:opacity-60" />
+      <CardHeader className="relative z-10 flex flex-row items-start gap-4 space-y-0">
+        <div className="space-y-1">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <BrainCircuit className="h-5 w-5" />
+            New Script from Idea
+          </CardTitle>
+          <CardDescription>Describe your idea and let AI help you build a script.</CardDescription>
+        </div>
+      </CardHeader>
+      <CardContent className="relative z-10">
+        <Button>Start Writing</Button>
+      </CardContent>
+    </Card>
+  );
+};
+
 export default function ContentCreatorPage() {
   const [scriptIdea, setScriptIdea] = useState("");
   const [isCreating, setIsCreating] = useState(false);
@@ -153,8 +177,8 @@ export default function ContentCreatorPage() {
               onFocus={() => setIsInputActive(true)}
               onBlur={() => setIsInputActive(false)}
               className={cn(
-                "flex-1 transition-all border border-input",
-                isInputActive && "ring-2 ring-primary ring-offset-2 ring-offset-background"
+                "border-input flex-1 border transition-all",
+                isInputActive && "ring-primary ring-offset-background ring-2 ring-offset-2",
               )}
             />
             <Button
@@ -175,14 +199,15 @@ export default function ContentCreatorPage() {
         {/* Quick Actions Grid Section */}
         <section className="space-y-4">
           <h2 className="text-foreground text-xl font-semibold">Start Creating</h2>
-          <div className="grid gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
-            {quickActions.map((action) => {
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <NewScriptCard onClick={handleNewScriptClick} />
+            {quickActions.slice(1).map((action) => {
               const IconComponent = action.icon;
               return (
                 <Card
                   key={action.id}
                   className="group bg-card cursor-pointer border-0 transition-all duration-200 hover:shadow-lg"
-                  onClick={action.id === 1 ? handleNewScriptClick : action.onClick}
+                  onClick={action.onClick}
                 >
                   <CardHeader className="pb-4">
                     <div className="bg-primary/10 group-hover:bg-primary mb-3 flex h-12 w-12 items-center justify-center rounded-xl transition-colors">
