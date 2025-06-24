@@ -2,79 +2,134 @@
 
 import { useState } from "react";
 
-import {
-  Search,
-  Plus,
-  Download,
-  MoreHorizontal,
-  Eye,
-  Edit,
-  Trash2,
-  Copy,
-  Calendar,
-  TrendingUp,
-  Clock,
-} from "lucide-react";
+import { Download, Trash2 } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
+import { ScriptsControls } from "./_components/scripts-controls";
+import { ScriptsTable } from "./_components/scripts-table";
+
+interface Script {
+  id: number;
+  title: string;
+  authors: string;
+  status: string;
+  performance: { views: number; engagement: number };
+  category: string;
+  createdAt: string;
+  viewedAt: string;
+  duration: string;
+  tags: string[];
+  fileType: string;
+  summary: string;
+}
+
+interface ColumnVisibility {
+  title: boolean;
+  authors: boolean;
+  added: boolean;
+  viewed: boolean;
+  fileType: boolean;
+  summary: boolean;
+}
 
 // Mock data for scripts
-const mockScripts = [
+const mockScripts: Script[] = [
   {
     id: 1,
     title: "Morning Routine Success",
+    authors: "John Doe",
     status: "Published",
     performance: { views: 12500, engagement: 8.2 },
     category: "Lifestyle",
     createdAt: "2024-01-15",
+    viewedAt: "2024-01-20",
     duration: "2:34",
     tags: ["morning", "productivity"],
+    fileType: "Script",
+    summary: "Complete morning routine guide for productivity",
   },
   {
     id: 2,
     title: "Tech Product Review Template",
+    authors: "Jane Smith",
     status: "Draft",
     performance: { views: 0, engagement: 0 },
     category: "Technology",
     createdAt: "2024-01-20",
+    viewedAt: "2024-01-22",
     duration: "3:45",
     tags: ["tech", "review"],
+    fileType: "Template",
+    summary: "Comprehensive tech review framework",
   },
   {
     id: 3,
     title: "Quick Cooking Tutorial",
+    authors: "Mike Johnson",
     status: "Scheduled",
     performance: { views: 0, engagement: 0 },
     category: "Food",
     createdAt: "2024-01-18",
+    viewedAt: "2024-01-19",
     duration: "1:56",
     tags: ["cooking", "tutorial"],
+    fileType: "Script",
+    summary: "Fast and easy cooking techniques",
   },
 ];
 
+// Helper functions
+const getSortValue = (script: Script, sortBy: string): string | number => {
+  switch (sortBy) {
+    case "title":
+      return script.title;
+    case "authors":
+      return script.authors;
+    case "added":
+      return new Date(script.createdAt).getTime();
+    case "viewed":
+      return new Date(script.viewedAt).getTime();
+    case "fileType":
+      return script.fileType;
+    default:
+      return script.title;
+  }
+};
+
+const sortScripts = (scripts: Script[], sortBy: string, sortOrder: "asc" | "desc"): Script[] => {
+  return [...scripts].sort((a, b) => {
+    const aValue = getSortValue(a, sortBy);
+    const bValue = getSortValue(b, sortBy);
+
+    if (typeof aValue === "string" && typeof bValue === "string") {
+      return sortOrder === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+    }
+
+    return sortOrder === "asc" ? (aValue as number) - (bValue as number) : (bValue as number) - (aValue as number);
+  });
+};
+
 export default function ScriptsLibraryPage() {
-  const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedScripts, setSelectedScripts] = useState<number[]>([]);
+  const [sortBy, setSortBy] = useState("title");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>({
+    title: true,
+    authors: true,
+    added: true,
+    viewed: true,
+    fileType: true,
+    summary: true,
+  });
 
   const filteredScripts = mockScripts.filter((script) => {
-    const matchesSearch = script.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || script.status.toLowerCase() === statusFilter;
-    return matchesSearch && matchesStatus;
+    return statusFilter === "all" || script.status.toLowerCase() === statusFilter;
   });
+
+  const sortedScripts = sortScripts(filteredScripts, sortBy, sortOrder);
 
   const handleSelectScript = (scriptId: number) => {
     setSelectedScripts((prev) =>
@@ -82,73 +137,43 @@ export default function ScriptsLibraryPage() {
     );
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "published":
-        return "bg-green-500/10 text-green-600 border-green-500/20";
-      case "draft":
-        return "bg-yellow-500/10 text-yellow-600 border-yellow-500/20";
-      case "scheduled":
-        return "bg-blue-500/10 text-blue-600 border-blue-500/20";
-      default:
-        return "bg-muted/10 text-muted-foreground border-muted/20";
+  const handleSelectAll = () => {
+    if (selectedScripts.length === sortedScripts.length) {
+      setSelectedScripts([]);
+    } else {
+      setSelectedScripts(sortedScripts.map((script) => script.id));
     }
   };
 
-  const formatNumber = (num: number) => {
-    if (num >= 1000) {
-      return (num / 1000).toFixed(1) + "K";
+  const handleSort = (column: string) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(column);
+      setSortOrder("asc");
     }
-    return num.toString();
+  };
+
+  const toggleColumnVisibility = (column: keyof ColumnVisibility) => {
+    setColumnVisibility((prev) => {
+      const newVisibility = { ...prev };
+      newVisibility[column] = !newVisibility[column];
+      return newVisibility;
+    });
   };
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Scripts Library</h1>
-          <p className="text-muted-foreground">Manage and organize your content scripts</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" className="gap-2">
-            <Download className="h-4 w-4" />
-            Export
-          </Button>
-          <Button className="gap-2">
-            <Plus className="h-4 w-4" />
-            New Script
-          </Button>
-        </div>
-      </div>
-
-      {/* Filters and Search */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center">
-            <div className="relative flex-1">
-              <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-              <Input
-                placeholder="Search scripts..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="published">Published</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="scheduled">Scheduled</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Header with Controls */}
+      <ScriptsControls
+        statusFilter={statusFilter}
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+        columnVisibility={columnVisibility}
+        onStatusFilterChange={setStatusFilter}
+        onSort={handleSort}
+        onToggleColumnVisibility={toggleColumnVisibility}
+      />
 
       {/* Bulk Actions */}
       {selectedScripts.length > 0 && (
@@ -160,9 +185,11 @@ export default function ScriptsLibraryPage() {
               </span>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm">
+                  <Download className="mr-2 h-4 w-4" />
                   Export
                 </Button>
                 <Button variant="outline" size="sm" className="text-destructive">
+                  <Trash2 className="mr-2 h-4 w-4" />
                   Delete
                 </Button>
               </div>
@@ -172,102 +199,15 @@ export default function ScriptsLibraryPage() {
       )}
 
       {/* Scripts Table */}
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-12">
-                  <Checkbox />
-                </TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Performance</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead className="w-12"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredScripts.map((script) => (
-                <TableRow key={script.id}>
-                  <TableCell>
-                    <Checkbox
-                      checked={selectedScripts.includes(script.id)}
-                      onCheckedChange={() => handleSelectScript(script.id)}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <h4 className="font-medium">{script.title}</h4>
-                      <div className="text-muted-foreground flex items-center gap-2 text-xs">
-                        <Clock className="h-3 w-3" />
-                        {script.duration}
-                        <span>•</span>
-                        <span>{script.tags.join(", ")}</span>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={`text-xs ${getStatusColor(script.status)}`}>{script.status}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-4 text-sm">
-                      <div className="flex items-center gap-1">
-                        <Eye className="h-3 w-3" />
-                        {formatNumber(script.performance.views)}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <TrendingUp className="h-3 w-3" />
-                        {script.performance.engagement}%
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className="text-xs">
-                      {script.category}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-muted-foreground flex items-center gap-1 text-sm">
-                      <Calendar className="h-3 w-3" />
-                      {new Date(script.createdAt).toLocaleDateString()}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem className="gap-2">
-                          <Eye className="h-4 w-4" />
-                          View
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="gap-2">
-                          <Edit className="h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="gap-2">
-                          <Copy className="h-4 w-4" />
-                          Duplicate
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive gap-2">
-                          <Trash2 className="h-4 w-4" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      <ScriptsTable
+        scripts={sortedScripts}
+        selectedScripts={selectedScripts}
+        columnVisibility={columnVisibility}
+        sortBy={sortBy}
+        onSelectScript={handleSelectScript}
+        onSelectAll={handleSelectAll}
+        onSort={handleSort}
+      />
     </div>
   );
 }

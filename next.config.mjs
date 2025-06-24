@@ -4,13 +4,7 @@ const nextConfig = {
     removeConsole: process.env.NODE_ENV === "production",
   },
   async redirects() {
-    return [
-      {
-        source: "/dashboard",
-        destination: "/dashboard/default",
-        permanent: false,
-      },
-    ];
+    return [];
   },
   // Trigger a fresh build to clear the Vercel cache
   experimental: {

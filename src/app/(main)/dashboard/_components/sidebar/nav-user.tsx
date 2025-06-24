@@ -2,7 +2,6 @@
 
 import { EllipsisVertical, CircleUser, CreditCard, MessageSquareDot, LogOut, User } from "lucide-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +13,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/auth-context";
-import { getInitials } from "@/lib/utils";
 
 interface UserData {
   photoURL?: string | null;
@@ -24,10 +22,9 @@ interface UserData {
 
 function UserAvatar({ user }: { user: UserData }) {
   return (
-    <Avatar className="h-8 w-8 rounded-lg grayscale">
-      <AvatarImage src={user.photoURL ?? undefined} alt={user.displayName ?? user.email ?? "User"} />
-      <AvatarFallback className="rounded-lg">{getInitials(user.displayName ?? user.email ?? "User")}</AvatarFallback>
-    </Avatar>
+    <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+      <CircleUser className="text-primary h-4 w-4" />
+    </div>
   );
 }
 
