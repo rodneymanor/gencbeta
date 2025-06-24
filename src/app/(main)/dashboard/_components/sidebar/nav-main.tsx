@@ -1,212 +1,120 @@
 "use client";
 
+import { useState } from "react";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { PlusCircleIcon, MailIcon, ChevronRight } from "lucide-react";
+import { Zap, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
-  useSidebar,
-} from "@/components/ui/sidebar";
-import { type NavGroup, type NavMainItem } from "@/navigation/sidebar/sidebar-items";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
+import { type NavGroup, sidebarItems } from "@/navigation/sidebar/sidebar-items";
+
+import { SpeedWriteDialog } from "./speed-write-dialog";
 
 interface NavMainProps {
-  readonly items: readonly NavGroup[];
+  isCollapsed: boolean;
+  toggleSidebar: () => void;
 }
 
-const IsComingSoon = () => (
-  <span className="ml-auto rounded-md bg-gray-200 px-2 py-1 text-xs dark:text-gray-800">Soon</span>
-);
-
-const NavItemExpanded = ({
-  item,
-  isActive,
-  isSubmenuOpen,
-}: {
-  item: NavMainItem;
-  isActive: (url: string, subItems?: NavMainItem["subItems"]) => boolean;
-  isSubmenuOpen: (subItems?: NavMainItem["subItems"]) => boolean;
-}) => {
-  return (
-    <Collapsible key={item.title} asChild defaultOpen={isSubmenuOpen(item.subItems)} className="group/collapsible">
-      <SidebarMenuItem>
-        <CollapsibleTrigger asChild>
-          {item.subItems ? (
-            <SidebarMenuButton
-              disabled={item.comingSoon}
-              isActive={isActive(item.url, item.subItems)}
-              tooltip={item.title}
-            >
-              {item.icon && <item.icon />}
-              <span>{item.title}</span>
-              {item.comingSoon && <IsComingSoon />}
-              <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-            </SidebarMenuButton>
-          ) : (
-            <SidebarMenuButton
-              asChild
-              aria-disabled={item.comingSoon}
-              isActive={isActive(item.url)}
-              tooltip={item.title}
-            >
-              <Link href={item.url} target={item.newTab ? "_blank" : undefined}>
-                {item.icon && <item.icon />}
-                <span>{item.title}</span>
-                {item.comingSoon && <IsComingSoon />}
-              </Link>
-            </SidebarMenuButton>
-          )}
-        </CollapsibleTrigger>
-        {item.subItems && (
-          <CollapsibleContent>
-            <SidebarMenuSub>
-              {item.subItems.map((subItem) => (
-                <SidebarMenuSubItem key={subItem.title}>
-                  <SidebarMenuSubButton aria-disabled={subItem.comingSoon} isActive={isActive(subItem.url)} asChild>
-                    <Link href={subItem.url} target={subItem.newTab ? "_blank" : undefined}>
-                      {subItem.icon && <subItem.icon />}
-                      <span>{subItem.title}</span>
-                      {subItem.comingSoon && <IsComingSoon />}
-                    </Link>
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>
-              ))}
-            </SidebarMenuSub>
-          </CollapsibleContent>
-        )}
-      </SidebarMenuItem>
-    </Collapsible>
-  );
-};
-
-const NavItemCollapsed = ({
-  item,
-  isActive,
-}: {
-  item: NavMainItem;
-  isActive: (url: string, subItems?: NavMainItem["subItems"]) => boolean;
-}) => {
-  return (
-    <SidebarMenuItem key={item.title}>
-      {item.subItems ? (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              disabled={item.comingSoon}
-              tooltip={item.title}
-              isActive={isActive(item.url, item.subItems)}
-            >
-              {item.icon && <item.icon />}
-              <span>{item.title}</span>
-              <ChevronRight />
-            </SidebarMenuButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-50 space-y-1" side="right" align="start">
-            {item.subItems?.map((subItem) => (
-              <DropdownMenuItem key={subItem.title} asChild>
-                <SidebarMenuSubButton
-                  key={subItem.title}
-                  asChild
-                  className="focus-visible:ring-0"
-                  aria-disabled={subItem.comingSoon}
-                  isActive={isActive(subItem.url)}
-                >
-                  <Link href={subItem.url} target={subItem.newTab ? "_blank" : undefined}>
-                    {subItem.icon && <subItem.icon className="[&>svg]:text-sidebar-foreground" />}
-                    <span>{subItem.title}</span>
-                    {subItem.comingSoon && <IsComingSoon />}
-                  </Link>
-                </SidebarMenuSubButton>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ) : (
-        <SidebarMenuButton asChild aria-disabled={item.comingSoon} isActive={isActive(item.url)} tooltip={item.title}>
-          <Link href={item.url} target={item.newTab ? "_blank" : undefined}>
-            {item.icon && <item.icon />}
-            <span>{item.title}</span>
-            {item.comingSoon && <IsComingSoon />}
-          </Link>
-        </SidebarMenuButton>
-      )}
-    </SidebarMenuItem>
-  );
-};
-
-export function NavMain({ items }: NavMainProps) {
-  const path = usePathname();
-  const { state, isMobile } = useSidebar();
-
-  const isItemActive = (url: string, subItems?: NavMainItem["subItems"]) => {
-    if (subItems?.length) {
-      return subItems.some((sub) => path.startsWith(sub.url));
+export function NavMain({ isCollapsed, toggleSidebar }: NavMainProps) {
+  const pathname = usePathname();
+  const [openSection, setOpenSection] = useState<number | null>(() => {
+    for (let i = 0; i < sidebarItems.length; i++) {
+      for (let j = 0; j < sidebarItems[i].items.length; j++) {
+        if (pathname.startsWith(sidebarItems[i].items[j].href)) {
+          return i;
+        }
+      }
     }
-    return path === url;
+    return null;
+  });
+  const [isSpeedWriteOpen, setIsSpeedWriteOpen] = useState(false);
+
+  const handleToggleSection = (id: number) => {
+    setOpenSection(openSection === id ? null : id);
   };
 
-  const isSubmenuOpen = (subItems?: NavMainItem["subItems"]) => {
-    return subItems?.some((sub) => path.startsWith(sub.url)) ?? false;
+  const isLinkActive = (link: string) => {
+    return pathname === link;
   };
 
   return (
-    <>
-      <SidebarGroup>
-        <SidebarGroupContent className="flex flex-col gap-2">
-          <SidebarMenu>
-            <SidebarMenuItem className="flex items-center gap-2">
-              <SidebarMenuButton
-                tooltip="Quick Create"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
-              >
-                <PlusCircleIcon />
-                <span>Quick Create</span>
-              </SidebarMenuButton>
-              <Button
-                size="icon"
-                className="h-9 w-9 shrink-0 group-data-[collapsible=icon]:opacity-0"
-                variant="outline"
-              >
-                <MailIcon />
-                <span className="sr-only">Inbox</span>
+    <nav className="flex h-full flex-col">
+      <div className="flex-grow">
+        {sidebarItems.map((section, sectionIndex) => (
+          <Collapsible
+            key={sectionIndex}
+            open={openSection === sectionIndex}
+            onOpenChange={() => handleToggleSection(sectionIndex)}
+            className="mb-4"
+          >
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" className="flex w-full items-center justify-between">
+                <span className="text-sm font-semibold">{section.title}</span>
+                <ChevronRight
+                  className={cn("h-4 w-4 transform transition-transform", openSection === sectionIndex && "rotate-90")}
+                />
               </Button>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroupContent>
-      </SidebarGroup>
-      {items.map((group) => (
-        <SidebarGroup key={group.id}>
-          {group.label && <SidebarGroupLabel>{group.label}</SidebarGroupLabel>}
-          <SidebarGroupContent className="flex flex-col gap-2">
-            <SidebarMenu>
-              {group.items.map((item) =>
-                state === "collapsed" && !isMobile ? (
-                  <NavItemCollapsed key={item.title} item={item} isActive={isItemActive} />
-                ) : (
-                  <NavItemExpanded key={item.title} item={item} isActive={isItemActive} isSubmenuOpen={isSubmenuOpen} />
-                ),
-              )}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      ))}
-    </>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="mt-2 space-y-1">
+                {section.items.map((item, itemIndex) => (
+                  <TooltipProvider key={itemIndex}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant={isLinkActive(item.href) ? "secondary" : "ghost"}
+                          className="w-full justify-start"
+                          asChild
+                        >
+                          <Link href={item.href}>
+                            <item.icon className="mr-2 h-4 w-4" />
+                            <span className={cn("truncate", isCollapsed && "hidden")}>{item.title}</span>
+                          </Link>
+                        </Button>
+                      </TooltipTrigger>
+                      {isCollapsed && (
+                        <TooltipContent side="right" align="center">
+                          {item.title}
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
+                  </TooltipProvider>
+                ))}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        ))}
+      </div>
+
+      <div className="mt-auto">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                className="hover:bg-muted w-full justify-start"
+                onClick={() => setIsSpeedWriteOpen(true)}
+              >
+                <div className="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-lg">
+                  <Zap className="h-4 w-4" />
+                </div>
+                <span className={cn("ml-4 text-sm font-medium", isCollapsed && "hidden")}>Speed Write</span>
+              </Button>
+            </TooltipTrigger>
+            {isCollapsed && (
+              <TooltipContent side="right" align="center" className="bg-primary text-primary-foreground">
+                Speed Write
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+      <SpeedWriteDialog open={isSpeedWriteOpen} onOpenChange={setIsSpeedWriteOpen} />
+    </nav>
   );
 }
