@@ -12,6 +12,10 @@ const nextConfig = {
       },
     ];
   },
+  // Trigger a fresh build to clear the Vercel cache
+  experimental: {
+    // Other experimental features can be added here
+  },
 }
 
 export default nextConfig
