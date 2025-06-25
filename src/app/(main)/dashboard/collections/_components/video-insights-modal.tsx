@@ -93,38 +93,36 @@ export function VideoInsightsModal({ video, children }: VideoInsightsModalProps)
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="max-h-[95vh] max-w-7xl overflow-hidden">
-        <DialogHeader className="pb-6">
-          <div className="flex items-start justify-between">
-            <div className="space-y-2">
-              <DialogTitle className="flex items-center gap-3 text-xl">
-                <div className="flex items-center gap-2">
-                  <Play className="h-5 w-5" />
-                  Video Insights
-                </div>
-                <Badge className={getPlatformColor(video.platform)}>{video.platform}</Badge>
-              </DialogTitle>
-              <DialogDescription className="text-base">{video.title}</DialogDescription>
-              <div className="text-muted-foreground flex items-center gap-4 text-sm">
-                <span className="flex items-center gap-1">
-                  <User className="h-4 w-4" />
-                  {video.author}
-                </span>
-                <span>Duration: {Math.round(video.duration ?? 30)}s</span>
-                <span>Added: {new Date(video.addedAt).toLocaleDateString()}</span>
+      <DialogContent className="max-h-[95vh] w-[95vw] max-w-none overflow-hidden sm:max-w-4xl md:max-w-5xl lg:max-w-6xl xl:max-w-7xl">
+        <DialogHeader className="pb-4 lg:pb-6">
+          <div className="space-y-3">
+            <DialogTitle className="flex flex-col items-start gap-2 text-lg sm:flex-row sm:items-center sm:gap-3 sm:text-xl">
+              <div className="flex items-center gap-2">
+                <Play className="h-5 w-5" />
+                Video Insights
               </div>
+              <Badge className={getPlatformColor(video.platform)}>{video.platform}</Badge>
+            </DialogTitle>
+            <DialogDescription className="text-sm sm:text-base">{video.title}</DialogDescription>
+            <div className="text-muted-foreground flex flex-col gap-2 text-xs sm:flex-row sm:items-center sm:gap-4 sm:text-sm">
+              <span className="flex items-center gap-1">
+                <User className="h-4 w-4" />
+                {video.author}
+              </span>
+              <span>Duration: {Math.round(video.duration ?? 30)}s</span>
+              <span>Added: {new Date(video.addedAt).toLocaleDateString()}</span>
             </div>
           </div>
         </DialogHeader>
 
         <div className="flex-1 overflow-auto">
-          <div className="grid grid-cols-12 gap-8">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
             {/* Left Column - Video Preview & Hook Details */}
-            <div className="col-span-5 space-y-6">
+            <div className="space-y-6 lg:col-span-5">
               {/* Video Preview */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">Video Preview</h3>
-                <div className="bg-muted mx-auto aspect-[9/16] max-w-[280px] overflow-hidden rounded-lg">
+                <div className="bg-muted mx-auto aspect-[9/16] w-full max-w-[280px] overflow-hidden rounded-lg sm:max-w-[200px] lg:max-w-[280px]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={video.thumbnailUrl} alt="Video thumbnail" className="h-full w-full object-cover" />
                 </div>
@@ -148,7 +146,7 @@ export function VideoInsightsModal({ video, children }: VideoInsightsModalProps)
                     </Badge>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-2 sm:flex-row">
                     <Button variant="outline" size="sm" className="gap-2">
                       <Shuffle className="h-4 w-4" />
                       Remix Hook
@@ -162,14 +160,14 @@ export function VideoInsightsModal({ video, children }: VideoInsightsModalProps)
             </div>
 
             {/* Right Column - Metrics & Analysis */}
-            <div className="col-span-7 space-y-6">
+            <div className="space-y-6 lg:col-span-7">
               {/* Metrics Grid */}
               <VideoMetricsGrid insights={video.insights} />
 
               {/* Script Components */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">Script Breakdown</h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="space-y-3">
                     <div>
                       <Label className="text-sm font-medium">Bridge:</Label>
@@ -253,7 +251,7 @@ export function VideoInsightsModal({ video, children }: VideoInsightsModalProps)
               </div>
 
               {/* Action Buttons */}
-              <div className="flex justify-center gap-3 pt-4">
+              <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:justify-center">
                 <Button variant="default" className="gap-2">
                   <Lightbulb className="h-4 w-4" />
                   Generate Ideas

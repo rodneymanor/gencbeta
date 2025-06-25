@@ -27,7 +27,7 @@ export function VideoMetricsGrid({ insights }: VideoMetricsGridProps) {
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Metrics</h3>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6">
         <Card className="p-4 text-center">
           <div className="text-2xl font-bold text-blue-600">{formatNumber(insights.likes)}</div>
           <div className="text-muted-foreground mt-1 flex items-center justify-center gap-1 text-sm">
