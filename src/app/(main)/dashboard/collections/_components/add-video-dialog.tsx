@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 
-import { Plus, Link, AlertCircle } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,176 +17,298 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { CollectionsService, type Collection } from "@/lib/collections";
+import { useAuth } from "@/contexts/auth-context";
+import { CollectionsService } from "@/lib/collections";
 
 interface AddVideoDialogProps {
-  collections: Collection[];
-  onVideoAdded?: () => void;
-  children?: React.ReactNode;
+  collections: Array<{ id: string; title: string }>;
+  selectedCollectionId?: string;
+  onVideoAdded: () => void;
 }
 
-export function AddVideoDialog({ collections, onVideoAdded, children }: AddVideoDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isAdding, setIsAdding] = useState(false);
+interface VideoDownloadResponse {
+  success: boolean;
+  platform: string;
+  videoData: {
+    buffer: number[];
+    size: number;
+    mimeType: string;
+    filename: string;
+  };
+  metadata: {
+    originalUrl: string;
+    platform: string;
+    downloadedAt: string;
+    readyForTranscription: boolean;
+  };
+}
+
+interface TranscriptionResponse {
+  success: boolean;
+  transcript: string;
+  platform: string;
+  components: {
+    hook: string;
+    bridge: string;
+    nugget: string;
+    wta: string;
+  };
+  contentMetadata: {
+    platform: string;
+    author: string;
+    description: string;
+    source: string;
+    hashtags: string[];
+  };
+  visualContext: string;
+  transcriptionMetadata: {
+    method: string;
+    fileSize: number;
+    fileName: string;
+    processedAt: string;
+  };
+}
+
+export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded }: AddVideoDialogProps) {
+  const [open, setOpen] = useState(false);
   const [url, setUrl] = useState("");
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [selectedCollectionId, setSelectedCollectionId] = useState("");
-  const [urlError, setUrlError] = useState("");
+  const [collectionId, setCollectionId] = useState(selectedCollectionId ?? "");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingStep, setProcessingStep] = useState("");
+  const { user } = useAuth();
 
-  const validateUrl = (inputUrl: string) => {
-    if (!inputUrl.trim()) {
-      setUrlError("");
+  const validateUrl = (url: string): boolean => {
+    const urlPattern = /^https?:\/\/.+/;
+    if (!urlPattern.test(url)) return false;
+
+    const supportedPlatforms = ["tiktok.com", "instagram.com"];
+    return supportedPlatforms.some((platform) => url.toLowerCase().includes(platform));
+  };
+
+  const downloadVideo = async (videoUrl: string): Promise<VideoDownloadResponse> => {
+    const response = await fetch("/api/download-video", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ url: videoUrl }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error ?? "Failed to download video");
+    }
+
+    return response.json();
+  };
+
+  const transcribeVideo = async (videoData: VideoDownloadResponse["videoData"]): Promise<TranscriptionResponse> => {
+    // Convert the buffer array back to a File object
+    const uint8Array = new Uint8Array(videoData.buffer);
+    const blob = new Blob([uint8Array], { type: videoData.mimeType });
+    const file = new File([blob], videoData.filename, { type: videoData.mimeType });
+
+    const formData = new FormData();
+    formData.append("video", file);
+
+    const response = await fetch("/api/transcribe-video", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error ?? "Failed to transcribe video");
+    }
+
+    return response.json();
+  };
+
+  const extractVideoThumbnail = async (videoData: VideoDownloadResponse["videoData"]): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const uint8Array = new Uint8Array(videoData.buffer);
+      const blob = new Blob([uint8Array], { type: videoData.mimeType });
+      const video = document.createElement("video");
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      video.onloadedmetadata = () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        video.currentTime = 1; // Capture frame at 1 second
+      };
+
+      video.onseeked = () => {
+        if (ctx) {
+          ctx.drawImage(video, 0, 0);
+          const thumbnailUrl = canvas.toDataURL("image/jpeg", 0.8);
+          URL.revokeObjectURL(video.src);
+          resolve(thumbnailUrl);
+        } else {
+          reject(new Error("Failed to get canvas context"));
+        }
+      };
+
+      video.onerror = () => {
+        URL.revokeObjectURL(video.src);
+        reject(new Error("Failed to load video"));
+      };
+
+      video.src = URL.createObjectURL(blob);
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!url.trim()) {
+      toast.error("Please enter a video URL");
       return;
     }
 
-    const validation = CollectionsService.validateVideoUrl(inputUrl);
-    if (!validation.isValid) {
-      setUrlError("Please enter a valid TikTok or Instagram Reel URL");
-    } else {
-      setUrlError("");
-    }
-  };
-
-  const handleUrlChange = (inputUrl: string) => {
-    setUrl(inputUrl);
-    validateUrl(inputUrl);
-  };
-
-  const handleAddVideo = async () => {
-    if (!url.trim() || !title.trim() || !selectedCollectionId || urlError) return;
-
-    const validation = CollectionsService.validateVideoUrl(url);
-    if (!validation.isValid || !validation.platform) {
-      setUrlError("Please enter a valid TikTok or Instagram Reel URL");
+    if (!validateUrl(url)) {
+      toast.error("Please enter a valid TikTok or Instagram video URL");
       return;
     }
 
-    setIsAdding(true);
+    if (!user) {
+      toast.error("You must be logged in to add videos");
+      return;
+    }
+
+    setIsProcessing(true);
+
     try {
-      await CollectionsService.addVideoToCollection(selectedCollectionId, {
-        url: url.trim(),
-        platform: validation.platform,
-        title: title.trim(),
-        description: description.trim(),
-      });
+      // Step 1: Download video
+      setProcessingStep("Downloading video...");
+      const downloadResponse = await downloadVideo(url);
 
-      // Reset form
+      // Step 2: Transcribe video
+      setProcessingStep("Analyzing video content...");
+      const transcriptionResponse = await transcribeVideo(downloadResponse.videoData);
+
+      // Step 3: Generate thumbnail
+      setProcessingStep("Generating thumbnail...");
+      const thumbnailUrl = await extractVideoThumbnail(downloadResponse.videoData);
+
+      // Step 4: Save to collection
+      setProcessingStep("Saving to collection...");
+
+      // Determine which collection to use
+      const targetCollectionId = collectionId ?? "all-videos";
+
+      // Create video object with all the processed data
+      const videoToAdd = {
+        url: url,
+        platform: downloadResponse.platform,
+        thumbnailUrl: thumbnailUrl,
+        title: transcriptionResponse.contentMetadata.description || "Untitled Video",
+        author: transcriptionResponse.contentMetadata.author || "Unknown",
+        transcript: transcriptionResponse.transcript,
+        components: transcriptionResponse.components,
+        contentMetadata: transcriptionResponse.contentMetadata,
+        visualContext: transcriptionResponse.visualContext,
+        insights: {
+          // These would be populated from social media APIs in a real implementation
+          likes: 0,
+          comments: 0,
+          shares: 0,
+          views: 0,
+          saves: 0,
+          engagementRate: 0,
+        },
+        addedAt: new Date().toISOString(),
+        fileSize: downloadResponse.videoData.size,
+        duration: 0, // Would be extracted from video metadata
+      };
+
+      await CollectionsService.addVideoToCollection(user.uid, targetCollectionId, videoToAdd);
+
+      toast.success("Video added successfully!");
+      setOpen(false);
       setUrl("");
-      setTitle("");
-      setDescription("");
-      setSelectedCollectionId("");
-      setUrlError("");
-      setIsOpen(false);
-
-      // Notify parent component
-      onVideoAdded?.();
+      setCollectionId("");
+      onVideoAdded();
     } catch (error) {
-      console.error("Error adding video:", error);
-      // TODO: Add toast notification for error
+      console.error("Error processing video:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to process video");
     } finally {
-      setIsAdding(false);
+      setIsProcessing(false);
+      setProcessingStep("");
     }
   };
-
-  const trigger = children ?? (
-    <Button variant="outline" size="sm">
-      <Plus className="mr-2 h-4 w-4" />
-      Add Video
-    </Button>
-  );
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" className="gap-2">
+          <Plus className="h-4 w-4" />
+          Add Video
+        </Button>
+      </DialogTrigger>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader className="space-y-3">
-          <DialogTitle className="text-xl font-semibold">Add Video to Collection</DialogTitle>
-          <DialogDescription className="text-muted-foreground">
-            Add a TikTok or Instagram Reel to your collection.
+        <DialogHeader>
+          <DialogTitle>Add Video to Collection</DialogTitle>
+          <DialogDescription>
+            Enter a TikTok or Instagram video URL to automatically process and add it to your collection.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4 pt-2">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="video-url" className="text-sm font-medium">
-              Video URL
-            </Label>
-            <div className="relative">
-              <Link className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-              <Input
-                id="video-url"
-                placeholder="https://www.tiktok.com/... or https://www.instagram.com/reel/..."
-                value={url}
-                onChange={(e) => handleUrlChange(e.target.value)}
-                className={`min-h-[44px] pl-10 ${urlError ? "border-destructive" : ""}`}
-              />
-            </div>
-            {urlError && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{urlError}</AlertDescription>
-              </Alert>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="video-title" className="text-sm font-medium">
-              Video Title
-            </Label>
+            <Label htmlFor="url">Video URL</Label>
             <Input
-              id="video-title"
-              placeholder="Enter video title..."
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="min-h-[44px]"
+              id="url"
+              type="url"
+              placeholder="https://www.tiktok.com/@user/video/..."
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              disabled={isProcessing}
+              required
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="collection-select" className="text-sm font-medium">
-              Collection
-            </Label>
-            <Select value={selectedCollectionId} onValueChange={setSelectedCollectionId}>
-              <SelectTrigger className="min-h-[44px]">
-                <SelectValue placeholder="Select a collection" />
-              </SelectTrigger>
-              <SelectContent>
-                {collections.map((collection) => (
-                  <SelectItem key={collection.id} value={collection.id!}>
-                    {collection.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {collections.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="collection">Collection (Optional)</Label>
+              <Select value={collectionId} onValueChange={setCollectionId} disabled={isProcessing}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a collection or leave empty for All Videos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all-videos">All Videos</SelectItem>
+                  {collections.map((collection) => (
+                    <SelectItem key={collection.id} value={collection.id}>
+                      {collection.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
-          <div className="space-y-2">
-            <Label htmlFor="video-description" className="text-sm font-medium">
-              Description (Optional)
-            </Label>
-            <Textarea
-              id="video-description"
-              placeholder="Add a description for this video..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="min-h-[80px] resize-none"
-            />
-          </div>
+          {isProcessing && (
+            <div className="text-muted-foreground flex items-center gap-2 text-sm">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              {processingStep}
+            </div>
+          )}
 
-          <Button
-            onClick={handleAddVideo}
-            disabled={!url.trim() || !title.trim() || !selectedCollectionId || urlError !== "" || isAdding}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground w-full"
-          >
-            {isAdding ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-            ) : (
-              <Plus className="mr-2 h-4 w-4" />
-            )}
-            {isAdding ? "Adding..." : "Add Video"}
-          </Button>
-        </div>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={isProcessing}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isProcessing || !url.trim()}>
+              {isProcessing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                "Add Video"
+              )}
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );
