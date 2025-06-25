@@ -1,0 +1,21 @@
+---
+description: Error handling and asynchronous code best practices
+globs: ["**/*.{js,jsx,ts,tsx}"]
+alwaysApply: false
+---
+
+# Error Handling and Async Code Rules
+
+## Async/Await Patterns
+- Always wrap async operations in try-catch blocks
+- Use Promise.allSettled() instead of Promise.all() when some promises may fail
+- Handle loading and error states in async operations
+- Prefer async/await over .then() chains for readability
+
+## Error Handling Best Practices
+- Create specific error types instead of throwing generic Error objects
+- Always log errors with context information
+- Use optional chaining when accessing nested properties that might be undefined
+- Implement proper error boundaries in React applications
+
+@src/utils/errorHandling.ts

@@ -1,0 +1,21 @@
+---
+description: React-specific best practices and linting rules
+globs: ["**/*.{jsx,tsx}"]
+alwaysApply: false
+---
+
+# React Quality Rules
+
+## React Best Practices
+- Always use React.Fragment or <> </> instead of unnecessary div wrappers
+- Define prop types using TypeScript interfaces, not PropTypes
+- Use useCallback for functions passed as props to prevent unnecessary re-renders
+- Use useMemo for expensive calculations
+- Always include dependency arrays for useEffect hooks
+
+## JSX Rules
+- Use self-closing tags for components without children
+- Prefer ternary operators over && for conditional rendering when falsy values matter
+- Extract complex JSX into separate components when it exceeds 10 lines
+
+@src/types/components.ts

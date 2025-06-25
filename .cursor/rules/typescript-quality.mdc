@@ -1,0 +1,22 @@
+---
+description: TypeScript-specific linting and type safety rules
+globs: ["**/*.{ts,tsx}"]
+alwaysApply: false
+---
+
+# TypeScript Quality Rules
+
+## Type Safety Rules
+- Always define explicit return types for functions
+- Use strict null checks - prefer optional chaining (?.) over manual null checks
+- Define interfaces for objects with more than 2 properties
+- Use union types instead of 'any' when possible
+- Prefer 'unknown' over 'any' for truly unknown types
+
+## Common TypeScript Lint Fixes
+- When encountering "Object is possibly 'null'" errors, use optional chaining or null checks
+- For "Property does not exist on type" errors, define proper interfaces or use type assertions with caution
+- Replace implicit any with explicit types based on usage context
+- Use const assertions for immutable arrays and objects
+
+@tsconfig.json

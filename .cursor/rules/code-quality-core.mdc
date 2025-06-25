@@ -1,0 +1,33 @@
+---
+description: Core code quality rules for consistent linting and formatting
+globs: ["**/*.{js,jsx,ts,tsx}"]
+alwaysApply: true
+---
+
+# Core Code Quality Rules
+
+## Import Organization and Style
+- Always organize imports alphabetically within groups (external, internal, relative)
+- Use single quotes for strings unless they contain single quotes
+- Add trailing commas in multiline arrays and objects
+- Use 2 spaces for indentation consistently
+
+## Variable Naming Conventions
+- Use camelCase for variables and functions
+- Use PascalCase for classes and components
+- Use UPPER_SNAKE_CASE for constants
+- Prefix boolean variables with "is", "has", "can", or "should"
+
+## Common Lint Error Fixes
+- When fixing "no-unused-vars" errors, create a rule to avoid declaring unused variables
+- When fixing "no-console" errors, remind to use proper logging libraries in production
+- When fixing "prefer-const" errors, always use const for variables that don't get reassigned
+- When fixing "no-var" errors, always use let or const instead of var
+
+## Prettier Formatting Patterns
+- Apply automatic line breaks at 80-100 characters
+- Always include trailing commas in multiline structures
+- Maintain consistent semicolon usage based on project preference
+
+@eslint.config.js
+@prettier.config.js

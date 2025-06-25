@@ -1,0 +1,22 @@
+---
+description: Performance optimization rules and patterns
+globs: ["**/*.{js,jsx,ts,tsx}"]
+alwaysApply: false
+---
+
+# Performance Optimization Rules
+
+## General Performance Rules
+- Use const assertions for immutable arrays and objects
+- Prefer early returns to reduce nesting levels
+- Use object destructuring instead of repeated property access
+- Implement proper memoization for expensive calculations
+
+## React Performance Optimizations
+- Use React.memo for components with stable props
+- Implement proper dependency arrays in hooks
+- Use useCallback and useMemo appropriately
+- Avoid creating objects and functions in render methods
+
+@webpack.config.js
+@src/utils/performance.ts

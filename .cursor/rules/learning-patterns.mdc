@@ -1,0 +1,21 @@
+---
+description: Rules for learning from lint errors and adapting patterns
+globs: ["**/*.{js,jsx,ts,tsx}"]
+alwaysApply: true
+---
+
+# Learning and Adaptation Rules
+
+## Progressive Rule Development
+1. After fixing a lint error manually, add a rule explaining the fix
+2. Include the reasoning behind the fix in comments
+3. Update rules when patterns change or new best practices emerge
+4. Review and refine rules monthly based on recurring issues
+
+## Rule Priority System
+- Critical: Rules that prevent runtime errors or security issues
+- Important: Rules that improve code maintainability and readability
+- Preference: Rules that enforce team coding style preferences
+
+@.eslintrc.js
+@docs/rule-explanations.md
