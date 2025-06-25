@@ -42,6 +42,10 @@ interface VideoDownloadResponse {
     comments: number;
     saves: number;
   };
+  additionalMetadata: {
+    author: string;
+    duration: number;
+  };
   metadata: {
     originalUrl: string;
     platform: string;
@@ -186,7 +190,7 @@ export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded
       platform: downloadResponse.platform,
       thumbnailUrl: thumbnailUrl,
       title: transcriptionResponse.contentMetadata.description || "Untitled Video",
-      author: transcriptionResponse.contentMetadata.author || "Unknown",
+      author: downloadResponse.additionalMetadata.author || transcriptionResponse.contentMetadata.author || "Unknown",
       transcript: transcriptionResponse.transcript,
       components: transcriptionResponse.components,
       contentMetadata: transcriptionResponse.contentMetadata,
@@ -201,7 +205,7 @@ export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded
       },
       addedAt: new Date().toISOString(),
       fileSize: downloadResponse.videoData.size,
-      duration: 0, // Would be extracted from video metadata
+      duration: downloadResponse.additionalMetadata.duration,
     };
   };
 

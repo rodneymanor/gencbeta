@@ -116,51 +116,39 @@ export function VideoInsightsModal({ video, children }: VideoInsightsModalProps)
         </DialogHeader>
 
         <div className="flex-1 overflow-auto">
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
-            {/* Left Column - Video Preview & Hook Details */}
-            <div className="space-y-6 lg:col-span-5">
-              {/* Video Preview */}
+          <div className="space-y-6">
+            {/* Hook Details */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Hook Details</h3>
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Video Preview</h3>
-                <div className="bg-muted mx-auto aspect-[9/16] w-full max-w-[280px] overflow-hidden rounded-lg sm:max-w-[200px] lg:max-w-[280px]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={video.thumbnailUrl} alt="Video thumbnail" className="h-full w-full object-cover" />
+                <div>
+                  <Label className="text-sm font-medium">Hook:</Label>
+                  <div className="bg-muted/50 mt-2 rounded-lg p-4">
+                    <p className="text-sm leading-relaxed">{video.components.hook}</p>
+                  </div>
                 </div>
-              </div>
 
-              {/* Hook Details */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Hook Details</h3>
-                <div className="space-y-4">
-                  <div>
-                    <Label className="text-sm font-medium">Hook:</Label>
-                    <div className="bg-muted/50 mt-2 rounded-lg p-4">
-                      <p className="text-sm leading-relaxed">{video.components.hook}</p>
-                    </div>
-                  </div>
+                <div>
+                  <Label className="text-sm font-medium">Hook Type:</Label>
+                  <Badge variant="outline" className="mt-2">
+                    Pattern Recognition
+                  </Badge>
+                </div>
 
-                  <div>
-                    <Label className="text-sm font-medium">Hook Type:</Label>
-                    <Badge variant="outline" className="mt-2">
-                      Pattern Recognition
-                    </Badge>
-                  </div>
-
-                  <div className="flex flex-col gap-2 sm:flex-row">
-                    <Button variant="outline" size="sm" className="gap-2">
-                      <Shuffle className="h-4 w-4" />
-                      Remix Hook
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => copyToClipboard(video.components.hook, "Hook")}>
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </div>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Shuffle className="h-4 w-4" />
+                    Remix Hook
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => copyToClipboard(video.components.hook, "Hook")}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </div>
 
-            {/* Right Column - Metrics & Analysis */}
-            <div className="space-y-6 lg:col-span-7">
+            {/* Metrics & Analysis */}
+            <div className="space-y-6">
               {/* Metrics Grid */}
               <VideoMetricsGrid insights={video.insights} />
 
