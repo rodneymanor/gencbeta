@@ -99,7 +99,7 @@ const NavItemExpanded = ({
                 <SidebarMenuSubItem>
                   <CreateCollectionDialog onCollectionCreated={onCollectionCreated}>
                     <SidebarMenuSubButton className="text-muted-foreground hover:text-foreground cursor-pointer">
-                      <FolderPlus className="h-4 w-4" />
+                      <FolderPlus />
                       <span>Create your first collection</span>
                     </SidebarMenuSubButton>
                   </CreateCollectionDialog>
@@ -159,7 +159,7 @@ const NavItemCollapsed = ({
               <DropdownMenuItem asChild>
                 <CreateCollectionDialog onCollectionCreated={onCollectionCreated}>
                   <SidebarMenuSubButton className="text-muted-foreground hover:text-foreground cursor-pointer focus-visible:ring-0">
-                    <FolderPlus className="h-4 w-4" />
+                    <FolderPlus />
                     <span>Create your first collection</span>
                   </SidebarMenuSubButton>
                 </CreateCollectionDialog>
