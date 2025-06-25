@@ -213,7 +213,7 @@ export function NavMain({ items, onCollectionCreated }: NavMainProps) {
               <CreateDropdown>
                 <Button
                   size="icon"
-                  className="h-9 w-9 shrink-0 group-data-[collapsible=icon]:opacity-0"
+                  className="h-11 w-11 shrink-0 group-data-[collapsible=icon]:opacity-0"
                   variant="outline"
                 >
                   <Plus />
