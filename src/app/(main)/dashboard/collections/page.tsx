@@ -10,7 +10,6 @@ import { Plus, Play, BarChart3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth-context";
 import { CollectionsService, type Video, type Collection } from "@/lib/collections";
@@ -123,6 +122,16 @@ export default function CollectionsPage() {
     }
   };
 
+  const formatNumber = (num: number): string => {
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + "M";
+    }
+    if (num >= 1000) {
+      return (num / 1000).toFixed(1) + "K";
+    }
+    return num.toString();
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -133,18 +142,15 @@ export default function CollectionsPage() {
           </div>
           <Skeleton className="h-10 w-24" />
         </div>
-        <Separator />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
           {Array.from({ length: 8 }).map((_, i) => (
-            <Card key={i}>
-              <CardContent className="p-0">
-                <Skeleton className="aspect-[9/16] w-full" />
-                <div className="space-y-2 p-4">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-3 w-20" />
-                </div>
-              </CardContent>
-            </Card>
+            <div key={i} className="relative mx-auto w-full max-w-sm">
+              <Card className="overflow-hidden border-0 bg-gradient-to-br from-gray-900 to-black shadow-2xl">
+                <CardContent className="p-0">
+                  <Skeleton className="aspect-[9/16] w-full rounded-xl" />
+                </CardContent>
+              </Card>
+            </div>
           ))}
         </div>
       </div>
@@ -170,15 +176,13 @@ export default function CollectionsPage() {
       {loadingVideos ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
           {Array.from({ length: 8 }).map((_, i) => (
-            <Card key={i}>
-              <CardContent className="p-0">
-                <Skeleton className="aspect-[9/16] w-full" />
-                <div className="space-y-2 p-4">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-3 w-20" />
-                </div>
-              </CardContent>
-            </Card>
+            <div key={i} className="relative mx-auto w-full max-w-sm">
+              <Card className="overflow-hidden border-0 bg-gradient-to-br from-gray-900 to-black shadow-2xl">
+                <CardContent className="p-0">
+                  <Skeleton className="aspect-[9/16] w-full rounded-xl" />
+                </CardContent>
+              </Card>
+            </div>
           ))}
         </div>
       ) : videos.length === 0 ? (
@@ -197,55 +201,73 @@ export default function CollectionsPage() {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
           {videos.map((video) => (
-            <Card key={video.id} className="group overflow-hidden transition-shadow hover:shadow-md">
-              <CardContent className="p-0">
-                {/* Video Thumbnail/Player */}
-                <div className="relative aspect-[9/16] bg-black">
-                  {video.isPlaying ? (
-                    <video
-                      src={video.url}
-                      className="h-full w-full object-cover"
-                      controls
-                      autoPlay
-                      onEnded={() => toggleVideoPlay(video.id!)}
-                    />
-                  ) : (
-                    <>
-                      <Image src={video.thumbnailUrl} alt={video.title} fill className="object-cover" />
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity group-hover:opacity-100">
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          className="bg-white/90 hover:bg-white"
-                          onClick={() => toggleVideoPlay(video.id!)}
-                        >
-                          <Play className="h-4 w-4" />
-                        </Button>
+            <div key={video.id} className="relative mx-auto w-full max-w-sm">
+              <Card className="overflow-hidden border-0 bg-gradient-to-br from-gray-900 to-black shadow-2xl">
+                <CardContent className="p-0">
+                  {/* Video Container */}
+                  <div className="relative aspect-[9/16] overflow-hidden rounded-xl bg-black">
+                    {video.isPlaying ? (
+                      <video
+                        src={video.url}
+                        className="h-full w-full rounded-xl object-cover"
+                        controls
+                        autoPlay
+                        onEnded={() => toggleVideoPlay(video.id!)}
+                      />
+                    ) : (
+                      <div
+                        className="relative h-full w-full cursor-pointer bg-black"
+                        onClick={() => toggleVideoPlay(video.id!)}
+                      >
+                        <Image src={video.thumbnailUrl} alt={video.title} fill className="rounded-xl object-cover" />
+                        {/* Play Button Overlay */}
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity duration-200 hover:opacity-100">
+                          <div className="rounded-full bg-white/90 p-4 transition-all duration-200 hover:scale-110 hover:bg-white">
+                            <Play className="ml-1 h-6 w-6 text-black" />
+                          </div>
+                        </div>
                       </div>
-                    </>
-                  )}
+                    )}
 
-                  {/* Platform Badge */}
-                  <Badge className={`absolute top-2 left-2 ${getPlatformColor(video.platform)}`}>
-                    {video.platform}
-                  </Badge>
-                </div>
+                    {/* Metrics Overlay */}
+                    <div className="absolute right-0 bottom-0 left-0 rounded-b-xl bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4">
+                      <div className="flex items-center justify-between text-white">
+                        <div className="flex items-center space-x-4">
+                          <div className="flex items-center space-x-1">
+                            <span className="text-sm">👁️</span>
+                            <span className="text-sm font-medium">{formatNumber(video.insights.views)}</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <span className="text-sm">❤️</span>
+                            <span className="text-sm font-medium">{formatNumber(video.insights.likes)}</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <span className="text-sm">💬</span>
+                            <span className="text-sm font-medium">{formatNumber(video.insights.comments)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
-                {/* Video Info */}
-                <div className="p-4">
-                  <h3 className="mb-2 line-clamp-2 text-sm font-medium">{video.title}</h3>
-                  <p className="text-muted-foreground mb-3 text-xs">by {video.author}</p>
+                    {/* Insights Button */}
+                    <VideoInsightsModal video={video}>
+                      <Button
+                        size="sm"
+                        className="absolute top-4 right-4 border-0 bg-black/50 text-white backdrop-blur-sm transition-all duration-200 hover:scale-105 hover:bg-black/70"
+                      >
+                        <BarChart3 className="mr-1 h-4 w-4" />
+                        Insights
+                      </Button>
+                    </VideoInsightsModal>
 
-                  {/* Insights Button */}
-                  <VideoInsightsModal video={video}>
-                    <Button variant="outline" size="sm" className="w-full">
-                      <BarChart3 className="mr-2 h-4 w-4" />
-                      View Insights
-                    </Button>
-                  </VideoInsightsModal>
-                </div>
-              </CardContent>
-            </Card>
+                    {/* Platform Badge */}
+                    <Badge className={`absolute top-4 left-4 border-0 capitalize ${getPlatformColor(video.platform)}`}>
+                      {video.platform}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           ))}
         </div>
       )}
