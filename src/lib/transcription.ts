@@ -3,11 +3,14 @@ import { TranscriptionResponse, TranscriptionError } from "@/types/transcription
 /**
  * Transcribe a video file using the Gemini AI API
  */
-export async function transcribeVideoFile(file: File): Promise<TranscriptionResponse> {
+export async function transcribeVideoFile(file: File, baseUrl?: string): Promise<TranscriptionResponse> {
   const formData = new FormData();
   formData.append("video", file);
 
-  const response = await fetch("/api/transcribe-video", {
+  // Use absolute URL for server-side calls, relative for client-side
+  const url = baseUrl ? `${baseUrl}/api/transcribe-video` : "/api/transcribe-video";
+
+  const response = await fetch(url, {
     method: "POST",
     body: formData,
   });

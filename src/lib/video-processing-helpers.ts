@@ -70,7 +70,9 @@ export async function transcribeVideoData(
     });
 
     console.log("🎬 [DOWNLOAD] Transcribing video file...");
-    const transcriptionResult = await transcribeVideoFile(file);
+    // Use localhost for server-side transcription calls
+    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
+    const transcriptionResult = await transcribeVideoFile(file, baseUrl);
 
     return transcriptionResult;
   } catch (error) {
