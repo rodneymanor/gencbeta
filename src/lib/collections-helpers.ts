@@ -9,6 +9,11 @@ export async function verifyCollectionOwnership(
   userId: string,
   collectionId: string,
 ): Promise<{ exists: boolean; data?: any }> {
+  // Handle special cases and invalid collection IDs
+  if (!collectionId || collectionId.trim() === "" || collectionId === "all-videos") {
+    return { exists: false };
+  }
+
   const docRef = doc(db, "collections", collectionId);
   const docSnap = await getDoc(docRef);
 

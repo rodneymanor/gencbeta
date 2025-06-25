@@ -215,19 +215,23 @@ export class CollectionsService {
     try {
       const batch = writeBatch(db);
 
+      // Normalize collection ID - handle empty strings and null/undefined
+      const normalizedCollectionId = !collectionId || collectionId.trim() === "" ? "all-videos" : collectionId;
+
       const videoRef = doc(collection(db, this.VIDEOS_PATH));
       const videoData = {
         ...video,
         userId,
-        collectionId: collectionId === "all-videos" ? "all-videos" : collectionId,
+        collectionId: normalizedCollectionId,
         addedAt: serverTimestamp(),
       };
 
       batch.set(videoRef, videoData);
 
-      if (collectionId !== "all-videos") {
-        await verifyCollectionOwnership(userId, collectionId);
-        await updateCollectionVideoCount(batch, collectionId, userId, 1);
+      // Only verify ownership and update count for actual collections (not "all-videos")
+      if (normalizedCollectionId !== "all-videos") {
+        await verifyCollectionOwnership(userId, normalizedCollectionId);
+        await updateCollectionVideoCount(batch, normalizedCollectionId, userId, 1);
       }
 
       await batch.commit();

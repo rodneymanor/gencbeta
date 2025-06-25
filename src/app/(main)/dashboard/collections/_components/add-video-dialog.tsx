@@ -195,7 +195,7 @@ export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded
       setProcessingStep("Saving to collection...");
 
       // Determine which collection to use
-      const targetCollectionId = collectionId ?? "all-videos";
+      const targetCollectionId = collectionId && collectionId.trim() !== "" ? collectionId : "all-videos";
 
       // Create video object with all the processed data
       const videoToAdd = {
