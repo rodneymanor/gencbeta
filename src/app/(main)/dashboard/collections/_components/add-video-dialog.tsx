@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Plus, Loader2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -21,64 +21,18 @@ import { useAppState } from "@/contexts/app-state-context";
 import { useAuth } from "@/contexts/auth-context";
 import { CollectionsService } from "@/lib/collections";
 
+import {
+  downloadVideo,
+  transcribeVideo,
+  extractVideoThumbnail,
+  createVideoObject,
+  validateUrl,
+} from "./video-processing";
+
 interface AddVideoDialogProps {
   collections: Array<{ id: string; title: string }>;
   selectedCollectionId?: string;
   onVideoAdded: () => void;
-}
-
-interface VideoDownloadResponse {
-  success: boolean;
-  platform: string;
-  videoData: {
-    buffer: number[];
-    size: number;
-    mimeType: string;
-    filename: string;
-  };
-  metrics: {
-    likes: number;
-    views: number;
-    shares: number;
-    comments: number;
-    saves: number;
-  };
-  additionalMetadata: {
-    author: string;
-    duration: number;
-  };
-  metadata: {
-    originalUrl: string;
-    platform: string;
-    downloadedAt: string;
-    readyForTranscription: boolean;
-  };
-}
-
-interface TranscriptionResponse {
-  success: boolean;
-  transcript: string;
-  platform: string;
-  components: {
-    hook: string;
-    bridge: string;
-    nugget: string;
-    wta: string;
-  };
-  contentMetadata: {
-    platform: string;
-    author: string;
-    description: string;
-    source: string;
-    hashtags: string[];
-  };
-  visualContext: string;
-  transcriptionMetadata: {
-    method: string;
-    fileSize: number;
-    fileName: string;
-    processedAt: string;
-  };
 }
 
 export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded }: AddVideoDialogProps) {
@@ -87,129 +41,9 @@ export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded
   const [collectionId, setCollectionId] = useState(selectedCollectionId ?? "");
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingStep, setProcessingStep] = useState("");
+
   const { user } = useAuth();
   const { setVideoProcessing } = useAppState();
-
-  const validateUrl = (url: string): boolean => {
-    const urlPattern = /^https?:\/\/.+/;
-    if (!urlPattern.test(url)) return false;
-
-    const supportedPlatforms = ["tiktok.com", "instagram.com"];
-    return supportedPlatforms.some((platform) => url.toLowerCase().includes(platform));
-  };
-
-  const downloadVideo = async (videoUrl: string): Promise<VideoDownloadResponse> => {
-    const response = await fetch("/api/download-video", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ url: videoUrl }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error ?? "Failed to download video");
-    }
-
-    const data = await response.json();
-    console.log("📥 [ADD_VIDEO] Download response received:", data);
-    console.log("🔍 [DEBUG] Download metrics:", data.metrics);
-    console.log("🔍 [DEBUG] Full response structure:", JSON.stringify(data, null, 2));
-    return data;
-  };
-
-  const transcribeVideo = async (videoData: VideoDownloadResponse["videoData"]): Promise<TranscriptionResponse> => {
-    // Convert the buffer array back to a File object
-    const uint8Array = new Uint8Array(videoData.buffer);
-    const blob = new Blob([uint8Array], { type: videoData.mimeType });
-    const file = new File([blob], videoData.filename, { type: videoData.mimeType });
-
-    const formData = new FormData();
-    formData.append("video", file);
-
-    const response = await fetch("/api/transcribe-video", {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error ?? "Failed to transcribe video");
-    }
-
-    return response.json();
-  };
-
-  const extractVideoThumbnail = async (videoData: VideoDownloadResponse["videoData"]): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const uint8Array = new Uint8Array(videoData.buffer);
-      const blob = new Blob([uint8Array], { type: videoData.mimeType });
-      const video = document.createElement("video");
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-
-      video.onloadedmetadata = () => {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        video.currentTime = 1; // Capture frame at 1 second
-      };
-
-      video.onseeked = () => {
-        if (ctx) {
-          ctx.drawImage(video, 0, 0);
-          const thumbnailUrl = canvas.toDataURL("image/jpeg", 0.8);
-          URL.revokeObjectURL(video.src);
-          resolve(thumbnailUrl);
-        } else {
-          reject(new Error("Failed to get canvas context"));
-        }
-      };
-
-      video.onerror = () => {
-        URL.revokeObjectURL(video.src);
-        reject(new Error("Failed to load video"));
-      };
-
-      video.src = URL.createObjectURL(blob);
-    });
-  };
-
-  const createVideoObject = (
-    downloadResponse: VideoDownloadResponse,
-    transcriptionResponse: TranscriptionResponse,
-    thumbnailUrl: string,
-  ) => {
-    const engagementRate =
-      downloadResponse.metrics.views > 0
-        ? ((downloadResponse.metrics.likes + downloadResponse.metrics.comments + downloadResponse.metrics.shares) /
-            downloadResponse.metrics.views) *
-          100
-        : 0;
-
-    return {
-      url: url,
-      platform: downloadResponse.platform,
-      thumbnailUrl: thumbnailUrl,
-      title: transcriptionResponse.contentMetadata.description || "Untitled Video",
-      author: downloadResponse.additionalMetadata.author || transcriptionResponse.contentMetadata.author || "Unknown",
-      transcript: transcriptionResponse.transcript,
-      components: transcriptionResponse.components,
-      contentMetadata: transcriptionResponse.contentMetadata,
-      visualContext: transcriptionResponse.visualContext,
-      insights: {
-        likes: downloadResponse.metrics.likes,
-        comments: downloadResponse.metrics.comments,
-        shares: downloadResponse.metrics.shares,
-        views: downloadResponse.metrics.views,
-        saves: downloadResponse.metrics.saves,
-        engagementRate,
-      },
-      addedAt: new Date().toISOString(),
-      fileSize: downloadResponse.videoData.size,
-      duration: downloadResponse.additionalMetadata.duration,
-    };
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -239,11 +73,11 @@ export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded
 
       // Step 2: Transcribe video
       setProcessingStep("Analyzing video content...");
-      const transcriptionResponse = await transcribeVideo(downloadResponse.videoData);
+      const transcriptionResponse = await transcribeVideo(downloadResponse);
 
       // Step 3: Generate thumbnail
       setProcessingStep("Generating thumbnail...");
-      const thumbnailUrl = await extractVideoThumbnail(downloadResponse.videoData);
+      const thumbnailUrl = await extractVideoThumbnail(downloadResponse);
 
       // Step 4: Save to collection
       setProcessingStep("Saving to collection...");
@@ -252,7 +86,7 @@ export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded
       const targetCollectionId = collectionId && collectionId.trim() !== "" ? collectionId : "all-videos";
 
       // Create video object with all the processed data
-      const videoToAdd = createVideoObject(downloadResponse, transcriptionResponse, thumbnailUrl);
+      const videoToAdd = createVideoObject(downloadResponse, transcriptionResponse, thumbnailUrl, url);
 
       await CollectionsService.addVideoToCollection(user.uid, targetCollectionId, videoToAdd);
 
@@ -292,53 +126,42 @@ export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded
             <Input
               id="url"
               type="url"
-              placeholder="https://www.tiktok.com/@user/video/..."
+              placeholder="https://www.tiktok.com/@user/video/123..."
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               disabled={isProcessing}
-              required
             />
           </div>
 
-          {collections.length > 0 && (
-            <div className="space-y-2">
-              <Label htmlFor="collection">Collection (Optional)</Label>
-              <Select value={collectionId} onValueChange={setCollectionId} disabled={isProcessing}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a collection or leave empty for All Videos" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all-videos">All Videos</SelectItem>
-                  {collections.map((collection) => (
-                    <SelectItem key={collection.id} value={collection.id}>
-                      {collection.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          <div className="space-y-2">
+            <Label htmlFor="collection">Collection (Optional)</Label>
+            <Select value={collectionId} onValueChange={setCollectionId} disabled={isProcessing}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a collection or leave empty for All Videos" />
+              </SelectTrigger>
+              <SelectContent>
+                {collections.map((collection) => (
+                  <SelectItem key={collection.id} value={collection.id}>
+                    {collection.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           {isProcessing && (
-            <div className="text-muted-foreground flex items-center gap-2 text-sm">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              {processingStep}
+            <div className="space-y-2 text-center">
+              <div className="border-primary mx-auto h-6 w-6 animate-spin rounded-full border-2 border-t-transparent" />
+              <p className="text-muted-foreground text-sm">{processingStep}</p>
             </div>
           )}
 
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end space-x-2">
             <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={isProcessing}>
               Cancel
             </Button>
             <Button type="submit" disabled={isProcessing || !url.trim()}>
-              {isProcessing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                "Add Video"
-              )}
+              {isProcessing ? "Processing..." : "Add Video"}
             </Button>
           </div>
         </form>

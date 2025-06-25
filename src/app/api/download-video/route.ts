@@ -48,7 +48,18 @@ export async function POST(request: NextRequest) {
       return sizeValidationResult;
     }
 
-    return createSuccessResponse(downloadResult, platform, url);
+    // Upload to Bunny.net CDN
+    console.log("🐰 [DOWNLOAD] Uploading video to Bunny.net CDN...");
+    const cdnResult = await uploadToBunnyCDN(downloadResult.videoData);
+
+    if (!cdnResult) {
+      console.error("❌ [DOWNLOAD] Failed to upload to CDN, returning original video data");
+      // Fall back to returning original video data if CDN upload fails
+      return createSuccessResponse(downloadResult, platform, url, null);
+    }
+
+    console.log("✅ [DOWNLOAD] Video uploaded to CDN:", cdnResult.cdnUrl);
+    return createSuccessResponse(downloadResult, platform, url, cdnResult);
   } catch (error) {
     console.error("❌ [DOWNLOAD] Video download error:", error);
     console.error("❌ [DOWNLOAD] Error stack:", error instanceof Error ? error.stack : "No stack trace");
@@ -81,7 +92,7 @@ function validateVideoSize(size: number) {
   return null;
 }
 
-function createSuccessResponse(downloadResult: any, platform: string, url: string) {
+function createSuccessResponse(downloadResult: any, platform: string, url: string, cdnResult: any) {
   const { videoData, metrics, additionalMetadata } = downloadResult;
 
   console.log("✅ [DOWNLOAD] Video downloaded successfully");
@@ -90,15 +101,9 @@ function createSuccessResponse(downloadResult: any, platform: string, url: strin
   console.log("  - Type:", videoData.mimeType);
   console.log("  - Platform:", platform);
 
-  return NextResponse.json({
+  const response: any = {
     success: true,
     platform,
-    videoData: {
-      buffer: Array.from(new Uint8Array(videoData.buffer)), // Convert to array for JSON
-      size: videoData.size,
-      mimeType: videoData.mimeType,
-      filename: videoData.filename ?? `${platform}-video.mp4`,
-    },
     metrics: metrics ?? {
       likes: 0,
       views: 0,
@@ -116,7 +121,27 @@ function createSuccessResponse(downloadResult: any, platform: string, url: strin
       downloadedAt: new Date().toISOString(),
       readyForTranscription: true,
     },
-  });
+  };
+
+  // If CDN upload was successful, return CDN URL instead of video buffer
+  if (cdnResult) {
+    response.cdnUrl = cdnResult.cdnUrl;
+    response.filename = cdnResult.filename;
+    response.hostedOnCDN = true;
+    console.log("🎯 [DOWNLOAD] Returning CDN-hosted video URL");
+  } else {
+    // Fallback: return video buffer for local processing
+    response.videoData = {
+      buffer: Array.from(new Uint8Array(videoData.buffer)), // Convert to array for JSON
+      size: videoData.size,
+      mimeType: videoData.mimeType,
+      filename: videoData.filename ?? `${platform}-video.mp4`,
+    };
+    response.hostedOnCDN = false;
+    console.log("📁 [DOWNLOAD] Returning video buffer for local processing");
+  }
+
+  return NextResponse.json(response);
 }
 
 function detectPlatform(url: string): string {
@@ -288,4 +313,44 @@ async function downloadInstagramVideoWithMetrics(url: string): Promise<{
 async function fallbackToBasicDownload(url: string) {
   const basicResult = await downloadInstagramVideo(url);
   return basicResult ? { videoData: basicResult } : null;
+}
+
+async function uploadToBunnyCDN(videoData: {
+  buffer: ArrayBuffer;
+  size: number;
+  mimeType: string;
+  filename?: string;
+}): Promise<{ cdnUrl: string; filename: string } | null> {
+  try {
+    console.log("🐰 [DOWNLOAD] Preparing video for CDN upload...");
+
+    const uploadResponse = await fetch("/api/upload-to-bunny", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        videoBuffer: Array.from(new Uint8Array(videoData.buffer)),
+        filename: videoData.filename ?? "video.mp4",
+        mimeType: videoData.mimeType,
+      }),
+    });
+
+    if (!uploadResponse.ok) {
+      const errorData = await uploadResponse.json();
+      console.error("❌ [DOWNLOAD] CDN upload failed:", errorData);
+      return null;
+    }
+
+    const result = await uploadResponse.json();
+    console.log("✅ [DOWNLOAD] CDN upload successful");
+
+    return {
+      cdnUrl: result.cdnUrl,
+      filename: result.filename,
+    };
+  } catch (error) {
+    console.error("❌ [DOWNLOAD] CDN upload error:", error);
+    return null;
+  }
 }

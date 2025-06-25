@@ -17,53 +17,13 @@ export async function POST(request: NextRequest) {
   console.log("🎬 [TRANSCRIBE] Starting video transcription...");
 
   try {
-    const formData = await request.formData();
-    const file = formData.get("video") as File;
+    const contentType = request.headers.get("content-type");
 
-    if (!file) {
-      console.error("❌ [TRANSCRIBE] No video file provided");
-      return NextResponse.json({ error: "No video file provided" }, { status: 400 });
+    if (contentType?.includes("application/json")) {
+      return await handleCdnTranscription(request);
+    } else {
+      return await handleFileTranscription(request);
     }
-
-    console.log("📁 [TRANSCRIBE] File info:");
-    console.log("  - Name:", file.name);
-    console.log("  - Size:", Math.round((file.size / 1024 / 1024) * 100) / 100, "MB");
-    console.log("  - Type:", file.type);
-
-    // Check file size limit (20MB for direct upload)
-    const maxDirectSize = 20 * 1024 * 1024; // 20MB
-
-    if (file.size > maxDirectSize) {
-      console.error("❌ [TRANSCRIBE] File too large for direct upload:", file.size, "bytes");
-      return NextResponse.json({ error: "Video file is too large (max 20MB)" }, { status: 400 });
-    }
-
-    const transcriptionResult = await transcribeDirectly(file);
-
-    if (!transcriptionResult) {
-      console.error("❌ [TRANSCRIBE] Transcription failed");
-      return NextResponse.json({ error: "Failed to transcribe video" }, { status: 500 });
-    }
-
-    console.log("✅ [TRANSCRIBE] Transcription completed successfully");
-    console.log("📊 [TRANSCRIBE] Result summary:");
-    console.log("  - Transcript length:", transcriptionResult.transcript.length, "characters");
-    console.log("  - Platform:", transcriptionResult.platform);
-
-    return NextResponse.json({
-      success: true,
-      transcript: transcriptionResult.transcript,
-      platform: transcriptionResult.platform,
-      components: transcriptionResult.components,
-      contentMetadata: transcriptionResult.contentMetadata,
-      visualContext: transcriptionResult.visualContext,
-      transcriptionMetadata: {
-        method: "direct",
-        fileSize: file.size,
-        fileName: file.name,
-        processedAt: new Date().toISOString(),
-      },
-    });
   } catch (error) {
     console.error("❌ [TRANSCRIBE] Transcription error:", error);
     console.error("❌ [TRANSCRIBE] Error stack:", error instanceof Error ? error.stack : "No stack trace");
@@ -76,6 +36,95 @@ export async function POST(request: NextRequest) {
       { status: 500 },
     );
   }
+}
+
+async function handleCdnTranscription(request: NextRequest) {
+  const { videoUrl, platform } = await request.json();
+
+  if (!videoUrl) {
+    console.error("❌ [TRANSCRIBE] No video URL provided");
+    return NextResponse.json({ error: "No video URL provided" }, { status: 400 });
+  }
+
+  console.log("🌐 [TRANSCRIBE] Transcribing CDN-hosted video:", videoUrl);
+  console.log("📱 [TRANSCRIBE] Platform:", platform);
+
+  const transcriptionResult = await transcribeFromUrl(videoUrl, platform);
+
+  if (!transcriptionResult) {
+    console.error("❌ [TRANSCRIBE] CDN transcription failed");
+    return NextResponse.json({ error: "Failed to transcribe video from URL" }, { status: 500 });
+  }
+
+  console.log("✅ [TRANSCRIBE] CDN transcription completed successfully");
+  console.log("📊 [TRANSCRIBE] Result summary:");
+  console.log("  - Transcript length:", transcriptionResult.transcript.length, "characters");
+  console.log("  - Platform:", transcriptionResult.platform);
+
+  return NextResponse.json({
+    success: true,
+    transcript: transcriptionResult.transcript,
+    platform: transcriptionResult.platform,
+    components: transcriptionResult.components,
+    contentMetadata: transcriptionResult.contentMetadata,
+    visualContext: transcriptionResult.visualContext,
+    transcriptionMetadata: {
+      method: "cdn-url",
+      fileSize: 0, // Unknown for CDN URLs
+      fileName: videoUrl.split("/").pop() ?? "cdn-video",
+      processedAt: new Date().toISOString(),
+    },
+  });
+}
+
+async function handleFileTranscription(request: NextRequest) {
+  const formData = await request.formData();
+  const file = formData.get("video") as File;
+
+  if (!file) {
+    console.error("❌ [TRANSCRIBE] No video file provided");
+    return NextResponse.json({ error: "No video file provided" }, { status: 400 });
+  }
+
+  console.log("📁 [TRANSCRIBE] File info:");
+  console.log("  - Name:", file.name);
+  console.log("  - Size:", Math.round((file.size / 1024 / 1024) * 100) / 100, "MB");
+  console.log("  - Type:", file.type);
+
+  // Check file size limit (20MB for direct upload)
+  const maxDirectSize = 20 * 1024 * 1024; // 20MB
+
+  if (file.size > maxDirectSize) {
+    console.error("❌ [TRANSCRIBE] File too large for direct upload:", file.size, "bytes");
+    return NextResponse.json({ error: "Video file is too large (max 20MB)" }, { status: 400 });
+  }
+
+  const transcriptionResult = await transcribeDirectly(file);
+
+  if (!transcriptionResult) {
+    console.error("❌ [TRANSCRIBE] Transcription failed");
+    return NextResponse.json({ error: "Failed to transcribe video" }, { status: 500 });
+  }
+
+  console.log("✅ [TRANSCRIBE] Transcription completed successfully");
+  console.log("📊 [TRANSCRIBE] Result summary:");
+  console.log("  - Transcript length:", transcriptionResult.transcript.length, "characters");
+  console.log("  - Platform:", transcriptionResult.platform);
+
+  return NextResponse.json({
+    success: true,
+    transcript: transcriptionResult.transcript,
+    platform: transcriptionResult.platform,
+    components: transcriptionResult.components,
+    contentMetadata: transcriptionResult.contentMetadata,
+    visualContext: transcriptionResult.visualContext,
+    transcriptionMetadata: {
+      method: "direct",
+      fileSize: file.size,
+      fileName: file.name,
+      processedAt: new Date().toISOString(),
+    },
+  });
 }
 
 function createFallbackResponse(responseText: string): {
@@ -225,6 +274,82 @@ async function transcribeDirectly(file: File): Promise<{
     }
   } catch (error) {
     console.error("❌ [TRANSCRIBE-DIRECT] Direct transcription error:", error);
+    return null;
+  }
+}
+
+async function transcribeFromUrl(
+  videoUrl: string,
+  platform?: string,
+): Promise<{
+  transcript: string;
+  platform: string;
+  components: ScriptComponents;
+  contentMetadata: ContentMetadata;
+  visualContext: string;
+} | null> {
+  try {
+    console.log("🌐 [TRANSCRIBE-URL] Downloading video from CDN...");
+
+    // Download video from CDN
+    const response = await fetch(videoUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch video: ${response.status} ${response.statusText}`);
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    const base64Data = Buffer.from(arrayBuffer).toString("base64");
+
+    console.log("🤖 [TRANSCRIBE-URL] Generating transcription from CDN video...");
+    console.log(
+      "📊 [TRANSCRIBE-URL] Video size:",
+      Math.round((arrayBuffer.byteLength / 1024 / 1024) * 100) / 100,
+      "MB",
+    );
+
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    const prompt = createTranscriptionPrompt();
+
+    const result = await model.generateContent([
+      {
+        inlineData: {
+          data: base64Data,
+          mimeType: "video/mp4", // Assume MP4 for CDN videos
+        },
+      },
+      prompt,
+    ]);
+
+    const response_text = result.response.text();
+    console.log("🎯 [TRANSCRIBE-URL] Raw AI response length:", response_text.length);
+
+    try {
+      const transcriptionData = parseTranscriptionResponse(response_text);
+      const processedResult = processTranscriptionData(transcriptionData, response_text);
+
+      // Override platform if provided
+      if (platform) {
+        processedResult.platform = platform;
+        processedResult.contentMetadata.platform = platform as ContentMetadata["platform"];
+      }
+
+      return processedResult;
+    } catch (parseError) {
+      console.error("❌ [TRANSCRIBE-URL] JSON parsing failed:", parseError);
+      console.log("🔄 [TRANSCRIBE-URL] Using fallback response format");
+
+      const fallbackResult = createFallbackResponse(response_text);
+
+      // Override platform if provided
+      if (platform) {
+        fallbackResult.platform = platform;
+        fallbackResult.contentMetadata.platform = platform as ContentMetadata["platform"];
+      }
+
+      return fallbackResult;
+    }
+  } catch (error) {
+    console.error("❌ [TRANSCRIBE-URL] CDN transcription error:", error);
     return null;
   }
 }
