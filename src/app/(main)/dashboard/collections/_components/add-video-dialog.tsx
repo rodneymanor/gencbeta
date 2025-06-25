@@ -35,6 +35,13 @@ interface VideoDownloadResponse {
     mimeType: string;
     filename: string;
   };
+  metrics: {
+    likes: number;
+    views: number;
+    shares: number;
+    comments: number;
+    saves: number;
+  };
   metadata: {
     originalUrl: string;
     platform: string;
@@ -158,6 +165,42 @@ export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded
     });
   };
 
+  const createVideoObject = (
+    downloadResponse: VideoDownloadResponse,
+    transcriptionResponse: TranscriptionResponse,
+    thumbnailUrl: string,
+  ) => {
+    const engagementRate =
+      downloadResponse.metrics.views > 0
+        ? ((downloadResponse.metrics.likes + downloadResponse.metrics.comments + downloadResponse.metrics.shares) /
+            downloadResponse.metrics.views) *
+          100
+        : 0;
+
+    return {
+      url: url,
+      platform: downloadResponse.platform,
+      thumbnailUrl: thumbnailUrl,
+      title: transcriptionResponse.contentMetadata.description || "Untitled Video",
+      author: transcriptionResponse.contentMetadata.author || "Unknown",
+      transcript: transcriptionResponse.transcript,
+      components: transcriptionResponse.components,
+      contentMetadata: transcriptionResponse.contentMetadata,
+      visualContext: transcriptionResponse.visualContext,
+      insights: {
+        likes: downloadResponse.metrics.likes,
+        comments: downloadResponse.metrics.comments,
+        shares: downloadResponse.metrics.shares,
+        views: downloadResponse.metrics.views,
+        saves: downloadResponse.metrics.saves,
+        engagementRate,
+      },
+      addedAt: new Date().toISOString(),
+      fileSize: downloadResponse.videoData.size,
+      duration: 0, // Would be extracted from video metadata
+    };
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -198,29 +241,7 @@ export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded
       const targetCollectionId = collectionId && collectionId.trim() !== "" ? collectionId : "all-videos";
 
       // Create video object with all the processed data
-      const videoToAdd = {
-        url: url,
-        platform: downloadResponse.platform,
-        thumbnailUrl: thumbnailUrl,
-        title: transcriptionResponse.contentMetadata.description || "Untitled Video",
-        author: transcriptionResponse.contentMetadata.author || "Unknown",
-        transcript: transcriptionResponse.transcript,
-        components: transcriptionResponse.components,
-        contentMetadata: transcriptionResponse.contentMetadata,
-        visualContext: transcriptionResponse.visualContext,
-        insights: {
-          // These would be populated from social media APIs in a real implementation
-          likes: 0,
-          comments: 0,
-          shares: 0,
-          views: 0,
-          saves: 0,
-          engagementRate: 0,
-        },
-        addedAt: new Date().toISOString(),
-        fileSize: downloadResponse.videoData.size,
-        duration: 0, // Would be extracted from video metadata
-      };
+      const videoToAdd = createVideoObject(downloadResponse, transcriptionResponse, thumbnailUrl);
 
       await CollectionsService.addVideoToCollection(user.uid, targetCollectionId, videoToAdd);
 

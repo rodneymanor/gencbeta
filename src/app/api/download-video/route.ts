@@ -32,12 +32,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const videoData = await downloadVideo(url, platform);
+    const downloadResult = await downloadVideo(url, platform);
 
-    if (!videoData) {
+    if (!downloadResult) {
       console.error("❌ [DOWNLOAD] Failed to download video");
       return NextResponse.json({ error: "Failed to download video from the provided URL" }, { status: 500 });
     }
+
+    const { videoData, metrics } = downloadResult;
 
     console.log("✅ [DOWNLOAD] Video downloaded successfully");
     console.log("📊 [DOWNLOAD] Video info:");
@@ -60,6 +62,13 @@ export async function POST(request: NextRequest) {
         size: videoData.size,
         mimeType: videoData.mimeType,
         filename: videoData.filename ?? `${platform}-video.mp4`,
+      },
+      metrics: metrics ?? {
+        likes: 0,
+        views: 0,
+        shares: 0,
+        comments: 0,
+        saves: 0,
       },
       metadata: {
         originalUrl: url,
@@ -102,11 +111,15 @@ function detectPlatform(url: string): string {
 async function downloadVideo(
   url: string,
   platform: string,
-): Promise<{ buffer: ArrayBuffer; size: number; mimeType: string; filename?: string } | null> {
+): Promise<{
+  videoData: { buffer: ArrayBuffer; size: number; mimeType: string; filename?: string };
+  metrics?: { likes: number; views: number; shares: number; comments: number; saves: number };
+} | null> {
   if (platform === "tiktok") {
-    return downloadTikTokVideo(url);
+    const result = await downloadTikTokVideo(url);
+    return result ? { videoData: result } : null;
   } else if (platform === "instagram") {
-    return downloadInstagramVideo(url);
+    return downloadInstagramVideoWithMetrics(url);
   }
   return null;
 }
@@ -197,4 +210,138 @@ function extractTikTokVideoId(url: string): string | null {
 function extractInstagramShortcode(url: string): string | null {
   const match = url.match(/(?:instagram\.com|instagr\.am)\/(?:p|reel)\/([A-Za-z0-9_-]+)/);
   return match ? match[1] : null;
+}
+
+async function downloadInstagramVideoWithMetrics(url: string): Promise<{
+  videoData: { buffer: ArrayBuffer; size: number; mimeType: string; filename?: string };
+  metrics?: { likes: number; views: number; shares: number; comments: number; saves: number };
+} | null> {
+  const shortcode = extractInstagramShortcode(url);
+  if (!shortcode) {
+    console.error("❌ [DOWNLOAD] Could not extract Instagram shortcode");
+    return null;
+  }
+
+  console.log("🆔 [DOWNLOAD] Instagram shortcode:", shortcode);
+
+  try {
+    const metadata = await fetchInstagramMetadata(shortcode);
+    if (!metadata) {
+      return await fallbackToBasicDownload(url);
+    }
+
+    const metrics = extractMetricsFromMetadata(metadata);
+    const videoData = await downloadVideoFromVersions(metadata.video_versions, shortcode);
+
+    if (!videoData) {
+      return null;
+    }
+
+    return { videoData, metrics };
+  } catch (error) {
+    console.error("❌ [DOWNLOAD] Instagram RapidAPI error:", error);
+    return await fallbackToBasicDownload(url);
+  }
+}
+
+async function fetchInstagramMetadata(shortcode: string) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+  console.log("🌐 [DOWNLOAD] Calling Instagram RapidAPI with 30s timeout...");
+
+  const response = await fetch(
+    `https://instagram-scrapper-posts-reels-stories-downloader.p.rapidapi.com/reel_by_shortcode?shortcode=${shortcode}`,
+    {
+      method: "GET",
+      headers: {
+        "x-rapidapi-key": process.env.RAPIDAPI_KEY ?? "7d8697833dmsh0919d85dc19515ap1175f7jsn0f8bb6dae84e",
+        "x-rapidapi-host": "instagram-scrapper-posts-reels-stories-downloader.p.rapidapi.com",
+      },
+      signal: controller.signal,
+    },
+  );
+
+  clearTimeout(timeoutId);
+
+  if (!response.ok) {
+    console.error("❌ [DOWNLOAD] Instagram RapidAPI error:", response.status);
+    return null;
+  }
+
+  return response.json();
+}
+
+function extractMetricsFromMetadata(metadata: any) {
+  const metrics = {
+    likes: metadata.like_count ?? 0,
+    views: metadata.play_count ?? 0,
+    shares: metadata.reshare_count ?? 0,
+    comments: 0, // Not available in this API response
+    saves: 0, // Not available in this API response
+  };
+
+  console.log("📊 [DOWNLOAD] Extracted metrics:", metrics);
+  return metrics;
+}
+
+async function downloadVideoFromVersions(videoVersions: any[], shortcode: string) {
+  if (!videoVersions || videoVersions.length === 0) {
+    console.error("❌ [DOWNLOAD] No video versions found in Instagram RapidAPI response");
+    return null;
+  }
+
+  console.log("🔗 [DOWNLOAD] Instagram video versions found:", videoVersions.length, "options");
+
+  // Try video versions, starting with the smallest
+  for (let i = videoVersions.length - 1; i >= 0; i--) {
+    const videoVersion = videoVersions[i];
+    const videoUrl = videoVersion.url;
+
+    const result = await tryDownloadFromUrl(videoUrl, i + 1);
+    if (result) {
+      return {
+        ...result,
+        filename: `instagram-${shortcode}.mp4`,
+      };
+    }
+  }
+
+  return null;
+}
+
+async function tryDownloadFromUrl(videoUrl: string, version: number) {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+    const response = await fetch(videoUrl, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+      },
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (response.ok) {
+      const buffer = await response.arrayBuffer();
+      const size = buffer.byteLength;
+      const mimeType = response.headers.get("content-type") ?? "video/mp4";
+
+      console.log(`✅ [DOWNLOAD] Successfully downloaded from Instagram version ${version}`);
+
+      return { buffer, size, mimeType };
+    }
+  } catch (error) {
+    console.log(`❌ [DOWNLOAD] Instagram version ${version} failed:`, error);
+  }
+
+  return null;
+}
+
+async function fallbackToBasicDownload(url: string) {
+  const basicResult = await downloadInstagramVideo(url);
+  return basicResult ? { videoData: basicResult } : null;
 }
