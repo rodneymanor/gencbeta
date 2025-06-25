@@ -1,0 +1,92 @@
+import { collection, doc, getDoc, getDocs, query, where, writeBatch, serverTimestamp } from "firebase/firestore";
+
+import { db } from "./firebase";
+
+/**
+ * Helper to verify collection ownership
+ */
+export async function verifyCollectionOwnership(
+  userId: string,
+  collectionId: string,
+): Promise<{ exists: boolean; data?: any }> {
+  const docRef = doc(db, "collections", collectionId);
+  const docSnap = await getDoc(docRef);
+
+  if (!docSnap.exists()) {
+    return { exists: false };
+  }
+
+  const data = docSnap.data();
+  if (data.userId !== userId) {
+    throw new Error("Access denied");
+  }
+
+  return { exists: true, data };
+}
+
+/**
+ * Helper to verify video ownership
+ */
+export async function verifyVideoOwnership(userId: string, videoId: string): Promise<{ exists: boolean; data?: any }> {
+  const docRef = doc(db, "videos", videoId);
+  const docSnap = await getDoc(docRef);
+
+  if (!docSnap.exists()) {
+    return { exists: false };
+  }
+
+  const data = docSnap.data();
+  if (data.userId !== userId) {
+    throw new Error("Access denied");
+  }
+
+  return { exists: true, data };
+}
+
+/**
+ * Helper to update collection video count
+ */
+export async function updateCollectionVideoCount(
+  batch: any,
+  collectionId: string,
+  userId: string,
+  increment: number,
+): Promise<void> {
+  if (collectionId === "all-videos") {
+    return; // Don't update count for all-videos
+  }
+
+  const collectionRef = doc(db, "collections", collectionId);
+  const collectionSnap = await getDoc(collectionRef);
+
+  if (collectionSnap.exists() && collectionSnap.data().userId === userId) {
+    const currentCount = collectionSnap.data().videoCount ?? 0;
+    batch.update(collectionRef, {
+      videoCount: Math.max(0, currentCount + increment),
+      updatedAt: serverTimestamp(),
+    });
+  }
+}
+
+/**
+ * Helper to delete videos in a collection
+ */
+export async function deleteCollectionVideos(batch: any, userId: string, collectionId: string): Promise<void> {
+  const videosQuery = query(
+    collection(db, "videos"),
+    where("userId", "==", userId),
+    where("collectionId", "==", collectionId),
+  );
+
+  const videosSnapshot = await getDocs(videosQuery);
+  videosSnapshot.docs.forEach((videoDoc) => {
+    batch.delete(videoDoc.ref);
+  });
+}
+
+/**
+ * Helper to format timestamps
+ */
+export function formatTimestamp(timestamp: any): string {
+  return timestamp?.toDate?.()?.toISOString() ?? timestamp;
+}
