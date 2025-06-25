@@ -1,26 +1,3 @@
-async function testBunnyStreamConnectivity(): Promise<boolean> {
-  try {
-    console.log("🔍 [BUNNY] Testing connectivity to Bunny Stream API...");
-
-    const testUrl = "https://video.bunnycdn.com";
-    const response = await Promise.race([
-      fetch(testUrl, {
-        method: "HEAD",
-        headers: {
-          "User-Agent": "NextJS-App/1.0",
-        },
-      }),
-      new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Connectivity test timeout")), 10000)),
-    ]);
-
-    console.log("✅ [BUNNY] Connectivity test passed:", response.status);
-    return true;
-  } catch (error) {
-    console.error("❌ [BUNNY] Connectivity test failed:", error);
-    return false;
-  }
-}
-
 async function createBunnyStreamVideo(
   libraryId: string,
   apiKey: string,
@@ -39,7 +16,6 @@ async function createBunnyStreamVideo(
         AccessKey: apiKey,
         "Content-Type": "application/json",
         Accept: "application/json",
-        "User-Agent": "NextJS-App/1.0",
       },
       body: JSON.stringify({
         title: filename.replace(/\.[^/.]+$/, ""), // Remove file extension for title
@@ -83,7 +59,6 @@ async function uploadBunnyStreamVideo(
         AccessKey: apiKey,
         Accept: "application/json",
         "Content-Type": "application/octet-stream",
-        "User-Agent": "NextJS-App/1.0",
       },
       body: arrayBuffer,
     }),
@@ -213,16 +188,12 @@ export async function uploadToBunnyStream(
   try {
     console.log("🚀 [BUNNY] Starting upload to Bunny Stream...");
 
+    // Test configuration for debugging
+    testBunnyStreamConfig();
+
     // Convert Buffer to ArrayBuffer as required by the guide
     const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
     console.log("🔄 [BUNNY] Converted Buffer to ArrayBuffer:", arrayBuffer.byteLength, "bytes");
-
-    // Test connectivity first
-    const isConnected = await testBunnyStreamConnectivity();
-    if (!isConnected) {
-      console.error("❌ [BUNNY] Failed connectivity test, aborting upload");
-      return null;
-    }
 
     // Validate configuration
     const configResult = validateBunnyConfig();
@@ -242,4 +213,29 @@ export function isBunnyStreamConfigured(): boolean {
   return (
     !!process.env.BUNNY_STREAM_LIBRARY_ID && !!process.env.BUNNY_STREAM_API_KEY && !!process.env.BUNNY_CDN_HOSTNAME
   );
+}
+
+// Test function to verify Bunny Stream configuration
+export function testBunnyStreamConfig(): void {
+  console.log("🔍 [BUNNY] Testing Bunny Stream Configuration:");
+  console.log("  - BUNNY_STREAM_LIBRARY_ID:", process.env.BUNNY_STREAM_LIBRARY_ID);
+  console.log("  - BUNNY_STREAM_API_KEY (length):", process.env.BUNNY_STREAM_API_KEY?.length);
+  console.log("  - BUNNY_CDN_HOSTNAME:", process.env.BUNNY_CDN_HOSTNAME);
+
+  if (process.env.BUNNY_STREAM_LIBRARY_ID && process.env.BUNNY_STREAM_API_KEY && process.env.BUNNY_CDN_HOSTNAME) {
+    console.log("✅ [BUNNY] All environment variables are present");
+
+    // Test URL construction
+    const testVideoId = "test-video-id";
+    const createUrl = `https://video.bunnycdn.com/library/${process.env.BUNNY_STREAM_LIBRARY_ID}/videos`;
+    const uploadUrl = `https://video.bunnycdn.com/library/${process.env.BUNNY_STREAM_LIBRARY_ID}/videos/${testVideoId}`;
+    const streamUrl = `https://${process.env.BUNNY_CDN_HOSTNAME}/${testVideoId}/playlist.m3u8`;
+
+    console.log("🔗 [BUNNY] Test URLs:");
+    console.log("  - Create URL:", createUrl);
+    console.log("  - Upload URL:", uploadUrl);
+    console.log("  - Stream URL:", streamUrl);
+  } else {
+    console.error("❌ [BUNNY] Missing environment variables");
+  }
 }
