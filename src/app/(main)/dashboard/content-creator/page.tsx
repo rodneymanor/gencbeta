@@ -185,25 +185,20 @@ export default function ContentCreatorPage() {
               return (
                 <Card
                   key={action.id}
-                  className="group bg-card cursor-pointer border-0 transition-all duration-200 hover:shadow-lg"
+                  className="group cursor-pointer transition-all duration-200 hover:shadow-md"
                   onClick={action.id === 1 ? handleNewScriptClick : action.onClick}
                 >
                   <CardHeader className="pb-4">
-                    <div className="bg-primary/10 group-hover:bg-primary mb-3 flex h-12 w-12 items-center justify-center rounded-xl transition-colors">
-                      <IconComponent className="text-primary group-hover:text-primary-foreground h-5 w-5 transition-colors" />
+                    <div className="bg-primary/10 mb-3 flex h-12 w-12 items-center justify-center rounded-lg">
+                      <IconComponent className="text-primary h-5 w-5" />
                     </div>
-                    <CardTitle className="group-hover:text-primary text-base transition-colors">
-                      {action.title}
-                    </CardTitle>
+                    <CardTitle className="text-base">{action.title}</CardTitle>
                     <CardDescription className="text-sm">{action.description}</CardDescription>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <div className="space-y-3">
-                      <p className="group-hover:text-primary text-sm font-medium transition-colors">
-                        {action.actionText}
-                      </p>
-                      <div className="bg-muted group-hover:bg-primary h-1 w-0 rounded-full transition-all duration-300 group-hover:w-full" />
-                    </div>
+                    <Button variant="outline" size="sm" className="w-full">
+                      {action.actionText}
+                    </Button>
                   </CardContent>
                 </Card>
               );
@@ -216,18 +211,17 @@ export default function ContentCreatorPage() {
           <h2 className="text-foreground text-xl font-semibold">Fresh Ideas For You</h2>
           <div className="grid gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
             {aiScriptIdeas.map((idea, index) => (
-              <Card key={index} className="bg-card border-0 transition-all duration-200 hover:shadow-lg">
-                <CardContent className="flex h-full flex-col p-6">
-                  <div className="mb-4 flex justify-center">
+              <Card key={index} className="transition-all duration-200 hover:shadow-md">
+                <CardHeader className="pb-3">
+                  <div className="flex justify-center">
                     <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full">
                       <Bot className="text-primary h-5 w-5" />
                     </div>
                   </div>
+                </CardHeader>
+                <CardContent className="flex h-full flex-col pt-0">
                   <p className="text-muted-foreground mb-6 flex-grow text-sm leading-relaxed">{idea}</p>
-                  <Button
-                    onClick={() => handleAIIdeaCreate(idea)}
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground w-full transition-colors"
-                  >
+                  <Button onClick={() => handleAIIdeaCreate(idea)} className="w-full">
                     <Zap className="mr-2 h-4 w-4" />
                     Create Script
                   </Button>
@@ -240,7 +234,7 @@ export default function ContentCreatorPage() {
         {/* Recent Activity Section */}
         <section className="space-y-4">
           <h2 className="text-foreground text-xl font-semibold">Recent Activity</h2>
-          <Card className="bg-card border-0">
+          <Card>
             <CardContent className="p-0">
               {recentActivities.map((activity, index) => {
                 const IconComponent = activity.icon;
