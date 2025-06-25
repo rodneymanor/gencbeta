@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 
+import { useAppState } from "@/contexts/app-state-context";
 import { transcribeVideoFile, validateVideoFile } from "@/lib/transcription";
 import { TranscriptionResponse } from "@/types/transcription";
 
@@ -19,50 +20,57 @@ export function useVideoTranscription(): UseVideoTranscriptionReturn {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
+  const { setTranscribing } = useAppState();
 
-  const transcribeVideo = useCallback(async (file: File) => {
-    // Reset state
-    setTranscription(null);
-    setError(null);
-    setProgress(0);
+  const transcribeVideo = useCallback(
+    async (file: File) => {
+      // Reset state
+      setTranscription(null);
+      setError(null);
+      setProgress(0);
 
-    // Validate file
-    const validation = validateVideoFile(file);
-    if (!validation.valid) {
-      setError(validation.error ?? "Invalid video file");
-      return;
-    }
+      // Validate file
+      const validation = validateVideoFile(file);
+      if (!validation.valid) {
+        setError(validation.error ?? "Invalid video file");
+        return;
+      }
 
-    setIsTranscribing(true);
+      setIsTranscribing(true);
+      setTranscribing(true);
 
-    try {
-      // Simulate progress updates
-      setProgress(10);
+      try {
+        // Simulate progress updates
+        setProgress(10);
 
-      // Start transcription
-      setProgress(30);
-      const result = await transcribeVideoFile(file);
+        // Start transcription
+        setProgress(30);
+        const result = await transcribeVideoFile(file);
 
-      setProgress(90);
-      setTranscription(result);
-      setProgress(100);
+        setProgress(90);
+        setTranscription(result);
+        setProgress(100);
 
-      console.log("✅ [HOOK] Video transcription completed successfully");
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to transcribe video";
-      setError(errorMessage);
-      console.error("❌ [HOOK] Video transcription failed:", errorMessage);
-    } finally {
-      setIsTranscribing(false);
-    }
-  }, []);
+        console.log("✅ [HOOK] Video transcription completed successfully");
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Failed to transcribe video";
+        setError(errorMessage);
+        console.error("❌ [HOOK] Video transcription failed:", errorMessage);
+      } finally {
+        setIsTranscribing(false);
+        setTranscribing(false);
+      }
+    },
+    [setTranscribing],
+  );
 
   const reset = useCallback(() => {
     setTranscription(null);
     setError(null);
     setProgress(0);
     setIsTranscribing(false);
-  }, []);
+    setTranscribing(false);
+  }, [setTranscribing]);
 
   return {
     transcription,

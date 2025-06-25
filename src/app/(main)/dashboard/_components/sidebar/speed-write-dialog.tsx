@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAppState } from "@/contexts/app-state-context";
 
 interface SpeedWriteDialogProps {
   children: React.ReactNode;
@@ -23,17 +24,20 @@ interface SpeedWriteDialogProps {
 export function SpeedWriteDialog({ children }: SpeedWriteDialogProps) {
   const [scriptIdea, setScriptIdea] = useState("");
   const [isCreating, setIsCreating] = useState(false);
+  const { setScriptCreating } = useAppState();
 
   const handleScriptCreation = async () => {
     if (!scriptIdea.trim()) return;
 
     setIsCreating(true);
+    setScriptCreating(true);
     console.log("Creating script from idea:", scriptIdea);
 
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     setIsCreating(false);
+    setScriptCreating(false);
     setScriptIdea("");
 
     // TODO: Navigate to script creation or handle the script creation logic

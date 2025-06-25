@@ -17,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAppState } from "@/contexts/app-state-context";
 import { useAuth } from "@/contexts/auth-context";
 import { CollectionsService } from "@/lib/collections";
 
@@ -87,6 +88,7 @@ export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingStep, setProcessingStep] = useState("");
   const { user } = useAuth();
+  const { setVideoProcessing } = useAppState();
 
   const validateUrl = (url: string): boolean => {
     const urlPattern = /^https?:\/\/.+/;
@@ -228,6 +230,7 @@ export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded
     }
 
     setIsProcessing(true);
+    setVideoProcessing(true);
 
     try {
       // Step 1: Download video
@@ -263,6 +266,7 @@ export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded
       toast.error(error instanceof Error ? error.message : "Failed to process video");
     } finally {
       setIsProcessing(false);
+      setVideoProcessing(false);
       setProcessingStep("");
     }
   };

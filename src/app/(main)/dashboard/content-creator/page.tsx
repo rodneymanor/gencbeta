@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useAppState } from "@/contexts/app-state-context";
 import { cn } from "@/lib/utils";
 
 // Mock data for demonstration
@@ -84,6 +85,7 @@ export default function ContentCreatorPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [isInputActive, setIsInputActive] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { setScriptCreating } = useAppState();
 
   // Mock user name - in real app, this would come from auth context
   const userName = "Alex";
@@ -97,12 +99,14 @@ export default function ContentCreatorPage() {
     if (!scriptIdea.trim()) return;
 
     setIsCreating(true);
+    setScriptCreating(true);
     console.log("Creating script from idea:", scriptIdea);
 
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     setIsCreating(false);
+    setScriptCreating(false);
     setScriptIdea("");
   };
 
