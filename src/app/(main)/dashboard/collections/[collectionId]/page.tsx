@@ -163,7 +163,7 @@ export default function CollectionDetailPage({ params }: PageProps) {
       </div>
 
       {/* Items Grid */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
         {items.map((item) => (
           <div
             key={item.id}

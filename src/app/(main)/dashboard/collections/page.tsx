@@ -134,7 +134,7 @@ export default function CollectionsPage() {
           <Skeleton className="h-10 w-24" />
         </div>
         <Separator />
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
           {Array.from({ length: 8 }).map((_, i) => (
             <Card key={i}>
               <CardContent className="p-0">
@@ -170,7 +170,7 @@ export default function CollectionsPage() {
 
       {/* Videos Grid */}
       {loadingVideos ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
           {Array.from({ length: 8 }).map((_, i) => (
             <Card key={i}>
               <CardContent className="p-0">
@@ -197,7 +197,7 @@ export default function CollectionsPage() {
           />
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
           {videos.map((video) => (
             <Card key={video.id} className="group overflow-hidden transition-shadow hover:shadow-md">
               <CardContent className="p-0">
