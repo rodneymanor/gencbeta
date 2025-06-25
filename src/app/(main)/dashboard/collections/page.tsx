@@ -2,18 +2,19 @@
 
 import { useState, useEffect, useCallback } from "react";
 
-import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 
-import { PlayCircle, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/auth-context";
 import { CollectionsService, type Collection, type Video } from "@/lib/collections";
 
 import { AddVideoDialog } from "./_components/add-video-dialog";
+import { createDemoData } from "./_components/demo-data";
+import { VideoGrid } from "./_components/video-grid";
+import { VideoModal } from "./_components/video-modal";
 
 export default function CollectionsPage() {
   const [collections, setCollections] = useState<Collection[]>([]);
@@ -26,12 +27,16 @@ export default function CollectionsPage() {
   const searchParams = useSearchParams();
   const collectionId = searchParams.get("collection");
 
-  const loadCollections = useCallback(async () => {
-    if (!user) return;
+  // Determine if we're in demo mode (not authenticated)
+  const isDemoMode = !user;
 
-    setIsLoading(true);
-    try {
-      const userCollections = await CollectionsService.getUserCollections(user.uid);
+  const loadUserCollections = useCallback(async () => {
+    if (!user) return [];
+    return await CollectionsService.getUserCollections(user.uid);
+  }, [user]);
+
+  const processCollections = useCallback(
+    (userCollections: Collection[]) => {
       setCollections(userCollections);
 
       // Flatten all videos from all collections
@@ -45,23 +50,37 @@ export default function CollectionsPage() {
       } else {
         setCurrentCollection(null); // Show all videos
       }
+    },
+    [collectionId],
+  );
+
+  const loadCollections = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const userCollections = isDemoMode ? createDemoData() : await loadUserCollections();
+      processCollections(userCollections);
     } catch (error) {
       console.error("Error loading collections:", error);
+      // Fallback to demo mode on error
+      const demoCollections = createDemoData();
+      processCollections(demoCollections);
     } finally {
       setIsLoading(false);
     }
-  }, [user, collectionId]);
+  }, [isDemoMode, loadUserCollections, processCollections]);
 
   useEffect(() => {
-    if (user) {
-      loadCollections();
-    }
-  }, [user, loadCollections]);
+    loadCollections();
+  }, [loadCollections]);
 
-  const handleVideoClick = (video: Video) => {
+  const handleVideoClick = useCallback((video: Video) => {
     setSelectedVideo(video);
     setIsModalOpen(true);
-  };
+  }, []);
+
+  const handleModalClose = useCallback(() => {
+    setIsModalOpen(false);
+  }, []);
 
   const displayVideos = currentCollection ? currentCollection.videos : allVideos;
   const pageTitle = currentCollection ? currentCollection.title : "All Videos";
@@ -79,80 +98,43 @@ export default function CollectionsPage() {
 
   return (
     <div className="flex h-full flex-col">
+      {/* Demo Mode Indicator */}
+      {isDemoMode && (
+        <div className="bg-primary/10 border-primary/20 border-b px-6 py-2">
+          <p className="text-primary text-sm">📺 Demo Mode: Showing sample collection layout with your TikTok video</p>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between p-6 pb-4">
         <div>
           <h1 className="text-3xl font-bold">{pageTitle}</h1>
           <p className="text-muted-foreground mt-1">{pageDescription}</p>
         </div>
-        <AddVideoDialog collections={collections} onVideoAdded={loadCollections}>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Video
+        {user && (
+          <AddVideoDialog collections={collections} onVideoAdded={loadCollections}>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Video
+            </Button>
+          </AddVideoDialog>
+        )}
+        {isDemoMode && (
+          <Button variant="outline" asChild>
+            <a href="/auth/v1/login">Sign In to Add Videos</a>
           </Button>
-        </AddVideoDialog>
+        )}
       </div>
 
       <Separator />
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-6">
-        {displayVideos.length === 0 ? (
-          <div className="text-muted-foreground flex h-full items-center justify-center text-center">
-            <div>
-              <p className="text-lg font-medium">Add your videos here</p>
-              <p className="mt-2">Start building your collection by adding your first video</p>
-            </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {displayVideos.map((video) => (
-              <div
-                key={video.id}
-                className="bg-muted group relative aspect-square cursor-pointer overflow-hidden rounded-lg"
-                onClick={() => handleVideoClick(video)}
-              >
-                {video.thumbnailUrl ? (
-                  <Image
-                    src={video.thumbnailUrl}
-                    alt={video.title}
-                    fill
-                    className="object-cover transition-transform group-hover:scale-110"
-                  />
-                ) : (
-                  <div className="from-primary/20 to-primary/5 flex h-full w-full items-center justify-center bg-gradient-to-br">
-                    <PlayCircle className="text-primary/60 h-12 w-12" />
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
-                  <PlayCircle className="h-12 w-12 text-white/80" />
-                </div>
-                <p className="absolute right-3 bottom-2 left-3 truncate text-sm font-semibold text-white">
-                  {video.title}
-                </p>
-                <div className="absolute top-2 right-2">
-                  <div className="rounded bg-black/50 px-2 py-1 text-xs text-white capitalize">{video.platform}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        <VideoGrid videos={displayVideos} onVideoClick={handleVideoClick} />
       </div>
 
       {/* Video Modal */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>{selectedVideo?.title}</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <p className="text-muted-foreground text-center">
-              Video information and embedded video will be displayed here.
-            </p>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <VideoModal video={selectedVideo} isOpen={isModalOpen} onClose={handleModalClose} />
     </div>
   );
 }
