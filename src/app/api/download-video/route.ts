@@ -50,6 +50,16 @@ export async function POST(request: NextRequest) {
 
     // Upload to Bunny.net CDN
     console.log("🐰 [DOWNLOAD] Uploading video to Bunny.net CDN...");
+    console.log("🔍 [DOWNLOAD] Checking environment variables for Stream upload:");
+    console.log("  - BUNNY_STREAM_LIBRARY_ID:", !!process.env.BUNNY_STREAM_LIBRARY_ID);
+    console.log("  - BUNNY_STREAM_API_KEY:", !!process.env.BUNNY_STREAM_API_KEY);
+    console.log("  - BUNNY_CDN_HOSTNAME:", !!process.env.BUNNY_CDN_HOSTNAME);
+
+    if (!isBunnyConfigured()) {
+      console.log("⚠️ [DOWNLOAD] Bunny.net not configured, skipping CDN upload");
+      return createSuccessResponse(downloadResult, platform, url, null);
+    }
+
     const cdnResult = await uploadToBunnyCDN(downloadResult.videoData);
 
     if (!cdnResult) {
@@ -323,34 +333,125 @@ async function uploadToBunnyCDN(videoData: {
 }): Promise<{ cdnUrl: string; filename: string } | null> {
   try {
     console.log("🐰 [DOWNLOAD] Preparing video for CDN upload...");
+    console.log("🔍 [DOWNLOAD] Video data details:");
+    console.log("  - Buffer size:", videoData.buffer.byteLength, "bytes");
+    console.log("  - Reported size:", videoData.size, "bytes");
+    console.log("  - MIME type:", videoData.mimeType);
+    console.log("  - Filename:", videoData.filename);
 
-    const uploadResponse = await fetch("/api/upload-to-bunny", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        videoBuffer: Array.from(new Uint8Array(videoData.buffer)),
-        filename: videoData.filename ?? "video.mp4",
-        mimeType: videoData.mimeType,
-      }),
-    });
-
-    if (!uploadResponse.ok) {
-      const errorData = await uploadResponse.json();
-      console.error("❌ [DOWNLOAD] CDN upload failed:", errorData);
+    // Check if we have the required data
+    if (!videoData.buffer || videoData.buffer.byteLength === 0) {
+      console.error("❌ [DOWNLOAD] No video buffer data available for CDN upload");
       return null;
     }
 
-    const result = await uploadResponse.json();
-    console.log("✅ [DOWNLOAD] CDN upload successful");
+    // Convert ArrayBuffer to Buffer and call upload function directly
+    const buffer = Buffer.from(videoData.buffer);
+    console.log("📤 [DOWNLOAD] Calling uploadToBunnyNet directly...");
+    
+    const result = await uploadToBunnyNetDirect(buffer, videoData.filename ?? "video.mp4", videoData.mimeType);
+    
+    if (!result) {
+      console.error("❌ [DOWNLOAD] CDN upload failed");
+      return null;
+    }
 
-    return {
-      cdnUrl: result.cdnUrl,
-      filename: result.filename,
-    };
+    console.log("✅ [DOWNLOAD] CDN upload successful");
+    console.log("🎯 [DOWNLOAD] CDN result:", result);
+
+    return result;
   } catch (error) {
     console.error("❌ [DOWNLOAD] CDN upload error:", error);
+    console.error("❌ [DOWNLOAD] CDN upload error stack:", error instanceof Error ? error.stack : "No stack");
     return null;
   }
+}
+
+async function uploadToBunnyNetDirect(
+  buffer: Buffer,
+  filename: string,
+  mimeType: string,
+): Promise<{ cdnUrl: string; filename: string } | null> {
+  try {
+    console.log("🚀 [BUNNY] Starting upload to Bunny Stream...");
+    
+    // Bunny Stream configuration
+    const BUNNY_STREAM_LIBRARY_ID = process.env.BUNNY_STREAM_LIBRARY_ID;
+    const BUNNY_STREAM_API_KEY = process.env.BUNNY_STREAM_API_KEY;
+    const BUNNY_CDN_HOSTNAME = process.env.BUNNY_CDN_HOSTNAME;
+
+    console.log("🔧 [BUNNY] Stream configuration check:");
+    console.log("  - Library ID:", BUNNY_STREAM_LIBRARY_ID);
+    console.log("  - API Key present:", !!BUNNY_STREAM_API_KEY);
+    console.log("  - CDN Hostname:", BUNNY_CDN_HOSTNAME);
+
+    if (!BUNNY_STREAM_LIBRARY_ID || !BUNNY_STREAM_API_KEY || !BUNNY_CDN_HOSTNAME) {
+      console.error("❌ [BUNNY] Missing Bunny Stream configuration");
+      return null;
+    }
+
+    // Step 1: Create a video object in Bunny Stream
+    console.log("📝 [BUNNY] Creating video object...");
+    const createVideoUrl = `https://video.bunnycdn.com/library/${BUNNY_STREAM_LIBRARY_ID}/videos`;
+    
+    const createResponse = await fetch(createVideoUrl, {
+      method: "POST",
+      headers: {
+        "AccessKey": BUNNY_STREAM_API_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: filename.replace(/\.[^/.]+$/, ""), // Remove file extension for title
+      }),
+    });
+
+    if (!createResponse.ok) {
+      const errorText = await createResponse.text();
+      console.error("❌ [BUNNY] Failed to create video object:", createResponse.status, errorText);
+      return null;
+    }
+
+    const videoObject = await createResponse.json();
+    const videoGuid = videoObject.guid;
+    console.log("✅ [BUNNY] Video object created with GUID:", videoGuid);
+
+    // Step 2: Upload the video file
+    console.log("📤 [BUNNY] Uploading video file...");
+    const uploadUrl = `https://video.bunnycdn.com/library/${BUNNY_STREAM_LIBRARY_ID}/videos/${videoGuid}`;
+    
+    const uploadResponse = await fetch(uploadUrl, {
+      method: "PUT",
+      headers: {
+        "AccessKey": BUNNY_STREAM_API_KEY,
+        "Content-Type": mimeType ?? "video/mp4",
+      },
+      body: buffer,
+    });
+
+    console.log("📥 [BUNNY] Upload response:");
+    console.log("  - Status:", uploadResponse.status);
+    console.log("  - Status Text:", uploadResponse.statusText);
+
+    if (!uploadResponse.ok) {
+      const errorText = await uploadResponse.text();
+      console.error("❌ [BUNNY] Upload failed:", uploadResponse.status, errorText);
+      return null;
+    }
+
+    // Step 3: Construct the CDN URL for playback
+    const cdnUrl = `https://${BUNNY_CDN_HOSTNAME}/${videoGuid}/playlist.m3u8`;
+    console.log("🎯 [BUNNY] Stream CDN URL constructed:", cdnUrl);
+
+    return {
+      cdnUrl,
+      filename: videoGuid, // Use GUID as filename for Stream
+    };
+  } catch (error) {
+    console.error("❌ [BUNNY] Stream upload error:", error);
+    return null;
+  }
+}
+
+function isBunnyConfigured(): boolean {
+  return !!process.env.BUNNY_STREAM_LIBRARY_ID && !!process.env.BUNNY_STREAM_API_KEY && !!process.env.BUNNY_CDN_HOSTNAME;
 }

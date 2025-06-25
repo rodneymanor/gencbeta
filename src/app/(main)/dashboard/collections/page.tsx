@@ -19,6 +19,13 @@ import { VideoInsightsModal } from "./_components/video-insights-modal";
 
 interface VideoWithPlayer extends Video {
   isPlaying?: boolean;
+  videoData?: {
+    buffer: number[];
+    size: number;
+    mimeType: string;
+    filename: string;
+  };
+  hostedOnCDN?: boolean;
 }
 
 export default function CollectionsPage() {
@@ -27,6 +34,7 @@ export default function CollectionsPage() {
   const [loading, setLoading] = useState(true);
   const [loadingVideos, setLoadingVideos] = useState(false);
   const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
+  const [videoObjectUrls, setVideoObjectUrls] = useState<Record<string, string>>({});
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const selectedCollectionId = searchParams.get("collection");
@@ -71,10 +79,39 @@ export default function CollectionsPage() {
     }
   }, [user, selectedCollectionId, loadCollections, loadVideos]);
 
+  // Cleanup object URLs on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(videoObjectUrls).forEach(url => {
+        if (url) {
+          URL.revokeObjectURL(url);
+        }
+      });
+    };
+  }, [videoObjectUrls]);
+
   const handleVideoAdded = () => {
     loadCollections();
     loadVideos();
   };
+
+  const createVideoObjectUrl = useCallback((video: VideoWithPlayer) => {
+    if (video.videoData && !video.hostedOnCDN && video.id) {
+      try {
+        const uint8Array = new Uint8Array(video.videoData.buffer);
+        const blob = new Blob([uint8Array], { type: video.videoData.mimeType });
+        const objectUrl = URL.createObjectURL(blob);
+        setVideoObjectUrls(prev => {
+          const videoId = video.id!;
+          return { ...prev, [videoId]: objectUrl };
+        });
+        return objectUrl;
+      } catch (error) {
+        console.error("❌ [VIDEO_PLAYER] Failed to create video blob:", error);
+      }
+    }
+    return null;
+  }, []);
 
   const toggleVideoPlay = (videoId: string) => {
     if (playingVideoId === videoId) {
@@ -88,6 +125,12 @@ export default function CollectionsPage() {
           isPlaying: v.id === videoId,
         })),
       );
+      
+             // Create object URL if needed
+       const video = videos.find(v => v.id === videoId);
+       if (video && video.videoData && !video.hostedOnCDN && !(videoId in videoObjectUrls)) {
+        createVideoObjectUrl(video);
+      }
     }
   };
 
@@ -208,11 +251,26 @@ export default function CollectionsPage() {
                   <div className="relative aspect-[9/16] overflow-hidden rounded-xl bg-black">
                     {video.isPlaying ? (
                       <video
-                        src={video.url}
+                        src={
+                          video.videoData && !video.hostedOnCDN && video.id && video.id in videoObjectUrls
+                            ? videoObjectUrls[video.id]
+                            : video.url
+                        }
                         className="h-full w-full rounded-xl object-cover"
                         controls
                         autoPlay
+                        muted
+                        playsInline
                         onEnded={() => toggleVideoPlay(video.id!)}
+                        onError={(e) => {
+                          console.error("❌ [VIDEO_PLAYER] Video playback error:", e);
+                          console.log("🔍 [VIDEO_PLAYER] Video details:", {
+                            url: video.url,
+                            hasVideoData: !!video.videoData,
+                            hostedOnCDN: video.hostedOnCDN,
+                            objectUrl: video.id ? videoObjectUrls[video.id] : undefined
+                          });
+                        }}
                       />
                     ) : (
                       <div

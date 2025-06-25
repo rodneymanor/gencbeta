@@ -200,25 +200,37 @@ export const extractVideoThumbnail = async (downloadResponse: VideoDownloadRespo
   }
 };
 
+const calculateEngagementRate = (metrics: VideoDownloadResponse['metrics']): number => {
+  if (metrics.views <= 0) return 0;
+  return ((metrics.likes + metrics.comments + metrics.shares) / metrics.views) * 100;
+};
+
+const getVideoUrl = (downloadResponse: VideoDownloadResponse, originalUrl: string): string => {
+  return downloadResponse.hostedOnCDN && downloadResponse.cdnUrl ? downloadResponse.cdnUrl : originalUrl;
+};
+
+const getVideoTitle = (transcriptionResponse: TranscriptionResponse): string => {
+  return transcriptionResponse.contentMetadata.description || "Untitled Video";
+};
+
+const getVideoAuthor = (downloadResponse: VideoDownloadResponse, transcriptionResponse: TranscriptionResponse): string => {
+  return downloadResponse.additionalMetadata.author || transcriptionResponse.contentMetadata.author || "Unknown";
+};
+
 export const createVideoObject = (
   downloadResponse: VideoDownloadResponse,
   transcriptionResponse: TranscriptionResponse,
   thumbnailUrl: string,
   originalUrl: string,
-) => {
-  const engagementRate =
-    downloadResponse.metrics.views > 0
-      ? ((downloadResponse.metrics.likes + downloadResponse.metrics.comments + downloadResponse.metrics.shares) /
-          downloadResponse.metrics.views) *
-        100
-      : 0;
+): Record<string, unknown> => {
+  const engagementRate = calculateEngagementRate(downloadResponse.metrics);
 
-  return {
-    url: downloadResponse.hostedOnCDN && downloadResponse.cdnUrl ? downloadResponse.cdnUrl : originalUrl,
+  const videoObject: Record<string, unknown> = {
+    url: getVideoUrl(downloadResponse, originalUrl),
     platform: downloadResponse.platform,
     thumbnailUrl: thumbnailUrl,
-    title: transcriptionResponse.contentMetadata.description || "Untitled Video",
-    author: downloadResponse.additionalMetadata.author || transcriptionResponse.contentMetadata.author || "Unknown",
+    title: getVideoTitle(transcriptionResponse),
+    author: getVideoAuthor(downloadResponse, transcriptionResponse),
     transcript: transcriptionResponse.transcript,
     components: transcriptionResponse.components,
     contentMetadata: transcriptionResponse.contentMetadata,
@@ -235,8 +247,15 @@ export const createVideoObject = (
     fileSize: downloadResponse.videoData?.size ?? 0,
     duration: downloadResponse.additionalMetadata.duration,
     hostedOnCDN: downloadResponse.hostedOnCDN,
-    originalUrl: originalUrl, // Keep the original social media URL for reference
+    originalUrl: originalUrl,
   };
+
+  // If not hosted on CDN, include video data for direct playback
+  if (!downloadResponse.hostedOnCDN && downloadResponse.videoData) {
+    videoObject.videoData = downloadResponse.videoData;
+  }
+
+  return videoObject;
 };
 
 export const validateUrl = (url: string): boolean => {
