@@ -12,6 +12,8 @@ interface VideoDownloadResponse {
     mimeType: string;
     filename: string;
   };
+  // Transcription data (included if already transcribed)
+  transcription?: TranscriptionResponse;
   metrics: {
     likes: number;
     views: number;
@@ -78,6 +80,13 @@ export const downloadVideo = async (videoUrl: string): Promise<VideoDownloadResp
 };
 
 export const transcribeVideo = async (downloadResponse: VideoDownloadResponse): Promise<TranscriptionResponse> => {
+  // If transcription is already included in the download response, return it
+  if (downloadResponse.transcription) {
+    console.log("✅ [ADD_VIDEO] Using existing transcription from download response");
+    return downloadResponse.transcription;
+  }
+
+  // Otherwise, transcribe as before (fallback for older workflow)
   if (downloadResponse.hostedOnCDN && downloadResponse.cdnUrl) {
     // For CDN-hosted videos, send the URL to transcription service
     console.log("🎥 [ADD_VIDEO] Transcribing CDN-hosted video:", downloadResponse.cdnUrl);
