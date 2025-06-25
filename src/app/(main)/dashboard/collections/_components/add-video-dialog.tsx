@@ -106,7 +106,11 @@ export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded
       throw new Error(error.error ?? "Failed to download video");
     }
 
-    return response.json();
+    const data = await response.json();
+    console.log("📥 [ADD_VIDEO] Download response received:", data);
+    console.log("🔍 [DEBUG] Download metrics:", data.metrics);
+    console.log("🔍 [DEBUG] Full response structure:", JSON.stringify(data, null, 2));
+    return data;
   };
 
   const transcribeVideo = async (videoData: VideoDownloadResponse["videoData"]): Promise<TranscriptionResponse> => {

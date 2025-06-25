@@ -225,21 +225,30 @@ async function downloadInstagramVideoWithMetrics(url: string): Promise<{
   console.log("🆔 [DOWNLOAD] Instagram shortcode:", shortcode);
 
   try {
+    console.log("📱 [DOWNLOAD] Fetching Instagram metadata...");
     const metadata = await fetchInstagramMetadata(shortcode);
+
     if (!metadata) {
+      console.log("❌ [DOWNLOAD] No metadata returned, falling back to basic download");
       return await fallbackToBasicDownload(url);
     }
 
+    console.log("📊 [DOWNLOAD] Extracting metrics from metadata...");
     const metrics = extractMetricsFromMetadata(metadata);
+
+    console.log("🎥 [DOWNLOAD] Downloading video from versions...");
     const videoData = await downloadVideoFromVersions(metadata.video_versions, shortcode);
 
     if (!videoData) {
+      console.log("❌ [DOWNLOAD] Failed to download video data");
       return null;
     }
 
+    console.log("✅ [DOWNLOAD] Successfully downloaded Instagram video with metrics:", metrics);
     return { videoData, metrics };
   } catch (error) {
     console.error("❌ [DOWNLOAD] Instagram RapidAPI error:", error);
+    console.log("🔄 [DOWNLOAD] Falling back to basic download...");
     return await fallbackToBasicDownload(url);
   }
 }
@@ -269,10 +278,23 @@ async function fetchInstagramMetadata(shortcode: string) {
     return null;
   }
 
-  return response.json();
+  const data = await response.json();
+  console.log("🔍 [DEBUG] Full Instagram API response:", JSON.stringify(data, null, 2));
+  return data;
 }
 
 function extractMetricsFromMetadata(metadata: any) {
+  console.log("🔍 [DEBUG] Full metadata object keys:", Object.keys(metadata));
+  console.log("🔍 [DEBUG] Metadata like_count:", metadata.like_count);
+  console.log("🔍 [DEBUG] Metadata play_count:", metadata.play_count);
+  console.log("🔍 [DEBUG] Metadata reshare_count:", metadata.reshare_count);
+
+  // Check if metadata has the structure we expect
+  if (typeof metadata === "object" && metadata !== null) {
+    console.log("🔍 [DEBUG] Metadata is valid object");
+    console.log("🔍 [DEBUG] First 500 chars of metadata:", JSON.stringify(metadata).substring(0, 500));
+  }
+
   const metrics = {
     likes: metadata.like_count ?? 0,
     views: metadata.play_count ?? 0,
