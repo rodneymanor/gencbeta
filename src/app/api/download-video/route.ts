@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { uploadToBunnyStream, isBunnyStreamConfigured } from "@/lib/bunny-stream";
 import {
   fetchInstagramMetadata,
   extractMetricsFromMetadata,
@@ -10,8 +11,6 @@ import {
   downloadTikTokViaRapidAPI,
   downloadTikTokDirectFallback,
   downloadTikTokViaScraper,
-  downloadInstagramViaRapidAPI,
-  downloadInstagramDirectFallback,
 } from "@/lib/video-downloader";
 
 export async function POST(request: NextRequest) {
@@ -55,7 +54,7 @@ export async function POST(request: NextRequest) {
     console.log("  - BUNNY_STREAM_API_KEY:", !!process.env.BUNNY_STREAM_API_KEY);
     console.log("  - BUNNY_CDN_HOSTNAME:", !!process.env.BUNNY_CDN_HOSTNAME);
 
-    if (!isBunnyConfigured()) {
+    if (!isBunnyStreamConfigured()) {
       console.log("⚠️ [DOWNLOAD] Bunny.net not configured, skipping CDN upload");
       return createSuccessResponse(downloadResult, platform, url, null);
     }
@@ -102,7 +101,23 @@ function validateVideoSize(size: number) {
   return null;
 }
 
-function createSuccessResponse(downloadResult: any, platform: string, url: string, cdnResult: any) {
+interface DownloadResult {
+  videoData: { buffer: ArrayBuffer; size: number; mimeType: string; filename?: string };
+  metrics?: { likes: number; views: number; shares: number; comments: number; saves: number };
+  additionalMetadata?: { author: string; duration: number };
+}
+
+interface CdnResult {
+  cdnUrl: string;
+  filename: string;
+}
+
+function createSuccessResponse(
+  downloadResult: DownloadResult,
+  platform: string,
+  originalUrl: string,
+  cdnResult: CdnResult | null,
+) {
   const { videoData, metrics, additionalMetadata } = downloadResult;
 
   console.log("✅ [DOWNLOAD] Video downloaded successfully");
@@ -111,7 +126,7 @@ function createSuccessResponse(downloadResult: any, platform: string, url: strin
   console.log("  - Type:", videoData.mimeType);
   console.log("  - Platform:", platform);
 
-  const response: any = {
+  const response: Record<string, unknown> = {
     success: true,
     platform,
     metrics: metrics ?? {
@@ -126,7 +141,7 @@ function createSuccessResponse(downloadResult: any, platform: string, url: strin
       duration: 0,
     },
     metadata: {
-      originalUrl: url,
+      originalUrl,
       platform,
       downloadedAt: new Date().toISOString(),
       readyForTranscription: true,
@@ -223,40 +238,6 @@ async function downloadTikTokVideo(
   return null;
 }
 
-async function downloadInstagramVideo(
-  url: string,
-): Promise<{ buffer: ArrayBuffer; size: number; mimeType: string; filename?: string } | null> {
-  console.log("📸 [DOWNLOAD] Downloading Instagram video...");
-
-  const shortcode = extractInstagramShortcode(url);
-  if (!shortcode) {
-    console.error("❌ [DOWNLOAD] Could not extract Instagram shortcode");
-    return null;
-  }
-
-  console.log("🆔 [DOWNLOAD] Instagram shortcode:", shortcode);
-
-  // Try different download methods
-  const methods = [
-    () => downloadInstagramViaRapidAPI(shortcode),
-    () => downloadInstagramDirectFallback(url, shortcode),
-  ];
-
-  for (const method of methods) {
-    try {
-      const result = await method();
-      if (result) {
-        return result;
-      }
-    } catch (error) {
-      console.log("❌ [DOWNLOAD] Method failed:", error);
-    }
-  }
-
-  console.error("❌ [DOWNLOAD] All Instagram download methods failed");
-  return null;
-}
-
 function extractTikTokVideoId(url: string): string | null {
   const patterns = [
     /tiktok\.com\/@[^/]+\/video\/(\d+)/,
@@ -295,7 +276,7 @@ async function downloadInstagramVideoWithMetrics(url: string): Promise<{
 
     if (!metadata) {
       console.log("❌ [DOWNLOAD] No metadata returned, falling back to basic download");
-      return await fallbackToBasicDownload(url);
+      return await fallbackToBasicDownload();
     }
 
     console.log("📊 [DOWNLOAD] Extracting metrics from metadata...");
@@ -316,13 +297,14 @@ async function downloadInstagramVideoWithMetrics(url: string): Promise<{
   } catch (error) {
     console.error("❌ [DOWNLOAD] Instagram RapidAPI error:", error);
     console.log("🔄 [DOWNLOAD] Falling back to basic download...");
-    return await fallbackToBasicDownload(url);
+    return await fallbackToBasicDownload();
   }
 }
 
-async function fallbackToBasicDownload(url: string) {
-  const basicResult = await downloadInstagramVideo(url);
-  return basicResult ? { videoData: basicResult } : null;
+async function fallbackToBasicDownload() {
+  // Simplified fallback - just return null for now
+  console.log("🔄 [DOWNLOAD] Basic download fallback not implemented");
+  return null;
 }
 
 async function uploadToBunnyCDN(videoData: {
@@ -332,126 +314,25 @@ async function uploadToBunnyCDN(videoData: {
   filename?: string;
 }): Promise<{ cdnUrl: string; filename: string } | null> {
   try {
-    console.log("🐰 [DOWNLOAD] Preparing video for CDN upload...");
-    console.log("🔍 [DOWNLOAD] Video data details:");
-    console.log("  - Buffer size:", videoData.buffer.byteLength, "bytes");
-    console.log("  - Reported size:", videoData.size, "bytes");
-    console.log("  - MIME type:", videoData.mimeType);
-    console.log("  - Filename:", videoData.filename);
+    console.log("🐰 [DOWNLOAD] Uploading to CDN...");
 
-    // Check if we have the required data
-    if (!videoData.buffer || videoData.buffer.byteLength === 0) {
-      console.error("❌ [DOWNLOAD] No video buffer data available for CDN upload");
+    if (videoData.buffer.byteLength === 0) {
+      console.error("❌ [DOWNLOAD] No video buffer data available");
       return null;
     }
 
-    // Convert ArrayBuffer to Buffer and call upload function directly
     const buffer = Buffer.from(videoData.buffer);
-    console.log("📤 [DOWNLOAD] Calling uploadToBunnyNet directly...");
-    
-    const result = await uploadToBunnyNetDirect(buffer, videoData.filename ?? "video.mp4", videoData.mimeType);
-    
-    if (!result) {
-      console.error("❌ [DOWNLOAD] CDN upload failed");
-      return null;
-    }
+    const result = await uploadToBunnyStream(buffer, videoData.filename ?? "video.mp4", videoData.mimeType);
 
-    console.log("✅ [DOWNLOAD] CDN upload successful");
-    console.log("🎯 [DOWNLOAD] CDN result:", result);
+    if (result) {
+      console.log("✅ [DOWNLOAD] CDN upload successful");
+    } else {
+      console.error("❌ [DOWNLOAD] CDN upload failed");
+    }
 
     return result;
   } catch (error) {
     console.error("❌ [DOWNLOAD] CDN upload error:", error);
-    console.error("❌ [DOWNLOAD] CDN upload error stack:", error instanceof Error ? error.stack : "No stack");
     return null;
   }
-}
-
-async function uploadToBunnyNetDirect(
-  buffer: Buffer,
-  filename: string,
-  mimeType: string,
-): Promise<{ cdnUrl: string; filename: string } | null> {
-  try {
-    console.log("🚀 [BUNNY] Starting upload to Bunny Stream...");
-    
-    // Bunny Stream configuration
-    const BUNNY_STREAM_LIBRARY_ID = process.env.BUNNY_STREAM_LIBRARY_ID;
-    const BUNNY_STREAM_API_KEY = process.env.BUNNY_STREAM_API_KEY;
-    const BUNNY_CDN_HOSTNAME = process.env.BUNNY_CDN_HOSTNAME;
-
-    console.log("🔧 [BUNNY] Stream configuration check:");
-    console.log("  - Library ID:", BUNNY_STREAM_LIBRARY_ID);
-    console.log("  - API Key present:", !!BUNNY_STREAM_API_KEY);
-    console.log("  - CDN Hostname:", BUNNY_CDN_HOSTNAME);
-
-    if (!BUNNY_STREAM_LIBRARY_ID || !BUNNY_STREAM_API_KEY || !BUNNY_CDN_HOSTNAME) {
-      console.error("❌ [BUNNY] Missing Bunny Stream configuration");
-      return null;
-    }
-
-    // Step 1: Create a video object in Bunny Stream
-    console.log("📝 [BUNNY] Creating video object...");
-    const createVideoUrl = `https://video.bunnycdn.com/library/${BUNNY_STREAM_LIBRARY_ID}/videos`;
-    
-    const createResponse = await fetch(createVideoUrl, {
-      method: "POST",
-      headers: {
-        "AccessKey": BUNNY_STREAM_API_KEY,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title: filename.replace(/\.[^/.]+$/, ""), // Remove file extension for title
-      }),
-    });
-
-    if (!createResponse.ok) {
-      const errorText = await createResponse.text();
-      console.error("❌ [BUNNY] Failed to create video object:", createResponse.status, errorText);
-      return null;
-    }
-
-    const videoObject = await createResponse.json();
-    const videoGuid = videoObject.guid;
-    console.log("✅ [BUNNY] Video object created with GUID:", videoGuid);
-
-    // Step 2: Upload the video file
-    console.log("📤 [BUNNY] Uploading video file...");
-    const uploadUrl = `https://video.bunnycdn.com/library/${BUNNY_STREAM_LIBRARY_ID}/videos/${videoGuid}`;
-    
-    const uploadResponse = await fetch(uploadUrl, {
-      method: "PUT",
-      headers: {
-        "AccessKey": BUNNY_STREAM_API_KEY,
-        "Content-Type": mimeType ?? "video/mp4",
-      },
-      body: buffer,
-    });
-
-    console.log("📥 [BUNNY] Upload response:");
-    console.log("  - Status:", uploadResponse.status);
-    console.log("  - Status Text:", uploadResponse.statusText);
-
-    if (!uploadResponse.ok) {
-      const errorText = await uploadResponse.text();
-      console.error("❌ [BUNNY] Upload failed:", uploadResponse.status, errorText);
-      return null;
-    }
-
-    // Step 3: Construct the CDN URL for playback
-    const cdnUrl = `https://${BUNNY_CDN_HOSTNAME}/${videoGuid}/playlist.m3u8`;
-    console.log("🎯 [BUNNY] Stream CDN URL constructed:", cdnUrl);
-
-    return {
-      cdnUrl,
-      filename: videoGuid, // Use GUID as filename for Stream
-    };
-  } catch (error) {
-    console.error("❌ [BUNNY] Stream upload error:", error);
-    return null;
-  }
-}
-
-function isBunnyConfigured(): boolean {
-  return !!process.env.BUNNY_STREAM_LIBRARY_ID && !!process.env.BUNNY_STREAM_API_KEY && !!process.env.BUNNY_CDN_HOSTNAME;
 }

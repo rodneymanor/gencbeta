@@ -74,7 +74,6 @@ export const downloadVideo = async (videoUrl: string): Promise<VideoDownloadResp
   const data = await response.json();
   console.log("📥 [ADD_VIDEO] Download response received:", data);
   console.log("🔍 [DEBUG] Download metrics:", data.metrics);
-  console.log("🔍 [DEBUG] Full response structure:", JSON.stringify(data, null, 2));
   return data;
 };
 
@@ -200,7 +199,7 @@ export const extractVideoThumbnail = async (downloadResponse: VideoDownloadRespo
   }
 };
 
-const calculateEngagementRate = (metrics: VideoDownloadResponse['metrics']): number => {
+const calculateEngagementRate = (metrics: VideoDownloadResponse["metrics"]): number => {
   if (metrics.views <= 0) return 0;
   return ((metrics.likes + metrics.comments + metrics.shares) / metrics.views) * 100;
 };
@@ -213,7 +212,10 @@ const getVideoTitle = (transcriptionResponse: TranscriptionResponse): string => 
   return transcriptionResponse.contentMetadata.description || "Untitled Video";
 };
 
-const getVideoAuthor = (downloadResponse: VideoDownloadResponse, transcriptionResponse: TranscriptionResponse): string => {
+const getVideoAuthor = (
+  downloadResponse: VideoDownloadResponse,
+  transcriptionResponse: TranscriptionResponse,
+): string => {
   return downloadResponse.additionalMetadata.author || transcriptionResponse.contentMetadata.author || "Unknown";
 };
 
