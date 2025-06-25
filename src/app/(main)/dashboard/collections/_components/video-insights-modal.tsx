@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Copy, ExternalLink, Lightbulb, Play, Shuffle, User } from "lucide-react";
+import { Copy, ExternalLink, Play, Shuffle, User } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -15,8 +15,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
+import { ContentSections } from "./content-sections";
+import { HashtagsSection } from "./hashtags-section";
+import { HookDetailsSection } from "./hook-details-section";
+import { VideoMetricsGrid } from "./video-metrics-grid";
 
 interface VideoInsights {
   likes: number;
@@ -119,61 +122,11 @@ export function VideoInsightsModal({ video, children }: VideoInsightsModalProps)
             {/* Main Split Layout */}
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
               {/* Left Side - Hook Details */}
+              <HookDetailsSection hook={video.components.hook} />
+
+              {/* Right Side - Metrics, Caption, and Transcription */}
               <div className="space-y-6">
-                {/* Hook Details Card */}
-                <div className="bg-card rounded-lg border-2 border-gray-200 p-6 shadow-sm dark:border-gray-700">
-                  <h3 className="mb-4 text-lg font-semibold">Hook Details</h3>
-
-                  <div className="space-y-4">
-                    <div>
-                      <Label className="text-muted-foreground text-sm font-medium">Hook:</Label>
-                      <div className="bg-muted/50 mt-2 rounded-lg border-2 border-gray-200 p-4 dark:border-gray-600">
-                        <p className="text-sm leading-relaxed">{video.components.hook}</p>
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label className="text-muted-foreground text-sm font-medium">Hook Type:</Label>
-                      <div className="mt-2">
-                        <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                          Curiosity Spike
-                        </Badge>
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label className="text-muted-foreground text-sm font-medium">Enter topic</Label>
-                      <Input
-                        placeholder="Enter topic"
-                        className="mt-2 border-2 border-gray-300 focus:border-blue-500 dark:border-gray-600"
-                      />
-                    </div>
-
-                    <Button className="w-full bg-blue-600 text-white hover:bg-blue-700">
-                      <Shuffle className="mr-2 h-4 w-4" />
-                      Remix Hook
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Remix Idea Section */}
-                <div className="bg-card rounded-lg border-2 border-gray-200 p-6 shadow-sm dark:border-gray-700">
-                  <h3 className="mb-4 text-lg font-semibold">Remix Idea</h3>
-                  <div className="bg-muted/50 flex min-h-[120px] items-center justify-center rounded-lg border-2 border-gray-200 p-4 dark:border-gray-600">
-                    <div className="space-y-2 text-center">
-                      <Lightbulb className="mx-auto h-8 w-8 text-blue-600" />
-                      <p className="text-muted-foreground text-sm">Brainstorm similar ideas based on your brand</p>
-                      <Button variant="outline" size="sm" className="gap-2">
-                        <Lightbulb className="h-4 w-4" />
-                        Generate Ideas
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Side - Metrics */}
-              <div className="space-y-6">
+                {/* Metrics */}
                 <div className="bg-card rounded-lg border-2 border-gray-200 p-6 shadow-sm dark:border-gray-700">
                   <h3 className="mb-4 text-lg font-semibold">Metrics</h3>
 
@@ -226,52 +179,18 @@ export function VideoInsightsModal({ video, children }: VideoInsightsModalProps)
                     </div>
                   </div>
                 </div>
+
+                {/* Caption and Transcription Side by Side */}
+                <ContentSections
+                  description={video.contentMetadata.description || video.visualContext}
+                  transcript={video.transcript}
+                  copyToClipboard={copyToClipboard}
+                />
               </div>
             </div>
 
-            {/* Bottom Section - Caption and Transcription */}
-            <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-              {/* Caption */}
-              <div className="bg-card rounded-lg border-2 border-gray-200 p-6 shadow-sm dark:border-gray-700">
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">Caption</h3>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => copyToClipboard(video.contentMetadata.description, "Caption")}
-                    className="gap-2"
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="bg-muted/50 min-h-[120px] rounded-lg border-2 border-gray-200 p-4 dark:border-gray-600">
-                  <p className="text-sm leading-relaxed">{video.contentMetadata.description || video.visualContext}</p>
-                </div>
-              </div>
-
-              {/* Transcription */}
-              <div className="bg-card rounded-lg border-2 border-gray-200 p-6 shadow-sm dark:border-gray-700">
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">Transcription</h3>
-                  <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground text-sm">
-                      Duration: {Math.round(video.duration ?? 30)} secs
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => copyToClipboard(video.transcript, "Transcription")}
-                      className="gap-2"
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-                <div className="bg-muted/50 max-h-48 min-h-[120px] overflow-y-auto rounded-lg border-2 border-gray-200 p-4 dark:border-gray-600">
-                  <p className="text-sm leading-relaxed">{video.transcript}</p>
-                </div>
-              </div>
-            </div>
+            {/* Bottom Section - Hashtags */}
+            <HashtagsSection hashtags={video.contentMetadata.hashtags} copyToClipboard={copyToClipboard} />
 
             {/* Action Buttons Row */}
             <div className="bg-card rounded-lg border-2 border-gray-200 p-6 shadow-sm dark:border-gray-700">
