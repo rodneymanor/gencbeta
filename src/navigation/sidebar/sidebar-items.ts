@@ -4,7 +4,6 @@ import {
   Mic,
   StickyNote,
   Sparkles,
-  Edit,
   FolderOpen,
   Settings,
   Users,
@@ -134,17 +133,6 @@ export const sidebarItems: NavGroup[] = [
   },
   {
     id: 5,
-    label: "Tools",
-    items: [
-      {
-        title: "Script Editor",
-        url: "/dashboard/scripts/editor",
-        icon: Edit,
-      },
-    ],
-  },
-  {
-    id: 6,
     label: "Administration",
     items: [
       {

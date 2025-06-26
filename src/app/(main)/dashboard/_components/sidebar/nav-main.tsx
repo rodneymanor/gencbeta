@@ -192,7 +192,8 @@ export function NavMain({ items, onCollectionCreated }: NavMainProps) {
   };
 
   const isSubmenuOpen = (subItems?: NavMainItem["subItems"]) => {
-    return subItems?.some((sub) => path.startsWith(sub.url)) ?? false;
+    // Always expand sub items by default
+    return subItems && subItems.length > 0;
   };
 
   return (
