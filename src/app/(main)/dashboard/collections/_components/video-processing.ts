@@ -80,6 +80,9 @@ export const downloadVideo = async (videoUrl: string): Promise<VideoDownloadResp
 };
 
 export const transcribeVideo = async (downloadResponse: VideoDownloadResponse): Promise<TranscriptionResponse> => {
+  console.log("🔍 [ADD_VIDEO] Checking download response for transcription:", !!downloadResponse.transcription);
+  console.log("🔍 [ADD_VIDEO] Download response keys:", Object.keys(downloadResponse));
+
   // If transcription is already included in the download response, return it
   if (downloadResponse.transcription) {
     console.log("✅ [ADD_VIDEO] Using existing transcription from download response");
@@ -136,6 +139,9 @@ export const transcribeVideo = async (downloadResponse: VideoDownloadResponse): 
 };
 
 export const extractVideoThumbnail = async (downloadResponse: VideoDownloadResponse): Promise<string> => {
+  console.log("🖼️ [ADD_VIDEO] Extracting thumbnail - hostedOnCDN:", downloadResponse.hostedOnCDN);
+  console.log("🖼️ [ADD_VIDEO] CDN URL:", downloadResponse.cdnUrl);
+
   if (downloadResponse.hostedOnCDN && downloadResponse.cdnUrl) {
     // For iframe URLs (like Bunny Stream), return a placeholder thumbnail
     if (downloadResponse.cdnUrl.includes("iframe.mediadelivery.net/embed")) {
@@ -276,6 +282,12 @@ export const createVideoObject = (
   thumbnailUrl: string,
   originalUrl: string,
 ): Record<string, unknown> => {
+  console.log("📦 [ADD_VIDEO] Creating video object with:");
+  console.log("  - Download response platform:", downloadResponse.platform);
+  console.log("  - Transcription success:", transcriptionResponse.success);
+  console.log("  - Thumbnail URL length:", thumbnailUrl.length);
+  console.log("  - Original URL:", originalUrl);
+
   const engagementRate = calculateEngagementRate(downloadResponse.metrics);
 
   const videoObject: Record<string, unknown> = {
