@@ -1,25 +1,24 @@
-"use client";
+import { Metadata } from "next";
 
-import { useEffect } from "react";
-
-import { useRouter } from "next/navigation";
-
-// Prevent static generation to avoid CSS prerendering issues
-export const dynamic = "force-dynamic";
+export const metadata: Metadata = {
+  title: "Redirecting...",
+  description: "Redirecting to dashboard",
+};
 
 export default function Home() {
-  const router = useRouter();
-
-  useEffect(() => {
-    router.push("/dashboard");
-  }, [router]);
-
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-2xl font-semibold">Redirecting...</h1>
-        <p className="text-muted-foreground">Please wait while we redirect you.</p>
-      </div>
-    </div>
+    <html>
+      <head>
+        <meta httpEquiv="refresh" content="0; url=/dashboard" />
+      </head>
+      <body>
+        <div style={{ textAlign: "center", marginTop: "50px" }}>
+          <h1>Redirecting...</h1>
+          <p>
+            If you are not redirected automatically, <a href="/dashboard">click here</a>.
+          </p>
+        </div>
+      </body>
+    </html>
   );
 }
