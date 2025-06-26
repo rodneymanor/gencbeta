@@ -33,8 +33,7 @@ export default function CollectionsPage() {
   const [videos, setVideos] = useState<VideoWithPlayer[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingVideos, setLoadingVideos] = useState(false);
-  const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
-  const [videoObjectUrls, setVideoObjectUrls] = useState<Record<string, string>>({});
+
   const [manageMode, setManageMode] = useState(false);
   const { user } = useAuth();
   const searchParams = useSearchParams();
@@ -81,17 +80,6 @@ export default function CollectionsPage() {
     }
   }, [user, selectedCollectionId, loadCollections, loadVideos]);
 
-  // Cleanup object URLs on unmount
-  useEffect(() => {
-    return () => {
-      Object.values(videoObjectUrls).forEach((url) => {
-        if (url) {
-          URL.revokeObjectURL(url);
-        }
-      });
-    };
-  }, [videoObjectUrls]);
-
   const handleVideoAdded = () => {
     loadCollections();
     loadVideos();
@@ -107,24 +95,6 @@ export default function CollectionsPage() {
       console.error("Error deleting video:", error);
     }
   };
-
-  const createVideoObjectUrl = useCallback((video: VideoWithPlayer) => {
-    if (video.videoData && !video.hostedOnCDN && video.id) {
-      try {
-        const uint8Array = new Uint8Array(video.videoData.buffer);
-        const blob = new Blob([uint8Array], { type: video.videoData.mimeType });
-        const objectUrl = URL.createObjectURL(blob);
-        setVideoObjectUrls((prev) => {
-          const videoId = video.id!;
-          return { ...prev, [videoId]: objectUrl };
-        });
-        return objectUrl;
-      } catch (error) {
-        console.error("❌ [VIDEO_PLAYER] Failed to create video blob:", error);
-      }
-    }
-    return null;
-  }, []);
 
   const getPageTitle = () => {
     if (!selectedCollectionId) {
@@ -159,7 +129,7 @@ export default function CollectionsPage() {
             <div key={i} className="relative mx-auto w-full max-w-sm">
               <Card className="overflow-hidden border-0 bg-gradient-to-br from-gray-900 to-black shadow-2xl">
                 <CardContent className="p-0">
-                  <Skeleton className="aspect-[9/16] w-full rounded-xl" />
+                  <Skeleton className="aspect-[9/16] w-full" />
                 </CardContent>
               </Card>
             </div>
@@ -238,7 +208,7 @@ export default function CollectionsPage() {
             <div key={i} className="relative mx-auto w-full max-w-sm">
               <Card className="overflow-hidden border-0 bg-gradient-to-br from-gray-900 to-black shadow-2xl">
                 <CardContent className="p-0">
-                  <Skeleton className="aspect-[9/16] w-full rounded-xl" />
+                  <Skeleton className="aspect-[9/16] w-full" />
                 </CardContent>
               </Card>
             </div>
@@ -261,48 +231,44 @@ export default function CollectionsPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
           {videos.map((video) => (
             <div key={video.id} className="relative mx-auto w-full max-w-sm">
-              <Card className="overflow-hidden border-0 bg-gradient-to-br from-gray-900 to-black shadow-2xl">
-                <CardContent className="p-0">
-                  {/* Use VideoPlayer Component */}
-                  <VideoPlayer
-                    videoUrl={video.url}
-                    platform={video.platform as "tiktok" | "instagram"}
-                    metrics={{
-                      views: video.insights.views,
-                      likes: video.insights.likes,
-                      comments: video.insights.comments,
-                      shares: video.insights.shares || 0,
-                    }}
-                    insights={{
-                      reach: video.insights.views * 1.2, // Estimate
-                      impressions: video.insights.views * 1.5, // Estimate
-                      engagementRate: ((video.insights.likes + video.insights.comments) / video.insights.views) * 100,
-                      topHours: ["18:00", "19:00", "20:00"], // Placeholder
-                      demographics: [
-                        { ageGroup: "18-24", percentage: 35 },
-                        { ageGroup: "25-34", percentage: 40 },
-                        { ageGroup: "35-44", percentage: 25 },
-                      ],
-                      growthRate: 15.2, // Placeholder
-                    }}
-                    title={video.title}
-                    author={video.author}
-                    hostedOnCDN={video.hostedOnCDN}
-                    videoData={video.videoData}
-                    className="h-full w-full"
-                  />
-                </CardContent>
-                {manageMode && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="absolute top-2 right-2 h-8 w-8 rounded-full bg-red-500 p-0 text-white hover:bg-red-600"
-                    onClick={() => handleDeleteVideo(video.id!)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
-              </Card>
+              {/* Use VideoPlayer Component with its own card */}
+              <VideoPlayer
+                videoUrl={video.url}
+                platform={video.platform as "tiktok" | "instagram"}
+                metrics={{
+                  views: video.insights.views,
+                  likes: video.insights.likes,
+                  comments: video.insights.comments,
+                  shares: video.insights.shares || 0,
+                }}
+                insights={{
+                  reach: video.insights.views * 1.2, // Estimate
+                  impressions: video.insights.views * 1.5, // Estimate
+                  engagementRate: ((video.insights.likes + video.insights.comments) / video.insights.views) * 100,
+                  topHours: ["18:00", "19:00", "20:00"], // Placeholder
+                  demographics: [
+                    { ageGroup: "18-24", percentage: 35 },
+                    { ageGroup: "25-34", percentage: 40 },
+                    { ageGroup: "35-44", percentage: 25 },
+                  ],
+                  growthRate: 15.2, // Placeholder
+                }}
+                title={video.title}
+                author={video.author}
+                hostedOnCDN={video.hostedOnCDN}
+                videoData={video.videoData}
+                className="h-full w-full"
+              />
+              {manageMode && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="absolute top-2 right-2 h-8 w-8 rounded-full bg-red-500 p-0 text-white hover:bg-red-600"
+                  onClick={() => handleDeleteVideo(video.id!)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
             </div>
           ))}
         </div>
