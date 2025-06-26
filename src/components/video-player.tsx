@@ -142,8 +142,9 @@ const VideoEmbed = ({
     );
   }
 
-  // Handle iframe URLs (like Bunny Stream)
+  // Handle iframe URLs (like Bunny Stream) - CHECK THIS FIRST!
   if (hostedOnCDN && url.includes("iframe.mediadelivery.net/embed")) {
+    console.log("🎬 [VIDEO_PLAYER] Using iframe for Bunny Stream embed:", url);
     return (
       <iframe
         src={url}
@@ -152,7 +153,7 @@ const VideoEmbed = ({
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowFullScreen
         onError={(e) => {
-          console.error("❌ [VIDEO_PLAYER] Video playback error:", e);
+          console.error("❌ [VIDEO_PLAYER] Iframe playback error:", e);
           setHasError(true);
         }}
         style={{ backgroundColor: "black" }}
@@ -160,11 +161,12 @@ const VideoEmbed = ({
     );
   }
 
-  // Handle direct video URLs or local video data
-  if (videoObjectUrl || (hostedOnCDN && url.startsWith("http"))) {
+  // Handle local video data first
+  if (videoObjectUrl) {
+    console.log("🎬 [VIDEO_PLAYER] Using local video object URL");
     return (
       <video
-        src={videoObjectUrl ?? url}
+        src={videoObjectUrl}
         className="h-full w-full rounded-xl object-cover"
         controls
         autoPlay
@@ -172,7 +174,28 @@ const VideoEmbed = ({
         loop
         playsInline
         onError={(e) => {
-          console.error("❌ [VIDEO_PLAYER] Video playback error:", e);
+          console.error("❌ [VIDEO_PLAYER] Local video playback error:", e);
+          setHasError(true);
+        }}
+        style={{ backgroundColor: "black" }}
+      />
+    );
+  }
+
+  // Handle other CDN URLs (not iframe embeds)
+  if (hostedOnCDN && url.startsWith("http") && !url.includes("iframe.mediadelivery.net")) {
+    console.log("🎬 [VIDEO_PLAYER] Using video element for CDN URL:", url);
+    return (
+      <video
+        src={url}
+        className="h-full w-full rounded-xl object-cover"
+        controls
+        autoPlay
+        muted
+        loop
+        playsInline
+        onError={(e) => {
+          console.error("❌ [VIDEO_PLAYER] CDN video playback error:", e);
           setHasError(true);
         }}
         style={{ backgroundColor: "black" }}
