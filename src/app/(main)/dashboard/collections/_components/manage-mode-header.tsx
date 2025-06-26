@@ -1,13 +1,10 @@
 "use client";
 
-import { Settings, Trash2, Plus, UserPlus } from "lucide-react";
+import { Settings, Trash2 } from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth-context";
-
-import { AddVideoDialog } from "./add-video-dialog";
-import { CreateCollectionDialog } from "./create-collection-dialog";
-import { CreateCreatorDialog } from "./create-creator-dialog";
 
 interface Collection {
   id?: string;
@@ -68,43 +65,48 @@ const ManageModeControls = ({
   </>
 );
 
-const AdminControls = ({
-  collections,
-  selectedCollectionId,
-  onManageModeToggle,
-  onVideoAdded,
-  userRole,
-}: {
-  collections: Collection[];
-  selectedCollectionId: string | null;
-  onManageModeToggle: () => void;
-  onVideoAdded: () => void;
-  userRole?: string;
-}) => (
+const AccountBadge = ({ userRole }: { userRole?: string }) => {
+  // Determine account level based on role
+  const getAccountLevel = () => {
+    switch (userRole) {
+      case "super_admin":
+        return "Super Admin";
+      case "coach":
+        return "Pro Account";
+      case "creator":
+        return "Creator Account";
+      default:
+        return "Free Account";
+    }
+  };
+
+  const getAccountVariant = () => {
+    switch (userRole) {
+      case "super_admin":
+        return "default"; // Primary color for super admin
+      case "coach":
+        return "default"; // Primary color for pro
+      case "creator":
+        return "secondary"; // Secondary color for creator
+      default:
+        return "outline"; // Outline for free
+    }
+  };
+
+  return (
+    <Badge variant={getAccountVariant()} className="px-3 py-1">
+      {getAccountLevel()}
+    </Badge>
+  );
+};
+
+const AdminControls = ({ onManageModeToggle, userRole }: { onManageModeToggle: () => void; userRole?: string }) => (
   <>
     <Button variant="outline" size="sm" onClick={onManageModeToggle}>
       <Settings className="mr-2 h-4 w-4" />
       Manage
     </Button>
-    {userRole === "coach" && (
-      <CreateCreatorDialog onCreatorCreated={onVideoAdded}>
-        <Button variant="outline" size="sm">
-          <UserPlus className="mr-2 h-4 w-4" />
-          Create Creator
-        </Button>
-      </CreateCreatorDialog>
-    )}
-    <CreateCollectionDialog onCollectionCreated={onVideoAdded}>
-      <Button variant="outline" size="sm">
-        <Plus className="mr-2 h-4 w-4" />
-        Create Collection
-      </Button>
-    </CreateCollectionDialog>
-    <AddVideoDialog
-      collections={collections.filter((c) => c.id).map((c) => ({ id: c.id!, title: c.title }))}
-      selectedCollectionId={selectedCollectionId ?? undefined}
-      onVideoAdded={onVideoAdded}
-    />
+    <AccountBadge userRole={userRole} />
   </>
 );
 
@@ -112,14 +114,11 @@ export const ManageModeHeader = ({
   manageMode,
   selectedVideos,
   videosLength,
-  collections,
-  selectedCollectionId,
   onManageModeToggle,
   onExitManageMode,
   onBulkDelete,
   onClearSelection,
   onSelectAll,
-  onVideoAdded,
 }: ManageModeHeaderProps) => {
   const { userProfile } = useAuth();
   const isAdmin = userProfile?.role === "coach" || userProfile?.role === "super_admin";
@@ -139,20 +138,12 @@ export const ManageModeHeader = ({
   }
 
   if (isCreator) {
-    return null;
+    return <AccountBadge userRole={userProfile.role} />;
   }
 
   if (isAdmin) {
-    return (
-      <AdminControls
-        collections={collections}
-        selectedCollectionId={selectedCollectionId}
-        onManageModeToggle={onManageModeToggle}
-        onVideoAdded={onVideoAdded}
-        userRole={userProfile.role}
-      />
-    );
+    return <AdminControls onManageModeToggle={onManageModeToggle} userRole={userProfile.role} />;
   }
 
-  return null;
+  return <AccountBadge userRole={userProfile?.role} />;
 };
