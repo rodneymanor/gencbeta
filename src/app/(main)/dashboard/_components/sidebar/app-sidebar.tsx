@@ -33,6 +33,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       return userProfile?.role === "coach" || userProfile?.role === "super_admin";
     }
 
+    // Show team section only to coaches
+    if (group.label === "Team") {
+      return userProfile?.role === "coach";
+    }
+
     // Show all other sections to everyone
     return true;
   });

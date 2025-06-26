@@ -25,7 +25,7 @@ interface AuthContextType {
   loading: boolean;
   accountLevel: AccountLevel;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, displayName?: string, role?: UserRole) => Promise<void>;
+  signUp: (email: string, password: string, displayName?: string, role?: UserRole, coachId?: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
@@ -130,7 +130,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signUp = async (email: string, password: string, displayName?: string, role: UserRole = "creator") => {
+  const signUp = async (
+    email: string,
+    password: string,
+    displayName?: string,
+    role: UserRole = "creator",
+    coachId?: string,
+  ) => {
     if (!auth) {
       throw new Error("Firebase is not configured. Please set up Firebase environment variables.");
     }
@@ -150,6 +156,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         result.user.email!,
         finalDisplayName,
         role,
+        coachId,
       );
     } catch (err) {
       if (err instanceof Error) {

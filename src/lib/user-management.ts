@@ -12,6 +12,7 @@ import {
 } from "firebase/firestore";
 
 import { db } from "./firebase";
+import { formatTimestamp, getAllCoaches, getCoachCreators, getAllUsers } from "./user-management-helpers";
 
 export type UserRole = "super_admin" | "coach" | "creator";
 
@@ -78,6 +79,26 @@ export class UserManagementService {
         updatedAt: serverTimestamp(),
       });
 
+      // If this is a creator being assigned to a coach, create the relationship
+      if (role === "creator" && coachId) {
+        try {
+          const relationshipData: Omit<CoachCreatorRelationship, "id"> = {
+            coachId,
+            creatorId: uid,
+            assignedAt: new Date().toISOString(),
+            isActive: true,
+          };
+
+          await addDoc(collection(db, this.RELATIONSHIPS_PATH), {
+            ...relationshipData,
+            assignedAt: serverTimestamp(),
+          });
+        } catch (error) {
+          console.error("Error creating coach-creator relationship:", error);
+          // Don't throw error here as the user was already created successfully
+        }
+      }
+
       return docRef.id;
     } catch (error) {
       console.error("Error creating/updating user profile:", error);
@@ -102,9 +123,9 @@ export class UserManagementService {
       return {
         id: doc.id,
         ...doc.data(),
-        createdAt: this.formatTimestamp(doc.data().createdAt),
-        updatedAt: this.formatTimestamp(doc.data().updatedAt),
-        lastLoginAt: doc.data().lastLoginAt ? this.formatTimestamp(doc.data().lastLoginAt) : undefined,
+        createdAt: formatTimestamp(doc.data().createdAt),
+        updatedAt: formatTimestamp(doc.data().updatedAt),
+        lastLoginAt: doc.data().lastLoginAt ? formatTimestamp(doc.data().lastLoginAt) : undefined,
       } as UserProfile;
     } catch (error) {
       console.error("Error fetching user profile:", error);
@@ -151,74 +172,21 @@ export class UserManagementService {
    * Get all coaches (for super admin)
    */
   static async getAllCoaches(): Promise<UserProfile[]> {
-    try {
-      const q = query(
-        collection(db, this.USERS_PATH),
-        where("role", "==", "coach"),
-        where("isActive", "==", true),
-        orderBy("displayName"),
-      );
-
-      const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: this.formatTimestamp(doc.data().createdAt),
-        updatedAt: this.formatTimestamp(doc.data().updatedAt),
-        lastLoginAt: doc.data().lastLoginAt ? this.formatTimestamp(doc.data().lastLoginAt) : undefined,
-      })) as UserProfile[];
-    } catch (error) {
-      console.error("Error fetching coaches:", error);
-      throw new Error("Failed to fetch coaches");
-    }
+    return getAllCoaches();
   }
 
   /**
    * Get all creators assigned to a coach
    */
   static async getCoachCreators(coachId: string): Promise<UserProfile[]> {
-    try {
-      const q = query(
-        collection(db, this.USERS_PATH),
-        where("role", "==", "creator"),
-        where("coachId", "==", coachId),
-        where("isActive", "==", true),
-        orderBy("displayName"),
-      );
-
-      const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: this.formatTimestamp(doc.data().createdAt),
-        updatedAt: this.formatTimestamp(doc.data().updatedAt),
-        lastLoginAt: doc.data().lastLoginAt ? this.formatTimestamp(doc.data().lastLoginAt) : undefined,
-      })) as UserProfile[];
-    } catch (error) {
-      console.error("Error fetching coach creators:", error);
-      throw new Error("Failed to fetch creators");
-    }
+    return getCoachCreators(coachId);
   }
 
   /**
    * Get all users (for super admin)
    */
   static async getAllUsers(): Promise<UserProfile[]> {
-    try {
-      const q = query(collection(db, this.USERS_PATH), where("isActive", "==", true), orderBy("createdAt", "desc"));
-
-      const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: this.formatTimestamp(doc.data().createdAt),
-        updatedAt: this.formatTimestamp(doc.data().updatedAt),
-        lastLoginAt: doc.data().lastLoginAt ? this.formatTimestamp(doc.data().lastLoginAt) : undefined,
-      })) as UserProfile[];
-    } catch (error) {
-      console.error("Error fetching all users:", error);
-      throw new Error("Failed to fetch users");
-    }
+    return getAllUsers();
   }
 
   /**
@@ -369,22 +337,5 @@ export class UserManagementService {
       console.error("Error getting accessible coaches:", error);
       return [];
     }
-  }
-
-  /**
-   * Format timestamp helper
-   */
-  private static formatTimestamp(timestamp: unknown): string {
-    if (!timestamp) return new Date().toISOString();
-
-    if (timestamp.toDate) {
-      return timestamp.toDate().toISOString();
-    }
-
-    if (timestamp.seconds) {
-      return new Date(timestamp.seconds * 1000).toISOString();
-    }
-
-    return timestamp;
   }
 }

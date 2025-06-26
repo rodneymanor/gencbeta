@@ -1,4 +1,15 @@
-import { Home, FileText, Mic, StickyNote, Sparkles, Edit, FolderOpen, Settings, type LucideIcon } from "lucide-react";
+import {
+  Home,
+  FileText,
+  Mic,
+  StickyNote,
+  Sparkles,
+  Edit,
+  FolderOpen,
+  Settings,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 
 export interface NavSubItem {
   title: string;
@@ -79,6 +90,17 @@ export const sidebarItems: NavGroup[] = [
   },
   {
     id: 5,
+    label: "Team",
+    items: [
+      {
+        title: "My Creators",
+        url: "/dashboard/creators",
+        icon: Users,
+      },
+    ],
+  },
+  {
+    id: 6,
     label: "Tools",
     items: [
       {
@@ -89,7 +111,7 @@ export const sidebarItems: NavGroup[] = [
     ],
   },
   {
-    id: 6,
+    id: 7,
     label: "Administration",
     items: [
       {

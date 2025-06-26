@@ -1,12 +1,13 @@
 "use client";
 
-import { Settings, Trash2, Plus } from "lucide-react";
+import { Settings, Trash2, Plus, UserPlus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth-context";
 
 import { AddVideoDialog } from "./add-video-dialog";
 import { CreateCollectionDialog } from "./create-collection-dialog";
+import { CreateCreatorDialog } from "./create-creator-dialog";
 
 interface Collection {
   id?: string;
@@ -72,17 +73,27 @@ const AdminControls = ({
   selectedCollectionId,
   onManageModeToggle,
   onVideoAdded,
+  userRole,
 }: {
   collections: Collection[];
   selectedCollectionId: string | null;
   onManageModeToggle: () => void;
   onVideoAdded: () => void;
+  userRole?: string;
 }) => (
   <>
     <Button variant="outline" size="sm" onClick={onManageModeToggle}>
       <Settings className="mr-2 h-4 w-4" />
       Manage
     </Button>
+    {userRole === "coach" && (
+      <CreateCreatorDialog onCreatorCreated={onVideoAdded}>
+        <Button variant="outline" size="sm">
+          <UserPlus className="mr-2 h-4 w-4" />
+          Create Creator
+        </Button>
+      </CreateCreatorDialog>
+    )}
     <CreateCollectionDialog onCollectionCreated={onVideoAdded}>
       <Button variant="outline" size="sm">
         <Plus className="mr-2 h-4 w-4" />
@@ -138,6 +149,7 @@ export const ManageModeHeader = ({
         selectedCollectionId={selectedCollectionId}
         onManageModeToggle={onManageModeToggle}
         onVideoAdded={onVideoAdded}
+        userRole={userProfile.role}
       />
     );
   }
