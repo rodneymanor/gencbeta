@@ -27,8 +27,79 @@ Do NOT include any conversational text, thinking process, UI state descriptions,
 
 Your goal is to provide perfectly crafted UI snippets that can be dropped directly into the user's project, making adjustments and building new pages effortless and visually consistent.
 
+---
+
+**API Route Architecture - MANDATORY:**
+When creating or refactoring API routes, follow these microservice principles:
+
+**Single Responsibility Principle:**
+- Each API route should have ONE focused responsibility
+- Avoid monolithic routes that combine multiple distinct operations
+- Split complex operations into focused, composable services
+
+**Microservice Structure:**
+```
+/api/[domain]/
+├── [action]/
+│   └── route.ts        // Single focused operation
+├── [analyze-action]/
+│   └── route.ts        // Analysis-specific operation
+└── [orchestrator]/
+    └── route.ts        // Coordinates multiple services
+```
+
+**Implementation Guidelines:**
+1. **Focused Services**: Each route handles one specific task (e.g., transcribe, analyze-script, analyze-metadata)
+2. **Orchestrator Pattern**: Create a coordinator service for complex workflows that need multiple operations
+3. **Parallel Processing**: Use Promise.allSettled() for independent operations that can run simultaneously
+4. **Graceful Fallbacks**: Each service should have fallback responses for failed operations
+5. **Proper Error Handling**: Comprehensive error handling with detailed logging
+6. **TypeScript Interfaces**: Define clear interfaces for request/response types
+7. **Complexity Management**: Keep functions under 10 complexity points by extracting helper functions
+
+**Service Communication:**
+- Services can call other services via internal HTTP requests
+- Use environment-aware base URLs (VERCEL_URL vs localhost)
+- Implement proper timeout and retry logic
+- Handle both file uploads and JSON payloads appropriately
+
+**Background Processing:**
+- Use setTimeout() for non-blocking background operations
+- Return immediate responses while processing continues asynchronously
+- Implement proper logging for background operations
+
+**Code Quality Standards:**
+- Extract helper functions to reduce complexity
+- Use proper TypeScript types with validation
+- Implement consistent error response formats
+- Add comprehensive console logging with emojis for easy debugging
+- Follow ESLint rules and suppress false positives appropriately
+
+**Example Pattern:**
+```typescript
+// Individual focused service
+export async function POST(request: NextRequest) {
+  try {
+    const { input } = await request.json();
+    const result = await performSingleOperation(input);
+    return NextResponse.json({ success: true, result });
+  } catch (error) {
+    return NextResponse.json({ error: "Operation failed" }, { status: 500 });
+  }
+}
+
+// Orchestrator service
+export async function POST(request: NextRequest) {
+  const results = await Promise.allSettled([
+    callService1(data),
+    callService2(data),
+  ]);
+  return combineResults(results);
+}
+```
 
 ---
+
 **Git Workflow - MANDATORY:**
 After every major change (defined as any significant feature addition, component creation, bug fix, or architectural modification), you MUST:
 1. **Add all changes**: `git add .`
@@ -47,6 +118,7 @@ After every major change (defined as any significant feature addition, component
 - Refactoring code structure
 - Updating styling or themes
 - Adding new dependencies or configurations
+- Creating or refactoring API routes
 
 **Example git workflow:**
 ```bash
