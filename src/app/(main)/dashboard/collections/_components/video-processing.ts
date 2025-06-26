@@ -138,7 +138,7 @@ export const transcribeVideo = async (downloadResponse: VideoDownloadResponse): 
 export const extractVideoThumbnail = async (downloadResponse: VideoDownloadResponse): Promise<string> => {
   if (downloadResponse.hostedOnCDN && downloadResponse.cdnUrl) {
     // For iframe URLs (like Bunny Stream), return a placeholder thumbnail
-    if (downloadResponse.cdnUrl.includes("iframe.mediadelivery.net")) {
+    if (downloadResponse.cdnUrl.includes("iframe.mediadelivery.net/embed")) {
       console.log("🖼️ [ADD_VIDEO] Using placeholder thumbnail for iframe URL");
       return generatePlaceholderThumbnail(downloadResponse.platform);
     }

@@ -143,7 +143,7 @@ const VideoEmbed = ({
   }
 
   // Handle iframe URLs (like Bunny Stream)
-  if (hostedOnCDN && url.includes("iframe.mediadelivery.net")) {
+  if (hostedOnCDN && url.includes("iframe.mediadelivery.net/embed")) {
     return (
       <iframe
         src={url}
