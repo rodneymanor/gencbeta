@@ -311,27 +311,40 @@ export class UserManagementService {
    */
   static async getUserAccessibleCoaches(userUid: string): Promise<string[]> {
     try {
+      console.log("🔍 [USER_MGMT] Getting accessible coaches for user:", userUid);
       const userProfile = await this.getUserProfile(userUid);
+      console.log("🔍 [USER_MGMT] User profile:", userProfile);
+
       if (!userProfile) {
+        console.log("❌ [USER_MGMT] No user profile found");
         return [];
       }
+
+      console.log("🔍 [USER_MGMT] User role:", userProfile.role);
 
       // Super admin can access all coaches
       if (userProfile.role === "super_admin") {
         const coaches = await this.getAllCoaches();
+        console.log(
+          "🔍 [USER_MGMT] Super admin - accessible coaches:",
+          coaches.map((coach) => coach.uid),
+        );
         return coaches.map((coach) => coach.uid);
       }
 
       // Coach can access their own collections
       if (userProfile.role === "coach") {
+        console.log("🔍 [USER_MGMT] Coach - returning own UID:", [userProfile.uid]);
         return [userProfile.uid];
       }
 
       // Creator can access their assigned coach's collections
       if (userProfile.coachId) {
+        console.log("🔍 [USER_MGMT] Creator - returning coach UID:", [userProfile.coachId]);
         return [userProfile.coachId];
       }
 
+      console.log("❌ [USER_MGMT] No accessible coaches found for user");
       return [];
     } catch (error) {
       console.error("Error getting accessible coaches:", error);

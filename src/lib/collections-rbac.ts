@@ -45,8 +45,11 @@ export class CollectionsRBACService {
   static async getCollectionVideos(userId: string, collectionId?: string): Promise<Video[]> {
     try {
       const accessibleCoaches = await UserManagementService.getUserAccessibleCoaches(userId);
+      console.log("🔍 [RBAC] User ID:", userId);
+      console.log("🔍 [RBAC] Accessible coaches:", accessibleCoaches);
 
       if (accessibleCoaches.length === 0) {
+        console.log("❌ [RBAC] No accessible coaches found - returning empty array");
         return [];
       }
 
