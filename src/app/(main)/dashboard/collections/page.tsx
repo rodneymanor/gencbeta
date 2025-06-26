@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 
-import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
 
-import { Plus, Play, BarChart3 } from "lucide-react";
+import { Plus, Settings, Trash2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,7 +16,6 @@ import { CollectionsService, type Video, type Collection } from "@/lib/collectio
 
 import { AddVideoDialog } from "./_components/add-video-dialog";
 import { CreateCollectionDialog } from "./_components/create-collection-dialog";
-import { VideoInsightsModal } from "./_components/video-insights-modal";
 
 interface VideoWithPlayer extends Video {
   isPlaying?: boolean;
@@ -37,6 +35,7 @@ export default function CollectionsPage() {
   const [loadingVideos, setLoadingVideos] = useState(false);
   const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
   const [videoObjectUrls, setVideoObjectUrls] = useState<Record<string, string>>({});
+  const [manageMode, setManageMode] = useState(false);
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -98,6 +97,17 @@ export default function CollectionsPage() {
     loadVideos();
   };
 
+  const handleDeleteVideo = async (videoId: string) => {
+    if (!user || !confirm("Are you sure you want to delete this video?")) return;
+
+    try {
+      await CollectionsService.deleteVideo(user.uid, videoId);
+      loadVideos();
+    } catch (error) {
+      console.error("Error deleting video:", error);
+    }
+  };
+
   const createVideoObjectUrl = useCallback((video: VideoWithPlayer) => {
     if (video.videoData && !video.hostedOnCDN && video.id) {
       try {
@@ -116,27 +126,6 @@ export default function CollectionsPage() {
     return null;
   }, []);
 
-  const toggleVideoPlay = (videoId: string) => {
-    if (playingVideoId === videoId) {
-      setPlayingVideoId(null);
-      setVideos((prev) => prev.map((v) => ({ ...v, isPlaying: false })));
-    } else {
-      setPlayingVideoId(videoId);
-      setVideos((prev) =>
-        prev.map((v) => ({
-          ...v,
-          isPlaying: v.id === videoId,
-        })),
-      );
-
-      // Create object URL if needed
-      const video = videos.find((v) => v.id === videoId);
-      if (video && video.videoData && !video.hostedOnCDN && !(videoId in videoObjectUrls)) {
-        createVideoObjectUrl(video);
-      }
-    }
-  };
-
   const getPageTitle = () => {
     if (!selectedCollectionId) {
       return "All Videos";
@@ -153,29 +142,6 @@ export default function CollectionsPage() {
 
     const collection = collections.find((c) => c.id === selectedCollectionId);
     return collection?.description ?? "Collection videos";
-  };
-
-  const getPlatformColor = (platform: string) => {
-    switch (platform.toLowerCase()) {
-      case "tiktok":
-        return "bg-black text-white";
-      case "instagram":
-        return "bg-gradient-to-r from-purple-500 to-pink-500 text-white";
-      case "youtube":
-        return "bg-red-600 text-white";
-      default:
-        return "bg-gray-500 text-white";
-    }
-  };
-
-  const formatNumber = (num: number): string => {
-    if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + "M";
-    }
-    if (num >= 1000) {
-      return (num / 1000).toFixed(1) + "K";
-    }
-    return num.toString();
   };
 
   if (loading) {
@@ -212,17 +178,25 @@ export default function CollectionsPage() {
           <p className="text-muted-foreground">{getPageDescription()}</p>
         </div>
         <div className="flex items-center gap-2">
-          <CreateCollectionDialog onCollectionCreated={handleVideoAdded}>
-            <Button variant="outline" size="sm">
-              <Plus className="mr-2 h-4 w-4" />
-              Create Collection
-            </Button>
-          </CreateCollectionDialog>
-          <AddVideoDialog
-            collections={collections.filter((c) => c.id).map((c) => ({ id: c.id!, title: c.title }))}
-            selectedCollectionId={selectedCollectionId ?? undefined}
-            onVideoAdded={handleVideoAdded}
-          />
+          <Button variant="outline" size="sm" onClick={() => setManageMode(!manageMode)}>
+            <Settings className="mr-2 h-4 w-4" />
+            {manageMode ? "Exit Manage" : "Manage"}
+          </Button>
+          {!manageMode && (
+            <>
+              <CreateCollectionDialog onCollectionCreated={handleVideoAdded}>
+                <Button variant="outline" size="sm">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Collection
+                </Button>
+              </CreateCollectionDialog>
+              <AddVideoDialog
+                collections={collections.filter((c) => c.id).map((c) => ({ id: c.id!, title: c.title }))}
+                selectedCollectionId={selectedCollectionId ?? undefined}
+                onVideoAdded={handleVideoAdded}
+              />
+            </>
+          )}
         </div>
       </div>
 
@@ -318,6 +292,16 @@ export default function CollectionsPage() {
                     className="h-full w-full"
                   />
                 </CardContent>
+                {manageMode && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="absolute top-2 right-2 h-8 w-8 rounded-full bg-red-500 p-0 text-white hover:bg-red-600"
+                    onClick={() => handleDeleteVideo(video.id!)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
               </Card>
             </div>
           ))}
