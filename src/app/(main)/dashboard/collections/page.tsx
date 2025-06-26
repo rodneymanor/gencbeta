@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 
 import { Plus, Play, BarChart3 } from "lucide-react";
 
@@ -16,6 +16,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { CollectionsService, type Video, type Collection } from "@/lib/collections";
 
 import { AddVideoDialog } from "./_components/add-video-dialog";
+import { CreateCollectionDialog } from "./_components/create-collection-dialog";
 import { VideoInsightsModal } from "./_components/video-insights-modal";
 
 interface VideoWithPlayer extends Video {
@@ -38,6 +39,7 @@ export default function CollectionsPage() {
   const [videoObjectUrls, setVideoObjectUrls] = useState<Record<string, string>>({});
   const { user } = useAuth();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const selectedCollectionId = searchParams.get("collection");
 
   const loadCollections = useCallback(async () => {
@@ -209,11 +211,50 @@ export default function CollectionsPage() {
           <h1 className="text-2xl font-bold tracking-tight">{getPageTitle()}</h1>
           <p className="text-muted-foreground">{getPageDescription()}</p>
         </div>
-        <AddVideoDialog
-          collections={collections.filter((c) => c.id).map((c) => ({ id: c.id!, title: c.title }))}
-          selectedCollectionId={selectedCollectionId ?? undefined}
-          onVideoAdded={handleVideoAdded}
-        />
+        <div className="flex items-center gap-2">
+          <CreateCollectionDialog onCollectionCreated={handleVideoAdded}>
+            <Button variant="outline" size="sm">
+              <Plus className="mr-2 h-4 w-4" />
+              Create Collection
+            </Button>
+          </CreateCollectionDialog>
+          <AddVideoDialog
+            collections={collections.filter((c) => c.id).map((c) => ({ id: c.id!, title: c.title }))}
+            selectedCollectionId={selectedCollectionId ?? undefined}
+            onVideoAdded={handleVideoAdded}
+          />
+        </div>
+      </div>
+
+      {/* Collection Filter Pills */}
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge
+          variant={!selectedCollectionId ? "default" : "secondary"}
+          className={`cursor-pointer transition-colors ${
+            !selectedCollectionId ? "bg-primary text-primary-foreground hover:bg-primary/90" : "hover:bg-secondary/80"
+          }`}
+          onClick={() => {
+            router.push("/dashboard/collections");
+          }}
+        >
+          All Videos ({videos.length})
+        </Badge>
+        {collections.map((collection) => (
+          <Badge
+            key={collection.id}
+            variant={selectedCollectionId === collection.id ? "default" : "secondary"}
+            className={`cursor-pointer transition-colors ${
+              selectedCollectionId === collection.id
+                ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                : "hover:bg-secondary/80"
+            }`}
+            onClick={() => {
+              router.push(`/dashboard/collections?collection=${collection.id}`);
+            }}
+          >
+            {collection.title} ({collection.videoCount})
+          </Badge>
+        ))}
       </div>
 
       {/* Videos Grid */}
