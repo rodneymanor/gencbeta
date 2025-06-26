@@ -4,18 +4,17 @@ import { useState, useEffect, useCallback } from "react";
 
 import { useSearchParams, useRouter } from "next/navigation";
 
-import { Plus, Settings, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { VideoPlayer } from "@/components/video-player";
 import { useAuth } from "@/contexts/auth-context";
 import { CollectionsService, type Video, type Collection } from "@/lib/collections";
 
 import { AddVideoDialog } from "./_components/add-video-dialog";
-import { CreateCollectionDialog } from "./_components/create-collection-dialog";
+import { ManageModeHeader } from "./_components/manage-mode-header";
+import { VideoCard } from "./_components/video-card";
 
 interface VideoWithPlayer extends Video {
   isPlaying?: boolean;
@@ -35,6 +34,8 @@ export default function CollectionsPage() {
   const [loadingVideos, setLoadingVideos] = useState(false);
 
   const [manageMode, setManageMode] = useState(false);
+  const [selectedVideos, setSelectedVideos] = useState<Set<string>>(new Set());
+  const [deletingVideos, setDeletingVideos] = useState<Set<string>>(new Set());
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -86,14 +87,91 @@ export default function CollectionsPage() {
   };
 
   const handleDeleteVideo = async (videoId: string) => {
-    if (!user || !confirm("Are you sure you want to delete this video?")) return;
+    if (!user) return;
+
+    // Start the delete animation
+    setDeletingVideos((prev) => new Set([...prev, videoId]));
 
     try {
       await CollectionsService.deleteVideo(user.uid, videoId);
-      loadVideos();
+
+      // Wait for animation to complete before removing from state
+      setTimeout(() => {
+        setDeletingVideos((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(videoId);
+          return newSet;
+        });
+        loadVideos();
+      }, 300);
     } catch (error) {
       console.error("Error deleting video:", error);
+      // Remove from deleting state on error
+      setDeletingVideos((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(videoId);
+        return newSet;
+      });
     }
+  };
+
+  const handleBulkDelete = async () => {
+    if (!user || selectedVideos.size === 0) return;
+
+    const videoIds = Array.from(selectedVideos);
+
+    // Start the delete animation for all selected videos
+    setDeletingVideos((prev) => new Set([...prev, ...videoIds]));
+
+    try {
+      // Delete all selected videos
+      await Promise.all(videoIds.map((videoId) => CollectionsService.deleteVideo(user.uid, videoId)));
+
+      // Wait for animation to complete before removing from state
+      setTimeout(() => {
+        setDeletingVideos((prev) => {
+          const newSet = new Set(prev);
+          videoIds.forEach((id) => newSet.delete(id));
+          return newSet;
+        });
+        setSelectedVideos(new Set());
+        loadVideos();
+      }, 300);
+    } catch (error) {
+      console.error("Error deleting videos:", error);
+      // Remove from deleting state on error
+      setDeletingVideos((prev) => {
+        const newSet = new Set(prev);
+        videoIds.forEach((id) => newSet.delete(id));
+        return newSet;
+      });
+    }
+  };
+
+  const toggleVideoSelection = (videoId: string) => {
+    setSelectedVideos((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(videoId)) {
+        newSet.delete(videoId);
+      } else {
+        newSet.add(videoId);
+      }
+      return newSet;
+    });
+  };
+
+  const selectAllVideos = () => {
+    const allVideoIds = videos.map((v) => v.id!);
+    setSelectedVideos(new Set(allVideoIds));
+  };
+
+  const clearSelection = () => {
+    setSelectedVideos(new Set());
+  };
+
+  const handleExitManageMode = () => {
+    setManageMode(false);
+    setSelectedVideos(new Set());
   };
 
   const getPageTitle = () => {
@@ -148,25 +226,19 @@ export default function CollectionsPage() {
           <p className="text-muted-foreground">{getPageDescription()}</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => setManageMode(!manageMode)}>
-            <Settings className="mr-2 h-4 w-4" />
-            {manageMode ? "Exit Manage" : "Manage"}
-          </Button>
-          {!manageMode && (
-            <>
-              <CreateCollectionDialog onCollectionCreated={handleVideoAdded}>
-                <Button variant="outline" size="sm">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Collection
-                </Button>
-              </CreateCollectionDialog>
-              <AddVideoDialog
-                collections={collections.filter((c) => c.id).map((c) => ({ id: c.id!, title: c.title }))}
-                selectedCollectionId={selectedCollectionId ?? undefined}
-                onVideoAdded={handleVideoAdded}
-              />
-            </>
-          )}
+          <ManageModeHeader
+            manageMode={manageMode}
+            selectedVideos={selectedVideos}
+            videosLength={videos.length}
+            collections={collections}
+            selectedCollectionId={selectedCollectionId}
+            onManageModeToggle={() => setManageMode(true)}
+            onExitManageMode={handleExitManageMode}
+            onBulkDelete={handleBulkDelete}
+            onClearSelection={clearSelection}
+            onSelectAll={selectAllVideos}
+            onVideoAdded={handleVideoAdded}
+          />
         </div>
       </div>
 
@@ -230,46 +302,15 @@ export default function CollectionsPage() {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
           {videos.map((video) => (
-            <div key={video.id} className="relative mx-auto w-full max-w-sm">
-              {/* Use VideoPlayer Component with its own card */}
-              <VideoPlayer
-                videoUrl={video.url}
-                platform={video.platform as "tiktok" | "instagram"}
-                metrics={{
-                  views: video.insights.views,
-                  likes: video.insights.likes,
-                  comments: video.insights.comments,
-                  shares: video.insights.shares || 0,
-                }}
-                insights={{
-                  reach: video.insights.views * 1.2, // Estimate
-                  impressions: video.insights.views * 1.5, // Estimate
-                  engagementRate: ((video.insights.likes + video.insights.comments) / video.insights.views) * 100,
-                  topHours: ["18:00", "19:00", "20:00"], // Placeholder
-                  demographics: [
-                    { ageGroup: "18-24", percentage: 35 },
-                    { ageGroup: "25-34", percentage: 40 },
-                    { ageGroup: "35-44", percentage: 25 },
-                  ],
-                  growthRate: 15.2, // Placeholder
-                }}
-                title={video.title}
-                author={video.author}
-                hostedOnCDN={video.hostedOnCDN}
-                videoData={video.videoData}
-                className="h-full w-full"
-              />
-              {manageMode && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="absolute top-2 right-2 h-8 w-8 rounded-full bg-red-500 p-0 text-white hover:bg-red-600"
-                  onClick={() => handleDeleteVideo(video.id!)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
+            <VideoCard
+              key={video.id}
+              video={video}
+              manageMode={manageMode}
+              isSelected={selectedVideos.has(video.id!)}
+              isDeleting={deletingVideos.has(video.id!)}
+              onToggleSelection={() => toggleVideoSelection(video.id!)}
+              onDelete={() => handleDeleteVideo(video.id!)}
+            />
           ))}
         </div>
       )}
