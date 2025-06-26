@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { collection, getDocs, orderBy, query } from "firebase/firestore";
-
-import { formatTimestamp } from "@/lib/collections-helpers";
-import { db } from "@/lib/firebase";
+import { getAdminDb, isAdminInitialized } from "@/lib/firebase-admin";
 
 // Simple API key authentication
 const API_KEY = process.env.VIDEO_API_KEY ?? "your-secret-api-key";
@@ -16,19 +13,27 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get all collections
-    const q = query(collection(db, "collections"), orderBy("updatedAt", "desc"));
-    const querySnapshot = await getDocs(q);
+    // Check if Admin SDK is initialized
+    const adminDb = getAdminDb();
+    if (!isAdminInitialized || !adminDb) {
+      return NextResponse.json({ error: "Firebase Admin SDK not configured" }, { status: 500 });
+    }
 
-    const collections = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      title: doc.data().title,
-      description: doc.data().description,
-      userId: doc.data().userId,
-      videoCount: doc.data().videoCount ?? 0,
-      createdAt: formatTimestamp(doc.data().createdAt),
-      updatedAt: formatTimestamp(doc.data().updatedAt),
-    }));
+    // Get all collections using Admin SDK
+    const querySnapshot = await adminDb.collection("collections").orderBy("updatedAt", "desc").get();
+
+    const collections = querySnapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        title: data.title,
+        description: data.description,
+        userId: data.userId,
+        videoCount: data.videoCount ?? 0,
+        createdAt: data.createdAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
+        updatedAt: data.updatedAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
+      };
+    });
 
     return NextResponse.json({
       success: true,

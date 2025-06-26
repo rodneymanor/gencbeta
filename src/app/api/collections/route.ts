@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { CollectionsRBACService } from "@/lib/collections-rbac";
-import { UserManagementService } from "@/lib/user-management";
+import { CollectionsRBACAdminService } from "@/lib/collections-rbac-admin";
+import { isAdminInitialized } from "@/lib/firebase-admin";
+import { UserManagementAdminService } from "@/lib/user-management-admin";
 
 // Simple API key authentication
 const API_KEY = process.env.VIDEO_API_KEY ?? "your-secret-api-key";
@@ -28,14 +29,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Check if Admin SDK is initialized
+    if (!isAdminInitialized) {
+      return NextResponse.json({ error: "Firebase Admin SDK not configured" }, { status: 500 });
+    }
+
     // Verify user exists
-    const userProfile = await UserManagementService.getUserProfile(userId);
+    const userProfile = await UserManagementAdminService.getUserProfile(userId);
     if (!userProfile) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Get collections using RBAC service
-    const collections = await CollectionsRBACService.getUserCollections(userId);
+    const collections = await CollectionsRBACAdminService.getUserCollections(userId);
 
     // Format response
     const formattedCollections = collections.map((collection) => ({
