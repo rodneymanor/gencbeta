@@ -1,6 +1,21 @@
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useRef, useState } from "react";
 
-import { Edit3, FileText, Save, Copy, Trash2, Hash, Bold, Italic, List, Quote, Link } from "lucide-react";
+import {
+  Edit3,
+  FileText,
+  Save,
+  Copy,
+  Trash2,
+  Hash,
+  Bold,
+  Italic,
+  List,
+  Quote,
+  Link,
+  Mic,
+  Play,
+  Pause,
+} from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,15 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 
-interface Note {
-  id: number;
-  title: string;
-  content: string;
-  tags: string[];
-  createdAt: string;
-  updatedAt: string;
-  starred: boolean;
-}
+import { type Note } from "./notes-data";
 
 interface NoteEditorProps {
   selectedNote: Note | null;
@@ -29,6 +36,7 @@ interface NoteEditorProps {
   getTagColor: (tagName: string) => string;
 }
 
+// eslint-disable-next-line complexity
 export function NoteEditor({
   selectedNote,
   isEditing,
@@ -38,16 +46,46 @@ export function NoteEditor({
   convertToScript,
   getTagColor,
 }: NoteEditorProps) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
   if (!selectedNote) {
     return null;
   }
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const initializeAudio = () => {
+    if (!selectedNote.audioUrl || audioRef.current) return;
+
+    audioRef.current = new Audio(selectedNote.audioUrl);
+    audioRef.current.onended = () => setIsPlaying(false);
+  };
+
+  const toggleAudioPlayback = () => {
+    if (!selectedNote.audioUrl) return;
+
+    initializeAudio();
+
+    if (isPlaying) {
+      audioRef.current!.pause();
+      setIsPlaying(false);
+    } else {
+      audioRef.current!.play();
+      setIsPlaying(true);
+    }
+  };
 
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <Edit3 className="h-5 w-5" />
+            {selectedNote.type === "voice" ? <Mic className="text-primary h-5 w-5" /> : <Edit3 className="h-5 w-5" />}
             {isEditing ? "Editing Note" : selectedNote.title}
           </CardTitle>
           <div className="flex gap-2">
@@ -114,6 +152,27 @@ export function NoteEditor({
           </>
         ) : (
           <div className="space-y-4">
+            {selectedNote.type === "voice" && selectedNote.audioUrl && (
+              <div className="bg-muted/30 rounded-lg p-4">
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Mic className="text-primary h-4 w-4" />
+                    <span className="text-sm font-medium">Voice Recording</span>
+                  </div>
+                  {selectedNote.duration && (
+                    <span className="text-muted-foreground text-sm">{formatTime(selectedNote.duration)}</span>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-center">
+                  <Button variant="outline" size="lg" onClick={toggleAudioPlayback} className="gap-2">
+                    {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+                    {isPlaying ? "Pause" : "Play"} Recording
+                  </Button>
+                </div>
+              </div>
+            )}
+
             <div className="prose prose-sm max-w-none">
               <div className="whitespace-pre-wrap">{selectedNote.content}</div>
             </div>

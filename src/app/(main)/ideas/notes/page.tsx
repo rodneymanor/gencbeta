@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Plus, Hash, X, Save } from "lucide-react";
+import { Plus, Hash, X, Save, Mic } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,98 +11,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 import { NoteEditor } from "./_components/note-editor";
+import { mockNotes, availableTags, type Note } from "./_components/notes-data";
 import { NotesList } from "./_components/notes-list";
 import { SearchFilters } from "./_components/search-filters";
-
-// Mock notes data
-const mockNotes = [
-  {
-    id: 1,
-    title: "Morning Routine Ideas",
-    content: `# Morning Routine Strategy
-
-Key insights for content:
-- Most people focus on what they do, not when they do it
-- First 10 minutes are crucial for setting intention
-- **Three-step framework:**
-  1. Hydrate before caffeinate
-  2. Set one clear intention
-  3. Move your body (even 2 minutes)
-
-> This could work as a TikTok series - one video per step
-
-**Potential hooks:**
-- "What if I told you 90% of people do morning routines wrong?"
-- "The first 10 minutes of your day determine everything"`,
-    tags: ["morning", "routine", "productivity", "tiktok"],
-    createdAt: "2024-01-20",
-    updatedAt: "2024-01-20",
-    starred: true,
-  },
-  {
-    id: 2,
-    title: "Content Ideas - Tech Reviews",
-    content: `## Tech Review Framework
-
-**Structure:**
-1. Hook with personal story
-2. Show the product in action
-3. Honest pros and cons
-4. Who it's perfect for
-5. Call to action
-
-**Upcoming reviews:**
-- New iPhone features for creators
-- Budget microphone comparison
-- Editing apps for beginners
-
-*Note: Focus on creator-specific use cases*`,
-    tags: ["tech", "reviews", "content", "structure"],
-    createdAt: "2024-01-18",
-    updatedAt: "2024-01-19",
-    starred: false,
-  },
-  {
-    id: 3,
-    title: "Storytelling Techniques",
-    content: `Personal storytelling for social media:
-
-**The 3-Act Structure:**
-- Setup: Where I was
-- Conflict: What went wrong
-- Resolution: How I changed
-
-**Emotional hooks:**
-- Start with the end result
-- Use specific details
-- Include vulnerable moments
-- End with actionable advice
-
-Remember: People connect with struggle, not success.`,
-    tags: ["storytelling", "social media", "engagement"],
-    createdAt: "2024-01-15",
-    updatedAt: "2024-01-16",
-    starred: true,
-  },
-];
-
-const availableTags = [
-  { name: "morning", color: "bg-blue-500" },
-  { name: "routine", color: "bg-green-500" },
-  { name: "productivity", color: "bg-purple-500" },
-  { name: "tiktok", color: "bg-pink-500" },
-  { name: "tech", color: "bg-orange-500" },
-  { name: "reviews", color: "bg-cyan-500" },
-  { name: "content", color: "bg-indigo-500" },
-  { name: "structure", color: "bg-emerald-500" },
-  { name: "storytelling", color: "bg-red-500" },
-  { name: "social media", color: "bg-yellow-500" },
-  { name: "engagement", color: "bg-violet-500" },
-];
+import { VoiceRecorder } from "./_components/voice-recorder";
 
 export default function NotesCapturePage() {
   const [notes, setNotes] = useState(mockNotes);
-  const [selectedNote, setSelectedNote] = useState<(typeof mockNotes)[0] | null>(null);
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -111,6 +27,7 @@ export default function NotesCapturePage() {
   const [newNoteContent, setNewNoteContent] = useState("");
   const [newNoteTags, setNewNoteTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
+  const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
 
   const filteredNotes = notes.filter((note) => {
     const matchesSearch =
@@ -144,6 +61,7 @@ export default function NotesCapturePage() {
       createdAt: new Date().toISOString().split("T")[0],
       updatedAt: new Date().toISOString().split("T")[0],
       starred: false,
+      type: "text" as const,
     };
 
     setNotes((prev) => [newNote, ...prev]);
@@ -152,6 +70,32 @@ export default function NotesCapturePage() {
     setNewNoteContent("");
     setNewNoteTags([]);
     setIsEditing(true);
+  };
+
+  const createVoiceNote = (audioBlob: Blob, duration: number, transcript?: string) => {
+    // Convert blob to URL for playback
+    const audioUrl = URL.createObjectURL(audioBlob);
+
+    // Generate a default title
+    const title = `Voice Note - ${new Date().toLocaleString()}`;
+
+    const newNote = {
+      id: Date.now(),
+      title,
+      content: transcript ?? "Voice recording - no transcript available",
+      tags: ["voice"],
+      createdAt: new Date().toISOString().split("T")[0],
+      updatedAt: new Date().toISOString().split("T")[0],
+      starred: false,
+      type: "voice" as const,
+      audioUrl,
+      duration,
+    };
+
+    setNotes((prev) => [newNote, ...prev]);
+    setSelectedNote(newNote);
+    setShowVoiceRecorder(false);
+    setIsEditing(false);
   };
 
   const saveNote = () => {
@@ -184,7 +128,7 @@ export default function NotesCapturePage() {
     return tag?.color ?? "bg-gray-500";
   };
 
-  const convertToScript = (note: (typeof mockNotes)[0]) => {
+  const convertToScript = (note: Note) => {
     // This would navigate to the script creation flow with pre-filled content
     console.log("Converting note to script:", note.title);
   };
@@ -197,10 +141,16 @@ export default function NotesCapturePage() {
           <h1 className="text-3xl font-bold">Notes Capture</h1>
           <p className="text-muted-foreground">Organize your ideas with rich text editing and smart tagging</p>
         </div>
-        <Button className="gap-2" onClick={() => setSelectedNote(null)}>
-          <Plus className="h-4 w-4" />
-          New Note
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" className="gap-2" onClick={() => setShowVoiceRecorder(true)}>
+            <Mic className="h-4 w-4" />
+            Voice Note
+          </Button>
+          <Button className="gap-2" onClick={() => setSelectedNote(null)}>
+            <Plus className="h-4 w-4" />
+            New Note
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -311,6 +261,15 @@ export default function NotesCapturePage() {
           )}
         </div>
       </div>
+
+      {/* Voice Recorder Modal */}
+      {showVoiceRecorder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="mx-4 w-full max-w-lg">
+            <VoiceRecorder onSave={createVoiceNote} onCancel={() => setShowVoiceRecorder(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

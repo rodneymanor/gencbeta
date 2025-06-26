@@ -51,7 +51,7 @@ export function GenCLogo({
       {/* Logo Text */}
       {showText && (
         <h1 className={`${textSizes[textSize]} font-bold text-foreground tracking-tighter`}>
-          Gen C
+          Gen.C
         </h1>
       )}
     </div>
