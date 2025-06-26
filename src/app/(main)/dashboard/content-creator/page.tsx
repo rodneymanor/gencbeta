@@ -1,15 +1,11 @@
 "use client";
 
-import { useState, useRef } from "react";
-
 import { PenTool, FileText, Inbox, Zap, Bot, Lightbulb, Film, Clock } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { useAppState } from "@/contexts/app-state-context";
-import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/auth-context";
 
 // Mock data for demonstration
 const aiScriptIdeas = [
@@ -81,40 +77,13 @@ const quickActions = [
 ];
 
 export default function ContentCreatorPage() {
-  const [scriptIdea, setScriptIdea] = useState("");
-  const [isCreating, setIsCreating] = useState(false);
-  const [isInputActive, setIsInputActive] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const { setScriptCreating } = useAppState();
+  const { userProfile, accountLevel } = useAuth();
 
-  // Mock user name - in real app, this would come from auth context
-  const userName = "Alex";
+  // Get user name from auth context or fallback
+  const userName = userProfile?.displayName ?? "User";
 
   const handleNewScriptClick = () => {
-    setIsInputActive(true);
-    inputRef.current?.focus();
-  };
-
-  const handleScriptCreation = async () => {
-    if (!scriptIdea.trim()) return;
-
-    setIsCreating(true);
-    setScriptCreating(true);
-    console.log("Creating script from idea:", scriptIdea);
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    setIsCreating(false);
-    setScriptCreating(false);
-    setScriptIdea("");
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleScriptCreation();
-    }
+    console.log("Starting new script from idea");
   };
 
   const handleAIIdeaCreate = async (idea: string) => {
@@ -146,33 +115,11 @@ export default function ContentCreatorPage() {
             <p className="text-muted-foreground">Let&apos;s create some compelling content today.</p>
           </div>
 
-          {/* Right side - Quick script creation */}
-          <div className="flex w-full max-w-md gap-2 md:w-1/2">
-            <Input
-              ref={inputRef}
-              placeholder="Describe your idea for a guided script..."
-              value={scriptIdea}
-              onChange={(e) => setScriptIdea(e.target.value)}
-              onKeyPress={handleKeyPress}
-              onFocus={() => setIsInputActive(true)}
-              onBlur={() => setIsInputActive(false)}
-              className={cn(
-                "border-input flex-1 border transition-all",
-                isInputActive && "ring-primary ring-offset-background ring-2 ring-offset-2",
-              )}
-            />
-            <Button
-              onClick={handleScriptCreation}
-              disabled={!scriptIdea.trim() || isCreating}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground shrink-0 transition-colors"
-            >
-              {isCreating ? (
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-              ) : (
-                <Zap className="h-4 w-4" />
-              )}
-              <span className="hidden sm:inline">Create</span>
-            </Button>
+          {/* Right side - Account level badge */}
+          <div className="flex items-center">
+            <Badge variant={accountLevel === "pro" ? "default" : "secondary"} className="px-3 py-1 text-sm font-medium">
+              {accountLevel === "pro" ? "Pro" : "Free"} Account
+            </Badge>
           </div>
         </div>
 
@@ -188,14 +135,14 @@ export default function ContentCreatorPage() {
                   className="group cursor-pointer transition-all duration-200 hover:shadow-md"
                   onClick={action.id === 1 ? handleNewScriptClick : action.onClick}
                 >
-                  <CardHeader className="pb-4">
+                  <CardHeader>
                     <div className="bg-primary/10 mb-3 flex h-12 w-12 items-center justify-center rounded-lg">
                       <IconComponent className="text-primary h-5 w-5" />
                     </div>
                     <CardTitle className="text-base">{action.title}</CardTitle>
                     <CardDescription className="text-sm">{action.description}</CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-0">
+                  <CardContent>
                     <Button variant="outline" size="sm" className="w-full">
                       {action.actionText}
                     </Button>
@@ -212,14 +159,14 @@ export default function ContentCreatorPage() {
           <div className="grid gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
             {aiScriptIdeas.map((idea, index) => (
               <Card key={index} className="transition-all duration-200 hover:shadow-md">
-                <CardHeader className="pb-3">
+                <CardHeader>
                   <div className="flex justify-center">
                     <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full">
                       <Bot className="text-primary h-5 w-5" />
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="flex h-full flex-col pt-0">
+                <CardContent className="flex h-full flex-col">
                   <p className="text-muted-foreground mb-6 flex-grow text-sm leading-relaxed">{idea}</p>
                   <Button onClick={() => handleAIIdeaCreate(idea)} className="w-full">
                     <Zap className="mr-2 h-4 w-4" />
