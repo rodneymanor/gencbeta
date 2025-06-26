@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { GenCLogo } from "@/components/ui/gen-c-logo";
 import {
   Sidebar,
@@ -9,6 +11,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/auth-context";
 import { useCollectionsSidebar } from "@/hooks/use-collections-sidebar";
@@ -20,6 +23,18 @@ import { NavUser } from "./nav-user";
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { userProfile } = useAuth();
   const { sidebarItems: dynamicSidebarItems, refreshCollections } = useCollectionsSidebar(sidebarItems);
+  const { setOpen } = useSidebar();
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+    setOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    setOpen(false);
+  };
 
   // Filter sidebar items based on user role
   const filteredSidebarItems = dynamicSidebarItems.filter((group) => {
@@ -43,7 +58,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   });
 
   return (
-    <Sidebar {...props}>
+    <Sidebar {...props} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>

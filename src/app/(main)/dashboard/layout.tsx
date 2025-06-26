@@ -22,8 +22,8 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
   const contentLayout = await getContentLayout();
 
   return (
-    <SidebarProvider defaultOpen={defaultOpen}>
-      <AppSidebar variant={sidebarVariant} collapsible={sidebarCollapsible} />
+    <SidebarProvider defaultOpen={false}>
+      <AppSidebar variant={sidebarVariant} collapsible="icon" />
       <SidebarInset
         className={cn(
           contentLayout === "centered" && "!mx-auto max-w-screen-2xl",
