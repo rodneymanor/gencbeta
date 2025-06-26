@@ -108,10 +108,9 @@ async function attemptUpload(
     return null;
   }
 
-  // Step 3: Construct CDN URL for HLS streaming
-  const cdnHostname = process.env.BUNNY_CDN_HOSTNAME;
-  const cdnUrl = `https://${cdnHostname}/${videoGuid}/playlist.m3u8`;
-  console.log("🎯 [BUNNY] Stream CDN URL constructed:", cdnUrl);
+  // Step 3: Construct iframe player URL for Bunny Stream
+  const cdnUrl = `https://iframe.mediadelivery.net/play/${libraryId}/${videoGuid}`;
+  console.log("🎯 [BUNNY] Iframe player URL constructed:", cdnUrl);
 
   return {
     cdnUrl,
@@ -229,12 +228,12 @@ export function testBunnyStreamConfig(): void {
     const testVideoId = "test-video-id";
     const createUrl = `https://video.bunnycdn.com/library/${process.env.BUNNY_STREAM_LIBRARY_ID}/videos`;
     const uploadUrl = `https://video.bunnycdn.com/library/${process.env.BUNNY_STREAM_LIBRARY_ID}/videos/${testVideoId}`;
-    const streamUrl = `https://${process.env.BUNNY_CDN_HOSTNAME}/${testVideoId}/playlist.m3u8`;
+    const iframeUrl = `https://iframe.mediadelivery.net/play/${process.env.BUNNY_STREAM_LIBRARY_ID}/${testVideoId}`;
 
     console.log("🔗 [BUNNY] Test URLs:");
     console.log("  - Create URL:", createUrl);
     console.log("  - Upload URL:", uploadUrl);
-    console.log("  - Stream URL:", streamUrl);
+    console.log("  - Iframe Player URL:", iframeUrl);
   } else {
     console.error("❌ [BUNNY] Missing environment variables");
   }
