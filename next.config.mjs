@@ -10,12 +10,20 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  async redirects() {
-    return [];
-  },
-  // Trigger a fresh build to clear the Vercel cache
+  // Force dynamic rendering for problematic pages
   experimental: {
-    // Other experimental features can be added here
+    forceSwcTransforms: true,
+  },
+  // Configure output for Vercel compatibility
+  output: 'standalone',
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/dashboard/content-creator',
+        permanent: false,
+      },
+    ];
   },
 }
 
