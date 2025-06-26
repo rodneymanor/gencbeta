@@ -36,7 +36,7 @@ export function CreateCollectionDialog({ onCollectionCreated, children }: Create
 
     setIsCreating(true);
     try {
-      await CollectionsService.createCollection(title.trim(), user.uid, description.trim());
+      await CollectionsService.createCollection(user.uid, title.trim(), description.trim());
 
       // Reset form
       setTitle("");
@@ -88,7 +88,9 @@ export function CreateCollectionDialog({ onCollectionCreated, children }: Create
               onChange={(e) => setTitle(e.target.value)}
               onKeyPress={handleKeyPress}
               className="min-h-[44px]"
+              required
             />
+            {!title.trim() && title.length > 0 && <p className="text-sm text-red-500">Collection title is required</p>}
           </div>
           <div className="space-y-2">
             <Label htmlFor="collection-description" className="text-sm font-medium">
