@@ -280,7 +280,7 @@ export default function CollectionsPage() {
             !selectedCollectionId ? "bg-primary text-primary-foreground hover:bg-primary/90" : "hover:bg-secondary/80"
           }`}
           onClick={() => {
-            router.push("/dashboard/collections");
+            router.push("/research/collections");
           }}
         >
           All Videos ({videos.length})
@@ -295,7 +295,7 @@ export default function CollectionsPage() {
                 : "hover:bg-secondary/80"
             }`}
             onClick={() => {
-              router.push(`/dashboard/collections?collection=${collection.id}`);
+              router.push(`/research/collections?collection=${collection.id}`);
             }}
           >
             {collection.title} ({collection.videoCount})

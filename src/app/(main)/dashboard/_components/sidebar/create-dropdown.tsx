@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 
 import { Plus, StickyNote, Mic, Link, FolderOpen } from "lucide-react";
 
+import { AddVideoDialog } from "@/app/(main)/research/collections/_components/add-video-dialog";
+import { CreateCollectionDialog } from "@/app/(main)/research/collections/_components/create-collection-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,9 +20,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/auth-context";
 import { CollectionsService, type Collection } from "@/lib/collections";
-
-import { AddVideoDialog } from "../../collections/_components/add-video-dialog";
-import { CreateCollectionDialog } from "../../collections/_components/create-collection-dialog";
 
 interface CreateDropdownProps {
   children: React.ReactNode;
@@ -57,7 +56,7 @@ export function CreateDropdown({ children }: CreateDropdownProps) {
   };
 
   const handleCollections = () => {
-    router.push("/dashboard/collections");
+    router.push("/research/collections");
   };
 
   return (

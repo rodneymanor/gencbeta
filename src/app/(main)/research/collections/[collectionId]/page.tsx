@@ -70,8 +70,8 @@ interface PageProps {
 }
 
 export default function CollectionDetailPage({ params }: PageProps) {
-  const [collectionId, setCollectionId] = useState<string>("");
-  const [items, setItems] = useState(mockItems);
+  const [_collectionId, setCollectionId] = useState<string>("");
+  const [items, _setItems] = useState(mockItems);
 
   useEffect(() => {
     params.then(({ collectionId }) => {
@@ -107,7 +107,7 @@ export default function CollectionDetailPage({ params }: PageProps) {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="space-y-1">
           <LinkNext
-            href="/dashboard/collections"
+            href="/research/collections"
             className="text-muted-foreground flex items-center gap-2 text-sm hover:underline"
           >
             <ArrowLeft className="h-4 w-4" />

@@ -41,7 +41,7 @@ export function useCollectionsSidebar(baseItems: readonly NavGroup[]) {
       const collectionsItems: NavMainItem[] = [
         {
           title: "All Videos",
-          url: "/dashboard/collections",
+          url: "/research/collections",
           icon: FolderOpen,
         },
       ];
@@ -50,7 +50,7 @@ export function useCollectionsSidebar(baseItems: readonly NavGroup[]) {
       collections.forEach((collection) => {
         collectionsItems.push({
           title: collection.title,
-          url: `/dashboard/collections?collection=${collection.id}`,
+          url: `/research/collections?collection=${collection.id}`,
           icon: Folder,
         });
       });

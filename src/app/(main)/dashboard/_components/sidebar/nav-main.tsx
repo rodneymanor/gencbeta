@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 import { Zap, Plus, ChevronRight, FolderPlus } from "lucide-react";
 
-import { CreateCollectionDialog } from "@/app/(main)/dashboard/collections/_components/create-collection-dialog";
+import { CreateCollectionDialog } from "@/app/(main)/research/collections/_components/create-collection-dialog";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
