@@ -96,6 +96,8 @@ export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded
       // Create video object with all the processed data
       const videoToAdd = createVideoObject(downloadResponse, transcriptionResponse, thumbnailUrl, url);
       console.log("📦 [ADD_VIDEO] Video object created:", Object.keys(videoToAdd));
+      console.log("🔍 [ADD_VIDEO] User ID:", user.uid);
+      console.log("🔍 [ADD_VIDEO] Target collection ID:", targetCollectionId);
 
       await CollectionsService.addVideoToCollection(user.uid, targetCollectionId, videoToAdd);
       console.log("✅ [ADD_VIDEO] Video added to collection successfully");

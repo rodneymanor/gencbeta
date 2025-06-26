@@ -77,10 +77,20 @@ export default function CollectionsPage() {
 
     setLoadingVideos(true);
     try {
+      console.log("🔍 [COLLECTIONS] Loading videos for user:", user.uid);
+      console.log("🔍 [COLLECTIONS] Selected collection:", selectedCollectionId);
+
       const collectionVideos = await CollectionsRBACService.getCollectionVideos(
         user.uid,
         selectedCollectionId ?? undefined,
       );
+
+      console.log("🔍 [COLLECTIONS] Loaded videos count:", collectionVideos.length);
+      console.log(
+        "🔍 [COLLECTIONS] Video IDs:",
+        collectionVideos.map((v) => v.id),
+      );
+
       setVideos(collectionVideos.map((video) => ({ ...video, isPlaying: false })));
     } catch (error) {
       console.error("Error loading videos:", error);
