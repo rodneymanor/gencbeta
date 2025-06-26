@@ -69,26 +69,36 @@ export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded
     try {
       // Step 1: Download video
       setProcessingStep("Downloading video...");
+      console.log("🚀 [ADD_VIDEO] Starting download for:", url);
       const downloadResponse = await downloadVideo(url);
+      console.log("✅ [ADD_VIDEO] Download completed:", downloadResponse);
 
       // Step 2: Transcribe video
       setProcessingStep("Analyzing video content...");
+      console.log("🎬 [ADD_VIDEO] Starting transcription...");
       const transcriptionResponse = await transcribeVideo(downloadResponse);
+      console.log("✅ [ADD_VIDEO] Transcription completed:", transcriptionResponse);
 
       // Step 3: Generate thumbnail
       setProcessingStep("Generating thumbnail...");
+      console.log("🖼️ [ADD_VIDEO] Generating thumbnail...");
       const thumbnailUrl = await extractVideoThumbnail(downloadResponse);
+      console.log("✅ [ADD_VIDEO] Thumbnail generated:", thumbnailUrl.substring(0, 50) + "...");
 
       // Step 4: Save to collection
       setProcessingStep("Saving to collection...");
+      console.log("💾 [ADD_VIDEO] Saving to collection...");
 
       // Determine which collection to use
       const targetCollectionId = collectionId && collectionId.trim() !== "" ? collectionId : "all-videos";
+      console.log("🎯 [ADD_VIDEO] Target collection:", targetCollectionId);
 
       // Create video object with all the processed data
       const videoToAdd = createVideoObject(downloadResponse, transcriptionResponse, thumbnailUrl, url);
+      console.log("📦 [ADD_VIDEO] Video object created:", Object.keys(videoToAdd));
 
       await CollectionsService.addVideoToCollection(user.uid, targetCollectionId, videoToAdd);
+      console.log("✅ [ADD_VIDEO] Video added to collection successfully");
 
       toast.success("Video added successfully!");
       setOpen(false);
@@ -96,7 +106,8 @@ export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded
       setCollectionId("");
       onVideoAdded();
     } catch (error) {
-      console.error("Error processing video:", error);
+      console.error("❌ [ADD_VIDEO] Error processing video:", error);
+      console.error("❌ [ADD_VIDEO] Error stack:", error instanceof Error ? error.stack : "No stack trace");
       toast.error(error instanceof Error ? error.message : "Failed to process video");
     } finally {
       setIsProcessing(false);
