@@ -5,14 +5,12 @@ import { cookies } from "next/headers";
 import { AppSidebar } from "@/app/(main)/dashboard/_components/sidebar/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { users } from "@/data/users";
 import { getSidebarVariant, getSidebarCollapsible, getContentLayout } from "@/lib/layout-preferences";
 import { cn } from "@/lib/utils";
 
-import { AccountSwitcher } from "./_components/sidebar/account-switcher";
-import { LayoutControls } from "./_components/sidebar/layout-controls";
+import { AccountBadge } from "./_components/sidebar/account-badge";
+import { NavUser } from "./_components/sidebar/nav-user";
 import { SearchDialog } from "./_components/sidebar/search-dialog";
-import { ThemeSwitcher } from "./_components/sidebar/theme-switcher";
 import DashboardClientLayout from "./dashboard-client-layout";
 
 export default async function Layout({ children }: Readonly<{ children: ReactNode }>) {
@@ -42,9 +40,8 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
               <SearchDialog />
             </div>
             <div className="flex items-center gap-2">
-              <LayoutControls contentLayout={contentLayout} variant={sidebarVariant} collapsible={sidebarCollapsible} />
-              <ThemeSwitcher />
-              <AccountSwitcher users={users} />
+              <AccountBadge />
+              <NavUser layoutSettings={{ contentLayout, variant: sidebarVariant, collapsible: sidebarCollapsible }} />
             </div>
           </div>
         </header>
