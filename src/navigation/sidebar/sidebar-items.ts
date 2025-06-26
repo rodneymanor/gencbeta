@@ -97,16 +97,6 @@ export const sidebarItems: NavGroup[] = [
   },
   {
     id: 3,
-    items: [
-      {
-        title: "Recordings",
-        url: "/dashboard/capture/recordings",
-        icon: Mic,
-      },
-    ],
-  },
-  {
-    id: 4,
     label: "Inspiration",
     items: [
       {
@@ -117,7 +107,7 @@ export const sidebarItems: NavGroup[] = [
     ],
   },
   {
-    id: 5,
+    id: 4,
     label: "Collections",
     items: [
       {
@@ -128,7 +118,7 @@ export const sidebarItems: NavGroup[] = [
     ],
   },
   {
-    id: 6,
+    id: 5,
     label: "Team",
     items: [
       {
@@ -139,7 +129,7 @@ export const sidebarItems: NavGroup[] = [
     ],
   },
   {
-    id: 7,
+    id: 6,
     label: "Tools",
     items: [
       {
@@ -150,7 +140,7 @@ export const sidebarItems: NavGroup[] = [
     ],
   },
   {
-    id: 8,
+    id: 7,
     label: "Administration",
     items: [
       {
