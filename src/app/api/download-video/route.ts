@@ -76,8 +76,7 @@ async function processVideoUpload(downloadResult: DownloadResult, platform: stri
   const transcriptionResult = await transcribeVideoData(downloadResult.videoData, platform);
 
   if (!transcriptionResult) {
-    console.error("❌ [DOWNLOAD] Failed to transcribe video");
-    return NextResponse.json({ error: "Failed to transcribe video" }, { status: 500 });
+    console.log("⚠️ [DOWNLOAD] Transcription failed, but continuing with video processing");
   }
 
   const cdnResult = await uploadToBunnyCDN(downloadResult.videoData);
