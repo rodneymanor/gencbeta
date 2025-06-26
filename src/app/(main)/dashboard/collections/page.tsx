@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth-context";
 import { CollectionsService, type Video, type Collection } from "@/lib/collections";
+import { CollectionsRBACService } from "@/lib/collections-rbac";
 
 import { AddVideoDialog } from "./_components/add-video-dialog";
 import { ManageModeHeader } from "./_components/manage-mode-header";
@@ -36,16 +37,35 @@ export default function CollectionsPage() {
   const [manageMode, setManageMode] = useState(false);
   const [selectedVideos, setSelectedVideos] = useState<Set<string>>(new Set());
   const [deletingVideos, setDeletingVideos] = useState<Set<string>>(new Set());
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
   const selectedCollectionId = searchParams.get("collection");
+
+  // Role-based access control
+  useEffect(() => {
+    if (!user) {
+      router.push("/auth/v1/login");
+      return;
+    }
+
+    if (userProfile && userProfile.role === "creator") {
+      // Creators can only view collections, not manage them
+      // They see their assigned coach's collections
+      return;
+    }
+
+    if (userProfile && userProfile.role !== "coach" && userProfile.role !== "super_admin") {
+      router.push("/dashboard");
+      return;
+    }
+  }, [user, userProfile, router]);
 
   const loadCollections = useCallback(async () => {
     if (!user) return;
 
     try {
-      const userCollections = await CollectionsService.getUserCollections(user.uid);
+      const userCollections = await CollectionsRBACService.getUserCollections(user.uid);
       setCollections(userCollections);
     } catch (error) {
       console.error("Error loading collections:", error);
@@ -57,7 +77,7 @@ export default function CollectionsPage() {
 
     setLoadingVideos(true);
     try {
-      const collectionVideos = await CollectionsService.getCollectionVideos(
+      const collectionVideos = await CollectionsRBACService.getCollectionVideos(
         user.uid,
         selectedCollectionId ?? undefined,
       );
@@ -232,7 +252,7 @@ export default function CollectionsPage() {
             videosLength={videos.length}
             collections={collections}
             selectedCollectionId={selectedCollectionId}
-            onManageModeToggle={() => setManageMode(true)}
+            onManageModeToggle={() => userProfile?.role !== "creator" && setManageMode(true)}
             onExitManageMode={handleExitManageMode}
             onBulkDelete={handleBulkDelete}
             onClearSelection={clearSelection}

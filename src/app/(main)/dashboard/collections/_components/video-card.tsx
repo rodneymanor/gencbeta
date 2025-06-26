@@ -5,6 +5,7 @@ import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { VideoPlayer } from "@/components/video-player";
+import { useAuth } from "@/contexts/auth-context";
 
 interface VideoCardProps {
   video: {
@@ -42,6 +43,8 @@ export const VideoCard = ({
   onToggleSelection,
   onDelete,
 }: VideoCardProps) => {
+  const { userProfile } = useAuth();
+  const isAdmin = userProfile?.role === "coach" || userProfile?.role === "super_admin";
   return (
     <div
       className={`relative mx-auto w-full max-w-sm transition-all duration-300 ease-in-out ${
@@ -77,7 +80,7 @@ export const VideoCard = ({
         className="h-full w-full"
       />
 
-      {manageMode && (
+      {manageMode && isAdmin && (
         <>
           {/* Checkbox for multi-select */}
           <div className="absolute top-2 left-2 z-10">

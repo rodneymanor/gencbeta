@@ -10,6 +10,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useAuth } from "@/contexts/auth-context";
 import { useCollectionsSidebar } from "@/hooks/use-collections-sidebar";
 import { sidebarItems } from "@/navigation/sidebar/sidebar-items";
 
@@ -17,7 +18,24 @@ import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { userProfile } = useAuth();
   const { sidebarItems: dynamicSidebarItems, refreshCollections } = useCollectionsSidebar(sidebarItems);
+
+  // Filter sidebar items based on user role
+  const filteredSidebarItems = dynamicSidebarItems.filter((group) => {
+    // Show administration section only to super admins
+    if (group.label === "Administration") {
+      return userProfile?.role === "super_admin";
+    }
+
+    // Show collections section only to coaches and super admins
+    if (group.label === "Collections") {
+      return userProfile?.role === "coach" || userProfile?.role === "super_admin";
+    }
+
+    // Show all other sections to everyone
+    return true;
+  });
 
   return (
     <Sidebar {...props}>
@@ -33,7 +51,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={dynamicSidebarItems} onCollectionCreated={refreshCollections} />
+        <NavMain items={filteredSidebarItems} onCollectionCreated={refreshCollections} />
         {/* <NavDocuments items={data.documents} /> */}
         {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>

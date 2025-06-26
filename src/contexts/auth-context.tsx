@@ -15,19 +15,22 @@ import {
 } from "firebase/auth";
 
 import { auth } from "@/lib/firebase";
+import { UserManagementService, type UserProfile, type UserRole } from "@/lib/user-management";
 
 export type AccountLevel = "free" | "pro";
 
 interface AuthContextType {
   user: User | null;
+  userProfile: UserProfile | null;
   loading: boolean;
   accountLevel: AccountLevel;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, displayName?: string) => Promise<void>;
+  signUp: (email: string, password: string, displayName?: string, role?: UserRole) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   upgradeAccount: () => Promise<void>;
+  refreshUserProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -42,8 +45,31 @@ export function useAuth() {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [accountLevel, setAccountLevel] = useState<AccountLevel>("free");
+
+  const refreshUserProfile = useCallback(async () => {
+    if (!user) {
+      setUserProfile(null);
+      return;
+    }
+
+    try {
+      const profile = await UserManagementService.getUserProfile(user.uid);
+      setUserProfile(profile);
+
+      // Set account level based on role
+      if (profile?.role === "super_admin" || profile?.role === "coach") {
+        setAccountLevel("pro");
+      } else {
+        setAccountLevel("free");
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      setUserProfile(null);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!auth) {
@@ -52,14 +78,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
 
-      if (user?.email) {
-        const isProUser =
-          user.email.includes("pro") || user.email.includes("admin") || user.email.endsWith("@company.com");
-        setAccountLevel(isProUser ? "pro" : "free");
+      if (user) {
+        // Update last login
+        await UserManagementService.updateLastLogin(user.uid);
+
+        // Load user profile
+        try {
+          const profile = await UserManagementService.getUserProfile(user.uid);
+          setUserProfile(profile);
+
+          // Set account level based on role
+          if (profile?.role === "super_admin" || profile?.role === "coach") {
+            setAccountLevel("pro");
+          } else {
+            setAccountLevel("free");
+          }
+        } catch (error) {
+          console.error("Error fetching user profile:", error);
+          setUserProfile(null);
+          setAccountLevel("free");
+        }
       } else {
+        setUserProfile(null);
         setAccountLevel("free");
       }
 
@@ -87,7 +130,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signUp = async (email: string, password: string, displayName?: string) => {
+  const signUp = async (email: string, password: string, displayName?: string, role: UserRole = "creator") => {
     if (!auth) {
       throw new Error("Firebase is not configured. Please set up Firebase environment variables.");
     }
@@ -95,9 +138,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     try {
       const result = await createUserWithEmailAndPassword(auth, email, password);
+      const finalDisplayName = displayName ?? result.user.email?.split("@")[0] ?? "User";
+
       if (displayName) {
-        await updateProfile(result.user, { displayName });
+        await updateProfile(result.user, { displayName: finalDisplayName });
       }
+
+      // Create user profile
+      await UserManagementService.createOrUpdateUserProfile(
+        result.user.uid,
+        result.user.email!,
+        finalDisplayName,
+        role,
+      );
     } catch (err) {
       if (err instanceof Error) {
         throw new Error(err.message);
@@ -157,6 +210,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<AuthContextType>(
     () => ({
       user,
+      userProfile,
       loading,
       accountLevel,
       signIn,
@@ -165,8 +219,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       logout,
       resetPassword,
       upgradeAccount,
+      refreshUserProfile,
     }),
-    [user, loading, accountLevel, upgradeAccount],
+    [user, userProfile, loading, accountLevel, upgradeAccount, refreshUserProfile],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

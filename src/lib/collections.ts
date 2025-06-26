@@ -4,7 +4,6 @@ import {
   addDoc,
   updateDoc,
   getDocs,
-  getDoc,
   query,
   where,
   orderBy,
@@ -66,7 +65,7 @@ export interface Collection {
   id?: string;
   title: string;
   description: string;
-  userId: string;
+  userId: string; // This will be the coach's UID
   videoCount: number;
   createdAt: string;
   updatedAt: string;
@@ -125,7 +124,7 @@ export class CollectionsService {
   }
 
   /**
-   * Get all collections for a user
+   * Get all collections for a user (legacy method - use CollectionsRBACService for role-based access)
    */
   static async getUserCollections(userId: string): Promise<Collection[]> {
     try {
@@ -243,7 +242,7 @@ export class CollectionsService {
   }
 
   /**
-   * Get videos from a collection or all videos
+   * Get videos from a collection or all videos (legacy method - use CollectionsRBACService for role-based access)
    */
   static async getCollectionVideos(userId: string, collectionId?: string): Promise<Video[]> {
     try {

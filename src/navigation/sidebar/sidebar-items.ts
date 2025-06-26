@@ -1,4 +1,4 @@
-import { Home, FileText, Mic, StickyNote, Sparkles, Edit, FolderOpen, type LucideIcon } from "lucide-react";
+import { Home, FileText, Mic, StickyNote, Sparkles, Edit, FolderOpen, Settings, type LucideIcon } from "lucide-react";
 
 export interface NavSubItem {
   title: string;
@@ -85,6 +85,17 @@ export const sidebarItems: NavGroup[] = [
         title: "Script Editor",
         url: "/dashboard/scripts/editor",
         icon: Edit,
+      },
+    ],
+  },
+  {
+    id: 6,
+    label: "Administration",
+    items: [
+      {
+        title: "User Management",
+        url: "/dashboard/admin",
+        icon: Settings,
       },
     ],
   },
