@@ -77,7 +77,7 @@ const quickActions = [
 ];
 
 export default function ContentCreatorPage() {
-  const { userProfile, accountLevel } = useAuth();
+  const { userProfile } = useAuth();
 
   // Get user name from auth context or fallback
   const userName = userProfile?.displayName ?? "User";
@@ -108,19 +108,9 @@ export default function ContentCreatorPage() {
     <div className="@container/main">
       <div className="mx-auto max-w-6xl space-y-8 p-4 md:space-y-10 md:p-6">
         {/* Top Header Section */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between md:gap-6">
-          {/* Left side - Personalized greeting */}
-          <div className="space-y-2">
-            <h1 className="text-foreground text-3xl font-bold">Welcome back, {userName}</h1>
-            <p className="text-muted-foreground">Let&apos;s create some compelling content today.</p>
-          </div>
-
-          {/* Right side - Account level badge */}
-          <div className="flex items-center">
-            <Badge variant={accountLevel === "pro" ? "default" : "secondary"} className="px-3 py-1 text-sm font-medium">
-              {accountLevel === "pro" ? "Pro" : "Free"} Account
-            </Badge>
-          </div>
+        <div className="space-y-2">
+          <h1 className="text-foreground text-3xl font-bold">Welcome back, {userName}</h1>
+          <p className="text-muted-foreground">Let&apos;s create some compelling content today.</p>
         </div>
 
         {/* Quick Actions Grid Section */}
