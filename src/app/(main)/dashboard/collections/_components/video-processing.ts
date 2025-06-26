@@ -137,7 +137,13 @@ export const transcribeVideo = async (downloadResponse: VideoDownloadResponse): 
 
 export const extractVideoThumbnail = async (downloadResponse: VideoDownloadResponse): Promise<string> => {
   if (downloadResponse.hostedOnCDN && downloadResponse.cdnUrl) {
-    // For CDN-hosted videos, generate thumbnail from URL
+    // For iframe URLs (like Bunny Stream), return a placeholder thumbnail
+    if (downloadResponse.cdnUrl.includes("iframe.mediadelivery.net")) {
+      console.log("🖼️ [ADD_VIDEO] Using placeholder thumbnail for iframe URL");
+      return generatePlaceholderThumbnail(downloadResponse.platform);
+    }
+
+    // For direct video URLs, generate thumbnail from URL
     console.log("🖼️ [ADD_VIDEO] Generating thumbnail from CDN URL");
 
     return new Promise((resolve, reject) => {
@@ -206,6 +212,42 @@ export const extractVideoThumbnail = async (downloadResponse: VideoDownloadRespo
   } else {
     throw new Error("No video data available for thumbnail generation");
   }
+};
+
+const generatePlaceholderThumbnail = (platform: string): string => {
+  // Create a simple canvas-based placeholder thumbnail
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+
+  canvas.width = 360;
+  canvas.height = 640; // 9:16 aspect ratio
+
+  if (ctx) {
+    // Create gradient background
+    const gradient = ctx.createLinearGradient(0, 0, 360, 640);
+    if (platform === "instagram") {
+      gradient.addColorStop(0, "#833AB4");
+      gradient.addColorStop(0.5, "#FD1D1D");
+      gradient.addColorStop(1, "#FCB045");
+    } else {
+      gradient.addColorStop(0, "#000000");
+      gradient.addColorStop(1, "#FF0050");
+    }
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 360, 640);
+
+    // Add platform icon/text
+    ctx.fillStyle = "white";
+    ctx.font = "bold 24px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("📹", 180, 300);
+    ctx.font = "16px Arial";
+    ctx.fillText(platform.toUpperCase(), 180, 340);
+    ctx.fillText("Video", 180, 360);
+  }
+
+  return canvas.toDataURL("image/jpeg", 0.8);
 };
 
 const calculateEngagementRate = (metrics: VideoDownloadResponse["metrics"]): number => {

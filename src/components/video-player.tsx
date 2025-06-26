@@ -47,15 +47,13 @@ interface VideoPlayerProps {
   };
 }
 
-
-
-const VideoEmbed = ({ 
-  url, 
-  platform, 
-  hostedOnCDN, 
-  videoData 
-}: { 
-  url: string; 
+const VideoEmbed = ({
+  url,
+  platform,
+  hostedOnCDN,
+  videoData,
+}: {
+  url: string;
   platform: "tiktok" | "instagram";
   hostedOnCDN?: boolean;
   videoData?: {
@@ -77,7 +75,7 @@ const VideoEmbed = ({
         const objectUrl = URL.createObjectURL(blob);
         setVideoObjectUrl(objectUrl);
         setIsLoading(false);
-        
+
         return () => {
           if (objectUrl) {
             URL.revokeObjectURL(objectUrl);
@@ -88,7 +86,7 @@ const VideoEmbed = ({
         setHasError(true);
         setIsLoading(false);
       }
-    } else if (hostedOnCDN || url.startsWith('http')) {
+    } else if (hostedOnCDN || url.startsWith("http")) {
       const timer = setTimeout(() => {
         setIsLoading(false);
       }, 1000);
@@ -144,7 +142,26 @@ const VideoEmbed = ({
     );
   }
 
-  if (videoObjectUrl || (hostedOnCDN && url.startsWith('http'))) {
+  // Handle iframe URLs (like Bunny Stream)
+  if (hostedOnCDN && url.includes("iframe.mediadelivery.net")) {
+    return (
+      <iframe
+        src={url}
+        className="h-full w-full rounded-xl"
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        onError={(e) => {
+          console.error("❌ [VIDEO_PLAYER] Video playback error:", e);
+          setHasError(true);
+        }}
+        style={{ backgroundColor: "black" }}
+      />
+    );
+  }
+
+  // Handle direct video URLs or local video data
+  if (videoObjectUrl || (hostedOnCDN && url.startsWith("http"))) {
     return (
       <video
         src={videoObjectUrl ?? url}
@@ -154,8 +171,11 @@ const VideoEmbed = ({
         muted
         loop
         playsInline
-        onError={() => setHasError(true)}
-        style={{ backgroundColor: 'black' }}
+        onError={(e) => {
+          console.error("❌ [VIDEO_PLAYER] Video playback error:", e);
+          setHasError(true);
+        }}
+        style={{ backgroundColor: "black" }}
       />
     );
   }
@@ -172,8 +192,6 @@ const VideoEmbed = ({
   );
 };
 
-
-
 const InsightsDialog = ({ insights, metrics }: { insights: VideoInsights; metrics: VideoMetrics }) => {
   return (
     <DialogContent className="max-h-[80vh] max-w-md overflow-y-auto">
@@ -188,7 +206,15 @@ const InsightsDialog = ({ insights, metrics }: { insights: VideoInsights; metric
   );
 };
 
-export const VideoPlayer = ({ videoUrl, platform, metrics, insights, className = "", hostedOnCDN, videoData }: VideoPlayerProps) => {
+export const VideoPlayer = ({
+  videoUrl,
+  platform,
+  metrics,
+  insights,
+  className = "",
+  hostedOnCDN,
+  videoData,
+}: VideoPlayerProps) => {
   return (
     <div className={`relative mx-auto w-full max-w-sm ${className}`}>
       <Card className="overflow-hidden border-0 bg-gradient-to-br from-gray-900 to-black shadow-2xl">
