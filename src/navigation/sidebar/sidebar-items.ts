@@ -14,6 +14,8 @@ import {
   Brain,
   Pen,
   WandSparkles,
+  Binoculars,
+  Bot,
   type LucideIcon,
 } from "lucide-react";
 
@@ -97,28 +99,30 @@ export const sidebarItems: NavGroup[] = [
   },
   {
     id: 3,
-    label: "Inspiration",
+    label: "Research",
     items: [
       {
-        title: "AI Ideas",
-        url: "/dashboard/inspiration",
-        icon: Sparkles,
+        title: "Research",
+        url: "/research",
+        icon: Binoculars,
+        subItems: [
+          {
+            title: "Collections",
+            url: "/research/collections",
+            icon: FolderOpen,
+          },
+          {
+            title: "AI Ideas",
+            url: "/research/aideas",
+            icon: Bot,
+            comingSoon: true,
+          },
+        ],
       },
     ],
   },
   {
     id: 4,
-    label: "Collections",
-    items: [
-      {
-        title: "All Videos",
-        url: "/dashboard/collections",
-        icon: FolderOpen,
-      },
-    ],
-  },
-  {
-    id: 5,
     label: "Team",
     items: [
       {
@@ -129,7 +133,7 @@ export const sidebarItems: NavGroup[] = [
     ],
   },
   {
-    id: 6,
+    id: 5,
     label: "Tools",
     items: [
       {
@@ -140,7 +144,7 @@ export const sidebarItems: NavGroup[] = [
     ],
   },
   {
-    id: 7,
+    id: 6,
     label: "Administration",
     items: [
       {

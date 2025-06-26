@@ -55,7 +55,7 @@ const mockInspirations = [
   },
 ];
 
-export default function InspirationPage() {
+export default function AIIdeasPage() {
   const [categoryFilter, setCategoryFilter] = useState("all");
 
   const filteredInspirations = mockInspirations.filter((inspiration) => {
@@ -67,7 +67,7 @@ export default function InspirationPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">AI Inspiration</h1>
+          <h1 className="text-3xl font-bold">AI Ideas</h1>
           <p className="text-muted-foreground">Trending ideas to kickstart your next script</p>
         </div>
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
