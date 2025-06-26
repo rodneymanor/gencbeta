@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 import { ClipboardDetectionDialog } from "@/components/clipboard-detection-dialog";
 import { useAppState } from "@/contexts/app-state-context";
@@ -17,6 +17,7 @@ export function ClipboardDetectionProvider({ children }: ClipboardDetectionProvi
   const [detectedUrl, setDetectedUrl] = useState<ClipboardDetectionResult | null>(null);
   const [showDialog, setShowDialog] = useState(false);
   const [hasShownForCurrentUrl, setHasShownForCurrentUrl] = useState<string>("");
+  const hasInitializedRef = useRef(false);
 
   const { user } = useAuth();
   const { busyState } = useAppState();
@@ -47,11 +48,16 @@ export function ClipboardDetectionProvider({ children }: ClipboardDetectionProvi
       },
     },
     {
-      enabled: !!user, // Only enable when user is logged in
+      enabled: !!user && !hasInitializedRef.current, // Only enable when user is logged in and not already initialized
       checkDelay: 1500, // Wait 1.5 seconds after page load for single check
       checkOnMount: true, // Only check once on component mount
     },
   );
+
+  // Mark as initialized after first mount
+  if (!!user && !hasInitializedRef.current) {
+    hasInitializedRef.current = true;
+  }
 
   const handleCloseDialog = () => {
     setShowDialog(false);

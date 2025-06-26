@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   downloadTikTokVideo,
   downloadInstagramVideoWithMetrics,
+  detectPlatform,
   type DownloadResult,
 } from "@/lib/video-processing-helpers";
 
@@ -86,23 +87,6 @@ export async function POST(request: NextRequest) {
       { status: 500 },
     );
   }
-}
-
-function detectPlatform(url: string): string {
-  const urlLower = url.toLowerCase();
-  console.log("🔍 [DOWNLOADER] Analyzing URL for platform detection:", urlLower);
-
-  if (urlLower.includes("tiktok.com")) {
-    console.log("✅ [DOWNLOADER] Platform identified: TikTok");
-    return "tiktok";
-  }
-  if (urlLower.includes("instagram.com")) {
-    console.log("✅ [DOWNLOADER] Platform identified: Instagram");
-    return "instagram";
-  }
-
-  console.log("⚠️ [DOWNLOADER] Platform unknown for URL:", urlLower);
-  return "unknown";
 }
 
 async function downloadVideo(url: string, platform: string): Promise<DownloadResult | null> {

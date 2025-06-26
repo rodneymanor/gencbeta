@@ -51,6 +51,23 @@ export interface TranscriptionResult {
   };
 }
 
+export function detectPlatform(url: string): string {
+  const urlLower = url.toLowerCase();
+  console.log("🔍 [PLATFORM] Analyzing URL for platform detection:", urlLower);
+
+  if (urlLower.includes("tiktok.com")) {
+    console.log("✅ [PLATFORM] Platform identified: TikTok");
+    return "tiktok";
+  }
+  if (urlLower.includes("instagram.com")) {
+    console.log("✅ [PLATFORM] Platform identified: Instagram");
+    return "instagram";
+  }
+
+  console.log("⚠️ [PLATFORM] Platform unknown for URL:", urlLower);
+  return "unknown";
+}
+
 export async function transcribeVideoData(
   videoData: {
     buffer: ArrayBuffer;
