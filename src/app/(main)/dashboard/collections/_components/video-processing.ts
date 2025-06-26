@@ -30,6 +30,7 @@ interface VideoDownloadResponse {
     platform: string;
     downloadedAt: string;
     readyForTranscription: boolean;
+    transcriptionStatus?: "pending" | "completed" | "failed";
   };
 }
 
@@ -81,12 +82,20 @@ export const downloadVideo = async (videoUrl: string): Promise<VideoDownloadResp
 
 export const transcribeVideo = async (downloadResponse: VideoDownloadResponse): Promise<TranscriptionResponse> => {
   console.log("🔍 [ADD_VIDEO] Checking download response for transcription:", !!downloadResponse.transcription);
+  console.log("🔍 [ADD_VIDEO] Transcription status:", downloadResponse.metadata.transcriptionStatus);
   console.log("🔍 [ADD_VIDEO] Download response keys:", Object.keys(downloadResponse));
 
   // If transcription is already included in the download response, return it
   if (downloadResponse.transcription) {
     console.log("✅ [ADD_VIDEO] Using existing transcription from download response");
     return downloadResponse.transcription;
+  }
+
+  // If transcription is pending (background processing), return a placeholder
+  if (downloadResponse.metadata.transcriptionStatus === "pending") {
+    console.log("⏳ [ADD_VIDEO] Transcription is processing in background, using placeholder");
+    const { createPlaceholderTranscription } = await import("./video-processing-utils");
+    return createPlaceholderTranscription(downloadResponse.platform, downloadResponse.additionalMetadata.author);
   }
 
   // Otherwise, transcribe as before (fallback for older workflow)

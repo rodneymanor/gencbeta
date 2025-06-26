@@ -8,7 +8,6 @@ import {
   downloadInstagramVideoWithMetrics,
   type DownloadResult,
   type CdnResult,
-  type TranscriptionResult,
 } from "@/lib/video-processing-helpers";
 
 export async function POST(request: NextRequest) {
@@ -68,26 +67,26 @@ async function processVideoUpload(downloadResult: DownloadResult, platform: stri
 
   if (!isBunnyStreamConfigured()) {
     console.log("⚠️ [DOWNLOAD] Bunny.net not configured, skipping CDN upload");
+    // Start background transcription without waiting
+    startBackgroundTranscription(downloadResult.videoData, platform, url);
     return createSuccessResponse(downloadResult, platform, url, null);
-  }
-
-  // Transcribe video BEFORE uploading to CDN (using original video data)
-  console.log("🎬 [DOWNLOAD] Transcribing video...");
-  const transcriptionResult = await transcribeVideoData(downloadResult.videoData, platform);
-
-  if (!transcriptionResult) {
-    console.log("⚠️ [DOWNLOAD] Transcription failed, but continuing with video processing");
   }
 
   const cdnResult = await uploadToBunnyCDN(downloadResult.videoData);
 
   if (!cdnResult) {
-    console.error("❌ [DOWNLOAD] Failed to upload to CDN, returning original video data with transcription");
-    return createSuccessResponse(downloadResult, platform, url, null, transcriptionResult);
+    console.error("❌ [DOWNLOAD] Failed to upload to CDN, returning original video data");
+    // Start background transcription without waiting
+    startBackgroundTranscription(downloadResult.videoData, platform, url);
+    return createSuccessResponse(downloadResult, platform, url, null);
   }
 
   console.log("✅ [DOWNLOAD] Video uploaded to CDN:", cdnResult.cdnUrl);
-  return createSuccessResponse(downloadResult, platform, url, cdnResult, transcriptionResult);
+
+  // Start background transcription without waiting for it to complete
+  startBackgroundTranscription(downloadResult.videoData, platform, url);
+
+  return createSuccessResponse(downloadResult, platform, url, cdnResult);
 }
 function validateRequest(url: string) {
   if (!url) {
@@ -107,12 +106,41 @@ function validateVideoSize(size: number) {
   return null;
 }
 
+/**
+ * Start transcription in the background without blocking the response
+ */
+async function startBackgroundTranscription(
+  videoData: { buffer: ArrayBuffer; size: number; mimeType: string; filename?: string },
+  platform: string,
+  originalUrl: string,
+) {
+  console.log("🎬 [BACKGROUND] Starting background transcription for:", originalUrl);
+
+  // Use setTimeout to ensure this runs after the response is sent
+  setTimeout(async () => {
+    try {
+      console.log("🎬 [BACKGROUND] Processing transcription...");
+      const transcriptionResult = await transcribeVideoData(videoData, platform);
+
+      if (transcriptionResult) {
+        console.log("✅ [BACKGROUND] Transcription completed successfully");
+        console.log("📝 [BACKGROUND] Transcription length:", transcriptionResult.transcript.length);
+        // TODO: Update video record in database with transcription result
+        // This would require knowing the video ID, which we could pass as a parameter
+      } else {
+        console.log("⚠️ [BACKGROUND] Transcription failed");
+      }
+    } catch (error) {
+      console.error("❌ [BACKGROUND] Background transcription error:", error);
+    }
+  }, 100); // Small delay to ensure response is sent first
+}
+
 function createSuccessResponse(
   downloadResult: DownloadResult,
   platform: string,
   originalUrl: string,
   cdnResult: CdnResult | null,
-  transcriptionResult: TranscriptionResult | null = null,
 ) {
   const { videoData, metrics, additionalMetadata } = downloadResult;
 
@@ -141,14 +169,9 @@ function createSuccessResponse(
       platform,
       downloadedAt: new Date().toISOString(),
       readyForTranscription: true,
+      transcriptionStatus: "pending", // Indicates transcription is happening in background
     },
   };
-
-  // Include transcription result if available
-  if (transcriptionResult) {
-    response.transcription = transcriptionResult;
-    (response.metadata as Record<string, unknown>).readyForTranscription = false; // Already transcribed
-  }
 
   // If CDN upload was successful, return CDN URL instead of video buffer
   if (cdnResult) {
