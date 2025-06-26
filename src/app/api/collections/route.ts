@@ -131,13 +131,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Firebase Admin SDK not configured" }, { status: 500 });
     }
 
-    // Verify user exists
-    const userProfile = await UserManagementAdminService.getUserProfile(userId);
-    if (!userProfile) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    // Create collection data
+    // Create collection data (skip user validation for API use)
     const collectionData = {
       title,
       description,
