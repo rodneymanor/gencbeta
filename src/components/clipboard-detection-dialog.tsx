@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Video, FileText, X } from "lucide-react";
+import { Video, FileText } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -85,17 +85,12 @@ export function ClipboardDetectionDialog({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {getPlatformIcon()}
-              <div>
-                <DialogTitle>Video Link Detected!</DialogTitle>
-                <DialogDescription>Found a {getPlatformName()} video in your clipboard</DialogDescription>
-              </div>
+          <div className="flex items-center gap-3">
+            {getPlatformIcon()}
+            <div>
+              <DialogTitle>Video Link Detected!</DialogTitle>
+              <DialogDescription>Found a {getPlatformName()} video in your clipboard</DialogDescription>
             </div>
-            <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0">
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         </DialogHeader>
 
