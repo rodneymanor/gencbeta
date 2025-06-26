@@ -11,6 +11,9 @@ import {
   UserPen,
   ChartLine,
   Trophy,
+  Brain,
+  Pen,
+  WandSparkles,
   type LucideIcon,
 } from "lucide-react";
 
@@ -70,27 +73,40 @@ export const sidebarItems: NavGroup[] = [
   },
   {
     id: 2,
-    label: "Library",
+    label: "Idea Inbox",
     items: [
       {
-        title: "Scripts",
-        url: "/dashboard/scripts",
-        icon: FileText,
-      },
-      {
-        title: "Recordings",
-        url: "/dashboard/capture/recordings",
-        icon: Mic,
-      },
-      {
-        title: "Notes",
-        url: "/dashboard/capture/notes",
-        icon: StickyNote,
+        title: "Idea Inbox",
+        url: "/ideas",
+        icon: Brain,
+        subItems: [
+          {
+            title: "Notes",
+            url: "/ideas/notes",
+            icon: Pen,
+          },
+          {
+            title: "Scripting",
+            url: "/ideas/scripting",
+            icon: WandSparkles,
+            comingSoon: true,
+          },
+        ],
       },
     ],
   },
   {
     id: 3,
+    items: [
+      {
+        title: "Recordings",
+        url: "/dashboard/capture/recordings",
+        icon: Mic,
+      },
+    ],
+  },
+  {
+    id: 4,
     label: "Inspiration",
     items: [
       {
@@ -101,7 +117,7 @@ export const sidebarItems: NavGroup[] = [
     ],
   },
   {
-    id: 4,
+    id: 5,
     label: "Collections",
     items: [
       {
@@ -112,7 +128,7 @@ export const sidebarItems: NavGroup[] = [
     ],
   },
   {
-    id: 5,
+    id: 6,
     label: "Team",
     items: [
       {
@@ -123,7 +139,7 @@ export const sidebarItems: NavGroup[] = [
     ],
   },
   {
-    id: 6,
+    id: 7,
     label: "Tools",
     items: [
       {
@@ -134,7 +150,7 @@ export const sidebarItems: NavGroup[] = [
     ],
   },
   {
-    id: 7,
+    id: 8,
     label: "Administration",
     items: [
       {
