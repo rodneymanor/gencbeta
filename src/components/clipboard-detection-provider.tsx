@@ -22,7 +22,7 @@ export function ClipboardDetectionProvider({ children }: ClipboardDetectionProvi
   const { busyState } = useAppState();
   const { collections, refreshCollections } = useCollectionsSidebar(sidebarItems);
 
-  // Only enable clipboard detection when user is authenticated
+  // Check clipboard once on page load when user is authenticated
   useClipboardDetection(
     {
       onDetected: (result) => {
@@ -39,19 +39,23 @@ export function ClipboardDetectionProvider({ children }: ClipboardDetectionProvi
             isScriptCreating: busyState.isScriptCreating,
             isTranscribing: busyState.isTranscribing,
           });
+        } else if (!isTikTokOrInstagramUrl(result.url)) {
+          console.log("📋 [CLIPBOARD] Ignoring non-TikTok/Instagram URL:", result.platform, result.url);
+        } else if (result.url === hasShownForCurrentUrl) {
+          console.log("📋 [CLIPBOARD] Already shown dialog for this URL:", result.url);
         }
       },
       onError: (error) => {
-        console.log("Clipboard detection error:", error);
+        console.log("📋 [CLIPBOARD] Detection error:", error);
       },
       onPermissionDenied: () => {
-        console.log("Clipboard permission denied");
+        console.log("📋 [CLIPBOARD] Permission denied - user needs to allow clipboard access");
       },
     },
     {
       enabled: !!user, // Only enable when user is logged in
-      checkDelay: 1500, // Wait 1.5 seconds after page load
-      checkOnMount: true,
+      checkDelay: 1500, // Wait 1.5 seconds after page load for single check
+      checkOnMount: true, // Only check once on component mount
     },
   );
 
