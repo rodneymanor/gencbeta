@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { isBunnyStreamConfigured } from "@/lib/bunny-stream";
 import {
-  transcribeVideoData,
   uploadToBunnyCDN,
   downloadTikTokVideo,
   downloadInstagramVideoWithMetrics,
@@ -120,20 +119,55 @@ async function startBackgroundTranscription(
   setTimeout(async () => {
     try {
       console.log("🎬 [BACKGROUND] Processing transcription...");
-      const transcriptionResult = await transcribeVideoData(videoData, platform);
+      const transcriptionResult = await callCompleteAnalysisService(videoData);
 
       if (transcriptionResult) {
-        console.log("✅ [BACKGROUND] Transcription completed successfully");
+        console.log("✅ [BACKGROUND] Complete analysis completed successfully");
         console.log("📝 [BACKGROUND] Transcription length:", transcriptionResult.transcript.length);
+        console.log("📊 [BACKGROUND] Platform detected:", transcriptionResult.contentMetadata.platform);
         // TODO: Update video record in database with transcription result
         // This would require knowing the video ID, which we could pass as a parameter
       } else {
-        console.log("⚠️ [BACKGROUND] Transcription failed");
+        console.log("⚠️ [BACKGROUND] Complete analysis failed");
       }
     } catch (error) {
-      console.error("❌ [BACKGROUND] Background transcription error:", error);
+      console.error("❌ [BACKGROUND] Background analysis error:", error);
     }
   }, 100); // Small delay to ensure response is sent first
+}
+
+/**
+ * Call the complete analysis service for background processing
+ */
+async function callCompleteAnalysisService(videoData: {
+  buffer: ArrayBuffer;
+  size: number;
+  mimeType: string;
+  filename?: string;
+}) {
+  try {
+    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
+
+    const formData = new FormData();
+    const blob = new Blob([videoData.buffer], { type: videoData.mimeType });
+    formData.append("video", blob, videoData.filename ?? "video.mp4");
+
+    const response = await fetch(`${baseUrl}/api/video/analyze-complete`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      console.error("❌ [BACKGROUND] Complete analysis service failed:", response.status);
+      return null;
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("❌ [BACKGROUND] Complete analysis service error:", error);
+    return null;
+  }
 }
 
 function createSuccessResponse(

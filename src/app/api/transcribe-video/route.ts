@@ -81,6 +81,7 @@ async function handleFileTranscription(request: NextRequest) {
   const formData = await request.formData();
   const file = formData.get("video") as File;
 
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (!file) {
     console.error("❌ [TRANSCRIBE] No video file provided");
     return NextResponse.json({ error: "No video file provided" }, { status: 400 });
@@ -328,8 +329,8 @@ async function transcribeFromUrl(
       const processedResult = processTranscriptionData(transcriptionData, response_text);
 
       // Override platform if provided
-      if (platform) {
-        processedResult.platform = platform;
+      if (platform && ["TikTok", "Instagram", "YouTube", "Unknown"].includes(platform)) {
+        processedResult.platform = platform as "TikTok" | "Instagram" | "YouTube" | "Unknown";
         processedResult.contentMetadata.platform = platform as ContentMetadata["platform"];
       }
 
@@ -341,8 +342,8 @@ async function transcribeFromUrl(
       const fallbackResult = createFallbackResponse(response_text);
 
       // Override platform if provided
-      if (platform) {
-        fallbackResult.platform = platform;
+      if (platform && ["TikTok", "Instagram", "YouTube", "Unknown"].includes(platform)) {
+        fallbackResult.platform = platform as "TikTok" | "Instagram" | "YouTube" | "Unknown";
         fallbackResult.contentMetadata.platform = platform as ContentMetadata["platform"];
       }
 
