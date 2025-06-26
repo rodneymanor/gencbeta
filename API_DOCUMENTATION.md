@@ -191,13 +191,56 @@ def get_collection(collection_id):
     return response.json()
 ```
 
+### GET /api/collections
+
+Get all collections for a user.
+
+**Headers:**
+- `x-api-key: your-secret-api-key`
+- `x-user-id: user-uid-here` (optional, can use query param instead)
+
+**Query Parameters:**
+- `userId`: The UID of the user whose collections to retrieve
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "user": {
+    "id": "user-uid",
+    "email": "user@example.com",
+    "displayName": "User Name",
+    "role": "super_admin"
+  },
+  "collections": [
+    {
+      "id": "collection-id",
+      "title": "Collection Title",
+      "description": "Collection Description",
+      "videoCount": 5,
+      "userId": "collection-owner-uid",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z"
+    }
+  ],
+  "total": 1,
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
+
+**Error Responses:**
+- `401 Unauthorized`: Invalid or missing API key
+- `400 Bad Request`: Missing userId parameter
+- `404 Not Found`: User not found
+- `500 Internal Server Error`: Server error
+
 ## Getting Collection IDs
 
 To find collection IDs:
 
-1. **Via UI**: Go to your collections page and check the URL or browser developer tools
-2. **Via Database**: Look in your Firestore `collections` collection
-3. **Via API**: Use the GET endpoint to list collections (if you know at least one collection ID)
+1. **Via API**: Use the `/api/collections` endpoint to list all collections
+2. **Via UI**: Go to your collections page and check the URL or browser developer tools
+3. **Via Database**: Look in your Firestore `collections` collection
 
 ## Security Notes
 
