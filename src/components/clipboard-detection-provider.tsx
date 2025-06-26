@@ -26,19 +26,13 @@ export function ClipboardDetectionProvider({ children }: ClipboardDetectionProvi
   useClipboardDetection(
     {
       onDetected: (result) => {
-        // Only show dialog for TikTok/Instagram URLs, if we haven't shown it for this URL already,
-        // and if the app is not currently busy with other operations
-        if (isTikTokOrInstagramUrl(result.url) && result.url !== hasShownForCurrentUrl && !busyState.isAnyBusy) {
+        // Only show dialog for TikTok/Instagram URLs and if we haven't shown it for this URL already
+        // Don't check busy state here - if we detect on page load, show immediately
+        if (isTikTokOrInstagramUrl(result.url) && result.url !== hasShownForCurrentUrl) {
           console.log("📋 [CLIPBOARD] Showing detection dialog for URL:", result.url);
           setDetectedUrl(result);
           setShowDialog(true);
           setHasShownForCurrentUrl(result.url);
-        } else if (busyState.isAnyBusy) {
-          console.log("📋 [CLIPBOARD] Skipping detection - app is busy:", {
-            isVideoProcessing: busyState.isVideoProcessing,
-            isScriptCreating: busyState.isScriptCreating,
-            isTranscribing: busyState.isTranscribing,
-          });
         } else if (!isTikTokOrInstagramUrl(result.url)) {
           console.log("📋 [CLIPBOARD] Ignoring non-TikTok/Instagram URL:", result.platform, result.url);
         } else if (result.url === hasShownForCurrentUrl) {

@@ -5,20 +5,8 @@ import { useState } from "react";
 import { Video, FileText, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/auth-context";
 import type { ClipboardDetectionResult } from "@/lib/clipboard-detector";
 import { CollectionsService, type Collection } from "@/lib/collections";
@@ -52,14 +40,12 @@ export function ClipboardDetectionDialog({
     try {
       // Generate a title based on the platform and URL
       const title = `${getPlatformName()} Video - ${detectedUrl.formattedUrl}`;
-      
-      await CollectionsService.addVideoToCollection(selectedCollection, {
+
+      await CollectionsService.addVideoToCollection(user.uid, selectedCollection, {
         url: detectedUrl.url,
         platform: detectedUrl.platform as "tiktok" | "instagram",
         title,
-        description: `Added from clipboard on ${new Date().toLocaleDateString()}`,
       });
-      
       onRefreshCollections();
       onClose();
     } catch (error) {
@@ -104,17 +90,10 @@ export function ClipboardDetectionDialog({
               {getPlatformIcon()}
               <div>
                 <DialogTitle>Video Link Detected!</DialogTitle>
-                <DialogDescription>
-                  Found a {getPlatformName()} video in your clipboard
-                </DialogDescription>
+                <DialogDescription>Found a {getPlatformName()} video in your clipboard</DialogDescription>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="h-8 w-8 p-0"
-            >
+            <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0">
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -122,10 +101,8 @@ export function ClipboardDetectionDialog({
 
         <div className="space-y-4">
           {/* URL Preview */}
-          <div className="rounded-lg bg-muted p-3">
-            <p className="text-sm font-mono break-all text-muted-foreground">
-              {detectedUrl.formattedUrl}
-            </p>
+          <div className="bg-muted rounded-lg p-3">
+            <p className="text-muted-foreground font-mono text-sm break-all">{detectedUrl.formattedUrl}</p>
           </div>
 
           {/* Action Buttons */}
@@ -136,7 +113,6 @@ export function ClipboardDetectionDialog({
                 <Video className="h-4 w-4" />
                 <span className="text-sm font-medium">Add to Collection</span>
               </div>
-              
               {collections.length > 0 ? (
                 <div className="flex gap-2">
                   <Select value={selectedCollection} onValueChange={setSelectedCollection}>
@@ -144,12 +120,12 @@ export function ClipboardDetectionDialog({
                       <SelectValue placeholder="Choose collection..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {collections.map((collection) => 
+                      {collections.map((collection) =>
                         collection.id ? (
                           <SelectItem key={collection.id} value={collection.id}>
                             {collection.title}
                           </SelectItem>
-                        ) : null
+                        ) : null,
                       )}
                     </SelectContent>
                   </Select>
@@ -162,9 +138,7 @@ export function ClipboardDetectionDialog({
                   </Button>
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">
-                  No collections found. Create a collection first.
-                </p>
+                <p className="text-muted-foreground text-sm">No collections found. Create a collection first.</p>
               )}
             </div>
 
@@ -188,12 +162,7 @@ export function ClipboardDetectionDialog({
 
           {/* Dismiss Button */}
           <div className="pt-2">
-            <Button
-              onClick={onClose}
-              variant="ghost"
-              className="w-full"
-              size="sm"
-            >
+            <Button onClick={onClose} variant="ghost" className="w-full" size="sm">
               Dismiss
             </Button>
           </div>
@@ -201,4 +170,4 @@ export function ClipboardDetectionDialog({
       </DialogContent>
     </Dialog>
   );
-} 
+}
