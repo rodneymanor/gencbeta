@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { VideoPlayer } from "@/components/video-player";
 import { useAuth } from "@/contexts/auth-context";
 import { CollectionsService, type Video, type Collection } from "@/lib/collections";
 
@@ -82,7 +83,7 @@ export default function CollectionsPage() {
   // Cleanup object URLs on unmount
   useEffect(() => {
     return () => {
-      Object.values(videoObjectUrls).forEach(url => {
+      Object.values(videoObjectUrls).forEach((url) => {
         if (url) {
           URL.revokeObjectURL(url);
         }
@@ -101,7 +102,7 @@ export default function CollectionsPage() {
         const uint8Array = new Uint8Array(video.videoData.buffer);
         const blob = new Blob([uint8Array], { type: video.videoData.mimeType });
         const objectUrl = URL.createObjectURL(blob);
-        setVideoObjectUrls(prev => {
+        setVideoObjectUrls((prev) => {
           const videoId = video.id!;
           return { ...prev, [videoId]: objectUrl };
         });
@@ -125,10 +126,10 @@ export default function CollectionsPage() {
           isPlaying: v.id === videoId,
         })),
       );
-      
-             // Create object URL if needed
-       const video = videos.find(v => v.id === videoId);
-       if (video && video.videoData && !video.hostedOnCDN && !(videoId in videoObjectUrls)) {
+
+      // Create object URL if needed
+      const video = videos.find((v) => v.id === videoId);
+      if (video && video.videoData && !video.hostedOnCDN && !(videoId in videoObjectUrls)) {
         createVideoObjectUrl(video);
       }
     }
@@ -247,82 +248,34 @@ export default function CollectionsPage() {
             <div key={video.id} className="relative mx-auto w-full max-w-sm">
               <Card className="overflow-hidden border-0 bg-gradient-to-br from-gray-900 to-black shadow-2xl">
                 <CardContent className="p-0">
-                  {/* Video Container */}
-                  <div className="relative aspect-[9/16] overflow-hidden rounded-xl bg-black">
-                    {video.isPlaying ? (
-                      <video
-                        src={
-                          video.videoData && !video.hostedOnCDN && video.id && video.id in videoObjectUrls
-                            ? videoObjectUrls[video.id]
-                            : video.url
-                        }
-                        className="h-full w-full rounded-xl object-cover"
-                        controls
-                        autoPlay
-                        muted
-                        playsInline
-                        onEnded={() => toggleVideoPlay(video.id!)}
-                        onError={(e) => {
-                          console.error("❌ [VIDEO_PLAYER] Video playback error:", e);
-                          console.log("🔍 [VIDEO_PLAYER] Video details:", {
-                            url: video.url,
-                            hasVideoData: !!video.videoData,
-                            hostedOnCDN: video.hostedOnCDN,
-                            objectUrl: video.id ? videoObjectUrls[video.id] : undefined
-                          });
-                        }}
-                      />
-                    ) : (
-                      <div
-                        className="relative h-full w-full cursor-pointer bg-black"
-                        onClick={() => toggleVideoPlay(video.id!)}
-                      >
-                        <Image src={video.thumbnailUrl} alt={video.title} fill className="rounded-xl object-cover" />
-                        {/* Play Button Overlay */}
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity duration-200 hover:opacity-100">
-                          <div className="rounded-full bg-white/90 p-4 transition-all duration-200 hover:scale-110 hover:bg-white">
-                            <Play className="ml-1 h-6 w-6 text-black" />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Metrics Overlay */}
-                    <div className="absolute right-0 bottom-0 left-0 rounded-b-xl bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4">
-                      <div className="flex items-center justify-between text-white">
-                        <div className="flex items-center space-x-4">
-                          <div className="flex items-center space-x-1">
-                            <span className="text-sm">👁️</span>
-                            <span className="text-sm font-medium">{formatNumber(video.insights.views)}</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <span className="text-sm">❤️</span>
-                            <span className="text-sm font-medium">{formatNumber(video.insights.likes)}</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <span className="text-sm">💬</span>
-                            <span className="text-sm font-medium">{formatNumber(video.insights.comments)}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Insights Button */}
-                    <VideoInsightsModal video={video}>
-                      <Button
-                        size="sm"
-                        className="absolute top-4 right-4 border-0 bg-black/50 text-white backdrop-blur-sm transition-all duration-200 hover:scale-105 hover:bg-black/70"
-                      >
-                        <BarChart3 className="mr-1 h-4 w-4" />
-                        Insights
-                      </Button>
-                    </VideoInsightsModal>
-
-                    {/* Platform Badge */}
-                    <Badge className={`absolute top-4 left-4 border-0 capitalize ${getPlatformColor(video.platform)}`}>
-                      {video.platform}
-                    </Badge>
-                  </div>
+                  {/* Use VideoPlayer Component */}
+                  <VideoPlayer
+                    videoUrl={video.url}
+                    platform={video.platform as "tiktok" | "instagram"}
+                    metrics={{
+                      views: video.insights.views,
+                      likes: video.insights.likes,
+                      comments: video.insights.comments,
+                      shares: video.insights.shares || 0,
+                    }}
+                    insights={{
+                      reach: video.insights.views * 1.2, // Estimate
+                      impressions: video.insights.views * 1.5, // Estimate
+                      engagementRate: ((video.insights.likes + video.insights.comments) / video.insights.views) * 100,
+                      topHours: ["18:00", "19:00", "20:00"], // Placeholder
+                      demographics: [
+                        { ageGroup: "18-24", percentage: 35 },
+                        { ageGroup: "25-34", percentage: 40 },
+                        { ageGroup: "35-44", percentage: 25 },
+                      ],
+                      growthRate: 15.2, // Placeholder
+                    }}
+                    title={video.title}
+                    author={video.author}
+                    hostedOnCDN={video.hostedOnCDN}
+                    videoData={video.videoData}
+                    className="h-full w-full"
+                  />
                 </CardContent>
               </Card>
             </div>
