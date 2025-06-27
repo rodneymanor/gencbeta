@@ -337,110 +337,231 @@ async function updateCollectionVideoCount(adminDb: any, collectionId: string, cu
 
 // eslint-disable-next-line complexity
 export async function POST(request: NextRequest) {
-  console.log("🚀 [API] Starting comprehensive video processing workflow...");
+  const startTime = Date.now();
+  const requestId = Math.random().toString(36).substring(7);
+  
+  console.log(`🚀 [${requestId}] Starting video processing workflow at ${new Date().toISOString()}`);
 
   try {
+    // Step 1: Authentication
+    console.log(`🔐 [${requestId}] Step 1: Validating API key...`);
     if (!validateApiKey(request)) {
+      console.log(`❌ [${requestId}] Authentication failed`);
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    console.log(`✅ [${requestId}] Authentication successful`);
 
+    // Step 2: Request validation
+    console.log(`📋 [${requestId}] Step 2: Validating request body...`);
     const body = await request.json();
     const validation = validateAddVideoRequest(body);
 
     if (!validation.isValid) {
+      console.log(`❌ [${requestId}] Request validation failed: ${validation.error}`);
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
     const { videoUrl, collectionId, title } = validation.data!;
+    console.log(`✅ [${requestId}] Request validation successful - URL: ${videoUrl}, Collection: ${collectionId}`);
 
+    // Step 3: URL validation
+    console.log(`🔗 [${requestId}] Step 3: Validating video URL...`);
     if (!validateUrl(videoUrl)) {
+      console.log(`❌ [${requestId}] URL validation failed - unsupported platform`);
       return NextResponse.json(
         { error: "Only TikTok and Instagram videos are supported for full processing" },
         { status: 400 },
       );
     }
+    console.log(`✅ [${requestId}] URL validation successful`);
 
+    // Step 4: Firebase connection
+    console.log(`🔥 [${requestId}] Step 4: Connecting to Firebase...`);
     const adminDb = getAdminDb();
     if (!isAdminInitialized || !adminDb) {
+      console.log(`❌ [${requestId}] Firebase connection failed - SDK not configured`);
       return NextResponse.json({ error: "Firebase Admin SDK not configured" }, { status: 500 });
     }
+    console.log(`✅ [${requestId}] Firebase connection successful`);
 
+    // Step 5: Collection verification
+    console.log(`📁 [${requestId}] Step 5: Verifying collection exists...`);
     const collectionDoc = await adminDb.collection("collections").doc(collectionId).get();
     if (!collectionDoc.exists) {
+      console.log(`❌ [${requestId}] Collection not found: ${collectionId}`);
       return NextResponse.json({ error: "Collection not found" }, { status: 404 });
     }
 
     const collectionData = collectionDoc.data();
+    console.log(`✅ [${requestId}] Collection verified - Title: ${collectionData?.title}, Owner: ${collectionData?.userId}`);
 
-    console.log("📥 [API] Step 1: Downloading video...");
+    // All validations passed - return immediate success response
+    const validationTime = Date.now() - startTime;
+    console.log(`🎉 [${requestId}] All validations passed in ${validationTime}ms - returning immediate response`);
+    
+    // Start background processing (non-blocking)
+    setTimeout(() => {
+      processVideoInBackground(requestId, videoUrl, collectionId, title, collectionData, adminDb);
+    }, 0);
+
+    // Return immediate success response
+    return NextResponse.json({
+      success: true,
+      message: "Video processing has started successfully",
+      requestId: requestId,
+      status: "processing",
+      estimatedTime: "30-60 seconds",
+      collectionId: collectionId,
+      videoUrl: videoUrl,
+      title: title || "Auto-generated title",
+      timestamp: new Date().toISOString(),
+      validationTime: `${validationTime}ms`
+    });
+
+  } catch (error) {
+    console.error(`❌ [${requestId}] Critical error during validation:`, error);
+    return NextResponse.json(
+      {
+        error: "Failed to process video request",
+        details: error instanceof Error ? error.message : "Unknown error",
+        requestId: requestId,
+        step: "validation",
+      },
+      { status: 500 },
+    );
+  }
+}
+
+// Background processing function with comprehensive logging
+async function processVideoInBackground(
+  requestId: string, 
+  videoUrl: string, 
+  collectionId: string, 
+  title: string | undefined, 
+  collectionData: any, 
+  adminDb: any
+) {
+  const backgroundStartTime = Date.now();
+  
+  try {
+    console.log(`🔄 [${requestId}] Background processing started at ${new Date().toISOString()}`);
+
+    // Step 6: Download video
+    console.log(`📥 [${requestId}] Step 6: Starting video download...`);
+    const downloadStartTime = Date.now();
     const downloadResponse = await downloadVideo(videoUrl);
-    console.log("✅ [API] Download completed successfully");
+    const downloadTime = Date.now() - downloadStartTime;
+    console.log(`✅ [${requestId}] Video download completed in ${downloadTime}ms`);
+    console.log(`📊 [${requestId}] Download details:`, {
+      platform: downloadResponse.platform,
+      hostedOnCDN: downloadResponse.hostedOnCDN,
+      filename: downloadResponse.filename,
+      hasVideoData: !!downloadResponse.videoData,
+      author: downloadResponse.additionalMetadata.author,
+      duration: downloadResponse.additionalMetadata.duration,
+      metrics: downloadResponse.metrics
+    });
 
-    console.log("🎬 [API] Step 2: Transcribing video...");
+    // Step 7: Transcribe video
+    console.log(`🎬 [${requestId}] Step 7: Starting video transcription...`);
+    const transcribeStartTime = Date.now();
     const transcriptionResponse = await transcribeVideo(downloadResponse);
-    console.log("✅ [API] Transcription completed successfully");
+    const transcribeTime = Date.now() - transcribeStartTime;
+    console.log(`✅ [${requestId}] Video transcription completed in ${transcribeTime}ms`);
+    console.log(`📝 [${requestId}] Transcription details:`, {
+      success: transcriptionResponse.success,
+      transcriptLength: transcriptionResponse.transcript.length,
+      hasComponents: !!(transcriptionResponse.components.hook && transcriptionResponse.components.bridge),
+      platform: transcriptionResponse.platform,
+      method: transcriptionResponse.transcriptionMetadata?.method
+    });
 
-    console.log("🖼️ [API] Step 3: Generating thumbnail...");
+    // Step 8: Generate thumbnail
+    console.log(`🖼️ [${requestId}] Step 8: Generating thumbnail...`);
+    const thumbnailStartTime = Date.now();
     const thumbnailUrl = await extractVideoThumbnail(downloadResponse);
-    console.log("✅ [API] Thumbnail generated successfully");
+    const thumbnailTime = Date.now() - thumbnailStartTime;
+    console.log(`✅ [${requestId}] Thumbnail generation completed in ${thumbnailTime}ms`);
+    console.log(`🖼️ [${requestId}] Thumbnail URL: ${thumbnailUrl}`);
 
-    console.log("📦 [API] Step 4: Creating comprehensive video object...");
+    // Step 9: Create video object
+    console.log(`📦 [${requestId}] Step 9: Creating comprehensive video object...`);
     const videoData = createVideoObject(downloadResponse, transcriptionResponse, thumbnailUrl, videoUrl, title);
-
+    
     videoData.userId = collectionData?.userId ?? "";
     videoData.collectionId = collectionId;
+    videoData.processingMetadata = {
+      requestId: requestId,
+      processedAt: new Date().toISOString(),
+      processingTimes: {
+        download: `${downloadTime}ms`,
+        transcription: `${transcribeTime}ms`,
+        thumbnail: `${thumbnailTime}ms`
+      }
+    };
 
-    console.log("💾 [API] Step 5: Saving to Firestore...");
-    console.log("📄 [API] Video data being saved:", {
+    console.log(`📄 [${requestId}] Video object created:`, {
       title: videoData.title,
       platform: videoData.platform,
       url: videoData.url,
+      author: videoData.author,
       collectionId: videoData.collectionId,
       userId: videoData.userId,
       hasTranscript: !!videoData.transcript,
       hasComponents: !!videoData.components,
       fileSize: videoData.fileSize,
       duration: videoData.duration,
+      thumbnailUrl: videoData.thumbnailUrl,
+      engagementRate: videoData.engagementRate
     });
 
+    // Step 10: Save to Firestore
+    console.log(`💾 [${requestId}] Step 10: Saving video to Firestore...`);
+    const saveStartTime = Date.now();
     const videoDocRef = await adminDb.collection("videos").add(videoData);
-    console.log("✅ [API] Video saved with ID:", videoDocRef.id);
+    const saveTime = Date.now() - saveStartTime;
+    console.log(`✅ [${requestId}] Video saved to Firestore in ${saveTime}ms with ID: ${videoDocRef.id}`);
 
+    // Step 11: Update collection video count
+    console.log(`📊 [${requestId}] Step 11: Updating collection video count...`);
     const currentVideoCount = collectionData?.videoCount ?? 0;
-    console.log("📊 [API] Updating collection video count from", currentVideoCount, "to", currentVideoCount + 1);
+    const updateStartTime = Date.now();
     await updateCollectionVideoCount(adminDb, collectionId, currentVideoCount);
+    const updateTime = Date.now() - updateStartTime;
+    console.log(`✅ [${requestId}] Collection video count updated in ${updateTime}ms: ${currentVideoCount} → ${currentVideoCount + 1}`);
 
-    console.log("✅ [API] Video processing and storage completed successfully");
-
-    return NextResponse.json({
-      success: true,
-      message: "Video processed and added successfully",
+    const totalProcessingTime = Date.now() - backgroundStartTime;
+    console.log(`🎉 [${requestId}] PROCESSING COMPLETED SUCCESSFULLY in ${totalProcessingTime}ms`);
+    console.log(`📈 [${requestId}] Final processing summary:`, {
       videoId: videoDocRef.id,
-      collectionId,
-      video: {
-        id: videoDocRef.id,
-        ...videoData,
-        addedAt: videoData.addedAt instanceof Date ? videoData.addedAt.toISOString() : videoData.addedAt,
+      collectionId: collectionId,
+      totalTime: `${totalProcessingTime}ms`,
+      breakdown: {
+        download: `${downloadTime}ms`,
+        transcription: `${transcribeTime}ms`,
+        thumbnail: `${thumbnailTime}ms`,
+        save: `${saveTime}ms`,
+        update: `${updateTime}ms`
       },
-      processing: {
-        downloaded: true,
-        transcribed: transcriptionResponse.success,
-        thumbnailGenerated: !!thumbnailUrl,
-        hostedOnCDN: downloadResponse.hostedOnCDN,
-        fileSize: downloadResponse.videoData?.size ?? 0,
-        duration: downloadResponse.additionalMetadata.duration,
-      },
+      success: true,
+      completedAt: new Date().toISOString()
     });
+
   } catch (error) {
-    console.error("❌ [API] Video processing error:", error);
-    return NextResponse.json(
-      {
-        error: "Failed to process video",
-        details: error instanceof Error ? error.message : "Unknown error",
-        step: "video_processing",
-      },
-      { status: 500 },
-    );
+    const totalTime = Date.now() - backgroundStartTime;
+    console.error(`❌ [${requestId}] BACKGROUND PROCESSING FAILED after ${totalTime}ms:`, error);
+    console.error(`❌ [${requestId}] Error details:`, {
+      message: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined,
+      videoUrl: videoUrl,
+      collectionId: collectionId,
+      title: title,
+      failedAt: new Date().toISOString(),
+      processingTime: `${totalTime}ms`
+    });
+    
+    // TODO: Consider implementing a retry mechanism or error notification system
+    // For now, we log the error but don't notify the client since they already got a success response
   }
 }
 
