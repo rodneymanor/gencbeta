@@ -3,10 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { Zap, Plus, ChevronRight, FolderPlus } from "lucide-react";
+import { Zap, ChevronRight, FolderPlus } from "lucide-react";
 
 import { CreateCollectionDialog } from "@/app/(main)/research/collections/_components/create-collection-dialog";
-import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   DropdownMenu,
@@ -28,7 +27,6 @@ import {
 } from "@/components/ui/sidebar";
 import { type NavGroup, type NavMainItem } from "@/navigation/sidebar/sidebar-items";
 
-import { CreateDropdown } from "./create-dropdown";
 import { SpeedWriteDialog } from "./speed-write-dialog";
 
 interface NavMainProps {
@@ -201,26 +199,16 @@ export function NavMain({ items, onCollectionCreated }: NavMainProps) {
       <SidebarGroup>
         <SidebarGroupContent className="flex flex-col gap-2">
           <SidebarMenu>
-            <SidebarMenuItem className="flex items-center gap-2">
+            <SidebarMenuItem>
               <SpeedWriteDialog>
                 <SidebarMenuButton
                   tooltip="Speed Write"
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground flex h-11 min-w-8 items-center justify-center duration-200 ease-linear"
                 >
                   <Zap />
                   <span>Speed Write</span>
                 </SidebarMenuButton>
               </SpeedWriteDialog>
-              <CreateDropdown>
-                <Button
-                  size="icon"
-                  className="h-11 w-11 shrink-0 group-data-[collapsible=icon]:opacity-0"
-                  variant="outline"
-                >
-                  <Plus />
-                  <span className="sr-only">Create</span>
-                </Button>
-              </CreateDropdown>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroupContent>
