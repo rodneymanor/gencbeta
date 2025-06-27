@@ -7,5 +7,6 @@
     "src/app/api/**/*.ts": {
       "maxDuration": 60
     }
-  }
+  },
+  "public": true
 } 
