@@ -41,7 +41,7 @@ export function LoginForm() {
     try {
       await signIn(values.email, values.password);
       toast.success("Login successful!");
-      router.push("/dashboard/home");
+      router.push("/dashboard/content-creator");
     } catch (err) {
       const error = err as Error;
       const message = error.message;
@@ -55,7 +55,7 @@ export function LoginForm() {
     try {
       await signInWithGoogle();
       toast.success("Signed in with Google successfully!");
-      router.push("/dashboard/home");
+      router.push("/dashboard/content-creator");
     } catch (err) {
       const error = err as Error;
       const message = error.message;
