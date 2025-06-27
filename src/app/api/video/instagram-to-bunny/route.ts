@@ -16,6 +16,21 @@ function validateEnvironmentVariables(): { valid: boolean; error?: string } {
   return { valid: true };
 }
 
+function getBaseUrl(request: NextRequest): string {
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  
+  // In development, use the request's host to get the correct port
+  const host = request.headers.get("host");
+  if (host) {
+    return `http://${host}`;
+  }
+  
+  // Fallback to default
+  return "http://localhost:3000";
+}
+
 function validateInstagramUrl(url: string): { valid: boolean; error?: string } {
   if (!url) {
     console.error("❌ [INSTAGRAM_TO_BUNNY] No URL provided");
@@ -95,7 +110,8 @@ export async function POST(request: NextRequest) {
 
     // Step 4: Start background transcription (non-blocking)
     console.log("🎬 [INSTAGRAM_TO_BUNNY] Starting background transcription...");
-    startBackgroundTranscription(bunnyIframeUrl, shortcode, metadata.platform);
+    const baseUrl = getBaseUrl(request);
+    startBackgroundTranscription(bunnyIframeUrl, shortcode, metadata.platform, baseUrl);
 
     // Step 5: Return immediate response with iframe and thumbnail
     return NextResponse.json({
@@ -207,13 +223,12 @@ function processInstagramResponse(data: any) {
   };
 }
 
-function startBackgroundTranscription(bunnyUrl: string, shortcode: string, platform: string) {
+function startBackgroundTranscription(bunnyUrl: string, shortcode: string, platform: string, baseUrl: string) {
   // Start transcription in background (non-blocking)
   setTimeout(async () => {
     try {
       console.log("🎬 [BACKGROUND] Starting transcription for:", shortcode);
-
-      const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
+      console.log("🌐 [BACKGROUND] Using base URL:", baseUrl);
 
       // Call background transcription service
       const response = await fetch(`${baseUrl}/api/video/transcribe`, {
@@ -228,8 +243,13 @@ function startBackgroundTranscription(bunnyUrl: string, shortcode: string, platf
 
       if (response.ok) {
         console.log("✅ [BACKGROUND] Transcription completed for:", shortcode);
+        const result = await response.json();
+        console.log("📄 [BACKGROUND] Transcript length:", result.transcript?.length || 0, "characters");
       } else {
+        const errorText = await response.text();
         console.error("❌ [BACKGROUND] Transcription failed for:", shortcode);
+        console.error("❌ [BACKGROUND] Response status:", response.status);
+        console.error("❌ [BACKGROUND] Response body:", errorText);
       }
     } catch (error) {
       console.error("❌ [BACKGROUND] Transcription error:", error);
