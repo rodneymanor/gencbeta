@@ -195,16 +195,7 @@ export class UserManagementAdminService {
 
       try {
         // Step 2: Create Firestore profile document
-        const profileData = {
-          uid: authUser.uid,
-          email,
-          displayName,
-          role,
-          coachId,
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
+        const profileData = this.createProfileData(authUser.uid, email, displayName, role, coachId);
 
         console.log("🔍 [ADMIN] Creating Firestore profile document...");
 
@@ -249,5 +240,31 @@ export class UserManagementAdminService {
       console.error("❌ [ADMIN] Error creating complete user account:", error);
       throw new Error("Failed to create user account");
     }
+  }
+
+  // Helper function to create Firestore profile data
+  private static createProfileData(
+    uid: string,
+    email: string,
+    displayName: string,
+    role: UserRole,
+    coachId?: string,
+  ): Record<string, any> {
+    const profileData: Record<string, any> = {
+      uid,
+      email,
+      displayName,
+      role,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Only include coachId if it has a value
+    if (coachId) {
+      profileData.coachId = coachId;
+    }
+
+    return profileData;
   }
 }
