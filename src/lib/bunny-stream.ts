@@ -265,7 +265,7 @@ export async function streamToBunnyFromUrl(
       return null;
     }
 
-    const iframeUrl = `https://iframe.mediadelivery.net/embed/${BUNNY_STREAM_LIBRARY_ID}/${videoGuid}`;
+    const iframeUrl = `https://iframe.mediadelivery.net/embed/${process.env.BUNNY_STREAM_LIBRARY_ID}/${videoGuid}`;
     console.log("✅ [BUNNY_STREAM] Direct stream completed successfully");
     console.log("🎯 [BUNNY_STREAM] Iframe URL:", iframeUrl);
 
@@ -278,11 +278,11 @@ export async function streamToBunnyFromUrl(
 
 async function createBunnyVideoObject(filename: string): Promise<string | null> {
   try {
-    const response = await fetch(`https://video.bunnycdn.com/library/${BUNNY_STREAM_LIBRARY_ID}/videos`, {
+    const response = await fetch(`https://video.bunnycdn.com/library/${process.env.BUNNY_STREAM_LIBRARY_ID}/videos`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        AccessKey: BUNNY_STREAM_API_KEY,
+        AccessKey: process.env.BUNNY_STREAM_API_KEY || "",
       },
       body: JSON.stringify({
         title: filename.replace(/\.[^/.]+$/, ""), // Remove extension
@@ -326,11 +326,11 @@ async function streamVideoToBunny(sourceUrl: string, videoGuid: string): Promise
 
     // Stream directly to Bunny CDN
     const uploadResponse = await fetch(
-      `https://video.bunnycdn.com/library/${BUNNY_STREAM_LIBRARY_ID}/videos/${videoGuid}`,
+      `https://video.bunnycdn.com/library/${process.env.BUNNY_STREAM_LIBRARY_ID}/videos/${videoGuid}`,
       {
         method: "PUT",
         headers: {
-          AccessKey: BUNNY_STREAM_API_KEY,
+          AccessKey: process.env.BUNNY_STREAM_API_KEY || "",
           "Content-Type": "application/octet-stream",
         },
         body: sourceResponse.body, // Direct stream!

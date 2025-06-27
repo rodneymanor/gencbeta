@@ -18,6 +18,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Only Instagram URLs are supported" }, { status: 400 });
     }
 
+    // Check for required environment variables
+    if (!process.env.BUNNY_STREAM_LIBRARY_ID || !process.env.BUNNY_STREAM_API_KEY) {
+      console.error("❌ [INSTAGRAM_TO_BUNNY] Missing Bunny Stream configuration");
+      return NextResponse.json({ error: "Bunny Stream not configured" }, { status: 500 });
+    }
+
+    if (!process.env.RAPIDAPI_KEY) {
+      console.error("❌ [INSTAGRAM_TO_BUNNY] Missing RapidAPI key");
+      return NextResponse.json({ error: "RapidAPI not configured" }, { status: 500 });
+    }
+
     console.log("🔍 [INSTAGRAM_TO_BUNNY] Processing Instagram URL:", url);
 
     // Step 1: Extract shortcode
@@ -45,6 +56,11 @@ export async function POST(request: NextRequest) {
     }
 
     const { videoData, metadata } = rapidApiData;
+
+    if (!videoData?.lowQualityUrl) {
+      console.error("❌ [INSTAGRAM_TO_BUNNY] No video URL found in response");
+      return NextResponse.json({ error: "No video URL found in Instagram data" }, { status: 500 });
+    }
 
     // Step 3: Stream video directly to Bunny CDN (using low quality for speed)
     console.log("🌊 [INSTAGRAM_TO_BUNNY] Streaming to Bunny CDN...");
