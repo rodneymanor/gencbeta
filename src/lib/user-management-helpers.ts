@@ -25,21 +25,20 @@ export function formatTimestamp(timestamp: unknown): string {
  */
 export async function getAllCoaches(): Promise<UserProfile[]> {
   try {
-    const q = query(
-      collection(db, "user_profiles"),
-      where("role", "==", "coach"),
-      where("isActive", "==", true),
-      orderBy("displayName"),
-    );
+    // Use simple query to avoid composite index requirement
+    const q = query(collection(db, "user_profiles"), where("role", "==", "coach"), where("isActive", "==", true));
 
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => ({
+    const coaches = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
       createdAt: formatTimestamp(doc.data().createdAt),
       updatedAt: formatTimestamp(doc.data().updatedAt),
       lastLoginAt: doc.data().lastLoginAt ? formatTimestamp(doc.data().lastLoginAt) : undefined,
     })) as UserProfile[];
+
+    // Sort in JavaScript to avoid composite index requirement
+    return coaches.sort((a, b) => (a.displayName || "").localeCompare(b.displayName || ""));
   } catch (error) {
     console.error("Error fetching coaches:", error);
     throw new Error("Failed to fetch coaches");
@@ -51,22 +50,25 @@ export async function getAllCoaches(): Promise<UserProfile[]> {
  */
 export async function getCoachCreators(coachId: string): Promise<UserProfile[]> {
   try {
+    // Use simple query to avoid composite index requirement
     const q = query(
       collection(db, "user_profiles"),
       where("role", "==", "creator"),
       where("coachId", "==", coachId),
       where("isActive", "==", true),
-      orderBy("displayName"),
     );
 
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => ({
+    const creators = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
       createdAt: formatTimestamp(doc.data().createdAt),
       updatedAt: formatTimestamp(doc.data().updatedAt),
       lastLoginAt: doc.data().lastLoginAt ? formatTimestamp(doc.data().lastLoginAt) : undefined,
     })) as UserProfile[];
+
+    // Sort in JavaScript to avoid composite index requirement
+    return creators.sort((a, b) => (a.displayName || "").localeCompare(b.displayName || ""));
   } catch (error) {
     console.error("Error fetching coach creators:", error);
     throw new Error("Failed to fetch creators");
@@ -78,16 +80,20 @@ export async function getCoachCreators(coachId: string): Promise<UserProfile[]> 
  */
 export async function getAllUsers(): Promise<UserProfile[]> {
   try {
-    const q = query(collection(db, "user_profiles"), where("isActive", "==", true), orderBy("createdAt", "desc"));
+    // Use simple query to avoid composite index requirement
+    const q = query(collection(db, "user_profiles"), where("isActive", "==", true));
 
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => ({
+    const users = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
       createdAt: formatTimestamp(doc.data().createdAt),
       updatedAt: formatTimestamp(doc.data().updatedAt),
       lastLoginAt: doc.data().lastLoginAt ? formatTimestamp(doc.data().lastLoginAt) : undefined,
     })) as UserProfile[];
+
+    // Sort in JavaScript to avoid composite index requirement
+    return users.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   } catch (error) {
     console.error("Error fetching all users:", error);
     throw new Error("Failed to fetch users");
