@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { UserManagementService } from "@/lib/user-management";
+import { UserManagementService, UserRole } from "@/lib/user-management";
 import { UserManagementAdminService } from "@/lib/user-management-admin";
 
 interface TestData {
@@ -14,6 +14,14 @@ interface TestData {
 interface UserData {
   uid: string;
   email: string;
+  displayName: string;
+  role?: string;
+  coachId?: string;
+}
+
+interface UserCreationData {
+  email: string;
+  password: string;
   displayName: string;
   role?: string;
   coachId?: string;
@@ -79,6 +87,41 @@ async function handleUserProfileCreation(userData: UserData) {
   }
 }
 
+// Handle complete user account creation using Admin SDK
+async function handleCompleteUserCreation(userData: UserCreationData) {
+  console.log("👤 [DEBUG] Creating complete user account via Admin SDK:", {
+    email: userData.email,
+    displayName: userData.displayName,
+    role: userData.role,
+  });
+
+  try {
+    const result = await UserManagementAdminService.createCompleteUserAccount(
+      userData.email,
+      userData.password,
+      userData.displayName,
+      (userData.role as UserRole) ?? "coach",
+      userData.coachId,
+    );
+
+    return NextResponse.json({
+      success: true,
+      message: "Complete user account created successfully",
+      uid: result.uid,
+      profileId: result.profileId,
+    });
+  } catch (error) {
+    console.error("❌ [DEBUG] Complete user creation failed:", error);
+    return NextResponse.json(
+      {
+        error: "Complete user creation failed",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
+    );
+  }
+}
+
 // Extract environment variable checking to reduce complexity
 // eslint-disable-next-line complexity
 function getEnvironmentStatus() {
@@ -113,6 +156,10 @@ export async function POST(request: NextRequest) {
 
     if (action === "create-user-profile") {
       return await handleUserProfileCreation(userData);
+    }
+
+    if (action === "complete-user-creation") {
+      return await handleCompleteUserCreation(userData);
     }
 
     if (!userId || !newRole) {

@@ -1,5 +1,4 @@
-import { initializeApp, cert, ServiceAccount, getApps } from "firebase-admin/app";
-import { getFirestore } from "firebase-admin/firestore";
+import { getAuth } from "firebase-admin/auth";
 
 import { getAdminDb, isAdminInitialized } from "./firebase-admin";
 import { UserRole } from "./user-management";
@@ -165,72 +164,90 @@ export class UserManagementAdminService {
   }
 
   /**
-   * Create user profile using Admin SDK (for server-side operations)
+   * Create complete user account (Firebase Auth + Firestore profile) using Admin SDK
+   * This ensures both operations succeed or fail together
    */
-  static async createUserProfile(
-    uid: string,
+  static async createCompleteUserAccount(
     email: string,
+    password: string,
     displayName: string,
     role: UserRole = "creator",
     coachId?: string,
-  ): Promise<string> {
+  ): Promise<{ uid: string; profileId: string }> {
     const adminDb = getAdminDb();
     if (!isAdminInitialized || !adminDb) {
       throw new Error("Firebase Admin SDK not initialized");
     }
 
     try {
-      console.log("🔍 [ADMIN] Creating user profile for:", { uid, email, displayName, role });
+      console.log("🔍 [ADMIN] Creating complete user account for:", { email, displayName, role });
 
-      // Check if user profile already exists
-      const existingProfile = await this.getUserProfile(uid);
-      if (existingProfile) {
-        console.log("✅ [ADMIN] User profile already exists, returning existing ID");
-        return uid; // Return the UID as document ID for consistency
-      }
-
-      // Create new profile data
-      const profileData = {
-        uid,
+      // Step 1: Create Firebase Auth user
+      const authUser = await getAuth().createUser({
         email,
+        password,
         displayName,
-        role,
-        coachId,
-        isActive: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
+        emailVerified: false,
+        disabled: false,
+      });
 
-      console.log("🔍 [ADMIN] Creating document with data:", profileData);
+      console.log("✅ [ADMIN] Firebase Auth user created:", authUser.uid);
 
-      // Create document using UID as document ID for easier access
-      await adminDb.collection(this.USER_PROFILES_PATH).doc(uid).set(profileData);
+      try {
+        // Step 2: Create Firestore profile document
+        const profileData = {
+          uid: authUser.uid,
+          email,
+          displayName,
+          role,
+          coachId,
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
 
-      console.log("✅ [ADMIN] User profile created successfully with UID as document ID");
+        console.log("🔍 [ADMIN] Creating Firestore profile document...");
 
-      // If this is a creator being assigned to a coach, create the relationship
-      if (role === "creator" && coachId) {
-        console.log("🔍 [ADMIN] Creating coach-creator relationship...");
-        try {
-          const relationshipData = {
-            coachId,
-            creatorId: uid,
-            assignedAt: new Date().toISOString(),
-            isActive: true,
-          };
+        // Use the UID as the document ID for easier access
+        await adminDb.collection(this.USER_PROFILES_PATH).doc(authUser.uid).set(profileData);
 
-          await adminDb.collection("coach_creator_relationships").add(relationshipData);
-          console.log("✅ [ADMIN] Coach-creator relationship created");
-        } catch (error) {
-          console.error("❌ [ADMIN] Error creating coach-creator relationship:", error);
-          // Don't throw error here as the user was already created successfully
+        console.log("✅ [ADMIN] Firestore profile created successfully");
+
+        // Step 3: Create coach-creator relationship if needed
+        if (role === "creator" && coachId) {
+          console.log("🔍 [ADMIN] Creating coach-creator relationship...");
+          try {
+            const relationshipData = {
+              coachId,
+              creatorId: authUser.uid,
+              assignedAt: new Date().toISOString(),
+              isActive: true,
+            };
+
+            await adminDb.collection("coach_creator_relationships").add(relationshipData);
+            console.log("✅ [ADMIN] Coach-creator relationship created");
+          } catch (relationshipError) {
+            console.error("❌ [ADMIN] Error creating coach-creator relationship:", relationshipError);
+            // Don't throw error here as the user was already created successfully
+          }
         }
-      }
 
-      return uid;
+        console.log("✅ [ADMIN] Complete user account created successfully");
+        return { uid: authUser.uid, profileId: authUser.uid };
+      } catch (profileError) {
+        // If Firestore profile creation fails, clean up the Auth user
+        console.error("❌ [ADMIN] Firestore profile creation failed, cleaning up Auth user:", profileError);
+        try {
+          await getAuth().deleteUser(authUser.uid);
+          console.log("✅ [ADMIN] Auth user cleaned up after profile creation failure");
+        } catch (cleanupError) {
+          console.error("❌ [ADMIN] Failed to cleanup Auth user:", cleanupError);
+        }
+        throw profileError;
+      }
     } catch (error) {
-      console.error("❌ [ADMIN] Error creating user profile:", error);
-      throw new Error("Failed to create user profile");
+      console.error("❌ [ADMIN] Error creating complete user account:", error);
+      throw new Error("Failed to create user account");
     }
   }
 }
