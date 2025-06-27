@@ -1,10 +1,14 @@
+import { initializeApp, cert, ServiceAccount, getApps } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
+
 import { getAdminDb, isAdminInitialized } from "./firebase-admin";
+import { UserRole } from "./user-management";
 
 export interface UserProfile {
   uid: string;
   email: string;
   displayName?: string;
-  role: "super_admin" | "admin" | "coach" | "creator" | "user";
+  role: UserRole;
   createdAt: string;
   updatedAt: string;
 }
@@ -167,7 +171,7 @@ export class UserManagementAdminService {
     uid: string,
     email: string,
     displayName: string,
-    role: "super_admin" | "admin" | "coach" | "creator" | "user" = "creator",
+    role: UserRole = "creator",
     coachId?: string,
   ): Promise<string> {
     const adminDb = getAdminDb();
