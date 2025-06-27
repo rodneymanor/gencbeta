@@ -1,5 +1,8 @@
 "use client";
 
+import React, { memo } from "react";
+
+import { motion } from "framer-motion";
 import { Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -35,7 +38,58 @@ interface VideoCardProps {
   onDelete: () => void;
 }
 
-export const VideoCard = ({
+// Helper component for checkbox
+const SelectionCheckbox = ({
+  isSelected,
+  onToggleSelection,
+}: {
+  isSelected: boolean;
+  onToggleSelection: () => void;
+}) => (
+  <motion.div
+    className="absolute top-2 left-2 z-10"
+    initial={{ opacity: 0, scale: 0.8 }}
+    animate={{ opacity: 1, scale: 1 }}
+    exit={{ opacity: 0, scale: 0.8 }}
+    transition={{ duration: 0.2 }}
+  >
+    <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+      <Checkbox
+        checked={isSelected}
+        onCheckedChange={onToggleSelection}
+        className="data-[state=checked]:bg-primary data-[state=checked]:border-primary h-5 w-5 border-2 bg-white/90 backdrop-blur-sm"
+      />
+    </motion.div>
+  </motion.div>
+);
+
+// Helper component for delete button
+const DeleteButton = ({ onDelete, isDeleting }: { onDelete: () => void; isDeleting: boolean }) => (
+  <motion.div
+    className="absolute top-2 right-2 z-10"
+    initial={{ opacity: 0, scale: 0.8 }}
+    animate={{ opacity: 1, scale: 1 }}
+    exit={{ opacity: 0, scale: 0.8 }}
+    transition={{ duration: 0.2, delay: 0.1 }}
+  >
+    <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+      <Button
+        size="sm"
+        variant="ghost"
+        className="h-8 w-8 rounded-full bg-red-500/90 p-0 text-white backdrop-blur-sm transition-all duration-200 hover:bg-red-600"
+        onClick={onDelete}
+        disabled={isDeleting}
+      >
+        <motion.div animate={isDeleting ? { rotate: 360 } : { rotate: 0 }} transition={{ duration: 0.5 }}>
+          <Trash2 className="h-4 w-4" />
+        </motion.div>
+      </Button>
+    </motion.div>
+  </motion.div>
+);
+
+// eslint-disable-next-line complexity
+const VideoCardComponent = ({
   video,
   manageMode,
   isSelected,
@@ -45,11 +99,22 @@ export const VideoCard = ({
 }: VideoCardProps) => {
   const { userProfile } = useAuth();
   const isAdmin = userProfile?.role === "coach" || userProfile?.role === "super_admin";
+
   return (
-    <div
+    <motion.div
       className={`relative mx-auto w-full max-w-sm transition-all duration-300 ease-in-out ${
-        isDeleting ? "translate-y-2 scale-95 transform opacity-0" : "translate-y-0 scale-100 transform opacity-100"
+        isDeleting ? "pointer-events-none" : ""
       } ${manageMode && isSelected ? "ring-primary ring-2 ring-offset-2" : ""}`}
+      animate={{
+        opacity: isDeleting ? 0 : 1,
+        scale: isDeleting ? 0.95 : 1,
+        y: isDeleting ? 10 : 0,
+      }}
+      transition={{
+        duration: 0.3,
+        ease: "easeInOut",
+      }}
+      layout
     >
       {/* Use VideoPlayer Component with its own card */}
       <VideoPlayer
@@ -82,27 +147,21 @@ export const VideoCard = ({
 
       {manageMode && isAdmin && (
         <>
-          {/* Checkbox for multi-select */}
-          <div className="absolute top-2 left-2 z-10">
-            <Checkbox
-              checked={isSelected}
-              onCheckedChange={onToggleSelection}
-              className="data-[state=checked]:bg-primary data-[state=checked]:border-primary h-5 w-5 border-2 bg-white/90 backdrop-blur-sm"
-            />
-          </div>
-
-          {/* Individual delete button */}
-          <Button
-            size="sm"
-            variant="ghost"
-            className="absolute top-2 right-2 h-8 w-8 rounded-full bg-red-500/90 p-0 text-white backdrop-blur-sm transition-all duration-200 hover:bg-red-600"
-            onClick={onDelete}
-            disabled={isDeleting}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <SelectionCheckbox isSelected={isSelected} onToggleSelection={onToggleSelection} />
+          <DeleteButton onDelete={onDelete} isDeleting={isDeleting} />
         </>
       )}
-    </div>
+    </motion.div>
   );
 };
+
+// Memoize the component to prevent unnecessary re-renders
+export const VideoCard = memo(VideoCardComponent, (prevProps, nextProps) => {
+  // Custom comparison function for optimal performance
+  return (
+    prevProps.video.id === nextProps.video.id &&
+    prevProps.manageMode === nextProps.manageMode &&
+    prevProps.isSelected === nextProps.isSelected &&
+    prevProps.isDeleting === nextProps.isDeleting
+  );
+});

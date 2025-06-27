@@ -1,26 +1,26 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo, useTransition } from "react";
 
 import { useSearchParams, useRouter } from "next/navigation";
 
-import { Plus } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/auth-context";
 import { CollectionsService, type Collection } from "@/lib/collections";
 import { CollectionsRBACService } from "@/lib/collections-rbac";
 
-import { AddVideoDialog } from "./_components/add-video-dialog";
+import { badgeVariants } from "./_components/collections-animations";
 import {
   type VideoWithPlayer,
   getPageTitle,
   getPageDescription,
   createVideoSelectionHandlers,
 } from "./_components/collections-helpers";
-import { LoadingSkeleton, VideosLoadingSkeleton } from "./_components/loading-skeleton";
+import { LoadingSkeleton } from "./_components/loading-skeleton";
 import { ManageModeHeader } from "./_components/manage-mode-header";
-import { VideoCard } from "./_components/video-card";
+import { VideoGrid } from "./_components/video-grid";
 
 export default function CollectionsPage() {
   const [collections, setCollections] = useState<Collection[]>([]);
@@ -30,6 +30,7 @@ export default function CollectionsPage() {
   const [manageMode, setManageMode] = useState(false);
   const [selectedVideos, setSelectedVideos] = useState<Set<string>>(new Set());
   const [deletingVideos, setDeletingVideos] = useState<Set<string>>(new Set());
+  const [isPending, startTransition] = useTransition();
 
   const { user, userProfile } = useAuth();
   const searchParams = useSearchParams();
@@ -40,6 +41,24 @@ export default function CollectionsPage() {
   const { toggleVideoSelection, selectAllVideos, clearSelection } = createVideoSelectionHandlers(
     setSelectedVideos,
     videos,
+  );
+
+  // Memoize computed values for performance
+  const pageTitle = useMemo(() => getPageTitle(selectedCollectionId, collections), [selectedCollectionId, collections]);
+  const pageDescription = useMemo(
+    () => getPageDescription(selectedCollectionId, collections),
+    [selectedCollectionId, collections],
+  );
+
+  // Optimized collection navigation with smooth transitions
+  const handleCollectionChange = useCallback(
+    (collectionId: string | null) => {
+      startTransition(() => {
+        const path = collectionId ? `/research/collections?collection=${collectionId}` : "/research/collections";
+        router.push(path);
+      });
+    },
+    [router],
   );
 
   // Role-based access control
@@ -97,68 +116,66 @@ export default function CollectionsPage() {
     }
   }, [user, selectedCollectionId, loadCollections, loadVideos]);
 
-  const handleVideoAdded = () => {
+  const handleVideoAdded = useCallback(() => {
     loadCollections();
     loadVideos();
-  };
+  }, [loadCollections, loadVideos]);
 
-  const handleDeleteVideo = async (videoId: string) => {
-    if (!user) return;
-    setDeletingVideos((prev) => new Set([...prev, videoId]));
+  const handleDeleteVideo = useCallback(
+    async (videoId: string) => {
+      if (!user) return;
+      setDeletingVideos((prev) => new Set([...prev, videoId]));
 
-    try {
-      await CollectionsService.deleteVideo(user.uid, videoId);
-      setTimeout(() => {
+      try {
+        await CollectionsService.deleteVideo(user.uid, videoId);
+        // Optimistic update - remove from state immediately for better UX
+        setVideos((prev) => prev.filter((video) => video.id !== videoId));
         setDeletingVideos((prev) => {
           const newSet = new Set(prev);
           newSet.delete(videoId);
           return newSet;
         });
+      } catch (error) {
+        console.error("Error deleting video:", error);
+        // Revert optimistic update on error
         loadVideos();
-      }, 300);
-    } catch (error) {
-      console.error("Error deleting video:", error);
-      setDeletingVideos((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(videoId);
-        return newSet;
-      });
-    }
-  };
+        setDeletingVideos((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(videoId);
+          return newSet;
+        });
+      }
+    },
+    [user, loadVideos],
+  );
 
-  const handleBulkDelete = async () => {
+  const handleBulkDelete = useCallback(async () => {
     if (!user || selectedVideos.size === 0) return;
     const videoIds = Array.from(selectedVideos);
     setDeletingVideos((prev) => new Set([...prev, ...videoIds]));
 
     try {
       await Promise.all(videoIds.map((videoId) => CollectionsService.deleteVideo(user.uid, videoId)));
-      setTimeout(() => {
-        setDeletingVideos((prev) => {
-          const newSet = new Set(prev);
-          videoIds.forEach((id) => newSet.delete(id));
-          return newSet;
-        });
-        setSelectedVideos(new Set());
-        loadVideos();
-      }, 300);
+      // Optimistic update
+      setVideos((prev) => prev.filter((video) => !videoIds.includes(video.id!)));
+      setSelectedVideos(new Set());
+      setDeletingVideos(new Set());
     } catch (error) {
       console.error("Error deleting videos:", error);
+      // Revert on error
+      loadVideos();
       setDeletingVideos((prev) => {
         const newSet = new Set(prev);
         videoIds.forEach((id) => newSet.delete(id));
         return newSet;
       });
     }
-  };
+  }, [user, selectedVideos, loadVideos]);
 
-  const handleExitManageMode = () => {
+  const handleExitManageMode = useCallback(() => {
     setManageMode(false);
     setSelectedVideos(new Set());
-  };
-
-  const pageTitle = getPageTitle(selectedCollectionId, collections);
-  const pageDescription = getPageDescription(selectedCollectionId, collections);
+  }, []);
 
   if (loading) {
     return <LoadingSkeleton />;
@@ -168,13 +185,28 @@ export default function CollectionsPage() {
     <div className="@container/main">
       <div className="mx-auto max-w-7xl space-y-8 p-4 md:space-y-10 md:p-6">
         {/* Header Section */}
-        <section className="space-y-4">
+        <motion.section
+          className="space-y-4"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="space-y-2">
+            <motion.div
+              className="space-y-2"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+            >
               <h1 className="text-foreground text-3xl font-bold tracking-tight">{pageTitle}</h1>
               <p className="text-muted-foreground text-lg">{pageDescription}</p>
-            </div>
-            <div className="flex items-center gap-2">
+            </motion.div>
+            <motion.div
+              className="flex items-center gap-2"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: 0.2 }}
+            >
               <ManageModeHeader
                 manageMode={manageMode}
                 selectedVideos={selectedVideos}
@@ -188,80 +220,79 @@ export default function CollectionsPage() {
                 onSelectAll={selectAllVideos}
                 onVideoAdded={handleVideoAdded}
               />
-            </div>
+            </motion.div>
           </div>
-        </section>
+        </motion.section>
 
         {/* Collection Filter Section */}
-        <section className="space-y-4">
+        <motion.section
+          className="space-y-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+        >
           <div className="flex flex-wrap items-center gap-3">
-            <Badge
-              variant={!selectedCollectionId ? "default" : "secondary"}
-              className={`cursor-pointer transition-all duration-200 ${
-                !selectedCollectionId
-                  ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
-                  : "bg-secondary/50 hover:bg-secondary/80"
-              }`}
-              onClick={() => router.push("/research/collections")}
+            <motion.div
+              variants={badgeVariants}
+              initial="inactive"
+              animate={!selectedCollectionId ? "active" : "inactive"}
+              whileHover="hover"
+              whileTap={{ scale: 0.98 }}
             >
-              All Videos ({videos.length})
-            </Badge>
-            {collections.map((collection) => (
               <Badge
-                key={collection.id}
-                variant={selectedCollectionId === collection.id ? "default" : "secondary"}
+                variant={!selectedCollectionId ? "default" : "secondary"}
                 className={`cursor-pointer transition-all duration-200 ${
-                  selectedCollectionId === collection.id
+                  !selectedCollectionId
                     ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
                     : "bg-secondary/50 hover:bg-secondary/80"
                 }`}
-                onClick={() => router.push(`/research/collections?collection=${collection.id}`)}
+                onClick={() => handleCollectionChange(null)}
               >
-                {collection.title} ({collection.videoCount})
+                All Videos ({videos.length})
               </Badge>
-            ))}
+            </motion.div>
+            <AnimatePresence mode="popLayout">
+              {collections.map((collection) => (
+                <motion.div
+                  key={collection.id}
+                  variants={badgeVariants}
+                  initial="inactive"
+                  animate={selectedCollectionId === collection.id ? "active" : "inactive"}
+                  whileHover="hover"
+                  whileTap={{ scale: 0.98 }}
+                  layout
+                >
+                  <Badge
+                    variant={selectedCollectionId === collection.id ? "default" : "secondary"}
+                    className={`cursor-pointer transition-all duration-200 ${
+                      selectedCollectionId === collection.id
+                        ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
+                        : "bg-secondary/50 hover:bg-secondary/80"
+                    }`}
+                    onClick={() => handleCollectionChange(collection.id!)}
+                  >
+                    {collection.title} ({collection.videoCount})
+                  </Badge>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
-        </section>
+        </motion.section>
 
         {/* Videos Content Section */}
-        <section className="space-y-6">
-          {loadingVideos ? (
-            <VideosLoadingSkeleton />
-          ) : videos.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="bg-muted/50 mb-6 rounded-full p-6">
-                <Plus className="text-muted-foreground h-12 w-12" />
-              </div>
-              <div className="space-y-4">
-                <h3 className="text-foreground text-xl font-semibold">No videos yet</h3>
-                <p className="text-muted-foreground max-w-md">
-                  Add your first video to get started with content analysis and research
-                </p>
-                <div className="pt-4">
-                  <AddVideoDialog
-                    collections={collections.filter((c) => c.id).map((c) => ({ id: c.id!, title: c.title }))}
-                    selectedCollectionId={selectedCollectionId ?? undefined}
-                    onVideoAdded={handleVideoAdded}
-                  />
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-              {videos.map((video) => (
-                <VideoCard
-                  key={video.id}
-                  video={video}
-                  manageMode={manageMode}
-                  isSelected={selectedVideos.has(video.id!)}
-                  isDeleting={deletingVideos.has(video.id!)}
-                  onToggleSelection={() => toggleVideoSelection(video.id!)}
-                  onDelete={() => handleDeleteVideo(video.id!)}
-                />
-              ))}
-            </div>
-          )}
-        </section>
+        <VideoGrid
+          videos={videos}
+          collections={collections}
+          selectedCollectionId={selectedCollectionId}
+          loadingVideos={loadingVideos}
+          isPending={isPending}
+          manageMode={manageMode}
+          selectedVideos={selectedVideos}
+          deletingVideos={deletingVideos}
+          onToggleVideoSelection={toggleVideoSelection}
+          onDeleteVideo={handleDeleteVideo}
+          onVideoAdded={handleVideoAdded}
+        />
       </div>
     </div>
   );
