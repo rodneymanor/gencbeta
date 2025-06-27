@@ -43,6 +43,42 @@ export function useAuth() {
   return context;
 }
 
+// Helper function to create user profile via API
+async function createUserProfileViaAPI(
+  uid: string,
+  email: string,
+  displayName: string,
+  role: UserRole,
+  coachId?: string,
+) {
+  console.log("🔍 [AUTH] Creating user profile in Firestore using Admin SDK...");
+
+  const response = await fetch("/api/debug-env", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      action: "create-user-profile",
+      userData: {
+        uid,
+        email,
+        displayName,
+        role,
+        coachId,
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to create user profile via API");
+  }
+
+  const profileResult = await response.json();
+  console.log("✅ [AUTH] User profile created with result:", profileResult);
+  return profileResult;
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -156,17 +192,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log("✅ [AUTH] Display name updated");
       }
 
-      // Create user profile
-      console.log("🔍 [AUTH] Creating user profile in Firestore...");
+      // Create user profile using Admin service for server-side operation
       try {
-        const profileId = await UserManagementService.createOrUpdateUserProfile(
-          result.user.uid,
-          result.user.email!,
-          finalDisplayName,
-          role,
-          coachId,
-        );
-        console.log("✅ [AUTH] User profile created with ID:", profileId);
+        await createUserProfileViaAPI(result.user.uid, result.user.email!, finalDisplayName, role, coachId);
       } catch (profileError) {
         console.error("❌ [AUTH] Failed to create user profile:", profileError);
         // Still throw the error so the UI can handle it

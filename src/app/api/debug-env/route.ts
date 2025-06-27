@@ -11,6 +11,14 @@ interface TestData {
   coachId?: string;
 }
 
+interface UserData {
+  uid: string;
+  email: string;
+  displayName: string;
+  role?: string;
+  coachId?: string;
+}
+
 // Extract complex logic to reduce function complexity
 async function handleTestProfileCreation(testData: TestData) {
   console.log("🧪 [DEBUG] Testing profile creation with data:", testData);
@@ -34,6 +42,36 @@ async function handleTestProfileCreation(testData: TestData) {
     return NextResponse.json(
       {
         error: "Test profile creation failed",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
+    );
+  }
+}
+
+// Handle user profile creation using Admin SDK
+async function handleUserProfileCreation(userData: UserData) {
+  console.log("👤 [DEBUG] Creating user profile via Admin SDK:", userData);
+
+  try {
+    const profileId = await UserManagementAdminService.createUserProfile(
+      userData.uid,
+      userData.email,
+      userData.displayName,
+      userData.role ?? "coach",
+      userData.coachId,
+    );
+
+    return NextResponse.json({
+      success: true,
+      message: "User profile created successfully",
+      profileId,
+    });
+  } catch (error) {
+    console.error("❌ [DEBUG] User profile creation failed:", error);
+    return NextResponse.json(
+      {
+        error: "User profile creation failed",
         details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 },
@@ -67,10 +105,14 @@ export async function GET() {
 // Add user role update functionality
 export async function POST(request: NextRequest) {
   try {
-    const { userId, newRole, action, testData } = await request.json();
+    const { userId, newRole, action, testData, userData } = await request.json();
 
     if (action === "test-profile-creation") {
       return await handleTestProfileCreation(testData);
+    }
+
+    if (action === "create-user-profile") {
+      return await handleUserProfileCreation(userData);
     }
 
     if (!userId || !newRole) {

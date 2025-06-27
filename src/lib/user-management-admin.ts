@@ -159,4 +159,74 @@ export class UserManagementAdminService {
       throw new Error("Failed to update user profile");
     }
   }
+
+  /**
+   * Create user profile using Admin SDK (for server-side operations)
+   */
+  static async createUserProfile(
+    uid: string,
+    email: string,
+    displayName: string,
+    role: "super_admin" | "admin" | "coach" | "creator" | "user" = "creator",
+    coachId?: string,
+  ): Promise<string> {
+    const adminDb = getAdminDb();
+    if (!isAdminInitialized || !adminDb) {
+      throw new Error("Firebase Admin SDK not initialized");
+    }
+
+    try {
+      console.log("🔍 [ADMIN] Creating user profile for:", { uid, email, displayName, role });
+
+      // Check if user profile already exists
+      const existingProfile = await this.getUserProfile(uid);
+      if (existingProfile) {
+        console.log("✅ [ADMIN] User profile already exists, returning existing ID");
+        return uid; // Return the UID as document ID for consistency
+      }
+
+      // Create new profile data
+      const profileData = {
+        uid,
+        email,
+        displayName,
+        role,
+        coachId,
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      console.log("🔍 [ADMIN] Creating document with data:", profileData);
+
+      // Create document using UID as document ID for easier access
+      await adminDb.collection(this.USER_PROFILES_PATH).doc(uid).set(profileData);
+
+      console.log("✅ [ADMIN] User profile created successfully with UID as document ID");
+
+      // If this is a creator being assigned to a coach, create the relationship
+      if (role === "creator" && coachId) {
+        console.log("🔍 [ADMIN] Creating coach-creator relationship...");
+        try {
+          const relationshipData = {
+            coachId,
+            creatorId: uid,
+            assignedAt: new Date().toISOString(),
+            isActive: true,
+          };
+
+          await adminDb.collection("coach_creator_relationships").add(relationshipData);
+          console.log("✅ [ADMIN] Coach-creator relationship created");
+        } catch (error) {
+          console.error("❌ [ADMIN] Error creating coach-creator relationship:", error);
+          // Don't throw error here as the user was already created successfully
+        }
+      }
+
+      return uid;
+    } catch (error) {
+      console.error("❌ [ADMIN] Error creating user profile:", error);
+      throw new Error("Failed to create user profile");
+    }
+  }
 }
