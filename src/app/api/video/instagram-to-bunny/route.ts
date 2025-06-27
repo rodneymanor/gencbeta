@@ -20,13 +20,13 @@ function getBaseUrl(request: NextRequest): string {
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}`;
   }
-  
+
   // In development, use the request's host to get the correct port
   const host = request.headers.get("host");
   if (host) {
     return `http://${host}`;
   }
-  
+
   // Fallback to default
   return "http://localhost:3000";
 }
@@ -108,10 +108,8 @@ export async function POST(request: NextRequest) {
 
     console.log("✅ [INSTAGRAM_TO_BUNNY] Video successfully streamed to Bunny CDN");
 
-    // Step 4: Start background transcription (non-blocking)
-    console.log("🎬 [INSTAGRAM_TO_BUNNY] Starting background transcription...");
-    const baseUrl = getBaseUrl(request);
-    startBackgroundTranscription(bunnyIframeUrl, shortcode, metadata.platform, baseUrl);
+    // Step 4: Background transcription handled by standard workflow
+    console.log("✅ [INSTAGRAM_TO_BUNNY] Transcription will be handled by standard analysis workflow");
 
     // Step 5: Return immediate response with iframe and thumbnail
     return NextResponse.json({
@@ -221,40 +219,6 @@ function processInstagramResponse(data: any) {
       duration: data.video_duration ?? data.duration ?? 0,
     },
   };
-}
-
-function startBackgroundTranscription(bunnyUrl: string, shortcode: string, platform: string, baseUrl: string) {
-  // Start transcription in background (non-blocking)
-  setTimeout(async () => {
-    try {
-      console.log("🎬 [BACKGROUND] Starting transcription for:", shortcode);
-      console.log("🌐 [BACKGROUND] Using base URL:", baseUrl);
-
-      // Call background transcription service
-      const response = await fetch(`${baseUrl}/api/video/transcribe`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          videoUrl: bunnyUrl,
-          platform,
-          shortcode,
-        }),
-      });
-
-      if (response.ok) {
-        console.log("✅ [BACKGROUND] Transcription completed for:", shortcode);
-        const result = await response.json();
-        console.log("📄 [BACKGROUND] Transcript length:", result.transcript?.length || 0, "characters");
-      } else {
-        const errorText = await response.text();
-        console.error("❌ [BACKGROUND] Transcription failed for:", shortcode);
-        console.error("❌ [BACKGROUND] Response status:", response.status);
-        console.error("❌ [BACKGROUND] Response body:", errorText);
-      }
-    } catch (error) {
-      console.error("❌ [BACKGROUND] Transcription error:", error);
-    }
-  }, 100); // Start after 100ms (non-blocking)
 }
 
 function generatePlaceholderThumbnail(): string {

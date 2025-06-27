@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 
+function getBaseUrl(): string {
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  // In development, check for common development ports
+  // This is a fallback since we don't have the request object here
+  return "http://localhost:3002"; // Use the port your dev server is running on
+}
+
 interface AnalysisResult {
   transcript: string;
   components: {
@@ -208,7 +218,7 @@ function createAnalysisResponse(result: AnalysisResult, videoUrl?: string, fileN
 
 async function callTranscribeService(videoData: ArrayBuffer, videoUrl?: string): Promise<string | null> {
   try {
-    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
+    const baseUrl = getBaseUrl();
 
     if (videoUrl) {
       const response = await fetch(`${baseUrl}/api/video/transcribe`, {
@@ -242,7 +252,7 @@ async function callTranscribeService(videoData: ArrayBuffer, videoUrl?: string):
 
 async function callScriptAnalysisService(transcript: string): Promise<AnalysisResult["components"] | null> {
   try {
-    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
+    const baseUrl = getBaseUrl();
 
     const response = await fetch(`${baseUrl}/api/video/analyze-script`, {
       method: "POST",
@@ -265,7 +275,7 @@ async function callMetadataAnalysisService(
   platform?: string,
 ): Promise<AnalysisResult["contentMetadata"] | null> {
   try {
-    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
+    const baseUrl = getBaseUrl();
 
     const response = await fetch(`${baseUrl}/api/video/analyze-metadata`, {
       method: "POST",
