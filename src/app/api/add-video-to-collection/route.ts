@@ -70,6 +70,21 @@ function validateApiKey(request: NextRequest) {
   return apiKey === API_KEY;
 }
 
+function getBaseUrl(request: NextRequest): string {
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  // In development, use the request's host to get the correct port
+  const host = request.headers.get("host");
+  if (host) {
+    return `http://${host}`;
+  }
+
+  // Fallback to default
+  return "http://localhost:3000";
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function validateAddVideoRequest(body: any) {
   const { videoUrl, collectionId, title } = body;
@@ -99,8 +114,8 @@ function validateUrl(url: string): boolean {
   return supportedPlatforms.some((platform) => url.toLowerCase().includes(platform));
 }
 
-async function downloadVideo(videoUrl: string): Promise<VideoDownloadResponse> {
-  const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
+async function downloadVideo(videoUrl: string, request: NextRequest): Promise<VideoDownloadResponse> {
+  const baseUrl = getBaseUrl(request);
 
   // Check if it's Instagram - use optimized streaming
   if (videoUrl.toLowerCase().includes("instagram.com")) {
@@ -403,7 +418,7 @@ export async function POST(request: NextRequest) {
 
     // Start background processing (non-blocking)
     setTimeout(() => {
-      processVideoInBackground(requestId, videoUrl, collectionId, title, collectionData, adminDb);
+      processVideoInBackground(requestId, videoUrl, collectionId, title, collectionData, adminDb, request);
     }, 0);
 
     // Return immediate success response
@@ -443,6 +458,7 @@ async function processVideoInBackground(
   collectionData: any,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   adminDb: any,
+  request: NextRequest,
 ) {
   const backgroundStartTime = Date.now();
 
@@ -452,7 +468,7 @@ async function processVideoInBackground(
     // Step 6: Download video
     console.log(`📥 [${requestId}] Step 6: Starting video download...`);
     const downloadStartTime = Date.now();
-    const downloadResponse = await downloadVideo(videoUrl);
+    const downloadResponse = await downloadVideo(videoUrl, request);
     const downloadTime = Date.now() - downloadStartTime;
     console.log(`✅ [${requestId}] Video download completed in ${downloadTime}ms`);
     console.log(`📊 [${requestId}] Download details:`, {
