@@ -6,7 +6,6 @@ import {
   getDocs,
   query,
   where,
-  orderBy,
   serverTimestamp,
   writeBatch,
 } from "firebase/firestore";
@@ -52,14 +51,20 @@ export class UserManagementService {
     coachId?: string,
   ): Promise<string> {
     try {
+      console.log("🔍 [USER_PROFILE] Starting createOrUpdateUserProfile for:", { uid, email, displayName, role });
+
       // Check if user profile already exists
+      console.log("🔍 [USER_PROFILE] Checking if user profile exists...");
       const existingProfile = await this.getUserProfile(uid);
 
       if (existingProfile) {
+        console.log("✅ [USER_PROFILE] User profile exists, updating:", existingProfile.id);
         // Update existing profile
         await this.updateUserProfile(uid, { displayName, role, coachId });
         return existingProfile.id!;
       }
+
+      console.log("🔍 [USER_PROFILE] No existing profile found, creating new one...");
 
       // Create new profile
       const profileData: Omit<UserProfile, "id"> = {
@@ -73,14 +78,20 @@ export class UserManagementService {
         updatedAt: new Date().toISOString(),
       };
 
+      console.log("🔍 [USER_PROFILE] Profile data prepared:", profileData);
+      console.log("🔍 [USER_PROFILE] Using collection path:", this.USERS_PATH);
+
       const docRef = await addDoc(collection(db, this.USERS_PATH), {
         ...profileData,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
 
+      console.log("✅ [USER_PROFILE] Document created successfully with ID:", docRef.id);
+
       // If this is a creator being assigned to a coach, create the relationship
       if (role === "creator" && coachId) {
+        console.log("🔍 [USER_PROFILE] Creating coach-creator relationship...");
         try {
           const relationshipData: Omit<CoachCreatorRelationship, "id"> = {
             coachId,
@@ -93,15 +104,22 @@ export class UserManagementService {
             ...relationshipData,
             assignedAt: serverTimestamp(),
           });
+          console.log("✅ [USER_PROFILE] Coach-creator relationship created");
         } catch (error) {
-          console.error("Error creating coach-creator relationship:", error);
+          console.error("❌ [USER_PROFILE] Error creating coach-creator relationship:", error);
           // Don't throw error here as the user was already created successfully
         }
       }
 
+      console.log("✅ [USER_PROFILE] User profile creation completed successfully");
       return docRef.id;
     } catch (error) {
-      console.error("Error creating/updating user profile:", error);
+      console.error("❌ [USER_PROFILE] Error creating/updating user profile:", error);
+      console.error("❌ [USER_PROFILE] Error details:", {
+        name: error instanceof Error ? error.name : "Unknown",
+        message: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : "No stack trace",
+      });
       throw new Error("Failed to create or update user profile");
     }
   }

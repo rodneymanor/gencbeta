@@ -1,9 +1,50 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { UserManagementService } from "@/lib/user-management";
 import { UserManagementAdminService } from "@/lib/user-management-admin";
 
-export async function GET() {
-  const envVars = {
+interface TestData {
+  uid: string;
+  email: string;
+  displayName: string;
+  role?: string;
+  coachId?: string;
+}
+
+// Extract complex logic to reduce function complexity
+async function handleTestProfileCreation(testData: TestData) {
+  console.log("🧪 [DEBUG] Testing profile creation with data:", testData);
+
+  try {
+    const profileId = await UserManagementService.createOrUpdateUserProfile(
+      testData.uid,
+      testData.email,
+      testData.displayName,
+      testData.role ?? "coach",
+      testData.coachId,
+    );
+
+    return NextResponse.json({
+      success: true,
+      message: "Test profile created successfully",
+      profileId,
+    });
+  } catch (error) {
+    console.error("❌ [DEBUG] Test profile creation failed:", error);
+    return NextResponse.json(
+      {
+        error: "Test profile creation failed",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
+    );
+  }
+}
+
+// Extract environment variable checking to reduce complexity
+// eslint-disable-next-line complexity
+function getEnvironmentStatus() {
+  return {
     NODE_ENV: process.env.NODE_ENV,
     FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID ? "✅ Set" : "❌ Missing",
     FIREBASE_PRIVATE_KEY: process.env.FIREBASE_PRIVATE_KEY ? "✅ Set" : "❌ Missing",
@@ -13,15 +54,24 @@ export async function GET() {
     BUNNY_CDN_HOSTNAME: process.env.BUNNY_CDN_HOSTNAME ? "✅ Set" : "❌ Missing",
     RAPIDAPI_KEY: process.env.RAPIDAPI_KEY ? "✅ Set" : "❌ Missing",
     VIDEO_API_KEY: process.env.VIDEO_API_KEY ? "✅ Set" : "❌ Missing",
+    NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ? "✅ Set" : "❌ Missing",
+    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ? "✅ Set" : "❌ Missing",
+    NEXT_PUBLIC_FIREBASE_PROJECT_ID: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ? "✅ Set" : "❌ Missing",
   };
+}
 
-  return NextResponse.json(envVars);
+export async function GET() {
+  return NextResponse.json(getEnvironmentStatus());
 }
 
 // Add user role update functionality
 export async function POST(request: NextRequest) {
   try {
-    const { userId, newRole } = await request.json();
+    const { userId, newRole, action, testData } = await request.json();
+
+    if (action === "test-profile-creation") {
+      return await handleTestProfileCreation(testData);
+    }
 
     if (!userId || !newRole) {
       return NextResponse.json({ error: "Missing userId or newRole" }, { status: 400 });

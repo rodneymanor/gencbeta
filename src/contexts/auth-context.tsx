@@ -143,22 +143,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     setLoading(true);
     try {
+      console.log("🔍 [AUTH] Starting user registration for:", { email, displayName, role });
+
       const result = await createUserWithEmailAndPassword(auth, email, password);
+      console.log("✅ [AUTH] Firebase Auth user created:", result.user.uid);
+
       const finalDisplayName = displayName ?? result.user.email?.split("@")[0] ?? "User";
 
       if (displayName) {
+        console.log("🔍 [AUTH] Updating user profile display name...");
         await updateProfile(result.user, { displayName: finalDisplayName });
+        console.log("✅ [AUTH] Display name updated");
       }
 
       // Create user profile
-      await UserManagementService.createOrUpdateUserProfile(
-        result.user.uid,
-        result.user.email!,
-        finalDisplayName,
-        role,
-        coachId,
-      );
+      console.log("🔍 [AUTH] Creating user profile in Firestore...");
+      try {
+        const profileId = await UserManagementService.createOrUpdateUserProfile(
+          result.user.uid,
+          result.user.email!,
+          finalDisplayName,
+          role,
+          coachId,
+        );
+        console.log("✅ [AUTH] User profile created with ID:", profileId);
+      } catch (profileError) {
+        console.error("❌ [AUTH] Failed to create user profile:", profileError);
+        // Still throw the error so the UI can handle it
+        throw new Error("User account created but profile creation failed. Please contact support.");
+      }
+
+      console.log("✅ [AUTH] User registration completed successfully");
     } catch (err) {
+      console.error("❌ [AUTH] Error during user registration:", err);
       if (err instanceof Error) {
         throw new Error(err.message);
       }
