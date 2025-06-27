@@ -397,9 +397,23 @@ export async function POST(request: NextRequest) {
     videoData.collectionId = collectionId;
 
     console.log("💾 [API] Step 5: Saving to Firestore...");
+    console.log("📄 [API] Video data being saved:", {
+      title: videoData.title,
+      platform: videoData.platform,
+      url: videoData.url,
+      collectionId: videoData.collectionId,
+      userId: videoData.userId,
+      hasTranscript: !!videoData.transcript,
+      hasComponents: !!videoData.components,
+      fileSize: videoData.fileSize,
+      duration: videoData.duration,
+    });
+
     const videoDocRef = await adminDb.collection("videos").add(videoData);
+    console.log("✅ [API] Video saved with ID:", videoDocRef.id);
 
     const currentVideoCount = collectionData?.videoCount ?? 0;
+    console.log("📊 [API] Updating collection video count from", currentVideoCount, "to", currentVideoCount + 1);
     await updateCollectionVideoCount(adminDb, collectionId, currentVideoCount);
 
     console.log("✅ [API] Video processing and storage completed successfully");
@@ -438,23 +452,26 @@ export async function POST(request: NextRequest) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function getCollectionVideos(adminDb: any, collectionId: string) {
-  const videosSnapshot = await adminDb
-    .collection("videos")
-    .where("collectionId", "==", collectionId)
-    .orderBy("addedAt", "desc")
-    .get();
+  // Use simpler query without orderBy to avoid index requirement
+  const videosSnapshot = await adminDb.collection("videos").where("collectionId", "==", collectionId).get();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return videosSnapshot.docs.map((doc: any) => {
+  const videos = videosSnapshot.docs.map((doc: any) => {
     const data = doc.data();
     return {
       id: doc.id,
       title: data.title,
       url: data.url,
       platform: data.platform,
+      author: data.author,
       addedAt: data.addedAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
+      insights: data.insights,
+      duration: data.duration,
     };
   });
+
+  // Sort in memory by addedAt (most recent first)
+  return videos.sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime());
 }
 
 export async function GET(request: NextRequest) {

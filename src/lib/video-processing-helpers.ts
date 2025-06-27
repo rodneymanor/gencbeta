@@ -210,7 +210,7 @@ export function extractTikTokVideoId(url: string): string | null {
 }
 
 export function extractInstagramShortcode(url: string): string | null {
-  const match = url.match(/(?:instagram\.com|instagr\.am)\/(?:p|reel)\/([A-Za-z0-9_-]+)/);
+  const match = url.match(/(?:instagram\.com|instagr\.am)\/(?:p|reels?)\/([A-Za-z0-9_-]+)/);
   return match ? match[1] : null;
 }
 
