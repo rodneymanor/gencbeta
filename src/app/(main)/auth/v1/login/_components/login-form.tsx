@@ -67,8 +67,8 @@ export function LoginForm() {
   return (
     <div className="space-y-6">
       <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-bold">Welcome Back</h1>
-        <p className="text-muted-foreground">Enter your credentials to access your account</p>
+        <h1 className="text-2xl font-bold">Welcome Back</h1>
+        <p className="text-muted-foreground text-sm">Enter your credentials to access your account</p>
       </div>
 
       {error && (
@@ -116,7 +116,7 @@ export function LoginForm() {
               </FormItem>
             )}
           />
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between pt-2">
             <FormField
               control={form.control}
               name="remember"
@@ -125,7 +125,7 @@ export function LoginForm() {
                   <FormControl>
                     <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
-                  <FormLabel>Remember me</FormLabel>
+                  <FormLabel className="text-sm">Remember me</FormLabel>
                 </FormItem>
               )}
             />
@@ -133,7 +133,7 @@ export function LoginForm() {
               Forgot password?
             </Link>
           </div>
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="mt-6 w-full" disabled={loading}>
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Sign In
           </Button>
@@ -149,18 +149,18 @@ export function LoginForm() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3">
         <Button variant="outline" onClick={handleGoogleSignIn} disabled={loading}>
-          <GoogleIcon className="mr-2 h-5 w-5" />
+          <GoogleIcon className="mr-2 h-4 w-4" />
           Google
         </Button>
         <Button variant="outline" disabled>
-          <GithubIcon className="mr-2 h-5 w-5" />
+          <GithubIcon className="mr-2 h-4 w-4" />
           GitHub
         </Button>
       </div>
 
-      <p className="text-muted-foreground text-center text-sm">
+      <p className="text-muted-foreground pt-2 text-center text-sm">
         Don&apos;t have an account?{" "}
         <Link href="/auth/v1/register" className="text-primary font-semibold hover:underline">
           Sign up
