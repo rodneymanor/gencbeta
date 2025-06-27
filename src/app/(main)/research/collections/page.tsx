@@ -7,40 +7,40 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth-context";
-import { CollectionsService, type Video, type Collection } from "@/lib/collections";
+import { CollectionsService, type Collection } from "@/lib/collections";
 import { CollectionsRBACService } from "@/lib/collections-rbac";
 
 import { AddVideoDialog } from "./_components/add-video-dialog";
+import {
+  type VideoWithPlayer,
+  getPageTitle,
+  getPageDescription,
+  createVideoSelectionHandlers,
+} from "./_components/collections-helpers";
+import { LoadingSkeleton, VideosLoadingSkeleton } from "./_components/loading-skeleton";
 import { ManageModeHeader } from "./_components/manage-mode-header";
 import { VideoCard } from "./_components/video-card";
-
-interface VideoWithPlayer extends Video {
-  isPlaying?: boolean;
-  videoData?: {
-    buffer: number[];
-    size: number;
-    mimeType: string;
-    filename: string;
-  };
-  hostedOnCDN?: boolean;
-}
 
 export default function CollectionsPage() {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [videos, setVideos] = useState<VideoWithPlayer[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingVideos, setLoadingVideos] = useState(false);
-
   const [manageMode, setManageMode] = useState(false);
   const [selectedVideos, setSelectedVideos] = useState<Set<string>>(new Set());
   const [deletingVideos, setDeletingVideos] = useState<Set<string>>(new Set());
+
   const { user, userProfile } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
   const selectedCollectionId = searchParams.get("collection");
+
+  // Create selection handlers
+  const { toggleVideoSelection, selectAllVideos, clearSelection } = createVideoSelectionHandlers(
+    setSelectedVideos,
+    videos,
+  );
 
   // Role-based access control
   useEffect(() => {
@@ -50,9 +50,7 @@ export default function CollectionsPage() {
     }
 
     if (userProfile && userProfile.role === "creator") {
-      // Creators can only view collections, not manage them
-      // They see their assigned coach's collections
-      return;
+      return; // Creators can view collections
     }
 
     if (userProfile && userProfile.role !== "coach" && userProfile.role !== "super_admin") {
@@ -63,7 +61,6 @@ export default function CollectionsPage() {
 
   const loadCollections = useCallback(async () => {
     if (!user) return;
-
     try {
       const userCollections = await CollectionsRBACService.getUserCollections(user.uid);
       setCollections(userCollections);
@@ -74,23 +71,12 @@ export default function CollectionsPage() {
 
   const loadVideos = useCallback(async () => {
     if (!user) return;
-
     setLoadingVideos(true);
     try {
-      console.log("🔍 [COLLECTIONS] Loading videos for user:", user.uid);
-      console.log("🔍 [COLLECTIONS] Selected collection:", selectedCollectionId);
-
       const collectionVideos = await CollectionsRBACService.getCollectionVideos(
         user.uid,
         selectedCollectionId ?? undefined,
       );
-
-      console.log("🔍 [COLLECTIONS] Loaded videos count:", collectionVideos.length);
-      console.log(
-        "🔍 [COLLECTIONS] Video IDs:",
-        collectionVideos.map((v) => v.id),
-      );
-
       setVideos(collectionVideos.map((video) => ({ ...video, isPlaying: false })));
     } catch (error) {
       console.error("Error loading videos:", error);
@@ -118,14 +104,10 @@ export default function CollectionsPage() {
 
   const handleDeleteVideo = async (videoId: string) => {
     if (!user) return;
-
-    // Start the delete animation
     setDeletingVideos((prev) => new Set([...prev, videoId]));
 
     try {
       await CollectionsService.deleteVideo(user.uid, videoId);
-
-      // Wait for animation to complete before removing from state
       setTimeout(() => {
         setDeletingVideos((prev) => {
           const newSet = new Set(prev);
@@ -136,7 +118,6 @@ export default function CollectionsPage() {
       }, 300);
     } catch (error) {
       console.error("Error deleting video:", error);
-      // Remove from deleting state on error
       setDeletingVideos((prev) => {
         const newSet = new Set(prev);
         newSet.delete(videoId);
@@ -147,17 +128,11 @@ export default function CollectionsPage() {
 
   const handleBulkDelete = async () => {
     if (!user || selectedVideos.size === 0) return;
-
     const videoIds = Array.from(selectedVideos);
-
-    // Start the delete animation for all selected videos
     setDeletingVideos((prev) => new Set([...prev, ...videoIds]));
 
     try {
-      // Delete all selected videos
       await Promise.all(videoIds.map((videoId) => CollectionsService.deleteVideo(user.uid, videoId)));
-
-      // Wait for animation to complete before removing from state
       setTimeout(() => {
         setDeletingVideos((prev) => {
           const newSet = new Set(prev);
@@ -169,7 +144,6 @@ export default function CollectionsPage() {
       }, 300);
     } catch (error) {
       console.error("Error deleting videos:", error);
-      // Remove from deleting state on error
       setDeletingVideos((prev) => {
         const newSet = new Set(prev);
         videoIds.forEach((id) => newSet.delete(id));
@@ -178,172 +152,117 @@ export default function CollectionsPage() {
     }
   };
 
-  const toggleVideoSelection = (videoId: string) => {
-    setSelectedVideos((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(videoId)) {
-        newSet.delete(videoId);
-      } else {
-        newSet.add(videoId);
-      }
-      return newSet;
-    });
-  };
-
-  const selectAllVideos = () => {
-    const allVideoIds = videos.map((v) => v.id!);
-    setSelectedVideos(new Set(allVideoIds));
-  };
-
-  const clearSelection = () => {
-    setSelectedVideos(new Set());
-  };
-
   const handleExitManageMode = () => {
     setManageMode(false);
     setSelectedVideos(new Set());
   };
 
-  const getPageTitle = () => {
-    if (!selectedCollectionId) {
-      return "All Videos";
-    }
-
-    const collection = collections.find((c) => c.id === selectedCollectionId);
-    return collection ? collection.title : "Collection";
-  };
-
-  const getPageDescription = () => {
-    if (!selectedCollectionId) {
-      return "All your videos across collections";
-    }
-
-    const collection = collections.find((c) => c.id === selectedCollectionId);
-    return collection?.description ?? "Collection videos";
-  };
+  const pageTitle = getPageTitle(selectedCollectionId, collections);
+  const pageDescription = getPageDescription(selectedCollectionId, collections);
 
   if (loading) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <Skeleton className="h-8 w-48" />
-            <Skeleton className="mt-2 h-4 w-64" />
-          </div>
-          <Skeleton className="h-10 w-24" />
-        </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="relative mx-auto w-full max-w-sm">
-              <Card className="overflow-hidden border-0 bg-gradient-to-br from-gray-900 to-black shadow-2xl">
-                <CardContent className="p-0">
-                  <Skeleton className="aspect-[9/16] w-full" />
-                </CardContent>
-              </Card>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
+    return <LoadingSkeleton />;
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">{getPageTitle()}</h1>
-          <p className="text-muted-foreground">{getPageDescription()}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <ManageModeHeader
-            manageMode={manageMode}
-            selectedVideos={selectedVideos}
-            videosLength={videos.length}
-            collections={collections}
-            selectedCollectionId={selectedCollectionId}
-            onManageModeToggle={() => userProfile?.role !== "creator" && setManageMode(true)}
-            onExitManageMode={handleExitManageMode}
-            onBulkDelete={handleBulkDelete}
-            onClearSelection={clearSelection}
-            onSelectAll={selectAllVideos}
-            onVideoAdded={handleVideoAdded}
-          />
-        </div>
-      </div>
-
-      {/* Collection Filter Pills */}
-      <div className="flex flex-wrap items-center gap-2">
-        <Badge
-          variant={!selectedCollectionId ? "default" : "secondary"}
-          className={`cursor-pointer transition-colors ${
-            !selectedCollectionId ? "bg-primary text-primary-foreground hover:bg-primary/90" : "hover:bg-secondary/80"
-          }`}
-          onClick={() => {
-            router.push("/research/collections");
-          }}
-        >
-          All Videos ({videos.length})
-        </Badge>
-        {collections.map((collection) => (
-          <Badge
-            key={collection.id}
-            variant={selectedCollectionId === collection.id ? "default" : "secondary"}
-            className={`cursor-pointer transition-colors ${
-              selectedCollectionId === collection.id
-                ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                : "hover:bg-secondary/80"
-            }`}
-            onClick={() => {
-              router.push(`/research/collections?collection=${collection.id}`);
-            }}
-          >
-            {collection.title} ({collection.videoCount})
-          </Badge>
-        ))}
-      </div>
-
-      {/* Videos Grid */}
-      {loadingVideos ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="relative mx-auto w-full max-w-sm">
-              <Card className="overflow-hidden border-0 bg-gradient-to-br from-gray-900 to-black shadow-2xl">
-                <CardContent className="p-0">
-                  <Skeleton className="aspect-[9/16] w-full" />
-                </CardContent>
-              </Card>
+    <div className="@container/main">
+      <div className="mx-auto max-w-7xl space-y-8 p-4 md:space-y-10 md:p-6">
+        {/* Header Section */}
+        <section className="space-y-4">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="space-y-2">
+              <h1 className="text-foreground text-3xl font-bold tracking-tight">{pageTitle}</h1>
+              <p className="text-muted-foreground text-lg">{pageDescription}</p>
             </div>
-          ))}
-        </div>
-      ) : videos.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <div className="bg-muted mb-4 rounded-full p-4">
-            <Plus className="text-muted-foreground h-8 w-8" />
+            <div className="flex items-center gap-2">
+              <ManageModeHeader
+                manageMode={manageMode}
+                selectedVideos={selectedVideos}
+                videosLength={videos.length}
+                collections={collections}
+                selectedCollectionId={selectedCollectionId}
+                onManageModeToggle={() => userProfile?.role !== "creator" && setManageMode(true)}
+                onExitManageMode={handleExitManageMode}
+                onBulkDelete={handleBulkDelete}
+                onClearSelection={clearSelection}
+                onSelectAll={selectAllVideos}
+                onVideoAdded={handleVideoAdded}
+              />
+            </div>
           </div>
-          <h3 className="mb-2 text-lg font-medium">No videos yet</h3>
-          <p className="text-muted-foreground mb-4">Add your first video to get started with content analysis</p>
-          <AddVideoDialog
-            collections={collections.filter((c) => c.id).map((c) => ({ id: c.id!, title: c.title }))}
-            selectedCollectionId={selectedCollectionId ?? undefined}
-            onVideoAdded={handleVideoAdded}
-          />
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-          {videos.map((video) => (
-            <VideoCard
-              key={video.id}
-              video={video}
-              manageMode={manageMode}
-              isSelected={selectedVideos.has(video.id!)}
-              isDeleting={deletingVideos.has(video.id!)}
-              onToggleSelection={() => toggleVideoSelection(video.id!)}
-              onDelete={() => handleDeleteVideo(video.id!)}
-            />
-          ))}
-        </div>
-      )}
+        </section>
+
+        {/* Collection Filter Section */}
+        <section className="space-y-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <Badge
+              variant={!selectedCollectionId ? "default" : "secondary"}
+              className={`cursor-pointer transition-all duration-200 ${
+                !selectedCollectionId
+                  ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
+                  : "bg-secondary/50 hover:bg-secondary/80"
+              }`}
+              onClick={() => router.push("/research/collections")}
+            >
+              All Videos ({videos.length})
+            </Badge>
+            {collections.map((collection) => (
+              <Badge
+                key={collection.id}
+                variant={selectedCollectionId === collection.id ? "default" : "secondary"}
+                className={`cursor-pointer transition-all duration-200 ${
+                  selectedCollectionId === collection.id
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
+                    : "bg-secondary/50 hover:bg-secondary/80"
+                }`}
+                onClick={() => router.push(`/research/collections?collection=${collection.id}`)}
+              >
+                {collection.title} ({collection.videoCount})
+              </Badge>
+            ))}
+          </div>
+        </section>
+
+        {/* Videos Content Section */}
+        <section className="space-y-6">
+          {loadingVideos ? (
+            <VideosLoadingSkeleton />
+          ) : videos.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="bg-muted/50 mb-6 rounded-full p-6">
+                <Plus className="text-muted-foreground h-12 w-12" />
+              </div>
+              <div className="space-y-4">
+                <h3 className="text-foreground text-xl font-semibold">No videos yet</h3>
+                <p className="text-muted-foreground max-w-md">
+                  Add your first video to get started with content analysis and research
+                </p>
+                <div className="pt-4">
+                  <AddVideoDialog
+                    collections={collections.filter((c) => c.id).map((c) => ({ id: c.id!, title: c.title }))}
+                    selectedCollectionId={selectedCollectionId ?? undefined}
+                    onVideoAdded={handleVideoAdded}
+                  />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              {videos.map((video) => (
+                <VideoCard
+                  key={video.id}
+                  video={video}
+                  manageMode={manageMode}
+                  isSelected={selectedVideos.has(video.id!)}
+                  isDeleting={deletingVideos.has(video.id!)}
+                  onToggleSelection={() => toggleVideoSelection(video.id!)}
+                  onDelete={() => handleDeleteVideo(video.id!)}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
 }
