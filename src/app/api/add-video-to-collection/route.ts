@@ -102,6 +102,66 @@ function validateUrl(url: string): boolean {
 async function downloadVideo(videoUrl: string): Promise<VideoDownloadResponse> {
   const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
 
+  // Check if it's Instagram - use optimized streaming
+  if (videoUrl.toLowerCase().includes("instagram.com")) {
+    console.log("🌊 [API] Using optimized Instagram-to-Bunny workflow...");
+
+    try {
+      const response = await fetch(`${baseUrl}/api/video/instagram-to-bunny`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ url: videoUrl }),
+      });
+
+      if (!response.ok) {
+        console.log("❌ [API] Optimized workflow failed, falling back to traditional download...");
+        // Fall back to traditional download
+        return await traditionalDownload(videoUrl, baseUrl);
+      }
+
+      const streamData = await response.json();
+      console.log("✅ [API] Optimized workflow response received:", streamData);
+
+      // Convert optimized response to expected format
+      return {
+        success: true,
+        platform: streamData.video.platform,
+        hostedOnCDN: true,
+        cdnUrl: streamData.video.iframeUrl,
+        filename: streamData.video.filename,
+        thumbnailUrl: streamData.video.thumbnailUrl,
+        metrics: {
+          likes: streamData.metadata.likes,
+          views: streamData.metadata.views,
+          shares: streamData.metadata.shares,
+          comments: streamData.metadata.comments,
+          saves: streamData.metadata.saves,
+        },
+        additionalMetadata: {
+          author: streamData.metadata.author,
+          duration: streamData.metadata.duration,
+        },
+        metadata: {
+          originalUrl: videoUrl,
+          platform: streamData.video.platform,
+          downloadedAt: streamData.metadata.processedAt,
+          readyForTranscription: true,
+          transcriptionStatus: "processing",
+        },
+      };
+    } catch (error) {
+      console.error("❌ [API] Optimized workflow error, falling back:", error);
+      return await traditionalDownload(videoUrl, baseUrl);
+    }
+  }
+
+  // Use traditional download for non-Instagram or fallback
+  return await traditionalDownload(videoUrl, baseUrl);
+}
+
+async function traditionalDownload(videoUrl: string, baseUrl: string): Promise<VideoDownloadResponse> {
   const response = await fetch(`${baseUrl}/api/download-video`, {
     method: "POST",
     headers: {
@@ -116,7 +176,7 @@ async function downloadVideo(videoUrl: string): Promise<VideoDownloadResponse> {
   }
 
   const data = await response.json();
-  console.log("📥 [API] Download response received:", data);
+  console.log("📥 [API] Traditional download response received:", data);
   return data;
 }
 

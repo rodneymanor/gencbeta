@@ -238,3 +238,116 @@ export function testBunnyStreamConfig(): void {
     console.error("❌ [BUNNY] Missing environment variables");
   }
 }
+
+export async function streamToBunnyFromUrl(
+  videoUrl: string,
+  filename: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _mimeType: string = "video/mp4",
+): Promise<string | null> {
+  try {
+    console.log("🌊 [BUNNY_STREAM] Starting direct stream from URL to Bunny CDN...");
+    console.log("🔗 [BUNNY_STREAM] Source URL:", videoUrl.substring(0, 100) + "...");
+
+    // Create video object in Bunny Stream first
+    const videoGuid = await createBunnyVideoObject(filename);
+    if (!videoGuid) {
+      console.error("❌ [BUNNY_STREAM] Failed to create video object");
+      return null;
+    }
+
+    console.log("📝 [BUNNY_STREAM] Created video object with GUID:", videoGuid);
+
+    // Stream video directly from source to Bunny CDN
+    const success = await streamVideoToBunny(videoUrl, videoGuid);
+    if (!success) {
+      console.error("❌ [BUNNY_STREAM] Failed to stream video");
+      return null;
+    }
+
+    const iframeUrl = `https://iframe.mediadelivery.net/embed/${BUNNY_STREAM_LIBRARY_ID}/${videoGuid}`;
+    console.log("✅ [BUNNY_STREAM] Direct stream completed successfully");
+    console.log("🎯 [BUNNY_STREAM] Iframe URL:", iframeUrl);
+
+    return iframeUrl;
+  } catch (error) {
+    console.error("❌ [BUNNY_STREAM] Direct stream error:", error);
+    return null;
+  }
+}
+
+async function createBunnyVideoObject(filename: string): Promise<string | null> {
+  try {
+    const response = await fetch(`https://video.bunnycdn.com/library/${BUNNY_STREAM_LIBRARY_ID}/videos`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        AccessKey: BUNNY_STREAM_API_KEY,
+      },
+      body: JSON.stringify({
+        title: filename.replace(/\.[^/.]+$/, ""), // Remove extension
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("❌ [BUNNY_STREAM] Failed to create video object:", response.status);
+      return null;
+    }
+
+    const data = await response.json();
+    return data.guid;
+  } catch (error) {
+    console.error("❌ [BUNNY_STREAM] Create video object error:", error);
+    return null;
+  }
+}
+
+async function streamVideoToBunny(sourceUrl: string, videoGuid: string): Promise<boolean> {
+  try {
+    console.log("🌊 [BUNNY_STREAM] Streaming video data...");
+
+    // Create a streaming pipeline: Instagram → Bunny CDN
+    const sourceResponse = await fetch(sourceUrl, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+      },
+    });
+
+    if (!sourceResponse.ok) {
+      console.error("❌ [BUNNY_STREAM] Failed to fetch source video:", sourceResponse.status);
+      return false;
+    }
+
+    if (!sourceResponse.body) {
+      console.error("❌ [BUNNY_STREAM] No response body from source");
+      return false;
+    }
+
+    // Stream directly to Bunny CDN
+    const uploadResponse = await fetch(
+      `https://video.bunnycdn.com/library/${BUNNY_STREAM_LIBRARY_ID}/videos/${videoGuid}`,
+      {
+        method: "PUT",
+        headers: {
+          AccessKey: BUNNY_STREAM_API_KEY,
+          "Content-Type": "application/octet-stream",
+        },
+        body: sourceResponse.body, // Direct stream!
+        // @ts-expect-error - duplex is supported in Node.js fetch
+        duplex: "half",
+      },
+    );
+
+    if (!uploadResponse.ok) {
+      console.error("❌ [BUNNY_STREAM] Upload failed:", uploadResponse.status);
+      return false;
+    }
+
+    console.log("✅ [BUNNY_STREAM] Video streamed successfully");
+    return true;
+  } catch (error) {
+    console.error("❌ [BUNNY_STREAM] Stream error:", error);
+    return false;
+  }
+}

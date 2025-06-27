@@ -15,7 +15,7 @@ import DashboardClientLayout from "../dashboard/dashboard-client-layout";
 
 export default async function ResearchLayout({ children }: Readonly<{ children: ReactNode }>) {
   const cookieStore = await cookies();
-  const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
+  // const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
 
   const sidebarVariant = await getSidebarVariant();
   const sidebarCollapsible = await getSidebarCollapsible();
