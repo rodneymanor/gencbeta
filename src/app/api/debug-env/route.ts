@@ -1,28 +1,47 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(request: NextRequest) {
-  // Check API key
-  const apiKey = request.headers.get("x-api-key");
-  // eslint-disable-next-line security/detect-possible-timing-attacks
-  if (apiKey !== "s7Sl*g94bPV2OsKM") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+import { UserManagementAdminService } from "@/lib/user-management-admin";
 
-  // Check environment variables (without exposing sensitive values)
-  const envCheck = {
-    RAPIDAPI_KEY: !!process.env.RAPIDAPI_KEY,
-    RAPIDAPI_KEY_LENGTH: process.env.RAPIDAPI_KEY?.length ?? 0,
-    BUNNY_STREAM_LIBRARY_ID: !!process.env.BUNNY_STREAM_LIBRARY_ID,
-    BUNNY_STREAM_API_KEY: !!process.env.BUNNY_STREAM_API_KEY,
-    BUNNY_CDN_HOSTNAME: !!process.env.BUNNY_CDN_HOSTNAME,
-    GEMINI_API_KEY: !!process.env.GEMINI_API_KEY,
-    VERCEL_URL: process.env.VERCEL_URL,
+export async function GET() {
+  const envVars = {
     NODE_ENV: process.env.NODE_ENV,
+    FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID ? "✅ Set" : "❌ Missing",
+    FIREBASE_PRIVATE_KEY: process.env.FIREBASE_PRIVATE_KEY ? "✅ Set" : "❌ Missing",
+    FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL ? "✅ Set" : "❌ Missing",
+    BUNNY_STREAM_LIBRARY_ID: process.env.BUNNY_STREAM_LIBRARY_ID ? "✅ Set" : "❌ Missing",
+    BUNNY_STREAM_API_KEY: process.env.BUNNY_STREAM_API_KEY ? "✅ Set" : "❌ Missing",
+    BUNNY_CDN_HOSTNAME: process.env.BUNNY_CDN_HOSTNAME ? "✅ Set" : "❌ Missing",
+    RAPIDAPI_KEY: process.env.RAPIDAPI_KEY ? "✅ Set" : "❌ Missing",
+    VIDEO_API_KEY: process.env.VIDEO_API_KEY ? "✅ Set" : "❌ Missing",
   };
 
-  return NextResponse.json({
-    success: true,
-    environment: envCheck,
-    timestamp: new Date().toISOString(),
-  });
+  return NextResponse.json(envVars);
+}
+
+// Add user role update functionality
+export async function POST(request: NextRequest) {
+  try {
+    const { userId, newRole } = await request.json();
+
+    if (!userId || !newRole) {
+      return NextResponse.json({ error: "Missing userId or newRole" }, { status: 400 });
+    }
+
+    // Update user role using admin service
+    await UserManagementAdminService.updateUserProfile(userId, { role: newRole });
+
+    return NextResponse.json({
+      success: true,
+      message: `User ${userId} role updated to ${newRole}`,
+    });
+  } catch (error) {
+    console.error("Error updating user role:", error);
+    return NextResponse.json(
+      {
+        error: "Failed to update user role",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
+    );
+  }
 }

@@ -30,7 +30,9 @@ export function CreateUserDialog({ children, onUserCreated }: CreateUserDialogPr
     email: "",
     password: "",
     displayName: "",
-    role: "creator" as UserRole,
+    // Default to "coach" since this is typically used by admins to create coach accounts
+    // Change to "creator" if creating content creators
+    role: "coach" as UserRole,
   });
 
   const { signUp } = useAuth();
@@ -53,7 +55,7 @@ export function CreateUserDialog({ children, onUserCreated }: CreateUserDialogPr
         email: "",
         password: "",
         displayName: "",
-        role: "creator",
+        role: "coach",
       });
 
       setOpen(false);

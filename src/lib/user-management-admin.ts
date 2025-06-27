@@ -108,4 +108,31 @@ export class UserManagementAdminService {
       throw new Error("Failed to get accessible coaches");
     }
   }
+
+  /**
+   * Update user profile using Admin SDK
+   */
+  static async updateUserProfile(uid: string, updates: Partial<UserProfile>): Promise<void> {
+    const adminDb = getAdminDb();
+    if (!isAdminInitialized || !adminDb) {
+      throw new Error("Firebase Admin SDK not initialized");
+    }
+
+    try {
+      console.log("🔍 [ADMIN] Updating user profile:", uid, updates);
+
+      await adminDb
+        .collection(this.USER_PROFILES_PATH)
+        .doc(uid)
+        .update({
+          ...updates,
+          updatedAt: new Date().toISOString(),
+        });
+
+      console.log("✅ [ADMIN] User profile updated successfully");
+    } catch (error) {
+      console.error("❌ [ADMIN] Error updating user profile:", error);
+      throw new Error("Failed to update user profile");
+    }
+  }
 }
