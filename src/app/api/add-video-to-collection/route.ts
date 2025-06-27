@@ -339,7 +339,7 @@ async function updateCollectionVideoCount(adminDb: any, collectionId: string, cu
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
   const requestId = Math.random().toString(36).substring(7);
-  
+
   console.log(`🚀 [${requestId}] Starting video processing workflow at ${new Date().toISOString()}`);
 
   try {
@@ -393,12 +393,14 @@ export async function POST(request: NextRequest) {
     }
 
     const collectionData = collectionDoc.data();
-    console.log(`✅ [${requestId}] Collection verified - Title: ${collectionData?.title}, Owner: ${collectionData?.userId}`);
+    console.log(
+      `✅ [${requestId}] Collection verified - Title: ${collectionData?.title}, Owner: ${collectionData?.userId}`,
+    );
 
     // All validations passed - return immediate success response
     const validationTime = Date.now() - startTime;
     console.log(`🎉 [${requestId}] All validations passed in ${validationTime}ms - returning immediate response`);
-    
+
     // Start background processing (non-blocking)
     setTimeout(() => {
       processVideoInBackground(requestId, videoUrl, collectionId, title, collectionData, adminDb);
@@ -413,11 +415,10 @@ export async function POST(request: NextRequest) {
       estimatedTime: "30-60 seconds",
       collectionId: collectionId,
       videoUrl: videoUrl,
-      title: title || "Auto-generated title",
+      title: title ?? "Auto-generated title",
       timestamp: new Date().toISOString(),
-      validationTime: `${validationTime}ms`
+      validationTime: `${validationTime}ms`,
     });
-
   } catch (error) {
     console.error(`❌ [${requestId}] Critical error during validation:`, error);
     return NextResponse.json(
@@ -434,15 +435,17 @@ export async function POST(request: NextRequest) {
 
 // Background processing function with comprehensive logging
 async function processVideoInBackground(
-  requestId: string, 
-  videoUrl: string, 
-  collectionId: string, 
-  title: string | undefined, 
-  collectionData: any, 
-  adminDb: any
+  requestId: string,
+  videoUrl: string,
+  collectionId: string,
+  title: string | undefined,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  collectionData: any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  adminDb: any,
 ) {
   const backgroundStartTime = Date.now();
-  
+
   try {
     console.log(`🔄 [${requestId}] Background processing started at ${new Date().toISOString()}`);
 
@@ -459,7 +462,7 @@ async function processVideoInBackground(
       hasVideoData: !!downloadResponse.videoData,
       author: downloadResponse.additionalMetadata.author,
       duration: downloadResponse.additionalMetadata.duration,
-      metrics: downloadResponse.metrics
+      metrics: downloadResponse.metrics,
     });
 
     // Step 7: Transcribe video
@@ -473,7 +476,7 @@ async function processVideoInBackground(
       transcriptLength: transcriptionResponse.transcript.length,
       hasComponents: !!(transcriptionResponse.components.hook && transcriptionResponse.components.bridge),
       platform: transcriptionResponse.platform,
-      method: transcriptionResponse.transcriptionMetadata?.method
+      method: transcriptionResponse.transcriptionMetadata?.method,
     });
 
     // Step 8: Generate thumbnail
@@ -487,7 +490,7 @@ async function processVideoInBackground(
     // Step 9: Create video object
     console.log(`📦 [${requestId}] Step 9: Creating comprehensive video object...`);
     const videoData = createVideoObject(downloadResponse, transcriptionResponse, thumbnailUrl, videoUrl, title);
-    
+
     videoData.userId = collectionData?.userId ?? "";
     videoData.collectionId = collectionId;
     videoData.processingMetadata = {
@@ -496,8 +499,8 @@ async function processVideoInBackground(
       processingTimes: {
         download: `${downloadTime}ms`,
         transcription: `${transcribeTime}ms`,
-        thumbnail: `${thumbnailTime}ms`
-      }
+        thumbnail: `${thumbnailTime}ms`,
+      },
     };
 
     console.log(`📄 [${requestId}] Video object created:`, {
@@ -512,7 +515,7 @@ async function processVideoInBackground(
       fileSize: videoData.fileSize,
       duration: videoData.duration,
       thumbnailUrl: videoData.thumbnailUrl,
-      engagementRate: videoData.engagementRate
+      engagementRate: videoData.engagementRate,
     });
 
     // Step 10: Save to Firestore
@@ -528,7 +531,9 @@ async function processVideoInBackground(
     const updateStartTime = Date.now();
     await updateCollectionVideoCount(adminDb, collectionId, currentVideoCount);
     const updateTime = Date.now() - updateStartTime;
-    console.log(`✅ [${requestId}] Collection video count updated in ${updateTime}ms: ${currentVideoCount} → ${currentVideoCount + 1}`);
+    console.log(
+      `✅ [${requestId}] Collection video count updated in ${updateTime}ms: ${currentVideoCount} → ${currentVideoCount + 1}`,
+    );
 
     const totalProcessingTime = Date.now() - backgroundStartTime;
     console.log(`🎉 [${requestId}] PROCESSING COMPLETED SUCCESSFULLY in ${totalProcessingTime}ms`);
@@ -541,12 +546,11 @@ async function processVideoInBackground(
         transcription: `${transcribeTime}ms`,
         thumbnail: `${thumbnailTime}ms`,
         save: `${saveTime}ms`,
-        update: `${updateTime}ms`
+        update: `${updateTime}ms`,
       },
       success: true,
-      completedAt: new Date().toISOString()
+      completedAt: new Date().toISOString(),
     });
-
   } catch (error) {
     const totalTime = Date.now() - backgroundStartTime;
     console.error(`❌ [${requestId}] BACKGROUND PROCESSING FAILED after ${totalTime}ms:`, error);
@@ -557,9 +561,9 @@ async function processVideoInBackground(
       collectionId: collectionId,
       title: title,
       failedAt: new Date().toISOString(),
-      processingTime: `${totalTime}ms`
+      processingTime: `${totalTime}ms`,
     });
-    
+
     // TODO: Consider implementing a retry mechanism or error notification system
     // For now, we log the error but don't notify the client since they already got a success response
   }
@@ -579,7 +583,7 @@ async function getCollectionVideos(adminDb: any, collectionId: string) {
       url: data.url,
       platform: data.platform,
       author: data.author,
-      addedAt: data.addedAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
+      addedAt: data.addedAt?.toDate?.().toISOString() ?? new Date().toISOString(),
       insights: data.insights,
       duration: data.duration,
     };
