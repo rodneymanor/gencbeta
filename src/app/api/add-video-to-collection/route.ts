@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { NextRequest, NextResponse } from "next/server";
 
 import { getAdminDb, isAdminInitialized } from "@/lib/firebase-admin";
@@ -5,11 +6,71 @@ import { getAdminDb, isAdminInitialized } from "@/lib/firebase-admin";
 // Simple API key authentication
 const API_KEY = process.env.VIDEO_API_KEY ?? "your-secret-api-key";
 
+interface VideoDownloadResponse {
+  success: boolean;
+  platform: string;
+  hostedOnCDN: boolean;
+  cdnUrl?: string;
+  filename?: string;
+  videoData?: {
+    buffer: number[];
+    size: number;
+    mimeType: string;
+    filename: string;
+  };
+  transcription?: TranscriptionResponse;
+  metrics: {
+    likes: number;
+    views: number;
+    shares: number;
+    comments: number;
+    saves: number;
+  };
+  additionalMetadata: {
+    author: string;
+    duration: number;
+  };
+  metadata: {
+    originalUrl: string;
+    platform: string;
+    downloadedAt: string;
+    readyForTranscription: boolean;
+    transcriptionStatus?: "pending" | "completed" | "failed";
+  };
+}
+
+interface TranscriptionResponse {
+  success: boolean;
+  transcript: string;
+  platform: string;
+  components: {
+    hook: string;
+    bridge: string;
+    nugget: string;
+    wta: string;
+  };
+  contentMetadata: {
+    platform: string;
+    author: string;
+    description: string;
+    source: string;
+    hashtags: string[];
+  };
+  visualContext: string;
+  transcriptionMetadata: {
+    method: string;
+    fileSize: number;
+    fileName: string;
+    processedAt: string;
+  };
+}
+
 function validateApiKey(request: NextRequest) {
   const apiKey = request.headers.get("x-api-key");
   return apiKey === API_KEY;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function validateAddVideoRequest(body: any) {
   const { videoUrl, collectionId, title } = body;
 
@@ -30,55 +91,246 @@ function validateAddVideoRequest(body: any) {
   return { isValid: true, data: { videoUrl, collectionId, title } };
 }
 
-// Helper function to detect platform from URL
-function detectPlatformFromUrl(url: string): string {
-  const urlLower = url.toLowerCase();
-  if (urlLower.includes("tiktok.com")) return "tiktok";
-  if (urlLower.includes("instagram.com")) return "instagram";
-  if (urlLower.includes("youtube.com") || urlLower.includes("youtu.be")) return "youtube";
-  if (urlLower.includes("twitter.com") || urlLower.includes("x.com")) return "twitter";
-  return "external";
+function validateUrl(url: string): boolean {
+  const urlPattern = /^https?:\/\/.+/;
+  if (!urlPattern.test(url)) return false;
+
+  const supportedPlatforms = ["tiktok.com", "instagram.com"];
+  return supportedPlatforms.some((platform) => url.toLowerCase().includes(platform));
 }
 
-function createVideoData(videoUrl: string, collectionId: string, title: string | undefined, userId: string) {
+async function downloadVideo(videoUrl: string): Promise<VideoDownloadResponse> {
+  const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
+
+  const response = await fetch(`${baseUrl}/api/download-video`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ url: videoUrl }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error ?? "Failed to download video");
+  }
+
+  const data = await response.json();
+  console.log("📥 [API] Download response received:", data);
+  return data;
+}
+
+function createPlaceholderTranscription(downloadResponse: VideoDownloadResponse): TranscriptionResponse {
   return {
-    url: videoUrl,
-    title: title ?? `Video ${Date.now()}`,
-    platform: detectPlatformFromUrl(videoUrl),
-    userId,
-    collectionId,
-    addedAt: new Date(),
-    // Default values for required fields
-    thumbnailUrl: "",
-    author: "",
-    transcript: "",
-    visualContext: "",
-    fileSize: 0,
-    duration: 0,
+    success: true,
+    transcript: "Transcription in progress...",
+    platform: downloadResponse.platform,
     components: {
-      hook: "",
-      bridge: "",
-      nugget: "",
-      wta: "",
+      hook: "Processing...",
+      bridge: "Processing...",
+      nugget: "Processing...",
+      wta: "Processing...",
     },
     contentMetadata: {
-      platform: detectPlatformFromUrl(videoUrl),
-      author: "",
-      description: "",
+      platform: downloadResponse.platform,
+      author: downloadResponse.additionalMetadata.author,
+      description: "Processing...",
       source: "api",
       hashtags: [],
     },
-    insights: {
-      likes: 0,
-      comments: 0,
-      shares: 0,
-      views: 0,
-      saves: 0,
-      engagementRate: 0,
+    visualContext: "Processing...",
+    transcriptionMetadata: {
+      method: "background",
+      fileSize: downloadResponse.videoData?.size ?? 0,
+      fileName: downloadResponse.filename ?? "video.mp4",
+      processedAt: new Date().toISOString(),
     },
   };
 }
 
+async function transcribeCdnVideo(
+  baseUrl: string,
+  downloadResponse: VideoDownloadResponse,
+): Promise<TranscriptionResponse> {
+  console.log("🎥 [API] Transcribing CDN-hosted video:", downloadResponse.cdnUrl);
+
+  const response = await fetch(`${baseUrl}/api/transcribe-video`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      videoUrl: downloadResponse.cdnUrl,
+      platform: downloadResponse.platform,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error ?? "Failed to transcribe video");
+  }
+
+  return response.json();
+}
+
+async function transcribeLocalVideo(
+  baseUrl: string,
+  downloadResponse: VideoDownloadResponse,
+): Promise<TranscriptionResponse> {
+  console.log("📁 [API] Transcribing local video data");
+
+  if (!downloadResponse.videoData) {
+    throw new Error("No video data available for transcription");
+  }
+
+  const uint8Array = new Uint8Array(downloadResponse.videoData.buffer);
+  const blob = new Blob([uint8Array], { type: downloadResponse.videoData.mimeType });
+  const file = new File([blob], downloadResponse.videoData.filename, { type: downloadResponse.videoData.mimeType });
+
+  const formData = new FormData();
+  formData.append("video", file);
+
+  const response = await fetch(`${baseUrl}/api/transcribe-video`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error ?? "Failed to transcribe video");
+  }
+
+  return response.json();
+}
+
+async function transcribeVideo(downloadResponse: VideoDownloadResponse): Promise<TranscriptionResponse> {
+  console.log("🔍 [API] Checking download response for transcription:", !!downloadResponse.transcription);
+
+  if (downloadResponse.transcription) {
+    console.log("✅ [API] Using existing transcription from download response");
+    return downloadResponse.transcription;
+  }
+
+  if (downloadResponse.metadata.transcriptionStatus === "pending") {
+    console.log("⏳ [API] Transcription is processing, creating placeholder");
+    return createPlaceholderTranscription(downloadResponse);
+  }
+
+  const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
+
+  if (downloadResponse.hostedOnCDN && downloadResponse.cdnUrl) {
+    return transcribeCdnVideo(baseUrl, downloadResponse);
+  } else if (downloadResponse.videoData) {
+    return transcribeLocalVideo(baseUrl, downloadResponse);
+  } else {
+    throw new Error("No video data available for transcription");
+  }
+}
+
+function generatePlaceholderThumbnail(platform: string): string {
+  const canvas = `data:image/svg+xml;base64,${Buffer.from(
+    `
+    <svg width="360" height="640" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" style="stop-color:${platform === "instagram" ? "#833AB4" : "#000000"};stop-opacity:1" />
+          <stop offset="100%" style="stop-color:${platform === "instagram" ? "#FCB045" : "#FF0050"};stop-opacity:1" />
+        </linearGradient>
+      </defs>
+      <rect width="360" height="640" fill="url(#grad)" />
+      <text x="180" y="300" fill="white" text-anchor="middle" font-size="24">📹</text>
+      <text x="180" y="340" fill="white" text-anchor="middle" font-size="16">${platform.toUpperCase()}</text>
+      <text x="180" y="360" fill="white" text-anchor="middle" font-size="16">Video</text>
+    </svg>
+  `,
+  ).toString("base64")}`;
+
+  return canvas;
+}
+
+async function extractVideoThumbnail(downloadResponse: VideoDownloadResponse): Promise<string> {
+  console.log("🖼️ [API] Extracting thumbnail - hostedOnCDN:", downloadResponse.hostedOnCDN);
+
+  if (downloadResponse.hostedOnCDN && downloadResponse.cdnUrl) {
+    if (downloadResponse.cdnUrl.includes("iframe.mediadelivery.net/embed")) {
+      console.log("🖼️ [API] Using placeholder thumbnail for iframe URL");
+      return generatePlaceholderThumbnail(downloadResponse.platform);
+    }
+
+    console.log("🖼️ [API] Using placeholder thumbnail for CDN URL");
+    return generatePlaceholderThumbnail(downloadResponse.platform);
+  } else {
+    console.log("📁 [API] Using placeholder thumbnail for local video");
+    return generatePlaceholderThumbnail(downloadResponse.platform);
+  }
+}
+
+function calculateEngagementRate(metrics: VideoDownloadResponse["metrics"]): number {
+  if (metrics.views <= 0) return 0;
+  return ((metrics.likes + metrics.comments + metrics.shares) / metrics.views) * 100;
+}
+
+function getVideoUrl(downloadResponse: VideoDownloadResponse, originalUrl: string): string {
+  return downloadResponse.hostedOnCDN && downloadResponse.cdnUrl ? downloadResponse.cdnUrl : originalUrl;
+}
+
+function getVideoTitle(transcriptionResponse: TranscriptionResponse, providedTitle?: string): string {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  return providedTitle ?? transcriptionResponse.contentMetadata.description ?? "Untitled Video";
+}
+
+function getVideoAuthor(downloadResponse: VideoDownloadResponse, transcriptionResponse: TranscriptionResponse): string {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  return downloadResponse.additionalMetadata.author ?? transcriptionResponse.contentMetadata.author ?? "Unknown";
+}
+
+function createVideoObject(
+  downloadResponse: VideoDownloadResponse,
+  transcriptionResponse: TranscriptionResponse,
+  thumbnailUrl: string,
+  originalUrl: string,
+  providedTitle?: string,
+): Record<string, unknown> {
+  console.log("📦 [API] Creating video object with full processing data");
+
+  const engagementRate = calculateEngagementRate(downloadResponse.metrics);
+
+  const videoObject: Record<string, unknown> = {
+    url: getVideoUrl(downloadResponse, originalUrl),
+    platform: downloadResponse.platform,
+    thumbnailUrl: thumbnailUrl,
+    title: getVideoTitle(transcriptionResponse, providedTitle),
+    author: getVideoAuthor(downloadResponse, transcriptionResponse),
+    transcript: transcriptionResponse.transcript,
+    components: transcriptionResponse.components,
+    contentMetadata: {
+      ...transcriptionResponse.contentMetadata,
+      source: "api",
+    },
+    visualContext: transcriptionResponse.visualContext,
+    insights: {
+      likes: downloadResponse.metrics.likes,
+      comments: downloadResponse.metrics.comments,
+      shares: downloadResponse.metrics.shares,
+      views: downloadResponse.metrics.views,
+      saves: downloadResponse.metrics.saves,
+      engagementRate,
+    },
+    addedAt: new Date(),
+    fileSize: downloadResponse.videoData?.size ?? 0,
+    duration: downloadResponse.additionalMetadata.duration,
+    hostedOnCDN: downloadResponse.hostedOnCDN,
+    originalUrl: originalUrl,
+  };
+
+  if (!downloadResponse.hostedOnCDN && downloadResponse.videoData) {
+    videoObject.videoData = downloadResponse.videoData;
+  }
+
+  return videoObject;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function updateCollectionVideoCount(adminDb: any, collectionId: string, currentVideoCount: number) {
   await adminDb
     .collection("collections")
@@ -89,6 +341,102 @@ async function updateCollectionVideoCount(adminDb: any, collectionId: string, cu
     });
 }
 
+// eslint-disable-next-line complexity
+export async function POST(request: NextRequest) {
+  console.log("🚀 [API] Starting comprehensive video processing workflow...");
+
+  try {
+    if (!validateApiKey(request)) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const validation = validateAddVideoRequest(body);
+
+    if (!validation.isValid) {
+      return NextResponse.json({ error: validation.error }, { status: 400 });
+    }
+
+    const { videoUrl, collectionId, title } = validation.data!;
+
+    if (!validateUrl(videoUrl)) {
+      return NextResponse.json(
+        { error: "Only TikTok and Instagram videos are supported for full processing" },
+        { status: 400 },
+      );
+    }
+
+    const adminDb = getAdminDb();
+    if (!isAdminInitialized || !adminDb) {
+      return NextResponse.json({ error: "Firebase Admin SDK not configured" }, { status: 500 });
+    }
+
+    const collectionDoc = await adminDb.collection("collections").doc(collectionId).get();
+    if (!collectionDoc.exists) {
+      return NextResponse.json({ error: "Collection not found" }, { status: 404 });
+    }
+
+    const collectionData = collectionDoc.data();
+
+    console.log("📥 [API] Step 1: Downloading video...");
+    const downloadResponse = await downloadVideo(videoUrl);
+    console.log("✅ [API] Download completed successfully");
+
+    console.log("🎬 [API] Step 2: Transcribing video...");
+    const transcriptionResponse = await transcribeVideo(downloadResponse);
+    console.log("✅ [API] Transcription completed successfully");
+
+    console.log("🖼️ [API] Step 3: Generating thumbnail...");
+    const thumbnailUrl = await extractVideoThumbnail(downloadResponse);
+    console.log("✅ [API] Thumbnail generated successfully");
+
+    console.log("📦 [API] Step 4: Creating comprehensive video object...");
+    const videoData = createVideoObject(downloadResponse, transcriptionResponse, thumbnailUrl, videoUrl, title);
+
+    videoData.userId = collectionData?.userId ?? "";
+    videoData.collectionId = collectionId;
+
+    console.log("💾 [API] Step 5: Saving to Firestore...");
+    const videoDocRef = await adminDb.collection("videos").add(videoData);
+
+    const currentVideoCount = collectionData?.videoCount ?? 0;
+    await updateCollectionVideoCount(adminDb, collectionId, currentVideoCount);
+
+    console.log("✅ [API] Video processing and storage completed successfully");
+
+    return NextResponse.json({
+      success: true,
+      message: "Video processed and added successfully",
+      videoId: videoDocRef.id,
+      collectionId,
+      video: {
+        id: videoDocRef.id,
+        ...videoData,
+        addedAt: videoData.addedAt instanceof Date ? videoData.addedAt.toISOString() : videoData.addedAt,
+      },
+      processing: {
+        downloaded: true,
+        transcribed: transcriptionResponse.success,
+        thumbnailGenerated: !!thumbnailUrl,
+        hostedOnCDN: downloadResponse.hostedOnCDN,
+        fileSize: downloadResponse.videoData?.size ?? 0,
+        duration: downloadResponse.additionalMetadata.duration,
+      },
+    });
+  } catch (error) {
+    console.error("❌ [API] Video processing error:", error);
+    return NextResponse.json(
+      {
+        error: "Failed to process video",
+        details: error instanceof Error ? error.message : "Unknown error",
+        step: "video_processing",
+      },
+      { status: 500 },
+    );
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function getCollectionVideos(adminDb: any, collectionId: string) {
   const videosSnapshot = await adminDb
     .collection("videos")
@@ -96,6 +444,7 @@ async function getCollectionVideos(adminDb: any, collectionId: string) {
     .orderBy("addedAt", "desc")
     .get();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return videosSnapshot.docs.map((doc: any) => {
     const data = doc.data();
     return {
@@ -108,74 +457,12 @@ async function getCollectionVideos(adminDb: any, collectionId: string) {
   });
 }
 
-// eslint-disable-next-line complexity
-export async function POST(request: NextRequest) {
-  try {
-    // Check API key authentication
-    if (!validateApiKey(request)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Parse and validate request body
-    const body = await request.json();
-    const validation = validateAddVideoRequest(body);
-
-    if (!validation.isValid) {
-      return NextResponse.json({ error: validation.error }, { status: 400 });
-    }
-
-    const { videoUrl, collectionId, title } = validation.data!;
-
-    // Check if Admin SDK is initialized
-    const adminDb = getAdminDb();
-    if (!isAdminInitialized || !adminDb) {
-      return NextResponse.json({ error: "Firebase Admin SDK not configured" }, { status: 500 });
-    }
-
-    // Check if collection exists using Admin SDK
-    const collectionDoc = await adminDb.collection("collections").doc(collectionId).get();
-    if (!collectionDoc.exists) {
-      return NextResponse.json({ error: "Collection not found" }, { status: 404 });
-    }
-
-    const collectionData = collectionDoc.data();
-    const videoData = createVideoData(videoUrl, collectionId, title, collectionData?.userId ?? "");
-
-    // Add video to Firestore using Admin SDK
-    const videoDocRef = await adminDb.collection("videos").add(videoData);
-
-    // Update collection video count
-    const currentVideoCount = collectionData?.videoCount ?? 0;
-    await updateCollectionVideoCount(adminDb, collectionId, currentVideoCount);
-
-    return NextResponse.json({
-      success: true,
-      message: "Video added successfully",
-      videoId: videoDocRef.id,
-      collectionId,
-      video: {
-        id: videoDocRef.id,
-        ...videoData,
-        addedAt: videoData.addedAt.toISOString(),
-      },
-    });
-  } catch (error) {
-    console.error("Error adding video to collection:", error);
-    return NextResponse.json(
-      { error: "Internal server error", details: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 },
-    );
-  }
-}
-
 export async function GET(request: NextRequest) {
   try {
-    // Check API key authentication
     if (!validateApiKey(request)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get collection ID from query params
     const { searchParams } = new URL(request.url);
     const collectionId = searchParams.get("collectionId");
 
@@ -183,13 +470,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Collection ID is required" }, { status: 400 });
     }
 
-    // Check if Admin SDK is initialized
     const adminDb = getAdminDb();
     if (!isAdminInitialized || !adminDb) {
       return NextResponse.json({ error: "Firebase Admin SDK not configured" }, { status: 500 });
     }
 
-    // Get collection details using Admin SDK
     const collectionDoc = await adminDb.collection("collections").doc(collectionId).get();
     if (!collectionDoc.exists) {
       return NextResponse.json({ error: "Collection not found" }, { status: 404 });
