@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
   console.log("🏷️ [METADATA_ANALYSIS] Starting content metadata analysis...");
 
   try {
-    const { transcript, videoUrl, additionalContext } = await request.json();
+    const { transcript, videoUrl, additionalContext, platform } = await request.json();
 
     if (!transcript) {
       console.error("❌ [METADATA_ANALYSIS] No transcript provided");
@@ -26,8 +26,9 @@ export async function POST(request: NextRequest) {
     console.log("📊 [METADATA_ANALYSIS] Analyzing content for metadata...");
     console.log("📊 [METADATA_ANALYSIS] Transcript length:", transcript.length, "characters");
     console.log("📊 [METADATA_ANALYSIS] Video URL provided:", !!videoUrl);
+    console.log("📊 [METADATA_ANALYSIS] Platform provided:", platform ?? "Not provided");
 
-    const metadata = await analyzeContentMetadata(transcript, videoUrl, additionalContext);
+    const metadata = await analyzeContentMetadata(transcript, videoUrl, additionalContext, platform);
 
     if (!metadata) {
       return NextResponse.json({ error: "Failed to analyze content metadata" }, { status: 500 });
@@ -43,6 +44,7 @@ export async function POST(request: NextRequest) {
       analysisInfo: {
         transcriptLength: transcript.length,
         hasVideoUrl: !!videoUrl,
+        platformProvided: !!platform,
         processedAt: new Date().toISOString(),
       },
     });
@@ -62,31 +64,41 @@ async function analyzeContentMetadata(
   transcript: string,
   videoUrl?: string,
   additionalContext?: string,
+  platform?: "TikTok" | "Instagram" | "YouTube" | "Unknown",
 ): Promise<ContentMetadata | null> {
   try {
     console.log("🤖 [METADATA_ANALYSIS] Analyzing content metadata with AI...");
 
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
-    const analysisContext = buildAnalysisContext(transcript, videoUrl, additionalContext);
-    const prompt = createMetadataPrompt(analysisContext);
+    const analysisContext = buildAnalysisContext(transcript, videoUrl, additionalContext, platform);
+    const prompt = createMetadataPrompt(analysisContext, platform);
 
     const result = await model.generateContent([{ text: prompt }]);
     const responseText = result.response.text().trim();
 
     console.log("📄 [METADATA_ANALYSIS] Raw response length:", responseText.length, "characters");
 
-    return parseMetadataResponse(responseText);
+    return parseMetadataResponse(responseText, platform);
   } catch (error) {
     console.error("❌ [METADATA_ANALYSIS] AI analysis error:", error);
     return null;
   }
 }
 
-function buildAnalysisContext(transcript: string, videoUrl?: string, additionalContext?: string): string {
+function buildAnalysisContext(
+  transcript: string,
+  videoUrl?: string,
+  additionalContext?: string,
+  platform?: string,
+): string {
   let analysisContext = `Transcript: "${transcript}"`;
 
   if (videoUrl) {
     analysisContext += `\nVideo URL: ${videoUrl}`;
+  }
+
+  if (platform) {
+    analysisContext += `\nKnown Platform: ${platform}`;
   }
 
   if (additionalContext) {
@@ -96,17 +108,20 @@ function buildAnalysisContext(transcript: string, videoUrl?: string, additionalC
   return analysisContext;
 }
 
-function createMetadataPrompt(analysisContext: string): string {
+function createMetadataPrompt(analysisContext: string, platform?: string): string {
+  const platformInstruction = platform
+    ? `The platform is already known to be ${platform}. Use this information.`
+    : `Identify if this is TikTok, Instagram, YouTube, or Unknown based on URL patterns and content style.`;
+
+  const platformValue = platform ?? "TikTok|Instagram|YouTube|Unknown";
+
   return `Analyze this content and extract metadata information:
 
 ${analysisContext}
 
 Based on the content, URL patterns, and context clues, determine:
 
-1. **Platform**: Identify if this is TikTok, Instagram, YouTube, or Unknown based on:
-   - URL patterns (tiktok.com, instagram.com, youtube.com)
-   - Content style and format
-   - Typical platform characteristics
+1. **Platform**: ${platformInstruction}
 
 2. **Author**: Extract the creator's name or username if mentioned in the transcript or visible in context
 
@@ -118,7 +133,7 @@ Based on the content, URL patterns, and context clues, determine:
 
 Respond with ONLY a valid JSON object in this exact format (no additional text):
 {
-  "platform": "TikTok|Instagram|YouTube|Unknown",
+  "platform": "${platformValue}",
   "author": "Creator name or @username",
   "description": "Brief description of video content and purpose",
   "source": "educational|entertainment|tutorial|lifestyle|business|other",
@@ -126,14 +141,14 @@ Respond with ONLY a valid JSON object in this exact format (no additional text):
 }`;
 }
 
-function parseMetadataResponse(responseText: string): ContentMetadata {
+function parseMetadataResponse(responseText: string, platform?: string): ContentMetadata {
   try {
     const cleanedJson = cleanJsonResponse(responseText);
     const metadata = JSON.parse(cleanedJson) as ContentMetadata;
-    return validateMetadata(metadata);
+    return validateMetadata(metadata, platform);
   } catch (parseError) {
     console.log("⚠️ [METADATA_ANALYSIS] JSON parsing failed, using fallback:", parseError);
-    return createFallbackMetadata();
+    return createFallbackMetadata(platform);
   }
 }
 
@@ -154,11 +169,15 @@ function cleanJsonResponse(responseText: string): string {
   return jsonString;
 }
 
-function validateMetadata(metadata: ContentMetadata): ContentMetadata {
+function validateMetadata(metadata: ContentMetadata, platform?: string): ContentMetadata {
   const validatedMetadata: ContentMetadata = {
-    platform: ["TikTok", "Instagram", "YouTube", "Unknown"].includes(metadata.platform) ? metadata.platform : "Unknown",
-    author: metadata.author || "Unknown",
-    description: metadata.description || "Video content analysis",
+    platform:
+      platform ??
+      (["TikTok", "Instagram", "YouTube", "Unknown"].includes(metadata.platform) ? metadata.platform : "Unknown"),
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    author: metadata.author ?? "Unknown",
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    description: metadata.description ?? "Video content analysis",
     source: ["educational", "entertainment", "tutorial", "lifestyle", "business", "other"].includes(metadata.source)
       ? metadata.source
       : "other",
@@ -173,9 +192,10 @@ function validateMetadata(metadata: ContentMetadata): ContentMetadata {
   return validatedMetadata;
 }
 
-function createFallbackMetadata(): ContentMetadata {
+function createFallbackMetadata(platform?: string): ContentMetadata {
   return {
-    platform: "Unknown",
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    platform: (platform as ContentMetadata["platform"]) ?? "Unknown",
     author: "Unknown",
     description: "Video content analysis - metadata extraction failed",
     source: "other",

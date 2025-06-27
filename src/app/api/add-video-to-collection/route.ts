@@ -148,61 +148,6 @@ function createPlaceholderTranscription(downloadResponse: VideoDownloadResponse)
   };
 }
 
-async function transcribeCdnVideo(
-  baseUrl: string,
-  downloadResponse: VideoDownloadResponse,
-): Promise<TranscriptionResponse> {
-  console.log("🎥 [API] Transcribing CDN-hosted video:", downloadResponse.cdnUrl);
-
-  const response = await fetch(`${baseUrl}/api/transcribe-video`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      videoUrl: downloadResponse.cdnUrl,
-      platform: downloadResponse.platform,
-    }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error ?? "Failed to transcribe video");
-  }
-
-  return response.json();
-}
-
-async function transcribeLocalVideo(
-  baseUrl: string,
-  downloadResponse: VideoDownloadResponse,
-): Promise<TranscriptionResponse> {
-  console.log("📁 [API] Transcribing local video data");
-
-  if (!downloadResponse.videoData) {
-    throw new Error("No video data available for transcription");
-  }
-
-  const uint8Array = new Uint8Array(downloadResponse.videoData.buffer);
-  const blob = new Blob([uint8Array], { type: downloadResponse.videoData.mimeType });
-  const file = new File([blob], downloadResponse.videoData.filename, { type: downloadResponse.videoData.mimeType });
-
-  const formData = new FormData();
-  formData.append("video", file);
-
-  const response = await fetch(`${baseUrl}/api/transcribe-video`, {
-    method: "POST",
-    body: formData,
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error ?? "Failed to transcribe video");
-  }
-
-  return response.json();
-}
-
 async function transcribeVideo(downloadResponse: VideoDownloadResponse): Promise<TranscriptionResponse> {
   console.log("🔍 [API] Checking download response for transcription:", !!downloadResponse.transcription);
 
@@ -211,20 +156,9 @@ async function transcribeVideo(downloadResponse: VideoDownloadResponse): Promise
     return downloadResponse.transcription;
   }
 
-  if (downloadResponse.metadata.transcriptionStatus === "pending") {
-    console.log("⏳ [API] Transcription is processing, creating placeholder");
-    return createPlaceholderTranscription(downloadResponse);
-  }
-
-  const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
-
-  if (downloadResponse.hostedOnCDN && downloadResponse.cdnUrl) {
-    return transcribeCdnVideo(baseUrl, downloadResponse);
-  } else if (downloadResponse.videoData) {
-    return transcribeLocalVideo(baseUrl, downloadResponse);
-  } else {
-    throw new Error("No video data available for transcription");
-  }
+  // Skip transcription in main API - let background analysis handle it
+  console.log("⏭️ [API] Skipping transcription - will be handled by background analysis");
+  return createPlaceholderTranscription(downloadResponse);
 }
 
 function generatePlaceholderThumbnail(platform: string): string {

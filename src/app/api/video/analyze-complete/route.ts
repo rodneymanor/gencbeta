@@ -105,9 +105,12 @@ async function performCompleteAnalysis(videoData: ArrayBuffer, videoUrl?: string
 
   console.log("🔄 [COMPLETE_ANALYSIS] Starting text-based analysis tasks...");
 
+  // Detect platform from URL if available
+  const platformFromUrl = detectPlatformFromUrl(videoUrl);
+
   const [scriptResult, metadataResult] = await Promise.allSettled([
     callScriptAnalysisService(transcript),
-    callMetadataAnalysisService(transcript, videoUrl),
+    callMetadataAnalysisService(transcript, videoUrl, platformFromUrl),
   ]);
 
   const components = getScriptResult(scriptResult);
@@ -120,6 +123,17 @@ async function performCompleteAnalysis(videoData: ArrayBuffer, videoUrl?: string
   console.log("  - Visual context length:", visualContext.length, "characters");
 
   return { transcript, components, contentMetadata, visualContext };
+}
+
+function detectPlatformFromUrl(videoUrl?: string): string | undefined {
+  if (!videoUrl) return undefined;
+
+  const url = videoUrl.toLowerCase();
+  if (url.includes("tiktok.com")) return "TikTok";
+  if (url.includes("instagram.com")) return "Instagram";
+  if (url.includes("youtube.com") || url.includes("youtu.be")) return "YouTube";
+
+  return undefined;
 }
 
 function getTranscriptResult(transcriptResult: PromiseSettledResult<string | null>): string {
@@ -248,6 +262,7 @@ async function callScriptAnalysisService(transcript: string): Promise<AnalysisRe
 async function callMetadataAnalysisService(
   transcript: string,
   videoUrl?: string,
+  platform?: string,
 ): Promise<AnalysisResult["contentMetadata"] | null> {
   try {
     const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
@@ -255,7 +270,7 @@ async function callMetadataAnalysisService(
     const response = await fetch(`${baseUrl}/api/video/analyze-metadata`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ transcript, videoUrl }),
+      body: JSON.stringify({ transcript, videoUrl, platform }),
     });
 
     if (!response.ok) return null;
