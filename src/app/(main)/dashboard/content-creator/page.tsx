@@ -1,10 +1,13 @@
 "use client";
 
-import { PenTool, FileText, Inbox, Zap, Bot, Lightbulb, Film, Clock } from "lucide-react";
+import { useState } from "react";
+
+import { PenTool, FileText, Inbox, Zap, Bot, Lightbulb, Film, Clock, Wand } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/contexts/auth-context";
 
 // Mock data for demonstration
@@ -78,6 +81,7 @@ const quickActions = [
 
 export default function ContentCreatorPage() {
   const { userProfile } = useAuth();
+  const [videoIdea, setVideoIdea] = useState("");
 
   // Get user name from auth context or fallback
   const userName = userProfile?.displayName ?? "User";
@@ -89,6 +93,12 @@ export default function ContentCreatorPage() {
   const handleAIIdeaCreate = async (idea: string) => {
     console.log("Creating script from AI idea:", idea);
     // Navigate to script creation with pre-filled idea
+  };
+
+  const handleQuickWrite = () => {
+    if (!videoIdea.trim()) return;
+    console.log("Quick writing with idea:", videoIdea);
+    // Navigate to script creation with the entered idea
   };
 
   const getStatusBadgeVariant = (status: string) => {
@@ -107,10 +117,33 @@ export default function ContentCreatorPage() {
   return (
     <div className="@container/main">
       <div className="mx-auto max-w-6xl space-y-8 p-4 md:space-y-10 md:p-6">
-        {/* Top Header Section */}
-        <div className="space-y-2">
-          <h1 className="text-foreground text-3xl font-bold">Welcome back, {userName}</h1>
-          <p className="text-muted-foreground">Let&apos;s create some compelling content today.</p>
+        {/* Top Header Section with Input Field */}
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-2">
+            <h1 className="text-foreground text-3xl font-bold">Welcome back, {userName}</h1>
+            <p className="text-muted-foreground">Let&apos;s create some compelling content today.</p>
+          </div>
+
+          {/* Quick Input Section */}
+          <div className="flex-shrink-0 space-y-4 lg:w-96">
+            <div className="space-y-3">
+              <Textarea
+                value={videoIdea}
+                onChange={(e) => setVideoIdea(e.target.value)}
+                placeholder="Start with a video idea, topic, or question for your audience..."
+                className="min-h-24 resize-none text-base"
+              />
+              <Button
+                onClick={handleQuickWrite}
+                disabled={!videoIdea.trim()}
+                className="bg-primary hover:bg-primary/90 w-full"
+                size="lg"
+              >
+                <Wand className="mr-2 h-4 w-4" />
+                Quick Write
+              </Button>
+            </div>
+          </div>
         </div>
 
         {/* Quick Actions Grid Section */}
