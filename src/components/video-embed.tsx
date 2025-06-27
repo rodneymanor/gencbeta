@@ -138,7 +138,14 @@ const VideoEmbedComponent = ({
         console.error("❌ [VIDEO_PLAYER] Iframe playback error:", e);
         setHasError(true);
       }}
-      style={{ backgroundColor: "black" }}
+      style={{
+        backgroundColor: "black",
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+      }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
@@ -157,7 +164,15 @@ const VideoEmbedComponent = ({
         console.error("❌ [VIDEO_PLAYER] Video playback error:", e);
         setHasError(true);
       }}
-      style={{ backgroundColor: "black" }}
+      style={{
+        backgroundColor: "black",
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        objectFit: "cover",
+      }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}

@@ -80,7 +80,10 @@ const VideoPlayerComponent = ({
   const videoContent = (
     <motion.div variants={containerVariants} initial="hidden" animate="visible">
       {/* Video Container */}
-      <div className={`relative aspect-[9/16] overflow-hidden bg-black ${disableCard ? "" : "rounded-xl"}`}>
+      <div
+        className={`relative aspect-[9/16] overflow-hidden bg-black ${disableCard ? "" : "rounded-xl"}`}
+        style={{ position: "relative" }}
+      >
         <VideoEmbed
           url={videoUrl}
           platform={platform}
