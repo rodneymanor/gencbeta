@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "URL is required" }, { status: 400 });
     }
 
-    const baseUrl = getBaseUrl();
+    const baseUrl = getBaseUrl(request);
     console.log("🌐 [ORCHESTRATOR] Using base URL:", baseUrl);
 
     // Step 1: Download video from social media platform
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 
     // Step 4: Start background analysis (fire-and-forget)
     console.log("🎬 [ORCHESTRATOR] Step 4: Starting background analysis...");
-    startBackgroundAnalysis(downloadResult.videoData);
+    startBackgroundAnalysis(downloadResult.videoData, request);
 
     // Step 5: Return combined response
     console.log("✅ [ORCHESTRATOR] Workflow completed successfully");
@@ -51,8 +51,20 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function getBaseUrl(): string {
-  return process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
+function getBaseUrl(request: NextRequest): string {
+  // In production, use VERCEL_URL
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  // In development, use the request's host to get the correct port
+  const host = request.headers.get("host");
+  if (host) {
+    return `http://${host}`;
+  }
+
+  // Fallback to default
+  return "http://localhost:3000";
 }
 
 async function callDownloaderService(baseUrl: string, url: string) {
@@ -131,13 +143,16 @@ function validateVideoSize(size: number) {
   return null;
 }
 
-function startBackgroundAnalysis(videoData: { buffer: number[]; size: number; mimeType: string; filename: string }) {
+function startBackgroundAnalysis(
+  videoData: { buffer: number[]; size: number; mimeType: string; filename: string },
+  request: NextRequest,
+) {
   console.log("🎬 [ORCHESTRATOR] Starting background analysis...");
 
   // Use setTimeout to ensure this runs after the response is sent
   setTimeout(async () => {
     try {
-      const baseUrl = getBaseUrl();
+      const baseUrl = getBaseUrl(request);
 
       const formData = new FormData();
       const buffer = Buffer.from(videoData.buffer);

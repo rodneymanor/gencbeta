@@ -7,9 +7,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     // Get the base URL for internal service calls
-    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
+    const baseUrl = getBaseUrl(request);
 
     console.log("🎬 [DOWNLOAD] Calling download-and-prepare orchestrator...");
+    console.log("🌐 [DOWNLOAD] Using base URL:", baseUrl);
 
     // Forward the request to the new orchestrator service
     const response = await fetch(`${baseUrl}/api/video/download-and-prepare`, {
@@ -38,4 +39,20 @@ export async function POST(request: NextRequest) {
       { status: 500 },
     );
   }
+}
+
+function getBaseUrl(request: NextRequest): string {
+  // In production, use VERCEL_URL
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  // In development, use the request's host to get the correct port
+  const host = request.headers.get("host");
+  if (host) {
+    return `http://${host}`;
+  }
+
+  // Fallback to default
+  return "http://localhost:3000";
 }

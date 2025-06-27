@@ -2,31 +2,50 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { streamToBunnyFromUrl } from "@/lib/bunny-stream";
 
+function validateEnvironmentVariables(): { valid: boolean; error?: string } {
+  if (!process.env.BUNNY_STREAM_LIBRARY_ID || !process.env.BUNNY_STREAM_API_KEY) {
+    console.error("❌ [INSTAGRAM_TO_BUNNY] Missing Bunny Stream configuration");
+    return { valid: false, error: "Bunny Stream not configured" };
+  }
+
+  if (!process.env.RAPIDAPI_KEY) {
+    console.error("❌ [INSTAGRAM_TO_BUNNY] Missing RapidAPI key");
+    return { valid: false, error: "RapidAPI not configured" };
+  }
+
+  return { valid: true };
+}
+
+function validateInstagramUrl(url: string): { valid: boolean; error?: string } {
+  if (!url) {
+    console.error("❌ [INSTAGRAM_TO_BUNNY] No URL provided");
+    return { valid: false, error: "URL is required" };
+  }
+
+  if (!url.toLowerCase().includes("instagram.com")) {
+    console.error("❌ [INSTAGRAM_TO_BUNNY] Only Instagram URLs supported");
+    return { valid: false, error: "Only Instagram URLs are supported" };
+  }
+
+  return { valid: true };
+}
+
 export async function POST(request: NextRequest) {
   console.log("🚀 [INSTAGRAM_TO_BUNNY] Starting optimized Instagram workflow...");
 
   try {
     const { url } = await request.json();
 
-    if (!url) {
-      console.error("❌ [INSTAGRAM_TO_BUNNY] No URL provided");
-      return NextResponse.json({ error: "URL is required" }, { status: 400 });
+    // Validate URL
+    const urlValidation = validateInstagramUrl(url);
+    if (!urlValidation.valid) {
+      return NextResponse.json({ error: urlValidation.error }, { status: 400 });
     }
 
-    if (!url.toLowerCase().includes("instagram.com")) {
-      console.error("❌ [INSTAGRAM_TO_BUNNY] Only Instagram URLs supported");
-      return NextResponse.json({ error: "Only Instagram URLs are supported" }, { status: 400 });
-    }
-
-    // Check for required environment variables
-    if (!process.env.BUNNY_STREAM_LIBRARY_ID || !process.env.BUNNY_STREAM_API_KEY) {
-      console.error("❌ [INSTAGRAM_TO_BUNNY] Missing Bunny Stream configuration");
-      return NextResponse.json({ error: "Bunny Stream not configured" }, { status: 500 });
-    }
-
-    if (!process.env.RAPIDAPI_KEY) {
-      console.error("❌ [INSTAGRAM_TO_BUNNY] Missing RapidAPI key");
-      return NextResponse.json({ error: "RapidAPI not configured" }, { status: 500 });
+    // Check environment variables
+    const envValidation = validateEnvironmentVariables();
+    if (!envValidation.valid) {
+      return NextResponse.json({ error: envValidation.error }, { status: 500 });
     }
 
     console.log("🔍 [INSTAGRAM_TO_BUNNY] Processing Instagram URL:", url);

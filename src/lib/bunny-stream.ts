@@ -282,7 +282,7 @@ async function createBunnyVideoObject(filename: string): Promise<string | null> 
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        AccessKey: process.env.BUNNY_STREAM_API_KEY || "",
+        AccessKey: process.env.BUNNY_STREAM_API_KEY ?? "",
       },
       body: JSON.stringify({
         title: filename.replace(/\.[^/.]+$/, ""), // Remove extension
@@ -330,7 +330,7 @@ async function streamVideoToBunny(sourceUrl: string, videoGuid: string): Promise
       {
         method: "PUT",
         headers: {
-          AccessKey: process.env.BUNNY_STREAM_API_KEY || "",
+          AccessKey: process.env.BUNNY_STREAM_API_KEY ?? "",
           "Content-Type": "application/octet-stream",
         },
         body: sourceResponse.body, // Direct stream!
