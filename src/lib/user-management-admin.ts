@@ -24,18 +24,24 @@ export class UserManagementAdminService {
     try {
       console.log("🔍 [ADMIN] Getting user profile for:", uid);
 
-      const userDoc = await adminDb.collection(this.USER_PROFILES_PATH).doc(uid).get();
+      // Query by UID field (not document ID)
+      const querySnapshot = await adminDb
+        .collection(this.USER_PROFILES_PATH)
+        .where("uid", "==", uid)
+        .where("isActive", "==", true)
+        .get();
 
-      if (!userDoc.exists) {
+      if (querySnapshot.empty) {
         console.log("❌ [ADMIN] User profile not found:", uid);
         return null;
       }
 
+      const userDoc = querySnapshot.docs[0];
       const userData = userDoc.data();
       console.log("✅ [ADMIN] User profile found:", { uid, role: userData?.role });
 
       return {
-        uid: userDoc.id,
+        uid: userData.uid,
         ...userData,
       } as UserProfile;
     } catch (error) {
@@ -121,9 +127,27 @@ export class UserManagementAdminService {
     try {
       console.log("🔍 [ADMIN] Updating user profile:", uid, updates);
 
+      // First, find the document by UID field (not document ID)
+      const querySnapshot = await adminDb
+        .collection(this.USER_PROFILES_PATH)
+        .where("uid", "==", uid)
+        .where("isActive", "==", true)
+        .get();
+
+      if (querySnapshot.empty) {
+        throw new Error(`User profile not found for UID: ${uid}`);
+      }
+
+      // Get the actual document ID
+      const userDoc = querySnapshot.docs[0];
+      const documentId = userDoc.id;
+
+      console.log("🔍 [ADMIN] Found user document ID:", documentId);
+
+      // Update using the actual document ID
       await adminDb
         .collection(this.USER_PROFILES_PATH)
-        .doc(uid)
+        .doc(documentId)
         .update({
           ...updates,
           updatedAt: new Date().toISOString(),
