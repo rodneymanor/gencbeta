@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth-context";
 import { UserManagementService, type UserProfile } from "@/lib/user-management";
 
-import { CreateCreatorDialog } from "../collections/_components/create-creator-dialog";
+import { CreateCreatorDialog } from "../../research/collections/_components/create-creator-dialog";
 
 export default function CreatorsPage() {
   const [creators, setCreators] = useState<UserProfile[]>([]);
