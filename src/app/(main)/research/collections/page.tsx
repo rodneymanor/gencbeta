@@ -183,7 +183,7 @@ export default function CollectionsPage() {
 
   return (
     <div className="@container/main">
-      <div className="mx-auto max-w-7xl space-y-8 p-4 md:space-y-10 md:p-6">
+      <div className="mx-auto max-w-7xl space-y-8 md:space-y-10">
         {/* Header Section */}
         <motion.section
           className="space-y-4"
