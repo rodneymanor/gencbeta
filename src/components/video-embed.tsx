@@ -5,6 +5,28 @@ import { useState, useEffect, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
+import { VideoLoadingOverlay } from "@/components/ui/page-loading";
+
+// Helper function to determine which content to render
+const getVideoContent = (
+  url: string,
+  platform: string,
+  hostedOnCDN: boolean | undefined,
+  videoObjectUrl: string | null,
+  renderIframeEmbed: (src: string) => JSX.Element,
+  renderVideoElement: (src: string) => JSX.Element,
+) => {
+  if (hostedOnCDN && url.includes("iframe.mediadelivery.net/embed")) {
+    return renderIframeEmbed(url);
+  }
+  if (videoObjectUrl) {
+    return renderVideoElement(videoObjectUrl);
+  }
+  if (hostedOnCDN && url.startsWith("http") && !url.includes("iframe.mediadelivery.net")) {
+    return renderVideoElement(url);
+  }
+  return renderIframeEmbed(getEmbedUrl(url, platform));
+};
 
 const VideoEmbedComponent = ({
   url,
@@ -27,15 +49,21 @@ const VideoEmbedComponent = ({
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [videoObjectUrl, setVideoObjectUrl] = useState<string | null>(null);
+  const [contentLoaded, setContentLoaded] = useState(false);
 
   useEffect(() => {
+    // Reset states when URL changes
+    setIsLoading(true);
+    setContentLoaded(false);
+    setHasError(false);
+
     if (videoData && !hostedOnCDN) {
       try {
         const uint8Array = new Uint8Array(videoData.buffer);
         const blob = new Blob([uint8Array], { type: videoData.mimeType });
         const objectUrl = URL.createObjectURL(blob);
         setVideoObjectUrl(objectUrl);
-        setIsLoading(false);
+        // Don't set loading to false here - wait for video load event
 
         return () => {
           if (objectUrl && objectUrl.startsWith("blob:")) {
@@ -47,18 +75,21 @@ const VideoEmbedComponent = ({
         setHasError(true);
         setIsLoading(false);
       }
-    } else if (hostedOnCDN || url.startsWith("http")) {
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-      }, 1000);
-      return () => clearTimeout(timer);
-    } else {
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-      }, 2000);
-      return () => clearTimeout(timer);
     }
+    // For other video types, we'll rely on load events from iframe/video elements
   }, [url, hostedOnCDN, videoData]);
+
+  // Handle content loading completion
+  const handleContentLoad = () => {
+    setContentLoaded(true);
+    setIsLoading(false);
+  };
+
+  const handleContentError = (error: Event | string) => {
+    console.error("❌ [VIDEO_PLAYER] Content load error:", error);
+    setHasError(true);
+    setIsLoading(false);
+  };
 
   const getEmbedUrl = (url: string, platform: string) => {
     if (platform === "tiktok") {
@@ -70,29 +101,7 @@ const VideoEmbedComponent = ({
     }
   };
 
-  const renderLoadingState = () => (
-    <motion.div
-      className={`flex h-full w-full items-center justify-center bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 ${disableCard ? "" : "rounded-xl"}`}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    >
-      <div className="space-y-4 text-center">
-        <motion.div
-          className="mx-auto h-12 w-12 rounded-full border-b-2 border-white"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-        />
-        <motion.p
-          className="text-sm text-white"
-          animate={{ opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-        >
-          Loading video...
-        </motion.p>
-      </div>
-    </motion.div>
-  );
+  const renderLoadingState = () => <VideoLoadingOverlay disableCard={disableCard} />;
 
   const renderErrorState = () => (
     <motion.div
@@ -134,10 +143,8 @@ const VideoEmbedComponent = ({
       frameBorder="0"
       allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
       allowFullScreen
-      onError={(e) => {
-        console.error("❌ [VIDEO_PLAYER] Iframe playback error:", e);
-        setHasError(true);
-      }}
+      onLoad={handleContentLoad}
+      onError={handleContentError}
       style={{
         backgroundColor: "black",
         position: "absolute",
@@ -147,8 +154,8 @@ const VideoEmbedComponent = ({
         height: "100%",
       }}
       initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
+      animate={{ opacity: contentLoaded ? 1 : 0 }}
+      transition={{ duration: 0.5 }}
     />
   );
 
@@ -160,10 +167,8 @@ const VideoEmbedComponent = ({
       muted
       loop
       playsInline
-      onError={(e) => {
-        console.error("❌ [VIDEO_PLAYER] Video playback error:", e);
-        setHasError(true);
-      }}
+      onLoadedData={handleContentLoad}
+      onError={handleContentError}
       style={{
         backgroundColor: "black",
         position: "absolute",
@@ -174,27 +179,28 @@ const VideoEmbedComponent = ({
         objectFit: "cover",
       }}
       initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
+      animate={{ opacity: contentLoaded ? 1 : 0 }}
+      transition={{ duration: 0.5 }}
     />
   );
 
   return (
     <AnimatePresence mode="wait">
-      {isLoading ? (
-        <motion.div key="loading">{renderLoadingState()}</motion.div>
-      ) : hasError ? (
+      {hasError ? (
         <motion.div key="error">{renderErrorState()}</motion.div>
       ) : (
-        <motion.div key="content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-          {/* Handle iframe URLs (like Bunny Stream) - CHECK THIS FIRST! */}
-          {hostedOnCDN && url.includes("iframe.mediadelivery.net/embed")
-            ? renderIframeEmbed(url)
-            : videoObjectUrl
-              ? renderVideoElement(videoObjectUrl)
-              : hostedOnCDN && url.startsWith("http") && !url.includes("iframe.mediadelivery.net")
-                ? renderVideoElement(url)
-                : renderIframeEmbed(getEmbedUrl(url, platform))}
+        <motion.div key="content" className="relative h-full w-full">
+          {/* Always show loading overlay until content is actually loaded */}
+          {(isLoading || !contentLoaded) && (
+            <motion.div key="loading" className="absolute inset-0 z-10">
+              {renderLoadingState()}
+            </motion.div>
+          )}
+
+          {/* Content layer - hidden until fully loaded */}
+          <div className="relative h-full w-full">
+            {getVideoContent(url, platform, hostedOnCDN, videoObjectUrl, renderIframeEmbed, renderVideoElement)}
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
