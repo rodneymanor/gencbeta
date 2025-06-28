@@ -5,6 +5,7 @@ interface VideoDownloadResponse {
   // CDN-hosted video properties
   cdnUrl?: string;
   filename?: string;
+  thumbnailUrl?: string;
   // Fallback: local video data
   videoData?: {
     buffer: number[];
@@ -148,7 +149,18 @@ export const transcribeVideo = async (downloadResponse: VideoDownloadResponse): 
 };
 
 export const extractVideoThumbnail = async (downloadResponse: VideoDownloadResponse): Promise<string> => {
-  console.log("🖼️ [ADD_VIDEO] Extracting thumbnail - hostedOnCDN:", downloadResponse.hostedOnCDN);
+  console.log("🖼️ [ADD_VIDEO] Extracting thumbnail - checking for real thumbnail URL...");
+  console.log("🖼️ [ADD_VIDEO] Thumbnail URL from API:", downloadResponse.thumbnailUrl ? "✅ Found" : "❌ Not found");
+
+  // First priority: Use real thumbnail URL from the download response (Instagram API)
+  if (downloadResponse.thumbnailUrl) {
+    console.log("✅ [ADD_VIDEO] Using real thumbnail from API response:", downloadResponse.thumbnailUrl);
+    return downloadResponse.thumbnailUrl;
+  }
+
+  // Fallback: Generate thumbnail from video
+  console.log("⚠️ [ADD_VIDEO] No real thumbnail found, generating from video...");
+  console.log("🖼️ [ADD_VIDEO] Hosted on CDN:", downloadResponse.hostedOnCDN);
   console.log("🖼️ [ADD_VIDEO] CDN URL:", downloadResponse.cdnUrl);
 
   if (downloadResponse.hostedOnCDN && downloadResponse.cdnUrl) {

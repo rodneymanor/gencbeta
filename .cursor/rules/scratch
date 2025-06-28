@@ -1,257 +1,340 @@
+🔍 [RBAC] User ID: xfPvnnUdJCRIJEVrpJCmR7kXBOX2
+🔍 [RBAC] User ID: xfPvnnUdJCRIJEVrpJCmR7kXBOX2
+🔍 [RBAC] Super admin loading all collections
+🔍 [RBAC] Super admin detected - bypassing coach restrictions
+🔍 [RBAC] Super admin loading all videos
+🔍 [RBAC] Super admin loading all collections
+🔍 [RBAC] Super admin detected - bypassing coach restrictions
+🔍 [RBAC] Super admin loading all videos
+✅ [RBAC] Super admin loaded collections: 3
+✅ [RBAC] Super admin loaded collections: 3
+✅ [RBAC] Super admin loaded videos: 15
+✅ [RBAC] Super admin loaded videos: 15
+🎥 [VideoEmbed]: Object
+🎥 [VideoEmbed]: Object
+🎬 [VideoThumbnail] Real image thumbnail: Object
+🎬 [VideoThumbnail] Real image thumbnail: Object
+🎥 [VideoEmbed]: Object
+🎥 [VideoEmbed]: Object
+🎬 [VideoThumbnail] Real image thumbnail: Object
+🎬 [VideoThumbnail] Real image thumbnail: Object
+🎥 [VideoEmbed]: Object
+🎥 [VideoEmbed]: Object
+🎬 [VideoThumbnail] SVG placeholder detected: Object
+🎬 [VideoThumbnail] SVG placeholder detected: Object
+🎥 [VideoEmbed]: Object
+🎥 [VideoEmbed]: Object
+🎬 [VideoThumbnail] SVG placeholder detected: Object
+🎬 [VideoThumbnail] SVG placeholder detected: Object
+🎥 [VideoEmbed]: Object
+🎥 [VideoEmbed]: Object
+🎬 [VideoThumbnail] SVG placeholder detected: Object
+🎬 [VideoThumbnail] SVG placeholder detected: Object
+🎥 [VideoEmbed]: Object
+🎥 [VideoEmbed]: Object
+🎬 [VideoThumbnail] SVG placeholder detected: Object
+🎬 [VideoThumbnail] SVG placeholder detected: Object
+🎥 [VideoEmbed]: Object
+🎥 [VideoEmbed]: Object
+🎬 [VideoThumbnail] SVG placeholder detected: Object
+🎬 [VideoThumbnail] SVG placeholder detected: Object
+🎥 [VideoEmbed]: Object
+🎥 [VideoEmbed]: Object
+🎬 [VideoThumbnail] Real image thumbnail: Object
+🎬 [VideoThumbnail] Real image thumbnail: Object
+🎥 [VideoEmbed]: Object
+🎥 [VideoEmbed]: Object
+🎬 [VideoThumbnail] Real image thumbnail: Object
+🎬 [VideoThumbnail] Real image thumbnail: Object
+🎥 [VideoEmbed]: Object
+🎥 [VideoEmbed]: Object
+🎬 [VideoThumbnail] Real image thumbnail: Object
+🎬 [VideoThumbnail] Real image thumbnail: Object
+🎥 [VideoEmbed]: Object
+🎥 [VideoEmbed]: Object
+🎬 [VideoThumbnail] SVG placeholder detected: Object
+🎬 [VideoThumbnail] SVG placeholder detected: Object
+🎥 [VideoEmbed]: Object
+hook.js:377 🎥 [VideoEmbed]: Object
+VM5726 video-thumbnail.tsx:165 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
+hook.js:377 🎥 [VideoEmbed]: Object
+VM5726 video-thumbnail.tsx:165 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
+hook.js:377 🎥 [VideoEmbed]: Object
+VM5726 video-thumbnail.tsx:165 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
+hook.js:377 🎥 [VideoEmbed]: Object
+VM5726 video-thumbnail.tsx:178 🎬 [VideoThumbnail] Real image thumbnail: Object
+hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
+hook.js:608 Image with src "data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIzNjAiIGhlaWdodD0iNjQwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgICA8ZGVmcz4KICAgICAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMCUiIHkyPSIxMDAlIj4KICAgICAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiM4MzNBQjQ7c3RvcC1vcGFjaXR5OjEiIC8+CiAgICAgICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNGQ0IwNDU7c3RvcC1vcGFjaXR5OjEiIC8+CiAgICAgICAgPC9saW5lYXJHcmFkaWVudD4KICAgICAgPC9kZWZzPgogICAgICA8cmVjdCB3aWR0aD0iMzYwIiBoZWlnaHQ9IjY0MCIgZmlsbD0idXJsKCNncmFkKSIgLz4KICAgICAgPHRleHQgeD0iMTgwIiB5PSIzMDAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjI0Ij7wn5O5PC90ZXh0PgogICAgICA8dGV4dCB4PSIxODAiIHk9IjM0MCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTYiPklOU1RBR1JBTTwvdGV4dD4KICAgICAgPHRleHQgeD0iMTgwIiB5PSIzNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA==" has "fill" and a height value of 0. This is likely because the parent element of the image has not been styled to have a set height.
+overrideMethod @ hook.js:608
+hook.js:608 Image with src "data:image/jpeg;base64,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
+overrideMethod @ hook.js:608
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+report-hmr-latency.js:14 [Fast Refresh] done in 616ms
+contentScript.bundle.js:4785 Event target tag: INPUT
+contentScript.bundle.js:4785 Current value: https://www.instagram.com/reel/DLdldjBRV78/?utm_source=ig_web_copy_link
+contentScript.bundle.js:4785 Current shortcuts: Array(0)
+contentScript.bundle.js:4785 Data received in content script: Array(0)
+app-state-context.tsx:38 🔄 [APP_STATE] Video processing state: true
+add-video-dialog.tsx:72 🚀 [ADD_VIDEO] Starting download for: https://www.instagram.com/reel/DLdldjBRV78/?utm_source=ig_web_copy_link
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+report-hmr-latency.js:14 [Fast Refresh] done in 295ms
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+report-hmr-latency.js:14 [Fast Refresh] done in 166ms
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+report-hmr-latency.js:14 [Fast Refresh] done in 226ms
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+report-hmr-latency.js:14 [Fast Refresh] done in 151ms
+video-processing.ts:78 📥 [ADD_VIDEO] Download response received: Object
+video-processing.ts:79 🔍 [DEBUG] Download metrics: Object
+add-video-dialog.tsx:74 ✅ [ADD_VIDEO] Download completed: Object
+add-video-dialog.tsx:78 🎬 [ADD_VIDEO] Starting transcription...
+video-processing.ts:84 🔍 [ADD_VIDEO] Checking download response for transcription: false
+video-processing.ts:85 🔍 [ADD_VIDEO] Transcription status: pending
+video-processing.ts:86 🔍 [ADD_VIDEO] Download response keys: Array(9)
+video-processing.ts:96 ⏳ [ADD_VIDEO] Transcription is processing in background, using placeholder
+add-video-dialog.tsx:80 ✅ [ADD_VIDEO] Transcription completed: Object
+add-video-dialog.tsx:84 🖼️ [ADD_VIDEO] Generating thumbnail...
+video-processing.ts:151 🖼️ [ADD_VIDEO] Extracting thumbnail - hostedOnCDN: true
+video-processing.ts:152 🖼️ [ADD_VIDEO] CDN URL: https://iframe.mediadelivery.net/embed/459811/cbac5d04-7cb7-4208-b29a-162a0b667336
+video-processing.ts:157 🖼️ [ADD_VIDEO] Using placeholder thumbnail for iframe URL
+add-video-dialog.tsx:86 ✅ [ADD_VIDEO] Thumbnail generated: data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD...
+add-video-dialog.tsx:90 💾 [ADD_VIDEO] Saving to collection...
+add-video-dialog.tsx:94 🎯 [ADD_VIDEO] Target collection: all-videos
+video-processing.ts:294 📦 [ADD_VIDEO] Creating video object with:
+video-processing.ts:295   - Download response platform: instagram
+video-processing.ts:296   - Transcription success: true
+video-processing.ts:297   - Thumbnail URL length: 10179
+video-processing.ts:298   - Original URL: https://www.instagram.com/reel/DLdldjBRV78/?utm_source=ig_web_copy_link
+add-video-dialog.tsx:98 📦 [ADD_VIDEO] Video object created: Array(15)
+add-video-dialog.tsx:99 🔍 [ADD_VIDEO] User ID: xfPvnnUdJCRIJEVrpJCmR7kXBOX2
+add-video-dialog.tsx:100 🔍 [ADD_VIDEO] Target collection ID: all-videos
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+report-hmr-latency.js:14 [Fast Refresh] done in 173ms
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+report-hmr-latency.js:14 [Fast Refresh] done in 127ms
+add-video-dialog.tsx:103 ✅ [ADD_VIDEO] Video added to collection successfully
 collections-rbac.ts:67 🔍 [RBAC] User ID: xfPvnnUdJCRIJEVrpJCmR7kXBOX2
-collections-rbac.ts:67 🔍 [RBAC] User ID: xfPvnnUdJCRIJEVrpJCmR7kXBOX2
-collections-rbac.ts:20 🔍 [RBAC] Super admin loading all collections
-collections-rbac.ts:85 🔍 [RBAC] Super admin detected - bypassing coach restrictions
-collections-rbac.ts:89 🔍 [RBAC] Super admin loading all videos
+app-state-context.tsx:38 🔄 [APP_STATE] Video processing state: false
 collections-rbac.ts:20 🔍 [RBAC] Super admin loading all collections
 collections-rbac.ts:85 🔍 [RBAC] Super admin detected - bypassing coach restrictions
 collections-rbac.ts:89 🔍 [RBAC] Super admin loading all videos
 collections-rbac.ts:33 ✅ [RBAC] Super admin loaded collections: 3
-collections-rbac.ts:33 ✅ [RBAC] Super admin loaded collections: 3
-collections-rbac.ts:103 ✅ [RBAC] Super admin loaded videos: 13
-collections-rbac.ts:103 ✅ [RBAC] Super admin loaded videos: 13
-video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
- 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
- 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
- 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
- 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
- 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
- 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
- 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
- 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
- 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
- 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
-video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
-video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
-video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
-video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
-video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
-video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…pTaBUKhULRWgVCoWgpTaBUKhUKRWgWtVCoWjtAloJSm3/2Q=='}
-video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…pTaBUKhULRWgVCoWgpTaBUKhUKRWgWtVCoWjtAloJSm3/2Q=='}
-video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…pTaBUKhULRWgVCoWgpTaBUKhUKRWgWtVCoWjtAloJSm3/2Q=='}
-video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…pTaBUKhULRWgVCoWgpTaBUKhUKRWgWtVCoWjtAloJSm3/2Q=='}
-video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…pTaBUKhULRWgVCoWgpTaBUKhUKRWgWtVCoWjtAloJSm3/2Q=='}
-video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…pTaBUKhULRWgVCoWgpTaBUKhUKRWgWtVCoWjtAloJSm3/2Q=='}
-video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
-video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
-video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
-video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
-video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
-video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
-video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
-video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
-video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…pTaBUKhULRWgVCoWgpTaBUKhUKRWgWtVCoWjtAloJSm3/2Q=='}platform: "instagram"thumbnailUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAA[[Prototype]]: Object
-video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…pTaBUKhULRWgVCoWgpTaBUKhUKRWgWtVCoWjtAloJSm3/2Q=='}
-video-thumbnail.tsx:11 Image with src "data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIzNjAiIGhlaWdodD0iNjQwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgICA8ZGVmcz4KICAgICAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMCUiIHkyPSIxMDAlIj4KICAgICAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiM4MzNBQjQ7c3RvcC1vcGFjaXR5OjEiIC8+CiAgICAgICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNGQ0IwNDU7c3RvcC1vcGFjaXR5OjEiIC8+CiAgICAgICAgPC9saW5lYXJHcmFkaWVudD4KICAgICAgPC9kZWZzPgogICAgICA8cmVjdCB3aWR0aD0iMzYwIiBoZWlnaHQ9IjY0MCIgZmlsbD0idXJsKCNncmFkKSIgLz4KICAgICAgPHRleHQgeD0iMTgwIiB5PSIzMDAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjI0Ij7wn5O5PC90ZXh0PgogICAgICA8dGV4dCB4PSIxODAiIHk9IjM0MCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTYiPklOU1RBR1JBTTwvdGV4dD4KICAgICAgPHRleHQgeD0iMTgwIiB5PSIzNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA==" has "fill" and a height value of 0. This is likely because the parent element of the image has not been styled to have a set height.
-overrideMethod @ hook.js:608
-warnOnce @ warn-once.js:16
-eval @ image-component.js:105
-Promise.then
-handleLoading @ image-component.js:36
-onLoad @ image-component.js:191
-executeDispatch @ react-dom-client.development.js:16502
-runWithFiberInDEV @ react-dom-client.development.js:845
-processDispatchQueue @ react-dom-client.development.js:16552
-eval @ react-dom-client.development.js:17150
-batchedUpdates$1 @ react-dom-client.development.js:3263
-dispatchEventForPluginEventSystem @ react-dom-client.development.js:16706
-dispatchEvent @ react-dom-client.development.js:20816
-<img>
-exports.jsx @ react-jsx-runtime.development.js:339
-eval @ image-component.js:166
-react-stack-bottom-frame @ react-dom-client.development.js:22974
-renderWithHooksAgain @ react-dom-client.development.js:6767
-renderWithHooks @ react-dom-client.development.js:6679
-updateForwardRef @ react-dom-client.development.js:8679
-beginWork @ react-dom-client.development.js:10895
-runWithFiberInDEV @ react-dom-client.development.js:845
-performUnitOfWork @ react-dom-client.development.js:15258
-workLoopSync @ react-dom-client.development.js:15078
-renderRootSync @ react-dom-client.development.js:15058
-performWorkOnRoot @ react-dom-client.development.js:14526
-performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
-performWorkUntilDeadline @ scheduler.development.js:45
-<ForwardRef>
-exports.jsx @ react-jsx-runtime.development.js:339
-eval @ image-component.js:281
-react-stack-bottom-frame @ react-dom-client.development.js:22974
-renderWithHooksAgain @ react-dom-client.development.js:6767
-renderWithHooks @ react-dom-client.development.js:6679
-updateForwardRef @ react-dom-client.development.js:8679
-beginWork @ react-dom-client.development.js:10895
-runWithFiberInDEV @ react-dom-client.development.js:845
-performUnitOfWork @ react-dom-client.development.js:15258
-workLoopSync @ react-dom-client.development.js:15078
-renderRootSync @ react-dom-client.development.js:15058
-performWorkOnRoot @ react-dom-client.development.js:14526
-performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
-performWorkUntilDeadline @ scheduler.development.js:45
-<ForwardRef>
-exports.jsxDEV @ react-jsx-dev-runtime.development.js:346
-ThumbnailImage @ video-thumbnail.tsx:11
-react-stack-bottom-frame @ react-dom-client.development.js:22974
-renderWithHooksAgain @ react-dom-client.development.js:6767
-renderWithHooks @ react-dom-client.development.js:6679
-updateFunctionComponent @ react-dom-client.development.js:8931
-beginWork @ react-dom-client.development.js:10556
-runWithFiberInDEV @ react-dom-client.development.js:845
-performUnitOfWork @ react-dom-client.development.js:15258
-workLoopSync @ react-dom-client.development.js:15078
-renderRootSync @ react-dom-client.development.js:15058
-performWorkOnRoot @ react-dom-client.development.js:14526
-performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
-performWorkUntilDeadline @ scheduler.development.js:45
-<ThumbnailImage>
-exports.jsxDEV @ react-jsx-dev-runtime.development.js:346
-VideoThumbnail @ video-thumbnail.tsx:109
-react-stack-bottom-frame @ react-dom-client.development.js:22974
-renderWithHooksAgain @ react-dom-client.development.js:6767
-renderWithHooks @ react-dom-client.development.js:6679
-updateFunctionComponent @ react-dom-client.development.js:8931
-beginWork @ react-dom-client.development.js:10556
-runWithFiberInDEV @ react-dom-client.development.js:845
-performUnitOfWork @ react-dom-client.development.js:15258
-workLoopSync @ react-dom-client.development.js:15078
-renderRootSync @ react-dom-client.development.js:15058
-performWorkOnRoot @ react-dom-client.development.js:14526
-performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
-performWorkUntilDeadline @ scheduler.development.js:45
-<VideoThumbnail>
-exports.jsxDEV @ react-jsx-dev-runtime.development.js:346
-VideoEmbedComponent @ video-embed.tsx:219
-react-stack-bottom-frame @ react-dom-client.development.js:22974
-renderWithHooksAgain @ react-dom-client.development.js:6767
-renderWithHooks @ react-dom-client.development.js:6679
-updateFunctionComponent @ react-dom-client.development.js:8931
-beginWork @ react-dom-client.development.js:10556
-runWithFiberInDEV @ react-dom-client.development.js:845
-performUnitOfWork @ react-dom-client.development.js:15258
-workLoopSync @ react-dom-client.development.js:15078
-renderRootSync @ react-dom-client.development.js:15058
-performWorkOnRoot @ react-dom-client.development.js:14526
-performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
-performWorkUntilDeadline @ scheduler.development.js:45
-video-thumbnail.tsx:11 Image with src "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAKAAWgDASIAAhEBAxEB/8QAHAABAQEBAAMBAQAAAAAAAAAAAAECBgQFBwMI/8QANRABAQACAgECBQMDAgMJAAAAAQACEQMEBQYSExQhMUEHIlEVYXEWMoGCkSM3QlJyoaOzwf/EABsBAQEBAQEBAQEAAAAAAAAAAAIBAAYEBQMH/8QAMREBAQEAAQIEBAQFBAMAAAAAAQARAgMhBBIxQQUiUWETFHGxgZGh0fAGFULBI7Lh/9oADAMBAAIRAxEAPwDkZJdqt0ISTVYrIKVpWCyCldSRWQSSRWYSSRWQSSRWQSSRWQSSaisgkkisgkkisgkkgsgkkisgkkisgmpJFZBJJFZhJKxWQSUkVkErKRWQVpWRWQSSRWQSSQWQSSU2WWayl1S3KhJWRWQSSRWQSSRWQSSQWQSSRWQSSRWYSSRWQSSRWQSSRWQSSRWQSSRWQSSRWQSSRWQSSsFkFK0kVkElZFZBJSsVkFKyRWYSSRWQSSRWQSSRWQSSR2WUkl1S3KhJJFZBJJFZBJJFZBJJFZBJJFZBJJBZBJJFZBJJFZBJJFZBJJFZhJJFZBJJFZBKykVkFaVkVkElKxWQUrJBZBJNSKyCSSKyCSSKyCSSKyCSSKzCSSO1ykkuqW5UJJIrMJJIrIJJIrIJJIrIJJIrIJJIrIJJIrIJJIrIJJILIJJIrIJKyKyCUlYrIKVlIrIK0rIrMJJIrIJJIrIJJIrIJJILIJJKLIJJILIJJIrIJJI7LKSS6tblQkkisgkkgsgkkisgkkiswkkisgkmpFZBJJFZBJJFZBJWRWQSUrFZBSspFZBWlZBZBJJFZBJJFZBJJFZBJJFZBJJFZhJJFZBJJFZBJJBZBJJFZBJJHZZSakurW5UJJIrIJJIrIJJIrIJJILIJJIrIJJIrIJJWKyClaSKyCSsiswlJWKyCSSKyCSSKyCSSKyCSSCyCSSKyCSSKyCSSKyCSSKyCSSKyCSSKzCSSKyCSSO1ykkuqW5YJJIrIJJIrIJJIrIJJIrIJJWKyClZSKyCSsgsgkpWKyClZIrIJJIrIJJIrIJJIrMJJIrIJJIrIJJIrIJJILIJJIrIJJIrIJJIrIJJIrIJJIrIJJI7LKSS6pblQkkisgkkisgkkisgkrSKzCtJWKyCSUisglZIrIJJIrIJqSRWQSSQWQSSRWQSSRWQSSRWQSSRWYSSRWQSSRWQSSQWQSSRWQSVpFZBWkrFZBStKxWQUlZHZZZkl1a3KhJJFZBJWQWQSUrFZBSspFZBWlZFZBJJFZBJJFZBJJFZhJJFZBJJFZBJJFZBJJBZBJJFZBJJFZBJJFZBJJFZBJJFZBWkrFZBSspFZBKyQWYSSRWQSSU2WWZK3VLcqElJFZBKykVkFaVkVkEkkVkEkkFkEkkVkEkkVkEkkVkEkkVmEkkVkEkkVkEkkFkEkkVkEkkVkEkrFZBStJFZBJWkVkFaVkVkElKxWQSSRWQSSRWQSSR2WWZWXVLcqElKxWQUrJFZhJJFZBJJFZBJJFZBJJFZBJJBZBJJFZBJJFZBJJFZBJJFZBJJFZBJJFZBK0kVmElZBZBKSsVkEkkVkEkkVkEkkVkEkkVkEkkVkEkkdllmsl1S3KhJNSKyCSSKyCSSKyCSSKyCSSKzCSSKyCSSKyCSSCyCSSKyCSSKyCSSKyCStIrIJJWKyClaVisgpWUisgrJIrIJJILMJJIrIJJIrIJJIrIJJIrIJJI7LKSS6tblQkkisgkkgsgkkosgkkgsgkkisgkkisgkkisgkkiswkkisgkrSCyCtJWKyClaVisgpWSKyCSSKyCSSKyCSSKyCSSKyCSSKyCSSKyCSSCzCSSK1CSSOyykkurW5UJJIrMJJIrIJJIrIJJILIJJIrIJJIrIJJIrIJJWKyCkkisglZSKyCtKyKyCSSKyCSSCzCSSKyCSSKyCSSKyCSSKyCSSKyCSSKyCSSKyCSSKyCSsjsssyS6pblQkkisgkkisgkkisgkkiswkkisgklYLIKVpI7IJK0isgrSsisgkkisgpWSKyCSSKyCSSKyCSSKyCSSCyCSSKzCSSKyCSSKyCSSKyCSV1HZZSuqhUKbagS2EpTb8ZJdQtzQSSRWQSSRWQSSRWQSSRWQSSRWQSSsVkElKxWQUrJBZhJJFZBJJFZBJJFZBJJFZBJJFZBJJFZBJJFZBJJFZBJJBZBJK6isgpXVQqFNrTVQqFQpTaBaCoVCkdoEtBLU28WSXTLfBCSSCyCSSKyCStIrIK0lYrIKVpWKyClZIrIJSsisgkkisgkkisgkkisgkkgswkkisgkkisgkkisgkkisgkkisglZquo7WgVCoWgpTaBUKhUKU2gWgqFQtHaBUKhaClNshLYSkdvAkl0i3xwkkisgrSVisgpWUisglZILMJJIrIJJIrIJJIrIJJIrIJJIrIJJdT/ovvhty1r77wfpLh0+fU3yG3k8X4/wAN4LPzHPy76fwuWl0vN6O8jhwufEHLkf8AhDS/9b0Pmevn4Lt9Th8pj7OTt/t4ePBMtr9N5P8AZT6E/wAp1e+mXg5/6k+H8fKcOp5lQ7fvfhJLyLdAEkkFkEkkVmEldVCm1pqoVCoRttAqFQtBaO0CoVCoUptAqFoKhSO0CoVC0Fo7QKhUKhSm0CWglI7esrSXQrfOCStIrIK0rIrIJKVisgkkisgkkisgkkgswkkisgkkisgkkisgl0XkfP8AmOD0r2u3z9/mwyeTA+Phn9UM9K/5LnbyvJdrj7fpvLxWfDlkZaXL8P7tpezwPVOHJOThcp/q3wHU8V0Onz6XF5cuL6BvZ9f2L2HT8l3O70zn63qDu84uIhmGt/n63qPV+XYfJ+Mw72PF2cQTDk5T3ZH7vufw/S8b0x0+n4jq8vC49v8Afnjl7scxQxdh9fxeZ5rk4/K9jq8+RycT111h9P3fXYt7+r4jpnB+a43wHwfx3LxHD/w8jv7iGe/r2vxklzy39jCSV1HZZIFQqEbbNVCoVC0VoFQqFoKU2gVCoVCkdoFoKhULUWgVCoVCkdgVCoVClNoFdVC0FI7ZCWwlqbeopK33lvIEkkVkEkkVkEkkVkEkkVkEkkVkEkkVkEkkVkEkkVkEkkFmEkkVkEkrqK1CldV1UKbWgVCoWgpRaBUKhUKR2gVCoWgpTaBUKhULRWgWgqFQpHaBUKhaClNoFQrqoWjtAqFQtBSm0CuqhUKR2gS0EtTb0kkvuLfkEkkFmEkkVkEkkVkEkkVkEkkVkEkkVkEkkVkEl2H6Rf8AeL4b/wBef/15XZ+D4PH+U/TroeD8i48Wfke52Mep2H7cXYxd4b/tltx/46/P0/Xp9H8Q3fr/ANf3vmeM+JnhOr5Hhp8uv2fNrmexx37/AL/HKuORr3CbNmz7l9Xwz6/p3pfp4+ous/C6fP5DHn43D3+zI5dDr8+3LWX0/j6XkeoebzHkPS/mMny3jPVfjHDHlMsNcfP0kd/E+GG8TWxN/wDtu34HZ79//m35/wC7rz45w+VU3eznN49nM3tuKeuG3x+ur6z4f1r6i5/0+9Qd/l8nyZdzrc/Xw4uX2YbxMl9x9tfW9p6E6/c5fB8fY8l0+13s/VHa5OPu8+HC5fD65hlhi5Iaw/flvf8AG/4px8Oc0OL69/T+H1+tOt8Y6nh+HPl1emfK+Xty3XDk+vE/47+qZ974mFpxcUMhFN/W+h+mely+lvH+sPI5cPDn5fxOXF1eDPPD3HFlnyOOXID/AGDT/wDi3mdjP1P5r0P3+XzOPU8p1cuLHtcPNlz8ZzdXTtyAN/U+iQOh27+vr6X7c/ioc/lDyaGvLFUHsZjgnub7ff5gFQv6B7/H6l7Pl/HcPgvUvjelxfJ8OT0uTMy5dGP7svh+1U1/f/pcn4Xg6fmv1S8t5rxPTz5vHeOxy7mHDx8KPLy44hiGOtjlnvI/xPl4XEB9XP8AO/teTo/HjqcOXPlwMOPm7K++A7xAX27vo3ywKhfWvK+O5sf1G9Jea5utydbLyufDyc3Fng4OHPihyGk2fh/vtv3894rr9v8AUjp+ecV8Y8Off7OR9sc+tvHPHX5/djgf80Xwr37++fw+sj45w+XePZ4r6+5vy/d7Pf7el8fCoXZfq
-overrideMethod @ hook.js:608
-warnOnce @ warn-once.js:16
-eval @ image-component.js:105
-Promise.then
-handleLoading @ image-component.js:36
-onLoad @ image-component.js:191
-executeDispatch @ react-dom-client.development.js:16502
-runWithFiberInDEV @ react-dom-client.development.js:845
-processDispatchQueue @ react-dom-client.development.js:16552
-eval @ react-dom-client.development.js:17150
-batchedUpdates$1 @ react-dom-client.development.js:3263
-dispatchEventForPluginEventSystem @ react-dom-client.development.js:16706
-dispatchEvent @ react-dom-client.development.js:20816
-<img>
-exports.jsx @ react-jsx-runtime.development.js:339
-eval @ image-component.js:166
-react-stack-bottom-frame @ react-dom-client.development.js:22974
-renderWithHooksAgain @ react-dom-client.development.js:6767
-renderWithHooks @ react-dom-client.development.js:6679
-updateForwardRef @ react-dom-client.development.js:8679
-beginWork @ react-dom-client.development.js:10895
-runWithFiberInDEV @ react-dom-client.development.js:845
-performUnitOfWork @ react-dom-client.development.js:15258
-workLoopSync @ react-dom-client.development.js:15078
-renderRootSync @ react-dom-client.development.js:15058
-performWorkOnRoot @ react-dom-client.development.js:14526
-performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
-performWorkUntilDeadline @ scheduler.development.js:45
-<ForwardRef>
-exports.jsx @ react-jsx-runtime.development.js:339
-eval @ image-component.js:281
-react-stack-bottom-frame @ react-dom-client.development.js:22974
-renderWithHooksAgain @ react-dom-client.development.js:6767
-renderWithHooks @ react-dom-client.development.js:6679
-updateForwardRef @ react-dom-client.development.js:8679
-beginWork @ react-dom-client.development.js:10895
-runWithFiberInDEV @ react-dom-client.development.js:845
-performUnitOfWork @ react-dom-client.development.js:15258
-workLoopSync @ react-dom-client.development.js:15078
-renderRootSync @ react-dom-client.development.js:15058
-performWorkOnRoot @ react-dom-client.development.js:14526
-performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
-performWorkUntilDeadline @ scheduler.development.js:45
-<ForwardRef>
-exports.jsxDEV @ react-jsx-dev-runtime.development.js:346
-ThumbnailImage @ video-thumbnail.tsx:11
-react-stack-bottom-frame @ react-dom-client.development.js:22974
-renderWithHooksAgain @ react-dom-client.development.js:6767
-renderWithHooks @ react-dom-client.development.js:6679
-updateFunctionComponent @ react-dom-client.development.js:8931
-beginWork @ react-dom-client.development.js:10556
-runWithFiberInDEV @ react-dom-client.development.js:845
-performUnitOfWork @ react-dom-client.development.js:15258
-workLoopSync @ react-dom-client.development.js:15078
-renderRootSync @ react-dom-client.development.js:15058
-performWorkOnRoot @ react-dom-client.development.js:14526
-performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
-performWorkUntilDeadline @ scheduler.development.js:45
-<ThumbnailImage>
-exports.jsxDEV @ react-jsx-dev-runtime.development.js:346
-VideoThumbnail @ video-thumbnail.tsx:109
-react-stack-bottom-frame @ react-dom-client.development.js:22974
-renderWithHooksAgain @ react-dom-client.development.js:6767
-renderWithHooks @ react-dom-client.development.js:6679
-updateFunctionComponent @ react-dom-client.development.js:8931
-beginWork @ react-dom-client.development.js:10556
-runWithFiberInDEV @ react-dom-client.development.js:845
-performUnitOfWork @ react-dom-client.development.js:15258
-workLoopSync @ react-dom-client.development.js:15078
-renderRootSync @ react-dom-client.development.js:15058
-performWorkOnRoot @ react-dom-client.development.js:14526
-performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
-performWorkUntilDeadline @ scheduler.development.js:45
-<VideoThumbnail>
-exports.jsxDEV @ react-jsx-dev-runtime.development.js:346
-VideoEmbedComponent @ video-embed.tsx:219
-react-stack-bottom-frame @ react-dom-client.development.js:22974
-renderWithHooksAgain @ react-dom-client.development.js:6767
-renderWithHooks @ react-dom-client.development.js:6679
-updateFunctionComponent @ react-dom-client.development.js:8931
-beginWork @ react-dom-client.development.js:10556
-runWithFiberInDEV @ react-dom-client.development.js:845
-performUnitOfWork @ react-dom-client.development.js:15258
-workLoopSync @ react-dom-client.development.js:15078
-renderRootSync @ react-dom-client.development.js:15058
-performWorkOnRoot @ react-dom-client.development.js:14526
-performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
-performWorkUntilDeadline @ scheduler.development.js:45
-<VideoEmbedComponent>
-exports.jsxDEV @ react-jsx-dev-runtime.development.js:346
-VideoEmbedWrapper @ video-embed.tsx:276
-react-stack-bottom-frame @ react-dom-client.development.js:22974
-renderWithHooksAgain @ react-dom-client.development.js:6767
-renderWithHooks @ react-dom-client.development.js:6679
-updateFunctionComponent @ react-dom-client.development.js:8931
-beginWork @ react-dom-client.development.js:10556
-runWithFiberInDEV @ react-dom-client.development.js:848
-performUnitOfWork @ react-dom-client.development.js:15258
-workLoopSync @ react-dom-client.development.js:15078
-renderRootSync @ react-dom-client.development.js:15058
-performWorkOnRoot @ react-dom-client.development.js:14526
-performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
-performWorkUntilDeadline @ scheduler.development.js:45
+collections-rbac.ts:103 ✅ [RBAC] Super admin loaded videos: 16
+VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
+hook.js:377 🎥 [VideoEmbed]: Object
+VM5726 video-thumbnail.tsx:178 🎬 [VideoThumbnail] Real image thumbnail: Object
+hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
+VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
+hook.js:377 🎥 [VideoEmbed]: Object
+VM5726 video-thumbnail.tsx:178 🎬 [VideoThumbnail] Real image thumbnail: Object
+hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
+VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
+hook.js:377 🎥 [VideoEmbed]: Object
+VM5726 video-thumbnail.tsx:178 🎬 [VideoThumbnail] Real image thumbnail: Object
+hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
+VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
+hook.js:377 🎥 [VideoEmbed]: Object
+VM5726 video-thumbnail.tsx:165 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
+hook.js:377 🎥 [VideoEmbed]: Object
+VM5726 video-thumbnail.tsx:165 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
+hook.js:377 🎥 [VideoEmbed]: Object
+VM5726 video-thumbnail.tsx:165 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
+hook.js:377 🎥 [VideoEmbed]: Object
+VM5726 video-thumbnail.tsx:165 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
+hook.js:377 🎥 [VideoEmbed]: Object
+VM5726 video-thumbnail.tsx:165 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
+hook.js:377 🎥 [VideoEmbed]: Object
+VM5726 video-thumbnail.tsx:178 🎬 [VideoThumbnail] Real image thumbnail: Object
+hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
+VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
+hook.js:377 🎥 [VideoEmbed]: Object
+VM5726 video-thumbnail.tsx:178 🎬 [VideoThumbnail] Real image thumbnail: Object
+hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
+VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
+hook.js:377 🎥 [VideoEmbed]: Object
+VM5726 video-thumbnail.tsx:178 🎬 [VideoThumbnail] Real image thumbnail: Object
+hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
+VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
+hook.js:377 🎥 [VideoEmbed]: Object
+VM5726 video-thumbnail.tsx:165 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
+hook.js:377 🎥 [VideoEmbed]: Object
+VM5726 video-thumbnail.tsx:165 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
+hook.js:377 🎥 [VideoEmbed]: Object
+VM5726 video-thumbnail.tsx:165 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
+hook.js:377 🎥 [VideoEmbed]: Object
+VM5726 video-thumbnail.tsx:165 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
+hook.js:377 🎥 [VideoEmbed]: Object
+VM5726 video-thumbnail.tsx:178 🎬 [VideoThumbnail] Real image thumbnail: Object
+hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+VM5902 video-thumbnail.tsx:232 🎬 [VideoThumbnail] Real image thumbnail: Object
+hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
+VM5902 video-thumbnail.tsx:232 🎬 [VideoThumbnail] Real image thumbnail: Object
+hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
+VM5902 video-thumbnail.tsx:232 🎬 [VideoThumbnail] Real image thumbnail: Object
+hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
+VM5902 video-thumbnail.tsx:219 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5902 video-thumbnail.tsx:219 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5902 video-thumbnail.tsx:219 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5902 video-thumbnail.tsx:219 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5902 video-thumbnail.tsx:219 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5902 video-thumbnail.tsx:232 🎬 [VideoThumbnail] Real image thumbnail: Object
+hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
+VM5902 video-thumbnail.tsx:232 🎬 [VideoThumbnail] Real image thumbnail: Object
+hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
+VM5902 video-thumbnail.tsx:232 🎬 [VideoThumbnail] Real image thumbnail: Object
+hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
+VM5902 video-thumbnail.tsx:219 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5902 video-thumbnail.tsx:219 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5902 video-thumbnail.tsx:219 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5902 video-thumbnail.tsx:219 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5902 video-thumbnail.tsx:232 🎬 [VideoThumbnail] Real image thumbnail: Object
+hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
+report-hmr-latency.js:14 [Fast Refresh] done in 1007ms
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+report-hmr-latency.js:14 [Fast Refresh] done in 433ms
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+VM5910 video-thumbnail.tsx:179 🎬 [VideoThumbnail] Real image thumbnail: Object
+hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
+VM5910 video-thumbnail.tsx:179 🎬 [VideoThumbnail] Real image thumbnail: Object
+hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
+VM5910 video-thumbnail.tsx:179 🎬 [VideoThumbnail] Real image thumbnail: Object
+hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
+VM5910 video-thumbnail.tsx:164 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5910 video-thumbnail.tsx:164 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5910 video-thumbnail.tsx:164 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5910 video-thumbnail.tsx:164 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5910 video-thumbnail.tsx:164 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5910 video-thumbnail.tsx:179 🎬 [VideoThumbnail] Real image thumbnail: Object
+hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
+VM5910 video-thumbnail.tsx:179 🎬 [VideoThumbnail] Real image thumbnail: Object
+hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
+VM5910 video-thumbnail.tsx:179 🎬 [VideoThumbnail] Real image thumbnail: Object
+hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
+VM5910 video-thumbnail.tsx:164 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5910 video-thumbnail.tsx:164 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5910 video-thumbnail.tsx:164 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5910 video-thumbnail.tsx:164 🎬 [VideoThumbnail] SVG placeholder detected: Object
+hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
+VM5910 video-thumbnail.tsx:179 🎬 [VideoThumbnail] Real image thumbnail: ObjectisRealThumbnail: trueplatform: "instagram"previewUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI..."size: "10KB"type: "JPEG"[[Prototype]]: Objectconstructor: ƒ Object()hasOwnProperty: ƒ hasOwnProperty()isPrototypeOf: ƒ isPrototypeOf()propertyIsEnumerable: ƒ propertyIsEnumerable()toLocaleString: ƒ toLocaleString()toString: ƒ toString()valueOf: ƒ valueOf()__defineGetter__: ƒ __defineGetter__()__defineSetter__: ƒ __defineSetter__()__lookupGetter__: ƒ __lookupGetter__()__lookupSetter__: ƒ __lookupSetter__()__proto__: (...)get __proto__: ƒ __proto__()set __proto__: ƒ __proto__()
+hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
+report-hmr-latency.js:14 [Fast Refresh] done in 224ms
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+report-hmr-latency.js:14 [Fast Refresh] done in 248ms
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+report-hmr-latency.js:14 [Fast Refresh] done in 181ms
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+report-hmr-latency.js:14 [Fast Refresh] done in 192ms
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+report-hmr-latency.js:14 [Fast Refresh] done in 1223ms
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+report-hmr-latency.js:14 [Fast Refresh] done in 298ms
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+report-hmr-latency.js:14 [Fast Refresh] done in 200ms
+[Fast Refresh] rebuilding
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
+🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
+🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
+🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
+🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
+🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
+🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
+🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
+🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
+🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
+🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
+🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
+🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
+🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
+🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
+🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
+🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
+[Fast Refresh] done in 1864ms
