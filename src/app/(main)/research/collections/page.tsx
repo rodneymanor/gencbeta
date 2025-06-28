@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, useTransition, useRef, memo } from "react";
@@ -275,6 +276,18 @@ export default function CollectionsPage() {
     setSelectedVideos(new Set());
   }, []);
 
+  console.log(
+    "📊 [CollectionsPage] Videos data:",
+    videos.map((v) => ({
+      id: v.id,
+      platform: v.platform,
+      title: v.title,
+      author: v.author,
+      url: v.url,
+    })),
+  );
+
+  // Early return for loading state
   if (loading) {
     return <LoadingSkeleton />;
   }
@@ -282,6 +295,11 @@ export default function CollectionsPage() {
   return (
     <motion.div className="@container/main" {...optimizedAnimations.container}>
       <div className="mx-auto max-w-7xl space-y-8 md:space-y-10">
+        {/* DEBUG: Test gradient to see if Tailwind CSS is working */}
+        <div className="fixed top-4 right-4 z-50 h-20 w-20 rounded-lg bg-gradient-to-br from-pink-500 via-purple-500 to-indigo-500 p-2 text-xs text-white">
+          Test Gradient
+        </div>
+
         {/* Header Section - Optimized animations */}
         <motion.section className="space-y-4" {...optimizedAnimations.header}>
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">

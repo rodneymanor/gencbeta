@@ -59,7 +59,15 @@ const VideoThumbnail = ({
     instagram: "from-purple-500 via-pink-500 to-orange-500",
   } as const;
 
-  const gradientClass = platformGradients[platform] ?? platformGradients.tiktok;
+  const gradientClass =
+    platform === "tiktok"
+      ? platformGradients.tiktok
+      : platform === "instagram"
+        ? platformGradients.instagram
+        : platformGradients.tiktok;
+
+  // Debug logging
+  console.log("🎬 [VideoThumbnail] Rendering with:", { platform, gradientClass, title, author });
 
   return (
     <motion.div
@@ -138,11 +146,15 @@ const VideoEmbedComponent = ({
   const [hasError, setHasError] = useState(false);
   const [videoObjectUrl, setVideoObjectUrl] = useState<string | null>(null);
   const [contentLoaded, setContentLoaded] = useState(false);
-  const [shouldLoad, setShouldLoad] = useState(!lazyLoad); // If lazyLoad false, load immediately
+  const [shouldLoad, setShouldLoad] = useState(!lazyLoad);
   const [isPlaying, setIsPlaying] = useState(false);
+
+  // Debug logging
+  console.log("🎥 [VideoEmbed]:", { platform, lazyLoad, shouldLoad, isLoading });
 
   // Handle click to load video
   const handleLoadVideo = () => {
+    console.log("🔥 [VideoEmbed] Click detected");
     if (!shouldLoad) {
       setShouldLoad(true);
       setIsLoading(true);
@@ -152,7 +164,6 @@ const VideoEmbedComponent = ({
   useEffect(() => {
     if (!shouldLoad) return;
 
-    // Reset states when URL changes or when starting to load
     setIsLoading(true);
     setContentLoaded(false);
     setHasError(false);
@@ -163,7 +174,6 @@ const VideoEmbedComponent = ({
         const blob = new Blob([uint8Array], { type: videoData.mimeType });
         const objectUrl = URL.createObjectURL(blob);
         setVideoObjectUrl(objectUrl);
-        // Don't set loading to false here - wait for video load event
 
         return () => {
           if (objectUrl && objectUrl.startsWith("blob:")) {
@@ -176,11 +186,10 @@ const VideoEmbedComponent = ({
         setIsLoading(false);
       }
     }
-    // For other video types, we'll rely on load events from iframe/video elements
   }, [url, hostedOnCDN, videoData, shouldLoad]);
 
-  // Handle content loading completion
   const handleContentLoad = () => {
+    console.log("✅ [VideoEmbed] Content loaded!");
     setContentLoaded(true);
     setIsLoading(false);
     setIsPlaying(true);
@@ -292,14 +301,11 @@ const VideoEmbedComponent = ({
         </motion.div>
       ) : (
         <motion.div key="content" className="relative h-full w-full">
-          {/* Always show loading overlay until content is actually loaded */}
           {(isLoading || !contentLoaded) && (
             <motion.div key="loading" className="absolute inset-0 z-10">
               {renderLoadingState()}
             </motion.div>
           )}
-
-          {/* Content layer - hidden until fully loaded */}
           <motion.div
             className="absolute inset-0"
             initial={{ opacity: 0 }}
@@ -314,7 +320,6 @@ const VideoEmbedComponent = ({
   );
 };
 
-// Memoize for performance
 export const VideoEmbed = memo(VideoEmbedComponent, (prevProps, nextProps) => {
   return (
     prevProps.url === nextProps.url &&
