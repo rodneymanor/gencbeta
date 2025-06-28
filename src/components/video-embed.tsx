@@ -5,8 +5,8 @@ import { useState, useEffect, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
+import { VideoLoadingOverlay } from "@/components/ui/page-loading";
 
-import { VideoLoadingOverlay } from "./video-player-components";
 import { VideoThumbnail } from "./video-thumbnail";
 
 // Helper function to determine which content to render
