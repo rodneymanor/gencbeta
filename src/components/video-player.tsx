@@ -72,6 +72,8 @@ const VideoPlayerComponent = ({
   platform,
   metrics,
   insights,
+  title,
+  author,
   className = "",
   hostedOnCDN,
   videoData,
@@ -90,6 +92,9 @@ const VideoPlayerComponent = ({
           hostedOnCDN={hostedOnCDN}
           videoData={videoData}
           disableCard={disableCard}
+          title={title}
+          author={author}
+          lazyLoad={true}
         />
 
         {/* Metrics Overlay */}

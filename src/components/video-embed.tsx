@@ -3,6 +3,7 @@
 import { useState, useEffect, memo } from "react";
 
 import { motion, AnimatePresence } from "framer-motion";
+import { Play } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { VideoLoadingOverlay } from "@/components/ui/page-loading";
@@ -28,12 +29,96 @@ const getVideoContent = (
   return renderIframeEmbed(getEmbedUrl(url, platform));
 };
 
+// Helper function to get embed URL
+const getEmbedUrl = (url: string, platform: string) => {
+  if (platform === "tiktok") {
+    const videoId = url.split("/").pop()?.split("?")[0];
+    return `https://www.tiktok.com/embed/v2/${videoId}`;
+  } else {
+    const postId = url.split("/p/")[1]?.split("/")[0] ?? "";
+    return `https://www.instagram.com/p/${postId}/embed/`;
+  }
+};
+
+// Thumbnail placeholder component
+const VideoThumbnail = ({
+  platform,
+  onClick,
+  disableCard = false,
+  title,
+  author,
+}: {
+  platform: "tiktok" | "instagram";
+  onClick: () => void;
+  disableCard?: boolean;
+  title?: string;
+  author?: string;
+}) => {
+  const platformGradients = {
+    tiktok: "from-pink-500 via-purple-500 to-indigo-500",
+    instagram: "from-purple-500 via-pink-500 to-orange-500",
+  } as const;
+
+  const gradientClass = platformGradients[platform] ?? platformGradients.tiktok;
+
+  return (
+    <motion.div
+      className={`relative flex h-full w-full cursor-pointer items-center justify-center bg-gradient-to-br ${gradientClass} ${disableCard ? "" : "rounded-xl"}`}
+      onClick={onClick}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3 }}
+    >
+      {/* Play button overlay */}
+      <motion.div
+        className="absolute inset-0 flex items-center justify-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2 }}
+      >
+        <motion.div
+          className="rounded-full bg-black/50 p-6 backdrop-blur-sm"
+          whileHover={{ scale: 1.1, backgroundColor: "rgba(0, 0, 0, 0.7)" }}
+          whileTap={{ scale: 0.9 }}
+        >
+          <Play className="h-8 w-8 text-white" fill="white" />
+        </motion.div>
+      </motion.div>
+
+      {/* Platform indicator */}
+      <div className="absolute top-4 left-4">
+        <div className="rounded-full bg-black/50 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
+          {platform.toUpperCase()}
+        </div>
+      </div>
+
+      {/* Video info overlay */}
+      {(title ?? author) && (
+        <div className="absolute right-4 bottom-4 left-4">
+          <div className="rounded-lg bg-black/50 p-3 backdrop-blur-sm">
+            {title && <p className="line-clamp-2 text-sm font-medium text-white">{title}</p>}
+            {author && <p className="text-xs text-white/80">@{author}</p>}
+          </div>
+        </div>
+      )}
+
+      {/* Shimmer effect */}
+      <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+    </motion.div>
+  );
+};
+
 const VideoEmbedComponent = ({
   url,
   platform,
   hostedOnCDN,
   videoData,
   disableCard = false,
+  lazyLoad = true,
+  title,
+  author,
 }: {
   url: string;
   platform: "tiktok" | "instagram";
@@ -45,14 +130,29 @@ const VideoEmbedComponent = ({
     filename: string;
   };
   disableCard?: boolean;
+  lazyLoad?: boolean;
+  title?: string;
+  author?: string;
 }) => {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [videoObjectUrl, setVideoObjectUrl] = useState<string | null>(null);
   const [contentLoaded, setContentLoaded] = useState(false);
+  const [shouldLoad, setShouldLoad] = useState(!lazyLoad); // If lazyLoad false, load immediately
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  // Handle click to load video
+  const handleLoadVideo = () => {
+    if (!shouldLoad) {
+      setShouldLoad(true);
+      setIsLoading(true);
+    }
+  };
 
   useEffect(() => {
-    // Reset states when URL changes
+    if (!shouldLoad) return;
+
+    // Reset states when URL changes or when starting to load
     setIsLoading(true);
     setContentLoaded(false);
     setHasError(false);
@@ -77,28 +177,19 @@ const VideoEmbedComponent = ({
       }
     }
     // For other video types, we'll rely on load events from iframe/video elements
-  }, [url, hostedOnCDN, videoData]);
+  }, [url, hostedOnCDN, videoData, shouldLoad]);
 
   // Handle content loading completion
   const handleContentLoad = () => {
     setContentLoaded(true);
     setIsLoading(false);
+    setIsPlaying(true);
   };
 
   const handleContentError = (error: Event | string) => {
     console.error("❌ [VIDEO_PLAYER] Content load error:", error);
     setHasError(true);
     setIsLoading(false);
-  };
-
-  const getEmbedUrl = (url: string, platform: string) => {
-    if (platform === "tiktok") {
-      const videoId = url.split("/").pop()?.split("?")[0];
-      return `https://www.tiktok.com/embed/v2/${videoId}`;
-    } else {
-      const postId = url.split("/p/")[1]?.split("/")[0] ?? "";
-      return `https://www.instagram.com/p/${postId}/embed/`;
-    }
   };
 
   const renderLoadingState = () => <VideoLoadingOverlay disableCard={disableCard} />;
@@ -167,6 +258,7 @@ const VideoEmbedComponent = ({
       muted
       loop
       playsInline
+      autoPlay={isPlaying}
       onLoadedData={handleContentLoad}
       onError={handleContentError}
       style={{
@@ -188,6 +280,16 @@ const VideoEmbedComponent = ({
     <AnimatePresence mode="wait">
       {hasError ? (
         <motion.div key="error">{renderErrorState()}</motion.div>
+      ) : !shouldLoad ? (
+        <motion.div key="thumbnail">
+          <VideoThumbnail
+            platform={platform}
+            onClick={handleLoadVideo}
+            disableCard={disableCard}
+            title={title}
+            author={author}
+          />
+        </motion.div>
       ) : (
         <motion.div key="content" className="relative h-full w-full">
           {/* Always show loading overlay until content is actually loaded */}
@@ -198,14 +300,28 @@ const VideoEmbedComponent = ({
           )}
 
           {/* Content layer - hidden until fully loaded */}
-          <div className="relative h-full w-full">
+          <motion.div
+            className="absolute inset-0"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: contentLoaded ? 1 : 0 }}
+            transition={{ duration: 0.5 }}
+          >
             {getVideoContent(url, platform, hostedOnCDN, videoObjectUrl, renderIframeEmbed, renderVideoElement)}
-          </div>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
   );
 };
 
-export const VideoEmbed = memo(VideoEmbedComponent);
+// Memoize for performance
+export const VideoEmbed = memo(VideoEmbedComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.url === nextProps.url &&
+    prevProps.platform === nextProps.platform &&
+    prevProps.hostedOnCDN === nextProps.hostedOnCDN &&
+    prevProps.lazyLoad === nextProps.lazyLoad
+  );
+});
+
 VideoEmbed.displayName = "VideoEmbed";
