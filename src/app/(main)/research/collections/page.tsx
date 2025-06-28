@@ -240,11 +240,11 @@ export default function CollectionsPage() {
               whileTap={{ scale: 0.98 }}
             >
               <Badge
-                variant={!selectedCollectionId ? "default" : "secondary"}
-                className={`cursor-pointer transition-all duration-200 ${
+                variant="outline"
+                className={`focus-visible:ring-ring cursor-pointer rounded-full border-0 px-4 py-2 font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 ${
                   !selectedCollectionId
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
-                    : "bg-secondary/50 hover:bg-secondary/80"
+                    ? "bg-secondary text-foreground hover:bg-secondary/80 font-semibold"
+                    : "text-muted-foreground hover:bg-secondary/50 bg-transparent font-normal"
                 }`}
                 onClick={() => handleCollectionChange(null)}
               >
@@ -263,11 +263,11 @@ export default function CollectionsPage() {
                   layout
                 >
                   <Badge
-                    variant={selectedCollectionId === collection.id ? "default" : "secondary"}
-                    className={`cursor-pointer transition-all duration-200 ${
+                    variant="outline"
+                    className={`focus-visible:ring-ring cursor-pointer rounded-full border-0 px-4 py-2 font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 ${
                       selectedCollectionId === collection.id
-                        ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
-                        : "bg-secondary/50 hover:bg-secondary/80"
+                        ? "bg-secondary text-foreground hover:bg-secondary/80 font-semibold"
+                        : "text-muted-foreground hover:bg-secondary/50 bg-transparent font-normal"
                     }`}
                     onClick={() => handleCollectionChange(collection.id!)}
                   >
