@@ -15,16 +15,38 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '*.cdninstagram.com',
+        hostname: 'scontent-waw2-1.cdninstagram.com',
       },
       {
         protocol: 'https',
-        hostname: 'scontent-*.cdninstagram.com',
+        hostname: 'scontent-waw2-2.cdninstagram.com',
       },
       {
         protocol: 'https',
-        hostname: 'scontent.cdninstagram.com',
+        hostname: 'scontent-waw1-1.cdninstagram.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'scontent-waw1-2.cdninstagram.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'scontent-atl3-1.cdninstagram.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'scontent-atl3-2.cdninstagram.com',
+      },
+    ],
+    domains: [
+      'scontent-waw2-1.cdninstagram.com',
+      'scontent-waw2-2.cdninstagram.com',
+      'scontent-waw1-1.cdninstagram.com',
+      'scontent-waw1-2.cdninstagram.com',
+      'scontent-atl3-1.cdninstagram.com',
+      'scontent-atl3-2.cdninstagram.com',
+      'instagram.com',
+      'cdninstagram.com'
     ],
   },
   // Force dynamic rendering for problematic pages
