@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thumbnail Debug Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 5px 10px 0;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #f8f9fa;
+        }
+        .thumbnail {
+            max-width: 300px;
+            max-height: 300px;
+            border: 1px solid #ddd;
+            margin: 10px 0;
+        }
+        .svg-content {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Video Thumbnail Debug Tool</h1>
+        <p>Paste a base64 thumbnail URL from the console to see what it contains:</p>
+        
+        <textarea id="thumbnailInput" placeholder="Paste base64 thumbnail URL here (e.g., data:image/svg+xml;base64,...)"></textarea>
+        
+        <button onclick="decodeThumbnail()">Decode Thumbnail</button>
+        <button onclick="clearResult()">Clear</button>
+        
+        <div id="result" class="result" style="display: none;">
+            <h3>Result:</h3>
+            <div id="info"></div>
+            <div id="content"></div>
+        </div>
+        
+        <!-- Sample test data -->
+        <h3>Quick Test:</h3>
+        <button onclick="testSvgPlaceholder()">Test SVG Placeholder</button>
+        <button onclick="testJpegSample()">Test Sample JPEG</button>
+    </div>
+
+    <script>
+        function decodeThumbnail() {
+            const input = document.getElementById('thumbnailInput').value.trim();
+            const result = document.getElementById('result');
+            const info = document.getElementById('info');
+            const content = document.getElementById('content');
+            
+            if (!input) {
+                alert('Please paste a thumbnail URL');
+                return;
+            }
+            
+            try {
+                if (input.startsWith('data:image/svg+xml;base64,')) {
+                    const base64Data = input.split(',')[1];
+                    const decoded = atob(base64Data);
+                    
+                    info.innerHTML = `
+                        <strong>Type:</strong> SVG Placeholder<br>
+                        <strong>Size:</strong> ${Math.round(input.length / 1024)}KB<br>
+                        <strong>Is Real Thumbnail:</strong> ❌ No (this is a placeholder)
+                    `;
+                    
+                    content.innerHTML = `
+                        <div class="svg-content">${decoded}</div>
+                        <img src="${input}" alt="SVG Preview" class="thumbnail">
+                    `;
+                    
+                } else if (input.startsWith('data:image/jpeg') || input.startsWith('data:image/png')) {
+                    const type = input.startsWith('data:image/jpeg') ? 'JPEG' : 'PNG';
+                    
+                    info.innerHTML = `
+                        <strong>Type:</strong> ${type} Image<br>
+                        <strong>Size:</strong> ${Math.round(input.length / 1024)}KB<br>
+                        <strong>Is Real Thumbnail:</strong> ✅ Yes (this appears to be a real image)
+                    `;
+                    
+                    content.innerHTML = `
+                        <img src="${input}" alt="Image Preview" class="thumbnail">
+                    `;
+                    
+                } else if (input.startsWith('http')) {
+                    info.innerHTML = `
+                        <strong>Type:</strong> HTTP URL<br>
+                        <strong>URL:</strong> ${input}<br>
+                        <strong>Is Real Thumbnail:</strong> ✅ Yes (external URL)
+                    `;
+                    
+                    content.innerHTML = `
+                        <img src="${input}" alt="External Image" class="thumbnail" 
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <div style="display:none; color:red;">❌ Failed to load external image</div>
+                    `;
+                    
+                } else {
+                    info.innerHTML = `
+                        <strong>Type:</strong> Unknown format<br>
+                        <strong>Preview:</strong> ${input.substring(0, 100)}...<br>
+                        <strong>Is Real Thumbnail:</strong> ❓ Unknown
+                    `;
+                    content.innerHTML = '<p>Unable to preview this format</p>';
+                }
+                
+                result.style.display = 'block';
+                
+            } catch (error) {
+                alert('Error decoding thumbnail: ' + error.message);
+            }
+        }
+        
+        function clearResult() {
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('thumbnailInput').value = '';
+        }
+        
+        function testSvgPlaceholder() {
+            document.getElementById('thumbnailInput').value = 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIzNjAiIGhlaWdodD0iNjQwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgICA8ZGVmcz4KICAgICAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMCUiIHkyPSIxMDAlIj4KICAgICAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiM4MzNBQjQ7c3RvcC1vcGFjaXR5OjEiIC8+CiAgICAgICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNGQ0IwNDU7c3RvcC1vcGFjaXR5OjEiIC8+CiAgICAgICAgPC9saW5lYXJHcmFkaWVudD4KICAgICAgPC9kZWZzPgogICAgICA8cmVjdCB3aWR0aD0iMzYwIiBoZWlnaHQ9IjY0MCIgZmlsbD0idXJsKCNncmFkKSIgLz4KICAgICAgPHRleHQgeD0iMTgwIiB5PSIzMDAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjI0Ij7wn5O5PC90ZXh0PgogICAgICA8dGV4dCB4PSIxODAiIHk9IjM0MCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTYiPklOU1RBR1JBTTwvdGV4dD4KICAgICAgPHRleHQgeD0iMTgwIiB5PSIzNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA==';
+            decodeThumbnail();
+        }
+        
+        function testJpegSample() {
+            // Small sample JPEG
+            document.getElementById('thumbnailInput').value = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwA/AG3M';
+            decodeThumbnail();
+        }
+    </script>
+</body>
+</html> 

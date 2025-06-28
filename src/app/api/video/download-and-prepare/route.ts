@@ -185,6 +185,7 @@ function createWorkflowResponse(downloadResult: unknown, uploadResult: unknown) 
     platform: (downloadResult as any).platform,
     metrics: (downloadResult as any).metrics,
     additionalMetadata: (downloadResult as any).additionalMetadata,
+    thumbnailUrl: (downloadResult as any).thumbnailUrl,
     metadata: {
       ...(downloadResult as any).metadata,
       readyForTranscription: true,

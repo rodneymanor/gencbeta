@@ -1,11 +1,10 @@
-import { NextResponse } from "next/server";
-
 import { uploadToBunnyStream } from "@/lib/bunny-stream";
 import {
   fetchInstagramMetadata,
   extractMetricsFromMetadata,
   extractAdditionalMetadata,
   downloadVideoFromVersions,
+  extractThumbnailUrl,
 } from "@/lib/instagram-downloader";
 import { transcribeVideoFile } from "@/lib/transcription";
 import {
@@ -18,6 +17,7 @@ export interface DownloadResult {
   videoData: { buffer: ArrayBuffer; size: number; mimeType: string; filename?: string };
   metrics?: { likes: number; views: number; shares: number; comments: number; saves: number };
   additionalMetadata?: { author: string; duration: number };
+  thumbnailUrl?: string;
 }
 
 export interface CdnResult {
@@ -235,6 +235,7 @@ export async function downloadInstagramVideoWithMetrics(url: string): Promise<Do
     console.log("📊 [DOWNLOAD] Extracting metrics from metadata...");
     const metrics = extractMetricsFromMetadata(metadata);
     const additionalMetadata = extractAdditionalMetadata(metadata);
+    const thumbnailUrl = extractThumbnailUrl(metadata);
 
     console.log("🎥 [DOWNLOAD] Downloading video from versions...");
     const videoData = await downloadVideoFromVersions(metadata.video_versions, shortcode);
@@ -246,7 +247,8 @@ export async function downloadInstagramVideoWithMetrics(url: string): Promise<Do
 
     console.log("✅ [DOWNLOAD] Successfully downloaded Instagram video with metrics:", metrics);
     console.log("📋 [DOWNLOAD] Additional metadata:", additionalMetadata);
-    return { videoData, metrics, additionalMetadata };
+    console.log("🖼️ [DOWNLOAD] Thumbnail URL:", thumbnailUrl ? "✅ Found" : "❌ Not found");
+    return { videoData, metrics, additionalMetadata, thumbnailUrl };
   } catch (error) {
     console.error("❌ [DOWNLOAD] Instagram RapidAPI error:", error);
     console.log("🔄 [DOWNLOAD] Falling back to basic download...");

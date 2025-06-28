@@ -72,6 +72,30 @@ export function extractAdditionalMetadata(metadata: any) {
   return additionalData;
 }
 
+export function extractThumbnailUrl(metadata: any): string | undefined {
+  try {
+    // Instagram API provides thumbnails in image_versions2 field
+    if (metadata.image_versions2?.candidates?.length > 0) {
+      const thumbnail = metadata.image_versions2.candidates[0].url;
+      console.log("🖼️ [DOWNLOAD] Extracted Instagram thumbnail from image_versions2:", thumbnail);
+      return thumbnail;
+    }
+
+    // Also check additional_candidates for better quality options
+    if (metadata.image_versions2?.additional_candidates?.first_frame?.url) {
+      const thumbnail = metadata.image_versions2.additional_candidates.first_frame.url;
+      console.log("🖼️ [DOWNLOAD] Extracted Instagram thumbnail from first_frame:", thumbnail);
+      return thumbnail;
+    }
+
+    console.log("⚠️ [DOWNLOAD] No thumbnail found in Instagram metadata");
+    return undefined;
+  } catch (error) {
+    console.error("❌ [DOWNLOAD] Error extracting thumbnail URL:", error);
+    return undefined;
+  }
+}
+
 function getAuthorFromMetadata(metadata: any): string {
   return (
     metadata.owner?.username ??
@@ -88,7 +112,7 @@ function getDurationFromMetadata(metadata: any): number {
 }
 
 export async function downloadVideoFromVersions(videoVersions: any[], shortcode: string) {
-  if (!videoVersions || videoVersions.length === 0) {
+  if (!videoVersions?.length) {
     console.error("❌ [DOWNLOAD] No video versions found in Instagram RapidAPI response");
     return null;
   }

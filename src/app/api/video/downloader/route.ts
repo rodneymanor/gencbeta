@@ -71,6 +71,7 @@ export async function POST(request: NextRequest) {
         author: "Unknown",
         duration: 0,
       },
+      thumbnailUrl: downloadResult.thumbnailUrl,
       metadata: {
         originalUrl: url,
         platform,

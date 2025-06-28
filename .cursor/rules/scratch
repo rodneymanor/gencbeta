@@ -1,201 +1,257 @@
-{
-    "id": "3655516832441723518_40168630800",
-    "pk": 3655516832441723400,
-    "code": "DK7ATD8Jmp-",
-    "media_type": 2,
-    "taken_at": 1749991609,
-    "image_versions2": {
-      "candidates": [
-        {
-          "width": 360,
-          "height": 640,
-          "url": "https://scontent-cdg4-2.cdninstagram.com/v/t51.75761-15/506072804_18052908257342801_3691899560646845588_n.jpg?stp=dst-jpg_e15_s640x640_tt6&_nc_cat=101&ig_cache_key=MzY1NTUxNjgzMjQ0MTcyMzUxOA%3D%3D.3-ccb1-7&ccb=1-7&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6InhwaWRzLjEwODB4MTkyMC5zZHIifQ%3D%3D&_nc_ohc=23Tsua3qv0cQ7kNvwHHiG-r&_nc_oc=AdnXJWUmlwO8npqPKmbDXo0tajH5PB9yjiSZ10B2XD4I4PipFvN1dQOKPL7ob4kmG8w&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-cdg4-2.cdninstagram.com&_nc_gid=slT5_0MJd3v3q72V-VJugA&oh=00_AfOmLkACqSS3AP7f_j7nlLo0otdC2ye2sW2ZukGUR72tOg&oe=6861993A",
-          "scans_profile": "e15"
-        }
-      ],
-      "additional_candidates": {
-        "first_frame": {
-          "width": 360,
-          "height": 639,
-          "url": "https://scontent-cdg4-1.cdninstagram.com/v/t51.71878-15/505191458_1214984003257616_343523545883704684_n.jpg?stp=dst-jpg_e15_p360x360_tt6&_nc_cat=108&ccb=1-7&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6InhwaWRzLjY0MHgxMTM2LnNkciJ9&_nc_ohc=gDeFKXSDK8gQ7kNvwHzgF63&_nc_oc=AdkRDELS4M-nM592kyRDNDtzoJxk4cs--N5YCx1WndLTWXBHD-AoiNA-vHYmwPXBrKQ&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-cdg4-1.cdninstagram.com&_nc_gid=slT5_0MJd3v3q72V-VJugA&oh=00_AfPzh92GGP_02C5CLKdNKeZkEzuyPaq6vk7nUztwcbyFqg&oe=6861C150",
-          "scans_profile": "e15"
-        },
-        "igtv_first_frame": {
-          "width": 360,
-          "height": 639,
-          "url": "https://scontent-cdg4-1.cdninstagram.com/v/t51.71878-15/505191458_1214984003257616_343523545883704684_n.jpg?stp=dst-jpg_e15_p360x360_tt6&_nc_cat=108&ccb=1-7&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6InhwaWRzLjY0MHgxMTM2LnNkciJ9&_nc_ohc=gDeFKXSDK8gQ7kNvwHzgF63&_nc_oc=AdkRDELS4M-nM592kyRDNDtzoJxk4cs--N5YCx1WndLTWXBHD-AoiNA-vHYmwPXBrKQ&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-cdg4-1.cdninstagram.com&_nc_gid=slT5_0MJd3v3q72V-VJugA&oh=00_AfPzh92GGP_02C5CLKdNKeZkEzuyPaq6vk7nUztwcbyFqg&oe=6861C150",
-          "scans_profile": "e15"
-        },
-        "smart_frame": null
-      }
-    },
-    "original_width": 1080,
-    "original_height": 1920,
-    "video_versions": [
-      {
-        "width": 720,
-        "height": 1280,
-        "url": "https://scontent-cdg4-3.cdninstagram.com/o1/v/t2/f2/m86/AQMsycIi7fnJ_DbxN3wP_cl_q_bksV79MdlbzNhlafYY4onihZuhWNGMuHu76gPOyXnGeSOcaNQeI87ZL7Q6Wl6eg3XxosmUOyVGEBI.mp4?_nc_cat=106&_nc_sid=5e9851&_nc_ht=scontent-cdg4-3.cdninstagram.com&_nc_ohc=MnJkMkKaWqkQ7kNvwHDM7ru&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0xJUFMuQzMuNzIwLmRhc2hfYmFzZWxpbmVfMV92MSIsInhwdl9hc3NldF9pZCI6MTIxMTk2ODE2MzU1OTIwMCwidmlfdXNlY2FzZV9pZCI6MTAwOTksImR1cmF0aW9uX3MiOjMzLCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&ccb=17-1&vs=64d5bb91e1dbc0ed&_nc_vs=HBksFQIYUmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC9CMzRFREI1RTQyRTcwNzVBRDQ0RUFGRUFDRjNGQjA5MV92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYOnBhc3N0aHJvdWdoX2V2ZXJzdG9yZS9HTG1GT2g2RTJ2QU1kdmdEQUdrWkxublZ1alZCYnFfRUFBQUYVAgLIARIAKAAYABsCiAd1c2Vfb2lsATEScHJvZ3Jlc3NpdmVfcmVjaXBlATEVAAAmwNzxveqRpwQVAigCQzMsF0BAszMzMzMzGBJkYXNoX2Jhc2VsaW5lXzFfdjERAHX-B2XmnQEA&_nc_zt=28&oh=00_AfND6Z9kx4x__FFdpWO6qs-CNH8LYgP0TRKpqVJmrbaiXg&oe=685DBC8F",
-        "bandwidth": 666395,
-        "id": "24004857615817910v",
-        "type": 101
-      },
-      {
-        "width": 720,
-        "height": 1280,
-        "url": "https://scontent-cdg4-3.cdninstagram.com/o1/v/t2/f2/m86/AQMsycIi7fnJ_DbxN3wP_cl_q_bksV79MdlbzNhlafYY4onihZuhWNGMuHu76gPOyXnGeSOcaNQeI87ZL7Q6Wl6eg3XxosmUOyVGEBI.mp4?_nc_cat=106&_nc_sid=5e9851&_nc_ht=scontent-cdg4-3.cdninstagram.com&_nc_ohc=MnJkMkKaWqkQ7kNvwHDM7ru&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0xJUFMuQzMuNzIwLmRhc2hfYmFzZWxpbmVfMV92MSIsInhwdl9hc3NldF9pZCI6MTIxMTk2ODE2MzU1OTIwMCwidmlfdXNlY2FzZV9pZCI6MTAwOTksImR1cmF0aW9uX3MiOjMzLCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&ccb=17-1&vs=64d5bb91e1dbc0ed&_nc_vs=HBksFQIYUmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC9CMzRFREI1RTQyRTcwNzVBRDQ0RUFGRUFDRjNGQjA5MV92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYOnBhc3N0aHJvdWdoX2V2ZXJzdG9yZS9HTG1GT2g2RTJ2QU1kdmdEQUdrWkxublZ1alZCYnFfRUFBQUYVAgLIARIAKAAYABsCiAd1c2Vfb2lsATEScHJvZ3Jlc3NpdmVfcmVjaXBlATEVAAAmwNzxveqRpwQVAigCQzMsF0BAszMzMzMzGBJkYXNoX2Jhc2VsaW5lXzFfdjERAHX-B2XmnQEA&_nc_zt=28&oh=00_AfND6Z9kx4x__FFdpWO6qs-CNH8LYgP0TRKpqVJmrbaiXg&oe=685DBC8F",
-        "bandwidth": 666395,
-        "id": "24004857615817910v",
-        "type": 102
-      },
-      {
-        "width": 720,
-        "height": 1280,
-        "url": "https://scontent-cdg4-3.cdninstagram.com/o1/v/t2/f2/m86/AQMsycIi7fnJ_DbxN3wP_cl_q_bksV79MdlbzNhlafYY4onihZuhWNGMuHu76gPOyXnGeSOcaNQeI87ZL7Q6Wl6eg3XxosmUOyVGEBI.mp4?_nc_cat=106&_nc_sid=5e9851&_nc_ht=scontent-cdg4-3.cdninstagram.com&_nc_ohc=MnJkMkKaWqkQ7kNvwHDM7ru&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0xJUFMuQzMuNzIwLmRhc2hfYmFzZWxpbmVfMV92MSIsInhwdl9hc3NldF9pZCI6MTIxMTk2ODE2MzU1OTIwMCwidmlfdXNlY2FzZV9pZCI6MTAwOTksImR1cmF0aW9uX3MiOjMzLCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&ccb=17-1&vs=64d5bb91e1dbc0ed&_nc_vs=HBksFQIYUmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC9CMzRFREI1RTQyRTcwNzVBRDQ0RUFGRUFDRjNGQjA5MV92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYOnBhc3N0aHJvdWdoX2V2ZXJzdG9yZS9HTG1GT2g2RTJ2QU1kdmdEQUdrWkxublZ1alZCYnFfRUFBQUYVAgLIARIAKAAYABsCiAd1c2Vfb2lsATEScHJvZ3Jlc3NpdmVfcmVjaXBlATEVAAAmwNzxveqRpwQVAigCQzMsF0BAszMzMzMzGBJkYXNoX2Jhc2VsaW5lXzFfdjERAHX-B2XmnQEA&_nc_zt=28&oh=00_AfND6Z9kx4x__FFdpWO6qs-CNH8LYgP0TRKpqVJmrbaiXg&oe=685DBC8F",
-        "bandwidth": 666395,
-        "id": "24004857615817910v",
-        "type": 103
-      }
-    ],
-    "has_audio": true,
-    "video_duration": 33.408,
-    "caption": {
-      "text": "Your best ideas come to you at random moments.\n\nMy goal is to make these random moments predictable.",
-      "pk": "18333089836166513",
-      "user_id": 40168630800,
-      "type": 1,
-      "did_report_as_spam": false,
-      "created_at": 1749991611,
-      "created_at_utc": 1749991611,
-      "content_type": "comment",
-      "status": "Active",
-      "bit_flags": 0,
-      "share_enabled": false,
-      "is_ranked_comment": false,
-      "is_covered": false,
-      "private_reply_status": 0,
-      "media_id": 3655516832441723400
-    },
-    "user": {
-      "pk": 40168630800,
-      "username": "onejkmolina",
-      "full_name": "JK Molina",
-      "is_private": false,
-      "profile_pic_url": "https://scontent-cdg4-1.cdninstagram.com/v/t51.2885-19/495196074_18048847595342801_5317145878588263739_n.jpg?stp=dst-jpg_e0_s150x150_tt6&_nc_ht=scontent-cdg4-1.cdninstagram.com&_nc_cat=105&_nc_oc=Q6cZ2QHcZE_XZH53PSRgn-OU7nxtVa5U9TwGqSYuq2ezSXVa73HLdKzvlSc50Ul7EVyuUB0&_nc_ohc=FmoyB-2RlIoQ7kNvwGyexH4&_nc_gid=slT5_0MJd3v3q72V-VJugA&edm=ALQROFkBAAAA&ccb=7-5&ig_cache_key=GKoXhB3Ri4bNVB9AADuNL1ABTMpJbvEnAQAB-ccb7-5&oh=00_AfPrjskgGUmgtEEZeg6hfaOYjzLzV9JFloLZVf1HRdU5Xg&oe=6861A19D&_nc_sid=fc8dfb",
-      "profile_pic_id": "3624949651749684577_40168630800",
-      "is_verified": false,
-      "account_type": 2,
-      "fan_club_info": {},
-      "fbid_v2": 17841440284011078,
-      "pk_id": "40168630800",
-      "third_party_downloads_enabled": 1,
-      "strong_id__": "40168630800",
-      "latest_reel_media": 1750787318,
-      "avatar_status": {
-        "has_avatar": false
-      },
-      "show_account_transparency_details": true
-    },
-    "product_type": "clips",
-    "like_count": 30,
-    "play_count": 1707,
-    "clips_metadata": {
-      "original_sound_info": {
-        "audio_asset_id": 9150560915047336,
-        "progressive_download_url": "https://scontent-cdg4-1.cdninstagram.com/o1/v/t2/f2/m69/AQPe__tklWksCwszFbCikG-D4-dnypXg79e__dOAF5R93QKlVQFWTbsNkLR_7is5G3XFtnEpPJisTEHxk-3SRrTX.mp4?strext=1&_nc_cat=104&_nc_sid=8bf8fe&_nc_ht=scontent-cdg4-1.cdninstagram.com&_nc_ohc=fjvjK6q5L_EQ7kNvwEzDkyJ&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5BVURJT19PTkxZLi5DMy4wLnByb2dyZXNzaXZlX2F1ZGlvIiwieHB2X2Fzc2V0X2lkIjoxMjExOTY4MTYzNTU5MjAwLCJ2aV91c2VjYXNlX2lkIjoxMDA5OSwiZHVyYXRpb25fcyI6MzMsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&_nc_zt=28&oh=00_AfMzNGLSqHv8XslEhkKlECl-pT2QDCONwYicpXm7pt0clA&oe=6861B312",
-        "dash_manifest": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<MPD xmlns=\"urn:mpeg:dash:schema:mpd:2011\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"urn:mpeg:dash:schema:mpd:2011 DASH-MPD.xsd\" profiles=\"urn:mpeg:dash:profile:isoff-on-demand:2011\" minBufferTime=\"PT2S\" type=\"static\" mediaPresentationDuration=\"PT33.429333S\"><Period id=\"0\" duration=\"PT33.429333S\"><AdaptationSet id=\"0\" contentType=\"audio\" subsegmentStartsWithSAP=\"1\" subsegmentAlignment=\"true\"><Representation id=\"2470172043341504a\" bandwidth=\"52220\" codecs=\"mp4a.40.5\" mimeType=\"audio/mp4\" FBAvgBitrate=\"52220\" audioSamplingRate=\"48000\" FBDefaultQuality=\"1\"><AudioChannelConfiguration schemeIdUri=\"urn:mpeg:dash:23003:3:audio_channel_configuration:2011\" value=\"2\"/><BaseURL>https://scontent-cdg4-2.cdninstagram.com/o1/v/t16/f2/m69/AQOq6zFpAz8kO_YQJYzwlUmC2BuZMrLsw2cF__OV_uC7k18-kodM2ffPbCLRBIlCfhjKy_-_YVlWVFhRat11X6nG.mp4?strext=1&amp;_nc_cat=109&amp;_nc_sid=9ca052&amp;_nc_ht=scontent-cdg4-2.cdninstagram.com&amp;_nc_ohc=BlCBlyMo3LsQ7kNvwFSrAIR&amp;efg=eyJ2ZW5jb2RlX3RhZyI6ImRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6MjU2MjgxMDQwNTU4LCJjbGllbnRfbmFtZSI6InVua25vd24iLCJ4cHZfYXNzZXRfaWQiOjEyMTE5NjgxNjM1NTkyMDAsInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjozMywidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&amp;ccb=17-1&amp;_nc_zt=28&amp;oh=00_AfNxw5sCIWVPyBIgkEwkX4YP_xyVZespAnCX8Y4fmVpdJw&amp;oe=6861975B</BaseURL><SegmentBase indexRange=\"824-1059\" timescale=\"48000\"><Initialization range=\"0-823\"/></SegmentBase></Representation></AdaptationSet></Period></MPD>\n",
-        "ig_artist": {
-          "pk": 40168630800,
-          "username": "onejkmolina",
-          "full_name": "JK Molina",
-          "is_private": false,
-          "profile_pic_url": "https://scontent-cdg4-1.cdninstagram.com/v/t51.2885-19/495196074_18048847595342801_5317145878588263739_n.jpg?stp=dst-jpg_e0_s150x150_tt6&_nc_ht=scontent-cdg4-1.cdninstagram.com&_nc_cat=105&_nc_oc=Q6cZ2QHcZE_XZH53PSRgn-OU7nxtVa5U9TwGqSYuq2ezSXVa73HLdKzvlSc50Ul7EVyuUB0&_nc_ohc=FmoyB-2RlIoQ7kNvwGyexH4&_nc_gid=slT5_0MJd3v3q72V-VJugA&edm=ALQROFkBAAAA&ccb=7-5&ig_cache_key=GKoXhB3Ri4bNVB9AADuNL1ABTMpJbvEnAQAB-ccb7-5&oh=00_AfPrjskgGUmgtEEZeg6hfaOYjzLzV9JFloLZVf1HRdU5Xg&oe=6861A19D&_nc_sid=fc8dfb",
-          "profile_pic_id": "3624949651749684577_40168630800",
-          "is_verified": false,
-          "pk_id": "40168630800",
-          "strong_id__": "40168630800",
-          "avatar_status": {
-            "has_avatar": false
-          }
-        },
-        "should_mute_audio": false,
-        "original_media_id": 3655516832441723400,
-        "hide_remixing": false,
-        "duration_in_ms": 33408,
-        "time_created": 1749991614,
-        "original_audio_title": "Original audio",
-        "consumption_info": {
-          "is_bookmarked": false,
-          "should_mute_audio_reason": "",
-          "is_trending_in_clips": false
-        },
-        "allow_creator_to_rename": true,
-        "can_remix_be_shared_to_fb": false,
-        "formatted_clips_media_count": null,
-        "audio_parts": [],
-        "is_explicit": false,
-        "original_audio_subtype": "default",
-        "is_audio_automatically_attributed": false
-      },
-      "audio_type": "original_sounds",
-      "music_canonical_id": "18516629857040331",
-      "mashup_info": {
-        "mashups_allowed": true,
-        "can_toggle_mashups_allowed": false,
-        "has_been_mashed_up": false,
-        "formatted_mashups_count": null,
-        "original_media": null,
-        "non_privacy_filtered_mashups_media_count": 0
-      },
-      "branded_content_tag_info": {
-        "can_add_tag": false
-      },
-      "shopping_info": null,
-      "additional_audio_info": {
-        "audio_reattribution_info": {
-          "should_allow_restore": false
-        }
-      },
-      "is_shared_to_fb": false,
-      "clips_creation_entry_point": "",
-      "audio_ranking_info": {
-        "best_audio_cluster_id": "1700025497571212"
-      }
-    },
-    "video_dash_manifest": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<MPD xmlns=\"urn:mpeg:dash:schema:mpd:2011\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"urn:mpeg:dash:schema:mpd:2011 DASH-MPD.xsd\" profiles=\"urn:mpeg:dash:profile:isoff-on-demand:2011\" minBufferTime=\"PT2S\" type=\"static\" mediaPresentationDuration=\"PT33.429333S\" FBManifestIdentifier=\"FgAYEWlnX2Rhc2hfYmFzaWNfdnA5GXaA4qjKmeCOApqsp6jZkacD0Ni2+6LT1gPYgujZk/7YA7K3vf3wqbAEwPq8nMbG7wSQruidlKqaWSIYImRhc2hfdW5pZmllZF9wcmVtaXVtX3hoZV9pYnJfYXVkaW8iAA==\"><Period id=\"0\" duration=\"PT33.429333S\"><AdaptationSet id=\"0\" contentType=\"video\" subsegmentAlignment=\"true\" par=\"9:16\" FBUnifiedUploadResolutionMos=\"360:73.8\"><Representation id=\"1040106284449964vd\" bandwidth=\"170177\" codecs=\"vp09.00.21.08.00.01.01.01.00\" mimeType=\"video/mp4\" sar=\"1:1\" FBEncodingTag=\"dash_vp9-basic-gen2_360p\" FBContentLength=\"710491\" FBPlaybackResolutionMos=\"0:100,360:75.9,480:71.3,720:63.7,1080:54.2\" FBPlaybackResolutionMosConfidenceLevel=\"high\" FBPlaybackResolutionCsvqm=\"0:100,360:90.3,480:85.9,720:78.9,1080:69.1\" FBAbrPolicyTags=\"\" width=\"360\" height=\"640\" frameRate=\"15360/512\" FBDefaultQuality=\"1\" FBQualityClass=\"sd\" FBQualityLabel=\"360p\"><BaseURL>https://scontent-cdg4-2.cdninstagram.com/o1/v/t2/f2/m367/AQOw_n7Al06tOLzG1FzA_52n_1UxUYVwbW9MP_gsdt6KcEAnsGgMwb1KidhsADc0kQKVVFaPq6MzGhyKBYpb7gqWbCJlT7rI1surkE_jiwRtAg.mp4?_nc_cat=107&amp;_nc_sid=9ca052&amp;_nc_ht=scontent-cdg4-2.cdninstagram.com&amp;_nc_ohc=pju5wLPlesMQ7kNvwHNu0yL&amp;efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfdnA5LWJhc2ljLWdlbjJfMzYwcCIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6NTY3MDY3MzQzMzUyNDI3LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxMjExOTY4MTYzNTU5MjAwLCJ2aV91c2VjYXNlX2lkIjoxMDA5OSwiZHVyYXRpb25fcyI6MzMsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&amp;ccb=17-1&amp;_nc_zt=28&amp;oh=00_AfNcnPDZrwHFpQxZwLIiqjRdK7auwR8RLCKgDnMkb-aR9w&amp;oe=68618CA1</BaseURL><SegmentBase indexRange=\"818-933\" timescale=\"15360\" FBMinimumPrefetchRange=\"934-14170\" FBPartialPrefetchDuration=\"2500\" FBPartialPrefetchRange=\"934-78600\" FBFirstSegmentRange=\"934-121554\" FBFirstSegmentDuration=\"5000\" FBSecondSegmentRange=\"121555-256526\" FBPrefetchSegmentRange=\"934-121554\" FBPrefetchSegmentDuration=\"5000\"><Initialization range=\"0-817\"/></SegmentBase></Representation><Representation id=\"1371203504152224v\" bandwidth=\"379661\" codecs=\"vp09.00.30.08.00.01.01.01.00\" mimeType=\"video/mp4\" sar=\"1:1\" FBEncodingTag=\"dash_vp9-basic-gen2_540p\" FBContentLength=\"1585088\" FBPlaybackResolutionMos=\"0:100,360:86.2,480:82.5,720:76.5,1080:70.5\" FBPlaybackResolutionMosConfidenceLevel=\"high\" FBPlaybackResolutionCsvqm=\"0:100,360:95.3,480:94.1,720:90.9,1080:85.2\" FBAbrPolicyTags=\"\" width=\"540\" height=\"960\" frameRate=\"15360/512\" FBQualityClass=\"sd\" FBQualityLabel=\"540p\"><BaseURL>https://scontent-cdg4-2.cdninstagram.com/o1/v/t2/f2/m367/AQPkcUZ6CViwB9dMLZp0FwHa5JZmfr5zlwPvZ_f3rhcz2MulKYjFx3ZL45WW4--Yu_x1e2krmPrlXvXf39PoZuHGGTvccq3zs2suKDNLnpdEIQ.mp4?_nc_cat=100&amp;_nc_sid=9ca052&amp;_nc_ht=scontent-cdg4-2.cdninstagram.com&amp;_nc_ohc=oWgEMvmypf8Q7kNvwH7ScKF&amp;efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfdnA5LWJhc2ljLWdlbjJfNTQwcCIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6NTY3MDY3MzQzMzUyNDI3LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxMjExOTY4MTYzNTU5MjAwLCJ2aV91c2VjYXNlX2lkIjoxMDA5OSwiZHVyYXRpb25fcyI6MzMsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&amp;ccb=17-1&amp;_nc_zt=28&amp;oh=00_AfNcoOk8FRBp0f-dM21dET05_-7eHeKUYknKRr56SEx6aw&amp;oe=6861B318</BaseURL><SegmentBase indexRange=\"818-933\" timescale=\"15360\" FBMinimumPrefetchRange=\"934-26177\" FBPartialPrefetchDuration=\"2500\" FBPartialPrefetchRange=\"934-169447\" FBFirstSegmentRange=\"934-266943\" FBFirstSegmentDuration=\"5000\" FBSecondSegmentRange=\"266944-560129\" FBPrefetchSegmentRange=\"934-266943\" FBPrefetchSegmentDuration=\"5000\"><Initialization range=\"0-817\"/></SegmentBase></Representation><Representation id=\"595388979812480v\" bandwidth=\"650593\" codecs=\"vp09.00.31.08.00.01.01.01.00\" mimeType=\"video/mp4\" sar=\"1:1\" FBEncodingTag=\"dash_vp9-basic-gen2_720p\" FBContentLength=\"2716228\" FBPlaybackResolutionMos=\"0:100,360:92.6,480:89.8,720:86.6,1080:76.9\" FBPlaybackResolutionMosConfidenceLevel=\"high\" FBPlaybackResolutionCsvqm=\"0:100,360:97.2,480:96.4,720:95.4,1080:91.3\" FBAbrPolicyTags=\"\" width=\"720\" height=\"1280\" frameRate=\"15360/512\" FBQualityClass=\"hd\" FBQualityLabel=\"720p\"><BaseURL>https://scontent-cdg4-1.cdninstagram.com/o1/v/t2/f2/m367/AQPK1eIMSHz9w_Dn1_MdWI-YFqlZ6DCTfxNBzY2ugZjlqZIQNk6BrBP96C4D-ODuB6XqWiCk4_EYconnWl68NWUG3VpgAH7KknkHOn87PEuFeg.mp4?_nc_cat=108&amp;_nc_sid=9ca052&amp;_nc_ht=scontent-cdg4-1.cdninstagram.com&amp;_nc_ohc=jXV7Bdr8cbAQ7kNvwFkO2GE&amp;efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfdnA5LWJhc2ljLWdlbjJfNzIwcCIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6NTY3MDY3MzQzMzUyNDI3LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxMjExOTY4MTYzNTU5MjAwLCJ2aV91c2VjYXNlX2lkIjoxMDA5OSwiZHVyYXRpb25fcyI6MzMsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&amp;ccb=17-1&amp;_nc_zt=28&amp;oh=00_AfOBc1tUOR6gX95U8ld1AqvMhM5A5CykPNjp2vrZFwv5TQ&amp;oe=68619D30</BaseURL><SegmentBase indexRange=\"818-933\" timescale=\"15360\" FBMinimumPrefetchRange=\"934-36328\" FBPartialPrefetchDuration=\"2500\" FBPartialPrefetchRange=\"934-285704\" FBFirstSegmentRange=\"934-457462\" FBFirstSegmentDuration=\"5000\" FBSecondSegmentRange=\"457463-951284\" FBPrefetchSegmentRange=\"934-457462\" FBPrefetchSegmentDuration=\"5000\"><Initialization range=\"0-817\"/></SegmentBase></Representation><Representation id=\"930490882517773v\" bandwidth=\"852205\" codecs=\"vp09.00.40.08.00.01.01.01.00\" mimeType=\"video/mp4\" sar=\"1:1\" FBEncodingTag=\"dash_vp9-basic-gen2_1080p\" FBContentLength=\"3557956\" FBPlaybackResolutionMos=\"0:100,360:93.7,480:92.7,720:90.6,1080:86.8\" FBPlaybackResolutionMosConfidenceLevel=\"high\" FBPlaybackResolutionCsvqm=\"0:100,360:97.7,480:97.3,720:96.6,1080:95.5\" FBAbrPolicyTags=\"\" width=\"1080\" height=\"1920\" frameRate=\"15360/512\" FBQualityClass=\"hd\" FBQualityLabel=\"1080p\"><BaseURL>https://scontent-cdg4-1.cdninstagram.com/o1/v/t2/f2/m367/AQNY54kiFr9WjMwAAIjA3A6iI8bJ2KIm7lXEDNN036S9CJYe2A13FA4a5wxg4d0HIrOE-kI-6AhMK7KwovbKsNzmDU4ntTIAnJsvihG0Lu1q2A.mp4?_nc_cat=102&amp;_nc_sid=9ca052&amp;_nc_ht=scontent-cdg4-1.cdninstagram.com&amp;_nc_ohc=uGkx94KWc5wQ7kNvwG9w6IE&amp;efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfdnA5LWJhc2ljLWdlbjJfMTA4MHAiLCJ2aWRlb19pZCI6bnVsbCwib2lsX3VybGdlbl9hcHBfaWQiOjU2NzA2NzM0MzM1MjQyNywiY2xpZW50X25hbWUiOiJpZyIsInhwdl9hc3NldF9pZCI6MTIxMTk2ODE2MzU1OTIwMCwidmlfdXNlY2FzZV9pZCI6MTAwOTksImR1cmF0aW9uX3MiOjMzLCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&amp;ccb=17-1&amp;_nc_zt=28&amp;oh=00_AfOpkHZvrOu1-u8OcLbbcDGcm3IdSN6cwFwnBbzFs2XIgA&amp;oe=6861BA96</BaseURL><SegmentBase indexRange=\"818-933\" timescale=\"15360\" FBMinimumPrefetchRange=\"934-46575\" FBPartialPrefetchDuration=\"2500\" FBPartialPrefetchRange=\"934-372606\" FBFirstSegmentRange=\"934-599825\" FBFirstSegmentDuration=\"5000\" FBSecondSegmentRange=\"599826-1240540\" FBPrefetchSegmentRange=\"934-599825\" FBPrefetchSegmentDuration=\"5000\"><Initialization range=\"0-817\"/></SegmentBase></Representation></AdaptationSet><AdaptationSet id=\"1\" contentType=\"audio\" subsegmentStartsWithSAP=\"1\" subsegmentAlignment=\"true\" bitstreamSwitching=\"true\"><Representation id=\"1232172561706457ad\" bandwidth=\"37177\" codecs=\"mp4a.40.42\" mimeType=\"audio/mp4\" FBAvgBitrate=\"37177\" audioSamplingRate=\"48000\" FBEncodingTag=\"dash_audio_xheaac_vbr1_abr_lrac_frag_5_audio\" FBContentLength=\"156300\" FBPaqMos=\"82.13\" FBAbrPolicyTags=\"\" FBDefaultQuality=\"1\"><AudioChannelConfiguration schemeIdUri=\"urn:mpeg:dash:23003:3:audio_channel_configuration:2011\" value=\"2\"/><BaseURL>https://scontent-cdg4-1.cdninstagram.com/o1/v/t16/f2/m69/AQN6UkLxepj9hnKWJC6S_1u1cbYZ11khP-cbB1bRxvU0UT2nJ4_A4WrnLNtkjYZnIgEspIFWOev2PpBzee_0oIDZ.mp4?strext=1&amp;_nc_cat=108&amp;_nc_sid=9ca052&amp;_nc_ht=scontent-cdg4-1.cdninstagram.com&amp;_nc_ohc=fm3sV9dh9vEQ7kNvwHIJOkt&amp;efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfYXVkaW9feGhlYWFjX3ZicjFfYWJyX2xyYWNfZnJhZ181X2F1ZGlvIiwidmlkZW9faWQiOm51bGwsIm9pbF91cmxnZW5fYXBwX2lkIjo1NjcwNjczNDMzNTI0MjcsImNsaWVudF9uYW1lIjoiaWciLCJ4cHZfYXNzZXRfaWQiOjEyMTE5NjgxNjM1NTkyMDAsInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjozMywidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&amp;ccb=17-1&amp;_nc_zt=28&amp;oh=00_AfMo1Vl8jXt30yNJ-5S6oqddhW9CgqFkvww-uKFhqug95Q&amp;oe=68618E38</BaseURL><SegmentBase indexRange=\"837-952\" timescale=\"48000\" FBMinimumPrefetchRange=\"953-2089\" FBPartialPrefetchDuration=\"2500\" FBPartialPrefetchRange=\"953-12861\" FBFirstSegmentRange=\"953-23198\" FBFirstSegmentDuration=\"4949\" FBSecondSegmentRange=\"23199-45791\" FBPrefetchSegmentRange=\"953-23198\" FBPrefetchSegmentDuration=\"4949\"><Initialization range=\"0-836\"/></SegmentBase></Representation><Representation id=\"25109171802016648a\" bandwidth=\"77905\" codecs=\"mp4a.40.42\" mimeType=\"audio/mp4\" FBAvgBitrate=\"77905\" audioSamplingRate=\"48000\" FBEncodingTag=\"dash_audio_xheaac_vbr2_abr_lrac_frag_5_audio\" FBContentLength=\"326492\" FBPaqMos=\"85.44\" FBAbrPolicyTags=\"\"><AudioChannelConfiguration schemeIdUri=\"urn:mpeg:dash:23003:3:audio_channel_configuration:2011\" value=\"2\"/><BaseURL>https://scontent-cdg4-2.cdninstagram.com/o1/v/t16/f2/m69/AQOBEnckhvJnZX22Ra66kZWtEBobL83piAjiDWayZccL58jfIElI--FYpORnfrIbW_Qj1MXhaCgOw1jMOliEbefL.mp4?strext=1&amp;_nc_cat=109&amp;_nc_sid=9ca052&amp;_nc_ht=scontent-cdg4-2.cdninstagram.com&amp;_nc_ohc=aKacKQOQzy0Q7kNvwFpKq7e&amp;efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfYXVkaW9feGhlYWFjX3ZicjJfYWJyX2xyYWNfZnJhZ181X2F1ZGlvIiwidmlkZW9faWQiOm51bGwsIm9pbF91cmxnZW5fYXBwX2lkIjo1NjcwNjczNDMzNTI0MjcsImNsaWVudF9uYW1lIjoiaWciLCJ4cHZfYXNzZXRfaWQiOjEyMTE5NjgxNjM1NTkyMDAsInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjozMywidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&amp;ccb=17-1&amp;_nc_zt=28&amp;oh=00_AfMHeUZAuo7NFVhB47gJ3pIzvvQdPQuOHKadpo7YBxH5_A&amp;oe=6861B8A7</BaseURL><SegmentBase indexRange=\"838-953\" timescale=\"48000\" FBMinimumPrefetchRange=\"954-2457\" FBPartialPrefetchDuration=\"2500\" FBPartialPrefetchRange=\"954-24940\" FBFirstSegmentRange=\"954-48080\" FBFirstSegmentDuration=\"4949\" FBSecondSegmentRange=\"48081-95544\" FBPrefetchSegmentRange=\"954-48080\" FBPrefetchSegmentDuration=\"4949\"><Initialization range=\"0-837\"/></SegmentBase></Representation><Representation id=\"1034971552077352a\" bandwidth=\"109776\" codecs=\"mp4a.40.42\" mimeType=\"audio/mp4\" FBAvgBitrate=\"109776\" audioSamplingRate=\"48000\" FBEncodingTag=\"dash_audio_xheaac_vbr3_abr_lrac_frag_5_audio\" FBContentLength=\"459666\" FBPaqMos=\"82.24\" FBAbrPolicyTags=\"\"><AudioChannelConfiguration schemeIdUri=\"urn:mpeg:dash:23003:3:audio_channel_configuration:2011\" value=\"2\"/><BaseURL>https://scontent-cdg4-3.cdninstagram.com/o1/v/t16/f2/m69/AQPmkFUQB1IjXh_W6IuO5MboofRK0dlsWqbLidaWsxLGVwaMmo6UYRLhrt7Hm7Ib9nNrWA9pj7nXXJs_vXnhayCd.mp4?strext=1&amp;_nc_cat=106&amp;_nc_sid=9ca052&amp;_nc_ht=scontent-cdg4-3.cdninstagram.com&amp;_nc_ohc=uBTGGIuZK_gQ7kNvwE_iicZ&amp;efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfYXVkaW9feGhlYWFjX3ZicjNfYWJyX2xyYWNfZnJhZ181X2F1ZGlvIiwidmlkZW9faWQiOm51bGwsIm9pbF91cmxnZW5fYXBwX2lkIjo1NjcwNjczNDMzNTI0MjcsImNsaWVudF9uYW1lIjoiaWciLCJ4cHZfYXNzZXRfaWQiOjEyMTE5NjgxNjM1NTkyMDAsInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjozMywidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&amp;ccb=17-1&amp;_nc_zt=28&amp;oh=00_AfPvSJ8sVVeLaUdgD4cViOPAExw2-1xPQ1MEv65XMm61Ng&amp;oe=68618AFA</BaseURL><SegmentBase indexRange=\"833-948\" timescale=\"48000\" FBMinimumPrefetchRange=\"949-2409\" FBPartialPrefetchDuration=\"2500\" FBPartialPrefetchRange=\"949-34663\" FBFirstSegmentRange=\"949-68123\" FBFirstSegmentDuration=\"4949\" FBSecondSegmentRange=\"68124-134795\" FBPrefetchSegmentRange=\"949-68123\" FBPrefetchSegmentDuration=\"4949\"><Initialization range=\"0-832\"/></SegmentBase></Representation></AdaptationSet></Period></MPD>\n",
-    "video_manifest": {
-      "audio": null,
-      "video": null
-    },
-    "strong_id__": "3655516832441723518_40168630800",
-    "fb_user_tags": {
-      "in": []
-    },
-    "sharing_friction_info": {
-      "should_have_sharing_friction": false,
-      "bloks_app_url": null,
-      "sharing_friction_payload": null
-    },
-    "device_timestamp": 1749991584,
-    "client_cache_key": "MzY1NTUxNjgzMjQ0MTcyMzUxOA==.3",
-    "integrity_review_decision": "pending",
-    "is_visual_reply_commenter_notice_enabled": true,
-    "is_organic_product_tagging_eligible": true,
-    "can_viewer_reshare": true,
-    "comment_inform_treatment": {
-      "should_have_inform_treatment": false,
-      "text": "",
-      "url": null,
-      "action_type": null
-    },
-    "fundraiser_tag": {
-      "has_standalone_fundraiser": false
-    },
-    "can_viewer_save": true,
-    "is_comments_gif_composer_enabled": true,
-    "organic_tracking_token": "eyJ2ZXJzaW9uIjo1LCJwYXlsb2FkIjp7ImlzX2FuYWx5dGljc190cmFja2VkIjp0cnVlLCJ1dWlkIjoiOGY1MzliNzM2MjJjNDhhMTg2ZWVhYzY4Nzg1MjJiZDQzNjU1NTE2ODMyNDQxNzIzNTE4Iiwic2VydmVyX3Rva2VuIjoiMTc1MDg0ODM0MjIxM3wzNjU1NTE2ODMyNDQxNzIzNTE4fDc1MzM2MDE5MzM3fDQ4N2NiN2E4MGRhOWZjYzYxYWFjYzlhMjk2YTQ0NzNiYTRmOGI2MGRlMzdjZmU2YmNmZjE1MDdmZTczMzRhZTQifSwic2lnbmF0dXJlIjoiIn0=",
-    "hide_view_all_comment_entrypoint": true,
-    "reshare_count": 1,
-    "video_codec": "vp09.00.21.08.00.01.01.01.00",
-    "number_of_qualities": 4
-  }
+collections-rbac.ts:67 🔍 [RBAC] User ID: xfPvnnUdJCRIJEVrpJCmR7kXBOX2
+collections-rbac.ts:67 🔍 [RBAC] User ID: xfPvnnUdJCRIJEVrpJCmR7kXBOX2
+collections-rbac.ts:20 🔍 [RBAC] Super admin loading all collections
+collections-rbac.ts:85 🔍 [RBAC] Super admin detected - bypassing coach restrictions
+collections-rbac.ts:89 🔍 [RBAC] Super admin loading all videos
+collections-rbac.ts:20 🔍 [RBAC] Super admin loading all collections
+collections-rbac.ts:85 🔍 [RBAC] Super admin detected - bypassing coach restrictions
+collections-rbac.ts:89 🔍 [RBAC] Super admin loading all videos
+collections-rbac.ts:33 ✅ [RBAC] Super admin loaded collections: 3
+collections-rbac.ts:33 ✅ [RBAC] Super admin loaded collections: 3
+collections-rbac.ts:103 ✅ [RBAC] Super admin loaded videos: 13
+collections-rbac.ts:103 ✅ [RBAC] Super admin loaded videos: 13
+video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+ 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+ 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
+ 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
+ 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+ 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+ 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
+ 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
+ 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+ 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+ 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
+video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
+video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
+video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
+video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
+video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
+video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…pTaBUKhULRWgVCoWgpTaBUKhUKRWgWtVCoWjtAloJSm3/2Q=='}
+video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…pTaBUKhULRWgVCoWgpTaBUKhUKRWgWtVCoWjtAloJSm3/2Q=='}
+video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…pTaBUKhULRWgVCoWgpTaBUKhUKRWgWtVCoWjtAloJSm3/2Q=='}
+video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…pTaBUKhULRWgVCoWgpTaBUKhUKRWgWtVCoWjtAloJSm3/2Q=='}
+video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…pTaBUKhULRWgVCoWgpTaBUKhUKRWgWtVCoWjtAloJSm3/2Q=='}
+video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…pTaBUKhULRWgVCoWgpTaBUKhUKRWgWtVCoWjtAloJSm3/2Q=='}
+video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
+video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
+video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
+video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
+video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
+video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
+video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
+video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIz…pemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA=='}
+video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+video-embed.tsx:78 🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
+video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…pTaBUKhULRWgVCoWgpTaBUKhUKRWgWtVCoWjtAloJSm3/2Q=='}platform: "instagram"thumbnailUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAA[[Prototype]]: Object
+video-thumbnail.tsx:91 🎬 [VideoThumbnail] Using: actual thumbnail {platform: 'instagram', thumbnailUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…pTaBUKhULRWgVCoWgpTaBUKhUKRWgWtVCoWjtAloJSm3/2Q=='}
+video-thumbnail.tsx:11 Image with src "data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIzNjAiIGhlaWdodD0iNjQwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgICA8ZGVmcz4KICAgICAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMCUiIHkyPSIxMDAlIj4KICAgICAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiM4MzNBQjQ7c3RvcC1vcGFjaXR5OjEiIC8+CiAgICAgICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNGQ0IwNDU7c3RvcC1vcGFjaXR5OjEiIC8+CiAgICAgICAgPC9saW5lYXJHcmFkaWVudD4KICAgICAgPC9kZWZzPgogICAgICA8cmVjdCB3aWR0aD0iMzYwIiBoZWlnaHQ9IjY0MCIgZmlsbD0idXJsKCNncmFkKSIgLz4KICAgICAgPHRleHQgeD0iMTgwIiB5PSIzMDAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjI0Ij7wn5O5PC90ZXh0PgogICAgICA8dGV4dCB4PSIxODAiIHk9IjM0MCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTYiPklOU1RBR1JBTTwvdGV4dD4KICAgICAgPHRleHQgeD0iMTgwIiB5PSIzNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA==" has "fill" and a height value of 0. This is likely because the parent element of the image has not been styled to have a set height.
+overrideMethod @ hook.js:608
+warnOnce @ warn-once.js:16
+eval @ image-component.js:105
+Promise.then
+handleLoading @ image-component.js:36
+onLoad @ image-component.js:191
+executeDispatch @ react-dom-client.development.js:16502
+runWithFiberInDEV @ react-dom-client.development.js:845
+processDispatchQueue @ react-dom-client.development.js:16552
+eval @ react-dom-client.development.js:17150
+batchedUpdates$1 @ react-dom-client.development.js:3263
+dispatchEventForPluginEventSystem @ react-dom-client.development.js:16706
+dispatchEvent @ react-dom-client.development.js:20816
+<img>
+exports.jsx @ react-jsx-runtime.development.js:339
+eval @ image-component.js:166
+react-stack-bottom-frame @ react-dom-client.development.js:22974
+renderWithHooksAgain @ react-dom-client.development.js:6767
+renderWithHooks @ react-dom-client.development.js:6679
+updateForwardRef @ react-dom-client.development.js:8679
+beginWork @ react-dom-client.development.js:10895
+runWithFiberInDEV @ react-dom-client.development.js:845
+performUnitOfWork @ react-dom-client.development.js:15258
+workLoopSync @ react-dom-client.development.js:15078
+renderRootSync @ react-dom-client.development.js:15058
+performWorkOnRoot @ react-dom-client.development.js:14526
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
+performWorkUntilDeadline @ scheduler.development.js:45
+<ForwardRef>
+exports.jsx @ react-jsx-runtime.development.js:339
+eval @ image-component.js:281
+react-stack-bottom-frame @ react-dom-client.development.js:22974
+renderWithHooksAgain @ react-dom-client.development.js:6767
+renderWithHooks @ react-dom-client.development.js:6679
+updateForwardRef @ react-dom-client.development.js:8679
+beginWork @ react-dom-client.development.js:10895
+runWithFiberInDEV @ react-dom-client.development.js:845
+performUnitOfWork @ react-dom-client.development.js:15258
+workLoopSync @ react-dom-client.development.js:15078
+renderRootSync @ react-dom-client.development.js:15058
+performWorkOnRoot @ react-dom-client.development.js:14526
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
+performWorkUntilDeadline @ scheduler.development.js:45
+<ForwardRef>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:346
+ThumbnailImage @ video-thumbnail.tsx:11
+react-stack-bottom-frame @ react-dom-client.development.js:22974
+renderWithHooksAgain @ react-dom-client.development.js:6767
+renderWithHooks @ react-dom-client.development.js:6679
+updateFunctionComponent @ react-dom-client.development.js:8931
+beginWork @ react-dom-client.development.js:10556
+runWithFiberInDEV @ react-dom-client.development.js:845
+performUnitOfWork @ react-dom-client.development.js:15258
+workLoopSync @ react-dom-client.development.js:15078
+renderRootSync @ react-dom-client.development.js:15058
+performWorkOnRoot @ react-dom-client.development.js:14526
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
+performWorkUntilDeadline @ scheduler.development.js:45
+<ThumbnailImage>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:346
+VideoThumbnail @ video-thumbnail.tsx:109
+react-stack-bottom-frame @ react-dom-client.development.js:22974
+renderWithHooksAgain @ react-dom-client.development.js:6767
+renderWithHooks @ react-dom-client.development.js:6679
+updateFunctionComponent @ react-dom-client.development.js:8931
+beginWork @ react-dom-client.development.js:10556
+runWithFiberInDEV @ react-dom-client.development.js:845
+performUnitOfWork @ react-dom-client.development.js:15258
+workLoopSync @ react-dom-client.development.js:15078
+renderRootSync @ react-dom-client.development.js:15058
+performWorkOnRoot @ react-dom-client.development.js:14526
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
+performWorkUntilDeadline @ scheduler.development.js:45
+<VideoThumbnail>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:346
+VideoEmbedComponent @ video-embed.tsx:219
+react-stack-bottom-frame @ react-dom-client.development.js:22974
+renderWithHooksAgain @ react-dom-client.development.js:6767
+renderWithHooks @ react-dom-client.development.js:6679
+updateFunctionComponent @ react-dom-client.development.js:8931
+beginWork @ react-dom-client.development.js:10556
+runWithFiberInDEV @ react-dom-client.development.js:845
+performUnitOfWork @ react-dom-client.development.js:15258
+workLoopSync @ react-dom-client.development.js:15078
+renderRootSync @ react-dom-client.development.js:15058
+performWorkOnRoot @ react-dom-client.development.js:14526
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
+performWorkUntilDeadline @ scheduler.development.js:45
+video-thumbnail.tsx:11 Image with src "data:image/jpeg;base64,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
+overrideMethod @ hook.js:608
+warnOnce @ warn-once.js:16
+eval @ image-component.js:105
+Promise.then
+handleLoading @ image-component.js:36
+onLoad @ image-component.js:191
+executeDispatch @ react-dom-client.development.js:16502
+runWithFiberInDEV @ react-dom-client.development.js:845
+processDispatchQueue @ react-dom-client.development.js:16552
+eval @ react-dom-client.development.js:17150
+batchedUpdates$1 @ react-dom-client.development.js:3263
+dispatchEventForPluginEventSystem @ react-dom-client.development.js:16706
+dispatchEvent @ react-dom-client.development.js:20816
+<img>
+exports.jsx @ react-jsx-runtime.development.js:339
+eval @ image-component.js:166
+react-stack-bottom-frame @ react-dom-client.development.js:22974
+renderWithHooksAgain @ react-dom-client.development.js:6767
+renderWithHooks @ react-dom-client.development.js:6679
+updateForwardRef @ react-dom-client.development.js:8679
+beginWork @ react-dom-client.development.js:10895
+runWithFiberInDEV @ react-dom-client.development.js:845
+performUnitOfWork @ react-dom-client.development.js:15258
+workLoopSync @ react-dom-client.development.js:15078
+renderRootSync @ react-dom-client.development.js:15058
+performWorkOnRoot @ react-dom-client.development.js:14526
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
+performWorkUntilDeadline @ scheduler.development.js:45
+<ForwardRef>
+exports.jsx @ react-jsx-runtime.development.js:339
+eval @ image-component.js:281
+react-stack-bottom-frame @ react-dom-client.development.js:22974
+renderWithHooksAgain @ react-dom-client.development.js:6767
+renderWithHooks @ react-dom-client.development.js:6679
+updateForwardRef @ react-dom-client.development.js:8679
+beginWork @ react-dom-client.development.js:10895
+runWithFiberInDEV @ react-dom-client.development.js:845
+performUnitOfWork @ react-dom-client.development.js:15258
+workLoopSync @ react-dom-client.development.js:15078
+renderRootSync @ react-dom-client.development.js:15058
+performWorkOnRoot @ react-dom-client.development.js:14526
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
+performWorkUntilDeadline @ scheduler.development.js:45
+<ForwardRef>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:346
+ThumbnailImage @ video-thumbnail.tsx:11
+react-stack-bottom-frame @ react-dom-client.development.js:22974
+renderWithHooksAgain @ react-dom-client.development.js:6767
+renderWithHooks @ react-dom-client.development.js:6679
+updateFunctionComponent @ react-dom-client.development.js:8931
+beginWork @ react-dom-client.development.js:10556
+runWithFiberInDEV @ react-dom-client.development.js:845
+performUnitOfWork @ react-dom-client.development.js:15258
+workLoopSync @ react-dom-client.development.js:15078
+renderRootSync @ react-dom-client.development.js:15058
+performWorkOnRoot @ react-dom-client.development.js:14526
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
+performWorkUntilDeadline @ scheduler.development.js:45
+<ThumbnailImage>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:346
+VideoThumbnail @ video-thumbnail.tsx:109
+react-stack-bottom-frame @ react-dom-client.development.js:22974
+renderWithHooksAgain @ react-dom-client.development.js:6767
+renderWithHooks @ react-dom-client.development.js:6679
+updateFunctionComponent @ react-dom-client.development.js:8931
+beginWork @ react-dom-client.development.js:10556
+runWithFiberInDEV @ react-dom-client.development.js:845
+performUnitOfWork @ react-dom-client.development.js:15258
+workLoopSync @ react-dom-client.development.js:15078
+renderRootSync @ react-dom-client.development.js:15058
+performWorkOnRoot @ react-dom-client.development.js:14526
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
+performWorkUntilDeadline @ scheduler.development.js:45
+<VideoThumbnail>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:346
+VideoEmbedComponent @ video-embed.tsx:219
+react-stack-bottom-frame @ react-dom-client.development.js:22974
+renderWithHooksAgain @ react-dom-client.development.js:6767
+renderWithHooks @ react-dom-client.development.js:6679
+updateFunctionComponent @ react-dom-client.development.js:8931
+beginWork @ react-dom-client.development.js:10556
+runWithFiberInDEV @ react-dom-client.development.js:845
+performUnitOfWork @ react-dom-client.development.js:15258
+workLoopSync @ react-dom-client.development.js:15078
+renderRootSync @ react-dom-client.development.js:15058
+performWorkOnRoot @ react-dom-client.development.js:14526
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
+performWorkUntilDeadline @ scheduler.development.js:45
+<VideoEmbedComponent>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:346
+VideoEmbedWrapper @ video-embed.tsx:276
+react-stack-bottom-frame @ react-dom-client.development.js:22974
+renderWithHooksAgain @ react-dom-client.development.js:6767
+renderWithHooks @ react-dom-client.development.js:6679
+updateFunctionComponent @ react-dom-client.development.js:8931
+beginWork @ react-dom-client.development.js:10556
+runWithFiberInDEV @ react-dom-client.development.js:848
+performUnitOfWork @ react-dom-client.development.js:15258
+workLoopSync @ react-dom-client.development.js:15078
+renderRootSync @ react-dom-client.development.js:15058
+performWorkOnRoot @ react-dom-client.development.js:14526
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
+performWorkUntilDeadline @ scheduler.development.js:45

@@ -7,12 +7,13 @@ import { Play } from "lucide-react";
 
 // Helper component for thumbnail image
 const ThumbnailImage = ({ thumbnailUrl, title }: { thumbnailUrl: string; title?: string }) => (
-  <>
+  <div className="absolute inset-0 h-full w-full">
     <Image
       src={thumbnailUrl}
       alt={title ?? "Video thumbnail"}
       fill
       className="object-cover"
+      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
       onError={(e) => {
         console.log("🖼️ [VideoThumbnail] Image failed to load, hiding...");
         e.currentTarget.style.display = "none";
@@ -20,7 +21,7 @@ const ThumbnailImage = ({ thumbnailUrl, title }: { thumbnailUrl: string; title?:
     />
     {/* Gradient overlay for better contrast */}
     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" />
-  </>
+  </div>
 );
 
 // Helper component for play button
@@ -64,6 +65,65 @@ const VideoInfoOverlay = ({ title, author }: { title?: string; author?: string }
   );
 };
 
+// Helper function for debug logging (extracted to reduce complexity)
+const logThumbnailDebugInfo = (thumbnailUrl: string | undefined, platform: string) => {
+  if (!thumbnailUrl) {
+    console.log("🎬 [VideoThumbnail] No thumbnail - using gradient:", {
+      platform,
+      type: "Gradient placeholder",
+      isRealThumbnail: false,
+    });
+    return;
+  }
+
+  if (thumbnailUrl.startsWith("data:image/svg+xml")) {
+    try {
+      const base64Data = thumbnailUrl.split(",")[1];
+      const decodedSvg = atob(base64Data);
+      console.log("🎬 [VideoThumbnail] SVG placeholder detected:", {
+        platform,
+        type: "SVG placeholder",
+        content: decodedSvg.substring(0, 200) + "...",
+        isRealThumbnail: false,
+      });
+    } catch {
+      console.log("🎬 [VideoThumbnail] SVG decode failed:", {
+        platform,
+        thumbnailUrl: thumbnailUrl.substring(0, 100) + "...",
+      });
+    }
+    return;
+  }
+
+  if (thumbnailUrl.startsWith("data:image/jpeg") || thumbnailUrl.startsWith("data:image/png")) {
+    console.log("🎬 [VideoThumbnail] Real image thumbnail:", {
+      platform,
+      type: thumbnailUrl.startsWith("data:image/jpeg") ? "JPEG" : "PNG",
+      size: `${Math.round(thumbnailUrl.length / 1024)}KB`,
+      isRealThumbnail: true,
+      previewUrl: thumbnailUrl.substring(0, 100) + "...",
+    });
+    return;
+  }
+
+  if (thumbnailUrl.startsWith("http")) {
+    console.log("🎬 [VideoThumbnail] HTTP thumbnail URL:", {
+      platform,
+      type: "HTTP URL",
+      url: thumbnailUrl,
+      isRealThumbnail: true,
+    });
+    return;
+  }
+
+  console.log("🎬 [VideoThumbnail] Unknown thumbnail format:", {
+    platform,
+    type: "Unknown",
+    preview: thumbnailUrl.substring(0, 100) + "...",
+    isRealThumbnail: "unknown",
+  });
+};
+
 // Main VideoThumbnail component
 export const VideoThumbnail = ({
   platform,
@@ -87,11 +147,8 @@ export const VideoThumbnail = ({
 
   const gradientClass = platform === "tiktok" ? platformGradients.tiktok : platformGradients.instagram;
 
-  // Debug logging
-  console.log("🎬 [VideoThumbnail] Using:", thumbnailUrl ? "actual thumbnail" : "gradient placeholder", {
-    platform,
-    thumbnailUrl: thumbnailUrl ? "✅" : "❌",
-  });
+  // Enhanced debug logging
+  logThumbnailDebugInfo(thumbnailUrl, platform);
 
   return (
     <motion.div

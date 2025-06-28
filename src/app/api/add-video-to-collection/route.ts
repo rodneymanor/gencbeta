@@ -12,6 +12,7 @@ interface VideoDownloadResponse {
   hostedOnCDN: boolean;
   cdnUrl?: string;
   filename?: string;
+  thumbnailUrl?: string;
   videoData?: {
     buffer: number[];
     size: number;
@@ -192,6 +193,7 @@ async function traditionalDownload(videoUrl: string, baseUrl: string): Promise<V
 
   const data = await response.json();
   console.log("📥 [API] Traditional download response received:", data);
+  console.log("🖼️ [API] Thumbnail URL from traditional download:", data.thumbnailUrl ? "✅ Found" : "❌ Not found");
   return data;
 }
 
@@ -258,20 +260,17 @@ function generatePlaceholderThumbnail(platform: string): string {
 }
 
 async function extractVideoThumbnail(downloadResponse: VideoDownloadResponse): Promise<string> {
-  console.log("🖼️ [API] Extracting thumbnail - hostedOnCDN:", downloadResponse.hostedOnCDN);
+  console.log("🖼️ [API] Extracting thumbnail - checking for real thumbnail URL...");
 
-  if (downloadResponse.hostedOnCDN && downloadResponse.cdnUrl) {
-    if (downloadResponse.cdnUrl.includes("iframe.mediadelivery.net/embed")) {
-      console.log("🖼️ [API] Using placeholder thumbnail for iframe URL");
-      return generatePlaceholderThumbnail(downloadResponse.platform);
-    }
-
-    console.log("🖼️ [API] Using placeholder thumbnail for CDN URL");
-    return generatePlaceholderThumbnail(downloadResponse.platform);
-  } else {
-    console.log("📁 [API] Using placeholder thumbnail for local video");
-    return generatePlaceholderThumbnail(downloadResponse.platform);
+  // First priority: Use actual thumbnail URL from the API response
+  if (downloadResponse.thumbnailUrl) {
+    console.log("✅ [API] Using real thumbnail from API response:", downloadResponse.thumbnailUrl);
+    return downloadResponse.thumbnailUrl;
   }
+
+  // Fallback: Generate placeholder thumbnail
+  console.log("⚠️ [API] No real thumbnail found, generating placeholder for platform:", downloadResponse.platform);
+  return generatePlaceholderThumbnail(downloadResponse.platform);
 }
 
 function calculateEngagementRate(metrics: VideoDownloadResponse["metrics"]): number {

@@ -79,10 +79,18 @@ const VideoEmbedComponent = ({
 
   // Handle click to load video
   const handleLoadVideo = () => {
-    console.log("🔥 [VideoEmbed] Click detected");
+    console.log("🔥 [VideoEmbed] Click detected - attempting to load video:", {
+      url,
+      platform,
+      currentShouldLoad: shouldLoad,
+      hostedOnCDN,
+      hasVideoData: Boolean(videoData),
+    });
     if (!shouldLoad) {
       setShouldLoad(true);
       setIsLoading(true);
+    } else {
+      console.log("⚠️ [VideoEmbed] Video already loading or loaded");
     }
   };
 
@@ -120,7 +128,7 @@ const VideoEmbedComponent = ({
     setIsPlaying(true);
   };
 
-  const handleContentError = (error: Event | string) => {
+  const handleContentError = (error: any) => {
     console.error("❌ [VIDEO_PLAYER] Content load error:", error);
     setHasError(true);
     setIsLoading(false);
