@@ -17,6 +17,7 @@ interface VideoCardProps {
     platform: string;
     title: string;
     author: string;
+    thumbnailUrl?: string;
     hostedOnCDN?: boolean;
     videoData?: {
       buffer: number[];
@@ -120,6 +121,7 @@ const VideoCardComponent = ({
       <VideoPlayer
         videoUrl={video.url}
         platform={video.platform as "tiktok" | "instagram"}
+        thumbnailUrl={video.thumbnailUrl}
         metrics={{
           views: video.insights.views,
           likes: video.insights.likes,

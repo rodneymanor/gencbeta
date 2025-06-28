@@ -3,10 +3,11 @@
 import { useState, useEffect, memo } from "react";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Play } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { VideoLoadingOverlay } from "@/components/ui/page-loading";
+
+import { VideoLoadingOverlay } from "./video-player-components";
+import { VideoThumbnail } from "./video-thumbnail";
 
 // Helper function to determine which content to render
 const getVideoContent = (
@@ -40,87 +41,10 @@ const getEmbedUrl = (url: string, platform: string) => {
   }
 };
 
-// Thumbnail placeholder component
-const VideoThumbnail = ({
-  platform,
-  onClick,
-  disableCard = false,
-  title,
-  author,
-}: {
-  platform: "tiktok" | "instagram";
-  onClick: () => void;
-  disableCard?: boolean;
-  title?: string;
-  author?: string;
-}) => {
-  const platformGradients = {
-    tiktok: "from-pink-500 via-purple-500 to-indigo-500",
-    instagram: "from-purple-500 via-pink-500 to-orange-500",
-  } as const;
-
-  const gradientClass =
-    platform === "tiktok"
-      ? platformGradients.tiktok
-      : platform === "instagram"
-        ? platformGradients.instagram
-        : platformGradients.tiktok;
-
-  // Debug logging
-  console.log("🎬 [VideoThumbnail] Rendering with:", { platform, gradientClass, title, author });
-
-  return (
-    <motion.div
-      className={`relative flex h-full w-full cursor-pointer items-center justify-center bg-gradient-to-br ${gradientClass} ${disableCard ? "" : "rounded-xl"}`}
-      onClick={onClick}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3 }}
-    >
-      {/* Play button overlay */}
-      <motion.div
-        className="absolute inset-0 flex items-center justify-center"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-      >
-        <motion.div
-          className="rounded-full bg-black/50 p-6 backdrop-blur-sm"
-          whileHover={{ scale: 1.1, backgroundColor: "rgba(0, 0, 0, 0.7)" }}
-          whileTap={{ scale: 0.9 }}
-        >
-          <Play className="h-8 w-8 text-white" fill="white" />
-        </motion.div>
-      </motion.div>
-
-      {/* Platform indicator */}
-      <div className="absolute top-4 left-4">
-        <div className="rounded-full bg-black/50 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
-          {platform.toUpperCase()}
-        </div>
-      </div>
-
-      {/* Video info overlay */}
-      {(title ?? author) && (
-        <div className="absolute right-4 bottom-4 left-4">
-          <div className="rounded-lg bg-black/50 p-3 backdrop-blur-sm">
-            {title && <p className="line-clamp-2 text-sm font-medium text-white">{title}</p>}
-            {author && <p className="text-xs text-white/80">@{author}</p>}
-          </div>
-        </div>
-      )}
-
-      {/* Shimmer effect */}
-      <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-    </motion.div>
-  );
-};
-
 const VideoEmbedComponent = ({
   url,
   platform,
+  thumbnailUrl,
   hostedOnCDN,
   videoData,
   disableCard = false,
@@ -130,6 +54,7 @@ const VideoEmbedComponent = ({
 }: {
   url: string;
   platform: "tiktok" | "instagram";
+  thumbnailUrl?: string;
   hostedOnCDN?: boolean;
   videoData?: {
     buffer: number[];
@@ -293,6 +218,7 @@ const VideoEmbedComponent = ({
         <motion.div key="thumbnail">
           <VideoThumbnail
             platform={platform}
+            thumbnailUrl={thumbnailUrl}
             onClick={handleLoadVideo}
             disableCard={disableCard}
             title={title}
@@ -320,10 +246,52 @@ const VideoEmbedComponent = ({
   );
 };
 
-export const VideoEmbed = memo(VideoEmbedComponent, (prevProps, nextProps) => {
+const VideoEmbedWrapper = ({
+  url,
+  platform,
+  thumbnailUrl,
+  hostedOnCDN,
+  videoData,
+  disableCard = false,
+  lazyLoad = true,
+  title,
+  author,
+}: {
+  url: string;
+  platform: "tiktok" | "instagram";
+  thumbnailUrl?: string;
+  hostedOnCDN?: boolean;
+  videoData?: {
+    buffer: number[];
+    size: number;
+    mimeType: string;
+    filename: string;
+  };
+  disableCard?: boolean;
+  lazyLoad?: boolean;
+  title?: string;
+  author?: string;
+}) => {
+  return (
+    <VideoEmbedComponent
+      url={url}
+      platform={platform}
+      thumbnailUrl={thumbnailUrl}
+      hostedOnCDN={hostedOnCDN}
+      videoData={videoData}
+      disableCard={disableCard}
+      lazyLoad={lazyLoad}
+      title={title}
+      author={author}
+    />
+  );
+};
+
+export const VideoEmbed = memo(VideoEmbedWrapper, (prevProps, nextProps) => {
   return (
     prevProps.url === nextProps.url &&
     prevProps.platform === nextProps.platform &&
+    prevProps.thumbnailUrl === nextProps.thumbnailUrl &&
     prevProps.hostedOnCDN === nextProps.hostedOnCDN &&
     prevProps.lazyLoad === nextProps.lazyLoad
   );

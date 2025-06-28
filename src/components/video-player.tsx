@@ -36,6 +36,7 @@ interface VideoInsights {
 interface VideoPlayerProps {
   videoUrl: string;
   platform: "tiktok" | "instagram";
+  thumbnailUrl?: string;
   metrics: VideoMetrics;
   insights?: VideoInsights;
   title?: string;
@@ -70,6 +71,7 @@ InsightsDialog.displayName = "InsightsDialog";
 const VideoPlayerComponent = ({
   videoUrl,
   platform,
+  thumbnailUrl,
   metrics,
   insights,
   title,
@@ -89,6 +91,7 @@ const VideoPlayerComponent = ({
         <VideoEmbed
           url={videoUrl}
           platform={platform}
+          thumbnailUrl={thumbnailUrl}
           hostedOnCDN={hostedOnCDN}
           videoData={videoData}
           disableCard={disableCard}
@@ -154,6 +157,7 @@ export const VideoPlayer = memo(VideoPlayerComponent, (prevProps, nextProps) => 
   return (
     prevProps.videoUrl === nextProps.videoUrl &&
     prevProps.platform === nextProps.platform &&
+    prevProps.thumbnailUrl === nextProps.thumbnailUrl &&
     prevProps.metrics.views === nextProps.metrics.views &&
     prevProps.metrics.likes === nextProps.metrics.likes &&
     prevProps.hostedOnCDN === nextProps.hostedOnCDN
