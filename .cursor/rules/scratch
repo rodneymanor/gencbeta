@@ -1,340 +1,452 @@
-🔍 [RBAC] User ID: xfPvnnUdJCRIJEVrpJCmR7kXBOX2
-🔍 [RBAC] User ID: xfPvnnUdJCRIJEVrpJCmR7kXBOX2
-🔍 [RBAC] Super admin loading all collections
-🔍 [RBAC] Super admin detected - bypassing coach restrictions
-🔍 [RBAC] Super admin loading all videos
-🔍 [RBAC] Super admin loading all collections
-🔍 [RBAC] Super admin detected - bypassing coach restrictions
-🔍 [RBAC] Super admin loading all videos
-✅ [RBAC] Super admin loaded collections: 3
-✅ [RBAC] Super admin loaded collections: 3
-✅ [RBAC] Super admin loaded videos: 15
-✅ [RBAC] Super admin loaded videos: 15
-🎥 [VideoEmbed]: Object
-🎥 [VideoEmbed]: Object
-🎬 [VideoThumbnail] Real image thumbnail: Object
-🎬 [VideoThumbnail] Real image thumbnail: Object
-🎥 [VideoEmbed]: Object
-🎥 [VideoEmbed]: Object
-🎬 [VideoThumbnail] Real image thumbnail: Object
-🎬 [VideoThumbnail] Real image thumbnail: Object
-🎥 [VideoEmbed]: Object
-🎥 [VideoEmbed]: Object
-🎬 [VideoThumbnail] SVG placeholder detected: Object
-🎬 [VideoThumbnail] SVG placeholder detected: Object
-🎥 [VideoEmbed]: Object
-🎥 [VideoEmbed]: Object
-🎬 [VideoThumbnail] SVG placeholder detected: Object
-🎬 [VideoThumbnail] SVG placeholder detected: Object
-🎥 [VideoEmbed]: Object
-🎥 [VideoEmbed]: Object
-🎬 [VideoThumbnail] SVG placeholder detected: Object
-🎬 [VideoThumbnail] SVG placeholder detected: Object
-🎥 [VideoEmbed]: Object
-🎥 [VideoEmbed]: Object
-🎬 [VideoThumbnail] SVG placeholder detected: Object
-🎬 [VideoThumbnail] SVG placeholder detected: Object
-🎥 [VideoEmbed]: Object
-🎥 [VideoEmbed]: Object
-🎬 [VideoThumbnail] SVG placeholder detected: Object
-🎬 [VideoThumbnail] SVG placeholder detected: Object
-🎥 [VideoEmbed]: Object
-🎥 [VideoEmbed]: Object
-🎬 [VideoThumbnail] Real image thumbnail: Object
-🎬 [VideoThumbnail] Real image thumbnail: Object
-🎥 [VideoEmbed]: Object
-🎥 [VideoEmbed]: Object
-🎬 [VideoThumbnail] Real image thumbnail: Object
-🎬 [VideoThumbnail] Real image thumbnail: Object
-🎥 [VideoEmbed]: Object
-🎥 [VideoEmbed]: Object
-🎬 [VideoThumbnail] Real image thumbnail: Object
-🎬 [VideoThumbnail] Real image thumbnail: Object
-🎥 [VideoEmbed]: Object
-🎥 [VideoEmbed]: Object
-🎬 [VideoThumbnail] SVG placeholder detected: Object
-🎬 [VideoThumbnail] SVG placeholder detected: Object
-🎥 [VideoEmbed]: Object
-hook.js:377 🎥 [VideoEmbed]: Object
-VM5726 video-thumbnail.tsx:165 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
-hook.js:377 🎥 [VideoEmbed]: Object
-VM5726 video-thumbnail.tsx:165 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
-hook.js:377 🎥 [VideoEmbed]: Object
-VM5726 video-thumbnail.tsx:165 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
-hook.js:377 🎥 [VideoEmbed]: Object
-VM5726 video-thumbnail.tsx:178 🎬 [VideoThumbnail] Real image thumbnail: Object
-hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
-hook.js:608 Image with src "data:image/svg+xml;base64,CiAgICA8c3ZnIHdpZHRoPSIzNjAiIGhlaWdodD0iNjQwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgICA8ZGVmcz4KICAgICAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMCUiIHkyPSIxMDAlIj4KICAgICAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiM4MzNBQjQ7c3RvcC1vcGFjaXR5OjEiIC8+CiAgICAgICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNGQ0IwNDU7c3RvcC1vcGFjaXR5OjEiIC8+CiAgICAgICAgPC9saW5lYXJHcmFkaWVudD4KICAgICAgPC9kZWZzPgogICAgICA8cmVjdCB3aWR0aD0iMzYwIiBoZWlnaHQ9IjY0MCIgZmlsbD0idXJsKCNncmFkKSIgLz4KICAgICAgPHRleHQgeD0iMTgwIiB5PSIzMDAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjI0Ij7wn5O5PC90ZXh0PgogICAgICA8dGV4dCB4PSIxODAiIHk9IjM0MCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTYiPklOU1RBR1JBTTwvdGV4dD4KICAgICAgPHRleHQgeD0iMTgwIiB5PSIzNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjE2Ij5WaWRlbzwvdGV4dD4KICAgIDwvc3ZnPgogIA==" has "fill" and a height value of 0. This is likely because the parent element of the image has not been styled to have a set height.
-overrideMethod @ hook.js:608
-hook.js:608 Image with src "data:image/jpeg;base64,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
-overrideMethod @ hook.js:608
-hot-reloader-client.js:197 [Fast Refresh] rebuilding
-report-hmr-latency.js:14 [Fast Refresh] done in 616ms
-contentScript.bundle.js:4785 Event target tag: INPUT
-contentScript.bundle.js:4785 Current value: https://www.instagram.com/reel/DLdldjBRV78/?utm_source=ig_web_copy_link
-contentScript.bundle.js:4785 Current shortcuts: Array(0)
-contentScript.bundle.js:4785 Data received in content script: Array(0)
-app-state-context.tsx:38 🔄 [APP_STATE] Video processing state: true
-add-video-dialog.tsx:72 🚀 [ADD_VIDEO] Starting download for: https://www.instagram.com/reel/DLdldjBRV78/?utm_source=ig_web_copy_link
-hot-reloader-client.js:197 [Fast Refresh] rebuilding
-report-hmr-latency.js:14 [Fast Refresh] done in 295ms
-hot-reloader-client.js:197 [Fast Refresh] rebuilding
-report-hmr-latency.js:14 [Fast Refresh] done in 166ms
-hot-reloader-client.js:197 [Fast Refresh] rebuilding
-report-hmr-latency.js:14 [Fast Refresh] done in 226ms
-hot-reloader-client.js:197 [Fast Refresh] rebuilding
-report-hmr-latency.js:14 [Fast Refresh] done in 151ms
-video-processing.ts:78 📥 [ADD_VIDEO] Download response received: Object
-video-processing.ts:79 🔍 [DEBUG] Download metrics: Object
-add-video-dialog.tsx:74 ✅ [ADD_VIDEO] Download completed: Object
-add-video-dialog.tsx:78 🎬 [ADD_VIDEO] Starting transcription...
-video-processing.ts:84 🔍 [ADD_VIDEO] Checking download response for transcription: false
-video-processing.ts:85 🔍 [ADD_VIDEO] Transcription status: pending
-video-processing.ts:86 🔍 [ADD_VIDEO] Download response keys: Array(9)
-video-processing.ts:96 ⏳ [ADD_VIDEO] Transcription is processing in background, using placeholder
-add-video-dialog.tsx:80 ✅ [ADD_VIDEO] Transcription completed: Object
-add-video-dialog.tsx:84 🖼️ [ADD_VIDEO] Generating thumbnail...
-video-processing.ts:151 🖼️ [ADD_VIDEO] Extracting thumbnail - hostedOnCDN: true
-video-processing.ts:152 🖼️ [ADD_VIDEO] CDN URL: https://iframe.mediadelivery.net/embed/459811/cbac5d04-7cb7-4208-b29a-162a0b667336
-video-processing.ts:157 🖼️ [ADD_VIDEO] Using placeholder thumbnail for iframe URL
-add-video-dialog.tsx:86 ✅ [ADD_VIDEO] Thumbnail generated: data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD...
-add-video-dialog.tsx:90 💾 [ADD_VIDEO] Saving to collection...
-add-video-dialog.tsx:94 🎯 [ADD_VIDEO] Target collection: all-videos
-video-processing.ts:294 📦 [ADD_VIDEO] Creating video object with:
-video-processing.ts:295   - Download response platform: instagram
-video-processing.ts:296   - Transcription success: true
-video-processing.ts:297   - Thumbnail URL length: 10179
-video-processing.ts:298   - Original URL: https://www.instagram.com/reel/DLdldjBRV78/?utm_source=ig_web_copy_link
-add-video-dialog.tsx:98 📦 [ADD_VIDEO] Video object created: Array(15)
-add-video-dialog.tsx:99 🔍 [ADD_VIDEO] User ID: xfPvnnUdJCRIJEVrpJCmR7kXBOX2
-add-video-dialog.tsx:100 🔍 [ADD_VIDEO] Target collection ID: all-videos
-hot-reloader-client.js:197 [Fast Refresh] rebuilding
-report-hmr-latency.js:14 [Fast Refresh] done in 173ms
-hot-reloader-client.js:197 [Fast Refresh] rebuilding
-report-hmr-latency.js:14 [Fast Refresh] done in 127ms
-add-video-dialog.tsx:103 ✅ [ADD_VIDEO] Video added to collection successfully
-collections-rbac.ts:67 🔍 [RBAC] User ID: xfPvnnUdJCRIJEVrpJCmR7kXBOX2
-app-state-context.tsx:38 🔄 [APP_STATE] Video processing state: false
-collections-rbac.ts:20 🔍 [RBAC] Super admin loading all collections
-collections-rbac.ts:85 🔍 [RBAC] Super admin detected - bypassing coach restrictions
-collections-rbac.ts:89 🔍 [RBAC] Super admin loading all videos
-collections-rbac.ts:33 ✅ [RBAC] Super admin loaded collections: 3
-collections-rbac.ts:103 ✅ [RBAC] Super admin loaded videos: 16
-VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
-hook.js:377 🎥 [VideoEmbed]: Object
-VM5726 video-thumbnail.tsx:178 🎬 [VideoThumbnail] Real image thumbnail: Object
-hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
-VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
-hook.js:377 🎥 [VideoEmbed]: Object
-VM5726 video-thumbnail.tsx:178 🎬 [VideoThumbnail] Real image thumbnail: Object
-hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
-VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
-hook.js:377 🎥 [VideoEmbed]: Object
-VM5726 video-thumbnail.tsx:178 🎬 [VideoThumbnail] Real image thumbnail: Object
-hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
-VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
-hook.js:377 🎥 [VideoEmbed]: Object
-VM5726 video-thumbnail.tsx:165 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
-hook.js:377 🎥 [VideoEmbed]: Object
-VM5726 video-thumbnail.tsx:165 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
-hook.js:377 🎥 [VideoEmbed]: Object
-VM5726 video-thumbnail.tsx:165 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
-hook.js:377 🎥 [VideoEmbed]: Object
-VM5726 video-thumbnail.tsx:165 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
-hook.js:377 🎥 [VideoEmbed]: Object
-VM5726 video-thumbnail.tsx:165 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
-hook.js:377 🎥 [VideoEmbed]: Object
-VM5726 video-thumbnail.tsx:178 🎬 [VideoThumbnail] Real image thumbnail: Object
-hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
-VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
-hook.js:377 🎥 [VideoEmbed]: Object
-VM5726 video-thumbnail.tsx:178 🎬 [VideoThumbnail] Real image thumbnail: Object
-hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
-VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
-hook.js:377 🎥 [VideoEmbed]: Object
-VM5726 video-thumbnail.tsx:178 🎬 [VideoThumbnail] Real image thumbnail: Object
-hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
-VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
-hook.js:377 🎥 [VideoEmbed]: Object
-VM5726 video-thumbnail.tsx:165 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
-hook.js:377 🎥 [VideoEmbed]: Object
-VM5726 video-thumbnail.tsx:165 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
-hook.js:377 🎥 [VideoEmbed]: Object
-VM5726 video-thumbnail.tsx:165 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
-hook.js:377 🎥 [VideoEmbed]: Object
-VM5726 video-thumbnail.tsx:165 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5724 video-embed.tsx:56 🎥 [VideoEmbed]: Object
-hook.js:377 🎥 [VideoEmbed]: Object
-VM5726 video-thumbnail.tsx:178 🎬 [VideoThumbnail] Real image thumbnail: Object
-hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
-hot-reloader-client.js:197 [Fast Refresh] rebuilding
-VM5902 video-thumbnail.tsx:232 🎬 [VideoThumbnail] Real image thumbnail: Object
-hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
-VM5902 video-thumbnail.tsx:232 🎬 [VideoThumbnail] Real image thumbnail: Object
-hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
-VM5902 video-thumbnail.tsx:232 🎬 [VideoThumbnail] Real image thumbnail: Object
-hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
-VM5902 video-thumbnail.tsx:219 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5902 video-thumbnail.tsx:219 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5902 video-thumbnail.tsx:219 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5902 video-thumbnail.tsx:219 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5902 video-thumbnail.tsx:219 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5902 video-thumbnail.tsx:232 🎬 [VideoThumbnail] Real image thumbnail: Object
-hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
-VM5902 video-thumbnail.tsx:232 🎬 [VideoThumbnail] Real image thumbnail: Object
-hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
-VM5902 video-thumbnail.tsx:232 🎬 [VideoThumbnail] Real image thumbnail: Object
-hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
-VM5902 video-thumbnail.tsx:219 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5902 video-thumbnail.tsx:219 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5902 video-thumbnail.tsx:219 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5902 video-thumbnail.tsx:219 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5902 video-thumbnail.tsx:232 🎬 [VideoThumbnail] Real image thumbnail: Object
-hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
-report-hmr-latency.js:14 [Fast Refresh] done in 1007ms
-hot-reloader-client.js:197 [Fast Refresh] rebuilding
-report-hmr-latency.js:14 [Fast Refresh] done in 433ms
-hot-reloader-client.js:197 [Fast Refresh] rebuilding
-VM5910 video-thumbnail.tsx:179 🎬 [VideoThumbnail] Real image thumbnail: Object
-hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
-VM5910 video-thumbnail.tsx:179 🎬 [VideoThumbnail] Real image thumbnail: Object
-hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
-VM5910 video-thumbnail.tsx:179 🎬 [VideoThumbnail] Real image thumbnail: Object
-hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
-VM5910 video-thumbnail.tsx:164 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5910 video-thumbnail.tsx:164 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5910 video-thumbnail.tsx:164 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5910 video-thumbnail.tsx:164 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5910 video-thumbnail.tsx:164 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5910 video-thumbnail.tsx:179 🎬 [VideoThumbnail] Real image thumbnail: Object
-hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
-VM5910 video-thumbnail.tsx:179 🎬 [VideoThumbnail] Real image thumbnail: Object
-hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
-VM5910 video-thumbnail.tsx:179 🎬 [VideoThumbnail] Real image thumbnail: Object
-hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
-VM5910 video-thumbnail.tsx:164 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5910 video-thumbnail.tsx:164 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5910 video-thumbnail.tsx:164 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5910 video-thumbnail.tsx:164 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-VM5910 video-thumbnail.tsx:179 🎬 [VideoThumbnail] Real image thumbnail: ObjectisRealThumbnail: trueplatform: "instagram"previewUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI..."size: "10KB"type: "JPEG"[[Prototype]]: Objectconstructor: ƒ Object()hasOwnProperty: ƒ hasOwnProperty()isPrototypeOf: ƒ isPrototypeOf()propertyIsEnumerable: ƒ propertyIsEnumerable()toLocaleString: ƒ toLocaleString()toString: ƒ toString()valueOf: ƒ valueOf()__defineGetter__: ƒ __defineGetter__()__defineSetter__: ƒ __defineSetter__()__lookupGetter__: ƒ __lookupGetter__()__lookupSetter__: ƒ __lookupSetter__()__proto__: (...)get __proto__: ƒ __proto__()set __proto__: ƒ __proto__()
-hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
-report-hmr-latency.js:14 [Fast Refresh] done in 224ms
-hot-reloader-client.js:197 [Fast Refresh] rebuilding
-report-hmr-latency.js:14 [Fast Refresh] done in 248ms
-hot-reloader-client.js:197 [Fast Refresh] rebuilding
-report-hmr-latency.js:14 [Fast Refresh] done in 181ms
-hot-reloader-client.js:197 [Fast Refresh] rebuilding
-report-hmr-latency.js:14 [Fast Refresh] done in 192ms
-hot-reloader-client.js:197 [Fast Refresh] rebuilding
-report-hmr-latency.js:14 [Fast Refresh] done in 1223ms
-hot-reloader-client.js:197 [Fast Refresh] rebuilding
-report-hmr-latency.js:14 [Fast Refresh] done in 298ms
-hot-reloader-client.js:197 [Fast Refresh] rebuilding
-report-hmr-latency.js:14 [Fast Refresh] done in 200ms
-[Fast Refresh] rebuilding
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎥 [VideoEmbed]: {platform: 'instagram', lazyLoad: true, shouldLoad: false, isLoading: false}
-🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-[Fast Refresh] done in 1864ms
+rmanor@Rodneys-MacBook-Air Gen C Beta % 
+rmanor@Rodneys-MacBoopkill -f "next dev" && sleep 3 && npm run devep 3 && npm run 
+dev
+> gen-c@1.0.0 dev
+> next dev
+
+   ▲ Next.js 15.3.4
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.86.25:3000
+   - Environments: .env.local
+   - Experiments (use with caution):
+     ✓ forceSwcTransforms
+
+ ✓ Starting...
+ ✓ Ready in 1469ms
+ ○ Compiling /research/collections ...
+ ✓ Compiled /research/collections in 3.9s (2395 modules)
+ GET /research/collections 200 in 4452ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 2.3s (2399 modules)
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 2620ms
+ GET /research/collections 200 in 362ms
+ ⚠ The "images.domains" configuration is deprecated. Please use "images.remotePatterns" configuration instead.
+ ✓ Compiled /api/download-video in 303ms (2404 modules)
+🔄 [DOWNLOAD] Redirecting to new orchestrator service...
+🎬 [DOWNLOAD] Calling download-and-prepare orchestrator...
+🌐 [DOWNLOAD] Using base URL: http://localhost:3000
+ ✓ Compiled /api/video/download-and-prepare in 180ms (2406 modules)
+🎬 [ORCHESTRATOR] Starting video download and preparation workflow...
+🌐 [ORCHESTRATOR] Using base URL: http://localhost:3000
+📥 [ORCHESTRATOR] Step 1: Downloading video...
+🔄 [ORCHESTRATOR] Calling downloader service...
+ ✓ Compiled /api/video/downloader in 204ms (2415 modules)
+📥 [DOWNLOADER] Starting video download service...
+🔍 [DOWNLOADER] Processing URL: https://www.instagram.com/reel/DLbxmBMzAfm/?utm_source=ig_web_copy_link
+🔍 [PLATFORM] Analyzing URL for platform detection: https://www.instagram.com/reel/dlbxmbmzafm/?utm_source=ig_web_copy_link
+✅ [PLATFORM] Platform identified: Instagram
+🎯 [DOWNLOADER] Platform detected: instagram
+🆔 [DOWNLOAD] Instagram shortcode: DLbxmBMzAfm
+📱 [DOWNLOAD] Fetching Instagram metadata...
+🌐 [DOWNLOAD] Calling Instagram RapidAPI with 30s timeout...
+🔍 [DEBUG] Full Instagram API response: {
+  "id": "3664740838703630310_58686955965",
+  "pk": 3664740838703630300,
+  "code": "DLbxmBMzAfm",
+  "media_type": 2,
+  "taken_at": 1751091265,
+  "image_versions2": {
+    "candidates": [
+      {
+        "width": 480,
+        "height": 853,
+        "url": "https://scontent-iev1-1.cdninstagram.com/v/t51.75761-15/512436770_17957237399955966_8838952837333039169_n.jpg?stp=dst-jpg_e15_p480x480_tt6&_nc_cat=109&ig_cache_key=MzY2NDc0MDgzODcwMzYzMDMxMA%3D%3D.3-ccb1-7&ccb=1-7&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6InhwaWRzLjU0MHg5NjAuc2RyIn0%3D&_nc_ohc=TWrR2_oMjPQQ7kNvwFaTaMy&_nc_oc=AdmBmWWQunPAFZGZqsysmwReerKXIU0xWbMn3dESvdYsJAj9k6JXYYBv02I_RTJjBq8&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-iev1-1.cdninstagram.com&_nc_gid=Wr3MBNhcqxzmlQKPamU7gA&oh=00_AfNzdiy3tMZQVxaZwzDRUjGoUA8GNE1ThM2-_qKQl1fKaA&oe=686637A9",
+        "scans_profile": "e15"
+      }
+    ],
+    "additional_candidates": {
+      "first_frame": {
+        "width": 480,
+        "height": 852,
+        "url": "https://scontent-iev1-1.cdninstagram.com/v/t51.71878-15/504728178_1959128648164183_3022929153861295778_n.jpg?stp=dst-jpg_e15_p480x480_tt6&_nc_cat=103&ccb=1-7&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6InhwaWRzLjY0MHgxMTM2LnNkciJ9&_nc_ohc=QJqbSb7VUNEQ7kNvwHRdHsI&_nc_oc=AdlMBat_xwtJe-yAVYwoKwhjJFm6reTf-Azwm4CHAbPnvW6XB39Iq28CEdzv9aljvQM&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-iev1-1.cdninstagram.com&_nc_gid=Wr3MBNhcqxzmlQKPamU7gA&oh=00_AfO5REU6DtGCQMiJNUzKPnsavA6csW1RA0r26ykSAfH8ZA&oe=68665055",
+        "scans_profile": "e15"
+      },
+      "igtv_first_frame": {
+        "width": 480,
+        "height": 852,
+        "url": "https://scontent-iev1-1.cdninstagram.com/v/t51.71878-15/504728178_1959128648164183_3022929153861295778_n.jpg?stp=dst-jpg_e15_p480x480_tt6&_nc_cat=103&ccb=1-7&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6InhwaWRzLjY0MHgxMTM2LnNkciJ9&_nc_ohc=QJqbSb7VUNEQ7kNvwHRdHsI&_nc_oc=AdlMBat_xwtJe-yAVYwoKwhjJFm6reTf-Azwm4CHAbPnvW6XB39Iq28CEdzv9aljvQM&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-iev1-1.cdninstagram.com&_nc_gid=Wr3MBNhcqxzmlQKPamU7gA&oh=00_AfO5REU6DtGCQMiJNUzKPnsavA6csW1RA0r26ykSAfH8ZA&oe=68665055",
+        "scans_profile": "e15"
+      },
+      "smart_frame": null
+    }
+  },
+  "original_width": 720,
+  "original_height": 1280,
+  "video_versions": [
+    {
+      "width": 720,
+      "height": 1280,
+      "url": "https://scontent-iev1-1.cdninstagram.com/o1/v/t2/f2/m86/AQP3rbpFj1iUd3pkZDGvD-oDIYqXfrJwmFu1mK5jV4WILYW_MV1LURtjZfwUQyxLfU0HFgmWMrx1ZJaJfBh-E3PVVVwSKcIERXy_tFc.mp4?_nc_cat=108&_nc_sid=5e9851&_nc_ht=scontent-iev1-1.cdninstagram.com&_nc_ohc=DNtVfvI3GnsQ7kNvwE7uH0s&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0xJUFMuQzMuNzIwLmRhc2hfYmFzZWxpbmVfMV92MSIsInhwdl9hc3NldF9pZCI6MTE1Njc4ODIxNjQ2NTk3NCwidmlfdXNlY2FzZV9pZCI6MTAwOTksImR1cmF0aW9uX3MiOjUsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=daad714d86c75a8b&_nc_vs=HBksFQIYUmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC8zRTQ2NUY1RjkwQjNCQkIzMjhBRDYyQzAyOERBNjRBNF92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYOnBhc3N0aHJvdWdoX2V2ZXJzdG9yZS9HSG5nZEI3MlBjeGFVSlVDQUhBbk9GVWU3YUFDYnFfRUFBQUYVAgLIARIAKAAYABsCiAd1c2Vfb2lsATEScHJvZ3Jlc3NpdmVfcmVjaXBlATEVAAAm7KjI6_eFjgQVAigCQzMsF0AW1P3ztkWiGBJkYXNoX2Jhc2VsaW5lXzFfdjERAHX-B2XmnQEA&_nc_zt=28&oh=00_AfNoZPxApbrFhCFkS4go_EFQJL_sn8StxjGxtBD5ZohQXQ&oe=68626E15",
+      "bandwidth": 798697,
+      "id": "1300548328261655v",
+      "type": 101
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "url": "https://scontent-iev1-1.cdninstagram.com/o1/v/t2/f2/m86/AQP3rbpFj1iUd3pkZDGvD-oDIYqXfrJwmFu1mK5jV4WILYW_MV1LURtjZfwUQyxLfU0HFgmWMrx1ZJaJfBh-E3PVVVwSKcIERXy_tFc.mp4?_nc_cat=108&_nc_sid=5e9851&_nc_ht=scontent-iev1-1.cdninstagram.com&_nc_ohc=DNtVfvI3GnsQ7kNvwE7uH0s&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0xJUFMuQzMuNzIwLmRhc2hfYmFzZWxpbmVfMV92MSIsInhwdl9hc3NldF9pZCI6MTE1Njc4ODIxNjQ2NTk3NCwidmlfdXNlY2FzZV9pZCI6MTAwOTksImR1cmF0aW9uX3MiOjUsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=daad714d86c75a8b&_nc_vs=HBksFQIYUmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC8zRTQ2NUY1RjkwQjNCQkIzMjhBRDYyQzAyOERBNjRBNF92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYOnBhc3N0aHJvdWdoX2V2ZXJzdG9yZS9HSG5nZEI3MlBjeGFVSlVDQUhBbk9GVWU3YUFDYnFfRUFBQUYVAgLIARIAKAAYABsCiAd1c2Vfb2lsATEScHJvZ3Jlc3NpdmVfcmVjaXBlATEVAAAm7KjI6_eFjgQVAigCQzMsF0AW1P3ztkWiGBJkYXNoX2Jhc2VsaW5lXzFfdjERAHX-B2XmnQEA&_nc_zt=28&oh=00_AfNoZPxApbrFhCFkS4go_EFQJL_sn8StxjGxtBD5ZohQXQ&oe=68626E15",
+      "bandwidth": 798697,
+      "id": "1300548328261655v",
+      "type": 102
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "url": "https://scontent-iev1-1.cdninstagram.com/o1/v/t2/f2/m86/AQP3rbpFj1iUd3pkZDGvD-oDIYqXfrJwmFu1mK5jV4WILYW_MV1LURtjZfwUQyxLfU0HFgmWMrx1ZJaJfBh-E3PVVVwSKcIERXy_tFc.mp4?_nc_cat=108&_nc_sid=5e9851&_nc_ht=scontent-iev1-1.cdninstagram.com&_nc_ohc=DNtVfvI3GnsQ7kNvwE7uH0s&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0xJUFMuQzMuNzIwLmRhc2hfYmFzZWxpbmVfMV92MSIsInhwdl9hc3NldF9pZCI6MTE1Njc4ODIxNjQ2NTk3NCwidmlfdXNlY2FzZV9pZCI6MTAwOTksImR1cmF0aW9uX3MiOjUsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=daad714d86c75a8b&_nc_vs=HBksFQIYUmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC8zRTQ2NUY1RjkwQjNCQkIzMjhBRDYyQzAyOERBNjRBNF92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYOnBhc3N0aHJvdWdoX2V2ZXJzdG9yZS9HSG5nZEI3MlBjeGFVSlVDQUhBbk9GVWU3YUFDYnFfRUFBQUYVAgLIARIAKAAYABsCiAd1c2Vfb2lsATEScHJvZ3Jlc3NpdmVfcmVjaXBlATEVAAAm7KjI6_eFjgQVAigCQzMsF0AW1P3ztkWiGBJkYXNoX2Jhc2VsaW5lXzFfdjERAHX-B2XmnQEA&_nc_zt=28&oh=00_AfNoZPxApbrFhCFkS4go_EFQJL_sn8StxjGxtBD5ZohQXQ&oe=68626E15",
+      "bandwidth": 798697,
+      "id": "1300548328261655v",
+      "type": 103
+    }
+  ],
+  "has_audio": true,
+  "video_duration": 5.76,
+  "caption": {
+    "text": "Here are the Prompts:\n\n1. Daily Report Generator\n\nPrompt: \"Every day, I need to send a report summarizing [insert team/client/task updates]. Based on this raw info: [paste data], generate a well-structured, professional report I can copy-paste directly.\"\n\n2. Daily Email Drafting Assistant\n\nPrompt: \"Every day I need to write emails for [insert task, e.g., follow-ups, client updates, status reports]. Here's the context: [insert details]. Write clear, professional, and personalized email drafts for me to send.\"\n\n3. Invoice and Quote Generator\n\nPrompt: \"I run a [insert business type]. Help me generate professional invoice and quote templates I can reuse. Include fields like service, pricing, client name, due date, and payment methods.\"\n\n4. PDF Extractor + Action Plan Maker\n\nPrompt: \"I have a long PDF/document on [insert topic]. Extract only the most relevant information, create a summary, and convert it into a simple action plan I can follow or delegate.\"\n\n5. Content Calendar Auto-Generator\n\nPrompt: \"I want to post consistently on [insert platform] about [insert niche]. Generate a 30-day content calendar with themes, post ideas, and call-to-actions for each day.\"\n\nThat's a wrap, Download The Ultimate ChatGPT Prompts Handbook (Link in Bio) and let ChatGPT do all your hours of boring work in seconds.\n\nFollow @yourchatgptguide for daily such unique prompts.\n\n.\n\n#chatgptprompts #promptengineering #productivityhacks #productivityboost #chatgptprompt",
+    "pk": "18076372690734158",
+    "user_id": 58686955965,
+    "type": 1,
+    "did_report_as_spam": false,
+    "created_at": 1751091270,
+    "created_at_utc": 1751091270,
+    "content_type": "comment",
+    "status": "Active",
+    "bit_flags": 0,
+    "share_enabled": false,
+    "is_ranked_comment": false,
+    "is_covered": false,
+    "private_reply_status": 0,
+    "media_id": 3664740838703630300
+  },
+  "user": {
+    "pk": 58686955965,
+    "username": "yourchatgptguide",
+    "full_name": "ChatGPT Tips | Artificial Intelligence",
+    "is_private": false,
+    "profile_pic_url": "https://scontent-iev1-1.cdninstagram.com/v/t51.2885-19/336963802_1425764154860466_647659982723454047_n.jpg?stp=dst-jpg_e0_s150x150_tt6&_nc_ht=scontent-iev1-1.cdninstagram.com&_nc_cat=1&_nc_oc=Q6cZ2QHEInT-RLqeeahgGJWUUqA2qoSSrmZw0qIVdM-0y2X027YEC-rFlh8ZEjYfyd1LtMo&_nc_ohc=pafhErdfzcsQ7kNvwFggZh2&_nc_gid=Wr3MBNhcqxzmlQKPamU7gA&edm=ALQROFkBAAAA&ccb=7-5&ig_cache_key=GNqoFRSy4-uVuRAFAF_Ud6VS8-wIbkULAAAB-ccb7-5&oh=00_AfONqSP8aIv9V5gmP-o40VVartw0f3H9qjMLW_UVZVigKw&oe=68665F5D&_nc_sid=fc8dfb",
+    "profile_pic_id": "3063129288407595450_58686955965",
+    "is_verified": true,
+    "account_type": 2,
+    "fan_club_info": {},
+    "fbid_v2": 17841458678965868,
+    "pk_id": "58686955965",
+    "third_party_downloads_enabled": 1,
+    "strong_id__": "58686955965",
+    "avatar_status": {
+      "has_avatar": false
+    },
+    "show_account_transparency_details": true
+  },
+  "product_type": "clips",
+  "comment_count": 6,
+  "like_count": 216,
+  "play_count": 44135,
+  "clips_metadata": {
+    "original_sound_info": {
+      "audio_asset_id": 1367492950447660,
+      "progressive_download_url": "https://scontent-iev1-1.cdninstagram.com/o1/v/t2/f2/m69/AQPJjWSjRJy03eQpKm-r2VLsOK6oeve_aJGuSYp2gMOqfOWLQlFC-4PMzD9053kQiZSnndOR1Aa-tltMte88sdyT.mp4?strext=1&_nc_cat=103&_nc_sid=8bf8fe&_nc_ht=scontent-iev1-1.cdninstagram.com&_nc_ohc=z6FE6cAtLG8Q7kNvwEokf2t&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5BVURJT19PTkxZLi5DMy4wLnByb2dyZXNzaXZlX2F1ZGlvIiwieHB2X2Fzc2V0X2lkIjo2NjI2NDU3Njg0OTQ5NTMsImFzc2V0X2FnZV9kYXlzIjo5OTQsInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjoxMCwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_zt=28&oh=00_AfMk6wD0aTkWeyYIicKX6u7s76k8T8Hz8OheRBXZ6_FSHw&oe=6866465F",
+      "dash_manifest": "<?xml version=\"1.0\"?>\n<MPD xmlns=\"urn:mpeg:dash:schema:mpd:2011\" minBufferTime=\"PT1.500S\" type=\"static\" mediaPresentationDuration=\"PT0H0M10.774S\" maxSegmentDuration=\"PT0H0M5.016S\" profiles=\"urn:mpeg:dash:profile:isoff-on-demand:2011,http://dashif.org/guidelines/dash264\"><Period duration=\"PT0H0M10.774S\"><AdaptationSet segmentAlignment=\"true\" lang=\"und\" subsegmentAlignment=\"true\" subsegmentStartsWithSAP=\"1\"><Representation id=\"1319986988742021a\" mimeType=\"audio/mp4\" codecs=\"mp4a.40.5\" audioSamplingRate=\"44100\" startWithSAP=\"1\" bandwidth=\"92957\" FBDefaultQuality=\"1\"><AudioChannelConfiguration schemeIdUri=\"urn:mpeg:dash:23003:3:audio_channel_configuration:2011\" value=\"2\"/><BaseURL>https://scontent-iev1-1.cdninstagram.com/o1/v/t16/f2/m69/AQNrJX5TDlSDbOLkRLwWwOf1UxgBWcFuSvHuPtEprVjdNSgWHcA5E5AoAMcsCyquLFhEeUpB2iTUiTWaJTZdZIDW.mp4?strext=1&amp;_nc_cat=1&amp;_nc_sid=9ca052&amp;_nc_ht=scontent-iev1-1.cdninstagram.com&amp;_nc_ohc=54MVgDnhjXoQ7kNvwFMrXQS&amp;efg=eyJ2ZW5jb2RlX3RhZyI6ImRhc2hfYmFzZWxpbmVfYXVkaW9fdjEiLCJ2aWRlb19pZCI6bnVsbCwib2lsX3VybGdlbl9hcHBfaWQiOjI1NjI4MTA0MDU1OCwiY2xpZW50X25hbWUiOiJ1bmtub3duIiwieHB2X2Fzc2V0X2lkIjo2NjI2NDU3Njg0OTQ5NTMsImFzc2V0X2FnZV9kYXlzIjo5OTQsInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjoxMCwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&amp;ccb=17-1&amp;_nc_zt=28&amp;oh=00_AfMGADoVzyFl6mrvCZsqsVS0jOXpByPDHnX-jCmbzfw3Qg&amp;oe=68666C64</BaseURL><SegmentBase indexRangeExact=\"true\" indexRange=\"783-850\"><Initialization range=\"0-782\"/></SegmentBase></Representation></AdaptationSet></Period></MPD>\n",
+      "ig_artist": {
+        "pk": 51193701088,
+        "username": "leveviolao",
+        "full_name": "Leve Violão",
+        "is_private": false,
+        "profile_pic_url": "https://scontent-iev1-1.cdninstagram.com/v/t51.2885-19/323884192_568548774737917_8986640593716967697_n.jpg?stp=dst-jpg_e0_s150x150_tt6&_nc_ht=scontent-iev1-1.cdninstagram.com&_nc_cat=1&_nc_oc=Q6cZ2QHEInT-RLqeeahgGJWUUqA2qoSSrmZw0qIVdM-0y2X027YEC-rFlh8ZEjYfyd1LtMo&_nc_ohc=qQijBl1jgqwQ7kNvwFXZAzb&_nc_gid=Wr3MBNhcqxzmlQKPamU7gA&edm=ALQROFkBAAAA&ccb=7-5&ig_cache_key=GKAUThP9d8GTFwUCABH5mrgB9rZ8bkULAAAB-ccb7-5&oh=00_AfMJburWidsnS5apntIXG3e0DfKU7Pbmz8oZmkKsso3hXA&oe=68664C13&_nc_sid=fc8dfb",
+        "profile_pic_id": "3009264402206436499_51193701088",
+        "is_verified": false,
+        "pk_id": "51193701088",
+        "strong_id__": "51193701088",
+        "avatar_status": {
+          "has_avatar": false
+        }
+      },
+      "should_mute_audio": false,
+      "original_media_id": 2944456854652279000,
+      "hide_remixing": false,
+      "duration_in_ms": 10889,
+      "time_created": 1665226815,
+      "original_audio_title": "Sweet Dreams - Marilyn Manson",
+      "consumption_info": {
+        "is_bookmarked": false,
+        "should_mute_audio_reason": "",
+        "is_trending_in_clips": true
+      },
+      "allow_creator_to_rename": false,
+      "can_remix_be_shared_to_fb": true,
+      "formatted_clips_media_count": null,
+      "audio_parts": [],
+      "is_explicit": false,
+      "original_audio_subtype": "default",
+      "is_audio_automatically_attributed": false
+    },
+    "audio_type": "original_sounds",
+    "music_canonical_id": "18297100774078841",
+    "mashup_info": {
+      "mashups_allowed": true,
+      "can_toggle_mashups_allowed": false,
+      "has_been_mashed_up": false,
+      "formatted_mashups_count": null,
+      "original_media": null,
+      "non_privacy_filtered_mashups_media_count": 0
+    },
+    "branded_content_tag_info": {
+      "can_add_tag": false
+    },
+    "shopping_info": null,
+    "additional_audio_info": {
+      "audio_reattribution_info": {
+        "should_allow_restore": false
+      }
+    },
+    "is_shared_to_fb": true,
+    "clips_creation_entry_point": "clips",
+    "audio_ranking_info": {
+      "best_audio_cluster_id": "1299204470947978"
+    }
+  },
+  "video_dash_manifest": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<MPD xmlns=\"urn:mpeg:dash:schema:mpd:2011\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"urn:mpeg:dash:schema:mpd:2011 DASH-MPD.xsd\" profiles=\"urn:mpeg:dash:profile:isoff-on-demand:2011\" minBufferTime=\"PT2S\" type=\"static\" mediaPresentationDuration=\"PT5.758549S\" FBManifestIdentifier=\"FgAYEnIyZXZldnA5LXIxZ2VuMnZwORl21qSNptv/qgLkyu7nw5vQApyIlrTb6vAD9OWAsM3OtATapeH8z7K5BIqt5uSttaEF0L+rgPmBwQciGCJkYXNoX3VuaWZpZWRfcHJlbWl1bV94aGVfaWJyX2F1ZGlvIgA=\"><Period id=\"0\" duration=\"PT5.758549S\"><AdaptationSet id=\"0\" contentType=\"video\" subsegmentAlignment=\"true\" par=\"9:16\" FBUnifiedUploadResolutionMos=\"360:70.1\"><Representation id=\"1252113959889261vd\" bandwidth=\"127081\" codecs=\"vp09.00.31.08.00.01.01.01.00\" mimeType=\"video/mp4\" sar=\"1:1\" FBEncodingTag=\"dash_r2evevp9-r1gen2vp9_q60\" FBContentLength=\"90678\" FBPlaybackResolutionMos=\"0:100,360:82.9,480:77.9,720:73.8\" FBPlaybackResolutionMosConfidenceLevel=\"high\" FBPlaybackResolutionCsvqm=\"0:100,360:89,480:86.4,720:82.5\" FBAbrPolicyTags=\"\" width=\"720\" height=\"1280\" frameRate=\"12288/512\" FBDefaultQuality=\"1\" FBQualityClass=\"hd\" FBQualityLabel=\"480p\"><BaseURL>https://scontent-iev1-1.cdninstagram.com/o1/v/t2/f2/m367/AQM2nteuG1mW4dfi0YUog_lY1DCsscKGnQUy4vI9p5vbZ7uL3o_Fjplf1gIeJxyWKCpnRwpJKxU0PpQngclgPR0JQCBWHBnSUSi6H60.mp4?_nc_cat=102&amp;_nc_sid=9ca052&amp;_nc_ht=scontent-iev1-1.cdninstagram.com&amp;_nc_ohc=VENo82sYbQIQ7kNvwF_ArU7&amp;efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfcjJldmV2cDktcjFnZW4ydnA5X3E2MCIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6NTY3MDY3MzQzMzUyNDI3LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxMTU2Nzg4MjE2NDY1OTc0LCJ2aV91c2VjYXNlX2lkIjoxMDA5OSwiZHVyYXRpb25fcyI6NSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&amp;ccb=17-1&amp;_nc_zt=28&amp;oh=00_AfOj6AGEvrncI5jpHjhh1JjVRmGQvPa54d7wXkxz99t1DQ&amp;oe=686653AB</BaseURL><SegmentBase indexRange=\"818-873\" timescale=\"12288\" FBMinimumPrefetchRange=\"874-19360\" FBPartialPrefetchDuration=\"2500\" FBPartialPrefetchRange=\"874-42402\" FBFirstSegmentRange=\"874-65137\" FBFirstSegmentDuration=\"5000\" FBSecondSegmentRange=\"65138-90677\" FBPrefetchSegmentRange=\"874-65137\" FBPrefetchSegmentDuration=\"5000\"><Initialization range=\"0-817\"/></SegmentBase></Representation><Representation id=\"1241599531030906v\" bandwidth=\"216832\" codecs=\"vp09.00.31.08.00.01.01.01.00\" mimeType=\"video/mp4\" sar=\"1:1\" FBEncodingTag=\"dash_r2evevp9-r1gen2vp9_q70\" FBContentLength=\"154719\" FBPlaybackResolutionMos=\"0:100,360:91.5,480:88.2,720:84\" FBPlaybackResolutionMosConfidenceLevel=\"high\" FBPlaybackResolutionCsvqm=\"0:100,360:93.4,480:91.7,720:88.8\" FBAbrPolicyTags=\"\" width=\"720\" height=\"1280\" frameRate=\"12288/512\" FBQualityClass=\"hd\" FBQualityLabel=\"540p\"><BaseURL>https://scontent-iev1-1.cdninstagram.com/o1/v/t2/f2/m367/AQPTY3XTn7eOzCBG0MuP-DQJjTw3XstTqEtzmV5LgGeXz-6vIQVbvPoNzdO1t7ku4VMfVAqRDbexQPABij5Ar5Dxs3AbUUOIaqDt23Y.mp4?_nc_cat=111&amp;_nc_sid=9ca052&amp;_nc_ht=scontent-iev1-1.cdninstagram.com&amp;_nc_ohc=g2x7GF2DtYYQ7kNvwFihCPF&amp;efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfcjJldmV2cDktcjFnZW4ydnA5X3E3MCIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6NTY3MDY3MzQzMzUyNDI3LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxMTU2Nzg4MjE2NDY1OTc0LCJ2aV91c2VjYXNlX2lkIjoxMDA5OSwiZHVyYXRpb25fcyI6NSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&amp;ccb=17-1&amp;_nc_zt=28&amp;oh=00_AfMHan2HRmESxQJ0F-O4oX70lHP593rZPb-z8Ex9oOQakg&amp;oe=68664E80</BaseURL><SegmentBase indexRange=\"818-873\" timescale=\"12288\" FBMinimumPrefetchRange=\"874-27147\" FBPartialPrefetchDuration=\"2500\" FBPartialPrefetchRange=\"874-71941\" FBFirstSegmentRange=\"874-115272\" FBFirstSegmentDuration=\"5000\" FBSecondSegmentRange=\"115273-154718\" FBPrefetchSegmentRange=\"874-115272\" FBPrefetchSegmentDuration=\"5000\"><Initialization range=\"0-817\"/></SegmentBase></Representation><Representation id=\"2113294769156072v\" bandwidth=\"333240\" codecs=\"vp09.00.31.08.00.01.01.01.00\" mimeType=\"video/mp4\" sar=\"1:1\" FBEncodingTag=\"dash_r2evevp9-r1gen2vp9_q80\" FBContentLength=\"237781\" FBPlaybackResolutionMos=\"0:100,360:94.9,480:92.9,720:89.5\" FBPlaybackResolutionMosConfidenceLevel=\"high\" FBPlaybackResolutionCsvqm=\"0:100,360:95.5,480:94.5,720:92.5\" FBAbrPolicyTags=\"\" width=\"720\" height=\"1280\" frameRate=\"12288/512\" FBQualityClass=\"hd\" FBQualityLabel=\"640p\"><BaseURL>https://scontent-iev1-1.cdninstagram.com/o1/v/t2/f2/m367/AQPpncqA9xZTFZZlTuScCHtHWLEI0VSWFkPaoVbu5rBBMBT4EEObXTM8OqnUW5RSQ2q86-liozFqcsq6RSJJHXmz7SIBac-VftTgzY8.mp4?_nc_cat=100&amp;_nc_sid=9ca052&amp;_nc_ht=scontent-iev1-1.cdninstagram.com&amp;_nc_ohc=pgnUrJ7UGbkQ7kNvwGiVrHS&amp;efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfcjJldmV2cDktcjFnZW4ydnA5X3E4MCIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6NTY3MDY3MzQzMzUyNDI3LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxMTU2Nzg4MjE2NDY1OTc0LCJ2aV91c2VjYXNlX2lkIjoxMDA5OSwiZHVyYXRpb25fcyI6NSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&amp;ccb=17-1&amp;_nc_zt=28&amp;oh=00_AfMg1SDvRC5RLos8dpSKICg6_lFvX4nLb93-j4802ypLYw&amp;oe=68665B21</BaseURL><SegmentBase indexRange=\"818-873\" timescale=\"12288\" FBMinimumPrefetchRange=\"874-35227\" FBPartialPrefetchDuration=\"2500\" FBPartialPrefetchRange=\"874-110635\" FBFirstSegmentRange=\"874-182121\" FBFirstSegmentDuration=\"5000\" FBSecondSegmentRange=\"182122-237780\" FBPrefetchSegmentRange=\"874-182121\" FBPrefetchSegmentDuration=\"5000\"><Initialization range=\"0-817\"/></SegmentBase></Representation><Representation id=\"1480859329547077v\" bandwidth=\"503852\" codecs=\"vp09.00.31.08.00.01.01.01.00\" mimeType=\"video/mp4\" sar=\"1:1\" FBEncodingTag=\"dash_r2evevp9-r1gen2vp9_q90\" FBContentLength=\"359520\" FBPlaybackResolutionMos=\"0:100,360:96.7,480:95.3,720:92.9\" FBPlaybackResolutionMosConfidenceLevel=\"high\" FBPlaybackResolutionCsvqm=\"0:100,360:97,480:96.4,720:95.2\" FBAbrPolicyTags=\"\" width=\"720\" height=\"1280\" frameRate=\"12288/512\" FBQualityClass=\"hd\" FBQualityLabel=\"720p\"><BaseURL>https://scontent-iev1-1.cdninstagram.com/o1/v/t2/f2/m367/AQP168mHR46cSP-f3uFDgZUcnfzafTN-Xea01fAxpZpgk9hjEhPzBIf7HA7R4hsucdGzmRiT3Zgt99UzSpnROQ-d_RKIv_WrBux9mco.mp4?_nc_cat=109&amp;_nc_sid=9ca052&amp;_nc_ht=scontent-iev1-1.cdninstagram.com&amp;_nc_ohc=YbpHUU39CVwQ7kNvwHkI69k&amp;efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfcjJldmV2cDktcjFnZW4ydnA5X3E5MCIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6NTY3MDY3MzQzMzUyNDI3LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxMTU2Nzg4MjE2NDY1OTc0LCJ2aV91c2VjYXNlX2lkIjoxMDA5OSwiZHVyYXRpb25fcyI6NSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&amp;ccb=17-1&amp;_nc_zt=28&amp;oh=00_AfOuGp2Bv4HaY6TvVpE3foG5-SY9ZZezsZYOQ0NNSdji9Q&amp;oe=686637FE</BaseURL><SegmentBase indexRange=\"818-873\" timescale=\"12288\" FBMinimumPrefetchRange=\"874-46154\" FBPartialPrefetchDuration=\"2500\" FBPartialPrefetchRange=\"874-168729\" FBFirstSegmentRange=\"874-281741\" FBFirstSegmentDuration=\"5000\" FBSecondSegmentRange=\"281742-359519\" FBPrefetchSegmentRange=\"874-281741\" FBPrefetchSegmentDuration=\"5000\"><Initialization range=\"0-817\"/></SegmentBase></Representation></AdaptationSet><AdaptationSet id=\"1\" contentType=\"audio\" subsegmentStartsWithSAP=\"1\" subsegmentAlignment=\"true\" bitstreamSwitching=\"true\"><Representation id=\"1092548869407246ad\" bandwidth=\"38888\" codecs=\"mp4a.40.42\" mimeType=\"audio/mp4\" FBAvgBitrate=\"38888\" audioSamplingRate=\"44100\" FBEncodingTag=\"dash_audio_xheaac_vbr1_abr_lrac_frag_5_audio\" FBContentLength=\"28885\" FBPaqMos=\"90.49\" FBAbrPolicyTags=\"\" FBDefaultQuality=\"1\"><AudioChannelConfiguration schemeIdUri=\"urn:mpeg:dash:23003:3:audio_channel_configuration:2011\" value=\"2\"/><BaseURL>https://scontent-iev1-1.cdninstagram.com/o1/v/t16/f2/m69/AQOJVBzDVfpp97GjlU5g4M5u7zhkR0_gJhoMvnXgDEZk7JqMEbPdq_SgsOuAAVLiV81L6Ax6kBcEqh0HBrylhaqp.mp4?strext=1&amp;_nc_cat=110&amp;_nc_sid=9ca052&amp;_nc_ht=scontent-iev1-1.cdninstagram.com&amp;_nc_ohc=spqv2wBSWwgQ7kNvwFsdAEs&amp;efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfYXVkaW9feGhlYWFjX3ZicjFfYWJyX2xyYWNfZnJhZ181X2F1ZGlvIiwidmlkZW9faWQiOm51bGwsIm9pbF91cmxnZW5fYXBwX2lkIjo1NjcwNjczNDMzNTI0MjcsImNsaWVudF9uYW1lIjoiaWciLCJ4cHZfYXNzZXRfaWQiOjExNTY3ODgyMTY0NjU5NzQsInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjo1LCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&amp;ccb=17-1&amp;_nc_zt=28&amp;oh=00_AfPTQxOUU8Vf3M3zJcakmFuYtoiRyj6AmH5WV8sMiiHoqg&amp;oe=68665E52</BaseURL><SegmentBase indexRange=\"837-892\" timescale=\"44100\" FBMinimumPrefetchRange=\"893-1591\" FBPartialPrefetchDuration=\"2500\" FBPartialPrefetchRange=\"893-12966\" FBFirstSegmentRange=\"893-24380\" FBFirstSegmentDuration=\"4922\" FBSecondSegmentRange=\"24381-28884\" FBPrefetchSegmentRange=\"893-24380\" FBPrefetchSegmentDuration=\"4922\"><Initialization range=\"0-836\"/></SegmentBase></Representation><Representation id=\"739344771830450a\" bandwidth=\"66988\" codecs=\"mp4a.40.42\" mimeType=\"audio/mp4\" FBAvgBitrate=\"66988\" audioSamplingRate=\"44100\" FBEncodingTag=\"dash_audio_xheaac_vbr2_abr_lrac_frag_5_audio\" FBContentLength=\"49113\" FBPaqMos=\"91.57\" FBAbrPolicyTags=\"\"><AudioChannelConfiguration schemeIdUri=\"urn:mpeg:dash:23003:3:audio_channel_configuration:2011\" value=\"2\"/><BaseURL>https://scontent-iev1-1.cdninstagram.com/o1/v/t16/f2/m69/AQOLb5RyU_VUoVi67INXnp-HU8W1VuwV3YmGrNMFA3p04XHlMaCCX5EzLlH5E_WGiS4BPHdWNfkOXIs2J6JnDLcL.mp4?strext=1&amp;_nc_cat=110&amp;_nc_sid=9ca052&amp;_nc_ht=scontent-iev1-1.cdninstagram.com&amp;_nc_ohc=XP_XOd18xO4Q7kNvwGR4Qx2&amp;efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfYXVkaW9feGhlYWFjX3ZicjJfYWJyX2xyYWNfZnJhZ181X2F1ZGlvIiwidmlkZW9faWQiOm51bGwsIm9pbF91cmxnZW5fYXBwX2lkIjo1NjcwNjczNDMzNTI0MjcsImNsaWVudF9uYW1lIjoiaWciLCJ4cHZfYXNzZXRfaWQiOjExNTY3ODgyMTY0NjU5NzQsInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjo1LCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&amp;ccb=17-1&amp;_nc_zt=28&amp;oh=00_AfOyf3tdUcEa17lVtXkjKMrWhkfzYDq3ELaA9tcYpa4Aww&amp;oe=686653FE</BaseURL><SegmentBase indexRange=\"838-893\" timescale=\"44100\" FBMinimumPrefetchRange=\"894-1623\" FBPartialPrefetchDuration=\"2500\" FBPartialPrefetchRange=\"894-21424\" FBFirstSegmentRange=\"894-41491\" FBFirstSegmentDuration=\"4922\" FBSecondSegmentRange=\"41492-49112\" FBPrefetchSegmentRange=\"894-41491\" FBPrefetchSegmentDuration=\"4922\"><Initialization range=\"0-837\"/></SegmentBase></Representation><Representation id=\"657503027308843a\" bandwidth=\"110520\" codecs=\"mp4a.40.42\" mimeType=\"audio/mp4\" FBAvgBitrate=\"110520\" audioSamplingRate=\"44100\" FBEncodingTag=\"dash_audio_xheaac_vbr3_abr_lrac_frag_5_audio\" FBContentLength=\"80443\" FBPaqMos=\"93.50\" FBAbrPolicyTags=\"\"><AudioChannelConfiguration schemeIdUri=\"urn:mpeg:dash:23003:3:audio_channel_configuration:2011\" value=\"2\"/><BaseURL>https://scontent-iev1-1.cdninstagram.com/o1/v/t16/f2/m69/AQNKrd8-NDWi5THhzcJwCQUJ86TFYECfwt76ezerSrNAbUD2ZsJmxXgod5MD7XvBajJ_wrD03A_bMCvKiDs0fim1.mp4?strext=1&amp;_nc_cat=100&amp;_nc_sid=9ca052&amp;_nc_ht=scontent-iev1-1.cdninstagram.com&amp;_nc_ohc=r4EtMcf0UfIQ7kNvwHdcprV&amp;efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmMyLUMzLmRhc2hfYXVkaW9feGhlYWFjX3ZicjNfYWJyX2xyYWNfZnJhZ181X2F1ZGlvIiwidmlkZW9faWQiOm51bGwsIm9pbF91cmxnZW5fYXBwX2lkIjo1NjcwNjczNDMzNTI0MjcsImNsaWVudF9uYW1lIjoiaWciLCJ4cHZfYXNzZXRfaWQiOjExNTY3ODgyMTY0NjU5NzQsInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjo1LCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&amp;ccb=17-1&amp;_nc_zt=28&amp;oh=00_AfPpSMkpUMe2RXhh7iaiEAOVFSGnfK-oDUaH15FC5VfYeQ&amp;oe=68664F78</BaseURL><SegmentBase indexRange=\"833-888\" timescale=\"44100\" FBMinimumPrefetchRange=\"889-1942\" FBPartialPrefetchDuration=\"2500\" FBPartialPrefetchRange=\"889-34214\" FBFirstSegmentRange=\"889-68617\" FBFirstSegmentDuration=\"4922\" FBSecondSegmentRange=\"68618-80442\" FBPrefetchSegmentRange=\"889-68617\" FBPrefetchSegmentDuration=\"4922\"><Initialization range=\"0-832\"/></SegmentBase></Representation></AdaptationSet></Period></MPD>\n",
+  "video_manifest": {
+    "audio": null,
+    "video": null
+  },
+  "strong_id__": "3664740838703630310_58686955965",
+  "fb_user_tags": {
+    "in": []
+  },
+  "sharing_friction_info": {
+    "should_have_sharing_friction": false,
+    "bloks_app_url": null,
+    "sharing_friction_payload": null
+  },
+  "device_timestamp": 449908967315710,
+  "client_cache_key": "MzY2NDc0MDgzODcwMzYzMDMxMA==.3",
+  "integrity_review_decision": "pending",
+  "is_visual_reply_commenter_notice_enabled": true,
+  "is_organic_product_tagging_eligible": true,
+  "can_viewer_reshare": true,
+  "comment_inform_treatment": {
+    "should_have_inform_treatment": false,
+    "text": "",
+    "url": null,
+    "action_type": null
+  },
+  "fundraiser_tag": {
+    "has_standalone_fundraiser": false
+  },
+  "can_viewer_save": true,
+  "is_comments_gif_composer_enabled": true,
+  "organic_tracking_token": "eyJ2ZXJzaW9uIjo1LCJwYXlsb2FkIjp7ImlzX2FuYWx5dGljc190cmFja2VkIjp0cnVlLCJ1dWlkIjoiODAwMWI5NjZlYzg4NGMwNDlmZjA5Y2NlZDE5YjQzMDAzNjY0NzQwODM4NzAzNjMwMzEwIiwic2VydmVyX3Rva2VuIjoiMTc1MTE1NDY3MzY5MnwzNjY0NzQwODM4NzAzNjMwMzEwfDc1NDc0MjcwODE2fDA2M2Y1NTQ2MzVjZDZjYmZlOGZhZDIwN2YwMmM2MDYwZTkxOTBhYTEzNjkxMTM3YTU5NzQxY2YxZDY5ZjgzNzIifSwic2lnbmF0dXJlIjoiIn0=",
+  "hide_view_all_comment_entrypoint": true,
+  "fb_play_count": 9726,
+  "fb_like_count": 28,
+  "reshare_count": 63,
+  "video_codec": "vp09.00.31.08.00.01.01.01.00",
+  "number_of_qualities": 4
+}
+📊 [DOWNLOAD] Extracting metrics from metadata...
+🔍 [DEBUG] Full metadata object keys: [
+  'id',
+  'pk',
+  'code',
+  'media_type',
+  'taken_at',
+  'image_versions2',
+  'original_width',
+  'original_height',
+  'video_versions',
+  'has_audio',
+  'video_duration',
+  'caption',
+  'user',
+  'product_type',
+  'comment_count',
+  'like_count',
+  'play_count',
+  'clips_metadata',
+  'video_dash_manifest',
+  'video_manifest',
+  'strong_id__',
+  'fb_user_tags',
+  'sharing_friction_info',
+  'device_timestamp',
+  'client_cache_key',
+  'integrity_review_decision',
+  'is_visual_reply_commenter_notice_enabled',
+  'is_organic_product_tagging_eligible',
+  'can_viewer_reshare',
+  'comment_inform_treatment',
+  'fundraiser_tag',
+  'can_viewer_save',
+  'is_comments_gif_composer_enabled',
+  'organic_tracking_token',
+  'hide_view_all_comment_entrypoint',
+  'fb_play_count',
+  'fb_like_count',
+  'reshare_count',
+  'video_codec',
+  'number_of_qualities'
+]
+🔍 [DEBUG] Metadata like_count: 216
+🔍 [DEBUG] Metadata play_count: 44135
+🔍 [DEBUG] Metadata reshare_count: 63
+🔍 [DEBUG] Metadata comment_count: 6
+🔍 [DEBUG] Metadata save_count: undefined
+🔍 [DEBUG] Metadata video_duration: 5.76
+🔍 [DEBUG] Metadata duration: undefined
+🔍 [DEBUG] Metadata owner: undefined
+🔍 [DEBUG] Metadata user: {
+  pk: 58686955965,
+  username: 'yourchatgptguide',
+  full_name: 'ChatGPT Tips | Artificial Intelligence',
+  is_private: false,
+  profile_pic_url: 'https://scontent-iev1-1.cdninstagram.com/v/t51.2885-19/336963802_1425764154860466_647659982723454047_n.jpg?stp=dst-jpg_e0_s150x150_tt6&_nc_ht=scontent-iev1-1.cdninstagram.com&_nc_cat=1&_nc_oc=Q6cZ2QHEInT-RLqeeahgGJWUUqA2qoSSrmZw0qIVdM-0y2X027YEC-rFlh8ZEjYfyd1LtMo&_nc_ohc=pafhErdfzcsQ7kNvwFggZh2&_nc_gid=Wr3MBNhcqxzmlQKPamU7gA&edm=ALQROFkBAAAA&ccb=7-5&ig_cache_key=GNqoFRSy4-uVuRAFAF_Ud6VS8-wIbkULAAAB-ccb7-5&oh=00_AfONqSP8aIv9V5gmP-o40VVartw0f3H9qjMLW_UVZVigKw&oe=68665F5D&_nc_sid=fc8dfb',
+  profile_pic_id: '3063129288407595450_58686955965',
+  is_verified: true,
+  account_type: 2,
+  fan_club_info: {},
+  fbid_v2: 17841458678965868,
+  pk_id: '58686955965',
+  third_party_downloads_enabled: 1,
+  strong_id__: '58686955965',
+  avatar_status: { has_avatar: false },
+  show_account_transparency_details: true
+}
+🔍 [DEBUG] Metadata username: undefined
+🔍 [DEBUG] Metadata is valid object
+🔍 [DEBUG] First 500 chars of metadata: {"id":"3664740838703630310_58686955965","pk":3664740838703630300,"code":"DLbxmBMzAfm","media_type":2,"taken_at":1751091265,"image_versions2":{"candidates":[{"width":480,"height":853,"url":"https://scontent-iev1-1.cdninstagram.com/v/t51.75761-15/512436770_17957237399955966_8838952837333039169_n.jpg?stp=dst-jpg_e15_p480x480_tt6&_nc_cat=109&ig_cache_key=MzY2NDc0MDgzODcwMzYzMDMxMA%3D%3D.3-ccb1-7&ccb=1-7&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6InhwaWRzLjU0MHg5NjAuc2RyIn0%3D&_nc_ohc=TWrR2_oMjPQQ7kNvwFa
+📊 [DOWNLOAD] Extracted metrics: { likes: 216, views: 44135, shares: 63, comments: 6, saves: 0 }
+📋 [DOWNLOAD] Extracted additional metadata: { author: 'yourchatgptguide', duration: 5.76 }
+🖼️ [DOWNLOAD] Extracted Instagram thumbnail from image_versions2: https://scontent-iev1-1.cdninstagram.com/v/t51.75761-15/512436770_17957237399955966_8838952837333039169_n.jpg?stp=dst-jpg_e15_p480x480_tt6&_nc_cat=109&ig_cache_key=MzY2NDc0MDgzODcwMzYzMDMxMA%3D%3D.3-ccb1-7&ccb=1-7&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6InhwaWRzLjU0MHg5NjAuc2RyIn0%3D&_nc_ohc=TWrR2_oMjPQQ7kNvwFaTaMy&_nc_oc=AdmBmWWQunPAFZGZqsysmwReerKXIU0xWbMn3dESvdYsJAj9k6JXYYBv02I_RTJjBq8&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-iev1-1.cdninstagram.com&_nc_gid=Wr3MBNhcqxzmlQKPamU7gA&oh=00_AfNzdiy3tMZQVxaZwzDRUjGoUA8GNE1ThM2-_qKQl1fKaA&oe=686637A9
+🎥 [DOWNLOAD] Downloading video from versions...
+🔗 [DOWNLOAD] Instagram video versions found: 3 options
+✅ [DOWNLOAD] Successfully downloaded from Instagram version 3
+✅ [DOWNLOAD] Successfully downloaded Instagram video with metrics: { likes: 216, views: 44135, shares: 63, comments: 6, saves: 0 }
+📋 [DOWNLOAD] Additional metadata: { author: 'yourchatgptguide', duration: 5.76 }
+🖼️ [DOWNLOAD] Thumbnail URL: ✅ Found
+✅ [DOWNLOADER] Video downloaded successfully
+📊 [DOWNLOADER] Video info:
+  - Size: 0.59 MB
+  - Type: video/mp4
+  - Platform: instagram
+ POST /api/video/downloader 200 in 3279ms
+✅ [ORCHESTRATOR] Download completed successfully
+📊 [ORCHESTRATOR] Downloaded video size: 0.59 MB
+📤 [ORCHESTRATOR] Step 3: Uploading to CDN...
+🔄 [ORCHESTRATOR] Calling uploader service...
+ ✓ Compiled /api/video/uploader in 154ms (2417 modules)
+📤 [UPLOADER] Starting video upload service...
+📋 [UPLOADER] JSON upload details:
+  - Filename: instagram-DLbxmBMzAfm.mp4
+  - MIME type: video/mp4
+  - Video buffer length: 621987
+🔍 [UPLOADER] Checking CDN configuration...
+  - Bunny Stream configured: true
+🚀 [UPLOADER] Uploading to Bunny Stream CDN...
+🐰 [DOWNLOAD] Uploading to CDN...
+🚀 [BUNNY] Starting upload to Bunny Stream...
+🔍 [BUNNY] Testing Bunny Stream Configuration:
+  - BUNNY_STREAM_LIBRARY_ID: 459811
+  - BUNNY_STREAM_API_KEY (length): 41
+  - BUNNY_CDN_HOSTNAME: vz-8416c36e-556.b-cdn.net
+✅ [BUNNY] All environment variables are present
+🔗 [BUNNY] Test URLs:
+  - Create URL: https://video.bunnycdn.com/library/459811/videos
+  - Upload URL: https://video.bunnycdn.com/library/459811/videos/test-video-id
+  - Iframe Embed URL: https://iframe.mediadelivery.net/embed/459811/test-video-id
+🔄 [BUNNY] Converted Buffer to ArrayBuffer: 621987 bytes
+🔧 [BUNNY] Stream configuration check:
+  - Library ID: 459811
+  - API Key present: true
+  - CDN Hostname: vz-8416c36e-556.b-cdn.net
+🔄 [BUNNY] Attempt 1/3
+⏱️ [BUNNY] Using timeout: 60000ms
+📝 [BUNNY] Creating video object...
+🌐 [BUNNY] Making request to: https://video.bunnycdn.com/library/459811/videos
+🔑 [BUNNY] Using API key (first 10 chars): 89d7bd92-a...
+📥 [BUNNY] Create response status: 200
+✅ [BUNNY] Video object created with GUID: 27eb8362-a003-4700-bfec-24f5c709d17d
+📤 [BUNNY] Uploading video file...
+🌐 [BUNNY] Upload URL: https://video.bunnycdn.com/library/459811/videos/27eb8362-a003-4700-bfec-24f5c709d17d
+📊 [BUNNY] ArrayBuffer size: 621987 bytes
+📥 [BUNNY] Upload response status: 200
+✅ [BUNNY] Video file uploaded successfully
+🎯 [BUNNY] Iframe embed URL constructed: https://iframe.mediadelivery.net/embed/459811/27eb8362-a003-4700-bfec-24f5c709d17d
+✅ [DOWNLOAD] CDN upload successful
+✅ [UPLOADER] Video uploaded successfully: https://iframe.mediadelivery.net/embed/459811/27eb8362-a003-4700-bfec-24f5c709d17d
+ POST /api/video/uploader 200 in 3315ms
+✅ [ORCHESTRATOR] Upload completed successfully: https://iframe.mediadelivery.net/embed/459811/27eb8362-a003-4700-bfec-24f5c709d17d
+🎬 [ORCHESTRATOR] Step 4: Starting background analysis...
+🎬 [ORCHESTRATOR] Starting background analysis...
+✅ [ORCHESTRATOR] Workflow completed successfully
+🎯 [ORCHESTRATOR] Returning CDN-hosted video URL
+ POST /api/video/download-and-prepare 200 in 6829ms
+✅ [DOWNLOAD] Request forwarded successfully
+ POST /api/download-video 200 in 7230ms
+ ✓ Compiled /api/video/analyze-complete in 131ms (2419 modules)
+🎯 [COMPLETE_ANALYSIS] Starting comprehensive video analysis...
+📁 [COMPLETE_ANALYSIS] Processing video file: instagram-DLbxmBMzAfm.mp4
+📊 [COMPLETE_ANALYSIS] Video size: 0.59 MB
+🚀 [COMPLETE_ANALYSIS] Starting parallel analysis tasks...
+❌ [ORCHESTRATOR] Transcribe service error: TypeError: fetch failed
+    at async callTranscribeService (src/app/api/video/analyze-complete/route.ts:238:23)
+    at async performCompleteAnalysis (src/app/api/video/analyze-complete/route.ts:108:43)
+    at async POST (src/app/api/video/analyze-complete/route.ts:43:19)
+  236 |       formData.append("video", blob, "video.mp4");
+  237 |
+> 238 |       const response = await fetch(`${baseUrl}/api/video/transcribe`, {
+      |                       ^
+  239 |         method: "POST",
+  240 |         body: formData,
+  241 |       }); {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+ ✓ Compiled /api/video/analyze-visuals in 185ms (2422 modules)
+👁️ [VISUAL_ANALYSIS] Starting visual content analysis...
+📁 [VISUAL_ANALYSIS] File info:
+  - Name: video.mp4
+  - Size: 0.59 MB
+  - Type: video/mp4
+🤖 [VISUAL_ANALYSIS] Analyzing visual elements with AI...
+✅ [VISUAL_ANALYSIS] Visual analysis generated successfully
+📊 [VISUAL_ANALYSIS] Description length: 1494 characters
+✅ [VISUAL_ANALYSIS] File visual analysis completed
+ POST /api/video/analyze-visuals 200 in 3646ms
+⚠️ [COMPLETE_ANALYSIS] Transcription failed, using fallback
+✅ [COMPLETE_ANALYSIS] Visual analysis completed
+🔄 [COMPLETE_ANALYSIS] Starting text-based analysis tasks...
+❌ [ORCHESTRATOR] Metadata analysis service error: TypeError: fetch failed
+    at async callMetadataAnalysisService (src/app/api/video/analyze-complete/route.ts:280:21)
+    at async performCompleteAnalysis (src/app/api/video/analyze-complete/route.ts:121:41)
+    at async POST (src/app/api/video/analyze-complete/route.ts:43:19)
+  278 |     const baseUrl = getBaseUrl();
+  279 |
+> 280 |     const response = await fetch(`${baseUrl}/api/video/analyze-metadata`, {
+      |                     ^
+  281 |       method: "POST",
+  282 |       headers: { "Content-Type": "application/json" },
+  283 |       body: JSON.stringify({ transcript, videoUrl, platform }), {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+❌ [ORCHESTRATOR] Script analysis service error: TypeError: fetch failed
+    at async callScriptAnalysisService (src/app/api/video/analyze-complete/route.ts:257:21)
+    at async performCompleteAnalysis (src/app/api/video/analyze-complete/route.ts:121:41)
+    at async POST (src/app/api/video/analyze-complete/route.ts:43:19)
+  255 |     const baseUrl = getBaseUrl();
+  256 |
+> 257 |     const response = await fetch(`${baseUrl}/api/video/analyze-script`, {
+      |                     ^
+  258 |       method: "POST",
+  259 |       headers: { "Content-Type": "application/json" },
+  260 |       body: JSON.stringify({ transcript }), {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+⚠️ [COMPLETE_ANALYSIS] Script analysis failed, using fallback
+⚠️ [COMPLETE_ANALYSIS] Metadata analysis failed, using fallback
+🎉 [COMPLETE_ANALYSIS] All analyses completed successfully
+📊 [COMPLETE_ANALYSIS] Results summary:
+  - Transcript length: 66 characters
+  - Platform detected: Unknown
+  - Visual context length: 1494 characters
+ POST /api/video/analyze-complete 200 in 3934ms
+✅ [BACKGROUND] Complete analysis completed successfully
+📝 [BACKGROUND] Transcript length: 66
+📊 [BACKGROUND] Platform detected: Unknown
