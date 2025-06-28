@@ -7,7 +7,7 @@ import { Play } from "lucide-react";
 
 // Helper component for thumbnail image
 const ThumbnailImage = ({ thumbnailUrl, title }: { thumbnailUrl: string; title?: string }) => (
-  <div className="absolute inset-0 h-full w-full">
+  <div className="relative h-full w-full">
     <Image
       src={thumbnailUrl}
       alt={title ?? "Video thumbnail"}
