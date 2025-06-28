@@ -203,7 +203,7 @@ export function NavMain({ items, onCollectionCreated }: NavMainProps) {
               <SpeedWriteDialog>
                 <SidebarMenuButton
                   tooltip="Speed Write"
-                  className="bg-secondary text-secondary-foreground hover:bg-secondary/80 hover:text-secondary-foreground active:bg-secondary/80 active:text-secondary-foreground flex h-8 min-w-8 items-center justify-center shadow-sm transition-[width,height,padding,box-shadow] duration-200 ease-linear group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:p-0"
+                  className="bg-secondary text-secondary-foreground hover:bg-secondary/80 hover:text-secondary-foreground active:bg-secondary/80 active:text-secondary-foreground flex h-8 min-w-8 items-center justify-center shadow-md transition-[width,height,padding,box-shadow] duration-200 ease-linear group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:p-0"
                 >
                   <Zap className="group-data-[collapsible=icon]:h-4 group-data-[collapsible=icon]:w-4" />
                   <span className="group-data-[collapsible=icon]:sr-only">Speed Write</span>
