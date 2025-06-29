@@ -15,14 +15,17 @@ import DashboardClientLayout from "./dashboard-client-layout";
 
 export default async function Layout({ children }: Readonly<{ children: ReactNode }>) {
   const cookieStore = await cookies();
-  const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
+
+  // Read sidebar state from cookie with proper fallback
+  const sidebarStateCookie = cookieStore.get("sidebar_state")?.value;
+  const defaultOpen = sidebarStateCookie === "true" || (sidebarStateCookie === undefined && true); // Default to true if no cookie exists
 
   const sidebarVariant = await getSidebarVariant();
   const sidebarCollapsible = await getSidebarCollapsible();
   const contentLayout = await getContentLayout();
 
   return (
-    <SidebarProvider defaultOpen={false}>
+    <SidebarProvider defaultOpen={defaultOpen}>
       <AppSidebar variant={sidebarVariant} collapsible="icon" />
       <SidebarInset
         className={cn(

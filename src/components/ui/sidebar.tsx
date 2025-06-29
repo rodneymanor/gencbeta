@@ -53,6 +53,50 @@ function useSidebar() {
   return context
 }
 
+// Production-ready helper functions for state persistence
+const setSidebarState = (open: boolean) => {
+  try {
+    // Primary: Set cookie for SSR
+    if (typeof document !== 'undefined') {
+      document.cookie = `${SIDEBAR_COOKIE_NAME}=${open}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}; SameSite=Lax`
+    }
+    
+    // Fallback: Set localStorage for client-side persistence
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem(SIDEBAR_COOKIE_NAME, String(open))
+    }
+  } catch (error) {
+    console.warn('Failed to persist sidebar state:', error)
+  }
+}
+
+const getSidebarState = (defaultValue: boolean = true): boolean => {
+  try {
+    // Try localStorage first (more reliable on client)
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const stored = localStorage.getItem(SIDEBAR_COOKIE_NAME)
+      if (stored !== null) {
+        return stored === 'true'
+      }
+    }
+    
+    // Fallback to cookie parsing
+    if (typeof document !== 'undefined') {
+      const cookies = document.cookie.split(';')
+      const sidebarCookie = cookies.find(cookie => 
+        cookie.trim().startsWith(`${SIDEBAR_COOKIE_NAME}=`)
+      )
+      if (sidebarCookie) {
+        return sidebarCookie.split('=')[1]?.trim() === 'true'
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to read sidebar state:', error)
+  }
+  
+  return defaultValue
+}
+
 function SidebarProvider({
   defaultOpen = true,
   open: openProp,
@@ -69,21 +113,38 @@ function SidebarProvider({
   const isMobile = useIsMobile()
   const [openMobile, setOpenMobile] = React.useState(false)
 
-  // This is the internal state of the sidebar.
-  // We use openProp and setOpenProp for control from outside the component.
-  const [_open, _setOpen] = React.useState(defaultOpen)
+  // Initialize state from persisted value or default
+  const [_open, _setOpen] = React.useState(() => {
+    // On initial load, try to get the persisted state
+    if (typeof window !== 'undefined') {
+      return getSidebarState(defaultOpen)
+    }
+    return defaultOpen
+  })
+
+  // Sync with persisted state on hydration
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const persistedState = getSidebarState(defaultOpen)
+      if (persistedState !== _open) {
+        _setOpen(persistedState)
+      }
+    }
+  }, [defaultOpen, _open])
+
   const open = openProp ?? _open
   const setOpen = React.useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
       const openState = typeof value === "function" ? value(open) : value
+      
       if (setOpenProp) {
         setOpenProp(openState)
       } else {
         _setOpen(openState)
       }
 
-      // This sets the cookie to keep the sidebar state.
-      document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
+      // Persist the state
+      setSidebarState(openState)
     },
     [setOpenProp, open]
   )
