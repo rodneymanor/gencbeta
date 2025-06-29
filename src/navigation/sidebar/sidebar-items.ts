@@ -88,9 +88,8 @@ export const sidebarItems: NavGroup[] = [
           },
           {
             title: "Scripting",
-            url: "/ideas/scripting",
+            url: "/dashboard/scripts/new",
             icon: WandSparkles,
-            comingSoon: true,
           },
         ],
       },

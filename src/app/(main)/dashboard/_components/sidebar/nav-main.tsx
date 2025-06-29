@@ -27,8 +27,6 @@ import {
 } from "@/components/ui/sidebar";
 import { type NavGroup, type NavMainItem } from "@/navigation/sidebar/sidebar-items";
 
-import { SpeedWriteDialog } from "./speed-write-dialog";
-
 interface NavMainProps {
   readonly items: readonly NavGroup[];
   readonly onCollectionCreated?: () => void;
@@ -200,15 +198,16 @@ export function NavMain({ items, onCollectionCreated }: NavMainProps) {
         <SidebarGroupContent className="flex flex-col gap-2">
           <SidebarMenu>
             <SidebarMenuItem>
-              <SpeedWriteDialog>
-                <SidebarMenuButton
-                  tooltip="Speed Write"
-                  className="bg-secondary text-secondary-foreground hover:bg-secondary/80 hover:text-secondary-foreground active:bg-secondary/80 active:text-secondary-foreground flex h-8 min-w-8 items-center justify-center shadow-md transition-[width,height,padding,box-shadow] duration-200 ease-linear group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:p-0"
-                >
+              <SidebarMenuButton
+                asChild
+                tooltip="Speed Write"
+                className="bg-secondary text-secondary-foreground hover:bg-secondary/80 hover:text-secondary-foreground active:bg-secondary/80 active:text-secondary-foreground flex h-8 min-w-8 items-center justify-center shadow-md transition-[width,height,padding,box-shadow] duration-200 ease-linear group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:p-0"
+              >
+                <Link href="/dashboard/scripts/new">
                   <Zap className="group-data-[collapsible=icon]:h-4 group-data-[collapsible=icon]:w-4" />
                   <span className="group-data-[collapsible=icon]:sr-only">Speed Write</span>
-                </SidebarMenuButton>
-              </SpeedWriteDialog>
+                </Link>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroupContent>
