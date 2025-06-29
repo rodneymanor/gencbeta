@@ -42,7 +42,9 @@ export function ScriptChatInput({
     const adjustHeight = () => {
       textarea.style.height = "auto";
       const scrollHeight = textarea.scrollHeight;
-      textarea.style.height = `${Math.min(scrollHeight, 200)}px`;
+      const minHeight = 44; // Match our min-h-[44px] class
+      const maxHeight = 120; // Match our max-h-[120px] class
+      textarea.style.height = `${Math.max(minHeight, Math.min(scrollHeight, maxHeight))}px`;
     };
 
     textarea.addEventListener("input", adjustHeight);
@@ -164,7 +166,7 @@ export function ScriptChatInput({
                 onChange={(e) => onChange(e.target.value)}
                 onKeyDown={handleKeyPress}
                 placeholder="Ask me to adjust the tone, add details, or make changes..."
-                className="placeholder:text-muted-foreground max-h-[120px] min-h-[40px] resize-none border-0 bg-transparent p-0 text-base focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="placeholder:text-muted-foreground max-h-[120px] min-h-[44px] resize-none border-0 bg-transparent px-3 py-2 text-base focus-visible:ring-0 focus-visible:ring-offset-0"
                 rows={1}
                 disabled={disabled}
               />
