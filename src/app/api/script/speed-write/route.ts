@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+
+import { SPEED_WRITE_CONFIG } from "@/config/speed-write-prompt";
 import { generateScript } from "@/lib/gemini";
 import { trackApiUsage, UsageTracker } from "@/lib/usage-tracker";
-import { SPEED_WRITE_CONFIG } from "@/config/speed-write-prompt";
 
 // Validate environment setup
 if (!process.env.GEMINI_API_KEY) {
@@ -9,28 +10,33 @@ if (!process.env.GEMINI_API_KEY) {
 }
 
 // Educational prompt template
-const EDUCATIONAL_PROMPT_TEMPLATE = `Using the video idea below, write a script for an educational and informative video. Keep in mind that the video script will be read out loud and not shown on the screen.
+const EDUCATIONAL_PROMPT_TEMPLATE = `Write a complete, ready-to-read video script for an educational video about the topic below. This is the exact script the creator will read out loud.
 
-The script should follow this format:
-- Hook (starting with one of these lines, adapted to the topic):
-  • "The easiest way for you to..."
-  • "Give me 30 seconds and I'll show you how to..."
-  • "Here are 4 ways that you can [achieve X]"
-  • "This might just be the best advice on [niche] that I've ever heard..."
-  • "Stop doing [insert activity] alone. One of the best strategies to [insert goal] is [insert strategy]."
-  • "Here's a quick and easy way to [insert action]."
-  • "Top [insert number] tips for [insert activity or goal]."
-  • "If you're a [insert group or membership], keep watching."
-  • "Want to guarantee [insert desired outcome]? Try this."
+IMPORTANT: Write the complete script with actual words, not descriptions or instructions. The output should be the finished script ready to record.
 
-- Describe the problem in more detail
-- Discuss the solution  
-- Give more detail or examples of the solution
-- Call to action
+Target Length Guidelines:
+- 20 seconds = ~50 words
+- 60 seconds = ~130 words  
+- 90 seconds = ~195 words
 
-Total script should be a maximum of 120 words with extremely conversational tone and casual word choice.
+Script Structure:
+1. Strong opening hook (choose one approach):
+   - "The easiest way to [achieve goal] is..."
+   - "Give me 30 seconds and I'll show you..."
+   - "Here are 3 ways to [solve problem]..."
+   - "This might be the best advice on [topic] you'll ever hear..."
+   - "Stop [doing wrong thing]. Here's what works instead..."
 
-Video Idea: {VIDEO_IDEA}`;
+2. Explain the core problem or challenge
+3. Present your solution with specific steps or examples
+4. End with clear value or call to action
+
+Tone: Conversational, confident, and helpful. Use "you" frequently. Keep sentences short and punchy.
+
+Video Topic: {VIDEO_IDEA}
+Target Length: {TARGET_LENGTH} seconds
+
+Write the complete script now:`;
 
 interface SpeedWriteRequest {
   idea: string;
@@ -187,24 +193,36 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
 }
 
 async function generateSpeedWriteScript(idea: string, length: string) {
-  const prompt = `${SPEED_WRITE_CONFIG.systemPrompt}
+  // Calculate target word count based on length
+  const targetWords = Math.round(parseInt(length) * 2.2); // ~130 words per minute / 60 seconds * 2.2 = words per second
+  
+  const prompt = `Write a complete, ready-to-read video script using the Speed Write formula. This is the exact script the creator will read out loud.
 
-Video Idea: ${idea}
-Target Length: ${length} seconds
+IMPORTANT: Write the complete script with actual words, not descriptions or instructions. The output should be the finished script ready to record.
 
-Please generate a script following the Speed Write formula exactly:
-1. Hook (8-12 words starting with "If...")
-2. Simple actionable advice
-3. Why this advice works (starting with "This is...")
-4. The benefit (starting with "So you don't...")
+Speed Write Formula:
+1. Hook: Start with "If [specific problem], [try this action]." (8-12 words)
+2. Advice: Give simple, actionable steps they can take right now
+3. Reason: Explain why it works, starting with "This is..."
+4. Benefit: End with the result they'll get, starting with "So you don't..." or "So you can..."
 
-Keep it conversational and engaging.`;
+Target: ~${targetWords} words (${length} seconds)
+Tone: Conversational, like talking to a friend. Use "you" frequently. Keep it simple and energetic.
+
+Video Topic: ${idea}
+
+Write the complete script now:`;
 
   return generateScript(prompt, { temperature: 0.8, maxTokens: 400 });
 }
 
 async function generateEducationalScript(idea: string, length: string) {
-  const prompt = EDUCATIONAL_PROMPT_TEMPLATE.replace("{VIDEO_IDEA}", idea);
+  const targetWords = Math.round(parseInt(length) * 2.2);
+  
+  const prompt = EDUCATIONAL_PROMPT_TEMPLATE
+    .replace("{VIDEO_IDEA}", idea)
+    .replace("{TARGET_LENGTH}", length);
+    
   return generateScript(prompt, { temperature: 0.7, maxTokens: 400 });
 }
 
