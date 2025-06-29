@@ -1,332 +1,235 @@
 "use client";
 
-import { useState, useEffect, memo, useRef } from "react";
-
-import { motion } from "framer-motion";
+import React, { useState, useRef, useEffect, useCallback, memo } from "react";
 
 import { useVideoPlayback } from "@/contexts/video-playback-context";
 
-import { VideoLoadingOverlay } from "./ui/page-loading";
-import { getVideoContent, getEmbedUrl, VideoErrorDisplay } from "./video-embed-helpers";
 import { VideoThumbnail } from "./video-thumbnail";
 
-const VideoEmbedComponent = ({
-  url,
-  platform,
-  thumbnailUrl,
-  hostedOnCDN,
-  videoData,
-  disableCard = false,
-  lazyLoad = true,
-  title,
-  author,
-}: {
+interface VideoData {
+  thumbnail_url?: string;
+  image_versions2?: {
+    candidates?: Array<{ url: string }>;
+  };
+}
+
+interface VideoEmbedProps {
   url: string;
   platform: "tiktok" | "instagram";
-  thumbnailUrl?: string;
-  hostedOnCDN?: boolean;
-  videoData?: {
-    buffer: number[];
-    size: number;
-    mimeType: string;
-    filename: string;
-  };
-  disableCard?: boolean;
-  lazyLoad?: boolean;
-  title?: string;
-  author?: string;
-}) => {
-  // Generate unique video ID based on URL
-  const videoId = url;
+  videoData?: VideoData;
+  className?: string;
+}
 
-  // Global video playback management
-  const { currentlyPlayingId, setCurrentlyPlaying, isPlaying: isGloballyPlaying } = useVideoPlayback();
-
-  const [shouldLoad, setShouldLoad] = useState(!lazyLoad);
+// Memoize the component to prevent unnecessary re-renders
+const VideoEmbed = memo(function VideoEmbed({ url, platform, videoData, className = "" }: VideoEmbedProps) {
+  // Local state
+  const [shouldLoad, setShouldLoad] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [contentLoaded, setContentLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [videoObjectUrl, setVideoObjectUrl] = useState<string | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Refs for stable references
   const iframeSrcRef = useRef<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  // Local playing state derived from global state
-  const isPlaying = isGloballyPlaying(videoId);
+  // Global playback state
+  const { currentlyPlayingId, setCurrentlyPlaying } = useVideoPlayback();
 
-  // Debug logging
+  // Memoize video ID to prevent recalculation
+  const videoId = React.useMemo(() => url, [url]);
+
+  // Memoize playing state calculation
+  const isPlaying = React.useMemo(() => currentlyPlayingId === videoId, [currentlyPlayingId, videoId]);
+
+  // Determine if video is hosted on CDN
+  const hostedOnCDN = url.includes("iframe.mediadelivery.net");
+
+  // Extract thumbnail URL from videoData if available
+  const thumbnailUrl = React.useMemo(() => {
+    if (!videoData) return undefined;
+
+    // Try to extract thumbnail from Instagram data structure
+    if (videoData.thumbnail_url) {
+      return videoData.thumbnail_url;
+    }
+
+    // Try alternate structure
+    if (videoData.image_versions2?.candidates?.[0]?.url) {
+      return videoData.image_versions2.candidates[0].url;
+    }
+
+    return undefined;
+  }, [videoData]);
+
   console.log("🎥 [VideoEmbed] Render:", {
     url: url.substring(0, 50) + "...",
     platform,
     shouldLoad,
     isLoading,
     contentLoaded,
-    hasError,
     isPlaying,
-    currentlyPlayingId: currentlyPlayingId?.substring(0, 30) + "...",
+    currentlyPlayingId: (currentlyPlayingId ?? "null").substring(0, 50) + "...",
+    hasError,
   });
 
-  // Handle click to load video
-  const handleLoadVideo = () => {
+  // Handle video click with useCallback to prevent re-creation
+  const handleClick = useCallback(() => {
+    if (hasError || shouldLoad) return;
+
     console.log("🔥 [VideoEmbed] Click detected - attempting to load video:", {
-      url,
+      url: url.substring(0, 50) + "...",
       platform,
       currentShouldLoad: shouldLoad,
       hostedOnCDN,
-      hasVideoData: Boolean(videoData),
+      hasVideoData: !!videoData,
     });
-    if (!shouldLoad) {
-      setShouldLoad(true);
-      setIsLoading(true);
-      setCurrentlyPlaying(videoId);
-    } else {
-      console.log("⚠️ [VideoEmbed] Video already loading or loaded");
-    }
-  };
 
-  useEffect(() => {
-    if (!shouldLoad) {
-      // Reset iframe src ref when video is unloaded
-      if (iframeSrcRef.current) {
-        console.log(`🔄 [VideoEmbed] Resetting iframe src for ${videoId.substring(0, 30)}... (shouldLoad: false)`);
-        iframeSrcRef.current = null;
-      }
+    // Start loading this video
+    setShouldLoad(true);
+    setIsLoading(true);
+
+    // Set this video as currently playing (stops all others)
+    setCurrentlyPlaying(videoId);
+  }, [hasError, shouldLoad, url, platform, hostedOnCDN, videoData, videoId, setCurrentlyPlaying]);
+
+  // Handle content load events
+  const handleContentLoad = useCallback(() => {
+    console.log("✅ [VideoEmbed] Content loaded!");
+    setIsLoading(false);
+    setContentLoaded(true);
+
+    // Only start playing if this video is currently the active one
+    if (currentlyPlayingId !== videoId) {
+      console.log(
+        "⏸️ [VideoEmbed] Content loaded but not starting - another video is playing:",
+        (currentlyPlayingId ?? "none").substring(0, 50) + "...",
+      );
       return;
     }
 
-    setIsLoading(true);
-    setContentLoaded(false);
-    setHasError(false);
-
-    if (videoData && !hostedOnCDN) {
-      try {
-        const uint8Array = new Uint8Array(videoData.buffer);
-        const blob = new Blob([uint8Array], { type: videoData.mimeType });
-        const objectUrl = URL.createObjectURL(blob);
-        setVideoObjectUrl(objectUrl);
-
-        return () => {
-          if (objectUrl && objectUrl.startsWith("blob:")) {
-            URL.revokeObjectURL(objectUrl);
-          }
-        };
-      } catch (error) {
-        console.error("❌ [VIDEO_PLAYER] Failed to create video blob:", error);
-        setHasError(true);
-        setIsLoading(false);
-      }
+    // Start playback for video elements
+    if (videoRef.current && !hostedOnCDN) {
+      videoRef.current.play().catch((err) => console.error("🚫 [VideoEmbed] Video play failed:", err));
     }
-  }, [url, hostedOnCDN, videoData, shouldLoad]);
+  }, [currentlyPlayingId, videoId, hostedOnCDN]);
 
-  const handleContentLoad = () => {
-    console.log("✅ [VideoEmbed] Content loaded!");
-    setContentLoaded(true);
-    setIsLoading(false);
-
-    // Only start playing if this video is still the currently selected one
-    if (isPlaying && videoRef.current && currentlyPlayingId === videoId) {
-      console.log(`▶️ [VideoEmbed] Starting playback for ${videoId.substring(0, 30)}...`);
-      videoRef.current.play().catch((error) => {
-        console.warn("⚠️ [VideoEmbed] Autoplay failed (may require user interaction):", error);
-      });
-    } else if (currentlyPlayingId !== videoId) {
-      console.log(
-        `⏸️ [VideoEmbed] Content loaded but not starting - another video is playing: ${currentlyPlayingId?.substring(0, 30)}...`,
-      );
-    }
-  };
-
-  const handleContentError = (error: unknown) => {
-    console.error("❌ [VIDEO_PLAYER] Content load error:", error);
-    setHasError(true);
-    setIsLoading(false);
-  };
-
-  // Handle when another video starts playing - stop this one
+  // Effect to stop videos when another video starts playing
   useEffect(() => {
-    if (currentlyPlayingId && currentlyPlayingId !== videoId) {
-      console.log(`🛑 [VideoEmbed] Stopping video (another video started):`, {
-        thisVideo: videoId.substring(0, 30) + "...",
-        currentlyPlaying: currentlyPlayingId.substring(0, 30) + "...",
+    if (currentlyPlayingId && currentlyPlayingId !== videoId && shouldLoad) {
+      console.log("🛑 [VideoEmbed] Stopping video (another video started):", {
+        thisVideo: videoId.substring(0, 50) + "...",
+        currentlyPlaying: currentlyPlayingId.substring(0, 50) + "...",
       });
 
-      // For video elements, stop programmatically and prevent restart
+      // Stop video element if it exists and is playing
       if (videoRef.current && !videoRef.current.paused) {
         videoRef.current.pause();
-        videoRef.current.currentTime = 0;
-        console.log(`🛑 [VideoEmbed] Video ${videoId.substring(0, 30)}... successfully stopped`);
       }
 
-      // For iframe videos (TikTok, etc.), they will automatically stop
-      // because autoplay will be false when re-rendered
+      // Note: We DON'T reset iframeSrcRef.current here to prevent reloads
+      // The iframe will simply stop autoplaying when it's not the active video
     }
-  }, [currentlyPlayingId, videoId]);
+  }, [currentlyPlayingId, videoId, shouldLoad]);
 
-  // Cleanup: stop video when component unmounts
+  // Effect to clean up when component unmounts
   useEffect(() => {
     return () => {
       if (currentlyPlayingId === videoId) {
-        console.log(`🧹 [VideoEmbed] Cleanup - stopping video on unmount:`, videoId.substring(0, 30) + "...");
+        console.log("🧹 [VideoEmbed] Cleanup - stopping video on unmount:", videoId.substring(0, 50) + "...");
         setCurrentlyPlaying(null);
-      }
-      // Reset iframe src ref for fresh load next time
-      if (iframeSrcRef.current) {
-        console.log(`🔄 [VideoEmbed] Cleanup - resetting iframe src for ${videoId.substring(0, 30)}...`);
-        iframeSrcRef.current = null;
       }
     };
   }, [currentlyPlayingId, videoId, setCurrentlyPlaying]);
 
-  const renderIframeEmbed = (src: string) => {
-    // Store the iframe src once to prevent reloading on state changes
-    if (!iframeSrcRef.current) {
+  // Set iframe src only once when needed, never reset it
+  useEffect(() => {
+    if (shouldLoad && hostedOnCDN && !iframeSrcRef.current) {
       const shouldAutoplay = isPlaying && currentlyPlayingId === videoId;
-      iframeSrcRef.current =
-        shouldAutoplay && src.includes("iframe.mediadelivery.net")
-          ? `${src}${src.includes("?") ? "&" : "?"}autoplay=true`
-          : src;
-      console.log(`🎬 [VideoEmbed] Setting iframe src for ${videoId.substring(0, 30)}...:`, {
+      const finalSrc = shouldAutoplay ? `${url}${url.includes("?") ? "&" : "?"}autoplay=true` : url;
+
+      iframeSrcRef.current = finalSrc;
+
+      console.log("🎬 [VideoEmbed] Setting iframe src for", videoId.substring(0, 50) + "...:", {
         shouldAutoplay,
-        finalSrc: iframeSrcRef.current.substring(0, 100) + "...",
+        finalSrc: finalSrc.substring(0, 100) + "...",
       });
     }
+  }, [shouldLoad, hostedOnCDN, url, isPlaying, currentlyPlayingId, videoId]);
 
+  // Don't render anything if there's an error
+  if (hasError) {
     return (
-      <motion.iframe
-        key={videoId} // Use videoId as key to prevent unnecessary re-renders
-        src={iframeSrcRef.current}
-        className={`h-full w-full ${disableCard ? "" : "rounded-xl"}`}
-        frameBorder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-        onLoad={handleContentLoad}
-        onError={handleContentError}
-        style={{
-          backgroundColor: "black",
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-        }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: contentLoaded ? 1 : 0 }}
-        transition={{ duration: 0.5 }}
-      />
+      <div className={`relative flex aspect-[9/16] items-center justify-center rounded-lg bg-gray-100 ${className}`}>
+        <p className="text-sm text-gray-500">Failed to load video</p>
+      </div>
     );
-  };
+  }
 
-  const renderVideoElement = (src: string) => (
-    <motion.video
-      ref={videoRef}
-      src={src}
-      className={`h-full w-full object-cover ${disableCard ? "" : "rounded-xl"}`}
-      controls
-      loop
-      playsInline
-      onLoadedData={handleContentLoad}
-      onError={handleContentError}
-      style={{
-        backgroundColor: "black",
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        objectFit: "cover",
-      }}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: contentLoaded ? 1 : 0 }}
-      transition={{ duration: 0.5 }}
-    />
-  );
+  // Show thumbnail if not loaded yet
+  if (!shouldLoad) {
+    return (
+      <div className={`relative cursor-pointer ${className}`} onClick={handleClick}>
+        <VideoThumbnail platform={platform} thumbnailUrl={thumbnailUrl} onClick={handleClick} />
+      </div>
+    );
+  }
 
-  return (
-    <div className="relative h-full w-full">
-      {hasError ? (
-        <VideoErrorDisplay
-          disableCard={disableCard}
-          onRetry={() => {
-            setHasError(false);
-            setIsLoading(true);
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className={`relative ${className}`}>
+        <VideoThumbnail platform={platform} thumbnailUrl={thumbnailUrl} onClick={handleClick} />
+      </div>
+    );
+  }
+
+  // Render iframe for CDN-hosted videos
+  if (hostedOnCDN && iframeSrcRef.current) {
+    return (
+      <div className={`relative aspect-[9/16] overflow-hidden rounded-lg bg-black ${className}`}>
+        <iframe
+          ref={iframeRef}
+          src={iframeSrcRef.current}
+          className="h-full w-full border-0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          onLoad={handleContentLoad}
+          onError={() => {
+            console.error("🚫 [VideoEmbed] Iframe failed to load");
+            setHasError(true);
           }}
         />
-      ) : !shouldLoad ? (
-        <VideoThumbnail
-          platform={platform}
-          thumbnailUrl={thumbnailUrl}
-          onClick={handleLoadVideo}
-          disableCard={disableCard}
-          title={title}
-          author={author}
+      </div>
+    );
+  }
+
+  // Render video element for direct video URLs
+  if (contentLoaded) {
+    return (
+      <div className={`relative aspect-[9/16] overflow-hidden rounded-lg bg-black ${className}`}>
+        <video
+          ref={videoRef}
+          src={url}
+          className="h-full w-full object-cover"
+          controls
+          playsInline
+          onLoadedData={handleContentLoad}
+          onError={() => {
+            console.error("🚫 [VideoEmbed] Video failed to load");
+            setHasError(true);
+          }}
         />
-      ) : (
-        <>
-          {/* Loading overlay - only show when loading */}
-          {(isLoading || !contentLoaded) && (
-            <div className="pointer-events-none absolute inset-0 z-20">
-              <VideoLoadingOverlay disableCard={disableCard} />
-            </div>
-          )}
+      </div>
+    );
+  }
 
-          {/* Video content - ensure it's above any thumbnail elements */}
-          <div className="absolute inset-0 z-10 bg-black">
-            {getVideoContent(url, platform, hostedOnCDN, videoObjectUrl, renderIframeEmbed, renderVideoElement)}
-          </div>
-        </>
-      )}
+  // Fallback loading state
+  return (
+    <div className={`relative ${className}`}>
+      <VideoThumbnail platform={platform} thumbnailUrl={thumbnailUrl} onClick={handleClick} />
     </div>
-  );
-};
-
-const VideoEmbedWrapper = ({
-  url,
-  platform,
-  thumbnailUrl,
-  hostedOnCDN,
-  videoData,
-  disableCard = false,
-  lazyLoad = true,
-  title,
-  author,
-}: {
-  url: string;
-  platform: "tiktok" | "instagram";
-  thumbnailUrl?: string;
-  hostedOnCDN?: boolean;
-  videoData?: {
-    buffer: number[];
-    size: number;
-    mimeType: string;
-    filename: string;
-  };
-  disableCard?: boolean;
-  lazyLoad?: boolean;
-  title?: string;
-  author?: string;
-}) => {
-  return (
-    <VideoEmbedComponent
-      url={url}
-      platform={platform}
-      thumbnailUrl={thumbnailUrl}
-      hostedOnCDN={hostedOnCDN}
-      videoData={videoData}
-      disableCard={disableCard}
-      lazyLoad={lazyLoad}
-      title={title}
-      author={author}
-    />
-  );
-};
-
-export const VideoEmbed = memo(VideoEmbedWrapper, (prevProps, nextProps) => {
-  return (
-    prevProps.url === nextProps.url &&
-    prevProps.platform === nextProps.platform &&
-    prevProps.thumbnailUrl === nextProps.thumbnailUrl &&
-    prevProps.hostedOnCDN === nextProps.hostedOnCDN &&
-    prevProps.lazyLoad === nextProps.lazyLoad
   );
 });
 
-VideoEmbed.displayName = "VideoEmbed";
+export { VideoEmbed };
