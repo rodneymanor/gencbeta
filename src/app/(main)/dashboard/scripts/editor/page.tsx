@@ -4,10 +4,12 @@ import { useCallback, useEffect, useState } from "react";
 
 import { useSearchParams } from "next/navigation";
 
-import { Bot, FileText } from "lucide-react";
+import { ArrowUp, Bot, FileText } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 
 import { ChatHistory } from "./_components/chat-history";
 import { ScriptChatInput } from "./_components/script-chat-input";
@@ -269,15 +271,30 @@ export default function ScriptEditorPage() {
                 </div>
 
                 {/* Sticky Chat Input */}
-                <div className="bg-background flex-shrink-0 border-t">
-                  <ScriptChatInput
-                    value={chatInput}
-                    onChange={setChatInput}
-                    onSubmit={handleChatSubmit}
-                    disabled={isGenerating || isProcessingVideo}
-                    refinementControls={refinementControls}
-                    onRefinementChange={setRefinementControls}
-                  />
+                <div className="bg-background flex-shrink-0 border-t p-4">
+                  <div className="flex items-center gap-3">
+                    <Textarea
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey && !isGenerating && !isProcessingVideo && chatInput.trim()) {
+                          e.preventDefault();
+                          handleChatSubmit();
+                        }
+                      }}
+                      placeholder="Ask me to adjust the tone, add details, or make changes..."
+                      className="flex-1 min-h-[44px] max-h-[100px] resize-none"
+                      disabled={isGenerating || isProcessingVideo}
+                    />
+                    <Button
+                      onClick={handleChatSubmit}
+                      disabled={isGenerating || isProcessingVideo || !chatInput.trim()}
+                      size="icon"
+                      className="h-10 w-10"
+                    >
+                      <ArrowUp size={18} />
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
