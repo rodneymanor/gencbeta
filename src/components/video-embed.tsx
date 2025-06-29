@@ -4,42 +4,11 @@ import { useState, useEffect, memo, useRef } from "react";
 
 import { motion } from "framer-motion";
 
-import { Button } from "@/components/ui/button";
-import { VideoLoadingOverlay } from "@/components/ui/page-loading";
+import { useVideoPlayback } from "@/contexts/video-playback-context";
 
+import { VideoLoadingOverlay } from "./ui/page-loading";
+import { getVideoContent, getEmbedUrl, VideoErrorDisplay } from "./video-embed-helpers";
 import { VideoThumbnail } from "./video-thumbnail";
-
-// Helper function to determine which content to render
-const getVideoContent = (
-  url: string,
-  platform: string,
-  hostedOnCDN: boolean | undefined,
-  videoObjectUrl: string | null,
-  renderIframeEmbed: (src: string) => JSX.Element,
-  renderVideoElement: (src: string) => JSX.Element,
-) => {
-  if (hostedOnCDN && url.includes("iframe.mediadelivery.net/embed")) {
-    return renderIframeEmbed(url);
-  }
-  if (videoObjectUrl) {
-    return renderVideoElement(videoObjectUrl);
-  }
-  if (hostedOnCDN && url.startsWith("http") && !url.includes("iframe.mediadelivery.net")) {
-    return renderVideoElement(url);
-  }
-  return renderIframeEmbed(getEmbedUrl(url, platform));
-};
-
-// Helper function to get embed URL
-const getEmbedUrl = (url: string, platform: string) => {
-  if (platform === "tiktok") {
-    const videoId = url.split("/").pop()?.split("?")[0];
-    return `https://www.tiktok.com/embed/v2/${videoId}`;
-  } else {
-    const postId = url.split("/p/")[1]?.split("/")[0] ?? "";
-    return `https://www.instagram.com/p/${postId}/embed/`;
-  }
-};
 
 const VideoEmbedComponent = ({
   url,
@@ -67,16 +36,33 @@ const VideoEmbedComponent = ({
   title?: string;
   author?: string;
 }) => {
+  // Generate unique video ID based on URL
+  const videoId = url;
+
+  // Global video playback management
+  const { currentlyPlayingId, setCurrentlyPlaying, isPlaying: isGloballyPlaying } = useVideoPlayback();
+
   const [shouldLoad, setShouldLoad] = useState(!lazyLoad);
   const [isLoading, setIsLoading] = useState(false);
   const [contentLoaded, setContentLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [videoObjectUrl, setVideoObjectUrl] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  // Local playing state derived from global state
+  const isPlaying = isGloballyPlaying(videoId);
+
   // Debug logging
-  console.log("🎥 [VideoEmbed]:", { platform, lazyLoad, shouldLoad, isLoading });
+  console.log("🎥 [VideoEmbed] Render:", {
+    url: url.substring(0, 50) + "...",
+    platform,
+    shouldLoad,
+    isLoading,
+    contentLoaded,
+    hasError,
+    isPlaying,
+    currentlyPlayingId: currentlyPlayingId?.substring(0, 30) + "...",
+  });
 
   // Handle click to load video
   const handleLoadVideo = () => {
@@ -90,7 +76,7 @@ const VideoEmbedComponent = ({
     if (!shouldLoad) {
       setShouldLoad(true);
       setIsLoading(true);
-      setIsPlaying(true);
+      setCurrentlyPlaying(videoId);
     } else {
       console.log("⚠️ [VideoEmbed] Video already loading or loaded");
     }
@@ -141,6 +127,35 @@ const VideoEmbedComponent = ({
     setHasError(true);
     setIsLoading(false);
   };
+
+  // Handle when another video starts playing - stop this one
+  useEffect(() => {
+    if (currentlyPlayingId && currentlyPlayingId !== videoId) {
+      console.log(`🛑 [VideoEmbed] Stopping video (another video started):`, {
+        thisVideo: videoId.substring(0, 30) + "...",
+        currentlyPlaying: currentlyPlayingId.substring(0, 30) + "...",
+      });
+
+      // For video elements, stop programmatically
+      if (videoRef.current) {
+        videoRef.current.pause();
+        videoRef.current.currentTime = 0;
+      }
+
+      // For iframe videos (TikTok, etc.), they will automatically stop
+      // because autoplay will be false when re-rendered
+    }
+  }, [currentlyPlayingId, videoId]);
+
+  // Cleanup: stop video when component unmounts
+  useEffect(() => {
+    return () => {
+      if (currentlyPlayingId === videoId) {
+        console.log(`🧹 [VideoEmbed] Cleanup - stopping video on unmount:`, videoId.substring(0, 30) + "...");
+        setCurrentlyPlaying(null);
+      }
+    };
+  }, [currentlyPlayingId, videoId, setCurrentlyPlaying]);
 
   const renderIframeEmbed = (src: string) => {
     // Add autoplay parameter for Bunny.net videos when user clicked to play
@@ -202,36 +217,13 @@ const VideoEmbedComponent = ({
   return (
     <div className="relative h-full w-full">
       {hasError ? (
-        <motion.div
-          className={`flex h-full w-full items-center justify-center bg-gradient-to-br from-red-900 via-pink-900 to-purple-900 ${disableCard ? "" : "rounded-xl"}`}
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9 }}
-        >
-          <div className="space-y-4 text-center">
-            <motion.div
-              className="text-4xl text-white"
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              ⚠️
-            </motion.div>
-            <p className="text-sm text-white">Failed to load video</p>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setHasError(false);
-                  setIsLoading(true);
-                }}
-                className="border-white/20 bg-white/10 text-white hover:bg-white/20"
-              >
-                Retry
-              </Button>
-            </motion.div>
-          </div>
-        </motion.div>
+        <VideoErrorDisplay
+          disableCard={disableCard}
+          onRetry={() => {
+            setHasError(false);
+            setIsLoading(true);
+          }}
+        />
       ) : !shouldLoad ? (
         <VideoThumbnail
           platform={platform}

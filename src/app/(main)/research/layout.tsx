@@ -1,10 +1,9 @@
 import { ReactNode } from "react";
 
-import { cookies } from "next/headers";
-
 import { AppSidebar } from "@/app/(main)/dashboard/_components/sidebar/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { VideoPlaybackProvider } from "@/contexts/video-playback-context";
 import { getSidebarVariant, getSidebarCollapsible, getContentLayout } from "@/lib/layout-preferences";
 import { cn } from "@/lib/utils";
 
@@ -14,9 +13,6 @@ import { SearchDialog } from "../dashboard/_components/sidebar/search-dialog";
 import DashboardClientLayout from "../dashboard/dashboard-client-layout";
 
 export default async function ResearchLayout({ children }: Readonly<{ children: ReactNode }>) {
-  const cookieStore = await cookies();
-  // const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
-
   const sidebarVariant = await getSidebarVariant();
   const sidebarCollapsible = await getSidebarCollapsible();
   const contentLayout = await getContentLayout();
@@ -46,7 +42,9 @@ export default async function ResearchLayout({ children }: Readonly<{ children: 
           </div>
         </header>
         <DashboardClientLayout>
-          <div className="p-4 md:p-6">{children}</div>
+          <VideoPlaybackProvider>
+            <div className="p-4 md:p-6">{children}</div>
+          </VideoPlaybackProvider>
         </DashboardClientLayout>
       </SidebarInset>
     </SidebarProvider>
