@@ -97,14 +97,13 @@ export default function NewScriptPage() {
         <div className="space-y-6">
           <InputModeToggle
             inputMode={inputMode}
-            setInputMode={setInputMode}
+            onInputModeChange={setInputMode}
             textValue={scriptIdea}
             onTextChange={setScriptIdea}
             videoUrl={videoUrl}
             onVideoUrlChange={setVideoUrl}
-            onKeyPress={handleKeyPress}
-            isSubmitDisabled={isSubmitDisabled}
             onSubmit={handleSubmit}
+            disabled={false}
           />
 
           {/* Controls and Action Buttons Row */}

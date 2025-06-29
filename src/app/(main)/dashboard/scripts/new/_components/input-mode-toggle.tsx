@@ -11,25 +11,39 @@ import { Textarea } from "@/components/ui/textarea";
 
 export type InputMode = "text" | "video";
 
-interface InputModeToggleProps {
+export interface InputModeToggleProps {
   inputMode: InputMode;
-  setInputMode: (mode: InputMode) => void;
+  onInputModeChange: (mode: InputMode) => void;
   textValue: string;
   onTextChange: (value: string) => void;
   videoUrl: string;
   onVideoUrlChange: (url: string) => void;
-  onKeyPress: (e: React.KeyboardEvent) => void;
-  isSubmitDisabled: boolean;
   onSubmit: () => void;
+  disabled?: boolean;
 }
 
-const supportedPlatforms = [
-  { name: "TikTok", example: "tiktok.com/@username/video/123...", color: "bg-pink-500" },
-  { name: "Instagram", example: "instagram.com/p/ABC123...", color: "bg-gradient-to-r from-purple-500 to-pink-500" },
-  { name: "YouTube", example: "youtube.com/watch?v=abc123...", color: "bg-red-500", comingSoon: true },
-];
+interface UrlValidation {
+  isValid: boolean;
+  platform: string | null;
+  error?: string;
+}
 
-const detectPlatform = (url: string): string | null => {
+interface TabProps {
+  isActive: boolean;
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+}
+
+interface PlatformInfo {
+  name: string;
+  color: string;
+  available: boolean;
+  example: string;
+}
+
+const detectVideoPlatform = (url: string): string | null => {
+  if (!url) return null;
   const normalizedUrl = url.toLowerCase();
 
   if (normalizedUrl.includes("tiktok.com")) return "tiktok";
@@ -39,19 +53,12 @@ const detectPlatform = (url: string): string | null => {
   return null;
 };
 
-const validateVideoUrl = (url: string): { isValid: boolean; platform: string | null; error?: string } => {
+const validateUrl = (url: string): UrlValidation => {
   if (!url.trim()) {
     return { isValid: false, platform: null };
   }
 
-  // Basic URL format validation
-  try {
-    new URL(url);
-  } catch {
-    return { isValid: false, platform: null, error: "Please enter a valid URL" };
-  }
-
-  const platform = detectPlatform(url);
+  const platform = detectVideoPlatform(url);
 
   if (!platform) {
     return {
@@ -72,64 +79,106 @@ const validateVideoUrl = (url: string): { isValid: boolean; platform: string | n
   return { isValid: true, platform };
 };
 
+const TabButton = ({ isActive, icon, label, onClick }: TabProps) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={`relative px-1 pb-3 text-sm font-medium transition-colors ${
+      isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+    }`}
+  >
+    {icon}
+    {label}
+    {isActive && <div className="bg-primary absolute right-0 bottom-0 left-0 h-0.5 rounded-full" />}
+  </button>
+);
+
+const PlatformList = () => {
+  const supportedPlatforms: PlatformInfo[] = [
+    { name: "TikTok", color: "bg-pink-500", available: true, example: "tiktok.com/@user/video/123" },
+    {
+      name: "Instagram",
+      color: "bg-gradient-to-r from-purple-500 to-pink-500",
+      available: true,
+      example: "instagram.com/reel/ABC123",
+    },
+    { name: "YouTube", color: "bg-red-500", available: false, example: "youtube.com/watch?v=ABC123" },
+  ];
+
+  return (
+    <div className="bg-muted/30 rounded-lg border p-4">
+      <h4 className="mb-3 text-sm font-medium">Supported Platforms</h4>
+      <div className="space-y-2">
+        {supportedPlatforms.map((platform) => (
+          <div key={platform.name} className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`h-3 w-3 rounded-full ${platform.color} ${!platform.available && "opacity-50"}`} />
+              <span className={`text-sm ${!platform.available && "text-muted-foreground"}`}>
+                {platform.name}
+                {!platform.available && (
+                  <Badge variant="secondary" className="ml-2 text-xs">
+                    Coming Soon
+                  </Badge>
+                )}
+              </span>
+            </div>
+            <span className="text-muted-foreground text-xs">{platform.example}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export function InputModeToggle({
   inputMode,
-  setInputMode,
+  onInputModeChange,
   textValue,
   onTextChange,
   videoUrl,
   onVideoUrlChange,
-  onKeyPress,
-  isSubmitDisabled,
   onSubmit,
+  disabled = false,
 }: InputModeToggleProps) {
-  const [urlValidation, setUrlValidation] = useState<{ isValid: boolean; platform: string | null; error?: string }>({
-    isValid: false,
-    platform: null,
-  });
+  const urlValidation = validateUrl(videoUrl);
+  const finalSubmitDisabled = disabled || (inputMode === "text" ? !textValue.trim() : !urlValidation.isValid);
 
-  const handleVideoUrlChange = (value: string) => {
-    onVideoUrlChange(value);
-    const validation = validateVideoUrl(value);
-    setUrlValidation(validation);
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && !finalSubmitDisabled) {
+      e.preventDefault();
+      onSubmit();
+    }
   };
-
-  const isVideoModeValid = inputMode === "video" ? urlValidation.isValid : true;
-  const finalSubmitDisabled = isSubmitDisabled || (inputMode === "video" && !isVideoModeValid);
 
   return (
     <div className="space-y-6">
       {/* Input Mode Tabs */}
-      <div className="bg-muted flex items-center space-x-1 rounded-lg p-1">
-        <Button
-          variant={inputMode === "text" ? "default" : "ghost"}
-          size="sm"
-          onClick={() => setInputMode("text")}
-          className="flex-1 gap-2"
-        >
-          <Type className="h-4 w-4" />
-          Text Idea
-        </Button>
-        <Button
-          variant={inputMode === "video" ? "default" : "ghost"}
-          size="sm"
-          onClick={() => setInputMode("video")}
-          className="flex-1 gap-2"
-        >
-          <Video className="h-4 w-4" />
-          Video URL
-        </Button>
+      <div className="flex items-center border-b">
+        <TabButton
+          isActive={inputMode === "text"}
+          icon={<Type className="mr-2 inline h-4 w-4" />}
+          label="Text Idea"
+          onClick={() => onInputModeChange("text")}
+        />
+        <div className="bg-border mx-6 h-4 w-px" />
+        <TabButton
+          isActive={inputMode === "video"}
+          icon={<Video className="mr-2 inline h-4 w-4" />}
+          label="Video URL"
+          onClick={() => onInputModeChange("video")}
+        />
       </div>
 
-      {/* Conditional Input Rendering */}
+      {/* Input Content */}
       {inputMode === "text" ? (
         <div className="relative">
           <Textarea
+            placeholder="My script ideas for the day is..."
             value={textValue}
             onChange={(e) => onTextChange(e.target.value)}
-            onKeyDown={onKeyPress}
-            placeholder="My script ideas for the day is..."
-            className="min-h-32 resize-none p-6 pr-16 text-lg"
+            onKeyDown={handleKeyDown}
+            className="min-h-[200px] resize-none pr-16 text-base leading-relaxed"
+            disabled={disabled}
           />
           <Button
             onClick={onSubmit}
@@ -145,11 +194,12 @@ export function InputModeToggle({
           <div className="relative">
             <Input
               type="url"
+              placeholder="https://www.tiktok.com/@user/video/123..."
               value={videoUrl}
-              onChange={(e) => handleVideoUrlChange(e.target.value)}
-              onKeyDown={onKeyPress}
-              placeholder="Paste TikTok or Instagram video URL..."
-              className="h-16 p-6 pr-16 text-lg"
+              onChange={(e) => onVideoUrlChange(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="pr-16 text-base"
+              disabled={disabled}
             />
             <Button
               onClick={onSubmit}
@@ -178,29 +228,9 @@ export function InputModeToggle({
           )}
 
           {/* Supported Platforms Info */}
-          <div className="bg-muted/30 rounded-lg border p-4">
-            <h4 className="mb-3 text-sm font-medium">Supported Platforms</h4>
-            <div className="space-y-2">
-              {supportedPlatforms.map((platform) => (
-                <div key={platform.name} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`h-3 w-3 rounded-full ${platform.color}`} />
-                    <span className="text-sm font-medium">{platform.name}</span>
-                    {platform.comingSoon && (
-                      <Badge variant="secondary" className="text-xs">
-                        Coming Soon
-                      </Badge>
-                    )}
-                  </div>
-                  <span className="text-muted-foreground text-xs">{platform.example}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+          <PlatformList />
         </div>
       )}
     </div>
   );
 }
-
-export { validateVideoUrl, detectPlatform };
