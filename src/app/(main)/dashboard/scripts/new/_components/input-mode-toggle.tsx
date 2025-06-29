@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
 import { Type, Video, ExternalLink } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -93,21 +91,32 @@ const TabButton = ({ isActive, icon, label, onClick }: TabProps) => (
   </button>
 );
 
+const ModeDescription = ({ mode }: { mode: InputMode }) => {
+  const getDescription = (inputMode: InputMode): string => {
+    if (inputMode === "text") {
+      return "Describe your video idea and we'll help you script it";
+    }
+    return "Provide a video URL to transcribe and create a new script from it";
+  };
+
+  return <p className="text-muted-foreground text-sm leading-relaxed">{getDescription(mode)}</p>;
+};
+
 const PlatformList = () => {
   const supportedPlatforms: PlatformInfo[] = [
-    { name: "TikTok", color: "bg-pink-500", available: true, example: "tiktok.com/@user/video/123" },
+    { name: "TikTok", color: "bg-pink-500", available: true, example: "tiktok.com/@username/video/7123456789" },
     {
       name: "Instagram",
       color: "bg-gradient-to-r from-purple-500 to-pink-500",
       available: true,
-      example: "instagram.com/reel/ABC123",
+      example: "instagram.com/reel/CAbCdEfGhIj",
     },
-    { name: "YouTube", color: "bg-red-500", available: false, example: "youtube.com/watch?v=ABC123" },
+    { name: "YouTube", color: "bg-red-500", available: false, example: "youtube.com/watch?v=dQw4w9WgXcQ" },
   ];
 
   return (
     <div className="bg-muted/30 rounded-lg border p-4">
-      <h4 className="mb-3 text-sm font-medium">Supported Platforms</h4>
+      <h4 className="mb-3 text-sm font-medium">Supported Platforms for Transcription</h4>
       <div className="space-y-2">
         {supportedPlatforms.map((platform) => (
           <div key={platform.name} className="flex items-center justify-between">
@@ -126,6 +135,9 @@ const PlatformList = () => {
           </div>
         ))}
       </div>
+      <p className="text-muted-foreground mt-3 text-xs">
+        We&apos;ll extract the audio, transcribe the speech, and help you create a new script based on the content.
+      </p>
     </div>
   );
 };
@@ -153,27 +165,32 @@ export function InputModeToggle({
   return (
     <div className="space-y-6">
       {/* Input Mode Tabs */}
-      <div className="flex items-center border-b">
-        <TabButton
-          isActive={inputMode === "text"}
-          icon={<Type className="mr-2 inline h-4 w-4" />}
-          label="Text Idea"
-          onClick={() => onInputModeChange("text")}
-        />
-        <div className="bg-border mx-6 h-4 w-px" />
-        <TabButton
-          isActive={inputMode === "video"}
-          icon={<Video className="mr-2 inline h-4 w-4" />}
-          label="Video URL"
-          onClick={() => onInputModeChange("video")}
-        />
+      <div className="space-y-3">
+        <div className="flex items-center border-b">
+          <TabButton
+            isActive={inputMode === "text"}
+            icon={<Type className="mr-2 inline h-4 w-4" />}
+            label="Text Idea"
+            onClick={() => onInputModeChange("text")}
+          />
+          <div className="bg-border mx-6 h-4 w-px" />
+          <TabButton
+            isActive={inputMode === "video"}
+            icon={<Video className="mr-2 inline h-4 w-4" />}
+            label="Video URL"
+            onClick={() => onInputModeChange("video")}
+          />
+        </div>
+
+        {/* Mode Description */}
+        <ModeDescription mode={inputMode} />
       </div>
 
       {/* Input Content */}
       {inputMode === "text" ? (
         <div className="relative">
           <Textarea
-            placeholder="My script ideas for the day is..."
+            placeholder="My script idea is about productivity tips for remote workers..."
             value={textValue}
             onChange={(e) => onTextChange(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -194,7 +211,7 @@ export function InputModeToggle({
           <div className="relative">
             <Input
               type="url"
-              placeholder="https://www.tiktok.com/@user/video/123..."
+              placeholder="https://www.tiktok.com/@user/video/123456789..."
               value={videoUrl}
               onChange={(e) => onVideoUrlChange(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -221,7 +238,7 @@ export function InputModeToggle({
                   <Badge variant="outline" className="capitalize">
                     {urlValidation.platform} detected
                   </Badge>
-                  <span className="text-muted-foreground text-sm">Ready to process</span>
+                  <span className="text-muted-foreground text-sm">Ready to transcribe and script</span>
                 </div>
               ) : null}
             </div>
