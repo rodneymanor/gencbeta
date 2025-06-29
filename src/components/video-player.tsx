@@ -11,7 +11,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 import { VideoEmbed } from "./video-embed";
-import { containerVariants, overlayVariants } from "./video-player-animations";
 import { MetricsOverlay, InsightsDialogContent } from "./video-player-components";
 
 interface VideoMetrics {
@@ -68,6 +67,7 @@ const InsightsDialog = memo(({ insights, metrics }: { insights: VideoInsights; m
 
 InsightsDialog.displayName = "InsightsDialog";
 
+// Simplified VideoPlayer - reduced from 6+ divs to 2-3 divs max
 const VideoPlayerComponent = ({
   videoUrl,
   platform,
@@ -81,62 +81,54 @@ const VideoPlayerComponent = ({
   videoData,
   disableCard = false,
 }: VideoPlayerProps) => {
-  const videoContent = (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible">
-      {/* Video Container */}
-      <div
-        className={`relative aspect-[9/16] overflow-hidden bg-black ${disableCard ? "" : "rounded-xl"}`}
-        style={{ position: "relative" }}
-      >
-        <VideoEmbed
-          url={videoUrl}
-          platform={platform}
-          thumbnailUrl={thumbnailUrl}
-          hostedOnCDN={hostedOnCDN}
-          videoData={videoData}
-          disableCard={disableCard}
-          title={title}
-          author={author}
-          lazyLoad={true}
-        />
+  // Main video container - single div with aspect ratio
+  const videoContainer = (
+    <div className={`relative aspect-[9/16] overflow-hidden bg-black ${disableCard ? "" : "rounded-xl"}`}>
+      <VideoEmbed
+        url={videoUrl}
+        platform={platform}
+        thumbnailUrl={thumbnailUrl}
+        hostedOnCDN={hostedOnCDN}
+        videoData={videoData}
+        disableCard={disableCard}
+        title={title}
+        author={author}
+        lazyLoad={true}
+      />
 
-        {/* Metrics Overlay */}
-        <motion.div variants={overlayVariants}>
-          <MetricsOverlay metrics={metrics} />
-        </motion.div>
+      {/* Metrics Overlay */}
+      <MetricsOverlay metrics={metrics} />
 
-        {/* Insights Button */}
-        {insights && (
-          <motion.div className="absolute top-4 right-4" variants={overlayVariants}>
-            <Dialog>
-              <DialogTrigger asChild>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    size="sm"
-                    className="border-0 bg-black/50 text-white backdrop-blur-sm transition-all duration-200 hover:bg-black/70"
-                  >
-                    <BarChart3 className="mr-1 h-4 w-4" />
-                    Insights
-                  </Button>
-                </motion.div>
-              </DialogTrigger>
-              <InsightsDialog insights={insights} metrics={metrics} />
-            </Dialog>
-          </motion.div>
-        )}
+      {/* Insights Button */}
+      {insights && (
+        <div className="absolute top-4 right-4">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button
+                size="sm"
+                className="border-0 bg-black/50 text-white backdrop-blur-sm transition-all duration-200 hover:bg-black/70"
+              >
+                <BarChart3 className="mr-1 h-4 w-4" />
+                Insights
+              </Button>
+            </DialogTrigger>
+            <InsightsDialog insights={insights} metrics={metrics} />
+          </Dialog>
+        </div>
+      )}
 
-        {/* Platform Badge */}
-        <motion.div className="absolute top-4 left-4" variants={overlayVariants}>
-          <Badge className="border-0 bg-gradient-to-r from-purple-500 to-pink-500 text-white capitalize">
-            {platform}
-          </Badge>
-        </motion.div>
+      {/* Platform Badge */}
+      <div className="absolute top-4 left-4">
+        <Badge className="border-0 bg-gradient-to-r from-purple-500 to-pink-500 text-white capitalize">
+          {platform}
+        </Badge>
       </div>
-    </motion.div>
+    </div>
   );
 
+  // Return simplified structure
   if (disableCard) {
-    return <div className={className}>{videoContent}</div>;
+    return <div className={className}>{videoContainer}</div>;
   }
 
   return (
@@ -146,7 +138,7 @@ const VideoPlayerComponent = ({
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
     >
       <Card className="overflow-hidden border-0 bg-gradient-to-br from-gray-900 to-black shadow-2xl">
-        <CardContent className="p-0">{videoContent}</CardContent>
+        <CardContent className="p-0">{videoContainer}</CardContent>
       </Card>
     </motion.div>
   );

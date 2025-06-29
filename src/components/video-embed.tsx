@@ -2,7 +2,7 @@
 
 import { useState, useEffect, memo } from "react";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
 import { VideoLoadingOverlay } from "@/components/ui/page-loading";
@@ -128,46 +128,11 @@ const VideoEmbedComponent = ({
     setIsPlaying(true);
   };
 
-  const handleContentError = (error: any) => {
+  const handleContentError = (error: unknown) => {
     console.error("❌ [VIDEO_PLAYER] Content load error:", error);
     setHasError(true);
     setIsLoading(false);
   };
-
-  const renderLoadingState = () => <VideoLoadingOverlay disableCard={disableCard} />;
-
-  const renderErrorState = () => (
-    <motion.div
-      className={`flex h-full w-full items-center justify-center bg-gradient-to-br from-red-900 via-pink-900 to-purple-900 ${disableCard ? "" : "rounded-xl"}`}
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-    >
-      <div className="space-y-4 text-center">
-        <motion.div
-          className="text-4xl text-white"
-          animate={{ scale: [1, 1.1, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        >
-          ⚠️
-        </motion.div>
-        <p className="text-sm text-white">Failed to load video</p>
-        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setHasError(false);
-              setIsLoading(true);
-            }}
-            className="border-white/20 bg-white/10 text-white hover:bg-white/20"
-          >
-            Retry
-          </Button>
-        </motion.div>
-      </div>
-    </motion.div>
-  );
 
   const renderIframeEmbed = (src: string) => (
     <motion.iframe
@@ -219,38 +184,63 @@ const VideoEmbedComponent = ({
   );
 
   return (
-    <AnimatePresence mode="wait">
+    <div className="relative h-full w-full">
       {hasError ? (
-        <motion.div key="error">{renderErrorState()}</motion.div>
-      ) : !shouldLoad ? (
-        <motion.div key="thumbnail">
-          <VideoThumbnail
-            platform={platform}
-            thumbnailUrl={thumbnailUrl}
-            onClick={handleLoadVideo}
-            disableCard={disableCard}
-            title={title}
-            author={author}
-          />
-        </motion.div>
-      ) : (
-        <motion.div key="content" className="relative h-full w-full">
-          {(isLoading || !contentLoaded) && (
-            <motion.div key="loading" className="absolute inset-0 z-10">
-              {renderLoadingState()}
+        <motion.div
+          className={`flex h-full w-full items-center justify-center bg-gradient-to-br from-red-900 via-pink-900 to-purple-900 ${disableCard ? "" : "rounded-xl"}`}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+        >
+          <div className="space-y-4 text-center">
+            <motion.div
+              className="text-4xl text-white"
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              ⚠️
             </motion.div>
-          )}
-          <motion.div
-            className="absolute inset-0"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: contentLoaded ? 1 : 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            {getVideoContent(url, platform, hostedOnCDN, videoObjectUrl, renderIframeEmbed, renderVideoElement)}
-          </motion.div>
+            <p className="text-sm text-white">Failed to load video</p>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setHasError(false);
+                  setIsLoading(true);
+                }}
+                className="border-white/20 bg-white/10 text-white hover:bg-white/20"
+              >
+                Retry
+              </Button>
+            </motion.div>
+          </div>
         </motion.div>
+      ) : !shouldLoad ? (
+        <VideoThumbnail
+          platform={platform}
+          thumbnailUrl={thumbnailUrl}
+          onClick={handleLoadVideo}
+          disableCard={disableCard}
+          title={title}
+          author={author}
+        />
+      ) : (
+        <>
+          {/* Loading overlay - only show when loading */}
+          {(isLoading || !contentLoaded) && (
+            <div className="absolute inset-0 z-10">
+              <VideoLoadingOverlay disableCard={disableCard} />
+            </div>
+          )}
+
+          {/* Video content */}
+          <div className="absolute inset-0">
+            {getVideoContent(url, platform, hostedOnCDN, videoObjectUrl, renderIframeEmbed, renderVideoElement)}
+          </div>
+        </>
       )}
-    </AnimatePresence>
+    </div>
   );
 };
 
