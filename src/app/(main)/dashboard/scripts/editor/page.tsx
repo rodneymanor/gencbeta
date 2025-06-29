@@ -23,16 +23,16 @@ import {
   UrlParams,
   generateScriptContent,
 } from "./_components/types";
+import { VideoProcessor } from "./_components/video-processor";
 
 export default function ScriptEditorPage() {
   const searchParams = useSearchParams();
 
   // URL Parameters
   const [urlParams, setUrlParams] = useState<UrlParams>({
-    idea: "",
     mode: "",
     length: "",
-    source: "",
+    inputType: "text",
   });
 
   // Core State
@@ -41,6 +41,7 @@ export default function ScriptEditorPage() {
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isProcessingVideo, setIsProcessingVideo] = useState(false);
 
   // Script Options
   const [scriptOptions, setScriptOptions] = useState<{
@@ -58,7 +59,7 @@ export default function ScriptEditorPage() {
     scriptLength: "20",
   });
 
-  // Simulate AI script generation
+  // Generate scripts from text idea
   const generateInitialScripts = useCallback(async (idea: string, mode: string, length: string) => {
     setIsGenerating(true);
 
@@ -91,18 +92,66 @@ export default function ScriptEditorPage() {
     }, 2000);
   }, []);
 
-  // Parse URL parameters on mount
-  useEffect(() => {
-    const idea = searchParams.get("idea") ?? "";
-    const mode = searchParams.get("mode") ?? "";
-    const length = searchParams.get("length") ?? "20";
-    const source = searchParams.get("source") ?? "";
+  // Handle video transcription completion
+  const handleVideoTranscriptReady = useCallback(
+    (transcript: string) => {
+      setIsProcessingVideo(false);
 
-    setUrlParams({ idea, mode, length, source });
-    setRefinementControls((prev) => ({ ...prev, scriptLength: length }));
+      // Add transcript to chat history
+      const transcriptMessage: ChatMessage = {
+        id: `transcript-${Date.now()}`,
+        type: "system",
+        content: `Video transcription completed. Here's what was said:\n\n"${transcript}"`,
+        timestamp: new Date(),
+        metadata: {
+          videoUrl: urlParams.videoUrl,
+          processingStep: "complete",
+        },
+      };
+      setChatHistory((prev) => [...prev, transcriptMessage]);
 
-    // Add initial user message to chat
-    if (idea) {
+      // Generate script options based on transcript
+      generateInitialScripts(transcript, urlParams.mode, urlParams.length);
+    },
+    [urlParams, generateInitialScripts],
+  );
+
+  // Handle video processing error
+  const handleVideoError = useCallback(
+    (error: string) => {
+      setIsProcessingVideo(false);
+
+      const errorMessage: ChatMessage = {
+        id: `error-${Date.now()}`,
+        type: "error",
+        content: `Failed to process video: ${error}`,
+        timestamp: new Date(),
+        metadata: {
+          videoUrl: urlParams.videoUrl,
+          retryable: true,
+        },
+      };
+      setChatHistory((prev) => [...prev, errorMessage]);
+    },
+    [urlParams.videoUrl],
+  );
+
+  // Process video URL input
+  const processVideoInput = useCallback((videoUrl: string) => {
+    setIsProcessingVideo(true);
+
+    const initialMessage: ChatMessage = {
+      id: "initial",
+      type: "user",
+      content: `Analyze this video and create script options: ${decodeURIComponent(videoUrl)}`,
+      timestamp: new Date(),
+    };
+    setChatHistory([initialMessage]);
+  }, []);
+
+  // Process text idea input
+  const processTextInput = useCallback(
+    (idea: string, mode: string, length: string) => {
       const initialMessage: ChatMessage = {
         id: "initial",
         type: "user",
@@ -111,10 +160,38 @@ export default function ScriptEditorPage() {
       };
       setChatHistory([initialMessage]);
 
-      // Simulate AI script generation
+      // Generate scripts from text idea
       generateInitialScripts(decodeURIComponent(idea), mode, length);
+    },
+    [generateInitialScripts],
+  );
+
+  // Parse and set URL parameters
+  const parseUrlParameters = useCallback(() => {
+    const idea = searchParams.get("idea") ?? undefined;
+    const videoUrl = searchParams.get("videoUrl") ?? undefined;
+    const mode = searchParams.get("mode") ?? "";
+    const length = searchParams.get("length") ?? "20";
+    const source = searchParams.get("source") ?? undefined;
+    const inputType = (searchParams.get("inputType") ?? "text") as "text" | "video";
+
+    setUrlParams({ idea, videoUrl, mode, length, source, inputType });
+    setRefinementControls((prev) => ({ ...prev, scriptLength: length }));
+
+    return { idea, videoUrl, mode, length, inputType };
+  }, [searchParams]);
+
+  // Parse URL parameters on mount
+  useEffect(() => {
+    const { idea, videoUrl, mode, length, inputType } = parseUrlParameters();
+
+    // Handle different input types
+    if (inputType === "video" && videoUrl) {
+      processVideoInput(videoUrl);
+    } else if (inputType === "text" && idea) {
+      processTextInput(idea, mode, length);
     }
-  }, [searchParams, generateInitialScripts]);
+  }, [parseUrlParameters, processVideoInput, processTextInput]);
 
   // Handle script option selection
   const handleOptionSelect = (option: ScriptOption) => {
@@ -180,11 +257,16 @@ export default function ScriptEditorPage() {
                     {urlParams.mode.charAt(0).toUpperCase() + urlParams.mode.slice(1)} Mode
                   </Badge>
                 )}
+                {urlParams.inputType === "video" && (
+                  <Badge variant="secondary" className="w-fit">
+                    Video Mode
+                  </Badge>
+                )}
               </CardHeader>
 
               <CardContent className="flex flex-1 flex-col space-y-4">
                 {/* Chat History */}
-                <ChatHistory chatHistory={chatHistory} isGenerating={isGenerating} />
+                <ChatHistory chatHistory={chatHistory} isGenerating={isGenerating || isProcessingVideo} />
 
                 <Separator />
 
@@ -215,7 +297,15 @@ export default function ScriptEditorPage() {
 
           {/* Right Column: Script Canvas */}
           <div className="flex flex-col">
-            {viewMode === "ab-comparison" ? (
+            {isProcessingVideo && urlParams.videoUrl ? (
+              // Video Processing State
+              <VideoProcessor
+                videoUrl={decodeURIComponent(urlParams.videoUrl)}
+                onTranscriptReady={handleVideoTranscriptReady}
+                onError={handleVideoError}
+              />
+            ) : viewMode === "ab-comparison" ? (
+              // A/B Comparison State
               <ScriptOptions
                 optionA={scriptOptions.optionA}
                 optionB={scriptOptions.optionB}

@@ -4,35 +4,55 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { ArrowUp, Clock, Wand2, Bookmark } from "lucide-react";
+import { Clock, Wand2, Bookmark } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Textarea } from "@/components/ui/textarea";
 
 import { IdeaInboxDialog } from "./_components/idea-inbox-dialog";
+import { InputModeToggle, InputMode } from "./_components/input-mode-toggle";
 import { DailyIdea, ScriptMode, mockDailyIdeas, scriptModes, getSourceIcon, getSourceColor } from "./_components/types";
 
 export default function NewScriptPage() {
   const router = useRouter();
+
+  // Input mode state
+  const [inputMode, setInputMode] = useState<InputMode>("text");
   const [scriptIdea, setScriptIdea] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
+
+  // Other state
   const [selectedMode, setSelectedMode] = useState<ScriptMode["id"]>("yolo");
   const [scriptLength, setScriptLength] = useState("20");
   const [dailyIdeas, setDailyIdeas] = useState(mockDailyIdeas);
 
   const handleSubmit = () => {
-    if (!scriptIdea.trim()) return;
+    if (inputMode === "text") {
+      if (!scriptIdea.trim()) return;
 
-    const params = new URLSearchParams({
-      idea: encodeURIComponent(scriptIdea),
-      mode: selectedMode,
-      length: scriptLength,
-    });
+      const params = new URLSearchParams({
+        idea: encodeURIComponent(scriptIdea),
+        mode: selectedMode,
+        length: scriptLength,
+        inputType: "text",
+      });
 
-    router.push(`/dashboard/scripts/editor?${params.toString()}`);
+      router.push(`/dashboard/scripts/editor?${params.toString()}`);
+    } else {
+      if (!videoUrl.trim()) return;
+
+      const params = new URLSearchParams({
+        videoUrl: encodeURIComponent(videoUrl),
+        mode: selectedMode,
+        length: scriptLength,
+        inputType: "video",
+      });
+
+      router.push(`/dashboard/scripts/editor?${params.toString()}`);
+    }
   };
 
   const handleMagicWand = (idea: DailyIdea) => {
@@ -41,6 +61,7 @@ export default function NewScriptPage() {
       mode: selectedMode,
       length: scriptLength,
       source: idea.source,
+      inputType: "text",
     });
 
     router.push(`/dashboard/scripts/editor?${params.toString()}`);
@@ -59,6 +80,8 @@ export default function NewScriptPage() {
     }
   };
 
+  const isSubmitDisabled = inputMode === "video" ? !videoUrl.trim() : !scriptIdea.trim();
+
   return (
     <div className="bg-background min-h-screen p-6">
       <div className="mx-auto max-w-7xl space-y-8">
@@ -66,29 +89,23 @@ export default function NewScriptPage() {
         <div className="space-y-2">
           <h1 className="text-4xl font-bold">What will you Script today?</h1>
           <p className="text-muted-foreground text-lg">
-            Start with an idea, fix an existing script, or create a structured story from scratch.
+            Start with an idea, analyze a viral video, or create a structured story from scratch.
           </p>
         </div>
 
-        {/* Main Input Section */}
+        {/* Main Input Section with Mode Toggle */}
         <div className="space-y-6">
-          <div className="relative">
-            <Textarea
-              value={scriptIdea}
-              onChange={(e) => setScriptIdea(e.target.value)}
-              onKeyDown={handleKeyPress}
-              placeholder="My script ideas for the day is..."
-              className="min-h-32 resize-none p-6 pr-16 text-lg"
-            />
-            <Button
-              onClick={handleSubmit}
-              disabled={!scriptIdea.trim()}
-              size="sm"
-              className="absolute right-4 bottom-4 h-10 w-10 p-0"
-            >
-              <ArrowUp className="h-5 w-5" />
-            </Button>
-          </div>
+          <InputModeToggle
+            inputMode={inputMode}
+            setInputMode={setInputMode}
+            textValue={scriptIdea}
+            onTextChange={setScriptIdea}
+            videoUrl={videoUrl}
+            onVideoUrlChange={setVideoUrl}
+            onKeyPress={handleKeyPress}
+            isSubmitDisabled={isSubmitDisabled}
+            onSubmit={handleSubmit}
+          />
 
           {/* Controls and Action Buttons Row */}
           <div className="flex flex-wrap items-center gap-4">
@@ -138,7 +155,9 @@ export default function NewScriptPage() {
               })}
             </div>
 
-            <div className="text-muted-foreground ml-auto text-sm">Press ⌘+Enter to submit</div>
+            <div className="text-muted-foreground ml-auto text-sm">
+              Press ⌘+Enter to {inputMode === "video" ? "process video" : "submit"}
+            </div>
           </div>
         </div>
 
