@@ -114,11 +114,16 @@ const VideoEmbedComponent = ({
     setContentLoaded(true);
     setIsLoading(false);
 
-    // If user clicked to play and it's a video element, start playback immediately
-    if (isPlaying && videoRef.current) {
+    // Only start playing if this video is still the currently selected one
+    if (isPlaying && videoRef.current && currentlyPlayingId === videoId) {
+      console.log(`▶️ [VideoEmbed] Starting playback for ${videoId.substring(0, 30)}...`);
       videoRef.current.play().catch((error) => {
         console.warn("⚠️ [VideoEmbed] Autoplay failed (may require user interaction):", error);
       });
+    } else if (currentlyPlayingId !== videoId) {
+      console.log(
+        `⏸️ [VideoEmbed] Content loaded but not starting - another video is playing: ${currentlyPlayingId?.substring(0, 30)}...`,
+      );
     }
   };
 
@@ -136,10 +141,11 @@ const VideoEmbedComponent = ({
         currentlyPlaying: currentlyPlayingId.substring(0, 30) + "...",
       });
 
-      // For video elements, stop programmatically
-      if (videoRef.current) {
+      // For video elements, stop programmatically and prevent restart
+      if (videoRef.current && !videoRef.current.paused) {
         videoRef.current.pause();
         videoRef.current.currentTime = 0;
+        console.log(`🛑 [VideoEmbed] Video ${videoId.substring(0, 30)}... successfully stopped`);
       }
 
       // For iframe videos (TikTok, etc.), they will automatically stop
@@ -196,7 +202,6 @@ const VideoEmbedComponent = ({
       controls
       loop
       playsInline
-      autoPlay={isPlaying}
       onLoadedData={handleContentLoad}
       onError={handleContentError}
       style={{
