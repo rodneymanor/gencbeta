@@ -1,26 +1,23 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { useSearchParams } from "next/navigation";
 
-import { Send, Bot } from "lucide-react";
+import { Bot, FileText } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { ChatHistory } from "./_components/chat-history";
-import { RefinementControlsSection } from "./_components/refinement-controls";
+import { ScriptChatInput } from "./_components/script-chat-input";
 import { ScriptOptions } from "./_components/script-options";
 import {
   ChatMessage,
-  ScriptOption,
   RefinementControls,
-  ViewMode,
+  ScriptOption,
   UrlParams,
+  ViewMode,
   generateScriptContent,
   generateUniqueId,
 } from "./_components/types";
@@ -234,21 +231,56 @@ export default function ScriptEditorPage() {
     }, 1000);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleChatSubmit();
-    }
-  };
-
   return (
     <div className="bg-background min-h-screen p-6">
       <div className="mx-auto max-w-7xl">
-        <div className="grid h-[calc(100vh-6rem)] grid-cols-1 gap-6 lg:grid-cols-2">
-          {/* Left Column: AI Writing Partner */}
-          <div className="flex flex-col space-y-4">
+        <div className="grid h-[calc(100vh-6rem)] grid-cols-3 gap-6">
+          {/* Left Column: Script Canvas (2/3 width) */}
+          <div className="col-span-2 flex flex-col space-y-4">
             <Card className="flex flex-1 flex-col">
               <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Script Canvas
+                </CardTitle>
+                {workingDraft && (
+                  <Badge variant="outline" className="w-fit">
+                    Working on: {workingDraft.title}
+                  </Badge>
+                )}
+              </CardHeader>
+              <CardContent className="flex-1 overflow-auto">
+                {viewMode === "ab-comparison" && scriptOptions ? (
+                  <ScriptOptions
+                    optionA={scriptOptions.optionA}
+                    optionB={scriptOptions.optionB}
+                    isGenerating={isGenerating}
+                    onSelect={handleOptionSelect}
+                  />
+                ) : workingDraft ? (
+                  <div className="space-y-4">
+                    <div className="bg-muted/30 rounded-lg border p-6">
+                      <pre className="font-mono text-sm leading-relaxed whitespace-pre-wrap">
+                        {workingDraft.content}
+                      </pre>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-muted-foreground flex h-full items-center justify-center">
+                    <div className="text-center">
+                      <FileText className="mx-auto mb-4 h-12 w-12" />
+                      <p>Your script will appear here once generated</p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right Column: AI Writing Partner (1/3 width) */}
+          <div className="flex flex-col">
+            <Card className="flex flex-1 flex-col overflow-hidden">
+              <CardHeader className="flex-shrink-0">
                 <CardTitle className="flex items-center gap-2">
                   <Bot className="h-5 w-5" />
                   AI Writing Partner
@@ -258,78 +290,37 @@ export default function ScriptEditorPage() {
                     {urlParams.mode.charAt(0).toUpperCase() + urlParams.mode.slice(1)} Mode
                   </Badge>
                 )}
-                {urlParams.inputType === "video" && (
-                  <Badge variant="secondary" className="w-fit">
-                    Video Mode
-                  </Badge>
-                )}
               </CardHeader>
 
-              <CardContent className="flex flex-1 flex-col space-y-4">
-                {/* Chat History */}
-                <ChatHistory chatHistory={chatHistory} isGenerating={isGenerating || isProcessingVideo} />
-
-                <Separator />
-
-                {/* Refinement Controls */}
-                <RefinementControlsSection
-                  refinementControls={refinementControls}
-                  setRefinementControls={setRefinementControls}
-                />
-              </CardContent>
-
-              <CardFooter>
-                {viewMode === "editor" && (
-                  <div className="flex w-full gap-2">
-                    <Input
-                      placeholder="Ask me to refine your script..."
-                      value={chatInput}
-                      onChange={(e) => setChatInput(e.target.value)}
-                      onKeyPress={handleKeyPress}
+              {/* Chat Content */}
+              <CardContent className="flex flex-1 flex-col overflow-hidden p-0">
+                {/* Video Processing */}
+                {isProcessingVideo && urlParams.videoUrl && (
+                  <div className="border-b p-4">
+                    <VideoProcessor
+                      videoUrl={urlParams.videoUrl}
+                      onTranscriptReady={handleVideoTranscriptReady}
+                      onError={handleVideoError}
                     />
-                    <Button onClick={handleChatSubmit} size="icon">
-                      <Send className="h-4 w-4" />
-                    </Button>
                   </div>
                 )}
-              </CardFooter>
-            </Card>
-          </div>
 
-          {/* Right Column: Script Canvas */}
-          <div className="flex flex-col">
-            {isProcessingVideo && urlParams.videoUrl ? (
-              // Video Processing State
-              <VideoProcessor
-                videoUrl={decodeURIComponent(urlParams.videoUrl)}
-                onTranscriptReady={handleVideoTranscriptReady}
-                onError={handleVideoError}
-              />
-            ) : viewMode === "ab-comparison" ? (
-              // A/B Comparison State
-              <ScriptOptions
-                optionA={scriptOptions.optionA}
-                optionB={scriptOptions.optionB}
-                onOptionSelect={handleOptionSelect}
-                isGenerating={isGenerating}
-              />
-            ) : (
-              // Editor State - Working Draft
-              <div className="flex h-full flex-col">
-                <div className="mb-4 flex items-center justify-between">
-                  <h2 className="text-xl font-semibold">Working Draft</h2>
-                  <Badge variant="outline">{workingDraft?.title}</Badge>
+                {/* Chat History */}
+                <div className="flex-1 overflow-auto p-4">
+                  <ChatHistory messages={chatHistory} />
                 </div>
 
-                <Card className="flex-1">
-                  <CardContent className="h-full p-6">
-                    <pre className="h-full overflow-y-auto font-mono text-sm leading-relaxed whitespace-pre-wrap">
-                      {workingDraft?.content}
-                    </pre>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
+                {/* Sticky Chat Input */}
+                <ScriptChatInput
+                  value={chatInput}
+                  onChange={setChatInput}
+                  onSubmit={handleChatSubmit}
+                  disabled={isGenerating || isProcessingVideo}
+                  refinementControls={refinementControls}
+                  onRefinementChange={setRefinementControls}
+                />
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

@@ -5,11 +5,10 @@ import { Bot, User, AlertTriangle, CheckCircle } from "lucide-react";
 import { ChatMessage } from "./types";
 
 interface ChatHistoryProps {
-  chatHistory: ChatMessage[];
-  isGenerating: boolean;
+  messages: ChatMessage[];
 }
 
-export function ChatHistory({ chatHistory, isGenerating }: ChatHistoryProps) {
+export function ChatHistory({ messages }: ChatHistoryProps) {
   const getMessageIcon = (type: ChatMessage["type"]) => {
     switch (type) {
       case "user":
@@ -67,7 +66,7 @@ export function ChatHistory({ chatHistory, isGenerating }: ChatHistoryProps) {
 
   return (
     <div className="max-h-96 flex-1 space-y-4 overflow-y-auto">
-      {chatHistory.map((message) => {
+      {messages.map((message) => {
         const styles = getMessageStyles(message.type);
         const icon = getMessageIcon(message.type);
 
@@ -85,18 +84,6 @@ export function ChatHistory({ chatHistory, isGenerating }: ChatHistoryProps) {
           </div>
         );
       })}
-      {isGenerating && (
-        <div className="flex justify-start gap-3">
-          <div className="flex gap-2">
-            <div className="bg-muted flex h-8 w-8 items-center justify-center rounded-full">
-              <Bot className="text-muted-foreground h-4 w-4" />
-            </div>
-            <div className="bg-muted rounded-lg p-3">
-              <p className="text-sm">Generating your scripts...</p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
