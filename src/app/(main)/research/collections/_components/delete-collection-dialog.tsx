@@ -26,11 +26,7 @@ interface DeleteCollectionDialogProps {
   children: React.ReactNode;
 }
 
-export function DeleteCollectionDialog({
-  collection,
-  onCollectionDeleted,
-  children,
-}: DeleteCollectionDialogProps) {
+export function DeleteCollectionDialog({ collection, onCollectionDeleted, children }: DeleteCollectionDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [confirmationText, setConfirmationText] = useState("");
@@ -81,44 +77,46 @@ export function DeleteCollectionDialog({
       <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
       <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+          <AlertDialogTitle className="text-destructive flex items-center gap-2">
             <AlertTriangle className="h-5 w-5" />
             Delete Collection
           </AlertDialogTitle>
-          <AlertDialogDescription className="space-y-3">
-            <p>
-              This action <strong>cannot be undone</strong>. This will permanently delete the collection{" "}
-              <strong>&ldquo;{collection.title}&rdquo;</strong> and all {collection.videoCount} videos within it.
-            </p>
-            <div className="bg-destructive/10 border-destructive/20 rounded-lg border p-3">
-              <div className="flex items-start gap-2">
-                <AlertTriangle className="text-destructive h-4 w-4 mt-0.5 flex-shrink-0" />
-                <div className="text-sm">
-                  <p className="font-medium">Warning:</p>
-                  <p className="text-muted-foreground">
-                    All videos in this collection will be permanently deleted from the system.
-                  </p>
+          <AlertDialogDescription asChild>
+            <div className="text-muted-foreground space-y-3 text-sm">
+              <p>
+                This action <strong>cannot be undone</strong>. This will permanently delete the collection{" "}
+                <strong>&ldquo;{collection.title}&rdquo;</strong> and all {collection.videoCount} videos within it.
+              </p>
+              <div className="bg-destructive/10 border-destructive/20 rounded-lg border p-3">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="text-destructive mt-0.5 h-4 w-4 flex-shrink-0" />
+                  <div className="text-sm">
+                    <p className="font-medium">Warning:</p>
+                    <p className="text-muted-foreground">
+                      All videos in this collection will be permanently deleted from the system.
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmation" className="text-sm font-medium">
-                Type <strong>{collection.title}</strong> to confirm:
-              </Label>
-              <Input
-                id="confirmation"
-                value={confirmationText}
-                onChange={(e) => setConfirmationText(e.target.value)}
-                placeholder={collection.title}
-                className="font-mono"
-                disabled={isDeleting}
-              />
-            </div>
-            {error && (
-              <div className="bg-destructive/10 border-destructive/20 text-destructive rounded-lg border p-3 text-sm">
-                {error}
+              <div className="space-y-2">
+                <Label htmlFor="confirmation" className="text-sm font-medium">
+                  Type <strong>{collection.title}</strong> to confirm:
+                </Label>
+                <Input
+                  id="confirmation"
+                  value={confirmationText}
+                  onChange={(e) => setConfirmationText(e.target.value)}
+                  placeholder={collection.title}
+                  className="font-mono"
+                  disabled={isDeleting}
+                />
               </div>
-            )}
+              {error && (
+                <div className="bg-destructive/10 border-destructive/20 text-destructive rounded-lg border p-3 text-sm">
+                  {error}
+                </div>
+              )}
+            </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -144,4 +142,4 @@ export function DeleteCollectionDialog({
       </AlertDialogContent>
     </AlertDialog>
   );
-} 
+}

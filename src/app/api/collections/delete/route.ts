@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { CollectionsRBACAdminService } from "@/lib/collections-rbac-admin";
 import { isAdminInitialized } from "@/lib/firebase-admin";
 import { UserManagementAdminService } from "@/lib/user-management-admin";
-import { CollectionsRBACAdminService } from "@/lib/collections-rbac-admin";
 
 // Helper functions for API validation
 function validateApiKey(request: NextRequest): boolean {
@@ -29,7 +29,7 @@ async function validateUser(userId: string) {
   return userProfile;
 }
 
-async function validatePermissions(userProfile: any, userId: string, collectionId: string) {
+async function validatePermissions(userProfile: { role: string; uid: string }, userId: string, collectionId: string) {
   if (userProfile.role !== "coach" && userProfile.role !== "super_admin") {
     throw new Error("Insufficient permissions");
   }
@@ -52,18 +52,72 @@ function createErrorResponse(message: string, status: number, details?: string) 
       error: message,
       ...(details && { details }),
     },
-    { status }
+    { status },
   );
+}
+
+async function handleValidationError(validationError: unknown) {
+  console.error(`❌ [Collections API] Validation error:`, validationError);
+  const message = validationError instanceof Error ? validationError.message : "Unknown error";
+
+  if (message === "User not found") {
+    return createErrorResponse("User not found", 404);
+  }
+  if (message === "Collection not found") {
+    return createErrorResponse("Collection not found", 404);
+  }
+  if (message === "Access denied") {
+    return createErrorResponse("Access denied", 403, "You can only delete collections you created");
+  }
+  if (message === "Insufficient permissions") {
+    return createErrorResponse("Insufficient permissions", 403, "Only coaches and super admins can delete collections");
+  }
+
+  return createErrorResponse("Failed to delete collection", 500, message);
+}
+
+function validateRequestParameters(userId: string | null, collectionId: string | null) {
+  if (!userId) {
+    console.error("❌ [Collections API] User ID is required");
+    return createErrorResponse("User ID is required", 400, "Provide userId as query parameter or x-user-id header");
+  }
+
+  if (!collectionId) {
+    console.error("❌ [Collections API] Collection ID is required");
+    return createErrorResponse("Collection ID is required", 400, "Provide collectionId as query parameter");
+  }
+
+  return null;
+}
+
+async function handleCollectionDeletion(userId: string, collectionId: string) {
+  const userProfile = await validateUser(userId);
+  await validatePermissions(userProfile, userId, collectionId);
+  await CollectionsRBACAdminService.deleteCollection(collectionId);
+
+  console.log(`✅ [Collections API] Collection deleted successfully: ${collectionId} by user ${userId}`);
+
+  return {
+    success: true,
+    message: "Collection deleted successfully",
+    collectionId,
+    deletedBy: {
+      id: userProfile.uid,
+      email: userProfile.email,
+      role: userProfile.role,
+    },
+    timestamp: new Date().toISOString(),
+  };
 }
 
 /**
  * DELETE /api/collections/delete
  * Delete a collection with RBAC validation
- * 
+ *
  * Required headers:
  * - x-api-key: API authentication key
  * - x-user-id: User ID performing the deletion (optional if provided as query param)
- * 
+ *
  * Required query parameters:
  * - collectionId: ID of the collection to delete
  * - userId: User ID performing the deletion (optional if provided as header)
@@ -84,74 +138,23 @@ export async function DELETE(request: NextRequest) {
       return createErrorResponse("Firebase Admin SDK not configured", 500);
     }
 
-    // Get user ID and collection ID
+    // Get and validate user ID and collection ID
     const userId = getUserIdFromRequest(request);
     const collectionId = getCollectionIdFromRequest(request);
 
-    if (!userId) {
-      console.error("❌ [Collections API] User ID is required");
-      return createErrorResponse(
-        "User ID is required", 
-        400, 
-        "Provide userId as query parameter or x-user-id header"
-      );
-    }
-
-    if (!collectionId) {
-      console.error("❌ [Collections API] Collection ID is required");
-      return createErrorResponse(
-        "Collection ID is required", 
-        400, 
-        "Provide collectionId as query parameter"
-      );
+    const paramValidationError = validateRequestParameters(userId, collectionId);
+    if (paramValidationError) {
+      return paramValidationError;
     }
 
     try {
-      // Verify user exists and validate permissions
-      const userProfile = await validateUser(userId);
-      await validatePermissions(userProfile, userId, collectionId);
-
-      // Delete the collection
-      await CollectionsRBACAdminService.deleteCollection(collectionId);
-      
-      console.log(`✅ [Collections API] Collection deleted successfully: ${collectionId} by user ${userId}`);
-      
-      return NextResponse.json({
-        success: true,
-        message: "Collection deleted successfully",
-        collectionId,
-        deletedBy: {
-          id: userProfile.uid,
-          email: userProfile.email,
-          role: userProfile.role,
-        },
-        timestamp: new Date().toISOString(),
-      });
+      const result = await handleCollectionDeletion(userId!, collectionId!);
+      return NextResponse.json(result);
     } catch (validationError) {
-      console.error(`❌ [Collections API] Validation error:`, validationError);
-      const message = validationError instanceof Error ? validationError.message : "Unknown error";
-      
-      if (message === "User not found") {
-        return createErrorResponse("User not found", 404);
-      }
-      if (message === "Collection not found") {
-        return createErrorResponse("Collection not found", 404);
-      }
-      if (message === "Access denied") {
-        return createErrorResponse("Access denied", 403, "You can only delete collections you created");
-      }
-      if (message === "Insufficient permissions") {
-        return createErrorResponse("Insufficient permissions", 403, "Only coaches and super admins can delete collections");
-      }
-      
-      return createErrorResponse("Failed to delete collection", 500, message);
+      return await handleValidationError(validationError);
     }
   } catch (error) {
     console.error("❌ [Collections API] Unexpected error:", error);
-    return createErrorResponse(
-      "Internal server error", 
-      500, 
-      error instanceof Error ? error.message : "Unknown error"
-    );
+    return createErrorResponse("Internal server error", 500, error instanceof Error ? error.message : "Unknown error");
   }
-} 
+}
