@@ -222,9 +222,9 @@ export function InputModeToggle({
               onClick={onSubmit}
               disabled={finalSubmitDisabled}
               size="sm"
-              className="absolute right-4 bottom-3 h-10 w-10 p-0"
+              className="absolute right-3 bottom-2 h-8 w-8 p-0"
             >
-              <ExternalLink className="h-5 w-5" />
+              <ExternalLink className="h-4 w-4" />
             </Button>
           </div>
 
