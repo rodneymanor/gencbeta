@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 
     // Step 4: Start background analysis (fire-and-forget)
     console.log("🎬 [ORCHESTRATOR] Step 4: Starting background analysis...");
-    startBackgroundAnalysis(downloadResult.videoData, request);
+    startBackgroundAnalysis(downloadResult.videoData, url, request);
 
     // Step 5: Return combined response
     console.log("✅ [ORCHESTRATOR] Workflow completed successfully");
@@ -145,9 +145,11 @@ function validateVideoSize(size: number) {
 
 function startBackgroundAnalysis(
   videoData: { buffer: number[]; size: number; mimeType: string; filename: string },
+  originalVideoUrl: string,
   request: NextRequest,
 ) {
   console.log("🎬 [ORCHESTRATOR] Starting background analysis...");
+  console.log("🔗 [ORCHESTRATOR] Original video URL:", originalVideoUrl);
 
   // Use setTimeout to ensure this runs after the response is sent
   setTimeout(async () => {
@@ -159,6 +161,7 @@ function startBackgroundAnalysis(
       const blob = new Blob([buffer], { type: videoData.mimeType });
       formData.append("video", blob, videoData.filename);
 
+      console.log("🔍 [BACKGROUND] Calling analyze-complete service...");
       const response = await fetch(`${baseUrl}/api/video/analyze-complete`, {
         method: "POST",
         body: formData,
@@ -169,14 +172,59 @@ function startBackgroundAnalysis(
         console.log("✅ [BACKGROUND] Complete analysis completed successfully");
         console.log("📝 [BACKGROUND] Transcript length:", analysisResult.transcript?.length ?? 0);
         console.log("📊 [BACKGROUND] Platform detected:", analysisResult.contentMetadata?.platform ?? "Unknown");
-        // TODO: Update video record in database with analysis results
+
+        // Update video record in database with analysis results
+        console.log("💾 [BACKGROUND] Updating video record with analysis results...");
+        await updateVideoTranscription(baseUrl, originalVideoUrl, analysisResult);
       } else {
         console.log("⚠️ [BACKGROUND] Analysis failed:", response.status);
+        const errorText = await response.text();
+        console.log("❌ [BACKGROUND] Analysis error details:", errorText);
       }
     } catch (error) {
       console.error("❌ [BACKGROUND] Background analysis error:", error);
     }
   }, 100); // Small delay to ensure response is sent first
+}
+
+async function updateVideoTranscription(
+  baseUrl: string,
+  originalVideoUrl: string,
+  analysisResult: {
+    transcript: string;
+    components: { hook: string; bridge: string; nugget: string; wta: string };
+    contentMetadata: { platform: string; author: string; description: string; source: string; hashtags: string[] };
+    visualContext: string;
+  },
+) {
+  try {
+    console.log("🔄 [BACKGROUND] Calling update-transcription service...");
+
+    const response = await fetch(`${baseUrl}/api/video/update-transcription`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        videoUrl: originalVideoUrl,
+        transcript: analysisResult.transcript,
+        components: analysisResult.components,
+        contentMetadata: analysisResult.contentMetadata,
+        visualContext: analysisResult.visualContext,
+      }),
+    });
+
+    if (response.ok) {
+      const updateResult = await response.json();
+      console.log("✅ [BACKGROUND] Video transcription updated successfully");
+      console.log("📊 [BACKGROUND] Updated videos:", updateResult.updatedVideos);
+      console.log("🎯 [BACKGROUND] Video IDs:", updateResult.videoIds);
+    } else {
+      const errorText = await response.text();
+      console.log("❌ [BACKGROUND] Failed to update video transcription:", response.status);
+      console.log("❌ [BACKGROUND] Update error details:", errorText);
+    }
+  } catch (error) {
+    console.error("❌ [BACKGROUND] Error calling update-transcription service:", error);
+  }
 }
 
 function createWorkflowResponse(downloadResult: unknown, uploadResult: unknown) {
