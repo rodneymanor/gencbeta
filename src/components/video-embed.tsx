@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback, memo } from "react";
+import React, { useState, useCallback, useRef, useEffect, memo } from "react";
 
-import { useVideoPlayback } from "@/contexts/video-playback-context";
+import { useVideoPlaybackData, useVideoPlaybackAPI } from "@/contexts/video-playback-context";
 
 import { VideoThumbnail } from "./video-thumbnail";
 
@@ -22,8 +22,17 @@ interface VideoEmbedProps {
 }
 
 // Helper function to create iframe src with autoplay
-const createIframeSrc = (url: string, shouldAutoplay: boolean): string => {
-  return shouldAutoplay ? `${url}${url.includes("?") ? "&" : "?"}autoplay=true` : url;
+const createIframeSrc = (url: string, currentlyPlayingId: string | null, videoId: string) => {
+  const shouldAutoplay = currentlyPlayingId === videoId;
+  const autoplayParam = shouldAutoplay ? "&autoplay=true&muted=false" : "";
+  const finalSrc = `${url}${autoplayParam}`;
+
+  console.log("🎬 [VideoEmbed] Setting iframe src immediately for " + url.substring(0, 50) + "...:", {
+    shouldAutoplay,
+    finalSrc: finalSrc.substring(0, 100) + "...",
+  });
+
+  return finalSrc;
 };
 
 // Helper function to render error state
@@ -65,7 +74,7 @@ const renderCDNIframe = (
 ) => {
   if (!iframeSrcRef.current) {
     const shouldAutoplay = isPlaying && currentlyPlayingId === videoId;
-    const finalSrc = createIframeSrc(url, shouldAutoplay);
+    const finalSrc = createIframeSrc(url, shouldAutoplay ? currentlyPlayingId : null, videoId);
     iframeSrcRef.current = finalSrc;
 
     console.log("🎬 [VideoEmbed] Setting iframe src immediately for", videoId.substring(0, 50) + "...:", {
@@ -119,195 +128,235 @@ const renderDirectVideo = (
   </div>
 );
 
+// Helper functions to reduce component complexity
+const createVideoEventHandlers = (
+  videoId: string,
+  currentlyPlayingId: string | null,
+  setCurrentlyPlaying: (id: string | null) => Promise<void>,
+) => {
+  const handlePlay = async () => {
+    if (currentlyPlayingId !== videoId) {
+      console.log("🎵 [VideoEmbed] HTML5 video started, updating context");
+      await setCurrentlyPlaying(videoId);
+    }
+  };
+
+  const handlePause = async () => {
+    if (currentlyPlayingId === videoId) {
+      console.log("⏸️ [VideoEmbed] HTML5 video paused, clearing context");
+      await setCurrentlyPlaying(null);
+    }
+  };
+
+  return { handlePlay, handlePause };
+};
+
+const setupVideoEventListeners = (
+  videoElement: HTMLVideoElement,
+  handlePlay: () => Promise<void>,
+  handlePause: () => Promise<void>,
+) => {
+  videoElement.addEventListener("play", handlePlay);
+  videoElement.addEventListener("pause", handlePause);
+
+  return () => {
+    videoElement.removeEventListener("play", handlePlay);
+    videoElement.removeEventListener("pause", handlePause);
+  };
+};
+
 // Memoize the component to prevent unnecessary re-renders
-const VideoEmbed = memo(function VideoEmbed({
-  url,
-  platform,
-  thumbnailUrl,
-  videoData,
-  className = "",
-}: VideoEmbedProps) {
-  // Local state
-  const [shouldLoad, setShouldLoad] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [contentLoaded, setContentLoaded] = useState(false);
-  const [hasError, setHasError] = useState(false);
+export const VideoEmbed = memo<VideoEmbedProps>(
+  ({ url, platform, thumbnailUrl, videoData, className = "" }) => {
+    const [shouldLoad, setShouldLoad] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [contentLoaded, setContentLoaded] = useState(false);
+    const [hasError, setHasError] = useState(false);
 
-  // Refs for stable references
-  const iframeSrcRef = useRef<string | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+    // Use split contexts to minimize re-renders
+    const { currentlyPlayingId } = useVideoPlaybackData();
+    const { setCurrentlyPlaying, pauseAllOtherVideos } = useVideoPlaybackAPI();
 
-  // Global playback state
-  const { currentlyPlayingId, setCurrentlyPlaying, pauseAllOtherVideos } = useVideoPlayback();
+    const iframeSrcRef = useRef<string | null>(null);
+    const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  // Memoize video ID to prevent recalculation
-  const videoId = React.useMemo(() => url, [url]);
+    const videoId = url;
+    const hostedOnCDN = url.includes("iframe.mediadelivery.net");
 
-  // Memoize playing state calculation
-  const isPlaying = React.useMemo(() => currentlyPlayingId === videoId, [currentlyPlayingId, videoId]);
-
-  // Determine if video is hosted on CDN
-  const hostedOnCDN = url.includes("iframe.mediadelivery.net");
-
-  console.log("🎥 [VideoEmbed] Render:", {
-    url: url.substring(0, 50) + "...",
-    platform,
-    shouldLoad,
-    isLoading,
-    contentLoaded,
-    isPlaying,
-    thumbnailUrl: thumbnailUrl ? thumbnailUrl.substring(0, 50) + "..." : "none",
-    currentlyPlayingId: (currentlyPlayingId ?? "null").substring(0, 50) + "...",
-    hasError,
-  });
-
-  // Enhanced click handler with immediate pause of other videos
-  const handleClick = useCallback(() => {
-    if (hasError || shouldLoad) return;
-
-    console.log("🔥 [VideoEmbed] Click detected - pausing others first:", {
+    console.log("🎥 [VideoEmbed] Render:", {
       url: url.substring(0, 50) + "...",
       platform,
-      currentShouldLoad: shouldLoad,
+      shouldLoad,
+      isLoading,
+      contentLoaded,
+      currentlyPlaying: currentlyPlayingId?.substring(0, 50) + "..." || "none",
       hostedOnCDN,
       hasVideoData: !!videoData,
     });
 
-    // IMMEDIATELY pause all other videos before starting this one
-    pauseAllOtherVideos(videoId);
-
-    // Update global state (this also triggers DOM-level pause in context)
-    setCurrentlyPlaying(videoId);
-
-    // Then proceed with loading this video
-    setShouldLoad(true);
-    setIsLoading(true);
-  }, [hasError, shouldLoad, url, platform, hostedOnCDN, videoData, videoId, setCurrentlyPlaying, pauseAllOtherVideos]);
-
-  // Handle content load events
-  const handleContentLoad = useCallback(() => {
-    console.log("✅ [VideoEmbed] Content loaded!");
-    setIsLoading(false);
-    setContentLoaded(true);
-
-    if (currentlyPlayingId !== videoId) {
-      console.log(
-        "⏸️ [VideoEmbed] Content loaded but not starting - another video is playing:",
-        (currentlyPlayingId ?? "none").substring(0, 50) + "...",
-      );
-      return;
-    }
-
-    // For HTML5 videos, start playback
-    if (videoRef.current && !hostedOnCDN) {
-      videoRef.current.play().catch((err) => {
-        console.error("🚫 [VideoEmbed] Video play failed:", err);
-        setHasError(true);
-      });
-    }
-  }, [currentlyPlayingId, videoId, hostedOnCDN]);
-
-  // Effect to stop videos when another video starts playing (backup to context)
-  useEffect(() => {
-    if (currentlyPlayingId && currentlyPlayingId !== videoId && shouldLoad) {
-      console.log("🛑 [VideoEmbed] Stopping video (another video started):", {
-        thisVideo: videoId.substring(0, 50) + "...",
-        currentlyPlaying: currentlyPlayingId.substring(0, 50) + "...",
+    // Handle click to start video with proper async control
+    const handleClick = useCallback(async () => {
+      console.log("🔥 [VideoEmbed] Click detected - pausing others first:", {
+        url: url.substring(0, 50) + "...",
+        platform,
+        currentShouldLoad: shouldLoad,
+        hostedOnCDN,
+        hasVideoData: !!videoData,
       });
 
-      // Stop video element if it exists and is playing
-      if (videoRef.current && !videoRef.current.paused) {
-        videoRef.current.pause();
+      try {
+        // First pause all other videos and wait for completion
+        await pauseAllOtherVideos(videoId);
+
+        // Then start this video
+        await setCurrentlyPlaying(videoId);
+
+        setShouldLoad(true);
+        setIsLoading(true);
+      } catch (error) {
+        console.error("❌ [VideoEmbed] Error handling click:", error);
       }
-    }
-  }, [currentlyPlayingId, videoId, shouldLoad]);
+    }, [url, platform, shouldLoad, hostedOnCDN, videoData, pauseAllOtherVideos, setCurrentlyPlaying, videoId]);
 
-  // Add event listener to HTML5 video for play events (additional safeguard)
-  useEffect(() => {
-    if (!shouldLoad || hostedOnCDN || !videoRef.current) return;
+    // Set iframe src immediately when shouldLoad becomes true for CDN videos
+    useEffect(() => {
+      if (shouldLoad && hostedOnCDN && !iframeSrcRef.current) {
+        const shouldAutoplay = currentlyPlayingId === videoId;
+        const autoplayParam = shouldAutoplay ? "&autoplay=true&muted=false" : "";
+        const finalSrc = `${url}${autoplayParam}`;
 
-    const videoElement = videoRef.current;
+        console.log("🎬 [VideoEmbed] Setting iframe src immediately for " + url.substring(0, 50) + "...:", {
+          shouldAutoplay,
+          finalSrc: finalSrc.substring(0, 100) + "...",
+        });
 
-    const handlePlay = () => {
-      console.log("▶️ [VideoEmbed] HTML5 video play event detected - ensuring global state sync");
+        iframeSrcRef.current = finalSrc;
+      }
+    }, [shouldLoad, hostedOnCDN, url, currentlyPlayingId, videoId]);
+
+    // Handle content load events
+    const handleContentLoad = useCallback(() => {
+      console.log("✅ [VideoEmbed] Content loaded!");
+      setIsLoading(false);
+      setContentLoaded(true);
+
+      // Only start if this video is currently set to be playing
       if (currentlyPlayingId !== videoId) {
-        // This video started playing but isn't tracked globally - fix it
-        setCurrentlyPlaying(videoId);
-        pauseAllOtherVideos(videoId);
+        console.log(
+          "⏸️ [VideoEmbed] Content loaded but not starting - another video is playing:",
+          currentlyPlayingId?.substring(0, 20) + "..." || "none",
+        );
       }
-    };
+    }, [currentlyPlayingId, videoId]);
 
-    const handlePause = () => {
-      console.log("⏸️ [VideoEmbed] HTML5 video pause event detected");
-      if (currentlyPlayingId === videoId) {
-        // This was the active video and it paused - clear global state
-        setCurrentlyPlaying(null);
+    // Monitor when other videos start playing and stop this one
+    useEffect(() => {
+      if (currentlyPlayingId && currentlyPlayingId !== videoId && (shouldLoad || contentLoaded)) {
+        console.log("🛑 [VideoEmbed] Stopping video (another video started):", {
+          thisVideo: videoId.substring(0, 50) + "...",
+          currentlyPlaying: currentlyPlayingId.substring(0, 50) + "...",
+        });
+
+        // Reset state but keep content loaded for faster restart
+        setShouldLoad(false);
+        setIsLoading(false);
       }
-    };
+    }, [currentlyPlayingId, videoId, shouldLoad, contentLoaded]);
 
-    videoElement.addEventListener("play", handlePlay);
-    videoElement.addEventListener("pause", handlePause);
+    // HTML5 video event listeners for play/pause sync
+    useEffect(() => {
+      const videoElement = videoRef.current;
+      if (!videoElement || !shouldLoad || hostedOnCDN) return;
 
-    return () => {
-      videoElement.removeEventListener("play", handlePlay);
-      videoElement.removeEventListener("pause", handlePause);
-    };
-  }, [shouldLoad, hostedOnCDN, videoId, currentlyPlayingId, setCurrentlyPlaying, pauseAllOtherVideos]);
+      const { handlePlay, handlePause } = createVideoEventHandlers(videoId, currentlyPlayingId, setCurrentlyPlaying);
+      return setupVideoEventListeners(videoElement, handlePlay, handlePause);
+    }, [shouldLoad, hostedOnCDN, videoId, currentlyPlayingId, setCurrentlyPlaying]);
 
-  // Effect to clean up when component unmounts
-  useEffect(() => {
-    return () => {
-      if (currentlyPlayingId === videoId) {
-        console.log("🧹 [VideoEmbed] Cleanup - stopping video on unmount:", videoId.substring(0, 50) + "...");
-        setCurrentlyPlaying(null);
-      }
-    };
-  }, [currentlyPlayingId, videoId, setCurrentlyPlaying]);
+    // Cleanup when component unmounts
+    useEffect(() => {
+      return () => {
+        if (currentlyPlayingId === videoId) {
+          console.log("🧹 [VideoEmbed] Cleanup - stopping video on unmount:", videoId.substring(0, 50) + "...");
+          setCurrentlyPlaying(null);
+        }
+      };
+    }, [currentlyPlayingId, videoId, setCurrentlyPlaying]);
 
-  // Set iframe src only once when needed
-  useEffect(() => {
-    if (shouldLoad && hostedOnCDN && !iframeSrcRef.current) {
-      const shouldAutoplay = isPlaying && currentlyPlayingId === videoId;
-      const finalSrc = createIframeSrc(url, shouldAutoplay);
-      iframeSrcRef.current = finalSrc;
+    // Sync wrapper for handleClick to match VideoThumbnail interface
+    const handleClickSync = useCallback(() => {
+      void handleClick();
+    }, [handleClick]);
 
-      console.log("🎬 [VideoEmbed] Setting iframe src for", videoId.substring(0, 50) + "...:", {
-        shouldAutoplay,
-        finalSrc: finalSrc.substring(0, 100) + "...",
-      });
-    }
-  }, [shouldLoad, hostedOnCDN, url, isPlaying, currentlyPlayingId, videoId]);
+    // Render logic
+    const showThumbnail = !shouldLoad;
+    const showLoadingOverlay = shouldLoad && isLoading;
+    const showContent = shouldLoad;
 
-  // Error state
-  if (hasError) return renderErrorState(className);
+    return (
+      <div className={`group relative w-full overflow-hidden rounded-lg bg-black ${className || ""}`}>
+        {/* Thumbnail layer - shows when video not loaded */}
+        {showThumbnail && (
+          <div className="absolute inset-0 z-10">
+            <VideoThumbnail platform={platform} thumbnailUrl={thumbnailUrl} onClick={handleClickSync} />
+          </div>
+        )}
 
-  // Thumbnail state (not loaded yet)
-  if (!shouldLoad) return renderThumbnailState(className, platform, thumbnailUrl, handleClick, true);
+        {/* Content layer - iframe or video element */}
+        {showContent && (
+          <div className="relative h-0 w-full pb-[177.78%]">
+            {hostedOnCDN ? (
+              <iframe
+                key={videoId} // Prevent re-renders
+                src={iframeSrcRef.current || undefined}
+                className="absolute inset-0 h-full w-full"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                onLoad={handleContentLoad}
+                onError={() => {
+                  console.error("❌ [VideoEmbed] Iframe failed to load");
+                  setIsLoading(false);
+                }}
+              />
+            ) : (
+              <video
+                ref={videoRef}
+                src={url}
+                className="absolute inset-0 h-full w-full object-cover"
+                controls
+                playsInline
+                onLoadedData={handleContentLoad}
+                onError={() => {
+                  console.error("❌ [VideoEmbed] Video failed to load");
+                  setIsLoading(false);
+                }}
+              />
+            )}
+          </div>
+        )}
 
-  // CDN iframe rendering
-  if (hostedOnCDN) {
-    return renderCDNIframe(
-      className,
-      iframeSrcRef,
-      isPlaying,
-      currentlyPlayingId,
-      videoId,
-      url,
-      isLoading,
-      platform,
-      thumbnailUrl,
-      handleContentLoad,
-      setHasError,
+        {/* Loading overlay */}
+        {showLoadingOverlay && (
+          <div className="bg-opacity-75 absolute inset-0 z-20 flex items-center justify-center bg-black">
+            <div className="flex flex-col items-center gap-3">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              <p className="text-sm text-white">Loading video...</p>
+            </div>
+          </div>
+        )}
+      </div>
     );
-  }
+  },
+  (prevProps, nextProps) => {
+    // Custom comparison to prevent unnecessary re-renders
+    return (
+      prevProps.url === nextProps.url &&
+      prevProps.platform === nextProps.platform &&
+      prevProps.thumbnailUrl === nextProps.thumbnailUrl &&
+      JSON.stringify(prevProps.videoData) === JSON.stringify(nextProps.videoData) &&
+      prevProps.className === nextProps.className
+    );
+  },
+);
 
-  // Direct video rendering
-  if (contentLoaded) {
-    return renderDirectVideo(className, url, handleContentLoad, setHasError);
-  }
-
-  // Fallback loading state
-  return renderThumbnailState(className, platform, thumbnailUrl, handleClick, true);
-});
-
-export { VideoEmbed };
+VideoEmbed.displayName = "VideoEmbed";

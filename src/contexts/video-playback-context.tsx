@@ -1,114 +1,192 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect, useMemo, useRef } from "react";
 
-interface VideoPlaybackContextType {
+// Split contexts to minimize re-renders
+interface VideoPlaybackData {
   currentlyPlayingId: string | null;
   isGloballyPaused: boolean;
-  setCurrentlyPlaying: (videoId: string | null) => void;
-  pauseAll: () => void;
-  pauseAllOtherVideos: (excludeVideoId?: string) => void;
 }
 
-const VideoPlaybackContext = createContext<VideoPlaybackContextType | null>(null);
+interface VideoPlaybackAPI {
+  setCurrentlyPlaying: (videoId: string | null) => Promise<void>;
+  pauseAll: () => Promise<void>;
+  pauseAllOtherVideos: (excludeVideoId?: string) => Promise<void>;
+}
+
+const VideoPlaybackDataContext = createContext<VideoPlaybackData | null>(null);
+const VideoPlaybackAPIContext = createContext<VideoPlaybackAPI | null>(null);
+
+// Debounce utility
+function debounce<T extends(...args: any[]) => any>(func: T, delay: number): T {
+  let timeoutId: NodeJS.Timeout;
+  return ((...args: any[]) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
+  }) as T;
+}
 
 export const VideoPlaybackProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentlyPlayingId, setCurrentlyPlayingId] = useState<string | null>(null);
   const [isGloballyPaused, setIsGloballyPaused] = useState(false);
 
-  // DOM-level video control as robust backup
-  const pauseAllOtherVideosDOM = useCallback((excludeVideoId?: string) => {
+  // Track operations in progress to prevent race conditions
+  const pauseOperationsRef = useRef(new Set<string>());
+  const isSettingVideoRef = useRef(false);
+
+  // Enhanced DOM-level video control with proper async handling
+  const pauseAllOtherVideosDOM = useCallback(async (excludeVideoId?: string): Promise<void> => {
     console.log("🛑 [VideoPlayback] DOM-level pause of all other videos");
+
+    const pausePromises: Promise<void>[] = [];
 
     // Pause all HTML5 video elements
     const allVideos = document.querySelectorAll("video");
-    let pausedCount = 0;
-
     allVideos.forEach((video) => {
       const videoSrc = video.src ?? video.currentSrc;
       if (videoSrc && videoSrc !== excludeVideoId && !video.paused) {
         console.log("🔇 [VideoPlayback] Force pausing HTML5 video:", videoSrc.substring(0, 50) + "...");
-        video.pause();
-        pausedCount++;
+
+        pausePromises.push(
+          new Promise<void>((resolve) => {
+            const handlePause = () => {
+              video.removeEventListener("pause", handlePause);
+              resolve();
+            };
+            video.addEventListener("pause", handlePause);
+            video.pause();
+
+            // Fallback timeout in case pause event doesn't fire
+            setTimeout(() => {
+              video.removeEventListener("pause", handlePause);
+              resolve();
+            }, 200);
+          }),
+        );
       }
     });
 
-    // Handle CDN iframes with postMessage
+    // Handle CDN iframes with postMessage and wait for acknowledgment
     const allIframes = document.querySelectorAll('iframe[src*="iframe.mediadelivery.net"]');
     allIframes.forEach((iframe) => {
-      const iframeSrc = iframe.src;
+      const iframeElement = iframe as HTMLIFrameElement;
+      const iframeSrc = iframeElement.src;
       if (iframeSrc && iframeSrc !== excludeVideoId) {
-        try {
-          console.log("📺 [VideoPlayback] Sending pause message to iframe:", iframeSrc.substring(0, 50) + "...");
-          iframe.contentWindow?.postMessage('{"method":"pause"}', "*");
-          pausedCount++;
-        } catch (error) {
-          console.warn("⚠️ [VideoPlayback] Could not pause iframe:", error);
-        }
+        console.log("📺 [VideoPlayback] Sending pause message to iframe:", iframeSrc.substring(0, 50) + "...");
+
+        pausePromises.push(
+          new Promise<void>((resolve) => {
+            try {
+              iframeElement.contentWindow?.postMessage('{"method":"pause"}', "*");
+              // Give iframe time to process the pause command
+              setTimeout(resolve, 150);
+            } catch (error) {
+              console.warn("⚠️ [VideoPlayback] Could not pause iframe:", error);
+              resolve();
+            }
+          }),
+        );
       }
     });
 
-    if (pausedCount > 0) {
-      console.log("✅ [VideoPlayback] Paused", pausedCount, "videos/iframes");
-    }
+    // Wait for all pause operations to complete
+    await Promise.all(pausePromises);
+    console.log("✅ [VideoPlayback] All videos paused successfully");
   }, []);
 
-  // Enhanced setCurrentlyPlaying with immediate DOM-level pause
-  const setCurrentlyPlaying = useCallback(
-    (videoId: string | null) => {
-      console.log("🎬 [VideoPlayback] Setting currently playing video:", {
-        previous: currentlyPlayingId ? currentlyPlayingId.substring(0, 50) + "..." : "null",
-        new: videoId ? videoId.substring(0, 50) + "..." : "null",
-        action: videoId ? "start" : "stop",
-      });
+  // Debounced version to prevent rapid-fire operations
+  const debouncedPauseAll = useMemo(() => debounce(pauseAllOtherVideosDOM, 100), [pauseAllOtherVideosDOM]);
 
-      // If setting a new video, immediately pause all others
-      if (videoId && videoId !== currentlyPlayingId) {
-        pauseAllOtherVideosDOM(videoId);
+  // Enhanced setCurrentlyPlaying with proper async control
+  const setCurrentlyPlaying = useCallback(
+    async (videoId: string | null): Promise<void> => {
+      // Prevent concurrent video setting operations
+      if (isSettingVideoRef.current) {
+        console.log("⏸️ [VideoPlayback] Video setting in progress, skipping...");
+        return;
       }
 
-      setCurrentlyPlayingId(videoId);
-      setIsGloballyPaused(false);
+      isSettingVideoRef.current = true;
+
+      try {
+        console.log("🎬 [VideoPlayback] Setting currently playing video:", {
+          previous: currentlyPlayingId ? currentlyPlayingId.substring(0, 50) + "..." : "null",
+          new: videoId ? videoId.substring(0, 50) + "..." : "null",
+          action: videoId ? "start" : "stop",
+        });
+
+        // First, pause all other videos and wait for completion
+        if (videoId) {
+          await pauseAllOtherVideosDOM(videoId);
+        }
+
+        // Then update the state
+        setCurrentlyPlayingId(videoId);
+        setIsGloballyPaused(false);
+
+        console.log("✅ [VideoPlayback] Video state updated successfully");
+      } catch (error) {
+        console.error("❌ [VideoPlayback] Error setting video:", error);
+      } finally {
+        isSettingVideoRef.current = false;
+      }
     },
     [currentlyPlayingId, pauseAllOtherVideosDOM],
   );
 
   // Public method for external pause control
   const pauseAllOtherVideos = useCallback(
-    (excludeVideoId?: string) => {
-      pauseAllOtherVideosDOM(excludeVideoId);
+    async (excludeVideoId?: string): Promise<void> => {
+      const operationId = excludeVideoId ?? "global";
+
+      if (pauseOperationsRef.current.has(operationId)) {
+        console.log("⏸️ [VideoPlayback] Pause operation already in progress for:", operationId);
+        return;
+      }
+
+      pauseOperationsRef.current.add(operationId);
+
+      try {
+        await pauseAllOtherVideosDOM(excludeVideoId);
+      } finally {
+        pauseOperationsRef.current.delete(operationId);
+      }
     },
     [pauseAllOtherVideosDOM],
   );
 
   // Global pause all function
-  const pauseAll = useCallback(() => {
+  const pauseAll = useCallback(async (): Promise<void> => {
     console.log("⏸️ [VideoPlayback] Pausing all videos globally");
+
     setCurrentlyPlayingId(null);
     setIsGloballyPaused(true);
-    pauseAllOtherVideosDOM();
+
+    await pauseAllOtherVideosDOM();
   }, [pauseAllOtherVideosDOM]);
 
-  // Monitor for multiple playing videos (production safeguard)
+  // Monitor for multiple videos playing (reduced frequency)
   useEffect(() => {
     const monitorInterval = setInterval(() => {
       const playingVideos = document.querySelectorAll("video:not([paused])");
       if (playingVideos.length > 1) {
         console.warn("⚠️ [VideoPlayback] Multiple videos detected playing! Auto-correcting...");
         playingVideos.forEach((video) => {
-          const videoSrc = video.src ?? video.currentSrc;
+          const videoElement = video as HTMLVideoElement;
+          const videoSrc = videoElement.src ?? videoElement.currentSrc;
 
           if (!currentlyPlayingId || !videoSrc.includes(currentlyPlayingId)) {
             console.log("🔧 [VideoPlayback] Auto-pausing unexpected video:", videoSrc.substring(0, 50) + "...");
-            video.pause();
+            videoElement.pause();
           }
         });
       }
-    }, 3000);
+    }, 5000); // Reduced from 3000 to 5000ms to prevent interference
 
     return () => clearInterval(monitorInterval);
   }, [currentlyPlayingId]);
 
+  // Lifecycle management
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
@@ -144,24 +222,55 @@ export const VideoPlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, [pauseAll]);
 
-  const value = useMemo(
+  // Memoize data and API separately to minimize re-renders
+  const data = useMemo(
     () => ({
       currentlyPlayingId,
       isGloballyPaused,
+    }),
+    [currentlyPlayingId, isGloballyPaused],
+  );
+
+  const api = useMemo(
+    () => ({
       setCurrentlyPlaying,
       pauseAll,
       pauseAllOtherVideos,
     }),
-    [currentlyPlayingId, isGloballyPaused, setCurrentlyPlaying, pauseAll, pauseAllOtherVideos],
+    [setCurrentlyPlaying, pauseAll, pauseAllOtherVideos],
   );
 
-  return <VideoPlaybackContext.Provider value={value}>{children}</VideoPlaybackContext.Provider>;
+  return (
+    <VideoPlaybackDataContext.Provider value={data}>
+      <VideoPlaybackAPIContext.Provider value={api}>{children}</VideoPlaybackAPIContext.Provider>
+    </VideoPlaybackDataContext.Provider>
+  );
 };
 
-export const useVideoPlayback = () => {
-  const context = useContext(VideoPlaybackContext);
+// Custom hooks for accessing the split contexts
+export const useVideoPlaybackData = () => {
+  const context = useContext(VideoPlaybackDataContext);
   if (!context) {
-    throw new Error("useVideoPlayback must be used within VideoPlaybackProvider");
+    throw new Error("useVideoPlaybackData must be used within VideoPlaybackProvider");
   }
   return context;
+};
+
+export const useVideoPlaybackAPI = () => {
+  const context = useContext(VideoPlaybackAPIContext);
+  if (!context) {
+    throw new Error("useVideoPlaybackAPI must be used within VideoPlaybackProvider");
+  }
+  return context;
+};
+
+// Legacy hook for backward compatibility
+export const useVideoPlayback = () => {
+  const data = useVideoPlaybackData();
+  const api = useVideoPlaybackAPI();
+
+  return {
+    ...data,
+    ...api,
+  };
 };
