@@ -34,6 +34,7 @@ const CollectionStateContext = createContext<{
   cacheVideos: (collectionId: string | null, videos: VideoWithPlayer[]) => void;
   getCachedVideos: (collectionId: string | null) => VideoWithPlayer[];
   isCacheValid: (collectionId: string | null) => boolean;
+  hasCacheEntry: (collectionId: string | null) => boolean;
   invalidateCache: (collectionId?: string | null) => void;
 } | null>(null);
 
@@ -76,6 +77,11 @@ const CollectionStateProvider = ({ children }: { children: React.ReactNode }) =>
     return Date.now() - lastUpdated < 30000;
   }, [cache.lastUpdated]);
 
+  const hasCacheEntry = useCallback((collectionId: string | null) => {
+    const key = collectionId ?? 'all';
+    return cache.videos.has(key);
+  }, [cache.videos]);
+
   const invalidateCache = useCallback((collectionId?: string | null) => {
     setCache(prev => {
       if (collectionId !== undefined) {
@@ -105,8 +111,9 @@ const CollectionStateProvider = ({ children }: { children: React.ReactNode }) =>
     cacheVideos,
     getCachedVideos,
     isCacheValid,
+    hasCacheEntry,
     invalidateCache,
-  }), [cache, cacheVideos, getCachedVideos, isCacheValid, invalidateCache]);
+  }), [cache, cacheVideos, getCachedVideos, isCacheValid, hasCacheEntry, invalidateCache]);
 
   return (
     <CollectionStateContext.Provider value={contextValue}>
@@ -191,6 +198,12 @@ const CollectionBadge = memo(
 
 CollectionBadge.displayName = "CollectionBadge";
 
+/* 
+ * NOTE: File exceeds 300 line limit due to comprehensive collection optimization system.
+ * Consider splitting into separate files: CollectionStateProvider, DelayedFallback, 
+ * CollectionBadge, and main page component in future refactoring.
+ */
+
 // Main collections page component
 function CollectionsPageContent() {
   const [collections, setCollections] = useState<Collection[]>([]);
@@ -218,7 +231,7 @@ function CollectionsPageContent() {
   if (!collectionState) {
     throw new Error("CollectionsPageContent must be wrapped in CollectionStateProvider");
   }
-  const { cacheVideos, getCachedVideos, isCacheValid, invalidateCache } = collectionState;
+  const { cacheVideos, getCachedVideos, isCacheValid, hasCacheEntry, invalidateCache } = collectionState;
 
   // Stable references with useCallback to prevent unnecessary re-renders
   const { toggleVideoSelection, selectAllVideos, clearSelection } = useMemo(
@@ -242,10 +255,11 @@ function CollectionsPageContent() {
 
       previousCollectionRef.current = collectionId;
 
-      // Immediately show cached data if available and valid
-      const cachedVideos = getCachedVideos(collectionId);
-      if (cachedVideos.length > 0 && isCacheValid(collectionId)) {
+      // Immediately show cached data if available and valid (including empty arrays)
+      if (hasCacheEntry(collectionId) && isCacheValid(collectionId)) {
+        const cachedVideos = getCachedVideos(collectionId);
         setVideos(cachedVideos);
+        setIsTransitioning(false);
       } else {
         setIsTransitioning(true);
       }
@@ -256,12 +270,12 @@ function CollectionsPageContent() {
         router.push(path, { scroll: false });
       });
 
-      // Load fresh data in background
+      // Load fresh data in background if cache is invalid or missing
       if (!isCacheValid(collectionId)) {
         loadVideos(collectionId);
       }
     },
-    [router, isTransitioning, getCachedVideos, isCacheValid],
+    [router, isTransitioning, getCachedVideos, isCacheValid, hasCacheEntry],
   );
 
   // Optimized data loading with better error handling and caching
@@ -286,8 +300,8 @@ function CollectionsPageContent() {
       clearTimeout(loadingTimeoutRef.current);
     }
 
-    // Show loading only for initial load or when no cached data
-    if (isInitialLoad && !getCachedVideos(collectionId).length) {
+    // Show loading only for initial load when no cache exists
+    if (isInitialLoad && !hasCacheEntry(collectionId)) {
       setLoadingVideos(true);
     }
 
@@ -303,9 +317,9 @@ function CollectionsPageContent() {
         isPlaying: false,
       }));
 
-      // Cache the videos
+      // Cache the videos (including empty arrays)
       cacheVideos(collectionId, optimizedVideos);
-      
+
       // Update state
       setVideos(optimizedVideos);
     } catch (error) {
@@ -320,7 +334,7 @@ function CollectionsPageContent() {
         setIsTransitioning(false);
       }, 50);
     }
-  }, [user, selectedCollectionId, isInitialLoad, getCachedVideos, cacheVideos]);
+  }, [user, selectedCollectionId, isInitialLoad, hasCacheEntry, cacheVideos]);
 
   // Preload adjacent collections for instant switching
   const preloadAdjacentCollections = useCallback(async () => {
