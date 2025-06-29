@@ -7,21 +7,28 @@ import { useVideoPlayback } from "@/contexts/video-playback-context";
 import { VideoThumbnail } from "./video-thumbnail";
 
 interface VideoData {
-  thumbnail_url?: string;
-  image_versions2?: {
-    candidates?: Array<{ url: string }>;
-  };
+  buffer: number[];
+  size: number;
+  mimeType: string;
+  filename: string;
 }
 
 interface VideoEmbedProps {
   url: string;
   platform: "tiktok" | "instagram";
+  thumbnailUrl?: string;
   videoData?: VideoData;
   className?: string;
 }
 
 // Memoize the component to prevent unnecessary re-renders
-const VideoEmbed = memo(function VideoEmbed({ url, platform, videoData, className = "" }: VideoEmbedProps) {
+const VideoEmbed = memo(function VideoEmbed({
+  url,
+  platform,
+  thumbnailUrl,
+  videoData,
+  className = "",
+}: VideoEmbedProps) {
   // Local state
   const [shouldLoad, setShouldLoad] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -45,23 +52,6 @@ const VideoEmbed = memo(function VideoEmbed({ url, platform, videoData, classNam
   // Determine if video is hosted on CDN
   const hostedOnCDN = url.includes("iframe.mediadelivery.net");
 
-  // Extract thumbnail URL from videoData if available
-  const thumbnailUrl = React.useMemo(() => {
-    if (!videoData) return undefined;
-
-    // Try to extract thumbnail from Instagram data structure
-    if (videoData.thumbnail_url) {
-      return videoData.thumbnail_url;
-    }
-
-    // Try alternate structure
-    if (videoData.image_versions2?.candidates?.[0]?.url) {
-      return videoData.image_versions2.candidates[0].url;
-    }
-
-    return undefined;
-  }, [videoData]);
-
   console.log("🎥 [VideoEmbed] Render:", {
     url: url.substring(0, 50) + "...",
     platform,
@@ -69,6 +59,7 @@ const VideoEmbed = memo(function VideoEmbed({ url, platform, videoData, classNam
     isLoading,
     contentLoaded,
     isPlaying,
+    thumbnailUrl: thumbnailUrl ? thumbnailUrl.substring(0, 50) + "..." : "none",
     currentlyPlayingId: (currentlyPlayingId ?? "null").substring(0, 50) + "...",
     hasError,
   });

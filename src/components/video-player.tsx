@@ -88,12 +88,8 @@ const VideoPlayerComponent = ({
         url={videoUrl}
         platform={platform}
         thumbnailUrl={thumbnailUrl}
-        hostedOnCDN={hostedOnCDN}
         videoData={videoData}
-        disableCard={disableCard}
-        title={title}
-        author={author}
-        lazyLoad={true}
+        className="h-full w-full"
       />
 
       {/* Metrics Overlay */}
