@@ -21,6 +21,104 @@ interface VideoEmbedProps {
   className?: string;
 }
 
+// Helper function to create iframe src with autoplay
+const createIframeSrc = (url: string, shouldAutoplay: boolean): string => {
+  return shouldAutoplay ? `${url}${url.includes("?") ? "&" : "?"}autoplay=true` : url;
+};
+
+// Helper function to render error state
+const renderErrorState = (className: string) => (
+  <div className={`relative flex aspect-[9/16] items-center justify-center rounded-lg bg-gray-100 ${className}`}>
+    <p className="text-sm text-gray-500">Failed to load video</p>
+  </div>
+);
+
+// Helper function to render thumbnail state
+const renderThumbnailState = (
+  className: string,
+  platform: "tiktok" | "instagram",
+  thumbnailUrl: string | undefined,
+  handleClick: () => void,
+  clickable = true,
+) => (
+  <div
+    className={`relative ${clickable ? "cursor-pointer" : ""} ${className}`}
+    onClick={clickable ? handleClick : undefined}
+  >
+    <VideoThumbnail platform={platform} thumbnailUrl={thumbnailUrl} onClick={handleClick} />
+  </div>
+);
+
+// Helper function to render CDN iframe
+const renderCDNIframe = (
+  className: string,
+  iframeSrcRef: React.MutableRefObject<string | null>,
+  isPlaying: boolean,
+  currentlyPlayingId: string | null,
+  videoId: string,
+  url: string,
+  isLoading: boolean,
+  platform: "tiktok" | "instagram",
+  thumbnailUrl: string | undefined,
+  handleContentLoad: () => void,
+  setHasError: (error: boolean) => void,
+) => {
+  if (!iframeSrcRef.current) {
+    const shouldAutoplay = isPlaying && currentlyPlayingId === videoId;
+    const finalSrc = createIframeSrc(url, shouldAutoplay);
+    iframeSrcRef.current = finalSrc;
+
+    console.log("🎬 [VideoEmbed] Setting iframe src immediately for", videoId.substring(0, 50) + "...:", {
+      shouldAutoplay,
+      finalSrc: finalSrc.substring(0, 100) + "...",
+    });
+  }
+
+  return (
+    <div className={`relative aspect-[9/16] overflow-hidden rounded-lg bg-black ${className}`}>
+      <iframe
+        src={iframeSrcRef.current}
+        className="h-full w-full border-0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        onLoad={handleContentLoad}
+        onError={() => {
+          console.error("🚫 [VideoEmbed] Iframe failed to load");
+          setHasError(true);
+        }}
+      />
+
+      {isLoading && (
+        <div className="absolute inset-0 z-10">
+          <VideoThumbnail platform={platform} thumbnailUrl={thumbnailUrl} onClick={() => {}} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Helper function to render direct video
+const renderDirectVideo = (
+  className: string,
+  url: string,
+  handleContentLoad: () => void,
+  setHasError: (error: boolean) => void,
+) => (
+  <div className={`relative aspect-[9/16] overflow-hidden rounded-lg bg-black ${className}`}>
+    <video
+      src={url}
+      className="h-full w-full object-cover"
+      controls
+      playsInline
+      onLoadedData={handleContentLoad}
+      onError={() => {
+        console.error("🚫 [VideoEmbed] Video failed to load");
+        setHasError(true);
+      }}
+    />
+  </div>
+);
+
 // Memoize the component to prevent unnecessary re-renders
 const VideoEmbed = memo(function VideoEmbed({
   url,
@@ -76,11 +174,8 @@ const VideoEmbed = memo(function VideoEmbed({
       hasVideoData: !!videoData,
     });
 
-    // Start loading this video
     setShouldLoad(true);
     setIsLoading(true);
-
-    // Set this video as currently playing (stops all others)
     setCurrentlyPlaying(videoId);
   }, [hasError, shouldLoad, url, platform, hostedOnCDN, videoData, videoId, setCurrentlyPlaying]);
 
@@ -90,7 +185,6 @@ const VideoEmbed = memo(function VideoEmbed({
     setIsLoading(false);
     setContentLoaded(true);
 
-    // Only start playing if this video is currently the active one
     if (currentlyPlayingId !== videoId) {
       console.log(
         "⏸️ [VideoEmbed] Content loaded but not starting - another video is playing:",
@@ -99,7 +193,6 @@ const VideoEmbed = memo(function VideoEmbed({
       return;
     }
 
-    // Start playback for video elements
     if (videoRef.current && !hostedOnCDN) {
       videoRef.current.play().catch((err) => console.error("🚫 [VideoEmbed] Video play failed:", err));
     }
@@ -113,13 +206,9 @@ const VideoEmbed = memo(function VideoEmbed({
         currentlyPlaying: currentlyPlayingId.substring(0, 50) + "...",
       });
 
-      // Stop video element if it exists and is playing
       if (videoRef.current && !videoRef.current.paused) {
         videoRef.current.pause();
       }
-
-      // Note: We DON'T reset iframeSrcRef.current here to prevent reloads
-      // The iframe will simply stop autoplaying when it's not the active video
     }
   }, [currentlyPlayingId, videoId, shouldLoad]);
 
@@ -133,12 +222,11 @@ const VideoEmbed = memo(function VideoEmbed({
     };
   }, [currentlyPlayingId, videoId, setCurrentlyPlaying]);
 
-  // Set iframe src only once when needed, never reset it
+  // Set iframe src only once when needed
   useEffect(() => {
     if (shouldLoad && hostedOnCDN && !iframeSrcRef.current) {
       const shouldAutoplay = isPlaying && currentlyPlayingId === videoId;
-      const finalSrc = shouldAutoplay ? `${url}${url.includes("?") ? "&" : "?"}autoplay=true` : url;
-
+      const finalSrc = createIframeSrc(url, shouldAutoplay);
       iframeSrcRef.current = finalSrc;
 
       console.log("🎬 [VideoEmbed] Setting iframe src for", videoId.substring(0, 50) + "...:", {
@@ -148,79 +236,36 @@ const VideoEmbed = memo(function VideoEmbed({
     }
   }, [shouldLoad, hostedOnCDN, url, isPlaying, currentlyPlayingId, videoId]);
 
-  // Don't render anything if there's an error
-  if (hasError) {
-    return (
-      <div className={`relative flex aspect-[9/16] items-center justify-center rounded-lg bg-gray-100 ${className}`}>
-        <p className="text-sm text-gray-500">Failed to load video</p>
-      </div>
+  // Error state
+  if (hasError) return renderErrorState(className);
+
+  // Thumbnail state (not loaded yet)
+  if (!shouldLoad) return renderThumbnailState(className, platform, thumbnailUrl, handleClick, true);
+
+  // CDN iframe rendering
+  if (hostedOnCDN) {
+    return renderCDNIframe(
+      className,
+      iframeSrcRef,
+      isPlaying,
+      currentlyPlayingId,
+      videoId,
+      url,
+      isLoading,
+      platform,
+      thumbnailUrl,
+      handleContentLoad,
+      setHasError,
     );
   }
 
-  // Show thumbnail if not loaded yet
-  if (!shouldLoad) {
-    return (
-      <div className={`relative cursor-pointer ${className}`} onClick={handleClick}>
-        <VideoThumbnail platform={platform} thumbnailUrl={thumbnailUrl} onClick={handleClick} />
-      </div>
-    );
-  }
-
-  // Show loading state
-  if (isLoading) {
-    return (
-      <div className={`relative ${className}`}>
-        <VideoThumbnail platform={platform} thumbnailUrl={thumbnailUrl} onClick={handleClick} />
-      </div>
-    );
-  }
-
-  // Render iframe for CDN-hosted videos
-  if (hostedOnCDN && iframeSrcRef.current) {
-    return (
-      <div className={`relative aspect-[9/16] overflow-hidden rounded-lg bg-black ${className}`}>
-        <iframe
-          ref={iframeRef}
-          src={iframeSrcRef.current}
-          className="h-full w-full border-0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-          onLoad={handleContentLoad}
-          onError={() => {
-            console.error("🚫 [VideoEmbed] Iframe failed to load");
-            setHasError(true);
-          }}
-        />
-      </div>
-    );
-  }
-
-  // Render video element for direct video URLs
+  // Direct video rendering
   if (contentLoaded) {
-    return (
-      <div className={`relative aspect-[9/16] overflow-hidden rounded-lg bg-black ${className}`}>
-        <video
-          ref={videoRef}
-          src={url}
-          className="h-full w-full object-cover"
-          controls
-          playsInline
-          onLoadedData={handleContentLoad}
-          onError={() => {
-            console.error("🚫 [VideoEmbed] Video failed to load");
-            setHasError(true);
-          }}
-        />
-      </div>
-    );
+    return renderDirectVideo(className, url, handleContentLoad, setHasError);
   }
 
   // Fallback loading state
-  return (
-    <div className={`relative ${className}`}>
-      <VideoThumbnail platform={platform} thumbnailUrl={thumbnailUrl} onClick={handleClick} />
-    </div>
-  );
+  return renderThumbnailState(className, platform, thumbnailUrl, handleClick, true);
 });
 
 export { VideoEmbed };
