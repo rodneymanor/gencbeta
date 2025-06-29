@@ -1,18 +1,18 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { ScriptOption } from "./types";
 
 interface ScriptOptionsProps {
   optionA: ScriptOption | null;
   optionB: ScriptOption | null;
-  onOptionSelect: (option: ScriptOption) => void;
+  onSelect: (option: ScriptOption) => void;
   isGenerating: boolean;
 }
 
-export function ScriptOptions({ optionA, optionB, onOptionSelect, isGenerating }: ScriptOptionsProps) {
+export function ScriptOptions({ optionA, optionB, onSelect, isGenerating }: ScriptOptionsProps) {
   if (isGenerating) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -31,34 +31,30 @@ export function ScriptOptions({ optionA, optionB, onOptionSelect, isGenerating }
         {/* Option A */}
         {optionA && (
           <Card className="flex flex-col">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
               <CardTitle className="text-lg">Option A</CardTitle>
+              <Button onClick={() => onSelect(optionA)} variant="outline" size="sm" className="ml-4">
+                Select
+              </Button>
             </CardHeader>
             <CardContent className="flex-1">
               <pre className="font-mono text-sm leading-relaxed whitespace-pre-wrap">{optionA.content}</pre>
             </CardContent>
-            <CardFooter>
-              <Button onClick={() => onOptionSelect(optionA)} className="w-full">
-                Choose Option A
-              </Button>
-            </CardFooter>
           </Card>
         )}
 
         {/* Option B */}
         {optionB && (
           <Card className="flex flex-col">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
               <CardTitle className="text-lg">Option B</CardTitle>
+              <Button onClick={() => onSelect(optionB)} variant="outline" size="sm" className="ml-4">
+                Select
+              </Button>
             </CardHeader>
             <CardContent className="flex-1">
               <pre className="font-mono text-sm leading-relaxed whitespace-pre-wrap">{optionB.content}</pre>
             </CardContent>
-            <CardFooter>
-              <Button onClick={() => onOptionSelect(optionB)} className="w-full">
-                Choose Option B
-              </Button>
-            </CardFooter>
           </Card>
         )}
       </div>
