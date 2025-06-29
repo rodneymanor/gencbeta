@@ -4,20 +4,38 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { Clock, Wand2, Bookmark } from "lucide-react";
+import { Clock, Wand2, Bookmark, Loader2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useAuth } from "@/contexts/auth-context";
 
 import { IdeaInboxDialog } from "./_components/idea-inbox-dialog";
 import { InputModeToggle, InputMode } from "./_components/input-mode-toggle";
 import { DailyIdea, ScriptMode, mockDailyIdeas, scriptModes, getSourceIcon, getSourceColor } from "./_components/types";
 
+interface ScriptOption {
+  id: string;
+  title: string;
+  content: string;
+  estimatedDuration: string;
+  approach: "speed-write" | "educational";
+}
+
+interface SpeedWriteResponse {
+  success: boolean;
+  optionA: ScriptOption | null;
+  optionB: ScriptOption | null;
+  error?: string;
+  processingTime?: number;
+}
+
 export default function NewScriptPage() {
   const router = useRouter();
+  const { userProfile } = useAuth();
 
   // Input mode state
   const [inputMode, setInputMode] = useState<InputMode>("text");
@@ -25,22 +43,93 @@ export default function NewScriptPage() {
   const [videoUrl, setVideoUrl] = useState("");
 
   // Other state
-  const [selectedMode, setSelectedMode] = useState<ScriptMode["id"]>("yolo");
+  const [selectedMode, setSelectedMode] = useState<ScriptMode["id"]>("speed-write");
   const [scriptLength, setScriptLength] = useState("20");
   const [dailyIdeas, setDailyIdeas] = useState(mockDailyIdeas);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [speedWriteResponse, setSpeedWriteResponse] = useState<SpeedWriteResponse | null>(null);
 
-  const handleSubmit = () => {
+  const callSpeedWriteAPI = async (idea: string): Promise<SpeedWriteResponse> => {
+    const response = await fetch("/api/script/speed-write", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        idea,
+        length: scriptLength,
+        userId: userProfile?.uid ?? "anonymous",
+      }),
+    });
+
+    const data: SpeedWriteResponse = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error ?? "Failed to generate scripts");
+    }
+
+    return data;
+  };
+
+  const navigateToEditor = (idea: string, data: SpeedWriteResponse) => {
+    const params = new URLSearchParams({
+      idea: encodeURIComponent(idea),
+      mode: "speed-write",
+      length: scriptLength,
+      inputType: "text",
+      hasSpeedWriteResults: "true",
+    });
+
+    sessionStorage.setItem("speedWriteResults", JSON.stringify(data));
+    router.push(`/dashboard/scripts/editor?${params.toString()}`);
+  };
+
+  const handleSpeedWrite = async (idea: string) => {
+    if (!idea.trim()) return;
+
+    setIsGenerating(true);
+    setSpeedWriteResponse(null);
+
+    try {
+      console.log("🚀 Calling Speed Write API...");
+      const data = await callSpeedWriteAPI(idea);
+
+      console.log("✅ Speed Write API response:", data);
+      setSpeedWriteResponse(data);
+
+      if (data.success && (data.optionA || data.optionB)) {
+        navigateToEditor(idea, data);
+      }
+    } catch (error) {
+      console.error("❌ Speed Write API error:", error);
+      setSpeedWriteResponse({
+        success: false,
+        optionA: null,
+        optionB: null,
+        error: error instanceof Error ? error.message : "An unexpected error occurred",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleSubmit = async () => {
     if (inputMode === "text") {
       if (!scriptIdea.trim()) return;
 
-      const params = new URLSearchParams({
-        idea: encodeURIComponent(scriptIdea),
-        mode: selectedMode,
-        length: scriptLength,
-        inputType: "text",
-      });
+      if (selectedMode === "speed-write") {
+        await handleSpeedWrite(scriptIdea);
+      } else {
+        // Legacy mode handling for other modes
+        const params = new URLSearchParams({
+          idea: encodeURIComponent(scriptIdea),
+          mode: selectedMode,
+          length: scriptLength,
+          inputType: "text",
+        });
 
-      router.push(`/dashboard/scripts/editor?${params.toString()}`);
+        router.push(`/dashboard/scripts/editor?${params.toString()}`);
+      }
     } else {
       if (!videoUrl.trim()) return;
 
@@ -55,16 +144,21 @@ export default function NewScriptPage() {
     }
   };
 
-  const handleMagicWand = (idea: DailyIdea) => {
-    const params = new URLSearchParams({
-      idea: encodeURIComponent(idea.text),
-      mode: selectedMode,
-      length: scriptLength,
-      source: idea.source,
-      inputType: "text",
-    });
+  const handleMagicWand = async (idea: DailyIdea) => {
+    if (selectedMode === "speed-write") {
+      await handleSpeedWrite(idea.text);
+    } else {
+      // Legacy mode handling
+      const params = new URLSearchParams({
+        idea: encodeURIComponent(idea.text),
+        mode: selectedMode,
+        length: scriptLength,
+        source: idea.source,
+        inputType: "text",
+      });
 
-    router.push(`/dashboard/scripts/editor?${params.toString()}`);
+      router.push(`/dashboard/scripts/editor?${params.toString()}`);
+    }
   };
 
   const handleBookmark = (ideaId: string) => {
@@ -80,7 +174,15 @@ export default function NewScriptPage() {
     }
   };
 
-  const isSubmitDisabled = inputMode === "video" ? !videoUrl.trim() : !scriptIdea.trim();
+  const isSubmitDisabled =
+    isGenerating ||
+    (inputMode === "video" ? !videoUrl.trim() : !scriptIdea.trim());
+
+  const getSubmitButtonText = () => {
+    if (isGenerating) return "Generating Scripts...";
+    if (selectedMode === "speed-write") return "Generate A/B Scripts";
+    return inputMode === "video" ? "Process Video" : "Create Script";
+  };
 
   return (
     <div className="bg-background min-h-screen p-6">
@@ -93,6 +195,24 @@ export default function NewScriptPage() {
           </p>
         </div>
 
+        {/* Error Display */}
+        {speedWriteResponse && !speedWriteResponse.success && (
+          <Card className="border-destructive bg-destructive/5 p-4">
+            <div className="flex items-center gap-2 text-destructive">
+              <span className="font-medium">Generation Failed:</span>
+              <span>{speedWriteResponse.error}</span>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setSpeedWriteResponse(null)}
+                className="ml-auto"
+              >
+                Dismiss
+              </Button>
+            </div>
+          </Card>
+        )}
+
         {/* Main Input Section with Mode Toggle */}
         <div className="space-y-6">
           <InputModeToggle
@@ -103,7 +223,7 @@ export default function NewScriptPage() {
             videoUrl={videoUrl}
             onVideoUrlChange={setVideoUrl}
             onSubmit={handleSubmit}
-            disabled={false}
+            disabled={isGenerating}
           />
 
           {/* Controls and Action Buttons Row */}
@@ -112,7 +232,7 @@ export default function NewScriptPage() {
 
             <div className="flex items-center gap-2">
               <Clock className="text-muted-foreground h-4 w-4" />
-              <Select value={scriptLength} onValueChange={setScriptLength}>
+              <Select value={scriptLength} onValueChange={setScriptLength} disabled={isGenerating}>
                 <SelectTrigger className="w-32">
                   <SelectValue />
                 </SelectTrigger>
@@ -138,7 +258,7 @@ export default function NewScriptPage() {
                     key={mode.id}
                     variant={isSelected ? "default" : "outline"}
                     size="sm"
-                    disabled={!mode.available}
+                    disabled={!mode.available || isGenerating}
                     className={`gap-2 ${!mode.available ? "opacity-50" : ""}`}
                     onClick={() => mode.available && setSelectedMode(mode.id)}
                   >
@@ -154,8 +274,18 @@ export default function NewScriptPage() {
               })}
             </div>
 
-            <div className="text-muted-foreground ml-auto text-sm">
-              Press ⌘+Enter to {inputMode === "video" ? "process video" : "submit"}
+            {/* Submit Button */}
+            <Button 
+              onClick={handleSubmit} 
+              disabled={isSubmitDisabled}
+              className="gap-2 ml-auto"
+            >
+              {isGenerating && <Loader2 className="h-4 w-4 animate-spin" />}
+              {getSubmitButtonText()}
+            </Button>
+
+            <div className="text-muted-foreground text-sm">
+              Press ⌘+Enter to {selectedMode === "speed-write" ? "generate" : inputMode === "video" ? "process video" : "submit"}
             </div>
           </div>
         </div>

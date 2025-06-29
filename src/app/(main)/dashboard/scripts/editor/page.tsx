@@ -51,8 +51,81 @@ export default function ScriptEditorPage() {
     optionB: null,
   });
 
-  // Generate scripts from text idea
+  // Parse and set URL parameters
+  const parseUrlParameters = useCallback(() => {
+    const idea = searchParams.get("idea") ?? undefined;
+    const videoUrl = searchParams.get("videoUrl") ?? undefined;
+    const mode = searchParams.get("mode") ?? "";
+    const length = searchParams.get("length") ?? "20";
+    const source = searchParams.get("source") ?? undefined;
+    const inputType = (searchParams.get("inputType") ?? "text") as "text" | "video";
+    const hasSpeedWriteResults = searchParams.get("hasSpeedWriteResults") === "true";
+
+    setUrlParams({ idea, videoUrl, mode, length, source, inputType });
+
+    return { idea, videoUrl, mode, length, inputType, hasSpeedWriteResults };
+  }, [searchParams]);
+
+  // Load Speed Write results from sessionStorage
+  const loadSpeedWriteResults = useCallback(() => {
+    try {
+      const resultsData = sessionStorage.getItem("speedWriteResults");
+      if (!resultsData) return null;
+
+      const results = JSON.parse(resultsData);
+      
+      // Clear the sessionStorage to avoid stale data
+      sessionStorage.removeItem("speedWriteResults");
+
+      // Convert to our ScriptOption format
+      const scriptOptions: { optionA: ScriptOption | null; optionB: ScriptOption | null } = {
+        optionA: null,
+        optionB: null,
+      };
+
+      if (results.optionA) {
+        scriptOptions.optionA = {
+          id: results.optionA.id,
+          title: `${results.optionA.title} (${results.optionA.estimatedDuration})`,
+          content: results.optionA.content,
+        };
+      }
+
+      if (results.optionB) {
+        scriptOptions.optionB = {
+          id: results.optionB.id,
+          title: `${results.optionB.title} (${results.optionB.estimatedDuration})`,
+          content: results.optionB.content,
+        };
+      }
+
+      return scriptOptions;
+    } catch (error) {
+      console.error("❌ Failed to load Speed Write results:", error);
+      return null;
+    }
+  }, []);
+
+  // Generate scripts from text idea (for non-Speed Write modes)
   const generateInitialScripts = useCallback(async (idea: string, mode: string, length: string) => {
+    // Check if we have Speed Write results to load instead
+    if (mode === "speed-write") {
+      const speedWriteResults = loadSpeedWriteResults();
+      if (speedWriteResults) {
+        setScriptOptions(speedWriteResults);
+
+        const aiMessage: ChatMessage = {
+          id: generateUniqueId(),
+          type: "ai",
+          content: "I've generated two unique script approaches for you using AI. Option A follows the Speed Write formula for maximum engagement, while Option B takes an educational approach. Choose the one that best fits your style!",
+          timestamp: new Date(),
+        };
+        setChatHistory((prev) => [...prev, aiMessage]);
+        return;
+      }
+    }
+
+    // Fallback to mock generation for other modes
     setIsGenerating(true);
 
     // Simulate API delay
@@ -82,7 +155,7 @@ export default function ScriptEditorPage() {
       setChatHistory((prev) => [...prev, aiMessage]);
       setIsGenerating(false);
     }, 2000);
-  }, []);
+  }, [loadSpeedWriteResults]);
 
   // Handle video transcription completion
   const handleVideoTranscriptReady = useCallback(
@@ -158,23 +231,9 @@ export default function ScriptEditorPage() {
     [generateInitialScripts],
   );
 
-  // Parse and set URL parameters
-  const parseUrlParameters = useCallback(() => {
-    const idea = searchParams.get("idea") ?? undefined;
-    const videoUrl = searchParams.get("videoUrl") ?? undefined;
-    const mode = searchParams.get("mode") ?? "";
-    const length = searchParams.get("length") ?? "20";
-    const source = searchParams.get("source") ?? undefined;
-    const inputType = (searchParams.get("inputType") ?? "text") as "text" | "video";
-
-    setUrlParams({ idea, videoUrl, mode, length, source, inputType });
-
-    return { idea, videoUrl, mode, length, inputType };
-  }, [searchParams]);
-
   // Parse URL parameters on mount
   useEffect(() => {
-    const { idea, videoUrl, mode, length, inputType } = parseUrlParameters();
+    const { idea, videoUrl, mode, length, inputType, hasSpeedWriteResults } = parseUrlParameters();
 
     // Handle different input types
     if (inputType === "video" && videoUrl) {

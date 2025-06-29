@@ -17,7 +17,7 @@ export interface SavedIdea {
 }
 
 export interface ScriptMode {
-  id: "yolo" | "hook" | "influencer" | "template";
+  id: "speed-write" | "hook" | "influencer" | "template";
   label: string;
   description: string;
   icon: React.ComponentType<{ className?: string }>;
@@ -132,9 +132,9 @@ export const mockSavedIdeas: SavedIdea[] = [
 
 export const scriptModes: ScriptMode[] = [
   {
-    id: "yolo",
-    label: "Yolo Mode",
-    description: "Fast, spontaneous script generation",
+    id: "speed-write",
+    label: "Speed Write",
+    description: "AI-powered A/B script generation",
     icon: Zap,
     available: true,
   },

@@ -200,12 +200,12 @@ export function NavMain({ items, onCollectionCreated }: NavMainProps) {
             <SidebarMenuItem>
               <SidebarMenuButton
                 asChild
-                tooltip="Speed Write"
+                tooltip="Write Script"
                 className="bg-secondary text-secondary-foreground hover:bg-secondary/80 hover:text-secondary-foreground active:bg-secondary/80 active:text-secondary-foreground flex h-8 min-w-8 items-center justify-center shadow-md transition-[width,height,padding,box-shadow] duration-200 ease-linear group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:p-0"
               >
                 <Link href="/dashboard/scripts/new">
                   <Zap className="group-data-[collapsible=icon]:h-4 group-data-[collapsible=icon]:w-4" />
-                  <span className="group-data-[collapsible=icon]:sr-only">Speed Write</span>
+                  <span className="group-data-[collapsible=icon]:sr-only">Write Script</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
