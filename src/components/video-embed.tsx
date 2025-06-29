@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, memo } from "react";
+import { useState, useEffect, memo, useRef } from "react";
 
 import { motion } from "framer-motion";
 
@@ -67,12 +67,13 @@ const VideoEmbedComponent = ({
   title?: string;
   author?: string;
 }) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  const [videoObjectUrl, setVideoObjectUrl] = useState<string | null>(null);
-  const [contentLoaded, setContentLoaded] = useState(false);
   const [shouldLoad, setShouldLoad] = useState(!lazyLoad);
+  const [isLoading, setIsLoading] = useState(false);
+  const [contentLoaded, setContentLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [videoObjectUrl, setVideoObjectUrl] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   // Debug logging
   console.log("🎥 [VideoEmbed]:", { platform, lazyLoad, shouldLoad, isLoading });
@@ -89,6 +90,7 @@ const VideoEmbedComponent = ({
     if (!shouldLoad) {
       setShouldLoad(true);
       setIsLoading(true);
+      setIsPlaying(true);
     } else {
       console.log("⚠️ [VideoEmbed] Video already loading or loaded");
     }
@@ -125,7 +127,13 @@ const VideoEmbedComponent = ({
     console.log("✅ [VideoEmbed] Content loaded!");
     setContentLoaded(true);
     setIsLoading(false);
-    setIsPlaying(true);
+
+    // If user clicked to play and it's a video element, start playback immediately
+    if (isPlaying && videoRef.current) {
+      videoRef.current.play().catch((error) => {
+        console.warn("⚠️ [VideoEmbed] Autoplay failed (may require user interaction):", error);
+      });
+    }
   };
 
   const handleContentError = (error: unknown) => {
@@ -134,35 +142,43 @@ const VideoEmbedComponent = ({
     setIsLoading(false);
   };
 
-  const renderIframeEmbed = (src: string) => (
-    <motion.iframe
-      src={src}
-      className={`h-full w-full ${disableCard ? "" : "rounded-xl"}`}
-      frameBorder="0"
-      allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      allowFullScreen
-      onLoad={handleContentLoad}
-      onError={handleContentError}
-      style={{
-        backgroundColor: "black",
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-      }}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: contentLoaded ? 1 : 0 }}
-      transition={{ duration: 0.5 }}
-    />
-  );
+  const renderIframeEmbed = (src: string) => {
+    // Add autoplay parameter for Bunny.net videos when user clicked to play
+    const autoplaySrc =
+      isPlaying && src.includes("iframe.mediadelivery.net")
+        ? `${src}${src.includes("?") ? "&" : "?"}autoplay=true`
+        : src;
+
+    return (
+      <motion.iframe
+        src={autoplaySrc}
+        className={`h-full w-full ${disableCard ? "" : "rounded-xl"}`}
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        onLoad={handleContentLoad}
+        onError={handleContentError}
+        style={{
+          backgroundColor: "black",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+        }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: contentLoaded ? 1 : 0 }}
+        transition={{ duration: 0.5 }}
+      />
+    );
+  };
 
   const renderVideoElement = (src: string) => (
     <motion.video
+      ref={videoRef}
       src={src}
       className={`h-full w-full object-cover ${disableCard ? "" : "rounded-xl"}`}
       controls
-      muted
       loop
       playsInline
       autoPlay={isPlaying}
@@ -229,13 +245,13 @@ const VideoEmbedComponent = ({
         <>
           {/* Loading overlay - only show when loading */}
           {(isLoading || !contentLoaded) && (
-            <div className="absolute inset-0 z-10">
+            <div className="pointer-events-none absolute inset-0 z-20">
               <VideoLoadingOverlay disableCard={disableCard} />
             </div>
           )}
 
-          {/* Video content */}
-          <div className="absolute inset-0">
+          {/* Video content - ensure it's above any thumbnail elements */}
+          <div className="absolute inset-0 z-10 bg-black">
             {getVideoContent(url, platform, hostedOnCDN, videoObjectUrl, renderIframeEmbed, renderVideoElement)}
           </div>
         </>
