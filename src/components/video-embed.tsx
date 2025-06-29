@@ -31,7 +31,7 @@ const createIframeSrc = (url: string, currentlyPlayingId: string | null, videoId
 
   // Properly add query parameters for active playback
   const separator = url.includes('?') ? '&' : '?';
-  const autoplayParam = `autoplay=true&muted=false&controls=true`;
+  const autoplayParam = `autoplay=true&muted=false&controls=false`;
   const finalSrc = `${url}${separator}${autoplayParam}`;
 
   console.log("🎬 [VideoEmbed] Setting iframe src immediately for " + url.substring(0, 50) + "...:", {
@@ -297,7 +297,6 @@ export const VideoEmbed = memo<VideoEmbedProps>(
                 ref={videoRef}
                 src={url}
                 className="absolute inset-0 h-full w-full object-cover"
-                controls
                 playsInline
                 onLoadedData={handleContentLoad}
                 onError={() => {
