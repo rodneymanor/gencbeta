@@ -4,17 +4,17 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { ArrowUp, Clock } from "lucide-react";
+import { ArrowUp, Clock, Wand2, Bookmark } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 
-import { DailyIdeaCard } from "./_components/daily-idea-card";
 import { IdeaInboxDialog } from "./_components/idea-inbox-dialog";
-import { DailyIdea, ScriptMode, mockDailyIdeas, scriptModes } from "./_components/types";
+import { DailyIdea, ScriptMode, mockDailyIdeas, scriptModes, getSourceIcon, getSourceColor } from "./_components/types";
 
 export default function NewScriptPage() {
   const router = useRouter();
@@ -26,7 +26,6 @@ export default function NewScriptPage() {
   const handleSubmit = () => {
     if (!scriptIdea.trim()) return;
 
-    // Navigate to script editor with context
     const params = new URLSearchParams({
       idea: encodeURIComponent(scriptIdea),
       mode: selectedMode,
@@ -37,7 +36,6 @@ export default function NewScriptPage() {
   };
 
   const handleMagicWand = (idea: DailyIdea) => {
-    // Navigate to script editor with the selected idea
     const params = new URLSearchParams({
       idea: encodeURIComponent(idea.text),
       mode: selectedMode,
@@ -62,38 +60,38 @@ export default function NewScriptPage() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl space-y-8 p-6">
-      {/* Header */}
-      <div className="space-y-2 text-center">
-        <h1 className="text-4xl font-bold">What will you Script today?</h1>
-        <p className="text-muted-foreground text-lg">
-          Start with an idea, fix an existing script, or create a structured story from scratch.
-        </p>
-      </div>
-
-      {/* Main Input Section */}
-      <div className="space-y-4">
-        <div className="relative">
-          <Textarea
-            value={scriptIdea}
-            onChange={(e) => setScriptIdea(e.target.value)}
-            onKeyDown={handleKeyPress}
-            placeholder="My script ideas for the day is..."
-            className="min-h-32 resize-none p-6 pr-16 text-lg"
-          />
-          <Button
-            onClick={handleSubmit}
-            disabled={!scriptIdea.trim()}
-            size="sm"
-            className="absolute right-4 bottom-4 h-10 w-10 p-0"
-          >
-            <ArrowUp className="h-5 w-5" />
-          </Button>
+    <div className="bg-background min-h-screen p-6">
+      <div className="mx-auto max-w-7xl space-y-8">
+        {/* Header */}
+        <div className="space-y-2">
+          <h1 className="text-4xl font-bold">What will you Script today?</h1>
+          <p className="text-muted-foreground text-lg">
+            Start with an idea, fix an existing script, or create a structured story from scratch.
+          </p>
         </div>
 
-        {/* Controls Row */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        {/* Main Input Section */}
+        <div className="space-y-6">
+          <div className="relative">
+            <Textarea
+              value={scriptIdea}
+              onChange={(e) => setScriptIdea(e.target.value)}
+              onKeyDown={handleKeyPress}
+              placeholder="My script ideas for the day is..."
+              className="min-h-32 resize-none p-6 pr-16 text-lg"
+            />
+            <Button
+              onClick={handleSubmit}
+              disabled={!scriptIdea.trim()}
+              size="sm"
+              className="absolute right-4 bottom-4 h-10 w-10 p-0"
+            >
+              <ArrowUp className="h-5 w-5" />
+            </Button>
+          </div>
+
+          {/* Controls and Action Buttons Row */}
+          <div className="flex flex-wrap items-center gap-4">
             <IdeaInboxDialog />
 
             <div className="flex items-center gap-2">
@@ -109,65 +107,115 @@ export default function NewScriptPage() {
                 </SelectContent>
               </Select>
             </div>
-          </div>
 
-          <div className="text-muted-foreground text-sm">Press ⌘+Enter to submit</div>
-        </div>
-      </div>
+            <div className="bg-border h-4 w-px" />
 
-      {/* Action Buttons */}
-      <div className="space-y-3">
-        <h3 className="text-lg font-semibold">Script Mode</h3>
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {scriptModes.map((mode) => {
-            const IconComponent = mode.icon;
-            const isSelected = selectedMode === mode.id;
+            {/* Script Mode Buttons - Horizontal Layout */}
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground text-sm font-medium">Mode:</span>
+              {scriptModes.map((mode) => {
+                const IconComponent = mode.icon;
+                const isSelected = selectedMode === mode.id;
 
-            return (
-              <Card
-                key={mode.id}
-                className={`cursor-pointer transition-all duration-200 ${
-                  isSelected ? "ring-primary bg-primary/5 ring-2" : "hover:shadow-md"
-                } ${!mode.available ? "opacity-50" : ""}`}
-                onClick={() => mode.available && setSelectedMode(mode.id)}
-              >
-                <CardContent className="space-y-3 p-4 text-center">
-                  <div
-                    className={`mx-auto flex h-12 w-12 items-center justify-center rounded-lg ${
-                      isSelected ? "bg-primary text-primary-foreground" : "bg-muted"
-                    }`}
+                return (
+                  <Button
+                    key={mode.id}
+                    variant={isSelected ? "default" : "outline"}
+                    size="sm"
+                    disabled={!mode.available}
+                    className={`gap-2 ${!mode.available ? "opacity-50" : ""}`}
+                    onClick={() => mode.available && setSelectedMode(mode.id)}
                   >
-                    <IconComponent className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium">{mode.label}</h4>
-                    <p className="text-muted-foreground mt-1 text-xs">{mode.description}</p>
+                    <IconComponent className="h-4 w-4" />
+                    {mode.label}
                     {!mode.available && (
-                      <Badge variant="secondary" className="mt-2 text-xs">
-                        Coming Soon
+                      <Badge variant="secondary" className="ml-1 text-xs">
+                        Soon
                       </Badge>
                     )}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </div>
+                  </Button>
+                );
+              })}
+            </div>
 
-      {/* Daily Ideas Section */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Daily Ideas for You</h3>
-          <Button variant="ghost" size="sm">
-            Refresh Ideas
-          </Button>
+            <div className="text-muted-foreground ml-auto text-sm">Press ⌘+Enter to submit</div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {dailyIdeas.map((idea) => (
-            <DailyIdeaCard key={idea.id} idea={idea} onMagicWand={handleMagicWand} onBookmark={handleBookmark} />
-          ))}
+        {/* Daily Ideas Table */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Daily Ideas for You</h3>
+            <Button variant="ghost" size="sm">
+              Refresh Ideas
+            </Button>
+          </div>
+
+          <Card>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[50%]">Idea</TableHead>
+                  <TableHead className="w-[15%]">Source</TableHead>
+                  <TableHead className="w-[15%]">Category</TableHead>
+                  <TableHead className="w-[10%] text-center">Saved</TableHead>
+                  <TableHead className="w-[10%] text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {dailyIdeas.map((idea) => {
+                  const SourceIcon = getSourceIcon(idea.source);
+
+                  return (
+                    <TableRow key={idea.id} className="group">
+                      <TableCell className="font-medium">
+                        <p
+                          className="text-sm leading-relaxed"
+                          style={{
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                          }}
+                        >
+                          {idea.text}
+                        </p>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={`text-xs capitalize ${getSourceColor(idea.source)}`}>
+                          <SourceIcon className="mr-1 h-3 w-3" />
+                          {idea.source === "google-trends" ? "Trends" : idea.source}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-muted-foreground text-sm">{idea.category}</span>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleBookmark(idea.id)}
+                          className={`h-8 w-8 p-0 ${idea.isBookmarked ? "text-yellow-500" : ""}`}
+                        >
+                          <Bookmark className={`h-4 w-4 ${idea.isBookmarked ? "fill-current" : ""}`} />
+                        </Button>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="sm"
+                          onClick={() => handleMagicWand(idea)}
+                          className="gap-2 opacity-0 transition-opacity group-hover:opacity-100"
+                        >
+                          <Wand2 className="h-4 w-4" />
+                          Script
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </Card>
         </div>
       </div>
     </div>
