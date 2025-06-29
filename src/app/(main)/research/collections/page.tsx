@@ -1,7 +1,17 @@
 /* eslint-disable max-lines */
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, useTransition, useRef, memo, createContext, useContext } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useTransition,
+  useRef,
+  memo,
+  createContext,
+  useContext,
+} from "react";
 
 import { useSearchParams, useRouter } from "next/navigation";
 
@@ -12,6 +22,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { CollectionsService, type Collection } from "@/lib/collections";
 import { CollectionsRBACService } from "@/lib/collections-rbac";
 
+import { CollectionBadgeMenu } from "./_components/collection-badge-menu";
 import { badgeVariants, optimizedAnimations } from "./_components/collections-animations";
 import {
   type VideoWithPlayer,
@@ -22,7 +33,6 @@ import {
 import { LoadingSkeleton } from "./_components/loading-skeleton";
 import { ManageModeHeader } from "./_components/manage-mode-header";
 import { VideoGrid } from "./_components/video-grid";
-import { CollectionBadgeMenu } from "./_components/collection-badge-menu";
 
 // Collection state persistence context
 interface CollectionCache {
@@ -33,7 +43,7 @@ interface CollectionCache {
 
 const CollectionStateContext = createContext<{
   cache: CollectionCache;
-  cacheVideos: (collectionId: string | null, videos: VideoWithPlayer[]) => void;
+  cacheVideos:(collectionId: string | null, videos: VideoWithPlayer[]) => void;
   getCachedVideos: (collectionId: string | null) => VideoWithPlayer[];
   isCacheValid: (collectionId: string | null) => boolean;
   hasCacheEntry: (collectionId: string | null) => boolean;
@@ -52,7 +62,7 @@ const CollectionStateProvider = ({ children }: { children: React.ReactNode }) =>
     setCache((prev) => {
       const newVideos = new Map(prev.videos);
       const newLastUpdated = new Map(prev.lastUpdated);
-      const key = collectionId ?? 'all';
+      const key = collectionId ?? "all";
 
       newVideos.set(key, videos);
       newLastUpdated.set(key, Date.now());
@@ -65,29 +75,38 @@ const CollectionStateProvider = ({ children }: { children: React.ReactNode }) =>
     });
   }, []);
 
-  const getCachedVideos = useCallback((collectionId: string | null) => {
-    const key = collectionId ?? 'all';
-    return cache.videos.get(key) ?? [];
-  }, [cache.videos]);
+  const getCachedVideos = useCallback(
+    (collectionId: string | null) => {
+      const key = collectionId ?? "all";
+      return cache.videos.get(key) ?? [];
+    },
+    [cache.videos],
+  );
 
-  const isCacheValid = useCallback((collectionId: string | null) => {
-    const key = collectionId ?? 'all';
-    const lastUpdated = cache.lastUpdated.get(key);
-    if (!lastUpdated) return false;
+  const isCacheValid = useCallback(
+    (collectionId: string | null) => {
+      const key = collectionId ?? "all";
+      const lastUpdated = cache.lastUpdated.get(key);
+      if (!lastUpdated) return false;
 
-    // Cache valid for 30 seconds
-    return Date.now() - lastUpdated < 30000;
-  }, [cache.lastUpdated]);
+      // Cache valid for 30 seconds
+      return Date.now() - lastUpdated < 30000;
+    },
+    [cache.lastUpdated],
+  );
 
-  const hasCacheEntry = useCallback((collectionId: string | null) => {
-    const key = collectionId ?? 'all';
-    return cache.videos.has(key);
-  }, [cache.videos]);
+  const hasCacheEntry = useCallback(
+    (collectionId: string | null) => {
+      const key = collectionId ?? "all";
+      return cache.videos.has(key);
+    },
+    [cache.videos],
+  );
 
   const invalidateCache = useCallback((collectionId?: string | null) => {
     setCache((prev) => {
       if (collectionId !== undefined) {
-        const key = collectionId ?? 'all';
+        const key = collectionId ?? "all";
         const newVideos = new Map(prev.videos);
         const newLastUpdated = new Map(prev.lastUpdated);
         newVideos.delete(key);
@@ -108,54 +127,47 @@ const CollectionStateProvider = ({ children }: { children: React.ReactNode }) =>
     });
   }, []);
 
-  const contextValue = useMemo(() => ({
-    cache,
-    cacheVideos,
-    getCachedVideos,
-    isCacheValid,
-    hasCacheEntry,
-    invalidateCache,
-  }), [cache, cacheVideos, getCachedVideos, isCacheValid, hasCacheEntry, invalidateCache]);
-
-  return (
-    <CollectionStateContext.Provider value={contextValue}>
-      {children}
-    </CollectionStateContext.Provider>
+  const contextValue = useMemo(
+    () => ({
+      cache,
+      cacheVideos,
+      getCachedVideos,
+      isCacheValid,
+      hasCacheEntry,
+      invalidateCache,
+    }),
+    [cache, cacheVideos, getCachedVideos, isCacheValid, hasCacheEntry, invalidateCache],
   );
+
+  return <CollectionStateContext.Provider value={contextValue}>{children}</CollectionStateContext.Provider>;
 };
 
 // Delayed fallback component to prevent flash
-const DelayedFallback = memo(({
-  delay = 200,
-  show,
-  children
-}: {
-  delay?: number;
-  show: boolean;
-  children: React.ReactNode;
-}) => {
-  const [shouldShow, setShouldShow] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+const DelayedFallback = memo(
+  ({ delay = 200, show, children }: { delay?: number; show: boolean; children: React.ReactNode }) => {
+    const [shouldShow, setShouldShow] = useState(false);
+    const timeoutRef = useRef<NodeJS.Timeout>();
 
-  useEffect(() => {
-    if (show) {
-      timeoutRef.current = setTimeout(() => setShouldShow(true), delay);
-    } else {
-      setShouldShow(false);
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+    useEffect(() => {
+      if (show) {
+        timeoutRef.current = setTimeout(() => setShouldShow(true), delay);
+      } else {
+        setShouldShow(false);
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
       }
-    }
 
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, [show, delay]);
+      return () => {
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
+      };
+    }, [show, delay]);
 
-  return shouldShow ? <>{children}</> : null;
-});
+    return shouldShow ? <>{children}</> : null;
+  },
+);
 
 DelayedFallback.displayName = "DelayedFallback";
 
@@ -192,7 +204,7 @@ const CollectionBadge = memo(
           isActive
             ? "bg-secondary text-foreground hover:bg-secondary/80 font-semibold"
             : "text-muted-foreground hover:bg-secondary/50 bg-transparent font-normal"
-        } ${isTransitioning && isActive ? 'opacity-75' : ''} ${isTransitioning ? 'pointer-events-none' : ''}`}
+        } ${isTransitioning && isActive ? "opacity-75" : ""} ${isTransitioning ? "pointer-events-none" : ""}`}
         onClick={isTransitioning ? undefined : onClick}
       >
         {collection ? `${collection.title} (${collection.videoCount})` : `All Videos (${videoCount})`}
@@ -202,7 +214,7 @@ const CollectionBadge = memo(
           <CollectionBadgeMenu
             collection={collection}
             onCollectionDeleted={onCollectionDeleted}
-            className="bg-background border border-border shadow-sm"
+            className="bg-background border-border border shadow-sm"
           />
         </div>
       )}
@@ -212,9 +224,9 @@ const CollectionBadge = memo(
 
 CollectionBadge.displayName = "CollectionBadge";
 
-/* 
+/*
  * NOTE: File exceeds 300 line limit due to comprehensive collection optimization system.
- * Consider splitting into separate files: CollectionStateProvider, DelayedFallback, 
+ * Consider splitting into separate files: CollectionStateProvider, DelayedFallback,
  * CollectionBadge, and main page component in future refactoring.
  */
 
@@ -304,57 +316,57 @@ function CollectionsPageContent() {
     }
   }, [user]);
 
-  const loadVideos = useCallback(async (targetCollectionId?: string | null) => {
-    if (!user) return;
+  const loadVideos = useCallback(
+    async (targetCollectionId?: string | null) => {
+      if (!user) return;
 
-    const collectionId = targetCollectionId !== undefined ? targetCollectionId : selectedCollectionId;
+      const collectionId = targetCollectionId !== undefined ? targetCollectionId : selectedCollectionId;
 
-    // Clear previous timeout to prevent race conditions
-    if (loadingTimeoutRef.current) {
-      clearTimeout(loadingTimeoutRef.current);
-    }
+      // Clear previous timeout to prevent race conditions
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
 
-    // Show loading only for initial load when no cache exists
-    if (isInitialLoad && !hasCacheEntry(collectionId)) {
-      setLoadingVideos(true);
-    }
+      // Show loading only for initial load when no cache exists
+      if (isInitialLoad && !hasCacheEntry(collectionId)) {
+        setLoadingVideos(true);
+      }
 
-    try {
-      const collectionVideos = await CollectionsRBACService.getCollectionVideos(
-        user.uid,
-        collectionId ?? undefined,
-      );
+      try {
+        const collectionVideos = await CollectionsRBACService.getCollectionVideos(user.uid, collectionId ?? undefined);
 
-      // Optimize video object creation
-      const optimizedVideos = collectionVideos.map((video) => ({
-        ...video,
-        isPlaying: false,
-      }));
+        // Optimize video object creation
+        const optimizedVideos = collectionVideos.map((video) => ({
+          ...video,
+          isPlaying: false,
+        }));
 
-      // Cache the videos (including empty arrays)
-      cacheVideos(collectionId, optimizedVideos);
+        // Cache the videos (including empty arrays)
+        cacheVideos(collectionId, optimizedVideos);
 
-      // Update state
-      setVideos(optimizedVideos);
-    } catch (error) {
-      console.error("Error loading videos:", error);
-    } finally {
-      // Delayed loading state update for smoother transitions
-      loadingTimeoutRef.current = setTimeout(() => {
-        if (isInitialLoad) {
-          setLoadingVideos(false);
-          setIsInitialLoad(false);
-        }
-        setIsTransitioning(false);
-      }, 50);
-    }
-  }, [user, selectedCollectionId, isInitialLoad, hasCacheEntry, cacheVideos]);
+        // Update state
+        setVideos(optimizedVideos);
+      } catch (error) {
+        console.error("Error loading videos:", error);
+      } finally {
+        // Delayed loading state update for smoother transitions
+        loadingTimeoutRef.current = setTimeout(() => {
+          if (isInitialLoad) {
+            setLoadingVideos(false);
+            setIsInitialLoad(false);
+          }
+          setIsTransitioning(false);
+        }, 50);
+      }
+    },
+    [user, selectedCollectionId, isInitialLoad, hasCacheEntry, cacheVideos],
+  );
 
   // Preload adjacent collections for instant switching
   const preloadAdjacentCollections = useCallback(async () => {
     if (!user || collections.length === 0) return;
 
-    const currentIndex = collections.findIndex(c => c.id === selectedCollectionId);
+    const currentIndex = collections.findIndex((c) => c.id === selectedCollectionId);
     const adjacentCollections = [
       collections[currentIndex - 1],
       collections[currentIndex + 1],
@@ -364,10 +376,7 @@ function CollectionsPageContent() {
     for (const collection of adjacentCollections) {
       if (!isCacheValid(collection.id ?? null)) {
         try {
-          const videos = await CollectionsRBACService.getCollectionVideos(
-            user.uid,
-            collection.id
-          );
+          const videos = await CollectionsRBACService.getCollectionVideos(user.uid, collection.id);
           const optimizedVideos = videos.map((video) => ({
             ...video,
             isPlaying: false,
@@ -526,7 +535,7 @@ function CollectionsPageContent() {
 
         // Invalidate all caches to ensure consistency
         invalidateCache(null);
-        
+
         setDeletingVideos((prev) => {
           const newSet = new Set(prev);
           newSet.delete(videoId);
@@ -677,8 +686,8 @@ function CollectionsPageContent() {
                 transition={{ duration: 0.2 }}
                 className="flex items-center justify-center"
               >
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                  <div className="border-primary h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
                   Loading collection...
                 </div>
               </motion.div>
