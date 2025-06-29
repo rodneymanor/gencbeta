@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, useTransition, useRef, memo, createContext, useContext } from "react";
@@ -21,6 +22,7 @@ import {
 import { LoadingSkeleton } from "./_components/loading-skeleton";
 import { ManageModeHeader } from "./_components/manage-mode-header";
 import { VideoGrid } from "./_components/video-grid";
+import { CollectionBadgeMenu } from "./_components/collection-badge-menu";
 
 // Collection state persistence context
 interface CollectionCache {
@@ -47,7 +49,7 @@ const CollectionStateProvider = ({ children }: { children: React.ReactNode }) =>
   });
 
   const cacheVideos = useCallback((collectionId: string | null, videos: VideoWithPlayer[]) => {
-    setCache(prev => {
+    setCache((prev) => {
       const newVideos = new Map(prev.videos);
       const newLastUpdated = new Map(prev.lastUpdated);
       const key = collectionId ?? 'all';
@@ -83,7 +85,7 @@ const CollectionStateProvider = ({ children }: { children: React.ReactNode }) =>
   }, [cache.videos]);
 
   const invalidateCache = useCallback((collectionId?: string | null) => {
-    setCache(prev => {
+    setCache((prev) => {
       if (collectionId !== undefined) {
         const key = collectionId ?? 'all';
         const newVideos = new Map(prev.videos);
@@ -157,7 +159,7 @@ const DelayedFallback = memo(({
 
 DelayedFallback.displayName = "DelayedFallback";
 
-// Optimized collection badge with smooth transitions
+// Optimized collection badge with smooth transitions and management menu
 const CollectionBadge = memo(
   ({
     collection,
@@ -165,12 +167,14 @@ const CollectionBadge = memo(
     onClick,
     videoCount,
     isTransitioning,
+    onCollectionDeleted,
   }: {
     collection?: Collection;
     isActive: boolean;
     onClick: () => void;
     videoCount: number;
     isTransitioning: boolean;
+    onCollectionDeleted: () => void;
   }) => (
     <motion.div
       variants={badgeVariants}
@@ -180,6 +184,7 @@ const CollectionBadge = memo(
       whileTap={{ scale: 0.98 }}
       layout
       transition={{ duration: 0.2, ease: "easeInOut" }}
+      className="group relative"
     >
       <Badge
         variant="outline"
@@ -192,6 +197,15 @@ const CollectionBadge = memo(
       >
         {collection ? `${collection.title} (${collection.videoCount})` : `All Videos (${videoCount})`}
       </Badge>
+      {collection && (
+        <div className="absolute -top-1 -right-1">
+          <CollectionBadgeMenu
+            collection={collection}
+            onCollectionDeleted={onCollectionDeleted}
+            className="bg-background border border-border shadow-sm"
+          />
+        </div>
+      )}
     </motion.div>
   ),
 );
@@ -445,15 +459,53 @@ function CollectionsPageContent() {
   }, [selectedCollectionId, collections, preloadAdjacentCollections]);
 
   // Optimized video management functions with cache invalidation
-  const handleVideoAdded = useCallback(() => {
-    // Invalidate relevant caches
-    invalidateCache(selectedCollectionId);
-    invalidateCache(null); // Also invalidate "All Videos"
-    
-    // Refresh data
-    loadCollections();
-    loadVideos();
-  }, [selectedCollectionId, invalidateCache, loadCollections, loadVideos]);
+  const handleVideoAdded = useCallback(async () => {
+    try {
+      const freshCollections = await CollectionsService.getUserCollections(user!.uid);
+      setCollections(freshCollections);
+
+      // Invalidate all video caches to force refresh
+      invalidateCache(null);
+
+      // Force reload videos for current collection
+      await loadVideos();
+    } catch (error) {
+      console.error("Error refreshing after video added:", error);
+    }
+  }, [user, invalidateCache, loadVideos]);
+
+  // Handle collection deletion with optimistic updates
+  const handleCollectionDeleted = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      // Optimistic update - remove from UI immediately
+      if (selectedCollectionId) {
+        // If deleting current collection, navigate to "All Videos"
+        startTransition(() => {
+          router.push("/research/collections");
+        });
+      }
+
+      // Refresh collections list
+      const freshCollections = await CollectionsService.getUserCollections(user.uid);
+      setCollections(freshCollections);
+
+      // Invalidate all caches since collection structure changed
+      invalidateCache(null);
+
+      // Force reload videos for current view
+      await loadVideos();
+
+      // If we're on a deleted collection page, videos will be empty
+      // which is correct behavior
+    } catch (error) {
+      console.error("Error refreshing after collection deleted:", error);
+      // On error, still try to refresh the data
+      invalidateCache(null);
+      await loadVideos();
+    }
+  }, [user, selectedCollectionId, router, invalidateCache, loadVideos]);
 
   const handleDeleteVideo = useCallback(
     async (videoId: string) => {
@@ -579,6 +631,7 @@ function CollectionsPageContent() {
                 onClearSelection={clearSelection}
                 onSelectAll={selectAllVideos}
                 onVideoAdded={handleVideoAdded}
+                onCollectionDeleted={handleCollectionDeleted}
               />
             </motion.div>
           </div>
@@ -597,6 +650,7 @@ function CollectionsPageContent() {
               onClick={() => handleCollectionChange(null)}
               videoCount={videos.length}
               isTransitioning={isTransitioning && !selectedCollectionId}
+              onCollectionDeleted={handleCollectionDeleted}
             />
             <AnimatePresence mode="popLayout">
               {collections.map((collection) => (
@@ -607,6 +661,7 @@ function CollectionsPageContent() {
                   onClick={() => handleCollectionChange(collection.id!)}
                   videoCount={collection.videoCount || 0}
                   isTransitioning={isTransitioning && selectedCollectionId === collection.id}
+                  onCollectionDeleted={handleCollectionDeleted}
                 />
               ))}
             </AnimatePresence>

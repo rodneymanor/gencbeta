@@ -1,5 +1,6 @@
 import { getAdminDb, isAdminInitialized } from "./firebase-admin";
 import { UserManagementAdminService } from "./user-management-admin";
+import { FirebaseFirestore } from "firebase-admin";
 
 export interface Collection {
   id: string;
@@ -144,7 +145,12 @@ export class CollectionsRBACAdminService {
   /**
    * Build the appropriate Firestore query for videos based on user role
    */
-  private static async buildVideosQuery(adminDb: any, userProfile: any, userId: string, collectionId?: string) {
+  private static async buildVideosQuery(
+    adminDb: FirebaseFirestore.Firestore, 
+    userProfile: { role: string }, 
+    userId: string, 
+    collectionId?: string
+  ) {
     // Super admins can see all videos
     if (userProfile.role === "super_admin") {
       return this.buildSuperAdminQuery(adminDb, collectionId);
@@ -163,7 +169,7 @@ export class CollectionsRBACAdminService {
   /**
    * Build query for super admin users
    */
-  private static buildSuperAdminQuery(adminDb: any, collectionId?: string) {
+  private static buildSuperAdminQuery(adminDb: FirebaseFirestore.Firestore, collectionId?: string) {
     if (!collectionId || collectionId === "all-videos") {
       console.log("🔍 [ADMIN_RBAC] Super admin - getting all videos");
       return adminDb.collection(this.VIDEOS_PATH).orderBy("addedAt", "desc");
@@ -176,7 +182,11 @@ export class CollectionsRBACAdminService {
   /**
    * Build query for regular users
    */
-  private static buildRegularUserQuery(adminDb: any, accessibleCoaches: string[], collectionId?: string) {
+  private static buildRegularUserQuery(
+    adminDb: FirebaseFirestore.Firestore, 
+    accessibleCoaches: string[], 
+    collectionId?: string
+  ) {
     if (!collectionId || collectionId === "all-videos") {
       return adminDb.collection(this.VIDEOS_PATH).where("userId", "in", accessibleCoaches).orderBy("addedAt", "desc");
     } else {
@@ -185,6 +195,90 @@ export class CollectionsRBACAdminService {
         .where("collectionId", "==", collectionId)
         .where("userId", "in", accessibleCoaches)
         .orderBy("addedAt", "desc");
+    }
+  }
+
+  /**
+   * Get a specific collection by ID using Admin SDK
+   */
+  static async getCollection(collectionId: string): Promise<Collection | null> {
+    const adminDb = getAdminDb();
+    if (!isAdminInitialized || !adminDb) {
+      throw new Error("Firebase Admin SDK not initialized");
+    }
+
+    try {
+      console.log("🔍 [ADMIN_RBAC] Getting collection:", collectionId);
+
+      const collectionDoc = await adminDb.collection(this.COLLECTIONS_PATH).doc(collectionId).get();
+
+      if (!collectionDoc.exists) {
+        console.log("❌ [ADMIN_RBAC] Collection not found:", collectionId);
+        return null;
+      }
+
+      const collection = {
+        id: collectionDoc.id,
+        ...collectionDoc.data(),
+        createdAt: formatTimestamp(collectionDoc.data()?.createdAt),
+        updatedAt: formatTimestamp(collectionDoc.data()?.updatedAt),
+      } as Collection;
+
+      console.log("✅ [ADMIN_RBAC] Collection found:", collection.title);
+      return collection;
+    } catch (error) {
+      console.error("❌ [ADMIN_RBAC] Error fetching collection:", error);
+      throw new Error("Failed to fetch collection");
+    }
+  }
+
+  /**
+   * Delete a collection and all its videos using Admin SDK
+   */
+  static async deleteCollection(collectionId: string): Promise<void> {
+    const adminDb = getAdminDb();
+    if (!isAdminInitialized || !adminDb) {
+      throw new Error("Firebase Admin SDK not initialized");
+    }
+
+    try {
+      console.log("🗑️ [ADMIN_RBAC] Starting collection deletion:", collectionId);
+
+      // First, verify the collection exists
+      const collectionDoc = await adminDb.collection(this.COLLECTIONS_PATH).doc(collectionId).get();
+      if (!collectionDoc.exists) {
+        throw new Error("Collection not found");
+      }
+
+      const collectionData = collectionDoc.data() as Collection;
+      console.log("🗑️ [ADMIN_RBAC] Collection found, title:", collectionData.title);
+
+      // Use a batch to ensure atomicity
+      const batch = adminDb.batch();
+
+      // Delete all videos in the collection
+      const videosQuery = await adminDb
+        .collection(this.VIDEOS_PATH)
+        .where("collectionId", "==", collectionId)
+        .get();
+
+      console.log("🗑️ [ADMIN_RBAC] Found videos to delete:", videosQuery.docs.length);
+
+      // Add video deletions to batch
+      videosQuery.docs.forEach((videoDoc) => {
+        batch.delete(videoDoc.ref);
+      });
+
+      // Delete the collection document
+      batch.delete(collectionDoc.ref);
+
+      // Commit the batch
+      await batch.commit();
+
+      console.log("✅ [ADMIN_RBAC] Collection and all videos deleted successfully:", collectionId);
+    } catch (error) {
+      console.error("❌ [ADMIN_RBAC] Error deleting collection:", error);
+      throw new Error(`Failed to delete collection: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
   }
 }
