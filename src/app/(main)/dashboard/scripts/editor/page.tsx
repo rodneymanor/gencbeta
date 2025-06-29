@@ -232,11 +232,11 @@ export default function ScriptEditorPage() {
   };
 
   return (
-    <div className="bg-background min-h-screen p-4 pb-28">
-      <div className="mx-auto max-w-7xl">
-        <div className="grid h-[calc(100vh-8rem)] grid-cols-3 gap-4">
+    <div className="bg-background min-h-screen">
+      <div className="mx-auto max-w-7xl p-4 pb-32 md:pb-28">
+        <div className="grid h-[calc(100vh-10rem)] grid-cols-1 gap-4 md:h-[calc(100vh-8rem)] md:grid-cols-3">
           {/* Left Column: AI Writing Partner (1/3 width) */}
-          <div className="flex flex-col">
+          <div className="flex flex-col md:col-span-1">
             <Card className="flex flex-1 flex-col overflow-hidden">
               <CardHeader className="flex-shrink-0 pb-3">
                 <CardTitle className="flex items-center gap-2">
@@ -272,7 +272,7 @@ export default function ScriptEditorPage() {
           </div>
 
           {/* Right Column: Script Canvas (2/3 width) */}
-          <div className="col-span-2 flex flex-col">
+          <div className="flex flex-col md:col-span-2">
             <Card className="flex flex-1 flex-col">
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2">
@@ -313,23 +313,23 @@ export default function ScriptEditorPage() {
             </Card>
           </div>
         </div>
+      </div>
 
-        {/* Sticky Chat Input - Fixed to bottom of viewport */}
-        <div className="fixed right-0 bottom-0 left-0 z-50">
-          <div className="mx-auto max-w-7xl px-4">
-            <div className="grid grid-cols-3 gap-4">
-              <div className="flex">
-                <ScriptChatInput
-                  value={chatInput}
-                  onChange={setChatInput}
-                  onSubmit={handleChatSubmit}
-                  disabled={isGenerating || isProcessingVideo}
-                  refinementControls={refinementControls}
-                  onRefinementChange={setRefinementControls}
-                />
-              </div>
-              <div className="col-span-2"></div>
+      {/* Sticky Chat Input - Fixed to bottom of viewport */}
+      <div className="fixed right-0 bottom-0 left-0 z-50">
+        <div className="mx-auto max-w-7xl p-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="w-full md:col-span-1">
+              <ScriptChatInput
+                value={chatInput}
+                onChange={setChatInput}
+                onSubmit={handleChatSubmit}
+                disabled={isGenerating || isProcessingVideo}
+                refinementControls={refinementControls}
+                onRefinementChange={setRefinementControls}
+              />
             </div>
+            <div className="hidden md:col-span-2 md:block"></div>
           </div>
         </div>
       </div>

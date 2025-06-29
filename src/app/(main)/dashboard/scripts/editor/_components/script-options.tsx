@@ -26,7 +26,6 @@ export function ScriptOptions({ optionA, optionB, onSelect, isGenerating }: Scri
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold">Choose Your Script</h2>
       <div className="grid h-full grid-cols-1 gap-4 md:grid-cols-2">
         {/* Option A */}
         {optionA && (
