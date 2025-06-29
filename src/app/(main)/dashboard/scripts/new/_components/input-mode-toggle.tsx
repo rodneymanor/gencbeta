@@ -215,14 +215,14 @@ export function InputModeToggle({
               value={videoUrl}
               onChange={(e) => onVideoUrlChange(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="pr-16 text-base"
+              className="h-12 pr-16 text-base"
               disabled={disabled}
             />
             <Button
               onClick={onSubmit}
               disabled={finalSubmitDisabled}
               size="sm"
-              className="absolute right-3 bottom-2 h-8 w-8 p-0"
+              className="absolute top-1/2 right-3 h-8 w-8 -translate-y-1/2 p-0"
             >
               <ExternalLink className="h-4 w-4" />
             </Button>
