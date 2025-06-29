@@ -7,12 +7,13 @@ import { Play } from "lucide-react";
 
 // Helper component for thumbnail image
 const ThumbnailImage = ({ thumbnailUrl, title }: { thumbnailUrl: string; title?: string }) => (
-  <div className="relative h-full w-full">
+  <div className="absolute inset-0">
     <Image
       src={thumbnailUrl}
       alt={title ?? "Video thumbnail"}
-      fill
-      className="object-cover"
+      width={360}
+      height={640}
+      className="h-full w-full object-cover"
       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
       onError={(e) => {
         console.log("🖼️ [VideoThumbnail] Image failed to load, hiding...");
