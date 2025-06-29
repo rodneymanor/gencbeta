@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { SPEED_WRITE_CONFIG } from "@/config/speed-write-prompt";
 import { useAuth } from "@/contexts/auth-context";
 
 // Mock data for demonstration
@@ -95,9 +96,21 @@ export default function ContentCreatorPage() {
     // Navigate to script creation with pre-filled idea
   };
 
-  const handleQuickWrite = () => {
+  const handleQuickWrite = async () => {
     if (!videoIdea.trim()) return;
+
     console.log("Quick writing with idea:", videoIdea);
+    console.log("Using Speed Write System Prompt:", SPEED_WRITE_CONFIG.systemPrompt);
+
+    // TODO: Integrate with AI service using the SPEED_WRITE_CONFIG.systemPrompt
+    // The system prompt should be sent to the AI service along with the user's video idea
+    // Example API call structure:
+    // await aiService.createScript({
+    //   systemPrompt: SPEED_WRITE_CONFIG.systemPrompt,
+    //   userInput: videoIdea,
+    //   type: 'speed-write'
+    // });
+
     // Navigate to script creation with the entered idea
   };
 
@@ -130,9 +143,14 @@ export default function ContentCreatorPage() {
               <Textarea
                 value={videoIdea}
                 onChange={(e) => setVideoIdea(e.target.value)}
-                placeholder="Start with a video idea, topic, or question for your audience..."
+                placeholder={SPEED_WRITE_CONFIG.ui.placeholders.ideaInput}
                 className="min-h-24 resize-none text-base"
               />
+              <div className="bg-muted/50 text-muted-foreground rounded-lg p-3 text-xs">
+                <p>
+                  <strong>Speed Write Formula:</strong> {SPEED_WRITE_CONFIG.ui.formula.summary}
+                </p>
+              </div>
               <Button
                 onClick={handleQuickWrite}
                 disabled={!videoIdea.trim()}

@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SPEED_WRITE_CONFIG } from "@/config/speed-write-prompt";
 import { useAppState } from "@/contexts/app-state-context";
 
 interface SpeedWriteDialogProps {
@@ -32,6 +33,16 @@ export function SpeedWriteDialog({ children }: SpeedWriteDialogProps) {
     setIsCreating(true);
     setScriptCreating(true);
     console.log("Creating script from idea:", scriptIdea);
+    console.log("Using Speed Write System Prompt:", SPEED_WRITE_CONFIG.systemPrompt);
+
+    // TODO: Integrate with AI service using the SPEED_WRITE_CONFIG.systemPrompt
+    // The system prompt should be sent to the AI service along with the user's script idea
+    // Example API call structure:
+    // await aiService.createScript({
+    //   systemPrompt: SPEED_WRITE_CONFIG.systemPrompt,
+    //   userInput: scriptIdea,
+    //   type: 'speed-write'
+    // });
 
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -57,7 +68,7 @@ export function SpeedWriteDialog({ children }: SpeedWriteDialogProps) {
         <DialogHeader className="space-y-3">
           <DialogTitle className="text-xl font-semibold">What would you like to write today?</DialogTitle>
           <DialogDescription className="text-muted-foreground text-base">
-            Create engaging scripts that will grow your audience.
+            {SPEED_WRITE_CONFIG.ui.description}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 pt-2">
@@ -67,12 +78,17 @@ export function SpeedWriteDialog({ children }: SpeedWriteDialogProps) {
             </Label>
             <Input
               id="script-idea"
-              placeholder="Describe your script idea..."
+              placeholder={SPEED_WRITE_CONFIG.ui.placeholders.chatInput}
               value={scriptIdea}
               onChange={(e) => setScriptIdea(e.target.value)}
               onKeyPress={handleKeyPress}
               className="min-h-[44px]"
             />
+          </div>
+          <div className="bg-muted/50 text-muted-foreground rounded-lg p-3 text-xs">
+            <p>
+              <strong>Speed Write will create:</strong> {SPEED_WRITE_CONFIG.ui.formula.summary}
+            </p>
           </div>
           <Button
             onClick={handleScriptCreation}
