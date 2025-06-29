@@ -1,4 +1,4 @@
-import { Zap, Target, Mic, FileTemplate, Lightbulb, TrendingUp, MessageSquare, HelpCircle } from "lucide-react";
+import { Zap, Target, Mic, FileText, Lightbulb, TrendingUp, MessageSquare, HelpCircle } from "lucide-react";
 
 // Types
 export interface DailyIdea {
@@ -156,7 +156,7 @@ export const scriptModes: ScriptMode[] = [
     id: "template",
     label: "Template Chooser",
     description: "Choose script templates",
-    icon: FileTemplate,
+    icon: FileText,
     available: false,
   },
 ];
