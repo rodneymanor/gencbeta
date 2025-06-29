@@ -48,6 +48,7 @@ const VideoEmbedComponent = ({
   const [hasError, setHasError] = useState(false);
   const [videoObjectUrl, setVideoObjectUrl] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const iframeSrcRef = useRef<string | null>(null);
 
   // Local playing state derived from global state
   const isPlaying = isGloballyPlaying(videoId);
@@ -83,7 +84,14 @@ const VideoEmbedComponent = ({
   };
 
   useEffect(() => {
-    if (!shouldLoad) return;
+    if (!shouldLoad) {
+      // Reset iframe src ref when video is unloaded
+      if (iframeSrcRef.current) {
+        console.log(`🔄 [VideoEmbed] Resetting iframe src for ${videoId.substring(0, 30)}... (shouldLoad: false)`);
+        iframeSrcRef.current = null;
+      }
+      return;
+    }
 
     setIsLoading(true);
     setContentLoaded(false);
@@ -160,19 +168,32 @@ const VideoEmbedComponent = ({
         console.log(`🧹 [VideoEmbed] Cleanup - stopping video on unmount:`, videoId.substring(0, 30) + "...");
         setCurrentlyPlaying(null);
       }
+      // Reset iframe src ref for fresh load next time
+      if (iframeSrcRef.current) {
+        console.log(`🔄 [VideoEmbed] Cleanup - resetting iframe src for ${videoId.substring(0, 30)}...`);
+        iframeSrcRef.current = null;
+      }
     };
   }, [currentlyPlayingId, videoId, setCurrentlyPlaying]);
 
   const renderIframeEmbed = (src: string) => {
-    // Add autoplay parameter for Bunny.net videos when user clicked to play
-    const autoplaySrc =
-      isPlaying && src.includes("iframe.mediadelivery.net")
-        ? `${src}${src.includes("?") ? "&" : "?"}autoplay=true`
-        : src;
+    // Store the iframe src once to prevent reloading on state changes
+    if (!iframeSrcRef.current) {
+      const shouldAutoplay = isPlaying && currentlyPlayingId === videoId;
+      iframeSrcRef.current =
+        shouldAutoplay && src.includes("iframe.mediadelivery.net")
+          ? `${src}${src.includes("?") ? "&" : "?"}autoplay=true`
+          : src;
+      console.log(`🎬 [VideoEmbed] Setting iframe src for ${videoId.substring(0, 30)}...:`, {
+        shouldAutoplay,
+        finalSrc: iframeSrcRef.current.substring(0, 100) + "...",
+      });
+    }
 
     return (
       <motion.iframe
-        src={autoplaySrc}
+        key={videoId} // Use videoId as key to prevent unnecessary re-renders
+        src={iframeSrcRef.current}
         className={`h-full w-full ${disableCard ? "" : "rounded-xl"}`}
         frameBorder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
