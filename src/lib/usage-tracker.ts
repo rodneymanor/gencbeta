@@ -66,7 +66,7 @@ export class UsageTracker {
   }
 
   // Rate limiting helper
-  static async checkRateLimit(userId: string, windowMinutes: number = 60, maxRequests: number = 10): Promise<boolean> {
+  static async checkRateLimit(userId: string): Promise<boolean> {
     try {
       // TODO: Implement Redis-based rate limiting for production
       // For now, we'll rely on client-side throttling
@@ -97,7 +97,7 @@ export async function trackApiUsage(
     userId,
     operation,
     promptType,
-    tokensUsed: result.tokensUsed || 0,
+    tokensUsed: result.tokensUsed ?? 0,
     responseTime: result.responseTime,
     success: result.success,
     error: result.error,
@@ -107,15 +107,13 @@ export async function trackApiUsage(
 
 // Usage analytics helpers
 export class UsageAnalytics {
-  static async getUserDailyUsage(userId: string, date: string): Promise<DailyUsageStats | null> {
+  static async getUserDailyUsage(): Promise<DailyUsageStats | null> {
     // TODO: Implement aggregation query
-    // This would typically be done with Cloud Functions for better performance
     return null;
   }
 
-  static async getSystemUsage(startDate: string, endDate: string): Promise<DailyUsageStats[]> {
+  static async getSystemUsage(): Promise<DailyUsageStats[]> {
     // TODO: Implement system-wide usage analytics
-    // Useful for monitoring costs and system health
     return [];
   }
 } 

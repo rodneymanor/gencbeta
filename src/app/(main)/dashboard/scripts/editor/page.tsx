@@ -15,7 +15,6 @@ import { ChatHistory } from "./_components/chat-history";
 import { ScriptOptions } from "./_components/script-options";
 import {
   ChatMessage,
-  RefinementControls,
   ScriptOption,
   UrlParams,
   ViewMode,

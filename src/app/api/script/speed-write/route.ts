@@ -54,6 +54,65 @@ interface SpeedWriteResponse {
   processingTime?: number;
 }
 
+async function processSpeedWriteRequest(body: SpeedWriteRequest): Promise<{
+  speedWriteResult: any;
+  educationalResult: any;
+  processingTime: number;
+}> {
+  const { idea, length } = body;
+
+  console.log(`📝 [SpeedWrite] Generating scripts for: "${idea.substring(0, 50)}..."`);
+
+  // Generate both scripts in parallel
+  const [speedWriteResult, educationalResult] = await Promise.allSettled([
+    generateSpeedWriteScript(idea, length),
+    generateEducationalScript(idea, length),
+  ]);
+
+  return { speedWriteResult, educationalResult, processingTime: Date.now() };
+}
+
+async function createScriptOptions(
+  speedWriteResult: any,
+  educationalResult: any,
+  length: string
+): Promise<{ optionA: ScriptOption | null; optionB: ScriptOption | null }> {
+  const optionA = speedWriteResult.status === "fulfilled" && speedWriteResult.value.success
+    ? createScriptOption("option-a", "Speed Write Formula", speedWriteResult.value.content!, "speed-write")
+    : null;
+
+  const optionB = educationalResult.status === "fulfilled" && educationalResult.value.success
+    ? createScriptOption("option-b", "Educational Approach", educationalResult.value.content!, "educational")
+    : null;
+
+  return { optionA, optionB };
+}
+
+async function trackUsageForResults(
+  userId: string,
+  speedWriteResult: any,
+  educationalResult: any,
+  processingTime: number,
+  idea: string,
+  length: string
+): Promise<void> {
+  await Promise.allSettled([
+    trackApiUsage(userId, "speed-write", "speed-write-a", {
+      tokensUsed: speedWriteResult.status === "fulfilled" ? speedWriteResult.value.tokensUsed : 0,
+      responseTime: processingTime / 2,
+      success: speedWriteResult.status === "fulfilled" && speedWriteResult.value.success,
+      error: speedWriteResult.status === "rejected" ? speedWriteResult.reason?.message : undefined,
+    }, { scriptLength: length, inputLength: idea.length }),
+
+    trackApiUsage(userId, "speed-write", "speed-write-b", {
+      tokensUsed: educationalResult.status === "fulfilled" ? educationalResult.value.tokensUsed : 0,
+      responseTime: processingTime / 2,
+      success: educationalResult.status === "fulfilled" && educationalResult.value.success,
+      error: educationalResult.status === "rejected" ? educationalResult.reason?.message : undefined,
+    }, { scriptLength: length, inputLength: idea.length }),
+  ]);
+}
+
 export async function POST(request: NextRequest): Promise<NextResponse<SpeedWriteResponse>> {
   const startTime = Date.now();
   console.log("🚀 [SpeedWrite] Starting A/B script generation...");
@@ -61,7 +120,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
   try {
     // Parse and validate request
     const body: SpeedWriteRequest = await request.json();
-    const { idea, length, userId = "anonymous" } = body;
+    const { idea, userId = "anonymous" } = body;
 
     if (!idea?.trim()) {
       return NextResponse.json({
@@ -73,7 +132,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
     }
 
     // Rate limiting check
-    const rateLimitOk = await UsageTracker.checkRateLimit(userId, 60, 10);
+    const rateLimitOk = await UsageTracker.checkRateLimit(userId);
     if (!rateLimitOk) {
       return NextResponse.json({
         success: false,
@@ -83,41 +142,12 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
       }, { status: 429 });
     }
 
-    console.log(`📝 [SpeedWrite] Generating scripts for: "${idea.substring(0, 50)}..."`);
-
-    // Generate both scripts in parallel
-    const [speedWriteResult, educationalResult] = await Promise.allSettled([
-      generateSpeedWriteScript(idea, length),
-      generateEducationalScript(idea, length),
-    ]);
-
+    const { speedWriteResult, educationalResult } = await processSpeedWriteRequest(body);
     const processingTime = Date.now() - startTime;
 
-    // Process results
-    const optionA = speedWriteResult.status === "fulfilled" && speedWriteResult.value.success
-      ? createScriptOption("option-a", "Speed Write Formula", speedWriteResult.value.content!, length, "speed-write")
-      : null;
+    const { optionA, optionB } = await createScriptOptions(speedWriteResult, educationalResult, body.length);
 
-    const optionB = educationalResult.status === "fulfilled" && educationalResult.value.success
-      ? createScriptOption("option-b", "Educational Approach", educationalResult.value.content!, length, "educational")
-      : null;
-
-    // Track usage for both attempts
-    await Promise.allSettled([
-      trackApiUsage(userId, "speed-write", "speed-write-a", {
-        tokensUsed: speedWriteResult.status === "fulfilled" ? speedWriteResult.value.tokensUsed : 0,
-        responseTime: processingTime / 2,
-        success: speedWriteResult.status === "fulfilled" && speedWriteResult.value.success,
-        error: speedWriteResult.status === "rejected" ? speedWriteResult.reason?.message : undefined,
-      }, { scriptLength: length, inputLength: idea.length }),
-
-      trackApiUsage(userId, "speed-write", "speed-write-b", {
-        tokensUsed: educationalResult.status === "fulfilled" ? educationalResult.value.tokensUsed : 0,
-        responseTime: processingTime / 2,
-        success: educationalResult.status === "fulfilled" && educationalResult.value.success,
-        error: educationalResult.status === "rejected" ? educationalResult.reason?.message : undefined,
-      }, { scriptLength: length, inputLength: idea.length }),
-    ]);
+    await trackUsageForResults(userId, speedWriteResult, educationalResult, processingTime, idea, body.length);
 
     // Check if at least one script was generated successfully
     if (!optionA && !optionB) {
@@ -129,7 +159,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
         success: false,
         optionA: null,
         optionB: null,
-        error: error || "Failed to generate scripts. Please try again.",
+        error: error ?? "Failed to generate scripts. Please try again.",
       }, { status: 500 });
     }
 
@@ -182,10 +212,9 @@ function createScriptOption(
   id: string, 
   title: string, 
   content: string, 
-  length: string, 
   approach: "speed-write" | "educational"
 ): ScriptOption {
-  const estimatedDuration = estimateVideoDuration(content, length);
+  const estimatedDuration = estimateVideoDuration(content);
   
   return {
     id,
@@ -196,21 +225,21 @@ function createScriptOption(
   };
 }
 
-function estimateVideoDuration(content: string, targetLength: string): string {
+function estimateVideoDuration(content: string): string {
   // Average reading speed: 150-160 words per minute
   // For video, account for pauses: ~130 WPM effective
   const wordCount = content.split(/\s+/).length;
   const estimatedSeconds = Math.round((wordCount / 130) * 60);
   
   // Compare with target
-  const target = parseInt(targetLength);
+  const target = 60; // Assuming target length is 60 seconds
   const variance = Math.abs(estimatedSeconds - target);
   
   if (variance <= 5) {
-    return `~${targetLength}s`;
+    return `~60s`;
   } else if (estimatedSeconds < target) {
-    return `~${estimatedSeconds}s (shorter than ${target}s target)`;
+    return `~${estimatedSeconds}s (shorter than 60s target)`;
   } else {
-    return `~${estimatedSeconds}s (longer than ${target}s target)`;
+    return `~${estimatedSeconds}s (longer than 60s target)`;
   }
 } 

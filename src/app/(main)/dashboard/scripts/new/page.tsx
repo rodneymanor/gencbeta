@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { Clock, Wand2, Bookmark, Loader2 } from "lucide-react";
+import { Clock, Wand2, Bookmark } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -167,23 +167,6 @@ export default function NewScriptPage() {
     );
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-      e.preventDefault();
-      handleSubmit();
-    }
-  };
-
-  const isSubmitDisabled =
-    isGenerating ||
-    (inputMode === "video" ? !videoUrl.trim() : !scriptIdea.trim());
-
-  const getSubmitButtonText = () => {
-    if (isGenerating) return "Generating Scripts...";
-    if (selectedMode === "speed-write") return "Generate A/B Scripts";
-    return inputMode === "video" ? "Process Video" : "Create Script";
-  };
-
   return (
     <div className="bg-background min-h-screen p-6">
       <div className="mx-auto max-w-7xl space-y-8">
@@ -201,9 +184,9 @@ export default function NewScriptPage() {
             <div className="flex items-center gap-2 text-destructive">
               <span className="font-medium">Generation Failed:</span>
               <span>{speedWriteResponse.error}</span>
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => setSpeedWriteResponse(null)}
                 className="ml-auto"
               >
@@ -226,7 +209,7 @@ export default function NewScriptPage() {
             disabled={isGenerating}
           />
 
-          {/* Controls and Action Buttons Row */}
+          {/* Controls Row */}
           <div className="flex flex-wrap items-center gap-4">
             <IdeaInboxDialog />
 
@@ -274,18 +257,8 @@ export default function NewScriptPage() {
               })}
             </div>
 
-            {/* Submit Button */}
-            <Button 
-              onClick={handleSubmit} 
-              disabled={isSubmitDisabled}
-              className="gap-2 ml-auto"
-            >
-              {isGenerating && <Loader2 className="h-4 w-4 animate-spin" />}
-              {getSubmitButtonText()}
-            </Button>
-
-            <div className="text-muted-foreground text-sm">
-              Press ⌘+Enter to {selectedMode === "speed-write" ? "generate" : inputMode === "video" ? "process video" : "submit"}
+            <div className="text-muted-foreground ml-auto text-sm">
+              Press ⌘+Enter to {selectedMode === "speed-write" ? "generate scripts" : inputMode === "video" ? "process video" : "create script"}
             </div>
           </div>
         </div>

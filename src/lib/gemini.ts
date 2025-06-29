@@ -32,8 +32,8 @@ export class GeminiService {
       const model = genAI.getGenerativeModel({ 
         model: this.DEFAULT_MODEL,
         generationConfig: {
-          maxOutputTokens: request.maxTokens || 1000,
-          temperature: request.temperature || 0.7,
+          maxOutputTokens: request.maxTokens ?? 1000,
+          temperature: request.temperature ?? 0.7,
         },
       });
 
