@@ -22,6 +22,8 @@ Do NOT include any conversational text, thinking process, UI state descriptions,
 * **Code Format:** Output must be valid, runnable React/TypeScript code. Ensure necessary `use client` directives are included for client-side components.
 * **Imports:** Automatically include all required imports using the project's defined aliases (e.g., `@/components`, `@/lib/utils`, `@/hooks`).
 * **Icons:** Always use icons from `lucide-react`.
+* **DOM Structure Simplicity:** Keep component nesting to a maximum of 2-3 levels deep. Avoid unnecessary wrapper divs and extract complex nested structures into separate components. Prefer flat, simple DOM hierarchies over deeply nested containers that impact performance and maintainability.
+* **Component Complexity:** If a component requires more than 3-4 nested div elements, refactor into smaller, focused sub-components. Use direct placement of elements rather than multiple motion.div or wrapper containers when possible.
 * **Functionality:** Focus on the UI structure and styling. Assume any necessary data fetching or complex state management will be handled externally, but structure the component props appropriately.
 * **Non-Destructive:** Your outputs should facilitate building and placing components. Avoid generating code that would break existing functionality unless explicitly instructed for a modification.
 
