@@ -65,7 +65,7 @@ export function ChatHistory({ messages }: ChatHistoryProps) {
   };
 
   return (
-    <div className="max-h-96 flex-1 space-y-4 overflow-y-auto">
+    <div className="h-full space-y-4 overflow-y-auto">
       {messages.map((message) => {
         const styles = getMessageStyles(message.type);
         const icon = getMessageIcon(message.type);

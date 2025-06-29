@@ -12,7 +12,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 
 import { ChatHistory } from "./_components/chat-history";
-import { ScriptChatInput } from "./_components/script-chat-input";
 import { ScriptOptions } from "./_components/script-options";
 import {
   ChatMessage,
@@ -50,13 +49,6 @@ export default function ScriptEditorPage() {
   }>({
     optionA: null,
     optionB: null,
-  });
-
-  // Refinement Controls
-  const [refinementControls, setRefinementControls] = useState<RefinementControls>({
-    toneOfVoice: "casual",
-    voiceEngine: "creator-a",
-    scriptLength: "20",
   });
 
   // Generate scripts from text idea
@@ -176,7 +168,6 @@ export default function ScriptEditorPage() {
     const inputType = (searchParams.get("inputType") ?? "text") as "text" | "video";
 
     setUrlParams({ idea, videoUrl, mode, length, source, inputType });
-    setRefinementControls((prev) => ({ ...prev, scriptLength: length }));
 
     return { idea, videoUrl, mode, length, inputType };
   }, [searchParams]);
