@@ -136,10 +136,9 @@ const VideoEmbed = memo(function VideoEmbed({
   // Refs for stable references
   const iframeSrcRef = useRef<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   // Global playback state
-  const { currentlyPlayingId, setCurrentlyPlaying } = useVideoPlayback();
+  const { currentlyPlayingId, setCurrentlyPlaying, pauseAllOtherVideos } = useVideoPlayback();
 
   // Memoize video ID to prevent recalculation
   const videoId = React.useMemo(() => url, [url]);
@@ -162,11 +161,11 @@ const VideoEmbed = memo(function VideoEmbed({
     hasError,
   });
 
-  // Handle video click with useCallback to prevent re-creation
+  // Enhanced click handler with immediate pause of other videos
   const handleClick = useCallback(() => {
     if (hasError || shouldLoad) return;
 
-    console.log("🔥 [VideoEmbed] Click detected - attempting to load video:", {
+    console.log("🔥 [VideoEmbed] Click detected - pausing others first:", {
       url: url.substring(0, 50) + "...",
       platform,
       currentShouldLoad: shouldLoad,
@@ -174,10 +173,16 @@ const VideoEmbed = memo(function VideoEmbed({
       hasVideoData: !!videoData,
     });
 
+    // IMMEDIATELY pause all other videos before starting this one
+    pauseAllOtherVideos(videoId);
+
+    // Update global state (this also triggers DOM-level pause in context)
+    setCurrentlyPlaying(videoId);
+
+    // Then proceed with loading this video
     setShouldLoad(true);
     setIsLoading(true);
-    setCurrentlyPlaying(videoId);
-  }, [hasError, shouldLoad, url, platform, hostedOnCDN, videoData, videoId, setCurrentlyPlaying]);
+  }, [hasError, shouldLoad, url, platform, hostedOnCDN, videoData, videoId, setCurrentlyPlaying, pauseAllOtherVideos]);
 
   // Handle content load events
   const handleContentLoad = useCallback(() => {
@@ -193,12 +198,16 @@ const VideoEmbed = memo(function VideoEmbed({
       return;
     }
 
+    // For HTML5 videos, start playback
     if (videoRef.current && !hostedOnCDN) {
-      videoRef.current.play().catch((err) => console.error("🚫 [VideoEmbed] Video play failed:", err));
+      videoRef.current.play().catch((err) => {
+        console.error("🚫 [VideoEmbed] Video play failed:", err);
+        setHasError(true);
+      });
     }
   }, [currentlyPlayingId, videoId, hostedOnCDN]);
 
-  // Effect to stop videos when another video starts playing
+  // Effect to stop videos when another video starts playing (backup to context)
   useEffect(() => {
     if (currentlyPlayingId && currentlyPlayingId !== videoId && shouldLoad) {
       console.log("🛑 [VideoEmbed] Stopping video (another video started):", {
@@ -206,11 +215,44 @@ const VideoEmbed = memo(function VideoEmbed({
         currentlyPlaying: currentlyPlayingId.substring(0, 50) + "...",
       });
 
+      // Stop video element if it exists and is playing
       if (videoRef.current && !videoRef.current.paused) {
         videoRef.current.pause();
       }
     }
   }, [currentlyPlayingId, videoId, shouldLoad]);
+
+  // Add event listener to HTML5 video for play events (additional safeguard)
+  useEffect(() => {
+    if (!shouldLoad || hostedOnCDN || !videoRef.current) return;
+
+    const videoElement = videoRef.current;
+
+    const handlePlay = () => {
+      console.log("▶️ [VideoEmbed] HTML5 video play event detected - ensuring global state sync");
+      if (currentlyPlayingId !== videoId) {
+        // This video started playing but isn't tracked globally - fix it
+        setCurrentlyPlaying(videoId);
+        pauseAllOtherVideos(videoId);
+      }
+    };
+
+    const handlePause = () => {
+      console.log("⏸️ [VideoEmbed] HTML5 video pause event detected");
+      if (currentlyPlayingId === videoId) {
+        // This was the active video and it paused - clear global state
+        setCurrentlyPlaying(null);
+      }
+    };
+
+    videoElement.addEventListener("play", handlePlay);
+    videoElement.addEventListener("pause", handlePause);
+
+    return () => {
+      videoElement.removeEventListener("play", handlePlay);
+      videoElement.removeEventListener("pause", handlePause);
+    };
+  }, [shouldLoad, hostedOnCDN, videoId, currentlyPlayingId, setCurrentlyPlaying, pauseAllOtherVideos]);
 
   // Effect to clean up when component unmounts
   useEffect(() => {
