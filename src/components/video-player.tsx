@@ -113,12 +113,7 @@ const VideoPlayerComponent = ({
         </div>
       )}
 
-      {/* Platform Badge */}
-      <div className="absolute top-4 left-4">
-        <Badge className="border-0 bg-gradient-to-r from-purple-500 to-pink-500 text-white capitalize">
-          {platform}
-        </Badge>
-      </div>
+      {/* Platform Badge removed - VideoThumbnail handles platform indicator */}
     </div>
   );
 
