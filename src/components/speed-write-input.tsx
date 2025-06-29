@@ -31,31 +31,33 @@ export default function SpeedWriteInput({ onQuickWrite, disabled = false, classN
   };
 
   return (
-    <div className={`mx-auto w-full max-w-2xl space-y-4 ${className}`}>
+    <div className={`w-full space-y-4 ${className}`}>
       <div className="space-y-3">
-        <div className="relative">
+        {/* Main Input Container */}
+        <div className="group relative">
           <Input
             value={videoIdea}
             onChange={(e) => setVideoIdea(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder={SPEED_WRITE_CONFIG.ui.placeholders.ideaInput}
-            className="border-border/50 focus:border-border focus-visible:ring-ring/20 bg-background/50 h-12 pr-28 text-base backdrop-blur-sm focus-visible:ring-1"
+            className="placeholder:text-muted-foreground/70 border-border/40 hover:border-border/60 focus:border-primary/50 focus-visible:ring-primary/20 bg-background/80 h-11 pr-[120px] text-sm shadow-sm backdrop-blur-sm transition-all duration-200 hover:shadow-md focus-visible:shadow-md focus-visible:ring-2"
           />
           <Button
             onClick={handleSubmit}
             size="sm"
             disabled={!videoIdea.trim() || disabled}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground absolute top-1/2 right-2 h-8 -translate-y-1/2 px-3 font-medium shadow-sm transition-all duration-200 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground absolute top-1/2 right-1.5 h-8 -translate-y-1/2 px-3 text-xs font-medium shadow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <Wand2 className="mr-1 h-3 w-3" />
+            <Wand2 className="mr-1.5 h-3 w-3" />
             Quick Write
           </Button>
         </div>
 
-        <div className="bg-muted/30 border-border/30 rounded-lg border p-4">
-          <p className="text-muted-foreground text-sm leading-relaxed">
-            <span className="text-foreground font-semibold">Speed Write Formula:</span>{" "}
-            {SPEED_WRITE_CONFIG.ui.formula.summary}
+        {/* Formula Info Card */}
+        <div className="bg-muted/20 border-border/20 rounded-md border p-3 backdrop-blur-sm">
+          <p className="text-muted-foreground/80 text-xs leading-relaxed">
+            <span className="text-foreground/90 font-medium">Speed Write Formula:</span>{" "}
+            <span className="text-muted-foreground/70">{SPEED_WRITE_CONFIG.ui.formula.summary}</span>
           </p>
         </div>
       </div>

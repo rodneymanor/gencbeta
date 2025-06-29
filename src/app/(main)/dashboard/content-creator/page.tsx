@@ -126,14 +126,14 @@ export default function ContentCreatorPage() {
     <div className="@container/main">
       <div className="mx-auto max-w-6xl space-y-8 p-4 md:space-y-10 md:p-6">
         {/* Top Header Section with Input Field */}
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-          <div className="space-y-2">
-            <h1 className="text-foreground text-3xl font-bold">Welcome back, {userName}</h1>
-            <p className="text-muted-foreground">Let&apos;s create some compelling content today.</p>
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between lg:gap-12">
+          <div className="space-y-3">
+            <h1 className="text-foreground text-3xl font-bold tracking-tight">Welcome back, {userName}</h1>
+            <p className="text-muted-foreground text-lg">Let&apos;s create some compelling content today.</p>
           </div>
 
           {/* Quick Input Section */}
-          <div className="flex-shrink-0 lg:w-96">
+          <div className="w-full max-w-md flex-shrink-0 lg:max-w-lg xl:max-w-xl 2xl:max-w-2xl">
             <SpeedWriteInput onQuickWrite={handleQuickWrite} />
           </div>
         </div>
