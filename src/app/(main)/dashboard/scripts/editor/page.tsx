@@ -22,6 +22,7 @@ import {
   ViewMode,
   UrlParams,
   generateScriptContent,
+  generateUniqueId,
 } from "./_components/types";
 import { VideoProcessor } from "./_components/video-processor";
 
@@ -81,7 +82,7 @@ export default function ScriptEditorPage() {
 
       // Add AI response to chat
       const aiMessage: ChatMessage = {
-        id: `ai-${Date.now()}`,
+        id: generateUniqueId(),
         type: "ai",
         content:
           "I've generated two script options for you. Option A focuses on a strong hook, while Option B takes a storytelling approach. Choose the one that resonates with your vision!",
@@ -99,7 +100,7 @@ export default function ScriptEditorPage() {
 
       // Add transcript to chat history
       const transcriptMessage: ChatMessage = {
-        id: `transcript-${Date.now()}`,
+        id: generateUniqueId(),
         type: "system",
         content: `Video transcription completed. Here's what was said:\n\n"${transcript}"`,
         timestamp: new Date(),
@@ -122,7 +123,7 @@ export default function ScriptEditorPage() {
       setIsProcessingVideo(false);
 
       const errorMessage: ChatMessage = {
-        id: `error-${Date.now()}`,
+        id: generateUniqueId(),
         type: "error",
         content: `Failed to process video: ${error}`,
         timestamp: new Date(),
@@ -141,7 +142,7 @@ export default function ScriptEditorPage() {
     setIsProcessingVideo(true);
 
     const initialMessage: ChatMessage = {
-      id: "initial",
+      id: generateUniqueId(),
       type: "user",
       content: `Analyze this video and create script options: ${decodeURIComponent(videoUrl)}`,
       timestamp: new Date(),
@@ -153,7 +154,7 @@ export default function ScriptEditorPage() {
   const processTextInput = useCallback(
     (idea: string, mode: string, length: string) => {
       const initialMessage: ChatMessage = {
-        id: "initial",
+        id: generateUniqueId(),
         type: "user",
         content: `Write a script based on: ${decodeURIComponent(idea)}`,
         timestamp: new Date(),
@@ -199,7 +200,7 @@ export default function ScriptEditorPage() {
     setViewMode("editor");
 
     const selectionMessage: ChatMessage = {
-      id: `selection-${Date.now()}`,
+      id: generateUniqueId(),
       type: "ai",
       content: `Great choice! I've loaded ${option.title} as your working draft. You can now refine it by asking me to adjust the tone, add specific details, or make any other changes.`,
       timestamp: new Date(),
@@ -212,7 +213,7 @@ export default function ScriptEditorPage() {
     if (!chatInput.trim()) return;
 
     const userMessage: ChatMessage = {
-      id: `user-${Date.now()}`,
+      id: generateUniqueId(),
       type: "user",
       content: chatInput,
       timestamp: new Date(),
@@ -224,7 +225,7 @@ export default function ScriptEditorPage() {
     // Simulate AI response
     setTimeout(() => {
       const aiMessage: ChatMessage = {
-        id: `ai-${Date.now()}`,
+        id: generateUniqueId(),
         type: "ai",
         content: "I understand your request. I'm updating the script based on your feedback...",
         timestamp: new Date(),

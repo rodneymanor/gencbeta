@@ -41,6 +41,15 @@ export interface VideoProcessingState {
   retryable: boolean;
 }
 
+// Unique ID generator to prevent duplicate React keys
+let idCounter = 0;
+export const generateUniqueId = (prefix: string = ""): string => {
+  idCounter += 1;
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substr(2, 6);
+  return `${prefix}${prefix ? "-" : ""}${timestamp}-${random}-${idCounter}`;
+};
+
 // Script generation utility
 export const generateScriptContent = (idea: string, approach: string, length: string): string => {
   const isShort = length === "20";
