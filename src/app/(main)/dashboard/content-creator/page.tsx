@@ -1,13 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { PenTool, FileText, Inbox, Zap, Bot, Lightbulb, Film, Clock } from "lucide-react";
 
-import { PenTool, FileText, Inbox, Zap, Bot, Lightbulb, Film, Clock, Wand } from "lucide-react";
-
+import SpeedWriteInput from "@/components/speed-write-input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
 import { SPEED_WRITE_CONFIG } from "@/config/speed-write-prompt";
 import { useAuth } from "@/contexts/auth-context";
 
@@ -82,7 +80,6 @@ const quickActions = [
 
 export default function ContentCreatorPage() {
   const { userProfile } = useAuth();
-  const [videoIdea, setVideoIdea] = useState("");
 
   // Get user name from auth context or fallback
   const userName = userProfile?.displayName ?? "User";
@@ -96,9 +93,7 @@ export default function ContentCreatorPage() {
     // Navigate to script creation with pre-filled idea
   };
 
-  const handleQuickWrite = async () => {
-    if (!videoIdea.trim()) return;
-
+  const handleQuickWrite = async (videoIdea: string) => {
     console.log("Quick writing with idea:", videoIdea);
     console.log("Using Speed Write System Prompt:", SPEED_WRITE_CONFIG.systemPrompt);
 
@@ -138,29 +133,8 @@ export default function ContentCreatorPage() {
           </div>
 
           {/* Quick Input Section */}
-          <div className="flex-shrink-0 space-y-4 lg:w-96">
-            <div className="space-y-3">
-              <Textarea
-                value={videoIdea}
-                onChange={(e) => setVideoIdea(e.target.value)}
-                placeholder={SPEED_WRITE_CONFIG.ui.placeholders.ideaInput}
-                className="min-h-24 resize-none text-base"
-              />
-              <div className="bg-muted/50 text-muted-foreground rounded-lg p-3 text-xs">
-                <p>
-                  <strong>Speed Write Formula:</strong> {SPEED_WRITE_CONFIG.ui.formula.summary}
-                </p>
-              </div>
-              <Button
-                onClick={handleQuickWrite}
-                disabled={!videoIdea.trim()}
-                className="bg-primary hover:bg-primary/90 w-full"
-                size="lg"
-              >
-                <Wand className="mr-2 h-4 w-4" />
-                Quick Write
-              </Button>
-            </div>
+          <div className="flex-shrink-0 lg:w-96">
+            <SpeedWriteInput onQuickWrite={handleQuickWrite} />
           </div>
         </div>
 
