@@ -73,7 +73,7 @@ export function ScriptChatInput({
   ];
 
   return (
-    <div className="bg-background sticky bottom-0 border-t p-4">
+    <div className="bg-background w-full border-t p-3">
       <div className="border-border bg-card rounded-lg border shadow-sm">
         <div className="flex w-full flex-col">
           {/* Main input area */}
@@ -164,7 +164,7 @@ export function ScriptChatInput({
                 onChange={(e) => onChange(e.target.value)}
                 onKeyDown={handleKeyPress}
                 placeholder="Ask me to adjust the tone, add details, or make changes..."
-                className="placeholder:text-muted-foreground max-h-[200px] min-h-[40px] resize-none border-0 bg-transparent p-0 text-base focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="placeholder:text-muted-foreground max-h-[120px] min-h-[40px] resize-none border-0 bg-transparent p-0 text-base focus-visible:ring-0 focus-visible:ring-offset-0"
                 rows={1}
                 disabled={disabled}
               />

@@ -232,16 +232,52 @@ export default function ScriptEditorPage() {
   };
 
   return (
-    <div className="bg-background min-h-screen p-6">
+    <div className="bg-background min-h-screen p-4 pb-28">
       <div className="mx-auto max-w-7xl">
-        <div className="grid h-[calc(100vh-6rem)] grid-cols-3 gap-6">
-          {/* Left Column: Script Canvas (2/3 width) */}
-          <div className="col-span-2 flex flex-col space-y-4">
+        <div className="grid h-[calc(100vh-8rem)] grid-cols-3 gap-4">
+          {/* Left Column: AI Writing Partner (1/3 width) */}
+          <div className="flex flex-col">
+            <Card className="flex flex-1 flex-col overflow-hidden">
+              <CardHeader className="flex-shrink-0 pb-3">
+                <CardTitle className="flex items-center gap-2">
+                  <Bot className="h-5 w-5" />
+                  AI Writing Partner
+                </CardTitle>
+                {urlParams.mode && (
+                  <Badge variant="outline" className="w-fit">
+                    {urlParams.mode.charAt(0).toUpperCase() + urlParams.mode.slice(1)} Mode
+                  </Badge>
+                )}
+              </CardHeader>
+
+              {/* Chat Content */}
+              <CardContent className="flex flex-1 flex-col overflow-hidden p-0">
+                {/* Video Processing */}
+                {isProcessingVideo && urlParams.videoUrl && (
+                  <div className="border-b p-3">
+                    <VideoProcessor
+                      videoUrl={urlParams.videoUrl}
+                      onTranscriptReady={handleVideoTranscriptReady}
+                      onError={handleVideoError}
+                    />
+                  </div>
+                )}
+
+                {/* Chat History */}
+                <div className="flex-1 overflow-auto p-3">
+                  <ChatHistory messages={chatHistory} />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right Column: Script Canvas (2/3 width) */}
+          <div className="col-span-2 flex flex-col">
             <Card className="flex flex-1 flex-col">
-              <CardHeader>
+              <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2">
                   <FileText className="h-5 w-5" />
-                  Script Canvas
+                  {viewMode === "ab-comparison" ? "Choose Your Script" : "Script Editor"}
                 </CardTitle>
                 {workingDraft && (
                   <Badge variant="outline" className="w-fit">
@@ -259,7 +295,7 @@ export default function ScriptEditorPage() {
                   />
                 ) : workingDraft ? (
                   <div className="space-y-4">
-                    <div className="bg-muted/30 rounded-lg border p-6">
+                    <div className="bg-muted/30 rounded-lg border p-4">
                       <pre className="font-mono text-sm leading-relaxed whitespace-pre-wrap">
                         {workingDraft.content}
                       </pre>
@@ -276,41 +312,13 @@ export default function ScriptEditorPage() {
               </CardContent>
             </Card>
           </div>
+        </div>
 
-          {/* Right Column: AI Writing Partner (1/3 width) */}
-          <div className="flex flex-col">
-            <Card className="flex flex-1 flex-col overflow-hidden">
-              <CardHeader className="flex-shrink-0">
-                <CardTitle className="flex items-center gap-2">
-                  <Bot className="h-5 w-5" />
-                  AI Writing Partner
-                </CardTitle>
-                {urlParams.mode && (
-                  <Badge variant="outline" className="w-fit">
-                    {urlParams.mode.charAt(0).toUpperCase() + urlParams.mode.slice(1)} Mode
-                  </Badge>
-                )}
-              </CardHeader>
-
-              {/* Chat Content */}
-              <CardContent className="flex flex-1 flex-col overflow-hidden p-0">
-                {/* Video Processing */}
-                {isProcessingVideo && urlParams.videoUrl && (
-                  <div className="border-b p-4">
-                    <VideoProcessor
-                      videoUrl={urlParams.videoUrl}
-                      onTranscriptReady={handleVideoTranscriptReady}
-                      onError={handleVideoError}
-                    />
-                  </div>
-                )}
-
-                {/* Chat History */}
-                <div className="flex-1 overflow-auto p-4">
-                  <ChatHistory messages={chatHistory} />
-                </div>
-
-                {/* Sticky Chat Input */}
+        {/* Sticky Chat Input - Fixed to bottom of viewport */}
+        <div className="fixed right-0 bottom-0 left-0 z-50">
+          <div className="mx-auto max-w-7xl px-4">
+            <div className="grid grid-cols-3 gap-4">
+              <div className="flex">
                 <ScriptChatInput
                   value={chatInput}
                   onChange={setChatInput}
@@ -319,8 +327,9 @@ export default function ScriptEditorPage() {
                   refinementControls={refinementControls}
                   onRefinementChange={setRefinementControls}
                 />
-              </CardContent>
-            </Card>
+              </div>
+              <div className="col-span-2"></div>
+            </div>
           </div>
         </div>
       </div>
