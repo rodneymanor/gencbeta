@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Poppins } from "next/font/google";
 
 import { ThemeProvider } from "next-themes";
 
@@ -13,7 +13,11 @@ import { AuthProvider } from "@/contexts/auth-context";
 
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const poppins = Poppins({ 
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-poppins"
+});
 
 export const metadata: Metadata = {
   title: APP_CONFIG.meta.title,
@@ -23,7 +27,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en" className="light" suppressHydrationWarning>
-      <body className={`${inter.className} min-h-screen antialiased`}>
+      <body className={`${poppins.className} min-h-screen antialiased`}>
         <AuthProvider>
           <AppStateProvider>
             <ThemeProvider attribute="class" defaultTheme="light" disableTransitionOnChange enableSystem={false}>
