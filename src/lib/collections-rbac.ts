@@ -87,7 +87,11 @@ export class CollectionsRBACService {
     let q;
     if (!collectionId || collectionId === "all-videos") {
       console.log("🔍 [RBAC] Super admin loading all videos");
-      q = query(collection(db, this.VIDEOS_PATH), orderBy("addedAt", "desc"));
+      q = query(
+        collection(db, this.VIDEOS_PATH), 
+        where("processingStatus", "==", "ready"),
+        orderBy("addedAt", "desc")
+      );
     } else {
       try {
         q = await this.getSuperAdminCollectionQuery(userId, collectionId);
@@ -126,6 +130,7 @@ export class CollectionsRBACService {
       collection(db, this.VIDEOS_PATH),
       where("collectionId", "==", collectionId),
       where("userId", "==", targetCollection.userId),
+      where("processingStatus", "==", "ready"),
       orderBy("addedAt", "desc"),
     );
   }
@@ -164,6 +169,7 @@ export class CollectionsRBACService {
       return query(
         collection(db, this.VIDEOS_PATH),
         where("userId", "in", accessibleCoaches),
+        where("processingStatus", "==", "ready"),
         orderBy("addedAt", "desc"),
       );
     }
@@ -179,6 +185,7 @@ export class CollectionsRBACService {
       collection(db, this.VIDEOS_PATH),
       where("collectionId", "==", collectionId),
       where("userId", "in", accessibleCoaches),
+      where("processingStatus", "==", "ready"),
       orderBy("addedAt", "desc"),
     );
   }

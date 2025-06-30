@@ -23,6 +23,8 @@ import {
 import { LoadingSkeleton } from "./_components/loading-skeleton";
 import { ManageModeHeader } from "./_components/manage-mode-header";
 import { VideoGrid } from "./_components/video-grid";
+import { CreateCollectionDialog } from "./_components/create-collection-dialog";
+import { CreateCreatorDialog } from "./_components/create-creator-dialog";
 
 // Simplified cache for better performance
 interface SimpleCache {
@@ -409,84 +411,111 @@ function CollectionsPageContent() {
   }
 
   return (
-    <div className="@container/main">
-      <div className="mx-auto max-w-7xl space-y-8 md:space-y-10">
-        {/* Header Section - Simplified animations */}
-        <section className="space-y-4">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="space-y-2">
-              <h1 className="text-foreground text-3xl font-bold tracking-tight">{pageTitle}</h1>
-              <p className="text-muted-foreground text-lg">{pageDescription}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <ManageModeHeader
-                manageMode={manageMode}
-                selectedVideos={selectedVideos}
-                videosLength={videos.length}
-                collections={collections}
-                selectedCollectionId={selectedCollectionId}
-                onManageModeToggle={() => userProfile?.role !== "creator" && setManageMode(true)}
-                onExitManageMode={handleExitManageMode}
-                onBulkDelete={handleBulkDelete}
-                onClearSelection={clearSelection}
-                onSelectAll={selectAllVideos}
-                onVideoAdded={handleVideoAdded}
-                onCollectionDeleted={handleCollectionDeleted}
-              />
-            </div>
-          </div>
-        </section>
+    <div className="container mx-auto px-4 py-6 space-y-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Video Collections</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
+            Organize and analyze your video content across platforms
+          </p>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <CreateCollectionDialog onCollectionCreated={handleDataRefresh} />
+          <CreateCreatorDialog />
+        </div>
+      </div>
 
-        {/* Collection Filter Section */}
-        <section className="space-y-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <CollectionBadge
-              isActive={!selectedCollectionId}
-              onClick={() => handleCollectionChange(null)}
-              videoCount={videos.length}
-              isTransitioning={isTransitioning && !selectedCollectionId}
-              onCollectionDeleted={handleCollectionDeleted}
-            />
-            <AnimatePresence mode="popLayout">
-              {collections.map((collection) => (
-                <CollectionBadge
-                  key={collection.id}
-                  collection={collection}
-                  isActive={selectedCollectionId === collection.id}
-                  onClick={() => handleCollectionChange(collection.id!)}
-                  videoCount={collection.videoCount || 0}
-                  isTransitioning={isTransitioning && selectedCollectionId === collection.id}
+      {/* Processing Notification */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="flex items-center gap-2">
+          <div className="h-2 w-2 bg-blue-500 rounded-full animate-pulse"></div>
+          <span className="text-sm text-blue-800">
+            New videos are processed in the background (30-60 seconds). They will appear automatically once ready.
+          </span>
+        </div>
+      </div>
+
+      <div className="@container/main">
+        <div className="mx-auto max-w-7xl space-y-8 md:space-y-10">
+          {/* Header Section - Simplified animations */}
+          <section className="space-y-4">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="space-y-2">
+                <h1 className="text-foreground text-3xl font-bold tracking-tight">{pageTitle}</h1>
+                <p className="text-muted-foreground text-lg">{pageDescription}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <ManageModeHeader
+                  manageMode={manageMode}
+                  selectedVideos={selectedVideos}
+                  videosLength={videos.length}
+                  collections={collections}
+                  selectedCollectionId={selectedCollectionId}
+                  onManageModeToggle={() => userProfile?.role !== "creator" && setManageMode(true)}
+                  onExitManageMode={handleExitManageMode}
+                  onBulkDelete={handleBulkDelete}
+                  onClearSelection={clearSelection}
+                  onSelectAll={selectAllVideos}
+                  onVideoAdded={handleVideoAdded}
                   onCollectionDeleted={handleCollectionDeleted}
                 />
-              ))}
-            </AnimatePresence>
-          </div>
-
-          {/* Transition indicator */}
-          {isTransitioning && (
-            <div className="flex items-center justify-center py-4">
-              <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                <div className="border-primary h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
-                Loading collection...
               </div>
             </div>
-          )}
-        </section>
+          </section>
 
-        {/* Videos Content Section */}
-        <VideoGrid
-          videos={videos}
-          collections={collections}
-          selectedCollectionId={selectedCollectionId}
-          loadingVideos={isTransitioning}
-          isPending={isPending}
-          manageMode={manageMode}
-          selectedVideos={selectedVideos}
-          deletingVideos={deletingVideos}
-          onToggleVideoSelection={toggleVideoSelection}
-          onDeleteVideo={handleDeleteVideo}
-          onVideoAdded={handleVideoAdded}
-        />
+          {/* Collection Filter Section */}
+          <section className="space-y-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <CollectionBadge
+                isActive={!selectedCollectionId}
+                onClick={() => handleCollectionChange(null)}
+                videoCount={videos.length}
+                isTransitioning={isTransitioning && !selectedCollectionId}
+                onCollectionDeleted={handleCollectionDeleted}
+              />
+              <AnimatePresence mode="popLayout">
+                {collections.map((collection) => (
+                  <CollectionBadge
+                    key={collection.id}
+                    collection={collection}
+                    isActive={selectedCollectionId === collection.id}
+                    onClick={() => handleCollectionChange(collection.id!)}
+                    videoCount={collection.videoCount || 0}
+                    isTransitioning={isTransitioning && selectedCollectionId === collection.id}
+                    onCollectionDeleted={handleCollectionDeleted}
+                  />
+                ))}
+              </AnimatePresence>
+            </div>
+
+            {/* Transition indicator */}
+            {isTransitioning && (
+              <div className="flex items-center justify-center py-4">
+                <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                  <div className="border-primary h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
+                  Loading collection...
+                </div>
+              </div>
+            )}
+          </section>
+
+          {/* Videos Content Section */}
+          <VideoGrid
+            videos={videos}
+            collections={collections}
+            selectedCollectionId={selectedCollectionId}
+            loadingVideos={isTransitioning}
+            isPending={isPending}
+            manageMode={manageMode}
+            selectedVideos={selectedVideos}
+            deletingVideos={deletingVideos}
+            onToggleVideoSelection={toggleVideoSelection}
+            onDeleteVideo={handleDeleteVideo}
+            onVideoAdded={handleVideoAdded}
+          />
+        </div>
       </div>
     </div>
   );

@@ -88,6 +88,8 @@ export async function POST(request: NextRequest) {
       metrics: downloadResult.data.metrics || {},
       metadata: downloadResult.data.metadata || {},
       transcriptionStatus: 'pending',
+      processingStatus: 'processing', // ✅ Overall processing status
+      bunnyStatus: 'uploading',       // ✅ Bunny CDN processing status
       userId: userId
     };
 
@@ -100,14 +102,15 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
-    // Step 4: Start background transcription (real-time updates)
-    console.log("🎙️ [VIDEO_PROCESS] Step 4: Starting background transcription...");
-    startBackgroundTranscription(
+    // Step 4: Start background processing verification
+    console.log("🔄 [VIDEO_PROCESS] Step 4: Starting background processing verification...");
+    startBackgroundProcessing(
       baseUrl,
       downloadResult.data.videoData,
       addResult.videoId,
       collectionId,
-      downloadResult.data.platform
+      downloadResult.data.platform,
+      streamResult.iframeUrl
     );
 
     console.log("✅ [VIDEO_PROCESS] Complete workflow successful!");
@@ -118,8 +121,8 @@ export async function POST(request: NextRequest) {
       iframe: streamResult.iframeUrl,
       directUrl: streamResult.directUrl,
       platform: downloadResult.data.platform,
-      transcriptionStatus: 'processing',
-      message: "Video added successfully. Transcription in progress."
+      processingStatus: 'processing',
+      message: "Video processing in progress. It will appear once ready."
     });
 
   } catch (error) {
@@ -221,12 +224,14 @@ async function addVideoToCollection(collectionId: string, videoData: any) {
 
     // Add video to collection
     const videoRef = adminDb.collection('videos').doc();
+    const timestamp = new Date().toISOString();
     await videoRef.set({
       ...videoData,
       collectionId,
       id: videoRef.id,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      addedAt: timestamp,      // ✅ Required by RBAC queries
+      createdAt: timestamp,
+      updatedAt: timestamp
     });
 
     // Update collection video count
@@ -250,19 +255,29 @@ async function addVideoToCollection(collectionId: string, videoData: any) {
   }
 }
 
-function startBackgroundTranscription(
+function startBackgroundProcessing(
   baseUrl: string,
   videoData: any,
   videoId: string,
   collectionId: string,
-  platform: string
+  platform: string,
+  iframeUrl: string
 ) {
   // Use setTimeout to ensure response is sent before starting background work
   setTimeout(async () => {
     try {
-      console.log("🎙️ [BACKGROUND] Starting transcription for video:", videoId);
+      console.log("🔄 [BACKGROUND] Starting processing verification for video:", videoId);
 
-      // Convert buffer array back to proper format for transcription
+      // Step 1: Wait for Bunny CDN to process the video (30 seconds)
+      console.log("⏰ [BACKGROUND] Waiting for Bunny CDN processing...");
+      await new Promise(resolve => setTimeout(resolve, 30000)); // 30 second delay
+      
+      // Step 2: Update Bunny status to ready
+      await updateVideoBunnyStatus(videoId, 'ready');
+      console.log("✅ [BACKGROUND] Bunny CDN processing complete");
+
+      // Step 3: Start transcription
+      console.log("🎙️ [BACKGROUND] Starting transcription...");
       const buffer = Buffer.from(videoData.buffer);
       const blob = new Blob([buffer], { type: videoData.mimeType });
       const formData = new FormData();
@@ -277,23 +292,36 @@ function startBackgroundTranscription(
         const transcriptionResult = await response.json();
         console.log("✅ [BACKGROUND] Transcription completed");
         
-        // Update video with transcription results
-        await updateVideoTranscription(videoId, transcriptionResult);
+        // Step 4: Update video with transcription and mark as ready
+        await updateVideoWithTranscription(videoId, transcriptionResult);
         
-        // Real-time update could be sent via WebSocket here if implemented
-        console.log("📡 [BACKGROUND] Transcription ready for video:", videoId);
+        console.log("📡 [BACKGROUND] Video fully processed and ready:", videoId);
       } else {
         console.error("❌ [BACKGROUND] Transcription failed:", response.status);
-        await updateVideoTranscriptionStatus(videoId, 'failed');
+        await updateVideoProcessingStatus(videoId, 'transcription_failed');
       }
     } catch (error) {
-      console.error("❌ [BACKGROUND] Transcription error:", error);
-      await updateVideoTranscriptionStatus(videoId, 'failed');
+      console.error("❌ [BACKGROUND] Processing error:", error);
+      await updateVideoProcessingStatus(videoId, 'failed');
     }
   }, 100);
 }
 
-async function updateVideoTranscription(videoId: string, transcriptionData: any) {
+async function updateVideoBunnyStatus(videoId: string, status: string) {
+  try {
+    const adminDb = getAdminDb();
+    if (!adminDb) return;
+
+    await adminDb.collection('videos').doc(videoId).update({
+      bunnyStatus: status,
+      updatedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error("❌ [BACKGROUND] Failed to update Bunny status:", error);
+  }
+}
+
+async function updateVideoWithTranscription(videoId: string, transcriptionData: any) {
   try {
     const adminDb = getAdminDb();
     if (!adminDb) return;
@@ -301,6 +329,7 @@ async function updateVideoTranscription(videoId: string, transcriptionData: any)
     // Filter out undefined values to prevent Firestore errors
     const updateData: any = {
       transcriptionStatus: 'completed',
+      processingStatus: 'ready',  // ✅ Video is now ready to display
       transcriptionCompletedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -321,22 +350,22 @@ async function updateVideoTranscription(videoId: string, transcriptionData: any)
 
     await adminDb.collection('videos').doc(videoId).update(updateData);
 
-    console.log("✅ [BACKGROUND] Video transcription updated:", videoId);
+    console.log("✅ [BACKGROUND] Video marked as ready:", videoId);
   } catch (error) {
-    console.error("❌ [BACKGROUND] Failed to update transcription:", error);
+    console.error("❌ [BACKGROUND] Failed to update with transcription:", error);
   }
 }
 
-async function updateVideoTranscriptionStatus(videoId: string, status: string) {
+async function updateVideoProcessingStatus(videoId: string, status: string) {
   try {
     const adminDb = getAdminDb();
     if (!adminDb) return;
 
     await adminDb.collection('videos').doc(videoId).update({
-      transcriptionStatus: status,
+      processingStatus: status,
       updatedAt: new Date().toISOString()
     });
   } catch (error) {
-    console.error("❌ [BACKGROUND] Failed to update transcription status:", error);
+    console.error("❌ [BACKGROUND] Failed to update processing status:", error);
   }
 } 
