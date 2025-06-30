@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect, memo } from "react";
+
 import { Play } from "lucide-react";
 
 import { useVideoPlaybackData, useVideoPlaybackAPI } from "@/contexts/video-playback-context";
@@ -15,13 +16,14 @@ export const VideoEmbed = memo<VideoEmbedProps>(
   ({ url, className = "" }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [iframeKey, setIframeKey] = useState(0); // Force iframe recreation
 
     const { currentlyPlayingId } = useVideoPlaybackData();
     const { setCurrentlyPlaying } = useVideoPlaybackAPI();
 
     const videoId = url;
 
-    // Handle video play - moved before early return
+    // Handle video play
     const handlePlay = useCallback(() => {
       if (!isPlaying && videoId) {
         console.log("🎬 [VideoEmbed] Starting Bunny video:", videoId.substring(0, 50) + "...");
@@ -32,59 +34,67 @@ export const VideoEmbed = memo<VideoEmbedProps>(
       }
     }, [isPlaying, videoId, setCurrentlyPlaying]);
 
-    // Auto-pause when another video plays - moved before early return
+    // PRODUCTION SOLUTION: Force iframe recreation when pausing
     useEffect(() => {
       if (currentlyPlayingId !== videoId && isPlaying) {
-        console.log("⏸️ [VideoEmbed] Pausing Bunny video");
+        console.log("⏸️ [VideoEmbed] Force stopping Bunny video by recreating iframe");
         setIsPlaying(false);
         setIsLoading(false);
+        // Force iframe to be completely destroyed and recreated
+        setIframeKey((prev) => prev + 1);
       }
     }, [currentlyPlayingId, videoId, isPlaying]);
 
     // CRITICAL: Only allow Bunny.net iframe URLs - REJECT EVERYTHING ELSE
-    const isBunnyUrl = url && (
-      url.includes('iframe.mediadelivery.net') || 
-      url.includes('bunnycdn.com') ||
-      url.includes('b-cdn.net')
-    );
-    
+    const isBunnyUrl =
+      url && (url.includes("iframe.mediadelivery.net") || url.includes("bunnycdn.com") || url.includes("b-cdn.net"));
+
     if (!isBunnyUrl) {
       console.warn("🚫 [VideoEmbed] Rejected non-Bunny URL:", url);
       return (
         <div className={`flex items-center justify-center bg-gray-900 text-white ${className}`}>
-          <div className="text-center p-4">
+          <div className="p-4 text-center">
             <div className="text-sm font-medium">Video Processing Required</div>
-            <div className="text-xs text-gray-400 mt-1">Only Bunny.net CDN videos supported</div>
+            <div className="mt-1 text-xs text-gray-400">Only Bunny.net CDN videos supported</div>
           </div>
         </div>
       );
     }
 
-    // Create iframe src
-    const iframeSrc = isPlaying 
-      ? `${url}${url.includes("?") ? "&" : "?"}autoplay=true`
-      : url;
-
     return (
       <div className={`group relative w-full overflow-hidden rounded-lg bg-black ${className}`}>
         <div className="relative h-0 w-full pb-[177.78%]">
-          {/* Bunny.net iframe ONLY */}
-          <iframe
-            src={iframeSrc}
-            className="absolute inset-0 h-full w-full"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            onLoad={() => setIsLoading(false)}
-          />
+          {/* PRODUCTION SOLUTION: Conditional iframe rendering */}
+          {isPlaying ? (
+            // Playing iframe with autoplay
+            <iframe
+              key={`playing-${iframeKey}`}
+              src={`${url}${url.includes("?") ? "&" : "?"}autoplay=true`}
+              className="absolute inset-0 h-full w-full"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              onLoad={() => setIsLoading(false)}
+            />
+          ) : (
+            // Thumbnail iframe without autoplay
+            <iframe
+              key={`thumbnail-${iframeKey}`}
+              src={url}
+              className="absolute inset-0 h-full w-full"
+              frameBorder="0"
+              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          )}
 
           {/* Click overlay for play button */}
           {!isPlaying && (
-            <div 
-              className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer bg-black/20 hover:bg-black/30 transition-colors"
+            <div
+              className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center bg-black/20 transition-colors hover:bg-black/30"
               onClick={handlePlay}
             >
-              <div className="rounded-full bg-black/60 p-6 backdrop-blur-sm hover:scale-110 hover:bg-black/80 transition-all">
+              <div className="rounded-full bg-black/60 p-6 backdrop-blur-sm transition-all hover:scale-110 hover:bg-black/80">
                 <Play className="h-8 w-8 text-white" fill="white" />
               </div>
             </div>
@@ -100,7 +110,7 @@ export const VideoEmbed = memo<VideoEmbedProps>(
       </div>
     );
   },
-  (prevProps, nextProps) => prevProps.url === nextProps.url
+  (prevProps, nextProps) => prevProps.url === nextProps.url,
 );
 
 VideoEmbed.displayName = "VideoEmbed";

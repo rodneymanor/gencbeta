@@ -18,25 +18,20 @@ const VideoPlaybackAPIContext = createContext<VideoPlaybackAPI | null>(null);
 export const VideoPlaybackProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentlyPlayingId, setCurrentlyPlayingId] = useState<string | null>(null);
 
-  // SIMPLIFIED: Basic pause all function using DOM selectors
+  // PRODUCTION SOLUTION: Enhanced pause all function
   const pauseAllVideos = useCallback(() => {
     console.log("⏸️ [VideoPlayback] Pausing all videos");
 
-    // Simple DOM-based pause for all video elements
+    // Pause all HTML5 video elements
     document.querySelectorAll("video").forEach((video) => {
       if (!video.paused) {
         video.pause();
       }
     });
 
-    // Simple postMessage for iframes
-    document.querySelectorAll('iframe[src*="iframe.mediadelivery.net"]').forEach((iframe) => {
-      try {
-        iframe.contentWindow?.postMessage('{"command":"pause"}', "*");
-      } catch (error) {
-        // Ignore cross-origin errors
-      }
-    });
+    // For Bunny.net iframes: The VideoEmbed components will handle iframe recreation
+    // via their useEffect when currentlyPlayingId changes
+    // This is more reliable than postMessage to iframes with different origins
   }, []);
 
   // OPTIMIZED: Simple setCurrentlyPlaying without complex async operations
