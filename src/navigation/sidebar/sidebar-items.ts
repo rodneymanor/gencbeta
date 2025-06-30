@@ -52,9 +52,9 @@ export const sidebarItems: NavGroup[] = [
         icon: Home,
         subItems: [
           {
-            title: "Content Creator",
-            url: "/dashboard/content-creator",
-            icon: UserPen,
+            title: "Scripting",
+            url: "/dashboard/scripts/new",
+            icon: WandSparkles,
           },
           {
             title: "Analytics",
@@ -85,11 +85,6 @@ export const sidebarItems: NavGroup[] = [
             title: "Notes",
             url: "/ideas/notes",
             icon: Pen,
-          },
-          {
-            title: "Scripting",
-            url: "/dashboard/scripts/new",
-            icon: WandSparkles,
           },
         ],
       },

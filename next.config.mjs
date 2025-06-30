@@ -66,7 +66,7 @@ const nextConfig = {
     return [
       {
         source: '/',
-        destination: '/dashboard/content-creator',
+        destination: '/dashboard/scripts/new',
         permanent: false,
       },
     ];
