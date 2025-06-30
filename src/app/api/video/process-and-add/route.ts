@@ -1,8 +1,8 @@
 // Production-ready video processing and collection addition endpoint
 import { NextRequest, NextResponse } from "next/server";
 
-import { getAdminAuth, getAdminDb, isAdminInitialized } from "@/lib/firebase-admin";
 import { uploadToBunnyStream } from "@/lib/bunny-stream";
+import { getAdminAuth, getAdminDb, isAdminInitialized } from "@/lib/firebase-admin";
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,6 +11,33 @@ export async function POST(request: NextRequest) {
     // Check if Firebase Admin is initialized (it auto-initializes on import)
     if (!isAdminInitialized) {
       throw new Error("Firebase Admin SDK not initialized - check environment variables");
+    }
+
+    // Extract and verify user authentication
+    const authHeader = request.headers.get("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return NextResponse.json({
+        error: "Unauthorized - Missing or invalid authorization header"
+      }, { status: 401 });
+    }
+
+    const idToken = authHeader.split("Bearer ")[1];
+    let userId: string;
+    
+    try {
+      const adminAuth = getAdminAuth();
+      if (!adminAuth) {
+        throw new Error("Admin auth not available");
+      }
+      
+      const decodedToken = await adminAuth.verifyIdToken(idToken);
+      userId = decodedToken.uid;
+      console.log("✅ [VIDEO_PROCESS] User authenticated:", userId);
+    } catch (authError) {
+      console.error("❌ [VIDEO_PROCESS] Authentication failed:", authError);
+      return NextResponse.json({
+        error: "Unauthorized - Invalid token"
+      }, { status: 401 });
     }
 
     const { videoUrl, collectionId, title } = await request.json();
@@ -39,7 +66,7 @@ export async function POST(request: NextRequest) {
     console.log("🎬 [VIDEO_PROCESS] Step 2: Streaming to Bunny CDN...");
     const streamResult = await streamToBunny(downloadResult.data);
     
-    if (!streamResult.success || !streamResult.iframeUrl) {
+    if (!streamResult.success) {
       return NextResponse.json({
         error: "Failed to stream video to CDN",
         details: streamResult.error || "Failed to upload to Bunny CDN"
@@ -48,7 +75,7 @@ export async function POST(request: NextRequest) {
 
     console.log("✅ [VIDEO_PROCESS] Streaming successful");
 
-    // Step 3: Add to collection
+    // Step 3: Add to collection with userId
     console.log("💾 [VIDEO_PROCESS] Step 3: Adding to collection...");
     const videoData = {
       originalUrl: decodedUrl,
@@ -60,7 +87,8 @@ export async function POST(request: NextRequest) {
       thumbnailUrl: downloadResult.data.thumbnailUrl || streamResult.thumbnailUrl,
       metrics: downloadResult.data.metrics || {},
       metadata: downloadResult.data.metadata || {},
-      transcriptionStatus: 'pending'
+      transcriptionStatus: 'pending',
+      userId: userId
     };
 
     const addResult = await addVideoToCollection(collectionId, videoData);

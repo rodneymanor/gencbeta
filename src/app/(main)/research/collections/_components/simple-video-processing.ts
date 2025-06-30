@@ -3,6 +3,8 @@
  * Iframes handle their own thumbnails, no complex extraction needed
  */
 
+import { getAuth } from "firebase/auth";
+
 export interface VideoProcessResult {
   success: boolean;
   videoId?: string;
@@ -23,10 +25,26 @@ export async function processAndAddVideo(
   try {
     console.log("🎬 [PROCESS_VIDEO] Starting:", { videoUrl, collectionId, title });
 
+    // Get authentication token
+    const auth = getAuth();
+    const user = auth.currentUser;
+    
+    if (!user) {
+      console.error("❌ [PROCESS_VIDEO] User not authenticated");
+      return {
+        success: false,
+        error: "Authentication required",
+        details: "Please log in to add videos to collections"
+      };
+    }
+
+    const idToken = await user.getIdToken();
+
     const response = await fetch("/api/video/process-and-add", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`
       },
       body: JSON.stringify({
         videoUrl: videoUrl.trim(),
@@ -41,8 +59,8 @@ export async function processAndAddVideo(
       console.error("❌ [PROCESS_VIDEO] Server error:", result);
       return {
         success: false,
-        error: result.error ?? "Server error occurred",
-        details: result.details ?? undefined,
+        error: result.error || "Server error",
+        details: result.details || `HTTP ${response.status}`
       };
     }
 

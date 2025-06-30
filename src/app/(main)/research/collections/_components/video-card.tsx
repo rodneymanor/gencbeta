@@ -28,9 +28,9 @@ type LegacyVideo = VideoWithPlayer & {
 // Helper function to get the correct video URL
 const getVideoUrl = (video: LegacyVideo): string => {
   return (
-    video.iframeUrl || 
-    (video.url?.includes('iframe.mediadelivery.net') ? video.url : '') ||
-    video.originalUrl || 
+    video.iframeUrl ?? 
+    (video.url?.includes('iframe.mediadelivery.net') ? video.url : '') ??
+    video.originalUrl ?? 
     ''
   );
 };
