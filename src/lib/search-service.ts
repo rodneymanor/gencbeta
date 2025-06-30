@@ -1,6 +1,5 @@
-import { type LucideIcon, FolderOpen, StickyNote, FileText, Play, Home, Binoculars, Brain, Settings, Users, WandSparkles, ChartLine, Trophy, Pen, Bot } from "lucide-react";
+import { type LucideIcon, FolderOpen, StickyNote, FileText, Play, Home, Binoculars, Settings, Users, WandSparkles } from "lucide-react";
 
-import { type Collection, type Video } from "./collections";
 import { CollectionsRBACService } from "./collections-rbac";
 import { UserManagementService } from "./user-management";
 
@@ -50,8 +49,8 @@ export class SearchService {
       const [collections, videos, notes, scripts, pages] = await Promise.all([
         this.getCollectionsData(userUid),
         this.getVideosData(userUid),
-        this.getNotesData(userUid),
-        this.getScriptsData(userUid),
+        this.getNotesData(),
+        this.getScriptsData(),
         this.getNavigationPages(userUid),
       ]);
 
@@ -103,13 +102,7 @@ export class SearchService {
     const searchTerm = query.toLowerCase().trim();
     
     return data.all
-      .filter(item => 
-        item.title.toLowerCase().includes(searchTerm) ||
-        item.description.toLowerCase().includes(searchTerm) ||
-        item.metadata?.author?.toLowerCase().includes(searchTerm) ||
-        item.metadata?.tags?.some(tag => tag.toLowerCase().includes(searchTerm)) ||
-        item.metadata?.category?.toLowerCase().includes(searchTerm)
-      )
+      .filter(item => this.matchesSearchTerm(item, searchTerm))
       .slice(0, 20); // Limit results
   }
 
@@ -137,13 +130,7 @@ export class SearchService {
     
     const filterItems = (items: SearchResult[]) =>
       items
-        .filter(item => 
-          item.title.toLowerCase().includes(searchTerm) ||
-          item.description.toLowerCase().includes(searchTerm) ||
-          item.metadata?.author?.toLowerCase().includes(searchTerm) ||
-          item.metadata?.tags?.some(tag => tag.toLowerCase().includes(searchTerm)) ||
-          item.metadata?.category?.toLowerCase().includes(searchTerm)
-        )
+        .filter(item => this.matchesSearchTerm(item, searchTerm))
         .slice(0, 5); // Limit per category
 
     return {
@@ -153,6 +140,17 @@ export class SearchService {
       scripts: filterItems(data.scripts),
       pages: filterItems(data.pages),
     };
+  }
+
+  /**
+   * Check if an item matches the search term
+   */
+  private static matchesSearchTerm(item: SearchResult, searchTerm: string): boolean {
+    return item.title.toLowerCase().includes(searchTerm) ||
+           item.description.toLowerCase().includes(searchTerm) ||
+           (item.metadata?.author?.toLowerCase().includes(searchTerm) ?? false) ||
+           (item.metadata?.tags?.some(tag => tag.toLowerCase().includes(searchTerm)) ?? false) ||
+           (item.metadata?.category?.toLowerCase().includes(searchTerm) ?? false);
   }
 
   /**
@@ -171,93 +169,109 @@ export class SearchService {
       const userProfile = await UserManagementService.getUserProfile(userUid);
       if (!userProfile) return [];
 
-      const commonPages: SearchResult[] = [
-        {
-          id: "dashboard",
-          title: "Dashboard",
-          description: "Main dashboard and overview",
-          type: "page",
-          url: "/dashboard",
-          icon: Home,
-          metadata: { category: "Navigation" },
-        },
-        {
-          id: "new-script",
-          title: "New Script",
-          description: "Create a new script with AI assistance",
-          type: "page",
-          url: "/dashboard/scripts/new",
-          icon: WandSparkles,
-          metadata: { category: "Creation" },
-        },
-        {
-          id: "script-editor",
-          title: "Script Editor",
-          description: "AI-powered script editing and refinement",
-          type: "page",
-          url: "/dashboard/scripts/editor",
-          icon: FileText,
-          metadata: { category: "Creation" },
-        },
-        {
-          id: "notes",
-          title: "Notes",
-          description: "Capture and organize your ideas",
-          type: "page",
-          url: "/ideas/notes",
-          icon: StickyNote,
-          metadata: { category: "Ideas" },
-        },
-        {
-          id: "research",
-          title: "Research",
-          description: "Browse and analyze video content",
-          type: "page",
-          url: "/research",
-          icon: Binoculars,
-          metadata: { category: "Research" },
-        },
-        {
-          id: "collections",
-          title: "Collections",
-          description: "Video collections and content libraries",
-          type: "page",
-          url: "/research/collections",
-          icon: FolderOpen,
-          metadata: { category: "Research" },
-        },
-      ];
+      const commonPages = this.getCommonNavigationPages();
+      const rolePages = this.getRoleSpecificPages(userProfile.role);
 
-      // Add role-specific pages
-      if (userProfile.role === "coach" || userProfile.role === "super_admin") {
-        commonPages.push({
-          id: "creators",
-          title: "My Creators",
-          description: "Manage your content creators",
-          type: "page",
-          url: "/dashboard/creators",
-          icon: Users,
-          metadata: { category: "Team" },
-        });
-      }
-
-      if (userProfile.role === "super_admin") {
-        commonPages.push({
-          id: "admin",
-          title: "User Management",
-          description: "Manage users and permissions",
-          type: "page",
-          url: "/dashboard/admin",
-          icon: Settings,
-          metadata: { category: "Administration" },
-        });
-      }
-
-      return commonPages;
+      return [...commonPages, ...rolePages];
     } catch (error) {
       console.error("❌ [SEARCH] Error loading navigation pages:", error);
       return [];
     }
+  }
+
+  /**
+   * Get common navigation pages for all users
+   */
+  private static getCommonNavigationPages(): SearchResult[] {
+    return [
+      {
+        id: "dashboard",
+        title: "Dashboard",
+        description: "Main dashboard and overview",
+        type: "page",
+        url: "/dashboard",
+        icon: Home,
+        metadata: { category: "Navigation" },
+      },
+      {
+        id: "new-script",
+        title: "New Script",
+        description: "Create a new script with AI assistance",
+        type: "page",
+        url: "/dashboard/scripts/new",
+        icon: WandSparkles,
+        metadata: { category: "Creation" },
+      },
+      {
+        id: "script-editor",
+        title: "Script Editor",
+        description: "AI-powered script editing and refinement",
+        type: "page",
+        url: "/dashboard/scripts/editor",
+        icon: FileText,
+        metadata: { category: "Creation" },
+      },
+      {
+        id: "notes",
+        title: "Notes",
+        description: "Capture and organize your ideas",
+        type: "page",
+        url: "/ideas/notes",
+        icon: StickyNote,
+        metadata: { category: "Ideas" },
+      },
+      {
+        id: "research",
+        title: "Research",
+        description: "Browse and analyze video content",
+        type: "page",
+        url: "/research",
+        icon: Binoculars,
+        metadata: { category: "Research" },
+      },
+      {
+        id: "collections",
+        title: "Collections",
+        description: "Video collections and content libraries",
+        type: "page",
+        url: "/research/collections",
+        icon: FolderOpen,
+        metadata: { category: "Research" },
+      },
+    ];
+  }
+
+  /**
+   * Get role-specific navigation pages
+   */
+  private static getRoleSpecificPages(role: string): SearchResult[] {
+    const pages: SearchResult[] = [];
+
+    if (role === "coach" || role === "super_admin") {
+      pages.push({
+        id: "creators",
+        title: "My Creators",
+        description: "Manage your content creators",
+        type: "page",
+        url: "/dashboard/creators",
+        icon: Users,
+        metadata: { category: "Team" },
+      });
+    }
+
+    if (role === "super_admin") {
+      pages.push({
+        id: "admin",
+        title: "User Management",
+        description: "Manage users and permissions",
+        type: "page",
+        url: "/dashboard/admin",
+        icon: Settings,
+        metadata: { category: "Administration" },
+      });
+    }
+
+    return pages;
   }
 
   /**
@@ -270,7 +284,7 @@ export class SearchService {
       return collections.map(collection => ({
         id: collection.id!,
         title: collection.title,
-        description: collection.description || "No description",
+        description: collection.description ?? "No description",
         type: "collection" as const,
         url: `/research/collections/${collection.id}`,
         icon: FolderOpen,
@@ -301,13 +315,13 @@ export class SearchService {
           video.transcript.substring(0, 100) + "..." : 
           "No transcript available",
         type: "video" as const,
-        url: `/research/collections/${video.collectionId || 'all-videos'}?video=${video.id}`,
+        url: `/research/collections/${video.collectionId ?? 'all-videos'}?video=${video.id}`,
         icon: Play,
         metadata: {
           author: video.author,
           platform: video.platform,
           createdAt: video.addedAt,
-          tags: video.contentMetadata?.hashtags || [],
+          tags: video.contentMetadata?.hashtags ?? [],
           category: "Videos",
         },
       }));
@@ -320,10 +334,9 @@ export class SearchService {
   /**
    * Get notes data (currently mock data - replace with real API when available)
    */
-  private static async getNotesData(userUid: string): Promise<SearchResult[]> {
+  private static async getNotesData(): Promise<SearchResult[]> {
     try {
       // TODO: Replace with real notes API when implemented
-      // For now, return mock data
       const mockNotes = [
         {
           id: "1",
@@ -363,10 +376,9 @@ export class SearchService {
   /**
    * Get scripts data (currently mock data - replace with real API when available)
    */
-  private static async getScriptsData(userUid: string): Promise<SearchResult[]> {
+  private static async getScriptsData(): Promise<SearchResult[]> {
     try {
       // TODO: Replace with real scripts API when implemented
-      // For now, return mock data
       const mockScripts = [
         {
           id: "1",

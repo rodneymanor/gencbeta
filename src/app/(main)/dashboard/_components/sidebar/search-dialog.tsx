@@ -2,7 +2,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 
-import { Search, Clock, ArrowRight } from "lucide-react";
+import { Search, ArrowRight, Plus, FileText, StickyNote, Mic, Wand2 } from "lucide-react";
 
 import {
   CommandDialog,
@@ -17,6 +17,31 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth-context";
 import { SearchService, type SearchData, type SearchResult } from "@/lib/search-service";
+
+// Default actions available to all users
+const defaultActions = [
+  {
+    id: "create-script",
+    title: "Create Script",
+    description: "Generate a new script with AI assistance",
+    url: "/dashboard/scripts/new",
+    icon: Wand2,
+  },
+  {
+    id: "create-note",
+    title: "Create Note",
+    description: "Capture a new idea or note",
+    url: "/ideas/notes",
+    icon: StickyNote,
+  },
+  {
+    id: "new-recording",
+    title: "New Recording",
+    description: "Record voice notes or ideas",
+    url: "/dashboard/capture/voice",
+    icon: Mic,
+  },
+];
 
 export function SearchDialog() {
   const router = useRouter();
@@ -40,6 +65,26 @@ export function SearchDialog() {
   });
   const [isLoading, setIsLoading] = React.useState(false);
   const [isInitialLoad, setIsInitialLoad] = React.useState(true);
+
+  // Load search data when dialog opens
+  const loadSearchData = React.useCallback(async () => {
+    if (!user || !userProfile) return;
+
+    setIsLoading(true);
+    setIsInitialLoad(true);
+
+    try {
+      console.log("🔍 [SearchDialog] Loading search data...");
+      const data = await SearchService.getSearchData(user.uid);
+      setSearchData(data);
+      console.log("✅ [SearchDialog] Search data loaded");
+    } catch (error) {
+      console.error("❌ [SearchDialog] Failed to load search data:", error);
+    } finally {
+      setIsLoading(false);
+      setIsInitialLoad(false);
+    }
+  }, [user, userProfile]);
 
   // Debounced search effect
   React.useEffect(() => {
@@ -67,26 +112,7 @@ export function SearchDialog() {
     if (open && user && userProfile && !searchData) {
       loadSearchData();
     }
-  }, [open, user, userProfile]);
-
-  const loadSearchData = async () => {
-    if (!user || !userProfile) return;
-
-    setIsLoading(true);
-    setIsInitialLoad(true);
-
-    try {
-      console.log("🔍 [SearchDialog] Loading search data...");
-      const data = await SearchService.getSearchData(user.uid);
-      setSearchData(data);
-      console.log("✅ [SearchDialog] Search data loaded");
-    } catch (error) {
-      console.error("❌ [SearchDialog] Failed to load search data:", error);
-    } finally {
-      setIsLoading(false);
-      setIsInitialLoad(false);
-    }
-  };
+  }, [open, user, userProfile, searchData, loadSearchData]);
 
   // Keyboard shortcut
   React.useEffect(() => {
@@ -100,7 +126,7 @@ export function SearchDialog() {
     return () => document.removeEventListener("keydown", down);
   }, []);
 
-  const handleSelect = (result: SearchResult) => {
+  const handleSelect = (result: SearchResult | typeof defaultActions[0]) => {
     console.log("🔍 [SearchDialog] Navigating to:", result.url);
     setOpen(false);
     setQuery("");
@@ -124,6 +150,102 @@ export function SearchDialog() {
     } catch {
       return "";
     }
+  };
+
+  const getRecentScripts = () => {
+    if (!searchData) return [];
+    
+    return searchData.scripts
+      .sort((a, b) => {
+        const dateA = new Date(a.metadata?.createdAt || "");
+        const dateB = new Date(b.metadata?.createdAt || "");
+        return dateB.getTime() - dateA.getTime();
+      })
+      .slice(0, 5); // Show latest 5 scripts
+  };
+
+  const renderDefaultContent = () => {
+    if (isLoading || isInitialLoad) {
+      return renderLoadingState();
+    }
+
+    const recentScripts = getRecentScripts();
+
+    return (
+      <>
+        {/* Quick Actions */}
+        <CommandGroup heading="Actions">
+          {defaultActions.map((action) => (
+            <CommandItem
+              key={action.id}
+              className="!py-2 cursor-pointer"
+              onSelect={() => handleSelect(action)}
+            >
+              <action.icon className="mr-2 h-4 w-4" />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">{action.title}</span>
+                </div>
+                <div className="text-muted-foreground text-xs mt-1">
+                  {action.description}
+                </div>
+              </div>
+              <ArrowRight className="ml-2 h-3 w-3 opacity-50" />
+            </CommandItem>
+          ))}
+        </CommandGroup>
+
+        {/* Recent Scripts */}
+        {recentScripts.length > 0 && (
+          <>
+            <CommandSeparator />
+            <CommandGroup heading="Recent Scripts">
+              {recentScripts.map((script) => (
+                <CommandItem
+                  key={`script-${script.id}`}
+                  className="!py-2 cursor-pointer"
+                  onSelect={() => handleSelect(script)}
+                >
+                  <script.icon className="mr-2 h-4 w-4" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium truncate">{script.title}</span>
+                      {script.metadata?.author && (
+                        <Badge variant="outline" className="text-xs">
+                          {script.metadata.author}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="text-muted-foreground text-xs truncate mt-1">
+                      {script.description}
+                    </div>
+                    {script.metadata?.createdAt && (
+                      <div className="text-muted-foreground text-xs mt-1">
+                        {formatDate(script.metadata.createdAt)}
+                      </div>
+                    )}
+                  </div>
+                  <ArrowRight className="ml-2 h-3 w-3 opacity-50" />
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </>
+        )}
+
+        {/* Empty state when no recent scripts */}
+        {recentScripts.length === 0 && !isLoading && (
+          <>
+            <CommandSeparator />
+            <CommandGroup heading="Recent Scripts">
+              <CommandItem disabled>
+                <FileText className="mr-2 h-4 w-4 opacity-50" />
+                <span className="text-muted-foreground text-sm">No recent scripts found</span>
+              </CommandItem>
+            </CommandGroup>
+          </>
+        )}
+      </>
+    );
   };
 
   const renderSearchGroup = (title: string, items: SearchResult[], emptyMessage: string) => {
@@ -195,13 +317,13 @@ export function SearchDialog() {
     </>
   );
 
-  const renderEmptyState = () => {
-    if (query.trim()) {
+  const renderSearchResults = () => {
+    if (getTotalResultsCount() === 0) {
       return (
         <CommandEmpty>
           <div className="text-center py-6">
             <Search className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
-            <p className="text-muted-foreground">No results found for "{query}"</p>
+            <p className="text-muted-foreground">No results found for &quot;{query}&quot;</p>
             <p className="text-muted-foreground text-sm mt-1">
               Try searching for pages, collections, videos, notes, or scripts
             </p>
@@ -211,11 +333,41 @@ export function SearchDialog() {
     }
 
     return (
-      <div className="py-6 text-center text-muted-foreground">
-        <Search className="mx-auto h-8 w-8 mb-2" />
-        <p>Search pages, collections, videos, notes, and scripts</p>
-        <p className="text-sm mt-1">Start typing to see results</p>
-      </div>
+      <>
+        <div className="px-2 py-1.5 text-xs text-muted-foreground border-b">
+          {getTotalResultsCount()} result{getTotalResultsCount() !== 1 ? 's' : ''} found
+        </div>
+        
+        {renderSearchGroup(
+          "Pages", 
+          searchResults.pages, 
+          "No pages found"
+        )}
+        
+        {renderSearchGroup(
+          "Collections", 
+          searchResults.collections, 
+          "No collections found"
+        )}
+        
+        {renderSearchGroup(
+          "Videos", 
+          searchResults.videos, 
+          "No videos found"
+        )}
+        
+        {renderSearchGroup(
+          "Notes", 
+          searchResults.notes, 
+          "No notes found"
+        )}
+        
+        {renderSearchGroup(
+          "Scripts", 
+          searchResults.scripts, 
+          "No scripts found"
+        )}
+      </>
     );
   };
 
@@ -233,60 +385,22 @@ export function SearchDialog() {
       </div>
       <CommandDialog open={open} onOpenChange={setOpen}>
         <CommandInput 
-          placeholder="Search pages, collections, videos, notes, and scripts..."
+          placeholder="Search or create..."
           value={query}
           onValueChange={setQuery}
         />
         <CommandList>
-          {(isLoading || isInitialLoad) ? (
-            renderLoadingState()
-          ) : !searchData ? (
+          {!searchData ? (
             <CommandEmpty>
               <div className="text-center py-6">
                 <p className="text-muted-foreground">Failed to load search data</p>
                 <p className="text-muted-foreground text-sm mt-1">Please try again</p>
               </div>
             </CommandEmpty>
-          ) : getTotalResultsCount() === 0 ? (
-            renderEmptyState()
+          ) : query.trim() ? (
+            renderSearchResults()
           ) : (
-            <>
-              {query.trim() && (
-                <div className="px-2 py-1.5 text-xs text-muted-foreground border-b">
-                  {getTotalResultsCount()} result{getTotalResultsCount() !== 1 ? 's' : ''} found
-                </div>
-              )}
-              
-              {renderSearchGroup(
-                "Pages", 
-                searchResults.pages, 
-                "No pages found"
-              )}
-              
-              {renderSearchGroup(
-                "Collections", 
-                searchResults.collections, 
-                "No collections found"
-              )}
-              
-              {renderSearchGroup(
-                "Videos", 
-                searchResults.videos, 
-                "No videos found"
-              )}
-              
-              {renderSearchGroup(
-                "Notes", 
-                searchResults.notes, 
-                "No notes found"
-              )}
-              
-              {renderSearchGroup(
-                "Scripts", 
-                searchResults.scripts, 
-                "No scripts found"
-              )}
-            </>
+            renderDefaultContent()
           )}
         </CommandList>
       </CommandDialog>
