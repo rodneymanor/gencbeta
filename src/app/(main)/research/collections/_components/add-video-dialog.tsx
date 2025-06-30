@@ -1,9 +1,7 @@
 "use client";
 
-import { useState } from "react";
-
+import { useState, useCallback } from "react";
 import { Plus } from "lucide-react";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -16,165 +14,153 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useAppState } from "@/contexts/app-state-context";
-import { useAuth } from "@/contexts/auth-context";
-import { CollectionsService } from "@/lib/collections";
-
 import {
-  downloadVideo,
-  transcribeVideo,
-  extractVideoThumbnail,
-  createVideoObject,
-  validateUrl,
-} from "./video-processing";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-interface AddVideoDialogProps {
-  collections: Array<{ id: string; title: string }>;
-  selectedCollectionId?: string;
-  onVideoAdded: () => void;
+interface Collection {
+  id: string;
+  title: string;
 }
 
-export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded }: AddVideoDialogProps) {
-  const [open, setOpen] = useState(false);
+interface AddVideoDialogProps {
+  collections: Collection[];
+  selectedCollectionId?: string;
+  onVideoAdded?: () => void;
+  children?: React.ReactNode;
+}
+
+export function AddVideoDialog({
+  collections,
+  selectedCollectionId,
+  onVideoAdded,
+  children,
+}: AddVideoDialogProps) {
+  const [isOpen, setIsOpen] = useState(false);
   const [url, setUrl] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [collectionId, setCollectionId] = useState(selectedCollectionId ?? "");
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [processingStep, setProcessingStep] = useState("");
 
-  const { user } = useAuth();
-  const { setVideoProcessing } = useAppState();
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!url.trim() || !collectionId) return;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+      setIsLoading(true);
+      try {
+        const response = await fetch("/api/add-video-to-collection", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            url: url.trim(),
+            collectionId,
+          }),
+        });
 
-    if (!url.trim()) {
-      toast.error("Please enter a video URL");
-      return;
-    }
+        if (response.ok) {
+          setUrl("");
+          setIsOpen(false);
+          onVideoAdded?.();
+        } else {
+          console.error("Failed to add video");
+        }
+      } catch (error) {
+        console.error("Error adding video:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [url, collectionId, onVideoAdded],
+  );
 
-    if (!validateUrl(url)) {
-      toast.error("Please enter a valid TikTok or Instagram video URL");
-      return;
-    }
-
-    if (!user) {
-      toast.error("You must be logged in to add videos");
-      return;
-    }
-
-    setIsProcessing(true);
-    setVideoProcessing(true);
-
-    try {
-      // Step 1: Download video
-      setProcessingStep("Downloading video...");
-      console.log("🚀 [ADD_VIDEO] Starting download for:", url);
-      const downloadResponse = await downloadVideo(url);
-      console.log("✅ [ADD_VIDEO] Download completed:", downloadResponse);
-
-      // Step 2: Transcribe video
-      setProcessingStep("Analyzing video content...");
-      console.log("🎬 [ADD_VIDEO] Starting transcription...");
-      const transcriptionResponse = await transcribeVideo(downloadResponse);
-      console.log("✅ [ADD_VIDEO] Transcription completed:", transcriptionResponse);
-
-      // Step 3: Generate thumbnail
-      setProcessingStep("Generating thumbnail...");
-      console.log("🖼️ [ADD_VIDEO] Generating thumbnail...");
-      const thumbnailUrl = await extractVideoThumbnail(downloadResponse);
-      console.log("✅ [ADD_VIDEO] Thumbnail generated:", thumbnailUrl.substring(0, 50) + "...");
-
-      // Step 4: Save to collection
-      setProcessingStep("Saving to collection...");
-      console.log("💾 [ADD_VIDEO] Saving to collection...");
-
-      // Determine which collection to use
-      const targetCollectionId = collectionId && collectionId.trim() !== "" ? collectionId : "all-videos";
-      console.log("🎯 [ADD_VIDEO] Target collection:", targetCollectionId);
-
-      // Create video object with all the processed data
-      const videoToAdd = createVideoObject(downloadResponse, transcriptionResponse, thumbnailUrl, url);
-      console.log("📦 [ADD_VIDEO] Video object created:", Object.keys(videoToAdd));
-      console.log("🔍 [ADD_VIDEO] User ID:", user.uid);
-      console.log("🔍 [ADD_VIDEO] Target collection ID:", targetCollectionId);
-
-      await CollectionsService.addVideoToCollection(user.uid, targetCollectionId, videoToAdd);
-      console.log("✅ [ADD_VIDEO] Video added to collection successfully");
-
-      toast.success("Video added successfully!");
-      setOpen(false);
-      setUrl("");
-      setCollectionId("");
-      onVideoAdded();
-    } catch (error) {
-      console.error("❌ [ADD_VIDEO] Error processing video:", error);
-      console.error("❌ [ADD_VIDEO] Error stack:", error instanceof Error ? error.stack : "No stack trace");
-      toast.error(error instanceof Error ? error.message : "Failed to process video");
-    } finally {
-      setIsProcessing(false);
-      setVideoProcessing(false);
-      setProcessingStep("");
-    }
-  };
+  const defaultTrigger = (
+    <Button 
+      variant="outline" 
+      size="sm"
+      className="shadow-xs hover:shadow-sm transition-all duration-200 border-border/60 hover:border-border bg-background hover:bg-secondary/60"
+    >
+      <Plus className="mr-2 h-4 w-4" />
+      Add Video
+    </Button>
+  );
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add Video
-        </Button>
+        {children ?? defaultTrigger}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Add Video to Collection</DialogTitle>
-          <DialogDescription>
-            Enter a TikTok or Instagram video URL to automatically process and add it to your collection.
+      <DialogContent className="sm:max-w-md shadow-lg border-border/60">
+        <DialogHeader className="space-y-3">
+          <DialogTitle className="text-xl font-semibold">Add Video to Collection</DialogTitle>
+          <DialogDescription className="text-muted-foreground leading-relaxed">
+            Paste a TikTok or Instagram video URL to add it to your collection. The video will be analyzed and processed automatically.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6 pt-2">
           <div className="space-y-2">
-            <Label htmlFor="url">Video URL</Label>
+            <Label htmlFor="video-url" className="text-sm font-medium">
+              Video URL
+            </Label>
             <Input
-              id="url"
+              id="video-url"
               type="url"
-              placeholder="https://www.tiktok.com/@user/video/123..."
+              placeholder="https://www.tiktok.com/@username/video/123..."
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              disabled={isProcessing}
+              required
+              className="shadow-xs focus:shadow-sm transition-all duration-200 border-border/60 focus:border-border bg-background"
             />
           </div>
-
           <div className="space-y-2">
-            <Label htmlFor="collection">Collection (Optional)</Label>
-            <Select value={collectionId} onValueChange={setCollectionId} disabled={isProcessing}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a collection or leave empty for All Videos" />
+            <Label htmlFor="collection-select" className="text-sm font-medium">
+              Collection
+            </Label>
+            <Select value={collectionId} onValueChange={setCollectionId} required>
+              <SelectTrigger 
+                id="collection-select"
+                className="shadow-xs focus:shadow-sm transition-all duration-200 border-border/60 focus:border-border bg-background"
+              >
+                <SelectValue placeholder="Select a collection" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="shadow-lg border-border/60">
                 {collections.map((collection) => (
-                  <SelectItem key={collection.id} value={collection.id}>
+                  <SelectItem 
+                    key={collection.id} 
+                    value={collection.id}
+                    className="cursor-pointer hover:bg-secondary/60 focus:bg-secondary/60"
+                  >
                     {collection.title}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-
-          {isProcessing && (
-            <div className="space-y-2 text-center">
-              <div className="border-primary mx-auto h-6 w-6 animate-spin rounded-full border-2 border-t-transparent" />
-              <p className="text-muted-foreground text-sm">{processingStep}</p>
-            </div>
-          )}
-
-          <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={isProcessing}>
+          <div className="flex justify-end gap-3 pt-2">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setIsOpen(false)}
+              className="shadow-xs hover:shadow-sm transition-all duration-200 border-border/60 hover:border-border bg-background hover:bg-secondary/60"
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={isProcessing || !url.trim()}>
-              {isProcessing ? "Processing..." : "Add Video"}
+            <Button 
+              type="submit" 
+              disabled={!url.trim() || !collectionId || isLoading}
+              className="shadow-xs hover:shadow-sm transition-all duration-200 min-w-[100px]"
+            >
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  Adding...
+                </div>
+              ) : (
+                "Add Video"
+              )}
             </Button>
           </div>
         </form>

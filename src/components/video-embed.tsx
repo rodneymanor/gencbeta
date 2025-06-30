@@ -1,23 +1,15 @@
 "use client";
 
-import React, { useState, useCallback, useRef, useEffect, memo } from "react";
+import React, { useState, useCallback, useEffect, memo } from "react";
 
 import { useVideoPlaybackData, useVideoPlaybackAPI } from "@/contexts/video-playback-context";
 
 import { VideoThumbnail } from "./video-thumbnail";
 
-interface VideoData {
-  buffer: number[];
-  size: number;
-  mimeType: string;
-  filename: string;
-}
-
 interface VideoEmbedProps {
   url: string;
   platform: "tiktok" | "instagram";
   thumbnailUrl?: string;
-  videoData?: VideoData;
   className?: string;
 }
 
@@ -39,7 +31,7 @@ const createVideoSrc = (url: string, shouldAutoplay: boolean = false) => {
 
 // OPTIMIZED: Simplified Video Embed Component
 export const VideoEmbed = memo<VideoEmbedProps>(
-  ({ url, platform, thumbnailUrl, videoData, className = "" }) => {
+  ({ url, platform, thumbnailUrl, className = "" }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [hasError, setHasError] = useState(false);
@@ -49,7 +41,6 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     
     const videoId = url;
     const hostedOnCDN = url.includes("iframe.mediadelivery.net");
-    const isCurrentlyPlaying = currentlyPlayingId === videoId;
     
     // Debug: Log the full URL to verify completeness
     console.log("🎥 [VideoEmbed] Full URL check:", {

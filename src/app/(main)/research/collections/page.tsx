@@ -89,11 +89,12 @@ const CollectionBadge = memo(
     >
       <Badge
         variant="outline"
-        className={`focus-visible:ring-ring cursor-pointer rounded-full border-0 px-4 py-2 font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 ${
+        className={`focus-visible:ring-ring cursor-pointer font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 ${
           isActive
-            ? "bg-secondary text-foreground hover:bg-secondary/80 font-semibold"
-            : "text-muted-foreground hover:bg-secondary/50 bg-transparent font-normal"
-        } ${isTransitioning && isActive ? "opacity-75" : ""} ${isTransitioning ? "pointer-events-none" : ""}`}
+            ? "bg-secondary text-foreground hover:bg-secondary/80 font-semibold shadow-sm border-border/60"
+            : "text-muted-foreground hover:bg-secondary/50 bg-transparent font-normal hover:text-foreground hover:border-border/40"
+        } ${isTransitioning && isActive ? "opacity-75" : ""} ${isTransitioning ? "pointer-events-none" : ""} 
+        rounded-md border-0 px-4 py-2.5 text-sm min-h-[36px] shadow-xs hover:shadow-sm`}
         onClick={isTransitioning ? undefined : onClick}
       >
         {collection ? `${collection.title} (${collection.videoCount})` : `All Videos (${videoCount})`}
@@ -103,7 +104,7 @@ const CollectionBadge = memo(
           <CollectionBadgeMenu
             collection={collection}
             onCollectionDeleted={onCollectionDeleted}
-            className="bg-background border-border border shadow-sm"
+            className="bg-background border-border border shadow-md rounded-md hover:shadow-lg transition-shadow duration-200"
           />
         </div>
       )}
@@ -126,7 +127,7 @@ function CollectionsPageContent() {
 
   // Simplified cache
   const cacheRef = useRef<SimpleCache>({ data: new Map() });
-  const loadingTimeoutRef = useRef<NodeJS.Timeout>();
+
   const previousCollectionRef = useRef<string | null>(null);
 
   const { user, userProfile } = useAuth();
