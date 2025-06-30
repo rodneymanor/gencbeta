@@ -7,7 +7,6 @@ import {
   extractThumbnailUrl,
 } from "@/lib/instagram-downloader";
 import { transcribeVideoFile } from "@/lib/transcription";
-import { downloadTikTokVideo as downloadTikTokVideoFromAPI, extractTikTokVideoId } from "@/lib/tiktok-downloader";
 
 export interface DownloadResult {
   videoData: { buffer: ArrayBuffer; size: number; mimeType: string; filename?: string };
@@ -17,11 +16,8 @@ export interface DownloadResult {
 }
 
 export interface CdnResult {
-  success: boolean;
-  iframeUrl?: string;
-  directUrl?: string;
-  guid?: string;
-  error?: string;
+  cdnUrl: string;
+  filename: string;
 }
 
 export interface TranscriptionResult {
@@ -49,6 +45,10 @@ export interface TranscriptionResult {
     processedAt: string;
   };
 }
+
+// Simple in-memory cache for TikTok API responses (24 hour TTL)
+const tiktokCache = new Map<string, { data: unknown; timestamp: number }>();
+const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
 export function detectPlatform(url: string): string {
   const urlLower = url.toLowerCase();
@@ -159,15 +159,168 @@ export async function uploadToBunnyCDN(videoData: {
   }
 }
 
-// Simple wrapper for TikTok downloads using the new module
 export async function downloadTikTokVideo(
   url: string,
 ): Promise<{ buffer: ArrayBuffer; size: number; mimeType: string; filename?: string } | null> {
-  return await downloadTikTokVideoFromAPI(url);
+  console.log("🎵 [DOWNLOAD] Downloading TikTok video via RapidAPI...");
+
+  const videoId = extractTikTokVideoId(url);
+  if (!videoId) {
+    console.error("❌ [DOWNLOAD] Could not extract TikTok video ID from URL:", url);
+    throw new Error("Invalid TikTok URL format. Please check the URL and try again.");
+  }
+
+  console.log("🆔 [DOWNLOAD] TikTok video ID:", videoId);
+
+  try {
+    // Check cache first
+    const cacheKey = `tiktok_${videoId}`;
+    const cached = tiktokCache.get(cacheKey);
+
+    let metadata;
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      console.log("💾 [DOWNLOAD] Using cached TikTok metadata");
+      metadata = cached.data;
+    } else {
+      console.log("🌐 [DOWNLOAD] Fetching TikTok metadata from RapidAPI...");
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+      const metadataResponse = await fetch(
+        `https://tiktok-scrapper-videos-music-challenges-downloader.p.rapidapi.com/video/${videoId}`,
+        {
+          method: "GET",
+          headers: {
+            "x-rapidapi-key": process.env.RAPIDAPI_KEY || "",
+            "x-rapidapi-host": "tiktok-scrapper-videos-music-challenges-downloader.p.rapidapi.com",
+          },
+          signal: controller.signal,
+        },
+      );
+
+      clearTimeout(timeoutId);
+
+      if (!metadataResponse.ok) {
+        const errorText = await metadataResponse.text();
+        console.error("❌ [DOWNLOAD] TikTok RapidAPI error:", metadataResponse.status, errorText);
+
+        if (metadataResponse.status === 429) {
+          throw new Error(
+            "TikTok download service temporarily unavailable due to rate limits. Please try again in a few minutes.",
+          );
+        } else if (metadataResponse.status === 404) {
+          throw new Error("TikTok video not found. The video may be private, deleted, or the URL is incorrect.");
+        } else {
+          throw new Error("TikTok download service is currently unavailable. Please try again later.");
+        }
+      }
+
+      metadata = await metadataResponse.json();
+
+      // Cache the response
+      tiktokCache.set(cacheKey, { data: metadata, timestamp: Date.now() });
+
+      // Clean up old cache entries periodically
+      if (tiktokCache.size > 100) {
+        const now = Date.now();
+        for (const [key, value] of tiktokCache.entries()) {
+          if (now - value.timestamp > CACHE_TTL) {
+            tiktokCache.delete(key);
+          }
+        }
+      }
+    }
+
+    // Extract video data from response
+    const videoData = metadata.data?.aweme_detail?.video;
+    const videoUrls = videoData?.play_addr?.url_list;
+
+    if (!videoUrls || videoUrls.length === 0) {
+      console.error("❌ [DOWNLOAD] No video URLs found in TikTok response");
+      throw new Error("Unable to extract video download links. The video may be private or restricted.");
+    }
+
+    console.log("🔗 [DOWNLOAD] Found", videoUrls.length, "TikTok video quality options");
+
+    // Prioritize lowest quality (last URL in the list typically)
+    const prioritizedUrls = [...videoUrls].reverse();
+
+    // Try each video URL starting with lowest quality
+    for (let i = 0; i < prioritizedUrls.length; i++) {
+      const videoUrl = prioritizedUrls[i];
+
+      try {
+        console.log(`📥 [DOWNLOAD] Attempting download from quality option ${i + 1}/${prioritizedUrls.length}`);
+
+        const videoController = new AbortController();
+        const videoTimeoutId = setTimeout(() => videoController.abort(), 20000);
+
+        const videoResponse = await fetch(videoUrl, {
+          headers: {
+            "User-Agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+            Referer: "https://www.tiktok.com/",
+          },
+          signal: videoController.signal,
+        });
+
+        clearTimeout(videoTimeoutId);
+
+        if (videoResponse.ok) {
+          const buffer = await videoResponse.arrayBuffer();
+          const size = buffer.byteLength;
+          const mimeType = videoResponse.headers.get("content-type") || "video/mp4";
+
+          if (size > 1000) {
+            // Ensure we got actual video data
+            console.log(
+              `✅ [DOWNLOAD] Successfully downloaded TikTok video (${Math.round((size / 1024 / 1024) * 100) / 100}MB)`,
+            );
+
+            return {
+              buffer,
+              size,
+              mimeType,
+              filename: `tiktok-${videoId}.mp4`,
+            };
+          }
+        }
+      } catch (error) {
+        console.log(`❌ [DOWNLOAD] Quality option ${i + 1} failed:`, error);
+        continue;
+      }
+    }
+
+    throw new Error("Unable to download video from any available quality options. Please try again later.");
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error("TikTok download timed out. Please check your connection and try again.");
+    }
+
+    // Re-throw our custom errors, or wrap unknown errors
+    if (error instanceof Error && error.message.includes("TikTok")) {
+      throw error;
+    }
+
+    console.error("❌ [DOWNLOAD] TikTok download error:", error);
+    throw new Error("Failed to download TikTok video. Please check the URL and try again.");
+  }
 }
 
-// Export TikTok utilities for backwards compatibility
-export { extractTikTokVideoId };
+export function extractTikTokVideoId(url: string): string | null {
+  const patterns = [
+    /tiktok\.com\/@[^/]+\/video\/(\d+)/,
+    /vm\.tiktok\.com\/([A-Za-z0-9]+)/,
+    /tiktok\.com\/t\/([A-Za-z0-9]+)/,
+  ];
+
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return match[1];
+  }
+  return null;
+}
 
 export function extractInstagramShortcode(url: string): string | null {
   const match = url.match(/(?:instagram\.com|instagr\.am)\/(?:p|reels?)\/([A-Za-z0-9_-]+)/);
@@ -220,4 +373,4 @@ async function fallbackToBasicDownload(): Promise<DownloadResult | null> {
   // Simplified fallback - just return null for now
   console.log("🔄 [DOWNLOAD] Basic download fallback not implemented");
   return null;
-} 
+}
