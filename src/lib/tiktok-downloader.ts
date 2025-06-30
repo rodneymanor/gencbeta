@@ -53,7 +53,7 @@ async function fetchTikTokMetadata(videoId: string): Promise<TikTokMetadata> {
 
   try {
     const metadataResponse = await fetch(
-      `https://tiktok-scrapper-videos-music-challenges-downloader.p.rapidapi.com/video/\${videoId}`,
+      `https://tiktok-scrapper-videos-music-challenges-downloader.p.rapidapi.com/video/${videoId}`,
       {
         method: "GET",
         headers: {
@@ -99,13 +99,14 @@ async function downloadVideoContent(videoUrl: string, videoId: string): Promise<
     if (size <= 1000) return null; // Ensure we got actual video data
 
     console.log(
-      `✅ [DOWNLOAD] Successfully downloaded TikTok video (\${Math.round((size / 1024 / 1024) * 100) / 100}MB)`,
+      `✅ [DOWNLOAD] Successfully downloaded TikTok video (${Math.round((size / 1024 / 1024) * 100) / 100}MB)`,
+    );
 
     return {
       buffer,
       size,
       mimeType,
-      filename: `tiktok-\${videoId}.mp4`,
+      filename: `tiktok-${videoId}.mp4`,
     };
   } catch (error) {
     console.log("❌ [DOWNLOAD] Video download failed:", error);
@@ -127,7 +128,7 @@ function cleanupCache(): void {
 }
 
 async function getMetadata(videoId: string): Promise<TikTokMetadata> {
-  const cacheKey = `tiktok_\${videoId}`;
+  const cacheKey = `tiktok_${videoId}`;
   const cached = tiktokCache.get(cacheKey);
 
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
@@ -163,7 +164,7 @@ async function tryDownloadFromUrls(videoUrls: string[], videoId: string): Promis
   const prioritizedUrls = [...videoUrls].reverse();
 
   for (let i = 0; i < prioritizedUrls.length; i++) {
-    console.log(`📥 [DOWNLOAD] Attempting download from quality option \${i + 1}/\${prioritizedUrls.length}`);
+    console.log(`📥 [DOWNLOAD] Attempting download from quality option ${i + 1}/${prioritizedUrls.length}`);
     const result = await downloadVideoContent(prioritizedUrls[i], videoId);
     if (result) return result;
   }
