@@ -64,14 +64,26 @@ export const processVideoUrl = async (
       throw new Error(errorData.error ?? "Failed to download video");
     }
 
+    const downloadData = await downloadResponse.json();
     console.log("✅ [VIDEO_PROCESS] Video downloaded successfully");
 
-    // Step 2: Transcribe video
+    // Step 2: Transcribe video using the downloaded buffer
     console.log("🎙️ [VIDEO_PROCESS] Starting transcription...");
+
+    // Convert video buffer to File for transcription
+    const uint8Array = new Uint8Array(downloadData.videoData.buffer);
+    const blob = new Blob([uint8Array], { type: downloadData.videoData.mimeType });
+    const file = new File([blob], downloadData.videoData.filename ?? "video.mp4", {
+      type: downloadData.videoData.mimeType,
+    });
+
+    // Send video file to transcription API
+    const formData = new FormData();
+    formData.append("video", file);
+
     const transcribeResponse = await fetch("/api/video/transcribe", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ videoUrl }),
+      body: formData,
     });
 
     if (!transcribeResponse.ok) {

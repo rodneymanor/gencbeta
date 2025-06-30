@@ -38,8 +38,19 @@ async function handleUrlTranscription(request: NextRequest) {
   console.log("🌐 [TRANSCRIBE] Transcribing video from URL:", videoUrl);
 
   try {
+    // Decode URL-encoded URLs before fetching
+    let decodedUrl = videoUrl;
+    try {
+      decodedUrl = decodeURIComponent(videoUrl);
+      console.log("🔍 [TRANSCRIBE] Original URL:", videoUrl);
+      console.log("🔍 [TRANSCRIBE] Decoded URL:", decodedUrl);
+    } catch (error) {
+      console.log("⚠️ [TRANSCRIBE] URL decode failed, using original:", videoUrl);
+      decodedUrl = videoUrl;
+    }
+
     // Download video from URL
-    const response = await fetch(videoUrl);
+    const response = await fetch(decodedUrl);
     if (!response.ok) {
       throw new Error(`Failed to fetch video: ${response.status} ${response.statusText}`);
     }
@@ -59,7 +70,7 @@ async function handleUrlTranscription(request: NextRequest) {
       transcript,
       metadata: {
         method: "url",
-        videoUrl,
+        videoUrl: decodedUrl,
         processedAt: new Date().toISOString(),
       },
     });
