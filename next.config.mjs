@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Disable development indicators (Next.js logo, etc.)
+  devIndicators: {
+    buildActivity: false,
+  },
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
