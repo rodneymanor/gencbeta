@@ -71,12 +71,7 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     if (!isPlaying) {
       return (
         <div className={`group relative h-full w-full overflow-hidden rounded-lg bg-black ${className}`}>
-          <VideoThumbnail
-            platform={platform}
-            thumbnailUrl={thumbnailUrl}
-            onClick={handlePlay}
-            title={url.substring(0, 50) + "..."}
-          />
+          <VideoThumbnail platform={platform} thumbnailUrl={thumbnailUrl} onClick={handlePlay} />
         </div>
       );
     }

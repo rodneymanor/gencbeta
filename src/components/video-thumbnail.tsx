@@ -5,15 +5,12 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Play } from "lucide-react";
 
-// Simplified VideoThumbnail component - single container, no wrapper divs
-// eslint-disable-next-line complexity
+// Clean VideoThumbnail component - no duplicate badges or iframe labels
 export const VideoThumbnail = ({
   platform,
   thumbnailUrl,
   onClick,
   disableCard = false,
-  title,
-  author,
 }: {
   platform: "tiktok" | "instagram";
   thumbnailUrl?: string;
@@ -29,13 +26,10 @@ export const VideoThumbnail = ({
 
   const gradientClass = platform === "tiktok" ? platformGradients.tiktok : platformGradients.instagram;
 
-  // Only log critical thumbnail issues
+  // Only log critical thumbnail issues in development
   if (!thumbnailUrl && process.env.NODE_ENV === "development") {
     console.warn("⚠️ [VideoThumbnail] No thumbnail provided for", platform);
   }
-
-  // Enhanced debug logging
-  // logThumbnailDebugInfo(thumbnailUrl, platform);
 
   return (
     <motion.div
@@ -49,12 +43,12 @@ export const VideoThumbnail = ({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3 }}
     >
-      {/* Thumbnail Image - Direct placement, no wrapper */}
+      {/* Thumbnail Image */}
       {thumbnailUrl && (
         <>
           <Image
             src={thumbnailUrl}
-            alt={title ?? "Video thumbnail"}
+            alt="Video thumbnail"
             width={360}
             height={640}
             className="absolute inset-0 h-full w-full object-cover"
@@ -85,24 +79,7 @@ export const VideoThumbnail = ({
         </motion.div>
       </motion.div>
 
-      {/* Platform indicator */}
-      <div className="absolute top-4 left-4">
-        <div className="rounded-full bg-black/50 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
-          {platform.toUpperCase()}
-        </div>
-      </div>
-
-      {/* Video info overlay */}
-      {(title ?? author) && (
-        <div className="absolute right-4 bottom-4 left-4">
-          <div className="rounded-lg bg-black/50 p-3 backdrop-blur-sm">
-            {title && <p className="line-clamp-2 text-sm font-medium text-white">{title}</p>}
-            {author && <p className="text-xs text-white/80">@{author}</p>}
-          </div>
-        </div>
-      )}
-
-      {/* Shimmer effect - only show on gradients */}
+      {/* Shimmer effect - only show on gradients when no thumbnail */}
       {!thumbnailUrl && (
         <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       )}
