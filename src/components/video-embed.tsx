@@ -10,7 +10,7 @@ interface VideoEmbedProps {
   className?: string;
 }
 
-// Production-ready video embed for Bunny.net iframes
+// BUNNY.NET ONLY VIDEO EMBED - Rejects all non-Bunny URLs
 export const VideoEmbed = memo<VideoEmbedProps>(
   ({ url, className = "" }) => {
     const [isPlaying, setIsPlaying] = useState(false);
@@ -19,21 +19,39 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     const { currentlyPlayingId } = useVideoPlaybackData();
     const { setCurrentlyPlaying } = useVideoPlaybackAPI();
 
+    // CRITICAL: Only allow Bunny.net iframe URLs - REJECT EVERYTHING ELSE
+    const isBunnyUrl = url && (
+      url.includes('iframe.mediadelivery.net') || 
+      url.includes('bunnycdn.com') ||
+      url.includes('b-cdn.net')
+    );
+    
+    if (!isBunnyUrl) {
+      console.warn("🚫 [VideoEmbed] Rejected non-Bunny URL:", url);
+      return (
+        <div className={`flex items-center justify-center bg-gray-900 text-white ${className}`}>
+          <div className="text-center p-4">
+            <div className="text-sm font-medium">Video Processing Required</div>
+            <div className="text-xs text-gray-400 mt-1">Only Bunny.net CDN videos supported</div>
+          </div>
+        </div>
+      );
+    }
+
     const videoId = url;
 
-    // Create iframe src based on playing state
+    // Create iframe src
     const iframeSrc = isPlaying 
       ? `${url}${url.includes("?") ? "&" : "?"}autoplay=true`
       : url;
 
     // Handle video play
     const handlePlay = useCallback(() => {
-      if (!isPlaying) {
-        console.log("🎬 [VideoEmbed] Starting video playback:", videoId.slice(0, 50));
+      if (!isPlaying && videoId) {
+        console.log("🎬 [VideoEmbed] Starting Bunny video:", videoId.substring(0, 50) + "...");
         setIsLoading(true);
         setIsPlaying(true);
         void setCurrentlyPlaying(videoId);
-        // Quick loading timeout
         setTimeout(() => setIsLoading(false), 500);
       }
     }, [isPlaying, videoId, setCurrentlyPlaying]);
@@ -41,7 +59,7 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     // Auto-pause when another video plays
     useEffect(() => {
       if (currentlyPlayingId !== videoId && isPlaying) {
-        console.log("⏸️ [VideoEmbed] Pausing video:", videoId.slice(0, 50));
+        console.log("⏸️ [VideoEmbed] Pausing Bunny video");
         setIsPlaying(false);
         setIsLoading(false);
       }
@@ -50,19 +68,17 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     return (
       <div className={`group relative w-full overflow-hidden rounded-lg bg-black ${className}`}>
         <div className="relative h-0 w-full pb-[177.78%]">
-          {/* Bunny.net iframe */}
+          {/* Bunny.net iframe ONLY */}
           <iframe
             src={iframeSrc}
             className="absolute inset-0 h-full w-full"
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
-            onLoad={() => {
-              setIsLoading(false);
-            }}
+            onLoad={() => setIsLoading(false)}
           />
 
-          {/* Click overlay - only show when not playing */}
+          {/* Click overlay for play button */}
           {!isPlaying && (
             <div 
               className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer bg-black/20 hover:bg-black/30 transition-colors"
@@ -84,11 +100,7 @@ export const VideoEmbed = memo<VideoEmbedProps>(
       </div>
     );
   },
-  (prevProps, nextProps) => {
-    return (
-      prevProps.url === nextProps.url
-    );
-  },
+  (prevProps, nextProps) => prevProps.url === nextProps.url
 );
 
 VideoEmbed.displayName = "VideoEmbed";

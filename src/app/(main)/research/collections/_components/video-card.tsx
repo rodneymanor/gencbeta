@@ -111,7 +111,12 @@ export const VideoCard = memo<VideoCardProps>(
           {/* Video Content */}
           <div className="bg-muted/30 relative aspect-[9/16] overflow-hidden">
             <VideoEmbed
-              url={video.iframeUrl || video.originalUrl}
+              url={
+                video.iframeUrl || 
+                (video as any).url?.includes('iframe.mediadelivery.net') ? (video as any).url : 
+                video.originalUrl || 
+                ''
+              }
               className="absolute inset-0 h-full w-full"
             />
 
