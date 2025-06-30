@@ -84,6 +84,16 @@ export const VideoCard = memo<VideoCardProps>(({
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
+  // Debug: Log video data structure
+  console.log("🎬 [VideoCard] Rendering video:");
+  console.log("  Video ID:", video.id);
+  console.log("  Video URL:", video.url);
+  console.log("  Video URL type:", typeof video.url);
+  console.log("  Thumbnail URL:", video.thumbnailUrl);
+  console.log("  Thumbnail type:", typeof video.thumbnailUrl);
+  console.log("  Platform:", video.platform);
+  console.log("  Title:", video.title);
+
   const cardClassName = `group relative overflow-hidden transition-all duration-200 hover:shadow-lg border-border/50 hover:border-border ${className} ${
     isSelected ? "ring-2 ring-primary shadow-md" : ""
   } ${isDeleting ? "opacity-50 pointer-events-none" : ""}`;
@@ -114,7 +124,7 @@ export const VideoCard = memo<VideoCardProps>(({
           url={video.url}
           platform={video.platform as "tiktok" | "instagram"}
           thumbnailUrl={video.thumbnailUrl}
-          className="absolute inset-0"
+          className="absolute inset-0 w-full h-full"
         />
         
         {/* Platform Badge */}
