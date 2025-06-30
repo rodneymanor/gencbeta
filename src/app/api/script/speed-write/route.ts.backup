@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { SPEED_WRITE_CONFIG } from "@/config/speed-write-prompt";
 import { generateScript } from "@/lib/gemini";
 import { trackApiUsage, UsageTracker } from "@/lib/usage-tracker";
 
@@ -80,17 +81,15 @@ async function processSpeedWriteRequest(body: SpeedWriteRequest): Promise<{
 async function createScriptOptions(
   speedWriteResult: any,
   educationalResult: any,
-  length: string,
+  length: string
 ): Promise<{ optionA: ScriptOption | null; optionB: ScriptOption | null }> {
-  const optionA =
-    speedWriteResult.status === "fulfilled" && speedWriteResult.value.success
-      ? createScriptOption("option-a", "Speed Write Formula", speedWriteResult.value.content, "speed-write")
-      : null;
+  const optionA = speedWriteResult.status === "fulfilled" && speedWriteResult.value.success
+    ? createScriptOption("option-a", "Speed Write Formula", speedWriteResult.value.content!, "speed-write")
+    : null;
 
-  const optionB =
-    educationalResult.status === "fulfilled" && educationalResult.value.success
-      ? createScriptOption("option-b", "Educational Approach", educationalResult.value.content, "educational")
-      : null;
+  const optionB = educationalResult.status === "fulfilled" && educationalResult.value.success
+    ? createScriptOption("option-b", "Educational Approach", educationalResult.value.content!, "educational")
+    : null;
 
   return { optionA, optionB };
 }
@@ -101,34 +100,22 @@ async function trackUsageForResults(
   educationalResult: any,
   processingTime: number,
   idea: string,
-  length: string,
+  length: string
 ): Promise<void> {
   await Promise.allSettled([
-    trackApiUsage(
-      userId,
-      "speed-write",
-      "speed-write-a",
-      {
-        tokensUsed: speedWriteResult.status === "fulfilled" ? speedWriteResult.value.tokensUsed : 0,
-        responseTime: processingTime / 2,
-        success: speedWriteResult.status === "fulfilled" && speedWriteResult.value.success,
-        error: speedWriteResult.status === "rejected" ? speedWriteResult.reason?.message : undefined,
-      },
-      { scriptLength: length, inputLength: idea.length },
-    ),
+    trackApiUsage(userId, "speed-write", "speed-write-a", {
+      tokensUsed: speedWriteResult.status === "fulfilled" ? speedWriteResult.value.tokensUsed : 0,
+      responseTime: processingTime / 2,
+      success: speedWriteResult.status === "fulfilled" && speedWriteResult.value.success,
+      error: speedWriteResult.status === "rejected" ? speedWriteResult.reason?.message : undefined,
+    }, { scriptLength: length, inputLength: idea.length }),
 
-    trackApiUsage(
-      userId,
-      "speed-write",
-      "speed-write-b",
-      {
-        tokensUsed: educationalResult.status === "fulfilled" ? educationalResult.value.tokensUsed : 0,
-        responseTime: processingTime / 2,
-        success: educationalResult.status === "fulfilled" && educationalResult.value.success,
-        error: educationalResult.status === "rejected" ? educationalResult.reason?.message : undefined,
-      },
-      { scriptLength: length, inputLength: idea.length },
-    ),
+    trackApiUsage(userId, "speed-write", "speed-write-b", {
+      tokensUsed: educationalResult.status === "fulfilled" ? educationalResult.value.tokensUsed : 0,
+      responseTime: processingTime / 2,
+      success: educationalResult.status === "fulfilled" && educationalResult.value.success,
+      error: educationalResult.status === "rejected" ? educationalResult.reason?.message : undefined,
+    }, { scriptLength: length, inputLength: idea.length }),
   ]);
 }
 
@@ -142,29 +129,23 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
     const { idea, userId = "anonymous" } = body;
 
     if (!idea?.trim()) {
-      return NextResponse.json(
-        {
-          success: false,
-          optionA: null,
-          optionB: null,
-          error: "Script idea is required",
-        },
-        { status: 400 },
-      );
+      return NextResponse.json({
+        success: false,
+        optionA: null,
+        optionB: null,
+        error: "Script idea is required",
+      }, { status: 400 });
     }
 
     // Rate limiting check
     const rateLimitOk = await UsageTracker.checkRateLimit(userId);
     if (!rateLimitOk) {
-      return NextResponse.json(
-        {
-          success: false,
-          optionA: null,
-          optionB: null,
-          error: "Rate limit exceeded. Please try again in a few minutes.",
-        },
-        { status: 429 },
-      );
+      return NextResponse.json({
+        success: false,
+        optionA: null,
+        optionB: null,
+        error: "Rate limit exceeded. Please try again in a few minutes.",
+      }, { status: 429 });
     }
 
     const { speedWriteResult, educationalResult } = await processSpeedWriteRequest(body);
@@ -176,18 +157,16 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
 
     // Check if at least one script was generated successfully
     if (!optionA && !optionB) {
-      const error =
-        speedWriteResult.status === "rejected" ? speedWriteResult.reason?.message : "Failed to generate scripts";
+      const error = speedWriteResult.status === "rejected" 
+        ? speedWriteResult.reason?.message 
+        : "Failed to generate scripts";
 
-      return NextResponse.json(
-        {
-          success: false,
-          optionA: null,
-          optionB: null,
-          error: error ?? "Failed to generate scripts. Please try again.",
-        },
-        { status: 500 },
-      );
+      return NextResponse.json({
+        success: false,
+        optionA: null,
+        optionB: null,
+        error: error ?? "Failed to generate scripts. Please try again.",
+      }, { status: 500 });
     }
 
     console.log(`✅ [SpeedWrite] Generated ${optionA ? 1 : 0} + ${optionB ? 1 : 0} scripts in ${processingTime}ms`);
@@ -198,73 +177,39 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
       optionB,
       processingTime,
     });
+
   } catch (error) {
     const processingTime = Date.now() - startTime;
     console.error(`❌ [SpeedWrite] Generation failed after ${processingTime}ms:`, error);
 
-    return NextResponse.json(
-      {
-        success: false,
-        optionA: null,
-        optionB: null,
-        error: "An unexpected error occurred. Please try again.",
-        processingTime,
-      },
-      { status: 500 },
-    );
+    return NextResponse.json({
+      success: false,
+      optionA: null,
+      optionB: null,
+      error: "An unexpected error occurred. Please try again.",
+      processingTime,
+    }, { status: 500 });
   }
 }
 
 async function generateSpeedWriteScript(idea: string, length: string) {
-  const targetWords = Math.round(parseInt(length) * 2.2);
+  // Calculate target word count based on length
+  const targetWords = Math.round(parseInt(length) * 2.2); // ~130 words per minute / 60 seconds * 2.2 = words per second
+  
+  const prompt = `Write a complete, ready-to-read video script using the Speed Write formula. This is the exact script the creator will read out loud.
 
-  const prompt = `Goal:
-Create short, actionable video scripts using a friendly, conversational tone. Each script must include a hook, simple advice, a reason why the advice works, and a short benefit statement.
+IMPORTANT: Write the complete script with actual words, not descriptions or instructions. The output should be the finished script ready to record.
 
-Tone Guidelines:
-- Speak like you're on FaceTime with a friend
-- Use "you" often to keep it personal and engaging
-- Keep the language simple and easy (Grade 3 reading level or below)
-- Use casual connectors like "Now," "And," "Just"
-- Use friendly phrases (e.g., "you gotta," "super simple")
-- Be energetic and relatable
-- Use short sentences and clear words
-- Replace complex phrases with basic language (e.g., "quickly" instead of "promptly")
+Speed Write Formula:
+1. Hook: Start with "If [specific problem], [try this action]." (8-12 words)
+2. Advice: Give simple, actionable steps they can take right now
+3. Reason: Explain why it works, starting with "This is..."
+4. Benefit: End with the result they'll get, starting with "So you don't..." or "So you can..."
 
-Structure for Each Script:
-1. Hook (8-12 words)
-   - Must begin with "If..."
-   - Identify a specific problem or challenge
-   - Use personal and direct language (e.g., "If your dog is aggressive with kids, try this.")
-
-2. Simple actionable advice
-   - Clear, specific, and easy to apply
-   - Use simple words and short sentences
-
-3. Why this advice works
-   - Always start with: "This is..."
-   - Explain the reasoning in simple terms
-
-4. The benefit of taking this action
-   - Always start with: "So you don't..."
-   - Keep it short and clear
-
-Readability Check:
-- Always verify the text meets a Grade 3 reading level
-- Adjust any sentence flagged as too complex
-
-Examples of Conversational Phrasing:
-- "So here is something you can try"
-- "So the next time you... try..."
-- "And I know you are probably asking: How can I...?"
-- "You know when you..."
-- "You must have seen..."
-- "When you... What do you do?"
-
-Remember: Avoid generic advice. Every tip should be something the audience can use right now.
+Target: ~${targetWords} words (${length} seconds)
+Tone: Conversational, like talking to a friend. Use "you" frequently. Keep it simple and energetic.
 
 Video Topic: ${idea}
-Target Length: ${length} seconds (~${targetWords} words)
 
 Write the complete script now:`;
 
@@ -273,20 +218,22 @@ Write the complete script now:`;
 
 async function generateEducationalScript(idea: string, length: string) {
   const targetWords = Math.round(parseInt(length) * 2.2);
-
-  const prompt = EDUCATIONAL_PROMPT_TEMPLATE.replace("{VIDEO_IDEA}", idea).replace("{TARGET_LENGTH}", length);
-
+  
+  const prompt = EDUCATIONAL_PROMPT_TEMPLATE
+    .replace("{VIDEO_IDEA}", idea)
+    .replace("{TARGET_LENGTH}", length);
+    
   return generateScript(prompt, { temperature: 0.7, maxTokens: 400 });
 }
 
 function createScriptOption(
-  id: string,
-  title: string,
-  content: string,
-  approach: "speed-write" | "educational",
+  id: string, 
+  title: string, 
+  content: string, 
+  approach: "speed-write" | "educational"
 ): ScriptOption {
   const estimatedDuration = estimateVideoDuration(content);
-
+  
   return {
     id,
     title,
@@ -301,11 +248,11 @@ function estimateVideoDuration(content: string): string {
   // For video, account for pauses: ~130 WPM effective
   const wordCount = content.split(/\s+/).length;
   const estimatedSeconds = Math.round((wordCount / 130) * 60);
-
+  
   // Compare with target
   const target = 60; // Assuming target length is 60 seconds
   const variance = Math.abs(estimatedSeconds - target);
-
+  
   if (variance <= 5) {
     return `~60s`;
   } else if (estimatedSeconds < target) {
@@ -313,4 +260,4 @@ function estimateVideoDuration(content: string): string {
   } else {
     return `~${estimatedSeconds}s (longer than 60s target)`;
   }
-}
+} 
