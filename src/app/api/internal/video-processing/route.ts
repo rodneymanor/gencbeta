@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 
-import { verifyCollectionOwnershipAdmin } from "@/lib/collections-helpers";
+import { verifyCollectionOwnershipAdmin } from "@/lib/collections-admin-helpers";
 import { getAdminAuth } from "@/lib/firebase-admin";
 import { RateLimitService } from "@/lib/rate-limiting";
 import { VideoCollectionService, type VideoProcessingData } from "@/lib/video-collection-service";
