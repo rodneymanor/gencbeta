@@ -5,86 +5,6 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Play } from "lucide-react";
 
-// Helper functions for debug logging
-const logNoThumbnail = (platform: string) => {
-  console.log("🎬 [VideoThumbnail] No thumbnail - using gradient:", {
-    platform,
-    type: "Gradient placeholder",
-    isRealThumbnail: false,
-  });
-};
-
-const logSvgThumbnail = (thumbnailUrl: string, platform: string) => {
-  try {
-    const base64Data = thumbnailUrl.split(",")[1];
-    const decodedSvg = atob(base64Data);
-    console.log("🎬 [VideoThumbnail] SVG placeholder detected:", {
-      platform,
-      type: "SVG placeholder",
-      content: decodedSvg.substring(0, 200) + "...",
-      isRealThumbnail: false,
-    });
-  } catch {
-    console.log("🎬 [VideoThumbnail] SVG decode failed:", {
-      platform,
-      thumbnailUrl: thumbnailUrl.substring(0, 100) + "...",
-    });
-  }
-};
-
-const logImageThumbnail = (thumbnailUrl: string, platform: string) => {
-  console.log("🎬 [VideoThumbnail] Real image thumbnail:", {
-    platform,
-    type: thumbnailUrl.startsWith("data:image/jpeg") ? "JPEG" : "PNG",
-    size: `${Math.round(thumbnailUrl.length / 1024)}KB`,
-    isRealThumbnail: true,
-    previewUrl: thumbnailUrl.substring(0, 100) + "...",
-  });
-};
-
-const logHttpThumbnail = (thumbnailUrl: string, platform: string) => {
-  console.log("🎬 [VideoThumbnail] HTTP thumbnail URL:");
-  console.log("  Platform:", platform);
-  console.log("  Type: HTTP URL");
-  console.log("  URL:", thumbnailUrl);
-  console.log("  URL type:", typeof thumbnailUrl);
-  console.log("  URL length:", thumbnailUrl?.length || 0);
-};
-
-const logUnknownThumbnail = (thumbnailUrl: string, platform: string) => {
-  console.log("🎬 [VideoThumbnail] Unknown thumbnail format:", {
-    platform,
-    type: "Unknown",
-    preview: thumbnailUrl.substring(0, 100) + "...",
-    isRealThumbnail: "unknown",
-  });
-};
-
-// Main debug function (simplified complexity)
-const logThumbnailDebugInfo = (thumbnailUrl: string | undefined, platform: string) => {
-  if (!thumbnailUrl) {
-    logNoThumbnail(platform);
-    return;
-  }
-
-  if (thumbnailUrl.startsWith("data:image/svg+xml")) {
-    logSvgThumbnail(thumbnailUrl, platform);
-    return;
-  }
-
-  if (thumbnailUrl.startsWith("data:image/jpeg") || thumbnailUrl.startsWith("data:image/png")) {
-    logImageThumbnail(thumbnailUrl, platform);
-    return;
-  }
-
-  if (thumbnailUrl.startsWith("http")) {
-    logHttpThumbnail(thumbnailUrl, platform);
-    return;
-  }
-
-  logUnknownThumbnail(thumbnailUrl, platform);
-};
-
 // Simplified VideoThumbnail component - single container, no wrapper divs
 // eslint-disable-next-line complexity
 export const VideoThumbnail = ({
@@ -109,8 +29,13 @@ export const VideoThumbnail = ({
 
   const gradientClass = platform === "tiktok" ? platformGradients.tiktok : platformGradients.instagram;
 
+  // Only log critical thumbnail issues
+  if (!thumbnailUrl && process.env.NODE_ENV === "development") {
+    console.warn("⚠️ [VideoThumbnail] No thumbnail provided for", platform);
+  }
+
   // Enhanced debug logging
-  logThumbnailDebugInfo(thumbnailUrl, platform);
+  // logThumbnailDebugInfo(thumbnailUrl, platform);
 
   return (
     <motion.div
@@ -134,8 +59,9 @@ export const VideoThumbnail = ({
             height={640}
             className="absolute inset-0 h-full w-full object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            priority={true}
             onError={(e) => {
-              console.log("🖼️ [VideoThumbnail] Image failed to load, hiding...");
+              console.warn("🖼️ [VideoThumbnail] Image failed to load:", thumbnailUrl.substring(0, 50));
               e.currentTarget.style.display = "none";
             }}
           />

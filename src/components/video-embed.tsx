@@ -16,7 +16,7 @@ interface VideoEmbedProps {
 // FIXED: Proper Bunny.net iframe.mediadelivery.net URL handling
 const createVideoSrc = (url: string, shouldAutoplay: boolean = false) => {
   if (!url.includes("iframe.mediadelivery.net")) return url;
-  
+
   // For Bunny.net iframe.mediadelivery.net, use minimal parameters
   // Bunny.net iframe service has different parameter requirements
   if (shouldAutoplay) {
@@ -35,44 +35,33 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     const [isPlaying, setIsPlaying] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [hasError, setHasError] = useState(false);
-    
+
     const { currentlyPlayingId } = useVideoPlaybackData();
     const { setCurrentlyPlaying } = useVideoPlaybackAPI();
-    
+
     const videoId = url;
     const hostedOnCDN = url.includes("iframe.mediadelivery.net");
-    
-    // Debug: Log the full URL to verify completeness
-    console.log("🎥 [VideoEmbed] Full URL check:");
-    console.log("  URL:", url);
-    console.log("  URL type:", typeof url);
-    console.log("  URL length:", url?.length || 0);
-    console.log("  Is hosted on CDN:", hostedOnCDN);
-    console.log("  Platform:", platform);
-    console.log("  Thumbnail URL:", thumbnailUrl);
-    console.log("  Thumbnail type:", typeof thumbnailUrl);
-    
+
+    // Minimal debug for critical issues only
+    if (!url || url.length < 50) {
+      console.warn("⚠️ [VideoEmbed] Incomplete URL:", { url, urlLength: url.length || 0 });
+    }
+
     // CRITICAL: Simple click handler - no complex async operations
     const handlePlay = useCallback(() => {
-      console.log("🎬 [VideoEmbed] Starting playback:");
-      console.log("   Complete URL:", url); // Show full URL
-      console.log("   URL length:", url.length);
-      console.log("   Expected length:", "https://iframe.mediadelivery.net/embed/459811/".length + 36); // Base + UUID
-      
       setIsLoading(true);
       setIsPlaying(true);
-      
+
       // Set as currently playing (this will pause others)
       void setCurrentlyPlaying(videoId);
-      
+
       // Quick loading timeout
       setTimeout(() => setIsLoading(false), 800);
-    }, [url, videoId, setCurrentlyPlaying]);
+    }, [videoId, setCurrentlyPlaying]);
 
     // SIMPLIFIED: Auto-pause when another video plays
     useEffect(() => {
       if (currentlyPlayingId !== videoId && isPlaying) {
-        console.log("⏸️ [VideoEmbed] Auto-pausing:", url.substring(0, 50) + "...");
         setIsPlaying(false);
         setIsLoading(false);
       }
@@ -81,10 +70,10 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     // OPTIMIZED: Single render logic - no complex state combinations
     if (!isPlaying) {
       return (
-        <div className={`group relative w-full h-full overflow-hidden rounded-lg bg-black ${className}`}>
-          <VideoThumbnail 
-            platform={platform} 
-            thumbnailUrl={thumbnailUrl} 
+        <div className={`group relative h-full w-full overflow-hidden rounded-lg bg-black ${className}`}>
+          <VideoThumbnail
+            platform={platform}
+            thumbnailUrl={thumbnailUrl}
             onClick={handlePlay}
             title={url.substring(0, 50) + "..."}
           />
@@ -142,16 +131,14 @@ export const VideoEmbed = memo<VideoEmbedProps>(
         {/* Error state with debugging info */}
         {hasError && (
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/75 p-4">
-            <p className="text-sm text-white mb-2">Failed to load video</p>
-            <p className="text-xs text-gray-400 text-center break-all">
-              URL: {url.substring(0, 60)}...
-            </p>
-            <button 
+            <p className="mb-2 text-sm text-white">Failed to load video</p>
+            <p className="text-center text-xs break-all text-gray-400">URL: {url.substring(0, 60)}...</p>
+            <button
               onClick={() => {
                 setHasError(false);
                 setIsPlaying(false);
               }}
-              className="mt-2 px-3 py-1 bg-white/20 text-white text-xs rounded hover:bg-white/30"
+              className="mt-2 rounded bg-white/20 px-3 py-1 text-xs text-white hover:bg-white/30"
             >
               Try Again
             </button>
