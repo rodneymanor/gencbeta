@@ -89,8 +89,13 @@ export class CollectionsRBACService {
       console.log("🔍 [RBAC] Super admin loading all videos");
       q = query(collection(db, this.VIDEOS_PATH), orderBy("addedAt", "desc"));
     } else {
-      q = await this.getSuperAdminCollectionQuery(userId, collectionId);
-      if (!q) return [];
+      try {
+        q = await this.getSuperAdminCollectionQuery(userId, collectionId);
+      } catch (error) {
+        // Collection not found, return empty array
+        console.log("❌ [RBAC] Collection query failed:", error instanceof Error ? error.message : String(error));
+        return [];
+      }
     }
 
     const querySnapshot = await getDocs(q);
@@ -114,7 +119,7 @@ export class CollectionsRBACService {
 
     if (!targetCollection) {
       console.log("❌ [RBAC] Collection not found:", collectionId);
-      return null;
+      throw new Error(`Collection not found: ${collectionId}`);
     }
 
     return query(

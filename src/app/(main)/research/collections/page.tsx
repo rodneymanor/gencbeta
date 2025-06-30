@@ -91,10 +91,9 @@ const CollectionBadge = memo(
         variant="outline"
         className={`focus-visible:ring-ring cursor-pointer font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 ${
           isActive
-            ? "bg-secondary text-foreground hover:bg-secondary/80 font-semibold shadow-sm border-border/60"
-            : "text-muted-foreground hover:bg-secondary/50 bg-transparent font-normal hover:text-foreground hover:border-border/40"
-        } ${isTransitioning && isActive ? "opacity-75" : ""} ${isTransitioning ? "pointer-events-none" : ""} 
-        rounded-md border-0 px-4 py-2.5 text-sm min-h-[36px] shadow-xs hover:shadow-sm`}
+            ? "bg-secondary text-foreground hover:bg-secondary/80 border-border/60 font-semibold shadow-sm"
+            : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground hover:border-border/40 bg-transparent font-normal"
+        } ${isTransitioning && isActive ? "opacity-75" : ""} ${isTransitioning ? "pointer-events-none" : ""} min-h-[36px] rounded-md border-0 px-4 py-2.5 text-sm shadow-xs hover:shadow-sm`}
         onClick={isTransitioning ? undefined : onClick}
       >
         {collection ? `${collection.title} (${collection.videoCount})` : `All Videos (${videoCount})`}
@@ -104,7 +103,7 @@ const CollectionBadge = memo(
           <CollectionBadgeMenu
             collection={collection}
             onCollectionDeleted={onCollectionDeleted}
-            className="bg-background border-border border shadow-md rounded-md hover:shadow-lg transition-shadow duration-200"
+            className="bg-background border-border rounded-md border shadow-md transition-shadow duration-200 hover:shadow-lg"
           />
         </div>
       )}
@@ -163,6 +162,49 @@ function CollectionsPageContent() {
     cacheRef.current.data.set(key, { videos, timestamp: Date.now() });
   }, []);
 
+  // Helper function to validate collection exists
+  const validateCollectionExists = useCallback(
+    (collectionId: string | null, collections: Collection[]) => {
+      if (!collectionId || collectionId === "all-videos") return true;
+
+      const collectionExists = collections.some((c) => c.id === collectionId);
+      if (!collectionExists) {
+        console.warn("⚠️ [Collections] Collection not found, redirecting to all videos:", collectionId);
+        // Clear cache for clean refresh
+        cacheRef.current.data.clear();
+        // Redirect to all videos without the invalid collection parameter
+        startTransition(() => {
+          router.push("/research/collections", { scroll: false });
+        });
+        return false;
+      }
+      return true;
+    },
+    [router],
+  );
+
+  // Helper function to handle video loading result
+  const handleVideoResult = useCallback(
+    (videosResult: PromiseSettledResult<Video[]>, collectionId: string | null) => {
+      if (videosResult.status === "fulfilled") {
+        const optimizedVideos = videosResult.value.map((video) => ({
+          ...video,
+          isPlaying: false,
+        }));
+
+        setVideos(optimizedVideos);
+        setCachedVideos(collectionId, optimizedVideos);
+      } else {
+        console.error("Error loading videos:", videosResult.reason);
+        // If videos failed to load due to invalid collection, clear videos
+        if (videosResult.reason?.message?.includes("Collection not found")) {
+          setVideos([]);
+        }
+      }
+    },
+    [setCachedVideos],
+  );
+
   // OPTIMIZED: Parallel data loading - this eliminates the 3-second delay
   const loadData = useCallback(
     async (targetCollectionId?: string | null) => {
@@ -191,22 +233,17 @@ function CollectionsPageContent() {
         // Handle collections result
         if (collectionsResult.status === "fulfilled") {
           setCollections(collectionsResult.value);
+
+          // Validate collection exists and redirect if not
+          if (!validateCollectionExists(collectionId, collectionsResult.value)) {
+            return;
+          }
         } else {
           console.error("Error loading collections:", collectionsResult.reason);
         }
 
         // Handle videos result
-        if (videosResult.status === "fulfilled") {
-          const optimizedVideos = videosResult.value.map((video) => ({
-            ...video,
-            isPlaying: false,
-          }));
-
-          setVideos(optimizedVideos);
-          setCachedVideos(collectionId, optimizedVideos);
-        } else {
-          console.error("Error loading videos:", videosResult.reason);
-        }
+        handleVideoResult(videosResult, collectionId);
 
         console.log("✅ [Collections] Parallel loading completed");
       } catch (error) {
@@ -216,7 +253,7 @@ function CollectionsPageContent() {
         setIsTransitioning(false);
       }
     },
-    [user, selectedCollectionId, getCachedVideos, setCachedVideos],
+    [user, selectedCollectionId, getCachedVideos, validateCollectionExists, handleVideoResult],
   );
 
   // Optimized collection navigation
