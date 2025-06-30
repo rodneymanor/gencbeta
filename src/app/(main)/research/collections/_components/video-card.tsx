@@ -111,9 +111,7 @@ export const VideoCard = memo<VideoCardProps>(
           {/* Video Content */}
           <div className="bg-muted/30 relative aspect-[9/16] overflow-hidden">
             <VideoEmbed
-              url={video.url}
-              platform={video.platform as "tiktok" | "instagram"}
-              thumbnailUrl={video.thumbnailUrl}
+              url={video.iframeUrl || video.originalUrl}
               className="absolute inset-0 h-full w-full"
             />
 

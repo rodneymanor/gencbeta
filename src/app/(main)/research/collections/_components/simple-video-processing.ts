@@ -1,5 +1,9 @@
-// Production-ready simplified video processing using comprehensive endpoint
-interface VideoProcessResult {
+/**
+ * Simplified video processing - uses comprehensive backend endpoint
+ * Iframes handle their own thumbnails, no complex extraction needed
+ */
+
+export interface VideoProcessResult {
   success: boolean;
   videoId?: string;
   iframe?: string;
@@ -11,63 +15,71 @@ interface VideoProcessResult {
   details?: string;
 }
 
-/**
- * Complete video processing workflow using the comprehensive endpoint
- * Handles: URL decoding, download, Bunny streaming, collection addition, transcription
- */
-export const processAndAddVideo = async (
-  videoUrl: string, 
-  collectionId: string, 
-  title?: string
-): Promise<VideoProcessResult> => {
-  console.log("🚀 [VIDEO_PROCESS] Starting comprehensive video processing...");
-  console.log("🔗 [VIDEO_PROCESS] URL:", videoUrl);
-  console.log("📂 [VIDEO_PROCESS] Collection:", collectionId);
-  
+export async function processAndAddVideo(
+  videoUrl: string,
+  collectionId: string,
+  title?: string,
+): Promise<VideoProcessResult> {
   try {
+    console.log("🎬 [PROCESS_VIDEO] Starting:", { videoUrl, collectionId, title });
+
     const response = await fetch("/api/video/process-and-add", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ 
-        videoUrl, 
-        collectionId, 
-        title 
+      body: JSON.stringify({
+        videoUrl: videoUrl.trim(),
+        collectionId: collectionId.trim(),
+        title: title?.trim() ?? undefined,
       }),
     });
 
-    const data = await response.json();
+    const result = await response.json();
 
     if (!response.ok) {
-      console.error("❌ [VIDEO_PROCESS] Processing failed:", data);
+      console.error("❌ [PROCESS_VIDEO] Server error:", result);
       return {
         success: false,
-        error: data.error || "Video processing failed",
-        details: data.details
+        error: result.error ?? "Server error occurred",
+        details: result.details ?? undefined,
       };
     }
 
-    console.log("✅ [VIDEO_PROCESS] Processing successful:", data);
-    return {
-      success: true,
-      videoId: data.videoId,
-      iframe: data.iframe,
-      directUrl: data.directUrl,
-      platform: data.platform,
-      transcriptionStatus: data.transcriptionStatus,
-      message: data.message
-    };
-
+    if (result.success) {
+      console.log("✅ [PROCESS_VIDEO] Success:", result);
+      return {
+        success: true,
+        videoId: result.videoId ?? undefined,
+        iframe: result.iframe ?? undefined,
+        directUrl: result.directUrl ?? undefined,
+        platform: result.platform ?? undefined,
+        transcriptionStatus: result.transcriptionStatus ?? undefined,
+        message: result.message ?? undefined,
+      };
+    } else {
+      console.error("❌ [PROCESS_VIDEO] Processing failed:", result);
+      return {
+        success: false,
+        error: result.error ?? "Processing failed",
+        details: result.details ?? undefined,
+      };
+    }
   } catch (error) {
-    console.error("❌ [VIDEO_PROCESS] Network error:", error);
+    console.error("❌ [PROCESS_VIDEO] Network error:", error);
+    
+    let errorMessage = "Network error occurred";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    
     return {
       success: false,
-      error: "Network error during video processing",
-      details: error instanceof Error ? error.message : "Unknown error"
+      error: errorMessage,
+      details: error instanceof Error ? error.stack : String(error),
     };
   }
-};
+}
 
 /**
  * Real-time transcription status checker

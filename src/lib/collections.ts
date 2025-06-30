@@ -46,7 +46,8 @@ export interface ContentMetadata {
 
 export interface Video {
   id?: string;
-  url: string;
+  originalUrl: string;  // The original TikTok/Instagram URL
+  iframeUrl?: string;   // The Bunny.net iframe URL for playback
   platform: string;
   thumbnailUrl: string;
   title: string;

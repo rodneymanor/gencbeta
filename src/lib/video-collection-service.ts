@@ -323,7 +323,7 @@ export class VideoCollectionService {
     const platformLower = platform.toLowerCase();
 
     if (platformLower.includes("tiktok")) {
-      return "/images/tiktok-placeholder.jpg";
+      return "/images/placeholder.svg";
     }
 
     if (platformLower.includes("instagram")) {
