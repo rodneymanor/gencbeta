@@ -6,9 +6,8 @@ import {
   downloadVideoFromVersions,
   extractThumbnailUrl,
 } from "@/lib/instagram-downloader";
+import { downloadTikTokVideo as downloadTikTokVideoFromAPI, extractTikTokVideoId } from "@/lib/tiktok-downloader";
 import { transcribeVideoFile } from "@/lib/transcription";
-import { downloadTikTokVideo as downloadTikTokVideoFromAPI, extractTikTokVideoId } from "@/lib/tiktok-downloader";
-import { downloadTikTokVideo as downloadTikTokVideoFromAPI, extractTikTokVideoId } from "@/lib/tiktok-downloader";
 
 export interface DownloadResult {
   videoData: { buffer: ArrayBuffer; size: number; mimeType: string; filename?: string };
@@ -173,8 +172,16 @@ export async function downloadTikTokVideo(
 export { extractTikTokVideoId };
 
 export function extractInstagramShortcode(url: string): string | null {
-  const match = url.match(/(?:instagram\.com|instagr\.am)\/(?:p|reels?)\/([A-Za-z0-9_-]+)/);
-  return match ? match[1] : null;
+  // Decode URL first in case it's URL-encoded
+  const decodedUrl = decodeURIComponent(url);
+  console.log("🔍 [INSTAGRAM] Original URL:", url);
+  console.log("🔍 [INSTAGRAM] Decoded URL:", decodedUrl);
+
+  const match = decodedUrl.match(/(?:instagram\.com|instagr\.am)\/(?:p|reels?)\/([A-Za-z0-9_-]+)/);
+  const shortcode = match ? match[1] : null;
+
+  console.log("🆔 [INSTAGRAM] Extracted shortcode:", shortcode);
+  return shortcode;
 }
 
 export async function downloadInstagramVideoWithMetrics(url: string): Promise<DownloadResult | null> {
@@ -223,4 +230,4 @@ async function fallbackToBasicDownload(): Promise<DownloadResult | null> {
   // Simplified fallback - just return null for now
   console.log("🔄 [DOWNLOAD] Basic download fallback not implemented");
   return null;
-} 
+}
