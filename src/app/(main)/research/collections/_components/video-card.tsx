@@ -27,12 +27,31 @@ type LegacyVideo = VideoWithPlayer & {
 
 // Helper function to get the correct video URL
 const getVideoUrl = (video: LegacyVideo): string => {
-  return (
-    video.iframeUrl ?? 
-    (video.url?.includes('iframe.mediadelivery.net') ? video.url : '') ??
-    video.originalUrl ?? 
-    ''
-  );
+  console.log("🔍 [VideoCard] Video data:", {
+    id: video.id,
+    iframeUrl: video.iframeUrl,
+    url: video.url,
+    originalUrl: video.originalUrl
+  });
+
+  // Priority order: iframeUrl -> legacy url (if Bunny) -> originalUrl -> empty
+  if (video.iframeUrl) {
+    console.log("✅ [VideoCard] Using iframeUrl:", video.iframeUrl);
+    return video.iframeUrl;
+  }
+  
+  if (video.url && video.url.includes('iframe.mediadelivery.net')) {
+    console.log("✅ [VideoCard] Using legacy Bunny URL:", video.url);
+    return video.url;
+  }
+  
+  if (video.originalUrl) {
+    console.log("⚠️ [VideoCard] Falling back to originalUrl (will be rejected):", video.originalUrl);
+    return video.originalUrl;
+  }
+  
+  console.log("❌ [VideoCard] No valid URL found - returning empty string");
+  return '';
 };
 
 interface VideoCardProps {
