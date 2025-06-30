@@ -22,6 +22,17 @@ const tiktokCache = new Map<string, { data: TikTokMetadata; timestamp: number }>
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
 export function extractTikTokVideoId(url: string): string | null {
+  // Decode URL-encoded URLs
+  let decodedUrl = url;
+  try {
+    decodedUrl = decodeURIComponent(url);
+    console.log("🔍 [EXTRACT] Original URL:", url);
+    console.log("🔍 [EXTRACT] Decoded URL:", decodedUrl);
+  } catch (error) {
+    console.log("⚠️ [EXTRACT] URL decode failed, using original:", url);
+    decodedUrl = url;
+  }
+
   const patterns = [
     /tiktok\.com\/@[^/]+\/video\/(\d+)/,
     /vm\.tiktok\.com\/([A-Za-z0-9]+)/,
@@ -29,9 +40,14 @@ export function extractTikTokVideoId(url: string): string | null {
   ];
 
   for (const pattern of patterns) {
-    const match = url.match(pattern);
-    if (match) return match[1];
+    const match = decodedUrl.match(pattern);
+    if (match) {
+      console.log("✅ [EXTRACT] Video ID found:", match[1]);
+      return match[1];
+    }
   }
+
+  console.log("❌ [EXTRACT] No video ID found with any pattern");
   return null;
 }
 
