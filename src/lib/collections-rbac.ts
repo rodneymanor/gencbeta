@@ -94,11 +94,23 @@ export class CollectionsRBACService {
     }
 
     const querySnapshot = await getDocs(q);
-    const videos = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-      addedAt: formatTimestamp(doc.data().addedAt),
-    })) as Video[];
+    const videos = querySnapshot.docs.map((doc) => {
+      const rawData = doc.data();
+      console.log("🔍 [RBAC] Raw Firestore video data:", {
+        id: doc.id,
+        iframeUrl: rawData.iframeUrl,
+        url: rawData.url,
+        originalUrl: rawData.originalUrl,
+        userId: rawData.userId,
+        platform: rawData.platform,
+      });
+
+      return {
+        id: doc.id,
+        ...rawData,
+        addedAt: formatTimestamp(rawData.addedAt),
+      };
+    }) as Video[];
 
     console.log("✅ [RBAC] Super admin loaded videos:", videos.length);
     return videos;
@@ -140,11 +152,23 @@ export class CollectionsRBACService {
     const q = await this.getRegularUserQuery(userId, collectionId, accessibleCoaches);
     const querySnapshot = await getDocs(q);
 
-    return querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-      addedAt: formatTimestamp(doc.data().addedAt),
-    })) as Video[];
+    return querySnapshot.docs.map((doc) => {
+      const rawData = doc.data();
+      console.log("🔍 [RBAC] Raw Firestore video data:", {
+        id: doc.id,
+        iframeUrl: rawData.iframeUrl,
+        url: rawData.url,
+        originalUrl: rawData.originalUrl,
+        userId: rawData.userId,
+        platform: rawData.platform,
+      });
+
+      return {
+        id: doc.id,
+        ...rawData,
+        addedAt: formatTimestamp(rawData.addedAt),
+      };
+    }) as Video[];
   }
 
   /**
