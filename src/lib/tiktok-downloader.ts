@@ -21,7 +21,7 @@ interface TikTokVideoResult {
 const tiktokCache = new Map<string, { data: TikTokMetadata; timestamp: number }>();
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
-export function extractTikTokVideoId(url: string): string | null {
+export async function extractTikTokVideoId(url: string): Promise<string | null> {
   // Decode URL-encoded URLs
   let decodedUrl = url;
   try {
@@ -42,13 +42,73 @@ export function extractTikTokVideoId(url: string): string | null {
   for (const pattern of patterns) {
     const match = decodedUrl.match(pattern);
     if (match) {
-      console.log("✅ [EXTRACT] Video ID found:", match[1]);
-      return match[1];
+      const extractedId = match[1];
+      console.log("✅ [EXTRACT] Initial ID found:", extractedId);
+
+      // If it's already a full numeric ID (from @user/video/ pattern), use it directly
+      if (/^\d+$/.test(extractedId)) {
+        console.log("✅ [EXTRACT] Full numeric video ID:", extractedId);
+        return extractedId;
+      }
+
+      // If it's a short code, resolve it to get the full video ID
+      console.log("🔄 [EXTRACT] Short code detected, resolving to full ID...");
+      try {
+        const fullId = await resolveShortUrlToFullId(decodedUrl);
+        if (fullId) {
+          console.log("✅ [EXTRACT] Resolved to full video ID:", fullId);
+          return fullId;
+        }
+      } catch (error) {
+        console.log("⚠️ [EXTRACT] Failed to resolve short URL:", error);
+      }
+
+      // Fallback: return the short code (though it likely won't work with API)
+      console.log("⚠️ [EXTRACT] Using short code as fallback:", extractedId);
+      return extractedId;
     }
   }
 
   console.log("❌ [EXTRACT] No video ID found with any pattern");
   return null;
+}
+
+async function resolveShortUrlToFullId(url: string): Promise<string | null> {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    try {
+      // Make a HEAD request to follow redirects without downloading content
+      const response = await fetch(url, {
+        method: "HEAD",
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        },
+        signal: controller.signal,
+        redirect: "follow", // Follow redirects automatically
+      });
+
+      // Get the final URL after redirects
+      const finalUrl = response.url;
+      console.log("🔄 [EXTRACT] Resolved URL:", finalUrl);
+
+      // Extract full video ID from the resolved URL
+      const fullIdMatch = finalUrl.match(/tiktok\.com\/@[^/]+\/video\/(\d+)/);
+      if (fullIdMatch) {
+        return fullIdMatch[1];
+      }
+
+      console.log("⚠️ [EXTRACT] No full video ID found in resolved URL");
+      return null;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  } catch (error) {
+    console.log("❌ [EXTRACT] Error resolving short URL:", error);
+    return null;
+  }
 }
 
 function throwApiError(status: number): never {
@@ -204,7 +264,7 @@ function handleError(error: unknown): never {
 export async function downloadTikTokVideo(url: string): Promise<TikTokVideoResult | null> {
   console.log("🎵 [DOWNLOAD] Downloading TikTok video via RapidAPI...");
 
-  const videoId = extractTikTokVideoId(url);
+  const videoId = await extractTikTokVideoId(url);
   if (!videoId) {
     console.error("❌ [DOWNLOAD] Could not extract TikTok video ID from URL:", url);
     throw new Error("Invalid TikTok URL format. Please check the URL and try again.");
