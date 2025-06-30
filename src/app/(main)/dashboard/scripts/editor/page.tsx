@@ -18,7 +18,6 @@ import {
   ScriptOption,
   UrlParams,
   ViewMode,
-  generateScriptContent,
   generateUniqueId,
 } from "./_components/types";
 import { VideoProcessor } from "./_components/video-processor";
@@ -124,36 +123,75 @@ export default function ScriptEditorPage() {
       }
     }
 
-    // Fallback to mock generation for other modes
+    // For all modes, use the Speed Write API to generate real scripts
     setIsGenerating(true);
 
-    // Simulate API delay
-    setTimeout(() => {
-      const optionA: ScriptOption = {
-        id: "option-a",
-        title: "Option A",
-        content: generateScriptContent(idea, "hook-focused", length),
-      };
+    try {
+      const response = await fetch("/api/script/speed-write", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          idea,
+          length: length as "20" | "60" | "90",
+          userId: "user-id", // Replace with actual user ID when available
+        }),
+      });
 
-      const optionB: ScriptOption = {
-        id: "option-b",
-        title: "Option B",
-        content: generateScriptContent(idea, "story-focused", length),
-      };
+      if (!response.ok) {
+        throw new Error("Failed to generate scripts");
+      }
 
-      setScriptOptions({ optionA, optionB });
+      const data = await response.json();
 
-      // Add AI response to chat
-      const aiMessage: ChatMessage = {
+      if (data.success && (data.optionA || data.optionB)) {
+        const scriptOptions: { optionA: ScriptOption | null; optionB: ScriptOption | null } = {
+          optionA: null,
+          optionB: null,
+        };
+
+        if (data.optionA) {
+          scriptOptions.optionA = {
+            id: data.optionA.id,
+            title: `${data.optionA.title} (${data.optionA.estimatedDuration})`,
+            content: data.optionA.content,
+          };
+        }
+
+        if (data.optionB) {
+          scriptOptions.optionB = {
+            id: data.optionB.id,
+            title: `${data.optionB.title} (${data.optionB.estimatedDuration})`,
+            content: data.optionB.content,
+          };
+        }
+
+        setScriptOptions(scriptOptions);
+
+        const aiMessage: ChatMessage = {
+          id: generateUniqueId(),
+          type: "ai",
+          content: "I've generated two complete scripts for you using AI. Choose the one that best fits your vision and style!",
+          timestamp: new Date(),
+        };
+        setChatHistory((prev) => [...prev, aiMessage]);
+      } else {
+        throw new Error(data.error || "Failed to generate scripts");
+      }
+    } catch (error) {
+      console.error("❌ Script generation failed:", error);
+      
+      const errorMessage: ChatMessage = {
         id: generateUniqueId(),
-        type: "ai",
-        content:
-          "I've generated two script options for you. Option A focuses on a strong hook, while Option B takes a storytelling approach. Choose the one that resonates with your vision!",
+        type: "error",
+        content: "Failed to generate scripts. Please try again or check your connection.",
         timestamp: new Date(),
       };
-      setChatHistory((prev) => [...prev, aiMessage]);
+      setChatHistory((prev) => [...prev, errorMessage]);
+    } finally {
       setIsGenerating(false);
-    }, 2000);
+    }
   }, [loadSpeedWriteResults]);
 
   // Handle video transcription completion

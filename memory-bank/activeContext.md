@@ -1,4 +1,65 @@
-# Active Context
+# Active Context: Speed Write A/B Generation System
+
+## Current State: Production Ready ✅
+The Speed Write A/B Generation System is live and fully functional with the simplified, user-friendly prompt system.
+
+## Recent Completion: Simplified Speed Write Prompt (Dec 17, 2024)
+**What Was Done:**
+- Replaced complex prompts with user's exact Speed Write formula
+- Implemented Grade 3 reading level requirement
+- Added "FaceTime with a friend" conversational tone
+- Enforced exact structure: Hook ("If...") → Advice → Reason ("This is...") → Benefit ("So you don't...")
+- Included all specified conversational phrasing examples
+
+**Technical Implementation:**
+- Updated `/api/script/speed-write/route.ts` with new prompt template
+- Maintained parallel A/B generation with dual approaches
+- Preserved word count targeting (~2.2 words per second)
+- Kept all error handling and usage tracking functionality
+
+## System Overview
+**Complete Infrastructure:**
+- ✅ Gemini AI integration with retry logic and error boundaries
+- ✅ Firestore usage tracking and analytics
+- ✅ Parallel A/B script generation (Speed Write + Educational)
+- ✅ Session storage for seamless page transitions
+- ✅ Rate limiting and cost estimation
+- ✅ Video duration estimation
+
+**User Flow:**
+1. Navigate to `/dashboard/scripts/new` via "Write Script" sidebar button
+2. Enter idea and select duration (20s/60s/90s)
+3. Submit → automatic A/B generation with new simplified prompts
+4. Choose preferred script → loads in editor for refinement
+
+## Prompt Specifications
+**Speed Write Formula (Exact Structure):**
+- Hook: "If..." format (8-12 words)
+- Simple actionable advice with clear steps
+- Reasoning: "This is..." explanation
+- Benefit: "So you don't..." outcome
+- Grade 3 reading level, FaceTime conversational tone
+
+**Educational Approach:**
+- Simplified version focusing on teaching
+- Still maintains friendly, accessible language
+- Complementary alternative to Speed Write formula
+
+## Technical Status
+- **API Route:** Production ready with comprehensive error handling
+- **Frontend Integration:** Complete with loading states and error display
+- **Navigation:** Updated sidebar from "Speed Write" to "Write Script"
+- **Session Management:** Seamless transfer between pages
+- **Analytics:** Full usage tracking and performance monitoring
+
+## No Outstanding Issues
+All major functionality implemented and working as expected. System generates complete, usable scripts following the exact formula specified by the user.
+
+## Next Potential Enhancements
+- Redis-based rate limiting for production scale
+- Additional script format options
+- Enhanced analytics dashboard
+- Script performance tracking and optimization suggestions
 
 ## 🎯 **CRITICAL FIX COMPLETED: Complete Script Generation**
 *Fixed prompts to generate ready-to-use scripts instead of descriptions*
