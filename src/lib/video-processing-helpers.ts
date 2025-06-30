@@ -8,6 +8,7 @@ import {
 } from "@/lib/instagram-downloader";
 import { transcribeVideoFile } from "@/lib/transcription";
 import { downloadTikTokVideo as downloadTikTokVideoFromAPI, extractTikTokVideoId } from "@/lib/tiktok-downloader";
+import { downloadTikTokVideo as downloadTikTokVideoFromAPI, extractTikTokVideoId } from "@/lib/tiktok-downloader";
 
 export interface DownloadResult {
   videoData: { buffer: ArrayBuffer; size: number; mimeType: string; filename?: string };
@@ -49,6 +50,8 @@ export interface TranscriptionResult {
     processedAt: string;
   };
 }
+
+const tiktokCache = new Map<string, { data: unknown; timestamp: number }>();
 
 export function detectPlatform(url: string): string {
   const urlLower = url.toLowerCase();

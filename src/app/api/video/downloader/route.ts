@@ -18,9 +18,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "URL is required" }, { status: 400 });
     }
 
+    // Decode URL if it's URL-encoded (fixes Instagram issue)
+    const decodedUrl = decodeURIComponent(url);
     console.log("🔍 [DOWNLOADER] Processing URL:", url);
+    console.log("🔍 [DOWNLOADER] Decoded URL:", decodedUrl);
 
-    const platform = detectPlatform(url);
+    const platform = detectPlatform(decodedUrl);
     console.log("🎯 [DOWNLOADER] Platform detected:", platform);
 
     if (!["tiktok", "instagram"].includes(platform)) {
@@ -33,7 +36,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const downloadResult = await downloadVideo(url, platform);
+    const downloadResult = await downloadVideo(decodedUrl, platform);
 
     if (!downloadResult) {
       console.error("❌ [DOWNLOADER] Failed to download video");
@@ -73,7 +76,7 @@ export async function POST(request: NextRequest) {
       },
       thumbnailUrl: downloadResult.thumbnailUrl,
       metadata: {
-        originalUrl: url,
+        originalUrl: decodedUrl,
         platform,
         downloadedAt: new Date().toISOString(),
       },

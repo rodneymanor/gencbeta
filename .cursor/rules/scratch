@@ -1,336 +1,821 @@
- 🔍 [RBAC] User ID: xfPvnnUdJCRIJEVrpJCmR7kXBOX2
- 🔍 [RBAC] User ID: xfPvnnUdJCRIJEVrpJCmR7kXBOX2
- 🔍 [RBAC] Super admin loading all collections
- 🔍 [RBAC] Super admin detected - bypassing coach restrictions
- 🔍 [RBAC] Super admin loading all videos
- 🔍 [RBAC] Super admin loading all collections
- 🔍 [RBAC] Super admin detected - bypassing coach restrictions
- 🔍 [RBAC] Super admin loading all videos
- ✅ [RBAC] Super admin loaded collections: 3
- ✅ [RBAC] Super admin loaded collections: 3
- ✅ [RBAC] Super admin loaded videos: 10
- ✅ [RBAC] Super admin loaded videos: 10
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] Real image thumbnail: Object
- 🎬 [VideoThumbnail] Real image thumbnail: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] Real image thumbnail: Object
- 🎬 [VideoThumbnail] Real image thumbnail: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] Real image thumbnail: Object
- 🎬 [VideoThumbnail] Real image thumbnail: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] SVG placeholder detected: Object
- 🎬 [VideoThumbnail] SVG placeholder detected: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] SVG placeholder detected: Object
- 🎬 [VideoThumbnail] SVG placeholder detected: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] SVG placeholder detected: Object
- 🎬 [VideoThumbnail] SVG placeholder detected: Object
- Image with src "https://scontent-waw2-2.cdninstagram.com/v/t51.71878-15/514693117_1465693904614328_484730005480987096_n.jpg?stp=dst-jpg_e15_p360x360_tt6&_nc_cat=100&ig_cache_key=MzY2NTI0NDg2OTQ5ODM0NTc0Ng%3D%3D.3-ccb1-7&ccb=1-7&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6InhwaWRzLjY0MHgxMTM2LnNkciJ9&_nc_ohc=kSZQy4NGzWYQ7kNvwErcHr8&_nc_oc=AdlUTkztfuti2VUP6GUuNiRxL705ZoihWGMp-Ci1dBbF_JG9JrGJ9hze5rsKfVJvvRE&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-waw2-2.cdninstagram.com&_nc_gid=l7zqac_3oaFazUJEPl4M4Q&oh=00_AfPTUSQiKBtGT-pFs3GGeVcfawo4wor9d5xdgUBksr3XMg&oe=68665E7B" was detected as the Largest Contentful Paint (LCP). Please add the "priority" property if this image is above the fold.
-Read more: https://nextjs.org/docs/api-reference/next/image#priority
-overrideMethod @ installHook.js:1
- 🔥 [VideoEmbed] Click detected - pausing others first: Object
- 🛑 [VideoPlayback] DOM-level pause of all other videos
- 🎬 [VideoPlayback] Setting currently playing video: Object
- 🛑 [VideoPlayback] DOM-level pause of all other videos
- 🔥 [VideoEmbed] Click detected - pausing others first: Object
- 🛑 [VideoPlayback] DOM-level pause of all other videos
- 🎬 [VideoPlayback] Setting currently playing video: Object
- 🛑 [VideoPlayback] DOM-level pause of all other videos
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoEmbed] Setting iframe src immediately for https://iframe.mediadelivery.net/embed/459811/85a5...: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] Real image thumbnail: Object
- 🎬 [VideoThumbnail] Real image thumbnail: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] Real image thumbnail: Object
- 🎬 [VideoThumbnail] Real image thumbnail: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] Real image thumbnail: Object
- 🎬 [VideoThumbnail] Real image thumbnail: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] SVG placeholder detected: Object
- 🎬 [VideoThumbnail] SVG placeholder detected: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] SVG placeholder detected: Object
- 🎬 [VideoThumbnail] SVG placeholder detected: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] SVG placeholder detected: Object
- 🎬 [VideoThumbnail] SVG placeholder detected: Object
- ✅ [VideoEmbed] Content loaded!
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- Final response: OK - This is a metrics service by bunny.net for CDN latency optimization.
- 🔥 [VideoEmbed] Click detected - pausing others first: Object
- 🛑 [VideoPlayback] DOM-level pause of all other videos
- 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/85a5...
- ✅ [VideoPlayback] Paused 1 videos/iframes
- 🎬 [VideoPlayback] Setting currently playing video: Object
- 🛑 [VideoPlayback] DOM-level pause of all other videos
- 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/85a5...
- ✅ [VideoPlayback] Paused 1 videos/iframes
- 🔥 [VideoEmbed] Click detected - pausing others first: Object
- 🛑 [VideoPlayback] DOM-level pause of all other videos
- 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/85a5...
- ✅ [VideoPlayback] Paused 1 videos/iframes
- 🎬 [VideoPlayback] Setting currently playing video: Object
- 🛑 [VideoPlayback] DOM-level pause of all other videos
- 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/85a5...
- ✅ [VideoPlayback] Paused 1 videos/iframes
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoEmbed] Setting iframe src immediately for https://iframe.mediadelivery.net/embed/459811/27eb...: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] Real image thumbnail: Object
- 🎬 [VideoThumbnail] Real image thumbnail: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] Real image thumbnail: Object
- 🎬 [VideoThumbnail] Real image thumbnail: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] Real image thumbnail: Object
- 🎬 [VideoThumbnail] Real image thumbnail: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] SVG placeholder detected: Object
- 🎬 [VideoThumbnail] SVG placeholder detected: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] SVG placeholder detected: Object
- 🎬 [VideoThumbnail] SVG placeholder detected: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] SVG placeholder detected: Object
- 🎬 [VideoThumbnail] SVG placeholder detected: Object
- 🧹 [VideoEmbed] Cleanup - stopping video on unmount: https://iframe.mediadelivery.net/embed/459811/85a5...
- 🎬 [VideoPlayback] Setting currently playing video: Object
- 🛑 [VideoEmbed] Stopping video (another video started): Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] Real image thumbnail: Object
- 🎬 [VideoThumbnail] Real image thumbnail: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] Real image thumbnail: Object
- 🎬 [VideoThumbnail] Real image thumbnail: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] Real image thumbnail: Object
- 🎬 [VideoThumbnail] Real image thumbnail: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] SVG placeholder detected: Object
- 🎬 [VideoThumbnail] SVG placeholder detected: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] SVG placeholder detected: Object
- 🎬 [VideoThumbnail] SVG placeholder detected: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] SVG placeholder detected: Object
- 🎬 [VideoThumbnail] SVG placeholder detected: Object
- 🧹 [VideoEmbed] Cleanup - stopping video on unmount: https://iframe.mediadelivery.net/embed/459811/27eb...
- 🎬 [VideoPlayback] Setting currently playing video: Object
- ✅ [VideoEmbed] Content loaded!
- ⏸️ [VideoEmbed] Content loaded but not starting - another video is playing: none...
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
-edgezone-mi2.bunnyinfra.net/500b.jpg?s=1751162148364:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
-edgezone-mi2.bunnyinfra.net/500b.jpg?s=1751162148364:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
-edgezone-mi2.bunnyinfra.net/500b.jpg?s=1751162148364:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
-edgezone-mi2.bunnyinfra.net/500b.jpg?s=1751162148364:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
-edgezone-mi2.bunnyinfra.net/500b.jpg?s=1751162148364:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
- Final response: OK - This is a metrics service by bunny.net for CDN latency optimization.
- 👁️ [VideoPlayback] Window lost focus - pausing videos
- ⏸️ [VideoPlayback] Pausing all videos globally
- 🛑 [VideoPlayback] DOM-level pause of all other videos
- 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/85a5...
- 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/27eb...
- ✅ [VideoPlayback] Paused 2 videos/iframes
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎬 [VideoThumbnail] HTTP thumbnail URL: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
- 🎬 [VideoThumbnail] Real image thumbnail: Object
- 🎬 [VideoThumbnail] Real image thumbnail: Object
- 🎥 [VideoEmbed] Render: Object
- 🎥 [VideoEmbed] Render: Object
-video-thumbnail.tsx:36 🎬 [VideoThumbnail] Real image thumbnail: Object
-hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
-video-embed.tsx:152 🎥 [VideoEmbed] Render: Object
-hook.js:377 🎥 [VideoEmbed] Render: Object
-video-thumbnail.tsx:36 🎬 [VideoThumbnail] Real image thumbnail: Object
-hook.js:377 🎬 [VideoThumbnail] Real image thumbnail: Object
-video-embed.tsx:152 🎥 [VideoEmbed] Render: Object
-hook.js:377 🎥 [VideoEmbed] Render: Object
-video-thumbnail.tsx:21 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-video-embed.tsx:152 🎥 [VideoEmbed] Render: Object
-hook.js:377 🎥 [VideoEmbed] Render: Object
-video-thumbnail.tsx:21 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-video-embed.tsx:152 🎥 [VideoEmbed] Render: Object
-hook.js:377 🎥 [VideoEmbed] Render: Object
-video-thumbnail.tsx:21 🎬 [VideoThumbnail] SVG placeholder detected: Object
-hook.js:377 🎬 [VideoThumbnail] SVG placeholder detected: Object
-video-playback-context.tsx:136 👁️ [VideoPlayback] Window lost focus - pausing videos
-video-playback-context.tsx:86 ⏸️ [VideoPlayback] Pausing all videos globally
-video-playback-context.tsx:21 🛑 [VideoPlayback] DOM-level pause of all other videos
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/85a5...
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/27eb...
-video-playback-context.tsx:52 ✅ [VideoPlayback] Paused 2 videos/iframes
-hot-reloader-client.js:197 [Fast Refresh] rebuilding
-report-hmr-latency.js:14 [Fast Refresh] done in 42ms
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+Unchecked runtime.lastError: The page keeping the extension port is moved into back/forward cache, so the message channel is closed.
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+background-redux-new.js:1 Uncaught (in promise) 
+Unchecked runtime.lastError: Cannot create item with duplicate id LastPass <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id LastPass <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id LastPass <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id LastPass <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id LastPass <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id LastPass <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id LastPass <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id LastPass <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id LastPass <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id LastPass <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id LastPass <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id LastPass <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id LastPass <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id LastPass <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id LastPass <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id LastPass <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id LastPass <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id LastPass <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id LastPass <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id LastPass <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id LastPass <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id separator <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id separator <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id separator <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id separator <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id separator <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id separator <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id separator <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id separator <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id separator <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id separator <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id separator <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id separator <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id separator <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id separator <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id separator <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id separator <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id separator <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id separator <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id separator <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id separator <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id separator <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Address <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Address <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Address <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Address <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Address <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Address <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Address <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Address <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Address <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Address <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Address <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Address <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Address <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Address <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Address <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Address <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Address <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Address <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Address <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Address <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Address <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Payment Card <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Payment Card <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Payment Card <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Payment Card <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Payment Card <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Payment Card <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Payment Card <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Payment Card <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Payment Card <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Payment Card <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Payment Card <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Payment Card <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Payment Card <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Payment Card <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Payment Card <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Payment Card <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Payment Card <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Payment Card <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Payment Card <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Payment Card <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add Payment Card <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add other item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add other item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add other item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add other item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add other item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add other item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add other item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add other item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add other item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add other item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add other item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add other item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add other item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add other item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add other item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add other item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add other item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add other item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add other item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add other item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Add other item <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Save all entered data <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Save all entered data <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Save all entered data <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Save all entered data <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Save all entered data <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Save all entered data <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Save all entered data <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Save all entered data <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Save all entered data <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Save all entered data <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Save all entered data <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Save all entered data <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Save all entered data <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Save all entered data <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Save all entered data <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Save all entered data <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Save all entered data <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Save all entered data <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Save all entered data <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Save all entered data <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Save all entered data <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Generate Secure Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Generate Secure Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Generate Secure Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Generate Secure Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Generate Secure Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Generate Secure Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Generate Secure Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Generate Secure Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Generate Secure Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Generate Secure Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Generate Secure Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Generate Secure Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Generate Secure Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Generate Secure Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Generate Secure Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Generate Secure Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Generate Secure Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Generate Secure Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Generate Secure Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Generate Secure Password <URL>
+Unchecked runtime.lastError: Cannot create item with duplicate id Generate Secure Password <URL>
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
  
+J @ background-redux-new.js:2
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+background-redux-new.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+ 
+J @ background-redux-new.js:2
+ 
+J @ background-redux-new.js:2
+ 
+J @ background-redux-new.js:2
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+ 
+J @ background-redux-new.js:2
+background-redux-new.js:1 Uncaught (in promise) 
+background-redux-new.js:1 Uncaught (in promise) 
+background-redux-new.js:1 Uncaught (in promise) 
+background-redux-new.js:1 Uncaught (in promise) 
+background-redux-new.js:1 Uncaught (in promise) 
+ 
+J @ background-redux-new.js:2
+ 
+J @ background-redux-new.js:2
+background-redux-new.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1 Uncaught (in promise) 
+ 
+J @ background-redux-new.js:2
+background-redux-new.js:1 Uncaught (in promise) 
+Error in event handler: ReferenceError: strURL is not defined
+    at chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/background.js:1:61188
+page.tsx:182 🚀 [Collections] Loading data in parallel...
+collections-rbac.ts:67 🔍 [RBAC] User ID: xfPvnnUdJCRIJEVrpJCmR7kXBOX2
+page.tsx:182 🚀 [Collections] Loading data in parallel...
+collections-rbac.ts:67 🔍 [RBAC] User ID: xfPvnnUdJCRIJEVrpJCmR7kXBOX2
+collections-rbac.ts:20 🔍 [RBAC] Super admin loading all collections
+collections-rbac.ts:85 🔍 [RBAC] Super admin detected - bypassing coach restrictions
+collections-rbac.ts:89 🔍 [RBAC] Super admin loading all videos
+collections-rbac.ts:20 🔍 [RBAC] Super admin loading all collections
+collections-rbac.ts:85 🔍 [RBAC] Super admin detected - bypassing coach restrictions
+collections-rbac.ts:89 🔍 [RBAC] Super admin loading all videos
+collections-rbac.ts:33 ✅ [RBAC] Super admin loaded collections: 3
+collections-rbac.ts:33 ✅ [RBAC] Super admin loaded collections: 3
+collections-rbac.ts:103 ✅ [RBAC] Super admin loaded videos: 5
+page.tsx:211 ✅ [Collections] Parallel loading completed
+collections-rbac.ts:103 ✅ [RBAC] Super admin loaded videos: 5
+page.tsx:211 ✅ [Collections] Parallel loading completed
+completion_list.html:13 
             
             
-           GET https://edgezone-ct.bunnyinfra.net/500b.jpg?s=1751162167793 net::ERR_NAME_NOT_RESOLVED
-runNextTest @ rum.js:55
-setTimeout
-scheduleNextTest @ rum.js:45
-(anonymous) @ rum.js:63
-Promise.then
-(anonymous) @ rum.js:59
-Promise.then
-runNextTest @ rum.js:56
-setTimeout
-scheduleNextTest @ rum.js:45
-(anonymous) @ rum.js:63
-Promise.then
-(anonymous) @ rum.js:59
-Promise.then
-runNextTest @ rum.js:56
-setTimeout
-scheduleNextTest @ rum.js:45
-(anonymous) @ rum.js:63
-Promise.then
-(anonymous) @ rum.js:59
-Promise.then
-runNextTest @ rum.js:56
-setTimeout
-scheduleNextTest @ rum.js:45
-(anonymous) @ rum.js:63
-Promise.then
-(anonymous) @ rum.js:59
-Promise.then
-runNextTest @ rum.js:56
-setTimeout
-scheduleNextTest @ rum.js:45
-(anonymous) @ rum.js:63
-Promise.then
-(anonymous) @ rum.js:59
-Promise.then
-runNextTest @ rum.js:56
-setTimeout
-scheduleNextTest @ rum.js:45
-(anonymous) @ rum.js:63
-Promise.then
-(anonymous) @ rum.js:59
-Promise.then
-runNextTest @ rum.js:56
-setTimeout
-scheduleNextTest @ rum.js:45
-(anonymous) @ rum.js:63
-Promise.then
-(anonymous) @ rum.js:59
-Promise.then
-runNextTest @ rum.js:56
-setTimeout
-scheduleNextTest @ rum.js:45
-(anonymous) @ rum.js:63
-Promise.then
-(anonymous) @ rum.js:59
-Promise.then
-runNextTest @ rum.js:56
-setTimeout
-scheduleNextTest @ rum.js:45
-(anonymous) @ rum.js:63
-edgezone-ct.bunnyinfra.net/500b.jpg?s=1751162167793:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
-edgezone-ct.bunnyinfra.net/500b.jpg?s=1751162167793:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
-edgezone-ct.bunnyinfra.net/500b.jpg?s=1751162167793:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+           GET chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/extensionState.js net::ERR_FILE_NOT_FOUND
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/extensionState.js:1 
+            
+            
+           Failed to load resource: net::ERR_FILE_NOT_FOUND
+completion_list.html:14 
+            
+            
+           GET chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/heuristicsRedefinitions.js net::ERR_FILE_NOT_FOUND
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/heuristicsRedefinitions.js:1 
+            
+            
+           Failed to load resource: net::ERR_FILE_NOT_FOUND
+completion_list.html:12 
+            
+            
+           GET chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/utils.js net::ERR_FILE_NOT_FOUND
+chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/utils.js:1 
+            
+            
+           Failed to load resource: net::ERR_FILE_NOT_FOUND
+contentScript.bundle.js:4785 Event target tag: INPUT
+contentScript.bundle.js:4785 Current value: https://www.tiktok.com/@ahormozi/video/7517466184720092429?_r=1&_t=ZT-8xcoXsSixMN
+contentScript.bundle.js:4785 Current shortcuts: []
+completion_list.html:12 
+            
+            
+           GET chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/utils.js net::ERR_FILE_NOT_FOUND
+completion_list.html:13 
+            
+            
+           GET chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/extensionState.js net::ERR_FILE_NOT_FOUND
+completion_list.html:14 
+            
+            
+           GET chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/heuristicsRedefinitions.js net::ERR_FILE_NOT_FOUND
+contentScript.bundle.js:4785 Data received in content script: []
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+report-hmr-latency.js:14 [Fast Refresh] done in 388ms
+page.tsx:182 🚀 [Collections] Loading data in parallel...
+collections-rbac.ts:67 🔍 [RBAC] User ID: xfPvnnUdJCRIJEVrpJCmR7kXBOX2
+collections-rbac.ts:20 🔍 [RBAC] Super admin loading all collections
+collections-rbac.ts:85 🔍 [RBAC] Super admin detected - bypassing coach restrictions
+collections-rbac.ts:89 🔍 [RBAC] Super admin loading all videos
+collections-rbac.ts:33 ✅ [RBAC] Super admin loaded collections: 3
+collections-rbac.ts:103 ✅ [RBAC] Super admin loaded videos: 6
+page.tsx:211 ✅ [Collections] Parallel loading completed
+video-thumbnail.tsx:49 
+            
+            
+           GET http://localhost:3000/_next/image?url=%2Fimages%2Ftiktok-placeholder.jpg&w=640&q=75 400 (Bad Request)
+L @ react-dom-client.development.js:24627
+exports.preload @ react-dom.development.js:338
+ImagePreload @ image-component.js:218
+react-stack-bottom-frame @ react-dom-client.development.js:22974
+renderWithHooks @ react-dom-client.development.js:6667
+updateFunctionComponent @ react-dom-client.development.js:8931
+beginWork @ react-dom-client.development.js:10556
+runWithFiberInDEV @ react-dom-client.development.js:845
+performUnitOfWork @ react-dom-client.development.js:15258
+workLoopSync @ react-dom-client.development.js:15078
+renderRootSync @ react-dom-client.development.js:15058
+performWorkOnRoot @ react-dom-client.development.js:14526
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
+performWorkUntilDeadline @ scheduler.development.js:45
+<ImagePreload>
+exports.jsx @ react-jsx-runtime.development.js:339
+eval @ image-component.js:293
+react-stack-bottom-frame @ react-dom-client.development.js:22974
+renderWithHooksAgain @ react-dom-client.development.js:6767
+renderWithHooks @ react-dom-client.development.js:6679
+updateForwardRef @ react-dom-client.development.js:8679
+beginWork @ react-dom-client.development.js:10895
+runWithFiberInDEV @ react-dom-client.development.js:845
+performUnitOfWork @ react-dom-client.development.js:15258
+workLoopSync @ react-dom-client.development.js:15078
+renderRootSync @ react-dom-client.development.js:15058
+performWorkOnRoot @ react-dom-client.development.js:14526
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
+performWorkUntilDeadline @ scheduler.development.js:45
+<ForwardRef>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:346
+VideoThumbnail @ video-thumbnail.tsx:49
+react-stack-bottom-frame @ react-dom-client.development.js:22974
+renderWithHooksAgain @ react-dom-client.development.js:6767
+renderWithHooks @ react-dom-client.development.js:6679
+updateFunctionComponent @ react-dom-client.development.js:8931
+beginWork @ react-dom-client.development.js:10556
+runWithFiberInDEV @ react-dom-client.development.js:845
+performUnitOfWork @ react-dom-client.development.js:15258
+workLoopSync @ react-dom-client.development.js:15078
+renderRootSync @ react-dom-client.development.js:15058
+performWorkOnRoot @ react-dom-client.development.js:14526
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
+performWorkUntilDeadline @ scheduler.development.js:45
+<VideoThumbnail>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:346
+VideoEmbed @ video-embed.tsx:74
+react-stack-bottom-frame @ react-dom-client.development.js:22974
+renderWithHooksAgain @ react-dom-client.development.js:6767
+renderWithHooks @ react-dom-client.development.js:6679
+updateFunctionComponent @ react-dom-client.development.js:8931
+beginWork @ react-dom-client.development.js:10556
+runWithFiberInDEV @ react-dom-client.development.js:848
+performUnitOfWork @ react-dom-client.development.js:15258
+workLoopSync @ react-dom-client.development.js:15078
+renderRootSync @ react-dom-client.development.js:15058
+performWorkOnRoot @ react-dom-client.development.js:14526
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
+performWorkUntilDeadline @ scheduler.development.js:45
+video-thumbnail.tsx:58 🖼️ [VideoThumbnail] Image failed to load: /images/tiktok-placeholder.jpg
+overrideMethod @ hook.js:608
+onError @ video-thumbnail.tsx:58
+onError @ image-component.js:201
+executeDispatch @ react-dom-client.development.js:16502
+runWithFiberInDEV @ react-dom-client.development.js:845
+processDispatchQueue @ react-dom-client.development.js:16552
+eval @ react-dom-client.development.js:17150
+batchedUpdates$1 @ react-dom-client.development.js:3263
+dispatchEventForPluginEventSystem @ react-dom-client.development.js:16706
+dispatchEvent @ react-dom-client.development.js:20816
+<img>
+exports.jsx @ react-jsx-runtime.development.js:339
+eval @ image-component.js:166
+react-stack-bottom-frame @ react-dom-client.development.js:22974
+renderWithHooksAgain @ react-dom-client.development.js:6767
+renderWithHooks @ react-dom-client.development.js:6679
+updateForwardRef @ react-dom-client.development.js:8679
+beginWork @ react-dom-client.development.js:10895
+runWithFiberInDEV @ react-dom-client.development.js:845
+performUnitOfWork @ react-dom-client.development.js:15258
+workLoopSync @ react-dom-client.development.js:15078
+renderRootSync @ react-dom-client.development.js:15058
+performWorkOnRoot @ react-dom-client.development.js:14526
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
+performWorkUntilDeadline @ scheduler.development.js:45
+<ForwardRef>
+exports.jsx @ react-jsx-runtime.development.js:339
+eval @ image-component.js:281
+react-stack-bottom-frame @ react-dom-client.development.js:22974
+renderWithHooksAgain @ react-dom-client.development.js:6767
+renderWithHooks @ react-dom-client.development.js:6679
+updateForwardRef @ react-dom-client.development.js:8679
+beginWork @ react-dom-client.development.js:10895
+runWithFiberInDEV @ react-dom-client.development.js:845
+performUnitOfWork @ react-dom-client.development.js:15258
+workLoopSync @ react-dom-client.development.js:15078
+renderRootSync @ react-dom-client.development.js:15058
+performWorkOnRoot @ react-dom-client.development.js:14526
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
+performWorkUntilDeadline @ scheduler.development.js:45
+<ForwardRef>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:346
+VideoThumbnail @ video-thumbnail.tsx:49
+react-stack-bottom-frame @ react-dom-client.development.js:22974
+renderWithHooksAgain @ react-dom-client.development.js:6767
+renderWithHooks @ react-dom-client.development.js:6679
+updateFunctionComponent @ react-dom-client.development.js:8931
+beginWork @ react-dom-client.development.js:10556
+runWithFiberInDEV @ react-dom-client.development.js:845
+performUnitOfWork @ react-dom-client.development.js:15258
+workLoopSync @ react-dom-client.development.js:15078
+renderRootSync @ react-dom-client.development.js:15058
+performWorkOnRoot @ react-dom-client.development.js:14526
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
+performWorkUntilDeadline @ scheduler.development.js:45
+<VideoThumbnail>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:346
+VideoEmbed @ video-embed.tsx:74
+react-stack-bottom-frame @ react-dom-client.development.js:22974
+renderWithHooksAgain @ react-dom-client.development.js:6767
+renderWithHooks @ react-dom-client.development.js:6679
+updateFunctionComponent @ react-dom-client.development.js:8931
+beginWork @ react-dom-client.development.js:10556
+runWithFiberInDEV @ react-dom-client.development.js:848
+performUnitOfWork @ react-dom-client.development.js:15258
+workLoopSync @ react-dom-client.development.js:15078
+renderRootSync @ react-dom-client.development.js:15058
+performWorkOnRoot @ react-dom-client.development.js:14526
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
+performWorkUntilDeadline @ scheduler.development.js:45
 hook.js:608 'oklab(0 0 0 / 0.5)' is not an animatable color. Use the equivalent color code instead.
 overrideMethod @ hook.js:608
 warning @ errors.mjs:11
@@ -353,64 +838,6 @@ processBatch @ batcher.mjs:42
 requestAnimationFrame
 processBatch @ batcher.mjs:51
 requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
-processBatch @ batcher.mjs:51
-requestAnimationFrame
 wake @ batcher.mjs:58
 acc.<computed> @ batcher.mjs:65
 scheduleResolve @ KeyframesResolver.mjs:100
@@ -427,317 +854,651 @@ setActive @ animation-state.mjs:309
 handleHoverEvent @ hover.mjs:16
 eval @ hover.mjs:30
 onPointerEnter @ hover.mjs:26
-video-playback-context.tsx:136 👁️ [VideoPlayback] Window lost focus - pausing videos
-video-playback-context.tsx:86 ⏸️ [VideoPlayback] Pausing all videos globally
-video-playback-context.tsx:21 🛑 [VideoPlayback] DOM-level pause of all other videos
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/85a5...
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/27eb...
-video-playback-context.tsx:52 ✅ [VideoPlayback] Paused 2 videos/iframes
-video-embed.tsx:168 🔥 [VideoEmbed] Click detected - pausing others first: {url: 'https://iframe.mediadelivery.net/embed/459811/ae4c...', platform: 'instagram', currentShouldLoad: false, hostedOnCDN: true, hasVideoData: false}
-video-playback-context.tsx:21 🛑 [VideoPlayback] DOM-level pause of all other videos
- 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/85a5...
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/27eb...
-video-playback-context.tsx:52 ✅ [VideoPlayback] Paused 2 videos/iframes
-video-playback-context.tsx:59 🎬 [VideoPlayback] Setting currently playing video: {previous: 'null', new: 'https://iframe.mediadelivery.net/embed/459811/ae4c...', action: 'start'}
-video-playback-context.tsx:21 🛑 [VideoPlayback] DOM-level pause of all other videos
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/85a5...
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/27eb...
-video-playback-context.tsx:52 ✅ [VideoPlayback] Paused 2 videos/iframes
-video-embed.tsx:168 🔥 [VideoEmbed] Click detected - pausing others first: {url: 'https://iframe.mediadelivery.net/embed/459811/ae4c...', platform: 'instagram', currentShouldLoad: false, hostedOnCDN: true, hasVideoData: false}
-video-playback-context.tsx:21 🛑 [VideoPlayback] DOM-level pause of all other videos
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/85a5...
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/27eb...
-video-playback-context.tsx:52 ✅ [VideoPlayback] Paused 2 videos/iframes
-video-playback-context.tsx:59 🎬 [VideoPlayback] Setting currently playing video: {previous: 'null', new: 'https://iframe.mediadelivery.net/embed/459811/ae4c...', action: 'start'}
-video-playback-context.tsx:21 🛑 [VideoPlayback] DOM-level pause of all other videos
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/85a5...
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/27eb...
-video-playback-context.tsx:52 ✅ [VideoPlayback] Paused 2 videos/iframes
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/85a5...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/85a5...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/27eb...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/27eb...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/ae4c...', platform: 'instagram', shouldLoad: true, isLoading: true, contentLoaded: false, …}
-video-embed.tsx:71 🎬 [VideoEmbed] Setting iframe src immediately for https://iframe.mediadelivery.net/embed/459811/ae4c...: {shouldAutoplay: true, finalSrc: 'https://iframe.mediadelivery.net/embed/459811/ae4c9cbb-4850-42d9-93b0-c34dff434892?autoplay=true...'}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/ae4c...', platform: 'instagram', shouldLoad: true, isLoading: true, contentLoaded: false, …}
-video-thumbnail.tsx:46 🎬 [VideoThumbnail] HTTP thumbnail URL: {platform: 'instagram', type: 'HTTP URL', url: 'https://scontent-waw2-2.cdninstagram.com/v/t51.718…BtGT-pFs3GGeVcfawo4wor9d5xdgUBksr3XMg&oe=68665E7B', isRealThumbnail: true}
-video-thumbnail.tsx:46 🎬 [VideoThumbnail] HTTP thumbnail URL: {platform: 'instagram', type: 'HTTP URL', url: 'https://scontent-waw2-2.cdninstagram.com/v/t51.718…BtGT-pFs3GGeVcfawo4wor9d5xdgUBksr3XMg&oe=68665E7B', isRealThumbnail: true}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/7365...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/7365...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
- 🎬 [VideoThumbnail] HTTP thumbnail URL: {platform: 'instagram', type: 'HTTP URL', url: 'https://scontent-waw2-1.cdninstagram.com/v/t51.718…-9KHMGjQ4j3kCt-WUy_143bmDRcT1Qw6xPxnw&oe=6866674D', isRealThumbnail: true}
- 🎬 [VideoThumbnail] HTTP thumbnail URL: {platform: 'instagram', type: 'HTTP URL', url: 'https://scontent-waw2-1.cdninstagram.com/v/t51.718…-9KHMGjQ4j3kCt-WUy_143bmDRcT1Qw6xPxnw&oe=6866674D', isRealThumbnail: true}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/cbac...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/cbac...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-thumbnail.tsx:36 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-video-thumbnail.tsx:36 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/5ffc...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/5ffc...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-thumbnail.tsx:36 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-video-thumbnail.tsx:36 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/af92...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/af92...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-thumbnail.tsx:36 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-video-thumbnail.tsx:36 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/a9be...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/a9be...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-thumbnail.tsx:21 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-video-thumbnail.tsx:21 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/fba2...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/fba2...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-thumbnail.tsx:21 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-video-thumbnail.tsx:21 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/e019...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/e019...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-thumbnail.tsx:21 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-video-thumbnail.tsx:21 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-video-embed.tsx:213 🛑 [VideoEmbed] Stopping video (another video started): {thisVideo: 'https://iframe.mediadelivery.net/embed/459811/85a5...', currentlyPlaying: 'https://iframe.mediadelivery.net/embed/459811/ae4c...'}
-video-embed.tsx:213 🛑 [VideoEmbed] Stopping video (another video started): {thisVideo: 'https://iframe.mediadelivery.net/embed/459811/27eb...', currentlyPlaying: 'https://iframe.mediadelivery.net/embed/459811/ae4c...'}
-video-embed.tsx:189 ✅ [VideoEmbed] Content loaded!
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/ae4c...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/ae4c...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-rum.js:35 Final response: OK - This is a metrics service by bunny.net for CDN latency optimization.
-video-embed.tsx:168 🔥 [VideoEmbed] Click detected - pausing others first: {url: 'https://iframe.mediadelivery.net/embed/459811/7365...', platform: 'instagram', currentShouldLoad: false, hostedOnCDN: true, hasVideoData: false}
-video-playback-context.tsx:21 🛑 [VideoPlayback] DOM-level pause of all other videos
- 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/85a5...
- 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/27eb...
- 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/ae4c...
- ✅ [VideoPlayback] Paused 3 videos/iframes
- 🎬 [VideoPlayback] Setting currently playing video: {previous: 'https://iframe.mediadelivery.net/embed/459811/ae4c...', new: 'https://iframe.mediadelivery.net/embed/459811/7365...', action: 'start'}
- 🛑 [VideoPlayback] DOM-level pause of all other videos
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/85a5...
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/27eb...
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/ae4c...
-video-playback-context.tsx:52 ✅ [VideoPlayback] Paused 3 videos/iframes
-video-embed.tsx:168 🔥 [VideoEmbed] Click detected - pausing others first: {url: 'https://iframe.mediadelivery.net/embed/459811/7365...', platform: 'instagram', currentShouldLoad: false, hostedOnCDN: true, hasVideoData: false}
-video-playback-context.tsx:21 🛑 [VideoPlayback] DOM-level pause of all other videos
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/85a5...
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/27eb...
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/ae4c...
-video-playback-context.tsx:52 ✅ [VideoPlayback] Paused 3 videos/iframes
-video-playback-context.tsx:59 🎬 [VideoPlayback] Setting currently playing video: {previous: 'https://iframe.mediadelivery.net/embed/459811/ae4c...', new: 'https://iframe.mediadelivery.net/embed/459811/7365...', action: 'start'}
-video-playback-context.tsx:21 🛑 [VideoPlayback] DOM-level pause of all other videos
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/85a5...
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/27eb...
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/ae4c...
-video-playback-context.tsx:52 ✅ [VideoPlayback] Paused 3 videos/iframes
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/85a5...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/85a5...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/27eb...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/27eb...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/ae4c...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/ae4c...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/7365...', platform: 'instagram', shouldLoad: true, isLoading: true, contentLoaded: false, …}
-video-embed.tsx:71 🎬 [VideoEmbed] Setting iframe src immediately for https://iframe.mediadelivery.net/embed/459811/7365...: {shouldAutoplay: true, finalSrc: 'https://iframe.mediadelivery.net/embed/459811/736569d7-da78-4962-a6de-f451eb854f7e?autoplay=true...'}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/7365...', platform: 'instagram', shouldLoad: true, isLoading: true, contentLoaded: false, …}
-video-thumbnail.tsx:46 🎬 [VideoThumbnail] HTTP thumbnail URL: {platform: 'instagram', type: 'HTTP URL', url: 'https://scontent-waw2-1.cdninstagram.com/v/t51.718…-9KHMGjQ4j3kCt-WUy_143bmDRcT1Qw6xPxnw&oe=6866674D', isRealThumbnail: true}
- 🎬 [VideoThumbnail] HTTP thumbnail URL: {platform: 'instagram', type: 'HTTP URL', url: 'https://scontent-waw2-1.cdninstagram.com/v/t51.718…-9KHMGjQ4j3kCt-WUy_143bmDRcT1Qw6xPxnw&oe=6866674D', isRealThumbnail: true}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/cbac...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/cbac...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
- 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
- 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/5ffc...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/5ffc...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
- 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
- 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/af92...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/af92...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
- 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
- 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/a9be...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/a9be...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
- 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
- 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/fba2...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/fba2...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
- 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
- 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/e019...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/e019...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
- 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
- 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
- 🧹 [VideoEmbed] Cleanup - stopping video on unmount: https://iframe.mediadelivery.net/embed/459811/ae4c...
- 🎬 [VideoPlayback] Setting currently playing video: {previous: 'https://iframe.mediadelivery.net/embed/459811/ae4c...', new: 'null', action: 'stop'}
- 🛑 [VideoEmbed] Stopping video (another video started): {thisVideo: 'https://iframe.mediadelivery.net/embed/459811/85a5...', currentlyPlaying: 'https://iframe.mediadelivery.net/embed/459811/7365...'}
- 🛑 [VideoEmbed] Stopping video (another video started): {thisVideo: 'https://iframe.mediadelivery.net/embed/459811/27eb...', currentlyPlaying: 'https://iframe.mediadelivery.net/embed/459811/7365...'}
- 🛑 [VideoEmbed] Stopping video (another video started): {thisVideo: 'https://iframe.mediadelivery.net/embed/459811/ae4c...', currentlyPlaying: 'https://iframe.mediadelivery.net/embed/459811/7365...'}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/85a5...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/85a5...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/27eb...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/27eb...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/ae4c...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/ae4c...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/7365...', platform: 'instagram', shouldLoad: true, isLoading: true, contentLoaded: false, …}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/7365...', platform: 'instagram', shouldLoad: true, isLoading: true, contentLoaded: false, …}
- 🎬 [VideoThumbnail] HTTP thumbnail URL: {platform: 'instagram', type: 'HTTP URL', url: 'https://scontent-waw2-1.cdninstagram.com/v/t51.718…-9KHMGjQ4j3kCt-WUy_143bmDRcT1Qw6xPxnw&oe=6866674D', isRealThumbnail: true}
- 🎬 [VideoThumbnail] HTTP thumbnail URL: {platform: 'instagram', type: 'HTTP URL', url: 'https://scontent-waw2-1.cdninstagram.com/v/t51.718…-9KHMGjQ4j3kCt-WUy_143bmDRcT1Qw6xPxnw&oe=6866674D', isRealThumbnail: true}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/cbac...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/cbac...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-thumbnail.tsx:36 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-video-thumbnail.tsx:36 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/5ffc...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/5ffc...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-thumbnail.tsx:36 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-video-thumbnail.tsx:36 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/af92...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/af92...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-thumbnail.tsx:36 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-video-thumbnail.tsx:36 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/a9be...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/a9be...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-thumbnail.tsx:21 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-video-thumbnail.tsx:21 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/fba2...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/fba2...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-thumbnail.tsx:21 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-video-thumbnail.tsx:21 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/e019...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/e019...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-thumbnail.tsx:21 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-video-thumbnail.tsx:21 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-video-embed.tsx:261 🧹 [VideoEmbed] Cleanup - stopping video on unmount: https://iframe.mediadelivery.net/embed/459811/7365...
-video-playback-context.tsx:59 🎬 [VideoPlayback] Setting currently playing video: {previous: 'https://iframe.mediadelivery.net/embed/459811/7365...', new: 'null', action: 'stop'}
-video-embed.tsx:189 ✅ [VideoEmbed] Content loaded!
-video-embed.tsx:194 ⏸️ [VideoEmbed] Content loaded but not starting - another video is playing: none...
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/7365...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/7365...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-rum.js:35 Final response: OK - This is a metrics service by bunny.net for CDN latency optimization.
-video-embed.tsx:168 🔥 [VideoEmbed] Click detected - pausing others first: {url: 'https://iframe.mediadelivery.net/embed/459811/cbac...', platform: 'instagram', currentShouldLoad: false, hostedOnCDN: true, hasVideoData: false}
-video-playback-context.tsx:21 🛑 [VideoPlayback] DOM-level pause of all other videos
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/85a5...
- 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/27eb...
- 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/ae4c...
- 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/7365...
- ✅ [VideoPlayback] Paused 4 videos/iframes
- 🎬 [VideoPlayback] Setting currently playing video: {previous: 'null', new: 'https://iframe.mediadelivery.net/embed/459811/cbac...', action: 'start'}
- 🛑 [VideoPlayback] DOM-level pause of all other videos
- 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/85a5...
- 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/27eb...
- 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/ae4c...
- 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/7365...
- ✅ [VideoPlayback] Paused 4 videos/iframes
-video-embed.tsx:168 🔥 [VideoEmbed] Click detected - pausing others first: {url: 'https://iframe.mediadelivery.net/embed/459811/cbac...', platform: 'instagram', currentShouldLoad: false, hostedOnCDN: true, hasVideoData: false}
-video-playback-context.tsx:21 🛑 [VideoPlayback] DOM-level pause of all other videos
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/85a5...
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/27eb...
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/ae4c...
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/7365...
-video-playback-context.tsx:52 ✅ [VideoPlayback] Paused 4 videos/iframes
-video-playback-context.tsx:59 🎬 [VideoPlayback] Setting currently playing video: {previous: 'null', new: 'https://iframe.mediadelivery.net/embed/459811/cbac...', action: 'start'}
-video-playback-context.tsx:21 🛑 [VideoPlayback] DOM-level pause of all other videos
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/85a5...
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/27eb...
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/ae4c...
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/7365...
-video-playback-context.tsx:52 ✅ [VideoPlayback] Paused 4 videos/iframes
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/85a5...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/85a5...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/27eb...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/27eb...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/ae4c...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/ae4c...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/7365...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/7365...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/cbac...', platform: 'instagram', shouldLoad: true, isLoading: true, contentLoaded: false, …}
-video-embed.tsx:71 🎬 [VideoEmbed] Setting iframe src immediately for https://iframe.mediadelivery.net/embed/459811/cbac...: {shouldAutoplay: true, finalSrc: 'https://iframe.mediadelivery.net/embed/459811/cbac5d04-7cb7-4208-b29a-162a0b667336?autoplay=true...'}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/cbac...', platform: 'instagram', shouldLoad: true, isLoading: true, contentLoaded: false, …}
-video-thumbnail.tsx:36 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-video-thumbnail.tsx:36 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/5ffc...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/5ffc...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-thumbnail.tsx:36 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-video-thumbnail.tsx:36 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/af92...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/af92...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-thumbnail.tsx:36 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-video-thumbnail.tsx:36 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/a9be...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/a9be...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-thumbnail.tsx:21 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-video-thumbnail.tsx:21 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/fba2...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/fba2...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-thumbnail.tsx:21 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-video-thumbnail.tsx:21 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/e019...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/e019...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-thumbnail.tsx:21 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-video-thumbnail.tsx:21 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-video-embed.tsx:213 🛑 [VideoEmbed] Stopping video (another video started): {thisVideo: 'https://iframe.mediadelivery.net/embed/459811/85a5...', currentlyPlaying: 'https://iframe.mediadelivery.net/embed/459811/cbac...'}
-video-embed.tsx:213 🛑 [VideoEmbed] Stopping video (another video started): {thisVideo: 'https://iframe.mediadelivery.net/embed/459811/27eb...', currentlyPlaying: 'https://iframe.mediadelivery.net/embed/459811/cbac...'}
-video-embed.tsx:213 🛑 [VideoEmbed] Stopping video (another video started): {thisVideo: 'https://iframe.mediadelivery.net/embed/459811/ae4c...', currentlyPlaying: 'https://iframe.mediadelivery.net/embed/459811/cbac...'}
-video-embed.tsx:213 🛑 [VideoEmbed] Stopping video (another video started): {thisVideo: 'https://iframe.mediadelivery.net/embed/459811/7365...', currentlyPlaying: 'https://iframe.mediadelivery.net/embed/459811/cbac...'}
-rum.js:35 Final response: OK - This is a metrics service by bunny.net for CDN latency optimization.
-video-embed.tsx:189 ✅ [VideoEmbed] Content loaded!
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/cbac...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/cbac...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-playback-context.tsx:136 👁️ [VideoPlayback] Window lost focus - pausing videos
-video-playback-context.tsx:86 ⏸️ [VideoPlayback] Pausing all videos globally
-video-playback-context.tsx:21 🛑 [VideoPlayback] DOM-level pause of all other videos
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/85a5...
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/27eb...
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/ae4c...
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/7365...
-video-playback-context.tsx:42 📺 [VideoPlayback] Sending pause message to iframe: https://iframe.mediadelivery.net/embed/459811/cbac...
-video-playback-context.tsx:52 ✅ [VideoPlayback] Paused 5 videos/iframes
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/85a5...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/85a5...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/27eb...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/27eb...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/ae4c...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/ae4c...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/7365...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/7365...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/cbac...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/cbac...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/5ffc...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/5ffc...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-thumbnail.tsx:36 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-video-thumbnail.tsx:36 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/af92...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/af92...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
- 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
- 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/a9be...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/a9be...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
- 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
- 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/fba2...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/fba2...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
- 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
- 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/e019...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/e019...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
- 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
- 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
- 🧹 [VideoEmbed] Cleanup - stopping video on unmount: https://iframe.mediadelivery.net/embed/459811/cbac...
- 🎬 [VideoPlayback] Setting currently playing video: {previous: 'https://iframe.mediadelivery.net/embed/459811/cbac...', new: 'null', action: 'stop'}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/85a5...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/85a5...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/27eb...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
- 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/27eb...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/ae4c...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/ae4c...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/7365...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/7365...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/cbac...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/cbac...', platform: 'instagram', shouldLoad: true, isLoading: false, contentLoaded: true, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/5ffc...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/5ffc...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-thumbnail.tsx:36 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-video-thumbnail.tsx:36 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/af92...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/af92...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-thumbnail.tsx:36 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-video-thumbnail.tsx:36 🎬 [VideoThumbnail] Real image thumbnail: {platform: 'instagram', type: 'JPEG', size: '10KB', isRealThumbnail: true, previewUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…YSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...'}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/a9be...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/a9be...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-thumbnail.tsx:21 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-video-thumbnail.tsx:21 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/fba2...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/fba2...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-thumbnail.tsx:21 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-video-thumbnail.tsx:21 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/e019...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-embed.tsx:152 🎥 [VideoEmbed] Render: {url: 'https://iframe.mediadelivery.net/embed/459811/e019...', platform: 'instagram', shouldLoad: false, isLoading: false, contentLoaded: false, …}
-video-thumbnail.tsx:21 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
-video-thumbnail.tsx:21 🎬 [VideoThumbnail] SVG placeholder detected: {platform: 'instagram', type: 'SVG placeholder', content: '\n    <svg width="360" height="640" xmlns="http://w…         <stop offset="0%" style="stop-color:#...', isRealThumbnail: false}
+video-playback-context.tsx:45 🎬 [VideoPlayback] Setting currently playing: {previous: 'null', new: 'https://www.tiktok.com/@ahormozi/video/75174661847...'}
+video-playback-context.tsx:23 ⏸️ [VideoPlayback] Pausing all videos
+video-embed.tsx:111 ❌ [VideoEmbed] Video failed to load
+overrideMethod @ hook.js:608
+error @ intercept-console-error.js:50
+onError @ video-embed.tsx:111
+executeDispatch @ react-dom-client.development.js:16502
+runWithFiberInDEV @ react-dom-client.development.js:845
+processDispatchQueue @ react-dom-client.development.js:16552
+eval @ react-dom-client.development.js:17150
+batchedUpdates$1 @ react-dom-client.development.js:3263
+dispatchEventForPluginEventSystem @ react-dom-client.development.js:16706
+dispatchEvent @ react-dom-client.development.js:20816
+<video>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:346
+VideoEmbed @ video-embed.tsx:102
+react-stack-bottom-frame @ react-dom-client.development.js:22974
+renderWithHooksAgain @ react-dom-client.development.js:6767
+renderWithHooks @ react-dom-client.development.js:6679
+updateFunctionComponent @ react-dom-client.development.js:8931
+beginWork @ react-dom-client.development.js:10556
+runWithFiberInDEV @ react-dom-client.development.js:848
+performUnitOfWork @ react-dom-client.development.js:15258
+workLoopSync @ react-dom-client.development.js:15078
+renderRootSync @ react-dom-client.development.js:15058
+performWorkOnRoot @ react-dom-client.development.js:14526
+performSyncWorkOnRoot @ react-dom-client.development.js:16365
+flushSyncWorkAcrossRoots_impl @ react-dom-client.development.js:16211
+processRootScheduleInMicrotask @ react-dom-client.development.js:16250
+eval @ react-dom-client.development.js:16384
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+report-hmr-latency.js:14 [Fast Refresh] done in 1614ms
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+report-hmr-latency.js:14 [Fast Refresh] done in 300ms
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+report-hmr-latency.js:14 [Fast Refresh] done in 384ms
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+report-hmr-latency.js:14 [Fast Refresh] done in 222ms
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+report-hmr-latency.js:14 [Fast Refresh] done in 323ms
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+report-hmr-latency.js:14 [Fast Refresh] done in 577ms
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+report-hmr-latency.js:14 [Fast Refresh] done in 903ms
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+report-hmr-latency.js:14 [Fast Refresh] done in 867ms
+contentScript.bundle.js:4785 Event target tag: INPUT
+contentScript.bundle.js:4785 Current value: https://www.tiktok.com/@ahormozi/video/7517466184720092429?_r=1&_t=ZT-8xcoXsSixMN
+contentScript.bundle.js:4785 Current shortcuts: []
+contentScript.bundle.js:4785 Data received in content script: []
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+report-hmr-latency.js:14 [Fast Refresh] done in 459ms
+video-processor.tsx:93 🔄 [VIDEO_PROCESS] Skipping duplicate processing for same URL
+types.ts:55 🎬 [VIDEO_PROCESS] Starting video download...
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+report-hmr-latency.js:14 [Fast Refresh] done in 339ms
+types.ts:68 ✅ [VIDEO_PROCESS] Video downloaded successfully
+types.ts:71 🎙️ [VIDEO_PROCESS] Starting transcription...
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+report-hmr-latency.js:14 [Fast Refresh] done in 295ms
+types.ts:95 ✅ [VIDEO_PROCESS] Transcription completed
+hot-reloader-client.js:197 [Fast Refresh] rebuilding
+report-hmr-latency.js:14 [Fast Refresh] done in 680ms
+contentScript.bundle.js:4785 Event target tag: INPUT
+contentScript.bundle.js:4785 Current value: https://www.instagram.com/reels/DJHdTdVT_2d/
+contentScript.bundle.js:4785 Current shortcuts: []
+contentScript.bundle.js:4785 Data received in content script: []
+video-processor.tsx:93 🔄 [VIDEO_PROCESS] Skipping duplicate processing for same URL
+types.ts:55 🎬 [VIDEO_PROCESS] Starting video download...
+types.ts:56 
+            
+            
+           POST http://localhost:3000/api/video/downloader 500 (Internal Server Error)
+processVideoUrl @ types.ts:56
+VideoProcessor.useCallback[handleTranscriptionStep] @ video-processor.tsx:70
+VideoProcessor.useCallback[startProcessing] @ video-processor.tsx:117
+await in VideoProcessor.useCallback[startProcessing]
+VideoProcessor.useEffect @ video-processor.tsx:157
+react-stack-bottom-frame @ react-dom-client.development.js:23055
+runWithFiberInDEV @ react-dom-client.development.js:845
+commitHookEffectListMount @ react-dom-client.development.js:11978
+commitHookPassiveMountEffects @ react-dom-client.development.js:12099
+commitPassiveMountOnFiber @ react-dom-client.development.js:13929
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13932
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13932
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13932
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13932
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13932
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13932
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13932
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13932
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13932
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13932
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13932
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13932
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+<VideoProcessor>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:346
+ScriptEditorPage @ page.tsx:347
+react-stack-bottom-frame @ react-dom-client.development.js:22974
+renderWithHooksAgain @ react-dom-client.development.js:6767
+renderWithHooks @ react-dom-client.development.js:6679
+updateFunctionComponent @ react-dom-client.development.js:8931
+beginWork @ react-dom-client.development.js:10556
+runWithFiberInDEV @ react-dom-client.development.js:845
+performUnitOfWork @ react-dom-client.development.js:15258
+workLoopSync @ react-dom-client.development.js:15078
+renderRootSync @ react-dom-client.development.js:15058
+performWorkOnRoot @ react-dom-client.development.js:14526
+performSyncWorkOnRoot @ react-dom-client.development.js:16365
+flushSyncWorkAcrossRoots_impl @ react-dom-client.development.js:16211
+flushSpawnedWork @ react-dom-client.development.js:15805
+commitRoot @ react-dom-client.development.js:15529
+commitRootWhenReady @ react-dom-client.development.js:14759
+performWorkOnRoot @ react-dom-client.development.js:14682
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
+performWorkUntilDeadline @ scheduler.development.js:45
+<ScriptEditorPage>
+exports.jsx @ react-jsx-runtime.development.js:339
+ClientPageRoot @ client-page.js:20
+react-stack-bottom-frame @ react-dom-client.development.js:22974
+renderWithHooksAgain @ react-dom-client.development.js:6767
+renderWithHooks @ react-dom-client.development.js:6679
+updateFunctionComponent @ react-dom-client.development.js:8931
+beginWork @ react-dom-client.development.js:10505
+runWithFiberInDEV @ react-dom-client.development.js:845
+performUnitOfWork @ react-dom-client.development.js:15258
+workLoopConcurrentByScheduler @ react-dom-client.development.js:15252
+renderRootConcurrent @ react-dom-client.development.js:15227
+performWorkOnRoot @ react-dom-client.development.js:14525
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
+performWorkUntilDeadline @ scheduler.development.js:45
+"use client"
+eval @ react-server-dom-webpack-client.browser.development.js:2354
+initializeModelChunk @ react-server-dom-webpack-client.browser.development.js:1054
+resolveModelChunk @ react-server-dom-webpack-client.browser.development.js:1031
+resolveModel @ react-server-dom-webpack-client.browser.development.js:1599
+processFullStringRow @ react-server-dom-webpack-client.browser.development.js:2288
+processFullBinaryRow @ react-server-dom-webpack-client.browser.development.js:2233
+progress @ react-server-dom-webpack-client.browser.development.js:2479
+"use server"
+ResponseInstance @ react-server-dom-webpack-client.browser.development.js:1587
+createResponseFromOptions @ react-server-dom-webpack-client.browser.development.js:2396
+exports.createFromReadableStream @ react-server-dom-webpack-client.browser.development.js:2717
+createFromNextReadableStream @ fetch-server-response.js:172
+fetchServerResponse @ fetch-server-response.js:126
+await in fetchServerResponse
+eval @ prefetch-cache-utils.js:197
+task @ promise-queue.js:30
+processNext @ promise-queue.js:81
+enqueue @ promise-queue.js:45
+createLazyPrefetchEntry @ prefetch-cache-utils.js:197
+getOrCreatePrefetchCacheEntry @ prefetch-cache-utils.js:144
+navigateReducer @ navigate-reducer.js:163
+clientReducer @ router-reducer.js:25
+action @ app-router-instance.js:156
+runAction @ app-router-instance.js:66
+dispatchAction @ app-router-instance.js:120
+dispatch @ app-router-instance.js:154
+eval @ use-action-queue.js:55
+startTransition @ react-dom-client.development.js:7843
+dispatch @ use-action-queue.js:54
+dispatchAppRouterAction @ use-action-queue.js:37
+dispatchNavigateAction @ app-router-instance.js:207
+eval @ app-router-instance.js:260
+exports.startTransition @ react.development.js:1129
+push @ app-router-instance.js:258
+handleSubmit @ page.tsx:143
+executeDispatch @ react-dom-client.development.js:16502
+runWithFiberInDEV @ react-dom-client.development.js:845
+processDispatchQueue @ react-dom-client.development.js:16552
+eval @ react-dom-client.development.js:17150
+batchedUpdates$1 @ react-dom-client.development.js:3263
+dispatchEventForPluginEventSystem @ react-dom-client.development.js:16706
+dispatchEvent @ react-dom-client.development.js:20816
+dispatchDiscreteEvent @ react-dom-client.development.js:20784
+types.ts:102 ❌ [VIDEO_PROCESS] Processing failed: Error: Failed to download video from the provided URL
+    at processVideoUrl (types.ts:64:13)
+    at async VideoProcessor.useCallback[handleTranscriptionStep] (video-processor.tsx:70:20)
+    at async VideoProcessor.useCallback[startProcessing] (video-processor.tsx:117:11)
+overrideMethod @ hook.js:608
+error @ intercept-console-error.js:50
+processVideoUrl @ types.ts:102
+await in processVideoUrl
+VideoProcessor.useCallback[handleTranscriptionStep] @ video-processor.tsx:70
+VideoProcessor.useCallback[startProcessing] @ video-processor.tsx:117
+await in VideoProcessor.useCallback[startProcessing]
+VideoProcessor.useEffect @ video-processor.tsx:157
+react-stack-bottom-frame @ react-dom-client.development.js:23055
+runWithFiberInDEV @ react-dom-client.development.js:845
+commitHookEffectListMount @ react-dom-client.development.js:11978
+commitHookPassiveMountEffects @ react-dom-client.development.js:12099
+commitPassiveMountOnFiber @ react-dom-client.development.js:13929
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13932
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13932
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13932
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13932
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13932
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13932
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13932
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13932
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13932
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13932
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13932
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13932
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:13922
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+commitPassiveMountOnFiber @ react-dom-client.development.js:14048
+recursivelyTraversePassiveMountEffects @ react-dom-client.development.js:13902
+<VideoProcessor>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:346
+ScriptEditorPage @ page.tsx:347
+react-stack-bottom-frame @ react-dom-client.development.js:22974
+renderWithHooksAgain @ react-dom-client.development.js:6767
+renderWithHooks @ react-dom-client.development.js:6679
+updateFunctionComponent @ react-dom-client.development.js:8931
+beginWork @ react-dom-client.development.js:10556
+runWithFiberInDEV @ react-dom-client.development.js:845
+performUnitOfWork @ react-dom-client.development.js:15258
+workLoopSync @ react-dom-client.development.js:15078
+renderRootSync @ react-dom-client.development.js:15058
+performWorkOnRoot @ react-dom-client.development.js:14526
+performSyncWorkOnRoot @ react-dom-client.development.js:16365
+flushSyncWorkAcrossRoots_impl @ react-dom-client.development.js:16211
+flushSpawnedWork @ react-dom-client.development.js:15805
+commitRoot @ react-dom-client.development.js:15529
+commitRootWhenReady @ react-dom-client.development.js:14759
+performWorkOnRoot @ react-dom-client.development.js:14682
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
+performWorkUntilDeadline @ scheduler.development.js:45
+<ScriptEditorPage>
+exports.jsx @ react-jsx-runtime.development.js:339
+ClientPageRoot @ client-page.js:20
+react-stack-bottom-frame @ react-dom-client.development.js:22974
+renderWithHooksAgain @ react-dom-client.development.js:6767
+renderWithHooks @ react-dom-client.development.js:6679
+updateFunctionComponent @ react-dom-client.development.js:8931
+beginWork @ react-dom-client.development.js:10505
+runWithFiberInDEV @ react-dom-client.development.js:845
+performUnitOfWork @ react-dom-client.development.js:15258
+workLoopConcurrentByScheduler @ react-dom-client.development.js:15252
+renderRootConcurrent @ react-dom-client.development.js:15227
+performWorkOnRoot @ react-dom-client.development.js:14525
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:16350
+performWorkUntilDeadline @ scheduler.development.js:45
+"use client"
+eval @ react-server-dom-webpack-client.browser.development.js:2354
+initializeModelChunk @ react-server-dom-webpack-client.browser.development.js:1054
+resolveModelChunk @ react-server-dom-webpack-client.browser.development.js:1031
+resolveModel @ react-server-dom-webpack-client.browser.development.js:1599
+processFullStringRow @ react-server-dom-webpack-client.browser.development.js:2288
+processFullBinaryRow @ react-server-dom-webpack-client.browser.development.js:2233
+progress @ react-server-dom-webpack-client.browser.development.js:2479
+"use server"
+ResponseInstance @ react-server-dom-webpack-client.browser.development.js:1587
+createResponseFromOptions @ react-server-dom-webpack-client.browser.development.js:2396
+exports.createFromReadableStream @ react-server-dom-webpack-client.browser.development.js:2717
+createFromNextReadableStream @ fetch-server-response.js:172
+fetchServerResponse @ fetch-server-response.js:126
+await in fetchServerResponse
+eval @ prefetch-cache-utils.js:197
+task @ promise-queue.js:30
+processNext @ promise-queue.js:81
+enqueue @ promise-queue.js:45
+createLazyPrefetchEntry @ prefetch-cache-utils.js:197
+getOrCreatePrefetchCacheEntry @ prefetch-cache-utils.js:144
+navigateReducer @ navigate-reducer.js:163
+clientReducer @ router-reducer.js:25
+action @ app-router-instance.js:156
+runAction @ app-router-instance.js:66
+dispatchAction @ app-router-instance.js:120
+dispatch @ app-router-instance.js:154
+eval @ use-action-queue.js:55
+startTransition @ react-dom-client.development.js:7843
+dispatch @ use-action-queue.js:54
+dispatchAppRouterAction @ use-action-queue.js:37
+dispatchNavigateAction @ app-router-instance.js:207
+eval @ app-router-instance.js:260
+exports.startTransition @ react.development.js:1129
+push @ app-router-instance.js:258
+handleSubmit @ page.tsx:143
+executeDispatch @ react-dom-client.development.js:16502
+runWithFiberInDEV @ react-dom-client.development.js:845
+processDispatchQueue @ react-dom-client.development.js:16552
+eval @ react-dom-client.development.js:17150
+batchedUpdates$1 @ react-dom-client.development.js:3263
+dispatchEventForPluginEventSystem @ react-dom-client.development.js:16706
+dispatchEvent @ react-dom-client.development.js:20816
+dispatchDiscreteEvent @ react-dom-client.development.js:20784
+ [Fast Refresh] rebuilding
+ [Fast Refresh] done in 521ms

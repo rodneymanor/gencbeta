@@ -1,3 +1,75 @@
+// Simplified video processing using the comprehensive endpoint
+interface VideoProcessResult {
+  success: boolean;
+  videoId?: string;
+  iframe?: string;
+  directUrl?: string;
+  platform?: string;
+  transcriptionStatus?: string;
+  message?: string;
+  error?: string;
+  details?: string;
+}
+
+/**
+ * Complete video processing workflow using the comprehensive endpoint
+ * Handles: URL decoding, download, Bunny streaming, collection addition, transcription
+ */
+export const processAndAddVideo = async (
+  videoUrl: string, 
+  collectionId: string, 
+  title?: string
+): Promise<VideoProcessResult> => {
+  console.log("🚀 [VIDEO_PROCESS] Starting comprehensive video processing...");
+  console.log("🔗 [VIDEO_PROCESS] URL:", videoUrl);
+  console.log("📂 [VIDEO_PROCESS] Collection:", collectionId);
+  
+  try {
+    const response = await fetch("/api/video/process-and-add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ 
+        videoUrl, 
+        collectionId, 
+        title 
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("❌ [VIDEO_PROCESS] Processing failed:", data);
+      return {
+        success: false,
+        error: data.error || "Video processing failed",
+        details: data.details
+      };
+    }
+
+    console.log("✅ [VIDEO_PROCESS] Processing successful:", data);
+    return {
+      success: true,
+      videoId: data.videoId,
+      iframe: data.iframe,
+      directUrl: data.directUrl,
+      platform: data.platform,
+      transcriptionStatus: data.transcriptionStatus,
+      message: data.message
+    };
+
+  } catch (error) {
+    console.error("❌ [VIDEO_PROCESS] Network error:", error);
+    return {
+      success: false,
+      error: "Network error during video processing",
+      details: error instanceof Error ? error.message : "Unknown error"
+    };
+  }
+};
+
+// Keep existing interfaces for backwards compatibility
 interface VideoDownloadResponse {
   success: boolean;
   platform: string;
@@ -61,27 +133,9 @@ interface TranscriptionResponse {
   };
 }
 
-export const downloadVideo = async (videoUrl: string): Promise<VideoDownloadResponse> => {
-  const response = await fetch("/api/download-video", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ url: videoUrl }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error ?? "Failed to download video");
-  }
-
-  const data = await response.json();
-  console.log("📥 [ADD_VIDEO] Download response received:", data);
-  console.log("🔍 [DEBUG] Download metrics:", data.metrics);
-  return data;
-};
-
+// Keep legacy functions for backwards compatibility but mark as deprecated
 export const transcribeVideo = async (downloadResponse: VideoDownloadResponse): Promise<TranscriptionResponse> => {
+  console.warn("⚠️ [DEPRECATED] transcribeVideo is deprecated. Use processAndAddVideo instead.");
   console.log("🔍 [ADD_VIDEO] Checking download response for transcription:", !!downloadResponse.transcription);
   console.log("🔍 [ADD_VIDEO] Transcription status:", downloadResponse.metadata.transcriptionStatus);
   console.log("🔍 [ADD_VIDEO] Download response keys:", Object.keys(downloadResponse));
@@ -149,6 +203,8 @@ export const transcribeVideo = async (downloadResponse: VideoDownloadResponse): 
 };
 
 export const extractVideoThumbnail = async (downloadResponse: VideoDownloadResponse): Promise<string> => {
+  console.warn("⚠️ [DEPRECATED] extractVideoThumbnail is deprecated. Thumbnails are handled automatically in processAndAddVideo.");
+  
   console.log("🖼️ [ADD_VIDEO] Extracting thumbnail - checking for real thumbnail URL...");
   console.log("🖼️ [ADD_VIDEO] Thumbnail URL from API:", downloadResponse.thumbnailUrl ? "✅ Found" : "❌ Not found");
 
@@ -242,39 +298,13 @@ export const extractVideoThumbnail = async (downloadResponse: VideoDownloadRespo
 };
 
 const generatePlaceholderThumbnail = (platform: string): string => {
-  // Create a simple canvas-based placeholder thumbnail
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
-
-  canvas.width = 360;
-  canvas.height = 640; // 9:16 aspect ratio
-
-  if (ctx) {
-    // Create gradient background
-    const gradient = ctx.createLinearGradient(0, 0, 360, 640);
-    if (platform === "instagram") {
-      gradient.addColorStop(0, "#833AB4");
-      gradient.addColorStop(0.5, "#FD1D1D");
-      gradient.addColorStop(1, "#FCB045");
-    } else {
-      gradient.addColorStop(0, "#000000");
-      gradient.addColorStop(1, "#FF0050");
-    }
-
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, 360, 640);
-
-    // Add platform icon/text
-    ctx.fillStyle = "white";
-    ctx.font = "bold 24px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText("📹", 180, 300);
-    ctx.font = "16px Arial";
-    ctx.fillText(platform.toUpperCase(), 180, 340);
-    ctx.fillText("Video", 180, 360);
-  }
-
-  return canvas.toDataURL("image/jpeg", 0.8);
+  const placeholders = {
+    tiktok: '/images/tiktok-placeholder.jpg',
+    instagram: '/images/instagram-placeholder.jpg',
+    youtube: '/images/youtube-placeholder.jpg'
+  };
+  
+  return placeholders[platform as keyof typeof placeholders] || '/images/video-placeholder.jpg';
 };
 
 const calculateEngagementRate = (metrics: VideoDownloadResponse["metrics"]): number => {
@@ -297,59 +327,38 @@ const getVideoAuthor = (
   return downloadResponse.additionalMetadata.author || transcriptionResponse.contentMetadata.author || "Unknown";
 };
 
+// Legacy createVideoObject function - deprecated in favor of processAndAddVideo
 export const createVideoObject = (
   downloadResponse: VideoDownloadResponse,
   transcriptionResponse: TranscriptionResponse,
   thumbnailUrl: string,
   originalUrl: string,
 ): Record<string, unknown> => {
-  console.log("📦 [ADD_VIDEO] Creating video object with:");
-  console.log("  - Download response platform:", downloadResponse.platform);
-  console.log("  - Transcription success:", transcriptionResponse.success);
-  console.log("  - Thumbnail URL length:", thumbnailUrl.length);
-  console.log("  - Original URL:", originalUrl);
-
-  const engagementRate = calculateEngagementRate(downloadResponse.metrics);
-
-  const videoObject: Record<string, unknown> = {
-    url: getVideoUrl(downloadResponse, originalUrl),
+  console.warn("⚠️ [DEPRECATED] createVideoObject is deprecated. Video objects are created automatically in processAndAddVideo.");
+  
+  return {
+    url: originalUrl,
+    title: transcriptionResponse.contentMetadata.description.substring(0, 100) || "Untitled Video",
+    iframe: downloadResponse.cdnUrl || '',
     platform: downloadResponse.platform,
-    thumbnailUrl: thumbnailUrl,
-    title: getVideoTitle(transcriptionResponse),
-    author: getVideoAuthor(downloadResponse, transcriptionResponse),
+    author: downloadResponse.additionalMetadata.author,
+    thumbnail: thumbnailUrl,
     transcript: transcriptionResponse.transcript,
-    components: transcriptionResponse.components,
-    contentMetadata: transcriptionResponse.contentMetadata,
-    visualContext: transcriptionResponse.visualContext,
-    insights: {
-      likes: downloadResponse.metrics.likes,
-      comments: downloadResponse.metrics.comments,
-      shares: downloadResponse.metrics.shares,
-      views: downloadResponse.metrics.views,
-      saves: downloadResponse.metrics.saves,
-      engagementRate,
-    },
-    addedAt: new Date().toISOString(),
-    fileSize: downloadResponse.videoData?.size ?? 0,
-    duration: downloadResponse.additionalMetadata.duration,
-    hostedOnCDN: downloadResponse.hostedOnCDN,
-    originalUrl: originalUrl,
+    addedAt: new Date().toISOString()
   };
-
-  // If not hosted on CDN, include video data for direct playback
-  if (!downloadResponse.hostedOnCDN && downloadResponse.videoData) {
-    videoObject.videoData = downloadResponse.videoData;
-  }
-
-  return videoObject;
 };
 
 export const validateUrl = (url: string): boolean => {
-  const urlPattern = /^https?:\/\/.+/;
-  if (!urlPattern.test(url)) return false;
-
-  const supportedPlatforms = ["tiktok.com", "instagram.com"];
-  return supportedPlatforms.some((platform) => url.toLowerCase().includes(platform));
+  try {
+    const urlObj = new URL(url);
+    const domain = urlObj.hostname.toLowerCase();
+    
+    return domain.includes('tiktok.com') || 
+           domain.includes('instagram.com') || 
+           domain.includes('youtube.com');
+  } catch {
+    return false;
+  }
 };
 
 export type { VideoDownloadResponse, TranscriptionResponse };
