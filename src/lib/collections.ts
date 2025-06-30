@@ -71,6 +71,12 @@ export interface Collection {
   updatedAt: string;
 }
 
+// Character limits for collections
+export const COLLECTION_LIMITS = {
+  MAX_TITLE_LENGTH: 80,
+  MAX_DESCRIPTION_LENGTH: 500,
+} as const;
+
 export class CollectionsService {
   private static readonly COLLECTIONS_PATH = "collections";
   private static readonly VIDEOS_PATH = "videos";

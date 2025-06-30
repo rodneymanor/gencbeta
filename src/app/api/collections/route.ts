@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { FirebaseFirestore } from "firebase-admin";
+
+import { COLLECTION_LIMITS } from "@/lib/collections";
 import { CollectionsRBACAdminService } from "@/lib/collections-rbac-admin";
 import { getAdminDb, isAdminInitialized } from "@/lib/firebase-admin";
 import { UserManagementAdminService } from "@/lib/user-management-admin";
@@ -17,7 +20,7 @@ function getUserIdFromRequest(request: NextRequest): string | null {
   return searchParams.get("userId") ?? request.headers.get("x-user-id");
 }
 
-async function validateCreateCollectionRequest(body: any) {
+async function validateCreateCollectionRequest(body: { title?: string; description?: string; userId?: string }) {
   const { title, description = "", userId } = body;
 
   if (!title || !userId) {
@@ -30,13 +33,37 @@ async function validateCreateCollectionRequest(body: any) {
     };
   }
 
+  // Character limit validation using shared constants
+  if (title.trim().length > COLLECTION_LIMITS.MAX_TITLE_LENGTH) {
+    return {
+      isValid: false,
+      error: {
+        error: "Title too long",
+        message: `Collection title must be ${COLLECTION_LIMITS.MAX_TITLE_LENGTH} characters or less`,
+      },
+    };
+  }
+
+  if (description.trim().length > COLLECTION_LIMITS.MAX_DESCRIPTION_LENGTH) {
+    return {
+      isValid: false,
+      error: {
+        error: "Description too long",
+        message: `Collection description must be ${COLLECTION_LIMITS.MAX_DESCRIPTION_LENGTH} characters or less`,
+      },
+    };
+  }
+
   return {
     isValid: true,
     data: { title: title.trim(), description: description.trim(), userId },
   };
 }
 
-async function createCollectionInFirestore(adminDb: any, collectionData: any) {
+async function createCollectionInFirestore(
+  adminDb: FirebaseFirestore.Firestore,
+  collectionData: Record<string, unknown>,
+) {
   const docRef = await adminDb.collection("collections").add(collectionData);
   return docRef;
 }
