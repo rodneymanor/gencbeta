@@ -43,12 +43,12 @@ const logImageThumbnail = (thumbnailUrl: string, platform: string) => {
 };
 
 const logHttpThumbnail = (thumbnailUrl: string, platform: string) => {
-  console.log("🎬 [VideoThumbnail] HTTP thumbnail URL:", {
-    platform,
-    type: "HTTP URL",
-    url: thumbnailUrl,
-    isRealThumbnail: true,
-  });
+  console.log("🎬 [VideoThumbnail] HTTP thumbnail URL:");
+  console.log("  Platform:", platform);
+  console.log("  Type: HTTP URL");
+  console.log("  URL:", thumbnailUrl);
+  console.log("  URL type:", typeof thumbnailUrl);
+  console.log("  URL length:", thumbnailUrl?.length || 0);
 };
 
 const logUnknownThumbnail = (thumbnailUrl: string, platform: string) => {

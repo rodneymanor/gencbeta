@@ -43,13 +43,14 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     const hostedOnCDN = url.includes("iframe.mediadelivery.net");
     
     // Debug: Log the full URL to verify completeness
-    console.log("🎥 [VideoEmbed] Full URL check:", {
-      url: url,
-      fullUrl: url, // Show complete URL without truncation
-      isComplete: url.length > 50,
-      hostedOnCDN,
-      urlLength: url.length,
-    });
+    console.log("🎥 [VideoEmbed] Full URL check:");
+    console.log("  URL:", url);
+    console.log("  URL type:", typeof url);
+    console.log("  URL length:", url?.length || 0);
+    console.log("  Is hosted on CDN:", hostedOnCDN);
+    console.log("  Platform:", platform);
+    console.log("  Thumbnail URL:", thumbnailUrl);
+    console.log("  Thumbnail type:", typeof thumbnailUrl);
     
     // CRITICAL: Simple click handler - no complex async operations
     const handlePlay = useCallback(() => {
