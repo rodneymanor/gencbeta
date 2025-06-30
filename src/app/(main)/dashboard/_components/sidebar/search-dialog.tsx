@@ -28,13 +28,6 @@ const defaultActions = [
     icon: Wand2,
   },
   {
-    id: "create-note",
-    title: "Create Note",
-    description: "Capture a new idea or note",
-    url: "/ideas/notes",
-    icon: StickyNote,
-  },
-  {
     id: "new-recording",
     title: "New Recording",
     description: "Record voice notes or ideas",

@@ -85,6 +85,7 @@ export const sidebarItems: NavGroup[] = [
             title: "Notes",
             url: "/ideas/notes",
             icon: Pen,
+            comingSoon: true,
           },
         ],
       },
