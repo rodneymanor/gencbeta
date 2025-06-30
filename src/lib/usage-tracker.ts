@@ -1,4 +1,5 @@
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+
 import { db } from "@/lib/firebase";
 
 export interface UsageRecord {
@@ -42,13 +43,28 @@ export class UsageTracker {
   }): Promise<void> {
     try {
       const usageRecord: Omit<UsageRecord, "timestamp"> = {
-        ...data,
+        userId: data.userId,
         service: "gemini",
+        operation: data.operation,
+        promptType: data.promptType,
+        tokensUsed: data.tokensUsed,
+        responseTime: data.responseTime,
+        success: data.success,
         timestamp: serverTimestamp(),
       };
 
+      // Only include error field if it's not undefined
+      if (data.error !== undefined) {
+        usageRecord.error = data.error;
+      }
+
+      // Only include metadata field if it's not undefined
+      if (data.metadata !== undefined) {
+        usageRecord.metadata = data.metadata;
+      }
+
       await addDoc(collection(db, "usage_tracking"), usageRecord);
-      
+
       console.log(`📊 [Usage] Tracked Gemini usage for user ${data.userId}: ${data.tokensUsed} tokens`);
     } catch (error) {
       console.error("❌ [Usage] Failed to track usage:", error);
@@ -91,7 +107,7 @@ export async function trackApiUsage(
     success: boolean;
     error?: string;
   },
-  metadata?: UsageRecord["metadata"]
+  metadata?: UsageRecord["metadata"],
 ): Promise<void> {
   await UsageTracker.trackGeminiUsage({
     userId,
@@ -116,4 +132,4 @@ export class UsageAnalytics {
     // TODO: Implement system-wide usage analytics
     return [];
   }
-} 
+}
