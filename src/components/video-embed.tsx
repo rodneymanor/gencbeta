@@ -19,6 +19,28 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     const { currentlyPlayingId } = useVideoPlaybackData();
     const { setCurrentlyPlaying } = useVideoPlaybackAPI();
 
+    const videoId = url;
+
+    // Handle video play - moved before early return
+    const handlePlay = useCallback(() => {
+      if (!isPlaying && videoId) {
+        console.log("🎬 [VideoEmbed] Starting Bunny video:", videoId.substring(0, 50) + "...");
+        setIsLoading(true);
+        setIsPlaying(true);
+        void setCurrentlyPlaying(videoId);
+        setTimeout(() => setIsLoading(false), 500);
+      }
+    }, [isPlaying, videoId, setCurrentlyPlaying]);
+
+    // Auto-pause when another video plays - moved before early return
+    useEffect(() => {
+      if (currentlyPlayingId !== videoId && isPlaying) {
+        console.log("⏸️ [VideoEmbed] Pausing Bunny video");
+        setIsPlaying(false);
+        setIsLoading(false);
+      }
+    }, [currentlyPlayingId, videoId, isPlaying]);
+
     // CRITICAL: Only allow Bunny.net iframe URLs - REJECT EVERYTHING ELSE
     const isBunnyUrl = url && (
       url.includes('iframe.mediadelivery.net') || 
@@ -38,32 +60,10 @@ export const VideoEmbed = memo<VideoEmbedProps>(
       );
     }
 
-    const videoId = url;
-
     // Create iframe src
     const iframeSrc = isPlaying 
       ? `${url}${url.includes("?") ? "&" : "?"}autoplay=true`
       : url;
-
-    // Handle video play
-    const handlePlay = useCallback(() => {
-      if (!isPlaying && videoId) {
-        console.log("🎬 [VideoEmbed] Starting Bunny video:", videoId.substring(0, 50) + "...");
-        setIsLoading(true);
-        setIsPlaying(true);
-        void setCurrentlyPlaying(videoId);
-        setTimeout(() => setIsLoading(false), 500);
-      }
-    }, [isPlaying, videoId, setCurrentlyPlaying]);
-
-    // Auto-pause when another video plays
-    useEffect(() => {
-      if (currentlyPlayingId !== videoId && isPlaying) {
-        console.log("⏸️ [VideoEmbed] Pausing Bunny video");
-        setIsPlaying(false);
-        setIsLoading(false);
-      }
-    }, [currentlyPlayingId, videoId, isPlaying]);
 
     return (
       <div className={`group relative w-full overflow-hidden rounded-lg bg-black ${className}`}>

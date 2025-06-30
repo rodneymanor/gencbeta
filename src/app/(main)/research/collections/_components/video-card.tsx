@@ -20,6 +20,21 @@ import { VideoEmbed } from "@/components/video-embed";
 
 import type { VideoWithPlayer } from "./collections-helpers";
 
+// Legacy video type for backward compatibility
+type LegacyVideo = VideoWithPlayer & {
+  url?: string; // Legacy field that might contain Bunny.net URLs
+};
+
+// Helper function to get the correct video URL
+const getVideoUrl = (video: LegacyVideo): string => {
+  return (
+    video.iframeUrl || 
+    (video.url?.includes('iframe.mediadelivery.net') ? video.url : '') ||
+    video.originalUrl || 
+    ''
+  );
+};
+
 interface VideoCardProps {
   video: VideoWithPlayer;
   isManageMode: boolean;
@@ -77,6 +92,104 @@ const VideoActionsDropdown = ({ onDelete }: { onDelete: () => void }) => (
   </DropdownMenu>
 );
 
+// Helper Components
+const ManagementModeSelection = ({ 
+  isManageMode, 
+  isSelected, 
+  onToggleSelection, 
+  videoTitle 
+}: {
+  isManageMode: boolean;
+  isSelected: boolean;
+  onToggleSelection: () => void;
+  videoTitle: string;
+}) => {
+  if (!isManageMode) return null;
+  
+  return (
+    <div className="absolute top-3 left-3 z-20">
+      <Checkbox
+        checked={isSelected}
+        onCheckedChange={onToggleSelection}
+        className="bg-background/90 border-2 shadow-sm backdrop-blur-sm"
+        aria-label={`Select ${videoTitle}`}
+      />
+    </div>
+  );
+};
+
+const PlatformBadge = ({ platform }: { platform: string }) => (
+  <div className="absolute top-3 right-3 z-10">
+    <Badge
+      variant="secondary"
+      className="bg-background/90 text-foreground border-border/60 text-xs font-medium shadow-sm backdrop-blur-sm"
+    >
+      {platform}
+    </Badge>
+  </div>
+);
+
+const DurationBadge = ({ duration }: { duration?: number }) => {
+  if (!duration) return null;
+  
+  return (
+    <div className="absolute right-3 bottom-3 z-10">
+      <Badge
+        variant="secondary"
+        className="bg-background/90 text-foreground border-border/60 flex items-center gap-1 text-xs font-medium shadow-sm backdrop-blur-sm"
+      >
+        <Clock className="h-3 w-3" />
+        {Math.round(duration)}s
+      </Badge>
+    </div>
+  );
+};
+
+const HoverActions = ({ 
+  showActions, 
+  onDelete 
+}: { 
+  showActions: boolean; 
+  onDelete: () => void; 
+}) => {
+  if (!showActions) return null;
+  
+  return (
+    <div className="absolute top-3 right-3 z-15 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+      <VideoActionsDropdown onDelete={onDelete} />
+    </div>
+  );
+};
+
+const ActionButtons = ({
+  onShowInsights,
+  onShowRepurpose,
+}: {
+  onShowInsights: () => void;
+  onShowRepurpose: () => void;
+}) => (
+  <div className="flex gap-1.5 p-2">
+    <Button
+      variant="outline"
+      size="sm"
+      className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 h-8 flex-1 text-xs shadow-xs transition-all duration-200 hover:shadow-sm"
+      onClick={onShowInsights}
+    >
+      <TrendingUp className="mr-1.5 h-3.5 w-3.5" />
+      Insights
+    </Button>
+    <Button
+      variant="outline"
+      size="sm"
+      className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 h-8 flex-1 text-xs shadow-xs transition-all duration-200 hover:shadow-sm"
+      onClick={onShowRepurpose}
+    >
+      <Zap className="mr-1.5 h-3.5 w-3.5" />
+      Repurpose
+    </Button>
+  </div>
+);
+
 export const VideoCard = memo<VideoCardProps>(
   ({ video, isManageMode, isSelected, isDeleting, onToggleSelection, onDelete, className = "" }) => {
     const [isHovered, setIsHovered] = useState(false);
@@ -97,81 +210,35 @@ export const VideoCard = memo<VideoCardProps>(
           onMouseLeave={() => setIsHovered(false)}
         >
           {/* Management Mode Selection */}
-          {isManageMode && (
-            <div className="absolute top-3 left-3 z-20">
-              <Checkbox
-                checked={isSelected}
-                onCheckedChange={onToggleSelection}
-                className="bg-background/90 border-2 shadow-sm backdrop-blur-sm"
-                aria-label={`Select ${video.title}`}
-              />
-            </div>
-          )}
+          <ManagementModeSelection
+            isManageMode={isManageMode}
+            isSelected={isSelected}
+            onToggleSelection={onToggleSelection}
+            videoTitle={video.title}
+          />
 
           {/* Video Content */}
           <div className="bg-muted/30 relative aspect-[9/16] overflow-hidden">
             <VideoEmbed
-              url={
-                video.iframeUrl || 
-                (video as any).url?.includes('iframe.mediadelivery.net') ? (video as any).url : 
-                video.originalUrl || 
-                ''
-              }
+              url={getVideoUrl(video as LegacyVideo)}
               className="absolute inset-0 h-full w-full"
             />
 
             {/* Platform Badge */}
-            <div className="absolute top-3 right-3 z-10">
-              <Badge
-                variant="secondary"
-                className="bg-background/90 text-foreground border-border/60 text-xs font-medium shadow-sm backdrop-blur-sm"
-              >
-                {video.platform}
-              </Badge>
-            </div>
+            <PlatformBadge platform={video.platform} />
 
             {/* Duration Badge */}
-            {video.duration && (
-              <div className="absolute right-3 bottom-3 z-10">
-                <Badge
-                  variant="secondary"
-                  className="bg-background/90 text-foreground border-border/60 flex items-center gap-1 text-xs font-medium shadow-sm backdrop-blur-sm"
-                >
-                  <Clock className="h-3 w-3" />
-                  {Math.round(video.duration)}s
-                </Badge>
-              </div>
-            )}
+            <DurationBadge duration={video.duration} />
 
             {/* Hover Actions */}
-            {showActions && (
-              <div className="absolute top-3 right-3 z-15 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                <VideoActionsDropdown onDelete={onDelete} />
-              </div>
-            )}
+            <HoverActions showActions={showActions} onDelete={onDelete} />
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-1.5 p-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 h-8 flex-1 text-xs shadow-xs transition-all duration-200 hover:shadow-sm"
-              onClick={() => setShowInsightsModal(true)}
-            >
-              <TrendingUp className="mr-1.5 h-3.5 w-3.5" />
-              Insights
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 h-8 flex-1 text-xs shadow-xs transition-all duration-200 hover:shadow-sm"
-              onClick={() => setShowRepurposeModal(true)}
-            >
-              <Zap className="mr-1.5 h-3.5 w-3.5" />
-              Repurpose
-            </Button>
-          </div>
+          <ActionButtons
+            onShowInsights={() => setShowInsightsModal(true)}
+            onShowRepurpose={() => setShowRepurposeModal(true)}
+          />
         </Card>
 
         {/* Coming Soon Modals */}

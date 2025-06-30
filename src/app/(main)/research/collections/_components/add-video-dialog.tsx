@@ -53,11 +53,13 @@ export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded
       setUrl("");
       setTitle("");
       
-      // Auto-close after 2 seconds and refresh collections
+      // IMMEDIATE refresh - no delay for better UX
+      onVideoAdded?.();
+      
+      // Auto-close dialog after showing success message
       setTimeout(() => {
         setIsOpen(false);
         setSuccess(null);
-        onVideoAdded?.();
       }, 2000);
       
     } else {
