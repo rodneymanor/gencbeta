@@ -21,14 +21,20 @@ interface VideoEmbedProps {
   className?: string;
 }
 
-// SIMPLIFIED: Single iframe src creation function
+// FIXED: Proper Bunny.net iframe.mediadelivery.net URL handling
 const createVideoSrc = (url: string, shouldAutoplay: boolean = false) => {
   if (!url.includes("iframe.mediadelivery.net")) return url;
-
-  const separator = url.includes("?") ? "&" : "?";
-  const params = shouldAutoplay ? "autoplay=1&muted=0&controls=1" : "autoplay=0&muted=1&controls=0&preload=metadata";
-
-  return `${url}${separator}${params}`;
+  
+  // For Bunny.net iframe.mediadelivery.net, use minimal parameters
+  // Bunny.net iframe service has different parameter requirements
+  if (shouldAutoplay) {
+    // For autoplay, just add autoplay=true (Bunny.net handles the rest)
+    const separator = url.includes("?") ? "&" : "?";
+    return `${url}${separator}autoplay=true`;
+  } else {
+    // No parameters needed for non-autoplay iframe
+    return url;
+  }
 };
 
 // OPTIMIZED: Simplified Video Embed Component
@@ -37,24 +43,36 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     const [isPlaying, setIsPlaying] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [hasError, setHasError] = useState(false);
-
+    
     const { currentlyPlayingId } = useVideoPlaybackData();
     const { setCurrentlyPlaying } = useVideoPlaybackAPI();
-
+    
     const videoId = url;
     const hostedOnCDN = url.includes("iframe.mediadelivery.net");
     const isCurrentlyPlaying = currentlyPlayingId === videoId;
-
+    
+    // Debug: Log the full URL to verify completeness
+    console.log("🎥 [VideoEmbed] Full URL check:", {
+      url: url,
+      fullUrl: url, // Show complete URL without truncation
+      isComplete: url.length > 50,
+      hostedOnCDN,
+      urlLength: url.length,
+    });
+    
     // CRITICAL: Simple click handler - no complex async operations
     const handlePlay = useCallback(() => {
-      console.log("🎬 [VideoEmbed] Starting playback:", url.substring(0, 50) + "...");
-
+      console.log("🎬 [VideoEmbed] Starting playback:");
+      console.log("   Complete URL:", url); // Show full URL
+      console.log("   URL length:", url.length);
+      console.log("   Expected length:", "https://iframe.mediadelivery.net/embed/459811/".length + 36); // Base + UUID
+      
       setIsLoading(true);
       setIsPlaying(true);
-
+      
       // Set as currently playing (this will pause others)
       void setCurrentlyPlaying(videoId);
-
+      
       // Quick loading timeout
       setTimeout(() => setIsLoading(false), 800);
     }, [url, videoId, setCurrentlyPlaying]);
@@ -88,9 +106,13 @@ export const VideoEmbed = memo<VideoEmbedProps>(
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
-              onLoad={() => setIsLoading(false)}
-              onError={() => {
-                console.error("❌ [VideoEmbed] Iframe failed to load");
+              onLoad={() => {
+                console.log("✅ [VideoEmbed] Iframe loaded successfully");
+                setIsLoading(false);
+              }}
+              onError={(e) => {
+                console.error("❌ [VideoEmbed] Iframe failed to load:", e);
+                console.error("❌ [VideoEmbed] Failed URL:", createVideoSrc(url, true));
                 setHasError(true);
                 setIsLoading(false);
               }}
@@ -120,10 +142,22 @@ export const VideoEmbed = memo<VideoEmbedProps>(
           </div>
         )}
 
-        {/* Error state */}
+        {/* Error state with debugging info */}
         {hasError && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/75">
-            <p className="text-sm text-white">Failed to load video</p>
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/75 p-4">
+            <p className="text-sm text-white mb-2">Failed to load video</p>
+            <p className="text-xs text-gray-400 text-center break-all">
+              URL: {url.substring(0, 60)}...
+            </p>
+            <button 
+              onClick={() => {
+                setHasError(false);
+                setIsPlaying(false);
+              }}
+              className="mt-2 px-3 py-1 bg-white/20 text-white text-xs rounded hover:bg-white/30"
+            >
+              Try Again
+            </button>
           </div>
         )}
       </div>

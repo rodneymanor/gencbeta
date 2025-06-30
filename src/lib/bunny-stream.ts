@@ -257,6 +257,12 @@ export async function streamToBunnyFromUrl(
     }
 
     console.log("📝 [BUNNY_STREAM] Created video object with GUID:", videoGuid);
+    console.log("🔍 [BUNNY_STREAM] GUID details:", {
+      guid: videoGuid,
+      guidLength: videoGuid.length,
+      expectedLength: 36, // Standard UUID length
+      isComplete: videoGuid.length === 36,
+    });
 
     // Stream video directly from source to Bunny CDN
     const success = await streamVideoToBunny(videoUrl, videoGuid);
@@ -267,7 +273,14 @@ export async function streamToBunnyFromUrl(
 
     const iframeUrl = `https://iframe.mediadelivery.net/embed/${process.env.BUNNY_STREAM_LIBRARY_ID}/${videoGuid}`;
     console.log("✅ [BUNNY_STREAM] Direct stream completed successfully");
-    console.log("🎯 [BUNNY_STREAM] Iframe URL:", iframeUrl);
+    console.log("🎯 [BUNNY_STREAM] Complete Iframe URL:", iframeUrl);
+    console.log("🔍 [BUNNY_STREAM] URL validation:", {
+      fullUrl: iframeUrl,
+      urlLength: iframeUrl.length,
+      libraryId: process.env.BUNNY_STREAM_LIBRARY_ID,
+      guid: videoGuid,
+      expectedFormat: `https://iframe.mediadelivery.net/embed/${process.env.BUNNY_STREAM_LIBRARY_ID}/${videoGuid}`,
+    });
 
     return iframeUrl;
   } catch (error) {
@@ -278,6 +291,9 @@ export async function streamToBunnyFromUrl(
 
 async function createBunnyVideoObject(filename: string): Promise<string | null> {
   try {
+    console.log("📝 [BUNNY_STREAM] Creating video object for filename:", filename);
+    console.log("🔍 [BUNNY_STREAM] Using library ID:", process.env.BUNNY_STREAM_LIBRARY_ID);
+    
     const response = await fetch(`https://video.bunnycdn.com/library/${process.env.BUNNY_STREAM_LIBRARY_ID}/videos`, {
       method: "POST",
       headers: {
@@ -291,10 +307,16 @@ async function createBunnyVideoObject(filename: string): Promise<string | null> 
 
     if (!response.ok) {
       console.error("❌ [BUNNY_STREAM] Failed to create video object:", response.status);
+      const errorText = await response.text();
+      console.error("❌ [BUNNY_STREAM] Error response:", errorText);
       return null;
     }
 
     const data = await response.json();
+    console.log("✅ [BUNNY_STREAM] Video object created successfully");
+    console.log("🔍 [BUNNY_STREAM] Response data:", data);
+    console.log("🔍 [BUNNY_STREAM] Generated GUID:", data.guid);
+    
     return data.guid;
   } catch (error) {
     console.error("❌ [BUNNY_STREAM] Create video object error:", error);
