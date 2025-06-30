@@ -20,11 +20,11 @@ import {
   getPageDescription,
   createVideoSelectionHandlers,
 } from "./_components/collections-helpers";
+import { CreateCollectionDialog } from "./_components/create-collection-dialog";
+import { CreateCreatorDialog } from "./_components/create-creator-dialog";
 import { LoadingSkeleton } from "./_components/loading-skeleton";
 import { ManageModeHeader } from "./_components/manage-mode-header";
 import { VideoGrid } from "./_components/video-grid";
-import { CreateCollectionDialog } from "./_components/create-collection-dialog";
-import { CreateCreatorDialog } from "./_components/create-creator-dialog";
 
 // Simplified cache for better performance
 interface SimpleCache {
@@ -317,6 +317,9 @@ function CollectionsPageContent() {
     await loadData();
   }, [loadData]);
 
+  // Alias for collection creation callback
+  const handleDataRefresh = handleVideoAdded;
+
   const handleCollectionDeleted = useCallback(async () => {
     if (!user) return;
 
@@ -411,16 +414,16 @@ function CollectionsPageContent() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-6">
+    <div className="container mx-auto space-y-6 px-4 py-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Video Collections</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
+          <p className="mt-2 text-gray-600 dark:text-gray-400">
             Organize and analyze your video content across platforms
           </p>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <CreateCollectionDialog onCollectionCreated={handleDataRefresh} />
           <CreateCreatorDialog />
@@ -428,9 +431,9 @@ function CollectionsPageContent() {
       </div>
 
       {/* Processing Notification */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
         <div className="flex items-center gap-2">
-          <div className="h-2 w-2 bg-blue-500 rounded-full animate-pulse"></div>
+          <div className="h-2 w-2 animate-pulse rounded-full bg-blue-500"></div>
           <span className="text-sm text-blue-800">
             New videos are processed in the background (30-60 seconds). They will appear automatically once ready.
           </span>
