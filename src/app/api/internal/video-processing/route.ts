@@ -7,10 +7,10 @@ import { getAdminAuth } from "@/lib/firebase-admin";
 import { RateLimitService } from "@/lib/rate-limiting";
 import { VideoCollectionService, type VideoProcessingData } from "@/lib/video-collection-service";
 import { VideoProcessingQueue } from "@/lib/video-processing-queue";
-import type {
-  VideoProcessingResponse,
-  ProcessingStatusResponse,
+import {
   VIDEO_PROCESSING_ERRORS,
+  type VideoProcessingResponse,
+  type ProcessingStatusResponse,
 } from "@/types/video-processing";
 
 // Helper functions for cleaner code organization

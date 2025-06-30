@@ -37,7 +37,7 @@ export class VideoProcessingQueue {
       userId,
       collectionId,
       videoUrl,
-      title,
+      title: title ?? `Video - ${new Date().toLocaleDateString()}`,
       status: 'queued',
       priority,
       attempts: 0,

@@ -1,7 +1,7 @@
 // Production-ready video collection service
 
 import { getAdminDb, isAdminInitialized } from "./firebase-admin";
-import { CollectionsService, type Video } from "./collections";
+import type { Video } from "./collections";
 
 export interface VideoCollectionResult {
   success: boolean;
@@ -48,7 +48,7 @@ export interface VideoProcessingData {
 
 export class VideoCollectionService {
   /**
-   * Add a video to collection with comprehensive error handling and fallback
+   * Add a video to collection using guaranteed fallback processing
    */
   static async addVideoToCollection(
     userId: string,
@@ -56,9 +56,7 @@ export class VideoCollectionService {
     videoData: VideoProcessingData,
   ): Promise<VideoCollectionResult> {
     try {
-      console.log(`🎬 [VIDEO_COLLECTION] Adding video to collection: ${collectionId}`);
-
-      // Validate inputs
+      // Validate input data
       const validation = this.validateVideoData(videoData);
       if (!validation.isValid) {
         return {
@@ -68,22 +66,18 @@ export class VideoCollectionService {
         };
       }
 
-      // Try advanced processing first
+      // Try advanced processing first, then fallback to basic
       try {
-        const result = await this.addVideoWithAdvancedProcessing(userId, collectionId, videoData);
-        if (result.success) {
-          return result;
-        }
+        const advancedResult = await this.addVideoWithAdvancedProcessing(userId, collectionId, videoData);
+        return advancedResult;
       } catch (advancedError) {
-        console.warn(`⚠️ [VIDEO_COLLECTION] Advanced processing failed, falling back to basic: ${advancedError}`);
+        console.warn("🔄 [VIDEO_COLLECTION] Advanced processing failed, falling back to basic:", advancedError);
+        const fallbackResult = await this.addVideoWithBasicProcessing(userId, collectionId, videoData);
+        return {
+          ...fallbackResult,
+          fallbackUsed: true,
+        };
       }
-
-      // Fallback to basic processing
-      const fallbackResult = await this.addVideoWithBasicProcessing(userId, collectionId, videoData);
-      return {
-        ...fallbackResult,
-        fallbackUsed: true,
-      };
     } catch (error) {
       console.error("❌ [VIDEO_COLLECTION] Unexpected error:", error);
       return {
@@ -95,7 +89,7 @@ export class VideoCollectionService {
   }
 
   /**
-   * Advanced processing with full video analysis
+   * Advanced processing with full video analysis (when available)
    */
   private static async addVideoWithAdvancedProcessing(
     userId: string,
@@ -109,7 +103,73 @@ export class VideoCollectionService {
     }
 
     // Create comprehensive video object
-    const video: Omit<Video, "id"> = {
+    const video = this.createAdvancedVideoObject(userId, collectionId, videoData);
+
+    // Use admin SDK directly to bypass security rules
+    const videoRef = adminDb.collection("videos").doc();
+    await videoRef.set(video);
+    const videoId = videoRef.id;
+
+    // Update collection video count
+    await this.updateCollectionCount(adminDb, collectionId, userId, 1);
+
+    return {
+      success: true,
+      videoId,
+      message: "Video added successfully with advanced processing",
+    };
+  }
+
+  /**
+   * Basic processing as fallback
+   */
+  private static async addVideoWithBasicProcessing(
+    userId: string,
+    collectionId: string,
+    videoData: VideoProcessingData,
+  ): Promise<VideoCollectionResult> {
+    try {
+      const adminDb = getAdminDb();
+
+      if (!isAdminInitialized || !adminDb) {
+        throw new Error("Firebase Admin SDK not configured");
+      }
+
+      // Create minimal video object
+      const video = this.createBasicVideoObject(userId, collectionId, videoData);
+
+      // Use admin SDK directly to bypass security rules
+      const videoRef = adminDb.collection("videos").doc();
+      await videoRef.set(video);
+      const videoId = videoRef.id;
+
+      // Update collection video count
+      await this.updateCollectionCount(adminDb, collectionId, userId, 1);
+
+      return {
+        success: true,
+        videoId,
+        message: "Video added successfully with basic processing",
+      };
+    } catch (error) {
+      console.error("❌ [VIDEO_COLLECTION] Basic processing failed:", error);
+      return {
+        success: false,
+        message: "Failed to add video with basic processing",
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  }
+
+  /**
+   * Create advanced video object with full metadata
+   */
+  private static createAdvancedVideoObject(
+    userId: string,
+    collectionId: string,
+    videoData: VideoProcessingData,
+  ): Omit<Video, "id"> {
+    return {
       url: videoData.url,
       title: videoData.title ?? this.generateTitleFromUrl(videoData.url),
       platform: videoData.platform,
@@ -141,73 +201,70 @@ export class VideoCollectionService {
         difficulty: "beginner",
       },
     };
+  }
 
-    const videoId = await CollectionsService.addVideoToCollection(userId, collectionId, video);
-
+  /**
+   * Create basic video object with minimal metadata
+   */
+  private static createBasicVideoObject(
+    userId: string,
+    collectionId: string,
+    videoData: VideoProcessingData,
+  ): Omit<Video, "id"> {
     return {
-      success: true,
-      videoId,
-      message: "Video added successfully with advanced processing",
+      url: videoData.url,
+      title: videoData.title ?? this.generateTitleFromUrl(videoData.url),
+      platform: videoData.platform,
+      thumbnailUrl: videoData.thumbnailUrl ?? this.getDefaultThumbnail(videoData.platform),
+      author: videoData.author ?? "Unknown Creator",
+      transcript: videoData.transcript ?? "Transcript not available",
+      visualContext: "Basic video import",
+      fileSize: 0,
+      duration: videoData.duration ?? 0,
+      userId,
+      collectionId,
+      addedAt: new Date().toISOString(),
+      components: {
+        hook: "Auto-generated hook",
+        bridge: "Auto-generated bridge",
+        nugget: "Auto-generated nugget",
+        wta: "Auto-generated CTA",
+      },
+      contentMetadata: {
+        hashtags: this.extractHashtagsFromTitle(videoData.title ?? ""),
+        mentions: [],
+        description: videoData.title ?? "Imported video",
+      },
+      insights: {
+        engagementRate: 0,
+        contentType: this.inferContentType(videoData.platform),
+        keyTopics: [],
+        sentiment: "neutral",
+        difficulty: "beginner",
+      },
     };
   }
 
   /**
-   * Basic processing as fallback
+   * Update collection video count using admin SDK
    */
-  private static async addVideoWithBasicProcessing(
-    userId: string,
+  private static async updateCollectionCount(
+    adminDb: FirebaseFirestore.Firestore,
     collectionId: string,
-    videoData: VideoProcessingData,
-  ): Promise<VideoCollectionResult> {
-    try {
-      // Create minimal video object that works with the existing schema
-      const video: Omit<Video, "id"> = {
-        url: videoData.url,
-        title: videoData.title ?? this.generateTitleFromUrl(videoData.url),
-        platform: videoData.platform,
-        thumbnailUrl: videoData.thumbnailUrl ?? this.getDefaultThumbnail(videoData.platform),
-        author: videoData.author ?? "Unknown Creator",
-        transcript: videoData.transcript ?? "Transcript not available",
-        visualContext: "Basic video import",
-        fileSize: 0,
-        duration: videoData.duration ?? 0,
-        userId,
-        collectionId,
-        addedAt: new Date().toISOString(),
-        components: {
-          hook: "Auto-generated hook",
-          bridge: "Auto-generated bridge",
-          nugget: "Auto-generated nugget",
-          wta: "Auto-generated CTA",
-        },
-        contentMetadata: {
-          hashtags: this.extractHashtagsFromTitle(videoData.title ?? ""),
-          mentions: [],
-          description: videoData.title ?? "Imported video",
-        },
-        insights: {
-          engagementRate: 0,
-          contentType: this.inferContentType(videoData.platform),
-          keyTopics: [],
-          sentiment: "neutral",
-          difficulty: "beginner",
-        },
-      };
+    userId: string,
+    increment: number,
+  ): Promise<void> {
+    if (collectionId !== "all-videos") {
+      const collectionRef = adminDb.collection("collections").doc(collectionId);
+      const collectionDoc = await collectionRef.get();
 
-      const videoId = await CollectionsService.addVideoToCollection(userId, collectionId, video);
-
-      return {
-        success: true,
-        videoId,
-        message: "Video added successfully with basic processing",
-      };
-    } catch (error) {
-      console.error("❌ [VIDEO_COLLECTION] Basic processing failed:", error);
-      return {
-        success: false,
-        message: "Failed to add video with basic processing",
-        error: error instanceof Error ? error.message : "Unknown error",
-      };
+      if (collectionDoc.exists && collectionDoc.data()?.userId === userId) {
+        const currentCount = collectionDoc.data()?.videoCount ?? 0;
+        await collectionRef.update({
+          videoCount: Math.max(0, currentCount + increment),
+          updatedAt: new Date().toISOString(),
+        });
+      }
     }
   }
 
