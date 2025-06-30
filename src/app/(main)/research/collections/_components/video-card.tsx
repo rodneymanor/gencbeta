@@ -2,7 +2,7 @@
 
 import { useState, memo } from "react";
 
-import { MoreVertical, Trash2, ExternalLink, Clock, TrendingUp, Zap } from "lucide-react";
+import { MoreVertical, Trash2, ExternalLink, Clock, TrendingUp, Zap, RefreshCw } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,7 +31,7 @@ const getVideoUrl = (video: LegacyVideo): string => {
     id: video.id,
     iframeUrl: video.iframeUrl,
     url: video.url,
-    originalUrl: video.originalUrl
+    originalUrl: video.originalUrl,
   });
 
   // Priority order: iframeUrl -> legacy url (if Bunny) -> originalUrl -> empty
@@ -39,19 +39,19 @@ const getVideoUrl = (video: LegacyVideo): string => {
     console.log("✅ [VideoCard] Using iframeUrl:", video.iframeUrl);
     return video.iframeUrl;
   }
-  
-  if (video.url && video.url.includes('iframe.mediadelivery.net')) {
+
+  if (video.url && video.url.includes("iframe.mediadelivery.net")) {
     console.log("✅ [VideoCard] Using legacy Bunny URL:", video.url);
     return video.url;
   }
-  
+
   if (video.originalUrl) {
     console.log("⚠️ [VideoCard] Falling back to originalUrl (will be rejected):", video.originalUrl);
     return video.originalUrl;
   }
-  
+
   console.log("❌ [VideoCard] No valid URL found - returning empty string");
-  return '';
+  return "";
 };
 
 interface VideoCardProps {
@@ -59,8 +59,10 @@ interface VideoCardProps {
   isManageMode: boolean;
   isSelected: boolean;
   isDeleting: boolean;
+  isReprocessing?: boolean;
   onToggleSelection: () => void;
   onDelete: () => void;
+  onReprocess?: (video: VideoWithPlayer) => void;
   className?: string;
 }
 
@@ -112,11 +114,11 @@ const VideoActionsDropdown = ({ onDelete }: { onDelete: () => void }) => (
 );
 
 // Helper Components
-const ManagementModeSelection = ({ 
-  isManageMode, 
-  isSelected, 
-  onToggleSelection, 
-  videoTitle 
+const ManagementModeSelection = ({
+  isManageMode,
+  isSelected,
+  onToggleSelection,
+  videoTitle,
 }: {
   isManageMode: boolean;
   isSelected: boolean;
@@ -124,7 +126,7 @@ const ManagementModeSelection = ({
   videoTitle: string;
 }) => {
   if (!isManageMode) return null;
-  
+
   return (
     <div className="absolute top-3 left-3 z-20">
       <Checkbox
@@ -133,6 +135,40 @@ const ManagementModeSelection = ({
         className="bg-background/90 border-2 shadow-sm backdrop-blur-sm"
         aria-label={`Select ${videoTitle}`}
       />
+    </div>
+  );
+};
+
+// Reprocess Video Component for Legacy Videos
+const ReprocessVideoOverlay = ({
+  video,
+  onReprocess,
+  isReprocessing = false,
+}: {
+  video: LegacyVideo;
+  onReprocess: (video: LegacyVideo) => void;
+  isReprocessing?: boolean;
+}) => {
+  // Only show for videos missing iframeUrl
+  if (video.iframeUrl) return null;
+
+  return (
+    <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className="space-y-3 p-4 text-center">
+        <div className="text-sm font-medium text-white/90">{isReprocessing ? "Processing..." : "Legacy Video"}</div>
+        <div className="mx-auto max-w-[200px] text-xs text-white/70">
+          {isReprocessing ? "Converting video for playback..." : "This video needs reprocessing to enable playback"}
+        </div>
+        <Button
+          size="sm"
+          onClick={() => onReprocess(video)}
+          disabled={isReprocessing}
+          className="shadow-sm transition-all duration-200 hover:shadow-md"
+        >
+          <RefreshCw className={`mr-1.5 h-3.5 w-3.5 ${isReprocessing ? "animate-spin" : ""}`} />
+          {isReprocessing ? "Processing..." : "Reprocess Video"}
+        </Button>
+      </div>
     </div>
   );
 };
@@ -150,7 +186,7 @@ const PlatformBadge = ({ platform }: { platform: string }) => (
 
 const DurationBadge = ({ duration }: { duration?: number }) => {
   if (!duration) return null;
-  
+
   return (
     <div className="absolute right-3 bottom-3 z-10">
       <Badge
@@ -164,15 +200,9 @@ const DurationBadge = ({ duration }: { duration?: number }) => {
   );
 };
 
-const HoverActions = ({ 
-  showActions, 
-  onDelete 
-}: { 
-  showActions: boolean; 
-  onDelete: () => void; 
-}) => {
+const HoverActions = ({ showActions, onDelete }: { showActions: boolean; onDelete: () => void }) => {
   if (!showActions) return null;
-  
+
   return (
     <div className="absolute top-3 right-3 z-15 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
       <VideoActionsDropdown onDelete={onDelete} />
@@ -210,7 +240,17 @@ const ActionButtons = ({
 );
 
 export const VideoCard = memo<VideoCardProps>(
-  ({ video, isManageMode, isSelected, isDeleting, onToggleSelection, onDelete, className = "" }) => {
+  ({
+    video,
+    isManageMode,
+    isSelected,
+    isDeleting,
+    isReprocessing,
+    onToggleSelection,
+    onDelete,
+    onReprocess,
+    className = "",
+  }) => {
     const [isHovered, setIsHovered] = useState(false);
     const [showInsightsModal, setShowInsightsModal] = useState(false);
     const [showRepurposeModal, setShowRepurposeModal] = useState(false);
@@ -238,10 +278,16 @@ export const VideoCard = memo<VideoCardProps>(
 
           {/* Video Content */}
           <div className="bg-muted/30 relative aspect-[9/16] overflow-hidden">
-            <VideoEmbed
-              url={getVideoUrl(video as LegacyVideo)}
-              className="absolute inset-0 h-full w-full"
-            />
+            <VideoEmbed url={getVideoUrl(video as LegacyVideo)} className="absolute inset-0 h-full w-full" />
+
+            {/* Reprocess Video Overlay for Legacy Videos */}
+            {onReprocess && (
+              <ReprocessVideoOverlay
+                video={video as LegacyVideo}
+                onReprocess={onReprocess}
+                isReprocessing={isReprocessing}
+              />
+            )}
 
             {/* Platform Badge */}
             <PlatformBadge platform={video.platform} />
@@ -279,7 +325,8 @@ export const VideoCard = memo<VideoCardProps>(
       prevProps.video.id === nextProps.video.id &&
       prevProps.isManageMode === nextProps.isManageMode &&
       prevProps.isSelected === nextProps.isSelected &&
-      prevProps.isDeleting === nextProps.isDeleting
+      prevProps.isDeleting === nextProps.isDeleting &&
+      prevProps.isReprocessing === nextProps.isReprocessing
     );
   },
 );

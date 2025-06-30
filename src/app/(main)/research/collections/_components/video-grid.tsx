@@ -1,6 +1,7 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useState } from "react";
+
 import { Plus } from "lucide-react";
 
 import type { Collection } from "@/lib/collections";
@@ -8,6 +9,7 @@ import type { Collection } from "@/lib/collections";
 import { AddVideoDialog } from "./add-video-dialog";
 import type { VideoWithPlayer } from "./collections-helpers";
 import { VideosLoadingSkeleton } from "./loading-skeleton";
+import { processAndAddVideo } from "./simple-video-processing";
 import { VideoCard } from "./video-card";
 
 interface VideoGridProps {
@@ -38,6 +40,41 @@ export const VideoGrid = memo<VideoGridProps>(
     onDeleteVideo,
     onVideoAdded,
   }) => {
+    const [reprocessingVideos, setReprocessingVideos] = useState<Set<string>>(new Set());
+
+    const handleReprocessVideo = async (video: VideoWithPlayer) => {
+      if (!video.url || !video.collectionId) {
+        console.error("❌ [REPROCESS] Missing required fields:", { url: video.url, collectionId: video.collectionId });
+        return;
+      }
+
+      setReprocessingVideos((prev) => new Set(prev).add(video.id!));
+
+      try {
+        console.log("🔄 [REPROCESS] Starting reprocess for video:", video.id);
+
+        const result = await processAndAddVideo(video.url, video.collectionId, video.title);
+
+        if (result.success) {
+          console.log("✅ [REPROCESS] Video reprocessed successfully:", result);
+          // Refresh the video list to show updated data
+          onVideoAdded();
+        } else {
+          console.error("❌ [REPROCESS] Failed:", result.error);
+          // TODO: Show error toast to user
+        }
+      } catch (error) {
+        console.error("❌ [REPROCESS] Error:", error);
+        // TODO: Show error toast to user
+      } finally {
+        setReprocessingVideos((prev) => {
+          const next = new Set(prev);
+          next.delete(video.id!);
+          return next;
+        });
+      }
+    };
+
     // Show loading state
     if (loadingVideos || isPending) {
       return <VideosLoadingSkeleton />;
@@ -46,12 +83,12 @@ export const VideoGrid = memo<VideoGridProps>(
     // Empty state with improved styling
     if (videos.length === 0) {
       return (
-        <div className="flex flex-col items-center justify-center py-16 px-6">
-          <div className="w-16 h-16 bg-secondary/60 rounded-full flex items-center justify-center mb-6 shadow-sm">
-            <Plus className="h-8 w-8 text-muted-foreground" />
+        <div className="flex flex-col items-center justify-center px-6 py-16">
+          <div className="bg-secondary/60 mb-6 flex h-16 w-16 items-center justify-center rounded-full shadow-sm">
+            <Plus className="text-muted-foreground h-8 w-8" />
           </div>
-          <h3 className="text-xl font-semibold text-foreground mb-3">No videos yet</h3>
-          <p className="text-muted-foreground text-center max-w-md mb-8 leading-relaxed">
+          <h3 className="text-foreground mb-3 text-xl font-semibold">No videos yet</h3>
+          <p className="text-muted-foreground mb-8 max-w-md text-center leading-relaxed">
             {selectedCollectionId
               ? "This collection is empty. Add your first video to get started."
               : "Start building your video library by adding videos from TikTok or Instagram."}
@@ -61,7 +98,7 @@ export const VideoGrid = memo<VideoGridProps>(
             selectedCollectionId={selectedCollectionId ?? undefined}
             onVideoAdded={onVideoAdded}
           >
-            <button className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-md font-medium shadow-sm hover:shadow-md hover:bg-primary/90 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+            <button className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring inline-flex items-center gap-2 rounded-md px-6 py-3 font-medium shadow-sm transition-all duration-200 hover:shadow-md focus-visible:ring-2 focus-visible:ring-offset-2">
               <Plus className="h-4 w-4" />
               Add Your First Video
             </button>
@@ -80,9 +117,11 @@ export const VideoGrid = memo<VideoGridProps>(
             isManageMode={manageMode}
             isSelected={selectedVideos.has(video.id!)}
             isDeleting={deletingVideos.has(video.id!)}
+            isReprocessing={reprocessingVideos.has(video.id!)}
             onToggleSelection={() => onToggleVideoSelection(video.id!)}
             onDelete={() => onDeleteVideo(video.id!)}
-            className="shadow-sm hover:shadow-md transition-all duration-200 border-border/60 hover:border-border/80"
+            onReprocess={handleReprocessVideo}
+            className="border-border/60 hover:border-border/80 shadow-sm transition-all duration-200 hover:shadow-md"
           />
         ))}
       </div>
@@ -96,7 +135,9 @@ export const VideoGrid = memo<VideoGridProps>(
       prevProps.isPending === nextProps.isPending &&
       prevProps.manageMode === nextProps.manageMode &&
       prevProps.selectedVideos.size === nextProps.selectedVideos.size &&
-      prevProps.deletingVideos.size === nextProps.deletingVideos.size
+      prevProps.deletingVideos.size === nextProps.deletingVideos.size &&
+      // Video IDs comparison for proper reprocessing state
+      prevProps.videos.every((video, index) => video.id === nextProps.videos[index]?.id)
     );
   },
 );
