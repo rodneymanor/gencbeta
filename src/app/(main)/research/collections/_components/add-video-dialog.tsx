@@ -47,20 +47,22 @@ export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded
       const platform = result.platform ?? detectPlatform(url);
       const collection = collections.find(c => c.id === collectionId);
       
-      setSuccess(`${platform.toUpperCase()} video processing started! It will appear in "${collection?.title}" once fully processed (30-60 seconds).`);
+      setSuccess(`${platform.toUpperCase()} video added to "${collection?.title}"! ${result.message ?? ''}`);
       
       // Clear form
       setUrl("");
       setTitle("");
       
-      // IMMEDIATE refresh - video won't show yet but collection will update
-      onVideoAdded?.();
+      // Add delay before refresh
+      setTimeout(() => {
+        onVideoAdded?.();
+      }, 15000);
       
       // Auto-close dialog after showing success message
       setTimeout(() => {
         setIsOpen(false);
         setSuccess(null);
-      }, 3000); // Longer delay to read processing message
+      }, 2000);
       
     } else {
       console.error("❌ [ADD_VIDEO] Processing failed:", result);
@@ -129,9 +131,8 @@ export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded
         <DialogHeader>
           <DialogTitle>Add Video to Collection</DialogTitle>
           <DialogDescription>
-            Add a TikTok or Instagram video to your collection. The video will be downloaded, 
-            streamed to CDN, and transcribed automatically. Processing takes 30-60 seconds, 
-            after which the video will appear in your collection.
+            Add a TikTok or Instagram video to your collection. The video will be automatically downloaded, 
+            streamed to our CDN, and transcribed for analysis.
           </DialogDescription>
         </DialogHeader>
 
@@ -202,7 +203,7 @@ export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded
             <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
               <Loader2 className="h-4 w-4 text-blue-600 animate-spin" />
               <span className="text-sm text-blue-800">
-                Processing video... Download, CDN streaming, and transcription in progress. Video will appear in collection once fully processed.
+                Processing video... This may take a few moments for download, streaming, and transcription.
               </span>
             </div>
           )}

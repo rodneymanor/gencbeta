@@ -9,18 +9,10 @@ export class CollectionsRBACService {
   private static readonly COLLECTIONS_PATH = "collections";
   private static readonly VIDEOS_PATH = "videos";
 
-  private static checkFirebaseConnection() {
-    if (!db) {
-      throw new Error("Firebase not properly configured. Please check your environment variables.");
-    }
-  }
-
   /**
    * Get all collections for a user (role-based)
    */
   static async getUserCollections(userId: string): Promise<Collection[]> {
-    this.checkFirebaseConnection();
-
     try {
       // Check if user is super admin first
       const userProfile = await UserManagementService.getUserProfile(userId);
@@ -28,7 +20,7 @@ export class CollectionsRBACService {
         console.log("🔍 [RBAC] Super admin loading all collections");
 
         // For super admin, get all collections
-        const q = query(collection(db!, this.COLLECTIONS_PATH), orderBy("updatedAt", "desc"));
+        const q = query(collection(db, this.COLLECTIONS_PATH), orderBy("updatedAt", "desc"));
 
         const querySnapshot = await getDocs(q);
         const collections = querySnapshot.docs.map((doc) => ({
@@ -49,7 +41,7 @@ export class CollectionsRBACService {
       }
 
       const q = query(
-        collection(db!, this.COLLECTIONS_PATH),
+        collection(db, this.COLLECTIONS_PATH),
         where("userId", "in", accessibleCoaches),
         orderBy("updatedAt", "desc"),
       );
@@ -71,8 +63,6 @@ export class CollectionsRBACService {
    * Get videos from a collection or all videos (role-based)
    */
   static async getCollectionVideos(userId: string, collectionId?: string): Promise<Video[]> {
-    this.checkFirebaseConnection();
-
     try {
       console.log("🔍 [RBAC] User ID:", userId);
 
@@ -97,12 +87,7 @@ export class CollectionsRBACService {
     let q;
     if (!collectionId || collectionId === "all-videos") {
       console.log("🔍 [RBAC] Super admin loading all videos");
-      q = query(
-        collection(db!, this.VIDEOS_PATH),
-        // TODO: Re-enable when Firestore index is created
-        // where("processingStatus", "==", "ready"),
-        orderBy("addedAt", "desc"),
-      );
+      q = query(collection(db, this.VIDEOS_PATH), orderBy("addedAt", "desc"));
     } else {
       try {
         q = await this.getSuperAdminCollectionQuery(userId, collectionId);
@@ -138,11 +123,9 @@ export class CollectionsRBACService {
     }
 
     return query(
-      collection(db!, this.VIDEOS_PATH),
+      collection(db, this.VIDEOS_PATH),
       where("collectionId", "==", collectionId),
       where("userId", "==", targetCollection.userId),
-      // TODO: Re-enable when Firestore index is created
-      // where("processingStatus", "==", "ready"),
       orderBy("addedAt", "desc"),
     );
   }
@@ -179,10 +162,8 @@ export class CollectionsRBACService {
   ) {
     if (!collectionId || collectionId === "all-videos") {
       return query(
-        collection(db!, this.VIDEOS_PATH),
+        collection(db, this.VIDEOS_PATH),
         where("userId", "in", accessibleCoaches),
-        // TODO: Re-enable when Firestore index is created
-        // where("processingStatus", "==", "ready"),
         orderBy("addedAt", "desc"),
       );
     }
@@ -195,11 +176,9 @@ export class CollectionsRBACService {
     }
 
     return query(
-      collection(db!, this.VIDEOS_PATH),
+      collection(db, this.VIDEOS_PATH),
       where("collectionId", "==", collectionId),
       where("userId", "in", accessibleCoaches),
-      // TODO: Re-enable when Firestore index is created
-      // where("processingStatus", "==", "ready"),
       orderBy("addedAt", "desc"),
     );
   }

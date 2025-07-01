@@ -7,17 +7,16 @@ import { CollectionsRBACAdminService } from "@/lib/collections-rbac-admin";
 import { getAdminDb, isAdminInitialized } from "@/lib/firebase-admin";
 import { UserManagementAdminService } from "@/lib/user-management-admin";
 
-// Simple API key authentication
-const API_KEY = process.env.VIDEO_API_KEY ?? "your-secret-api-key";
-
-function validateApiKey(request: NextRequest) {
-  const apiKey = request.headers.get("x-api-key");
-  return apiKey === API_KEY;
-}
-
 function getUserIdFromRequest(request: NextRequest): string | null {
+  // User ID is now set by middleware after API key validation
+  const userIdFromHeader = request.headers.get("x-user-id");
+  if (userIdFromHeader) {
+    return userIdFromHeader;
+  }
+
+  // Fallback to query parameter for backward compatibility
   const { searchParams } = new URL(request.url);
-  return searchParams.get("userId") ?? request.headers.get("x-user-id");
+  return searchParams.get("userId");
 }
 
 async function validateCreateCollectionRequest(body: { title?: string; description?: string; userId?: string }) {
@@ -70,21 +69,21 @@ async function createCollectionInFirestore(
 
 export async function GET(request: NextRequest) {
   try {
-    // Check API key authentication
-    if (!validateApiKey(request)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    // Authentication is handled by middleware
+    console.log("📚 [Collections API] GET request received");
 
     const userId = getUserIdFromRequest(request);
     if (!userId) {
       return NextResponse.json(
         {
           error: "User ID is required",
-          message: "Provide userId as query parameter or x-user-id header",
+          message: "User ID should be provided by authenticated API key",
         },
         { status: 400 },
       );
     }
+
+    console.log("🔍 [Collections API] Fetching collections for user:", userId);
 
     // Check if Admin SDK is initialized
     if (!isAdminInitialized) {
@@ -111,6 +110,8 @@ export async function GET(request: NextRequest) {
       updatedAt: collection.updatedAt,
     }));
 
+    console.log("✅ [Collections API] Successfully fetched", formattedCollections.length, "collections");
+
     return NextResponse.json({
       success: true,
       user: {
@@ -124,7 +125,7 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error("Error fetching collections:", error);
+    console.error("❌ [Collections API] Error fetching collections:", error);
     return NextResponse.json(
       {
         error: "Internal server error",
@@ -137,13 +138,24 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Check API key authentication
-    if (!validateApiKey(request)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    // Authentication is handled by middleware
+    console.log("📚 [Collections API] POST request received");
 
     // Parse and validate request body
     const body = await request.json();
+    
+    // Get authenticated user ID from middleware
+    const authenticatedUserId = request.headers.get("x-user-id");
+    if (!authenticatedUserId) {
+      return NextResponse.json(
+        { error: "Authentication required", message: "User ID not found in authenticated request" },
+        { status: 401 }
+      );
+    }
+
+    // Override body userId with authenticated user to prevent privilege escalation
+    body.userId = authenticatedUserId;
+    
     const validation = await validateCreateCollectionRequest(body);
 
     if (!validation.isValid) {
@@ -152,13 +164,15 @@ export async function POST(request: NextRequest) {
 
     const { title, description, userId } = validation.data!;
 
+    console.log("🆕 [Collections API] Creating collection:", title, "for user:", userId);
+
     // Check if Admin SDK is initialized
     const adminDb = getAdminDb();
     if (!isAdminInitialized || !adminDb) {
       return NextResponse.json({ error: "Firebase Admin SDK not configured" }, { status: 500 });
     }
 
-    // Create collection data (skip user validation for API use)
+    // Create collection data
     const collectionData = {
       title,
       description,
@@ -170,6 +184,8 @@ export async function POST(request: NextRequest) {
 
     // Add collection to Firestore using Admin SDK
     const docRef = await createCollectionInFirestore(adminDb, collectionData);
+
+    console.log("✅ [Collections API] Collection created successfully:", docRef.id);
 
     // Return success response
     return NextResponse.json(
@@ -189,7 +205,7 @@ export async function POST(request: NextRequest) {
       { status: 201 },
     );
   } catch (error) {
-    console.error("Error creating collection:", error);
+    console.error("❌ [Collections API] Error creating collection:", error);
     return NextResponse.json(
       {
         error: "Internal server error",

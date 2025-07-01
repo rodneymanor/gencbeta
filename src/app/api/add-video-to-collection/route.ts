@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getAdminDb, isAdminInitialized } from "@/lib/firebase-admin";
 
-// Simple API key authentication
-const API_KEY = process.env.VIDEO_API_KEY ?? "your-secret-api-key";
+import { CollectionsRBACAdminService } from "@/lib/collections-rbac-admin";
+import { UserManagementAdminService } from "@/lib/user-management-admin";
 
 interface VideoDownloadResponse {
   success: boolean;
@@ -66,9 +66,59 @@ interface TranscriptionResponse {
   };
 }
 
-function validateApiKey(request: NextRequest) {
-  const apiKey = request.headers.get("x-api-key");
-  return apiKey === API_KEY;
+/**
+ * Check if user has permission to add videos to the specified collection
+ */
+async function checkCollectionAccess(userId: string, collectionId: string): Promise<{ hasAccess: boolean; collection?: any; error?: string }> {
+  try {
+    console.log("🔍 [Collection Access] Checking access for user:", userId, "collection:", collectionId);
+
+    // Get user's accessible collections via RBAC service
+    const userCollections = await CollectionsRBACAdminService.getUserCollections(userId);
+    const targetCollection = userCollections.find(c => c.id === collectionId);
+
+    if (!targetCollection) {
+      console.log("❌ [Collection Access] Collection not found or access denied");
+      return { 
+        hasAccess: false, 
+        error: "Collection not found or you don't have permission to access it" 
+      };
+    }
+
+    // Additional check: users can only add videos to collections they own
+    // Coaches can add to their own collections, creators can add to their own collections
+    // Super admins can add to any collection they can see
+    const userProfile = await UserManagementAdminService.getUserProfile(userId);
+    
+    if (!userProfile) {
+      return { hasAccess: false, error: "User profile not found" };
+    }
+
+    // Super admin can add to any accessible collection
+    if (userProfile.role === "super_admin") {
+      console.log("✅ [Collection Access] Super admin access granted");
+      return { hasAccess: true, collection: targetCollection };
+    }
+
+    // Regular users can only add to collections they own
+    if (targetCollection.userId !== userId) {
+      console.log("❌ [Collection Access] User can only add videos to their own collections");
+      return { 
+        hasAccess: false, 
+        error: "You can only add videos to collections you own" 
+      };
+    }
+
+    console.log("✅ [Collection Access] Access granted for collection owner");
+    return { hasAccess: true, collection: targetCollection };
+
+  } catch (error) {
+    console.error("❌ [Collection Access] Error checking collection access:", error);
+    return { 
+      hasAccess: false, 
+      error: "Failed to verify collection access" 
+    };
+  }
 }
 
 function getBaseUrl(request: NextRequest): string {
