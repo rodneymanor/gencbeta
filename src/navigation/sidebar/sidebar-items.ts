@@ -12,6 +12,7 @@ import {
   Bot,
   Wrench,
   Sparkles,
+  Chrome,
   type LucideIcon,
 } from "lucide-react";
 
@@ -119,6 +120,17 @@ export const sidebarItems: NavGroup[] = [
   },
   {
     id: 4,
+    label: "Tools",
+    items: [
+      {
+        title: "Chrome Extension",
+        url: "/dashboard/tools/chrome-extension",
+        icon: Chrome,
+      },
+    ],
+  },
+  {
+    id: 5,
     label: "Team",
     items: [
       {
@@ -129,7 +141,7 @@ export const sidebarItems: NavGroup[] = [
     ],
   },
   {
-    id: 5,
+    id: 6,
     label: "Administration",
     items: [
       {
@@ -140,7 +152,7 @@ export const sidebarItems: NavGroup[] = [
     ],
   },
   {
-    id: 6,
+    id: 7,
     label: "Settings",
     items: [
       {
