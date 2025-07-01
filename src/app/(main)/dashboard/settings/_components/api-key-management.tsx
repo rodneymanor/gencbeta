@@ -191,7 +191,16 @@ export function ApiKeyManagement({ user, apiKeyData, onRefresh }: ApiKeyManageme
       }
 
       const data: GenerateKeyResponse = await response.json();
+
+      // Debug: Log the full response to see what we received
+      console.log("🔍 [Debug] Full API response:", data);
+      console.log("🔍 [Debug] API Key from response:", data.apiKey);
+      console.log("🔍 [Debug] API Key length:", data.apiKey?.length);
+      console.log("🔍 [Debug] API Key starts with:", data.apiKey?.substring(0, 20) + "...");
+
       setNewApiKey(data.apiKey);
+      console.log("🔍 [Debug] Set newApiKey state to:", data.apiKey);
+
       toast.success("API key generated successfully!");
       onRefresh();
     } catch (error) {
