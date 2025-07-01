@@ -46,57 +46,101 @@ export const generateUniqueId = (): string => {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 };
 
-// Video processing utilities
+// Helper function for CDN transcription
+const transcribeFromCDN = async (cdnUrl: string, platform: string) => {
+  const transcribeResponse = await fetch("/api/transcribe-video", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      videoUrl: cdnUrl,
+      platform: platform,
+    }),
+  });
+
+  if (!transcribeResponse.ok) {
+    const errorData = await transcribeResponse.json();
+    throw new Error(errorData.error ?? "Failed to transcribe video");
+  }
+
+  const transcribeData = await transcribeResponse.json();
+  console.log("✅ [VIDEO_PROCESS] Transcription completed from CDN");
+
+  return transcribeData.transcript;
+};
+
+// Helper function for fallback transcription
+const transcribeFromBuffer = async (videoData: { buffer: ArrayBuffer; mimeType: string; filename?: string }) => {
+  console.log("📁 [VIDEO_PROCESS] Using fallback transcription method...");
+
+  const uint8Array = new Uint8Array(videoData.buffer);
+  const blob = new Blob([uint8Array], { type: videoData.mimeType });
+  const file = new File([blob], videoData.filename ?? "video.mp4", {
+    type: videoData.mimeType,
+  });
+
+  // Check file size before sending
+  const maxSize = 20 * 1024 * 1024; // 20MB limit
+  if (file.size > maxSize) {
+    throw new Error(`Video file is too large (${Math.round(file.size / 1024 / 1024)}MB). Maximum size is 20MB.`);
+  }
+
+  const formData = new FormData();
+  formData.append("video", file);
+
+  const transcribeResponse = await fetch("/api/video/transcribe", {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!transcribeResponse.ok) {
+    const errorData = await transcribeResponse.json();
+    throw new Error(errorData.error ?? "Failed to transcribe video");
+  }
+
+  const transcribeData = await transcribeResponse.json();
+  console.log("✅ [VIDEO_PROCESS] Fallback transcription completed");
+
+  return transcribeData.transcript;
+};
+
+// Video processing utilities - Updated to use efficient processing pipeline
 export const processVideoUrl = async (
   videoUrl: string,
 ): Promise<{ success: boolean; transcript?: string; error?: string }> => {
   try {
-    // Step 1: Download video
-    console.log("🎬 [VIDEO_PROCESS] Starting video download...");
-    const downloadResponse = await fetch("/api/video/downloader", {
+    console.log("🎬 [VIDEO_PROCESS] Starting efficient video processing...");
+
+    // Use the efficient video processing pipeline that streams to CDN first
+    const processResponse = await fetch("/api/video/download-and-prepare", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url: videoUrl }),
     });
 
-    if (!downloadResponse.ok) {
-      const errorData = await downloadResponse.json();
-      throw new Error(errorData.error ?? "Failed to download video");
+    if (!processResponse.ok) {
+      const errorData = await processResponse.json();
+      throw new Error(errorData.error ?? "Failed to process video");
     }
 
-    const downloadData = await downloadResponse.json();
-    console.log("✅ [VIDEO_PROCESS] Video downloaded successfully");
+    const processData = await processResponse.json();
+    console.log("✅ [VIDEO_PROCESS] Video processed and prepared");
 
-    // Step 2: Transcribe video using the downloaded buffer
-    console.log("🎙️ [VIDEO_PROCESS] Starting transcription...");
+    // Step 2: Transcribe using the CDN URL (much more efficient)
+    console.log("🎙️ [VIDEO_PROCESS] Starting transcription from CDN...");
 
-    // Convert video buffer to File for transcription
-    const uint8Array = new Uint8Array(downloadData.videoData.buffer);
-    const blob = new Blob([uint8Array], { type: downloadData.videoData.mimeType });
-    const file = new File([blob], downloadData.videoData.filename ?? "video.mp4", {
-      type: downloadData.videoData.mimeType,
-    });
+    let transcript: string;
 
-    // Send video file to transcription API
-    const formData = new FormData();
-    formData.append("video", file);
-
-    const transcribeResponse = await fetch("/api/video/transcribe", {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!transcribeResponse.ok) {
-      const errorData = await transcribeResponse.json();
-      throw new Error(errorData.error ?? "Failed to transcribe video");
+    if (processData.hostedOnCDN && processData.cdnUrl) {
+      transcript = await transcribeFromCDN(processData.cdnUrl, processData.platform);
+    } else if (processData.videoData) {
+      transcript = await transcribeFromBuffer(processData.videoData);
+    } else {
+      throw new Error("No video data available for transcription");
     }
-
-    const transcribeData = await transcribeResponse.json();
-    console.log("✅ [VIDEO_PROCESS] Transcription completed");
 
     return {
       success: true,
-      transcript: transcribeData.transcript,
+      transcript,
     };
   } catch (error) {
     console.error("❌ [VIDEO_PROCESS] Processing failed:", error);
