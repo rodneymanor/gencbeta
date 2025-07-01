@@ -1,13 +1,8 @@
 import {
   Home,
-  FileText,
-  Mic,
-  StickyNote,
-  Sparkles,
   FolderOpen,
   Settings,
   Users,
-  UserPen,
   ChartLine,
   Trophy,
   Brain,
@@ -15,6 +10,7 @@ import {
   WandSparkles,
   Binoculars,
   Bot,
+  Wrench,
   type LucideIcon,
 } from "lucide-react";
 
@@ -134,6 +130,17 @@ export const sidebarItems: NavGroup[] = [
         title: "User Management",
         url: "/dashboard/admin",
         icon: Settings,
+      },
+    ],
+  },
+  {
+    id: 6,
+    label: "Settings",
+    items: [
+      {
+        title: "Settings",
+        url: "/dashboard/settings",
+        icon: Wrench,
       },
     ],
   },

@@ -1,4 +1,5 @@
 import { createHash } from "crypto";
+
 import { getAdminDb, isAdminInitialized } from "./firebase-admin";
 import { UserManagementAdminService } from "./user-management-admin";
 
@@ -35,8 +36,11 @@ export class ApiKeyAuthService {
   /**
    * Validate API key and return user context
    */
-  static async validateApiKey(apiKey: string): Promise<{ user: AuthenticatedUser; rateLimitResult: RateLimitResult } | null> {
-    if (!apiKey || !apiKey.startsWith("genc_")) {
+  // eslint-disable-next-line complexity
+  static async validateApiKey(
+    apiKey: string,
+  ): Promise<{ user: AuthenticatedUser; rateLimitResult: RateLimitResult } | null> {
+    if (!apiKey || !apiKey.startsWith("gencbeta_")) {
       console.log("❌ [API Auth] Invalid API key format");
       return null;
     }
@@ -67,7 +71,7 @@ export class ApiKeyAuthService {
 
       const apiKeyDoc = apiKeyQuery.docs[0];
       const keyData = apiKeyDoc.data() as ApiKeyDocument;
-      
+
       // Check if key is active
       if (keyData.status !== "active") {
         console.log("❌ [API Auth] API key is disabled");
@@ -92,17 +96,17 @@ export class ApiKeyAuthService {
 
       // Check rate limiting and violations
       const rateLimitResult = await this.checkRateLimit(apiKeyDoc.ref, keyData);
-      
+
       if (!rateLimitResult.allowed) {
         console.log("🚫 [API Auth] Request blocked by rate limiting:", rateLimitResult.reason);
-        return { 
+        return {
           user: {
             uid: userProfile.uid,
             email: userProfile.email,
             role: userProfile.role,
             displayName: userProfile.displayName,
           },
-          rateLimitResult 
+          rateLimitResult,
         };
       }
 
@@ -118,9 +122,8 @@ export class ApiKeyAuthService {
           role: userProfile.role,
           displayName: userProfile.displayName,
         },
-        rateLimitResult
+        rateLimitResult,
       };
-
     } catch (error) {
       console.error("❌ [API Auth] Error validating API key:", error);
       return null;
@@ -131,8 +134,8 @@ export class ApiKeyAuthService {
    * Check rate limiting with escalating violations policy
    */
   private static async checkRateLimit(
-    apiKeyRef: FirebaseFirestore.DocumentReference, 
-    keyData: ApiKeyDocument
+    apiKeyRef: FirebaseFirestore.DocumentReference,
+    keyData: ApiKeyDocument,
   ): Promise<RateLimitResult> {
     const now = new Date();
     const oneMinuteAgo = new Date(now.getTime() - 60 * 1000);
@@ -167,7 +170,7 @@ export class ApiKeyAuthService {
     const lastUsed = keyData.lastUsed ? new Date(keyData.lastUsed) : null;
     const isNewMinute = !lastUsed || lastUsed < oneMinuteAgo;
 
-    let currentRequestCount = isNewMinute ? 1 : (keyData.requestCount || 0) + 1;
+    const currentRequestCount = isNewMinute ? 1 : (keyData.requestCount || 0) + 1;
 
     // Check if exceeding rate limit
     if (!isNewMinute && currentRequestCount > this.RATE_LIMIT_PER_MINUTE) {
@@ -216,7 +219,7 @@ export class ApiKeyAuthService {
    */
   private static async updateApiKeyUsage(
     apiKeyRef: FirebaseFirestore.DocumentReference,
-    keyData: ApiKeyDocument
+    keyData: ApiKeyDocument,
   ): Promise<void> {
     const now = new Date();
     const oneMinuteAgo = new Date(now.getTime() - 60 * 1000);
@@ -244,10 +247,10 @@ export class ApiKeyAuthService {
 
     // Check Authorization header as fallback
     const authHeader = request.headers.get("authorization");
-    if (authHeader?.startsWith("Bearer genc_")) {
+    if (authHeader?.startsWith("Bearer gencbeta_")) {
       return authHeader.substring(7);
     }
 
     return null;
   }
-} 
+}
