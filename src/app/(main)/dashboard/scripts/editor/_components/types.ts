@@ -81,41 +81,37 @@ const transcribeFromBuffer = async (videoData: { buffer: ArrayBuffer; mimeType: 
   return transcribeData.transcript;
 };
 
-// Video processing utilities - Updated to use efficient processing pipeline
+// Video processing utilities - Simplified direct approach for script workflow
 export const processVideoUrl = async (
   videoUrl: string,
 ): Promise<{ success: boolean; transcript?: string; error?: string }> => {
   try {
-    console.log("🎬 [VIDEO_PROCESS] Starting efficient video processing...");
+    console.log("🎬 [VIDEO_PROCESS] Starting direct video processing for scripts...");
 
-    // Use the efficient video processing pipeline that streams to CDN first
-    const processResponse = await fetch("/api/video/download-and-prepare", {
+    // Step 1: Download video directly (same as collections workflow)
+    console.log("📥 [VIDEO_PROCESS] Step 1: Downloading video...");
+    const downloadResponse = await fetch("/api/video/downloader", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url: videoUrl }),
     });
 
-    if (!processResponse.ok) {
-      const errorData = await processResponse.json();
-      throw new Error(errorData.error ?? "Failed to process video");
+    if (!downloadResponse.ok) {
+      const errorData = await downloadResponse.json();
+      throw new Error(errorData.error ?? "Failed to download video");
     }
 
-    const processData = await processResponse.json();
-    console.log("✅ [VIDEO_PROCESS] Video processed and prepared");
+    const downloadData = await downloadResponse.json();
+    console.log("✅ [VIDEO_PROCESS] Video downloaded successfully");
 
-    // Step 2: Transcribe using the video buffer (same as working collections workflow)
-    console.log("🎙️ [VIDEO_PROCESS] Starting transcription from video buffer...");
+    // Step 2: Transcribe using the video buffer directly
+    console.log("🎙️ [VIDEO_PROCESS] Step 2: Starting transcription...");
+    const transcript = await transcribeFromBuffer(downloadData.videoData);
 
-    if (processData.videoData) {
-      // Use buffer-based transcription (same as collections workflow)
-      const transcript = await transcribeFromBuffer(processData.videoData);
-      return {
-        success: true,
-        transcript,
-      };
-    } else {
-      throw new Error("No video data available for transcription");
-    }
+    return {
+      success: true,
+      transcript,
+    };
   } catch (error) {
     console.error("❌ [VIDEO_PROCESS] Processing failed:", error);
     return {
