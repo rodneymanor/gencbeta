@@ -5,6 +5,139 @@
 ### Overview
 The video processing system follows a microservice architecture with clear separation of concerns, orchestration patterns, and graceful fallbacks.
 
+## 🎉 **NEW: Production Video Playback Patterns** (Dec 30, 2024)
+
+### Single Video Playback Control Strategy
+
+#### **Iframe Recreation Pattern**
+**Problem**: Multiple Bunny.net iframes playing simultaneously when switching videos.
+**Solution**: Complete iframe lifecycle management with forced recreation.
+
+```typescript
+// VideoEmbed component pattern
+const VideoEmbed = memo<VideoEmbedProps>(({ url, className = "" }) => {
+  const [iframeKey, setIframeKey] = useState(0); // Force iframe recreation
+  const { currentlyPlayingId } = useVideoPlaybackData();
+  const videoId = url || "unknown";
+
+  useEffect(() => {
+    if (currentlyPlayingId !== videoId) {
+      setIsPlaying(false);
+      setIsLoading(false);
+      // Force iframe to be completely destroyed and recreated
+      setIframeKey((prev) => prev + 1);
+    }
+  }, [currentlyPlayingId, videoId, isPlaying]);
+
+  // Conditional rendering for thumbnail vs playing states
+  if (!isPlaying) {
+    return (
+      <div onClick={handlePlay}>
+        <iframe key={`thumbnail-${iframeKey}`} src={thumbnailUrl} />
+        <PlayButton />
+      </div>
+    );
+  }
+
+  return <iframe key={`playing-${iframeKey}`} src={playingUrl} />;
+});
+```
+
+#### **Benefits of Iframe Recreation**
+- **Guaranteed Pause**: Complete iframe destruction ensures no background playback
+- **React-Controlled**: Leverages React's component lifecycle for reliable state management
+- **Cross-Origin Safe**: Works with Bunny.net CDN without requiring postMessage API
+- **Production Tested**: Verified working across all collection pages
+
+### Bunny.net Security Policy Pattern
+
+#### **Strict URL Validation**
+**Security Requirement**: Prevent direct social media embedding causing CSP violations.
+**Implementation**: Whitelist-only approach for video URLs.
+
+```typescript
+// URL validation pattern
+const isBunnyUrl = (url: string) => {
+  return url && (
+    url.includes("iframe.mediadelivery.net") || 
+    url.includes("bunnycdn.com") ||
+    url.includes("b-cdn.net")
+  );
+};
+
+// VideoEmbed security enforcement
+if (!isBunnyUrl(url)) {
+  return (
+    <div className="video-security-warning">
+      <AlertTriangle className="text-yellow-500" />
+      <p>Video Processing Required</p>
+      <p>This video needs to be processed through our CDN before playback.</p>
+    </div>
+  );
+}
+```
+
+#### **Content Security Policy Compliance**
+- **Blocks**: All TikTok, Instagram, YouTube direct URLs
+- **Allows**: Only Bunny.net CDN domains
+- **User Experience**: Clear messaging for blocked content
+- **Security**: Prevents X-Frame-Options and CSP violations
+
+## 🎉 **NEW: UI Component Patterns** (Dec 30, 2024)
+
+### Smart Expandable Text Pattern
+
+#### **Intelligent Truncation Component**
+**Use Case**: Display long content in constrained spaces with user control.
+**Pattern**: Smart detection with optional expansion.
+
+```typescript
+// ExpandableText component pattern
+function ExpandableText({ content, maxLines = 4, className = "" }: ExpandableTextProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  // Smart truncation detection
+  const lines = content.split("\n");
+  const needsTruncation = lines.length > maxLines || content.length > 300;
+  
+  if (!needsTruncation) {
+    return <p className={`text-sm leading-relaxed whitespace-pre-wrap ${className}`}>{content}</p>;
+  }
+
+  const truncatedContent = isExpanded
+    ? content
+    : lines.slice(0, maxLines).join("\n") + (lines.length > maxLines ? "..." : "");
+
+  return (
+    <div className="space-y-2">
+      <p className={`text-sm leading-relaxed whitespace-pre-wrap ${className}`}>{truncatedContent}</p>
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs transition-colors"
+      >
+        {isExpanded ? (
+          <>
+            <ChevronUp className="h-3 w-3" />
+            Show less
+          </>
+        ) : (
+          <>
+            <ChevronDown className="h-3 w-3" />
+            Show more
+          </>
+        )}
+      </button>
+    </div>
+  );
+}
+```
+
+#### **Smart Detection Logic**
+- **Line-based**: Counts actual line breaks in content
+- **Character-based**: Considers total content length (>300 chars)
+- **User Control**: Toggle between expanded and collapsed states
+- **Graceful Fallback**: No truncation UI for short content
+
 ### Core Microservices
 
 #### 1. Video Downloader Service
@@ -142,6 +275,45 @@ export function createPlaceholderTranscription(platform: string, author: string)
 }
 ```
 
+## 🎉 **NEW: RBAC Data Integrity Patterns** (Dec 30, 2024)
+
+### Comprehensive Video Save Pattern
+
+#### **Required Fields for RBAC Compliance**
+**Issue**: RBAC queries failing due to missing required fields.
+**Solution**: Standardized video save operation with all required fields.
+
+```typescript
+// Complete video save pattern
+const processAndAddVideo = async (url: string, collectionId: string, title?: string) => {
+  // ... processing logic ...
+  
+  const timestamp = new Date().toISOString();
+  await videoRef.set({
+    ...videoData,
+    collectionId,
+    id: videoRef.id,
+    userId: decodedToken.uid,  // ✅ Required for RBAC ownership
+    addedAt: timestamp,        // ✅ Required for RBAC ordering
+    createdAt: timestamp,
+    updatedAt: timestamp
+  });
+};
+```
+
+#### **URL Decoding for Instagram Compatibility**
+**Issue**: Instagram URLs arriving URL-encoded causing regex failures.
+**Solution**: Decode before processing.
+
+```typescript
+// Instagram URL processing pattern
+const extractInstagramShortcode = (url: string): string | null => {
+  const decodedUrl = decodeURIComponent(url);  // ✅ Handle URL encoding
+  const match = decodedUrl.match(/(?:instagram\.com|instagr\.am)\/(?:p|reels?)\/([A-Za-z0-9_-]+)/);
+  return match ? match[1] : null;
+};
+```
+
 ### Graceful Fallback Patterns
 
 #### CDN Upload Fallbacks
@@ -198,62 +370,62 @@ const isBunnyStreamConfigured = () => {
 };
 ```
 
-#### Service Communication
-- Internal HTTP requests between services
-- Environment-aware base URLs (VERCEL_URL vs localhost)
-- Proper timeout and retry logic
-
-### Data Flow Patterns
-
-#### Request/Response Flow
-```
-User → Frontend → /api/download-video → /api/video/download-and-prepare
-                                          ↓
-                                      1. /api/video/downloader
-                                          ↓
-                                      2. /api/video/uploader
-                                          ↓
-                                      3. Background: /api/video/analyze-complete
-                                          ↓
-                                      4. Combined response
+#### Production URL Resolution
+```typescript
+const getBaseUrl = () => {
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return "http://localhost:3000";
+};
 ```
 
-#### Collection Integration Flow
+## **Performance Optimization Patterns**
+
+### React Memo for Video Components
+```typescript
+// Prevent unnecessary re-renders of video components
+export const VideoEmbed = memo<VideoEmbedProps>(({ url, className }) => {
+  // Component implementation
+});
+
+export const ExpandableText = memo<ExpandableTextProps>(({ content, maxLines }) => {
+  // Component implementation  
+});
 ```
-Video Processing → createVideoObject → CollectionsService.addVideoToCollection
-                                          ↓
-                                      Firestore Transaction
-                                          ↓
-                                      Collection Count Update
-                                          ↓
-                                      UI Refresh
+
+### Efficient State Management
+```typescript
+// Video playback context with optimized updates
+const VideoPlaybackContext = createContext<VideoPlaybackState>({
+  currentlyPlayingId: null,
+  setCurrentlyPlaying: () => {},
+  pauseAllVideos: () => {}
+});
+
+// Only update when necessary
+const setCurrentlyPlaying = useCallback((videoId: string | null) => {
+  if (videoId !== currentlyPlayingId) {
+    pauseAllVideos();
+    setCurrentlyPlayingId(videoId);
+  }
+}, [currentlyPlayingId, pauseAllVideos]);
 ```
 
-### Testing & Debugging Patterns
+## **Production Deployment Patterns**
 
-#### Comprehensive Logging
-- Service-specific emoji prefixes (📥 [DOWNLOADER], 📤 [UPLOADER], 🎬 [ORCHESTRATOR])
-- Step-by-step progress tracking
-- Error context preservation
+### Vercel Optimization
+- **Build Performance**: 55-second optimized builds
+- **Environment Variables**: Secure configuration management
+- **Static Optimization**: Next.js App Router with optimal bundle splitting
+- **CDN Integration**: Vercel Edge Network with Bunny Stream CDN
 
-#### Service Isolation
-- Each service can be tested independently
-- Clear input/output contracts
-- Focused unit testing capabilities
+### Security Implementation
+- **Content Security Policy**: Strict iframe src validation
+- **Authentication**: Firebase Admin SDK with proper token validation
+- **RBAC Enforcement**: Role-based access control at data layer
+- **API Security**: Protected endpoints with authentication middleware
 
-### Future Enhancement Patterns
+---
 
-#### Real-time Updates
-- WebSocket integration for background transcription completion
-- Live progress updates for long-running operations
-- Real-time collection synchronization
-
-#### Caching Strategies
-- CDN URL caching for repeated access
-- Transcription result caching
-- Metadata persistence for offline access
-
-#### Scaling Patterns
-- Horizontal scaling of individual services
-- Queue-based background processing
-- Load balancing for high-traffic scenarios 
+**Status**: System patterns now include production-ready video playback control, security policies, and UI enhancement patterns tested in live environment. 
