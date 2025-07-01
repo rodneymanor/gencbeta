@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { FirebaseFirestore } from "firebase-admin";
-
 import { ApiKeyAuthService } from "@/lib/api-key-auth";
 import { COLLECTION_LIMITS } from "@/lib/collections";
 import { CollectionsRBACAdminService } from "@/lib/collections-rbac-admin";
@@ -98,7 +96,7 @@ async function validateCreateCollectionRequest(body: { title?: string; descripti
 }
 
 async function createCollectionInFirestore(
-  adminDb: FirebaseFirestore.Firestore,
+  adminDb: any,
   collectionData: Record<string, unknown>,
 ) {
   const docRef = await adminDb.collection("collections").add(collectionData);

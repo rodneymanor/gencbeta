@@ -19,6 +19,10 @@ export interface TranscriptionMetadata {
   fileName?: string;
   processedAt: string;
   originalUrl?: string;
+  platform: string;
+  downloadedAt: string;
+  readyForTranscription: boolean;
+  transcriptionStatus?: "pending" | "completed" | "failed" | "processing";
 }
 
 export interface TranscriptionResponse {
