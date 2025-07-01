@@ -27,6 +27,8 @@ import {
 } from "@/components/ui/sidebar";
 import { type NavGroup, type NavMainItem } from "@/navigation/sidebar/sidebar-items";
 
+import { BrandProfileIndicator } from "./brand-profile-indicator";
+
 interface NavMainProps {
   readonly items: readonly NavGroup[];
   readonly onCollectionCreated?: () => void;
@@ -35,6 +37,31 @@ interface NavMainProps {
 const IsComingSoon = () => (
   <span className="ml-auto rounded-md bg-gray-200 px-2 py-1 text-xs dark:text-gray-800">Soon</span>
 );
+
+const renderCollapsibleTrigger = (item: NavMainItem, isActive: boolean, isBrandItem: boolean) => {
+  if (item.subItems) {
+    return (
+      <SidebarMenuButton disabled={item.comingSoon} isActive={isActive} tooltip={item.title}>
+        {item.icon && <item.icon />}
+        <span>{item.title}</span>
+        {isBrandItem && <BrandProfileIndicator />}
+        {item.comingSoon && <IsComingSoon />}
+        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+      </SidebarMenuButton>
+    );
+  }
+
+  return (
+    <SidebarMenuButton asChild aria-disabled={item.comingSoon} isActive={isActive} tooltip={item.title}>
+      <Link href={item.url} target={item.newTab ? "_blank" : undefined}>
+        {item.icon && <item.icon />}
+        <span>{item.title}</span>
+        {isBrandItem && <BrandProfileIndicator />}
+        {item.comingSoon && <IsComingSoon />}
+      </Link>
+    </SidebarMenuButton>
+  );
+};
 
 const NavItemExpanded = ({
   item,
@@ -47,35 +74,13 @@ const NavItemExpanded = ({
   isSubmenuOpen: (subItems?: NavMainItem["subItems"]) => boolean;
   onCollectionCreated?: () => void;
 }) => {
+  const isBrandItem = item.title === "My Brand";
+
   return (
     <Collapsible key={item.title} asChild defaultOpen={isSubmenuOpen(item.subItems)} className="group/collapsible">
       <SidebarMenuItem>
         <CollapsibleTrigger asChild>
-          {item.subItems ? (
-            <SidebarMenuButton
-              disabled={item.comingSoon}
-              isActive={isActive(item.url, item.subItems)}
-              tooltip={item.title}
-            >
-              {item.icon && <item.icon />}
-              <span>{item.title}</span>
-              {item.comingSoon && <IsComingSoon />}
-              <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-            </SidebarMenuButton>
-          ) : (
-            <SidebarMenuButton
-              asChild
-              aria-disabled={item.comingSoon}
-              isActive={isActive(item.url)}
-              tooltip={item.title}
-            >
-              <Link href={item.url} target={item.newTab ? "_blank" : undefined}>
-                {item.icon && <item.icon />}
-                <span>{item.title}</span>
-                {item.comingSoon && <IsComingSoon />}
-              </Link>
-            </SidebarMenuButton>
-          )}
+          {renderCollapsibleTrigger(item, isActive(item.url, item.subItems), isBrandItem)}
         </CollapsibleTrigger>
         {item.subItems && (
           <CollapsibleContent>
@@ -118,6 +123,8 @@ const NavItemCollapsed = ({
   isActive: (url: string, subItems?: NavMainItem["subItems"]) => boolean;
   onCollectionCreated?: () => void;
 }) => {
+  const isBrandItem = item.title === "My Brand";
+
   return (
     <SidebarMenuItem key={item.title}>
       {item.subItems ? (
@@ -130,6 +137,7 @@ const NavItemCollapsed = ({
             >
               {item.icon && <item.icon />}
               <span>{item.title}</span>
+              {isBrandItem && <BrandProfileIndicator />}
               <ChevronRight />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
@@ -168,6 +176,7 @@ const NavItemCollapsed = ({
           <Link href={item.url} target={item.newTab ? "_blank" : undefined}>
             {item.icon && <item.icon />}
             <span>{item.title}</span>
+            {isBrandItem && <BrandProfileIndicator />}
             {item.comingSoon && <IsComingSoon />}
           </Link>
         </SidebarMenuButton>
@@ -178,7 +187,7 @@ const NavItemCollapsed = ({
 
 export function NavMain({ items, onCollectionCreated }: NavMainProps) {
   const path = usePathname();
-  const { state, isMobile } = useSidebar();
+  const { state } = useSidebar();
 
   const isItemActive = (url: string, subItems?: NavMainItem["subItems"]) => {
     if (subItems?.length) {
@@ -218,19 +227,19 @@ export function NavMain({ items, onCollectionCreated }: NavMainProps) {
           <SidebarGroupContent className="flex flex-col gap-2">
             <SidebarMenu>
               {group.items.map((item) =>
-                state === "collapsed" && !isMobile ? (
-                  <NavItemCollapsed
-                    key={item.title}
-                    item={item}
-                    isActive={isItemActive}
-                    onCollectionCreated={onCollectionCreated}
-                  />
-                ) : (
+                state === "expanded" ? (
                   <NavItemExpanded
                     key={item.title}
                     item={item}
                     isActive={isItemActive}
                     isSubmenuOpen={isSubmenuOpen}
+                    onCollectionCreated={onCollectionCreated}
+                  />
+                ) : (
+                  <NavItemCollapsed
+                    key={item.title}
+                    item={item}
+                    isActive={isItemActive}
                     onCollectionCreated={onCollectionCreated}
                   />
                 ),
