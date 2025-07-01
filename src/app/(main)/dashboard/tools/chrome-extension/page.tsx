@@ -53,9 +53,11 @@ export default function ChromeExtensionPage() {
         
         {/* Download Button */}
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-center pt-4">
-          <Button size="lg" className="gap-2">
-            <Download className="h-5 w-5" />
-            Download Extension
+          <Button size="lg" className="gap-2" asChild>
+            <a href="https://gencdl.b-cdn.net/Gen.C%20Chrome%20Extension.zip" download>
+              <Download className="h-5 w-5" />
+              Download Extension
+            </a>
           </Button>
           <Badge variant="secondary" className="gap-1">
             <Chrome className="h-3 w-3" />
@@ -133,9 +135,15 @@ export default function ChromeExtensionPage() {
                   <div className="space-y-2">
                     <h3 className="font-semibold">Download and Extract</h3>
                     <p className="text-muted-foreground">
-                      Download the extension ZIP file and extract it to a folder on your computer. 
+                      Download the extension ZIP file from the link above and extract it to a folder on your computer. 
                       Remember this location - you'll need it for installation.
                     </p>
+                    <Button variant="outline" size="sm" className="gap-2" asChild>
+                      <a href="https://gencdl.b-cdn.net/Gen.C%20Chrome%20Extension.zip" download>
+                        <Download className="h-4 w-4" />
+                        Download ZIP File
+                      </a>
+                    </Button>
                   </div>
                 </div>
 
@@ -226,10 +234,10 @@ export default function ChromeExtensionPage() {
                     Navigate to Settings
                   </div>
                   <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground ml-6">
-                    <li>Click <strong>"Settings"</strong> in the left sidebar (gear icon ⚙️)</li>
-                    <li>Scroll down to find the <strong>"API Key Management"</strong> section</li>
-                    <li>Click <strong>"Generate API Key"</strong> if you don't have one</li>
-                    <li><strong>Copy your API key immediately</strong> - it's only shown once!</li>
+                    <li>Click <strong>&quot;Settings&quot;</strong> in the left sidebar (gear icon ⚙️)</li>
+                    <li>Scroll down to find the <strong>&quot;API Key Management&quot;</strong> section</li>
+                    <li>Click <strong>&quot;Generate API Key&quot;</strong> if you don&apos;t have one</li>
+                    <li><strong>Copy your API key immediately</strong> - it&apos;s only shown once!</li>
                   </ol>
                   
                   <Button asChild variant="outline" className="gap-2">
@@ -267,7 +275,7 @@ export default function ChromeExtensionPage() {
                     <div className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">
                       2
                     </div>
-                    <p className="text-sm">Click <strong>"Open Settings"</strong> when you see "Configuration Required"</p>
+                    <p className="text-sm">Click <strong>&quot;Open Settings&quot;</strong> when you see &quot;Configuration Required&quot;</p>
                   </div>
                   
                   <div className="flex gap-4">
