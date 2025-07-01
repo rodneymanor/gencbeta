@@ -46,31 +46,9 @@ export const generateUniqueId = (): string => {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 };
 
-// Helper function for CDN transcription
-const transcribeFromCDN = async (cdnUrl: string, platform: string) => {
-  const transcribeResponse = await fetch("/api/transcribe-video", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      videoUrl: cdnUrl,
-      platform: platform,
-    }),
-  });
-
-  if (!transcribeResponse.ok) {
-    const errorData = await transcribeResponse.json();
-    throw new Error(errorData.error ?? "Failed to transcribe video");
-  }
-
-  const transcribeData = await transcribeResponse.json();
-  console.log("✅ [VIDEO_PROCESS] Transcription completed from CDN");
-
-  return transcribeData.transcript;
-};
-
 // Helper function for fallback transcription
 const transcribeFromBuffer = async (videoData: { buffer: ArrayBuffer; mimeType: string; filename?: string }) => {
-  console.log("📁 [VIDEO_PROCESS] Using fallback transcription method...");
+  console.log("📁 [VIDEO_PROCESS] Using buffer transcription method...");
 
   const uint8Array = new Uint8Array(videoData.buffer);
   const blob = new Blob([uint8Array], { type: videoData.mimeType });
@@ -98,7 +76,7 @@ const transcribeFromBuffer = async (videoData: { buffer: ArrayBuffer; mimeType: 
   }
 
   const transcribeData = await transcribeResponse.json();
-  console.log("✅ [VIDEO_PROCESS] Fallback transcription completed");
+  console.log("✅ [VIDEO_PROCESS] Buffer transcription completed");
 
   return transcribeData.transcript;
 };
@@ -125,23 +103,19 @@ export const processVideoUrl = async (
     const processData = await processResponse.json();
     console.log("✅ [VIDEO_PROCESS] Video processed and prepared");
 
-    // Step 2: Transcribe using the CDN URL (much more efficient)
-    console.log("🎙️ [VIDEO_PROCESS] Starting transcription from CDN...");
+    // Step 2: Transcribe using the video buffer (same as working collections workflow)
+    console.log("🎙️ [VIDEO_PROCESS] Starting transcription from video buffer...");
 
-    let transcript: string;
-
-    if (processData.hostedOnCDN && processData.cdnUrl) {
-      transcript = await transcribeFromCDN(processData.cdnUrl, processData.platform);
-    } else if (processData.videoData) {
-      transcript = await transcribeFromBuffer(processData.videoData);
+    if (processData.videoData) {
+      // Use buffer-based transcription (same as collections workflow)
+      const transcript = await transcribeFromBuffer(processData.videoData);
+      return {
+        success: true,
+        transcript,
+      };
     } else {
       throw new Error("No video data available for transcription");
     }
-
-    return {
-      success: true,
-      transcript,
-    };
   } catch (error) {
     console.error("❌ [VIDEO_PROCESS] Processing failed:", error);
     return {
