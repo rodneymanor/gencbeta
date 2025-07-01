@@ -1,8 +1,13 @@
+/* eslint-disable security/detect-object-injection */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { NextRequest, NextResponse } from "next/server";
 
-import { adminAuth, adminDb } from "@/lib/firebase-admin";
+import { getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { GeminiService } from "@/lib/gemini";
 import type { BrandQuestionnaire, BrandProfileData, BrandProfile } from "@/types/brand-profile";
+
+const adminAuth = getAdminAuth();
+const adminDb = getAdminDb();
 
 const SYSTEM_PROMPT = `You are an expert brand and content strategist. Your task is to analyze a user's business profile and generate a foundational brand strategy profile in a valid JSON format. This profile will include core keywords and a set of personalized content pillar themes.
 
@@ -156,7 +161,8 @@ async function validateQuestionnaire(questionnaire: BrandQuestionnaire) {
   ];
 
   for (const field of requiredFields) {
-    if (!questionnaire[field]?.trim()) {
+    const fieldValue = questionnaire[field];
+    if (!fieldValue || typeof fieldValue !== "string" || !fieldValue.trim()) {
       throw new Error(`Missing required field: ${field}`);
     }
   }
@@ -272,7 +278,11 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
-    const existingProfile = profileDoc.data() as BrandProfile;
+    const existingProfileData = profileDoc.data();
+    if (!existingProfileData) {
+      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    }
+    const existingProfile = existingProfileData as BrandProfile;
     if (existingProfile.userId !== userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
@@ -326,7 +336,11 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
-    const existingProfile = profileDoc.data() as BrandProfile;
+    const existingProfileData = profileDoc.data();
+    if (!existingProfileData) {
+      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    }
+    const existingProfile = existingProfileData as BrandProfile;
     if (existingProfile.userId !== userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }

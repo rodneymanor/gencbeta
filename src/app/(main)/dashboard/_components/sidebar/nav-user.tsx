@@ -2,8 +2,18 @@
 
 import { useRouter } from "next/navigation";
 
-import { EllipsisVertical, CircleUser, CreditCard, MessageSquareDot, LogOut, User, Settings } from "lucide-react";
+import {
+  EllipsisVertical,
+  CircleUser,
+  CreditCard,
+  MessageSquareDot,
+  LogOut,
+  User,
+  Settings,
+  Sparkles,
+} from "lucide-react";
 
+import { BrandProfileManager } from "@/components/brand/brand-profile-manager";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,12 +55,12 @@ function SignedInTrigger({ user }: { user: UserData }) {
 function InitializingTrigger() {
   return (
     <>
-      <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg animate-pulse">
+      <div className="bg-primary/10 flex h-8 w-8 animate-pulse items-center justify-center rounded-lg">
         <CircleUser className="text-primary h-4 w-4" />
       </div>
       <div className="grid flex-1 text-left text-sm leading-tight">
-        <span className="truncate font-medium animate-pulse">Loading...</span>
-        <span className="text-muted-foreground truncate text-xs animate-pulse">Authenticating...</span>
+        <span className="animate-pulse truncate font-medium">Loading...</span>
+        <span className="text-muted-foreground animate-pulse truncate text-xs">Authenticating...</span>
       </div>
     </>
   );
@@ -101,6 +111,14 @@ function SignedInMenu({ handleLogout }: { handleLogout: () => void }) {
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
+        <BrandProfileManager
+          trigger={
+            <DropdownMenuItem>
+              <Sparkles />
+              Brand Profile
+            </DropdownMenuItem>
+          }
+        />
         <DropdownMenuItem onClick={handleSettingsClick}>
           <Settings />
           Settings
@@ -161,13 +179,7 @@ export function NavUser() {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              {initializing ? (
-                <InitializingTrigger />
-              ) : user ? (
-                <SignedInTrigger user={user} />
-              ) : (
-                <SignedOutTrigger />
-              )}
+              {initializing ? <InitializingTrigger /> : user ? <SignedInTrigger user={user} /> : <SignedOutTrigger />}
               <EllipsisVertical className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
