@@ -8,7 +8,6 @@ import { getAdminDb, isAdminInitialized } from "@/lib/firebase-admin";
 import { UserManagementAdminService } from "@/lib/user-management-admin";
 
 interface ApiKeyDocument {
-  hash: string;
   createdAt: string;
   status: "active" | "disabled";
   lastUsed?: string;
@@ -101,9 +100,8 @@ export async function POST(request: NextRequest) {
     // Hash for storage (SHA-256)
     const hash = createHash("sha256").update(apiKey).digest("hex"); // 64 chars
 
-    // Store API key metadata using hash as document ID and also as a field for querying
+    // Store API key metadata using hash as document ID
     const keyMetadata: ApiKeyDocument = {
-      hash: hash, // Store hash as a field for collection group queries
       createdAt: new Date().toISOString(),
       status: "active",
       requestCount: 0,

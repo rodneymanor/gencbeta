@@ -4,7 +4,6 @@ import { getAdminDb, isAdminInitialized } from "./firebase-admin";
 import { UserManagementAdminService } from "./user-management-admin";
 
 interface ApiKeyDocument {
-  hash: string;
   createdAt: string;
   status: "active" | "disabled";
   lastUsed?: string;
@@ -62,28 +61,36 @@ export class ApiKeyAuthService {
       const hash = createHash("sha256").update(apiKey).digest("hex");
       console.log("🔍 [API Auth] Looking up API key hash:", hash.substring(0, 8) + "...");
 
-      // Find the API key document across all users using collectionGroup
-      // Query by the hash field instead of __name__ to avoid document path issues
-      const apiKeyQuery = await adminDb.collectionGroup("apiKeys").where("hash", "==", hash).get();
+      // Since we store API keys using the hash as document ID, we need to find which user owns this key
+      // We'll search through all users to find the API key document
+      const usersCollection = adminDb.collection("users");
+      const usersSnapshot = await usersCollection.get();
 
-      if (apiKeyQuery.empty) {
+      let apiKeyDoc: FirebaseFirestore.DocumentSnapshot | null = null;
+      let userId: string | null = null;
+
+      // Check each user's apiKeys subcollection for this hash
+      for (const userDoc of usersSnapshot.docs) {
+        const keyRef = userDoc.ref.collection("apiKeys").doc(hash);
+        const keySnapshot = await keyRef.get();
+
+        if (keySnapshot.exists) {
+          apiKeyDoc = keySnapshot;
+          userId = userDoc.id;
+          break;
+        }
+      }
+
+      if (!apiKeyDoc || !apiKeyDoc.exists || !userId) {
         console.log("❌ [API Auth] API key not found");
         return null;
       }
 
-      const apiKeyDoc = apiKeyQuery.docs[0];
       const keyData = apiKeyDoc.data() as ApiKeyDocument;
 
       // Check if key is active
       if (keyData.status !== "active") {
         console.log("❌ [API Auth] API key is disabled");
-        return null;
-      }
-
-      // Extract user ID from document path: users/{userId}/apiKeys/{hash}
-      const userId = apiKeyDoc.ref.parent.parent?.id;
-      if (!userId) {
-        console.error("❌ [API Auth] Could not extract user ID from API key document path");
         return null;
       }
 
