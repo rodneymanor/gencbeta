@@ -15,14 +15,30 @@ import {
 } from "firebase/auth";
 
 import { auth } from "@/lib/firebase";
-import { getAuthCache, setAuthCache, clearAuthCache, type AccountLevel } from "@/lib/auth-cache";
 import { UserManagementService, type UserProfile, type UserRole } from "@/lib/user-management";
+
+export type AccountLevel = "free" | "pro";
+
+// Auth cache keys for localStorage
+const AUTH_CACHE_KEY = "gen_c_auth_cache";
+const AUTH_CACHE_EXPIRY = 1000 * 60 * 60 * 24; // 24 hours
+
+interface AuthCache {
+  user: {
+    uid: string;
+    email: string | null;
+    displayName: string | null;
+  } | null;
+  userProfile: UserProfile | null;
+  accountLevel: AccountLevel;
+  timestamp: number;
+}
 
 interface AuthContextType {
   user: User | null;
   userProfile: UserProfile | null;
   loading: boolean;
-  initializing: boolean;
+  initializing: boolean; // Separate state for initial Firebase auth check
   accountLevel: AccountLevel;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, displayName?: string, role?: UserRole, coachId?: string) => Promise<void>;
@@ -41,6 +57,61 @@ export function useAuth() {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
+}
+
+// Helper functions for auth cache
+function getAuthCache(): AuthCache | null {
+  if (typeof window === "undefined") return null;
+  
+  try {
+    const cached = localStorage.getItem(AUTH_CACHE_KEY);
+    if (!cached) return null;
+    
+    const parsed: AuthCache = JSON.parse(cached);
+    
+    // Check if cache is expired
+    if (Date.now() - parsed.timestamp > AUTH_CACHE_EXPIRY) {
+      localStorage.removeItem(AUTH_CACHE_KEY);
+      return null;
+    }
+    
+    return parsed;
+  } catch (error) {
+    console.warn("Error reading auth cache:", error);
+    localStorage.removeItem(AUTH_CACHE_KEY);
+    return null;
+  }
+}
+
+function setAuthCache(user: User | null, userProfile: UserProfile | null, accountLevel: AccountLevel) {
+  if (typeof window === "undefined") return;
+  
+  try {
+    const cache: AuthCache = {
+      user: user ? {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+      } : null,
+      userProfile,
+      accountLevel,
+      timestamp: Date.now(),
+    };
+    
+    localStorage.setItem(AUTH_CACHE_KEY, JSON.stringify(cache));
+  } catch (error) {
+    console.warn("Error setting auth cache:", error);
+  }
+}
+
+function clearAuthCache() {
+  if (typeof window === "undefined") return;
+  
+  try {
+    localStorage.removeItem(AUTH_CACHE_KEY);
+  } catch (error) {
+    console.warn("Error clearing auth cache:", error);
+  }
 }
 
 // Helper function to create user profile via API
@@ -82,8 +153,8 @@ async function createUserProfileViaAPI(
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [initializing, setInitializing] = useState(true);
+  const [loading, setLoading] = useState(false); // Only for operations
+  const [initializing, setInitializing] = useState(true); // For initial auth check
   const [accountLevel, setAccountLevel] = useState<AccountLevel>("free");
 
   // Initialize from cache immediately
@@ -93,15 +164,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log("🔍 [AUTH] Loading from cache:", cachedAuth);
       setUserProfile(cachedAuth.userProfile);
       setAccountLevel(cachedAuth.accountLevel);
+      // Don't set the user from cache as Firebase auth will handle this
     }
   }, []);
 
-  const updateAuthCache = useCallback(
-    (user: User | null, userProfile: UserProfile | null, accountLevel: AccountLevel) => {
-      setAuthCache(user, userProfile, accountLevel);
-    },
-    [],
-  );
+  const updateAuthCache = useCallback((user: User | null, userProfile: UserProfile | null, accountLevel: AccountLevel) => {
+    setAuthCache(user, userProfile, accountLevel);
+  }, []);
 
   const refreshUserProfile = useCallback(async () => {
     if (!user) {
@@ -115,10 +184,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const profile = await UserManagementService.getUserProfile(user.uid);
       setUserProfile(profile);
 
-      const newAccountLevel: AccountLevel =
-        profile?.role === "super_admin" || profile?.role === "coach" ? "pro" : "free";
+      // Set account level based on role
+      const newAccountLevel: AccountLevel = (profile?.role === "super_admin" || profile?.role === "coach") ? "pro" : "free";
       setAccountLevel(newAccountLevel);
 
+      // Update cache
       updateAuthCache(user, profile, newAccountLevel);
     } catch (error) {
       console.error("Error fetching user profile:", error);
@@ -130,25 +200,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!auth) {
+      // Firebase not configured, set initializing to false
       setInitializing(false);
       return;
     }
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      console.log("🔍 [AUTH] Auth state changed:", firebaseUser?.uid ?? "logged out");
+      console.log("🔍 [AUTH] Auth state changed:", firebaseUser?.uid || "logged out");
       setUser(firebaseUser);
 
       if (firebaseUser) {
+        // Update last login
         await UserManagementService.updateLastLogin(firebaseUser.uid);
 
+        // Load user profile
         try {
           const profile = await UserManagementService.getUserProfile(firebaseUser.uid);
           setUserProfile(profile);
 
-          const newAccountLevel: AccountLevel =
-            profile?.role === "super_admin" || profile?.role === "coach" ? "pro" : "free";
+          // Set account level based on role
+          const newAccountLevel: AccountLevel = (profile?.role === "super_admin" || profile?.role === "coach") ? "pro" : "free";
           setAccountLevel(newAccountLevel);
 
+          // Update cache
           updateAuthCache(firebaseUser, profile, newAccountLevel);
         } catch (error) {
           console.error("Error fetching user profile:", error);
@@ -212,6 +286,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log("✅ [AUTH] Display name updated");
       }
 
+      // Create user profile using Admin service for server-side operation
       try {
         await createUserProfileViaAPI(result.user.uid, result.user.email!, finalDisplayName, role, coachId);
       } catch (profileError) {
@@ -273,6 +348,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const upgradeAccount = useCallback(async () => {
+    // In production, this would handle Stripe/payment integration
+    // For demo purposes, just toggle the account level
     const newLevel: AccountLevel = accountLevel === "free" ? "pro" : "free";
     setAccountLevel(newLevel);
     updateAuthCache(user, userProfile, newLevel);
@@ -297,6 +374,4 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
-
-export type { AccountLevel };
+} 

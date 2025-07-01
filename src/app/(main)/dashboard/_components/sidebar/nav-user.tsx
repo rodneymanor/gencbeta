@@ -42,6 +42,20 @@ function SignedInTrigger({ user }: { user: UserData }) {
   );
 }
 
+function InitializingTrigger() {
+  return (
+    <>
+      <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg animate-pulse">
+        <CircleUser className="text-primary h-4 w-4" />
+      </div>
+      <div className="grid flex-1 text-left text-sm leading-tight">
+        <span className="truncate font-medium animate-pulse">Loading...</span>
+        <span className="text-muted-foreground truncate text-xs animate-pulse">Authenticating...</span>
+      </div>
+    </>
+  );
+}
+
 function SignedOutTrigger() {
   return (
     <>
@@ -128,7 +142,7 @@ function SignedOutMenu() {
 
 export function NavUser() {
   const { isMobile } = useSidebar();
-  const { user, logout } = useAuth();
+  const { user, logout, initializing } = useAuth();
 
   const handleLogout = async () => {
     try {
@@ -147,7 +161,13 @@ export function NavUser() {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              {user ? <SignedInTrigger user={user} /> : <SignedOutTrigger />}
+              {initializing ? (
+                <InitializingTrigger />
+              ) : user ? (
+                <SignedInTrigger user={user} />
+              ) : (
+                <SignedOutTrigger />
+              )}
               <EllipsisVertical className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>

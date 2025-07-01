@@ -4,27 +4,34 @@ import { useEffect } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { Loader2 } from "lucide-react";
-
 import { useAuth } from "@/contexts/auth-context";
+import AuthLoading from "@/components/ui/auth-loading";
 
 export default function withAuth<P extends object>(WrappedComponent: React.ComponentType<P>) {
   const WithAuthComponent = (props: P) => {
-    const { user, loading } = useAuth();
+    const { user, loading, initializing } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
-      if (!loading && !user) {
+      // Only redirect if we're done initializing and there's no user
+      if (!initializing && !user && !loading) {
         router.replace("/auth/v1/login");
       }
-    }, [user, loading, router]);
+    }, [user, loading, initializing, router]);
 
-    if (loading || !user) {
-      return (
-        <div className="flex h-screen w-full items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-      );
+    // Show auth loading during initial Firebase auth check
+    if (initializing) {
+      return <AuthLoading />;
+    }
+
+    // Show auth loading if we're redirecting to login
+    if (!user && !loading) {
+      return <AuthLoading />;
+    }
+
+    // Show auth loading during other operations
+    if (loading) {
+      return <AuthLoading />;
     }
 
     return <WrappedComponent {...props} />;
