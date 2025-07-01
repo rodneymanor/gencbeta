@@ -41,7 +41,7 @@ export function RegisterForm() {
     try {
       await signUp(values.email, values.password, values.displayName);
       toast.success("Account created successfully!");
-      router.push("/dashboard/content-creator");
+      router.push("/dashboard/scripts/new");
     } catch (err) {
       const error = err as Error;
       const message = error.message;
@@ -55,7 +55,7 @@ export function RegisterForm() {
     try {
       await signInWithGoogle();
       toast.success("Signed in with Google successfully!");
-      router.push("/dashboard/content-creator");
+      router.push("/dashboard/scripts/new");
     } catch (err) {
       const error = err as Error;
       const message = error.message;
