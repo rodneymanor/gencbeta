@@ -4,6 +4,7 @@ import { getAdminDb, isAdminInitialized } from "./firebase-admin";
 import { UserManagementAdminService } from "./user-management-admin";
 
 interface ApiKeyDocument {
+  hash: string;
   createdAt: string;
   status: "active" | "disabled";
   lastUsed?: string;
@@ -62,7 +63,8 @@ export class ApiKeyAuthService {
       console.log("🔍 [API Auth] Looking up API key hash:", hash.substring(0, 8) + "...");
 
       // Find the API key document across all users using collectionGroup
-      const apiKeyQuery = await adminDb.collectionGroup("apiKeys").where("__name__", "==", hash).get();
+      // Query by the hash field instead of __name__ to avoid document path issues
+      const apiKeyQuery = await adminDb.collectionGroup("apiKeys").where("hash", "==", hash).get();
 
       if (apiKeyQuery.empty) {
         console.log("❌ [API Auth] API key not found");

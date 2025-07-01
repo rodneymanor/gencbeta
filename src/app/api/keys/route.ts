@@ -1,10 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
 import { randomBytes, createHash } from "crypto";
-import { getAdminDb, isAdminInitialized } from "@/lib/firebase-admin";
-import { UserManagementAdminService } from "@/lib/user-management-admin";
+
+import { NextRequest, NextResponse } from "next/server";
+
 import { getAuth } from "firebase-admin/auth";
 
+import { getAdminDb, isAdminInitialized } from "@/lib/firebase-admin";
+import { UserManagementAdminService } from "@/lib/user-management-admin";
+
 interface ApiKeyDocument {
+  hash: string;
   createdAt: string;
   status: "active" | "disabled";
   lastUsed?: string;
@@ -16,7 +20,7 @@ interface ApiKeyDocument {
 /**
  * POST /api/keys
  * Generate a new API key for the authenticated user
- * 
+ *
  * Headers:
  * - Authorization: Bearer <firebase-id-token>
  */
@@ -29,17 +33,14 @@ export async function POST(request: NextRequest) {
     if (!authHeader?.startsWith("Bearer ")) {
       return NextResponse.json(
         { error: "Authorization header required", message: "Please provide Firebase ID token" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const idToken = authHeader.substring(7);
-    
+
     if (!isAdminInitialized) {
-      return NextResponse.json(
-        { error: "Firebase Admin SDK not configured" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Firebase Admin SDK not configured" }, { status: 500 });
     }
 
     // Verify Firebase ID token
@@ -50,10 +51,7 @@ export async function POST(request: NextRequest) {
       console.log("✅ [API Keys] Firebase token verified for user:", decodedToken.email);
     } catch (error) {
       console.error("❌ [API Keys] Token verification failed:", error);
-      return NextResponse.json(
-        { error: "Invalid Firebase token", message: "Authentication failed" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Invalid Firebase token", message: "Authentication failed" }, { status: 401 });
     }
 
     const userId = decodedToken.uid;
@@ -64,7 +62,7 @@ export async function POST(request: NextRequest) {
     if (!userProfile) {
       return NextResponse.json(
         { error: "User profile not found", message: "User registration incomplete" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -72,10 +70,7 @@ export async function POST(request: NextRequest) {
 
     const adminDb = getAdminDb();
     if (!adminDb) {
-      return NextResponse.json(
-        { error: "Database connection failed" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Database connection failed" }, { status: 500 });
     }
 
     // Check if user already has an active API key (enforce single key policy)
@@ -89,12 +84,12 @@ export async function POST(request: NextRequest) {
     if (!existingKeysQuery.empty) {
       console.log("⚠️ [API Keys] User already has an active API key");
       return NextResponse.json(
-        { 
-          error: "API key already exists", 
+        {
+          error: "API key already exists",
           message: "You can only have one active API key. Please revoke your existing key first.",
-          hasExistingKey: true
+          hasExistingKey: true,
         },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -106,20 +101,16 @@ export async function POST(request: NextRequest) {
     // Hash for storage (SHA-256)
     const hash = createHash("sha256").update(apiKey).digest("hex"); // 64 chars
 
-    // Store API key metadata using hash as document ID
+    // Store API key metadata using hash as document ID and also as a field for querying
     const keyMetadata: ApiKeyDocument = {
+      hash: hash, // Store hash as a field for collection group queries
       createdAt: new Date().toISOString(),
       status: "active",
       requestCount: 0,
       violations: 0,
     };
 
-    await adminDb
-      .collection("users")
-      .doc(userId)
-      .collection("apiKeys")
-      .doc(hash)
-      .create(keyMetadata);
+    await adminDb.collection("users").doc(userId).collection("apiKeys").doc(hash).create(keyMetadata);
 
     console.log("✅ [API Keys] API key generated and stored successfully");
 
@@ -141,7 +132,6 @@ export async function POST(request: NextRequest) {
         violations: "2 violations = 1 hour lockout",
       },
     });
-
   } catch (error) {
     console.error("❌ [API Keys] Critical error:", error);
     return NextResponse.json(
@@ -149,7 +139,7 @@ export async function POST(request: NextRequest) {
         error: "Failed to generate API key",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -157,7 +147,7 @@ export async function POST(request: NextRequest) {
 /**
  * DELETE /api/keys
  * Revoke the user's active API key
- * 
+ *
  * Headers:
  * - Authorization: Bearer <firebase-id-token>
  */
@@ -168,19 +158,13 @@ export async function DELETE(request: NextRequest) {
     // Extract Firebase ID token
     const authHeader = request.headers.get("authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return NextResponse.json(
-        { error: "Authorization header required" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Authorization header required" }, { status: 401 });
     }
 
     const idToken = authHeader.substring(7);
-    
+
     if (!isAdminInitialized) {
-      return NextResponse.json(
-        { error: "Firebase Admin SDK not configured" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Firebase Admin SDK not configured" }, { status: 500 });
     }
 
     // Verify Firebase ID token
@@ -188,11 +172,8 @@ export async function DELETE(request: NextRequest) {
     let decodedToken;
     try {
       decodedToken = await auth.verifyIdToken(idToken);
-    } catch (error) {
-      return NextResponse.json(
-        { error: "Invalid Firebase token" },
-        { status: 401 }
-      );
+    } catch {
+      return NextResponse.json({ error: "Invalid Firebase token" }, { status: 401 });
     }
 
     const userId = decodedToken.uid;
@@ -202,10 +183,7 @@ export async function DELETE(request: NextRequest) {
 
     const adminDb = getAdminDb();
     if (!adminDb) {
-      return NextResponse.json(
-        { error: "Database connection failed" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Database connection failed" }, { status: 500 });
     }
 
     // Find and revoke active API keys
@@ -218,11 +196,11 @@ export async function DELETE(request: NextRequest) {
 
     if (activeKeysQuery.empty) {
       return NextResponse.json(
-        { 
+        {
           error: "No active API key found",
-          message: "You don't have any active API keys to revoke"
+          message: "You don't have any active API keys to revoke",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -230,7 +208,7 @@ export async function DELETE(request: NextRequest) {
     const batch = adminDb.batch();
     let revokedCount = 0;
 
-    activeKeysQuery.docs.forEach(doc => {
+    activeKeysQuery.docs.forEach((doc) => {
       batch.update(doc.ref, {
         status: "disabled",
         revokedAt: new Date().toISOString(),
@@ -250,7 +228,6 @@ export async function DELETE(request: NextRequest) {
       },
       revokedAt: new Date().toISOString(),
     });
-
   } catch (error) {
     console.error("❌ [API Keys] Error revoking key:", error);
     return NextResponse.json(
@@ -258,7 +235,7 @@ export async function DELETE(request: NextRequest) {
         error: "Failed to revoke API key",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -266,7 +243,7 @@ export async function DELETE(request: NextRequest) {
 /**
  * GET /api/keys
  * Get information about the user's API key status
- * 
+ *
  * Headers:
  * - Authorization: Bearer <firebase-id-token>
  */
@@ -277,19 +254,13 @@ export async function GET(request: NextRequest) {
     // Extract Firebase ID token
     const authHeader = request.headers.get("authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return NextResponse.json(
-        { error: "Authorization header required" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Authorization header required" }, { status: 401 });
     }
 
     const idToken = authHeader.substring(7);
-    
+
     if (!isAdminInitialized) {
-      return NextResponse.json(
-        { error: "Firebase Admin SDK not configured" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Firebase Admin SDK not configured" }, { status: 500 });
     }
 
     // Verify Firebase ID token
@@ -297,11 +268,8 @@ export async function GET(request: NextRequest) {
     let decodedToken;
     try {
       decodedToken = await auth.verifyIdToken(idToken);
-    } catch (error) {
-      return NextResponse.json(
-        { error: "Invalid Firebase token" },
-        { status: 401 }
-      );
+    } catch {
+      return NextResponse.json({ error: "Invalid Firebase token" }, { status: 401 });
     }
 
     const userId = decodedToken.uid;
@@ -309,10 +277,7 @@ export async function GET(request: NextRequest) {
 
     const adminDb = getAdminDb();
     if (!adminDb) {
-      return NextResponse.json(
-        { error: "Database connection failed" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Database connection failed" }, { status: 500 });
     }
 
     // Get all API keys for the user
@@ -323,7 +288,7 @@ export async function GET(request: NextRequest) {
       .orderBy("createdAt", "desc")
       .get();
 
-    const apiKeys = allKeysQuery.docs.map(doc => {
+    const apiKeys = allKeysQuery.docs.map((doc) => {
       const data = doc.data();
       return {
         keyId: doc.id.substring(0, 8), // First 8 chars of hash for identification
@@ -337,7 +302,7 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    const activeKey = apiKeys.find(key => key.status === "active");
+    const activeKey = apiKeys.find((key) => key.status === "active");
 
     return NextResponse.json({
       success: true,
@@ -345,7 +310,7 @@ export async function GET(request: NextRequest) {
         email: userEmail,
       },
       hasActiveKey: !!activeKey,
-      activeKey: activeKey || null,
+      activeKey: activeKey ?? null,
       keyHistory: apiKeys,
       limits: {
         requestsPerMinute: 50,
@@ -353,7 +318,6 @@ export async function GET(request: NextRequest) {
         maxViolationsBeforeLockout: 2,
       },
     });
-
   } catch (error) {
     console.error("❌ [API Keys] Error getting key status:", error);
     return NextResponse.json(
@@ -361,7 +325,7 @@ export async function GET(request: NextRequest) {
         error: "Failed to get API key status",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
-} 
+}
