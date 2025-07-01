@@ -9,9 +9,6 @@ export default function MyBrandPage() {
     <div className="container mx-auto space-y-6">
       {/* Page Header */}
       <div className="flex items-center gap-3">
-        <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
-          <Sparkles className="text-primary h-6 w-6" />
-        </div>
         <div>
           <h1 className="text-3xl font-bold tracking-tight">My Brand</h1>
           <p className="text-muted-foreground text-lg">

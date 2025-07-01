@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect } from "react";
 
+import { useSmartSidebarContext } from "@/components/providers/smart-sidebar-provider";
 import { GenCLogo } from "@/components/ui/gen-c-logo";
 import {
   Sidebar,
@@ -24,17 +25,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { userProfile } = useAuth();
   const { sidebarItems: dynamicSidebarItems, refreshCollections } = useCollectionsSidebar(sidebarItems);
   const { setOpen } = useSidebar();
-  const [isHovered, setIsHovered] = useState(false);
 
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-    setOpen(true);
-  };
+  // Use smart sidebar for proper manual/hover state management
+  const smartSidebar = useSmartSidebarContext();
 
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-    setOpen(false);
-  };
+  // Sync smart sidebar state with the main sidebar context
+  useEffect(() => {
+    setOpen(smartSidebar.isOpen);
+  }, [smartSidebar.isOpen, setOpen]);
 
   // Filter sidebar items based on user role
   const filteredSidebarItems = dynamicSidebarItems.filter((group) => {
@@ -58,7 +56,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   });
 
   return (
-    <Sidebar {...props} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+    <Sidebar
+      {...props}
+      onMouseEnter={smartSidebar.handleMouseEnter}
+      onMouseLeave={smartSidebar.handleMouseLeave}
+      className={`transition-all duration-200 ${smartSidebar.visualState === "hover-open" ? "hover:shadow-lg" : ""}`}
+    >
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
