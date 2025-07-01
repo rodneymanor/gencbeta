@@ -202,7 +202,8 @@ export function ApiKeyManagement({ user, apiKeyData, onRefresh }: ApiKeyManageme
       console.log("🔍 [Debug] Set newApiKey state to:", data.apiKey);
 
       toast.success("API key generated successfully!");
-      onRefresh();
+      // Don't refresh immediately - let user see and copy the key first
+      // onRefresh will be called when they dismiss the alert
     } catch (error) {
       console.error("❌ [Settings] Error generating API key:", error);
       toast.error(error instanceof Error ? error.message : "Failed to generate API key");
@@ -260,7 +261,14 @@ export function ApiKeyManagement({ user, apiKeyData, onRefresh }: ApiKeyManageme
   return (
     <>
       {newApiKey && (
-        <NewApiKeyAlert newApiKey={newApiKey} onCopy={copyToClipboard} onDismiss={() => setNewApiKey(null)} />
+        <NewApiKeyAlert
+          newApiKey={newApiKey}
+          onCopy={copyToClipboard}
+          onDismiss={() => {
+            setNewApiKey(null);
+            onRefresh(); // Refresh data after user dismisses the alert
+          }}
+        />
       )}
 
       <Card>
