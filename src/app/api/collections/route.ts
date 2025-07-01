@@ -2,21 +2,60 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { FirebaseFirestore } from "firebase-admin";
 
+import { ApiKeyAuthService } from "@/lib/api-key-auth";
 import { COLLECTION_LIMITS } from "@/lib/collections";
 import { CollectionsRBACAdminService } from "@/lib/collections-rbac-admin";
 import { getAdminDb, isAdminInitialized } from "@/lib/firebase-admin";
 import { UserManagementAdminService } from "@/lib/user-management-admin";
 
-function getUserIdFromRequest(request: NextRequest): string | null {
-  // User ID is now set by middleware after API key validation
-  const userIdFromHeader = request.headers.get("x-user-id");
-  if (userIdFromHeader) {
-    return userIdFromHeader;
+async function authenticateApiKey(request: NextRequest) {
+  console.log("🔐 [Collections API] Checking API key authentication");
+
+  const apiKey = ApiKeyAuthService.extractApiKey(request);
+
+  if (!apiKey) {
+    console.log("❌ [Collections API] No API key provided");
+    return NextResponse.json(
+      {
+        error: "Unauthorized",
+        message: "API key required. Provide via x-api-key header or Authorization: Bearer header.",
+      },
+      { status: 401 },
+    );
   }
 
-  // Fallback to query parameter for backward compatibility
-  const { searchParams } = new URL(request.url);
-  return searchParams.get("userId");
+  const authResult = await ApiKeyAuthService.validateApiKey(apiKey);
+
+  if (!authResult) {
+    console.log("❌ [Collections API] Invalid API key");
+    return NextResponse.json(
+      {
+        error: "Unauthorized",
+        message: "Invalid API key",
+      },
+      { status: 401 },
+    );
+  }
+
+  if (!authResult.rateLimitResult.allowed) {
+    console.log("🚫 [Collections API] Request blocked by rate limiting");
+    return NextResponse.json(
+      {
+        error: "Rate limit exceeded",
+        message: authResult.rateLimitResult.reason,
+        rateLimitInfo: {
+          resetTime: authResult.rateLimitResult.resetTime,
+          violationsCount: authResult.rateLimitResult.violationsCount,
+          requestsPerMinute: 50,
+          maxViolations: 2,
+        },
+      },
+      { status: 429 },
+    );
+  }
+
+  console.log("✅ [Collections API] API key authenticated for user:", authResult.user.email);
+  return authResult;
 }
 
 async function validateCreateCollectionRequest(body: { title?: string; description?: string; userId?: string }) {
@@ -32,7 +71,6 @@ async function validateCreateCollectionRequest(body: { title?: string; descripti
     };
   }
 
-  // Character limit validation using shared constants
   if (title.trim().length > COLLECTION_LIMITS.MAX_TITLE_LENGTH) {
     return {
       isValid: false,
@@ -69,21 +107,14 @@ async function createCollectionInFirestore(
 
 export async function GET(request: NextRequest) {
   try {
-    // Authentication is handled by middleware
-    console.log("📚 [Collections API] GET request received");
-
-    const userId = getUserIdFromRequest(request);
-    if (!userId) {
-      return NextResponse.json(
-        {
-          error: "User ID is required",
-          message: "User ID should be provided by authenticated API key",
-        },
-        { status: 400 },
-      );
+    // Authenticate API key first
+    const authResult = await authenticateApiKey(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Return error response
     }
 
-    console.log("🔍 [Collections API] Fetching collections for user:", userId);
+    const userId = authResult.user.uid;
+    console.log("📚 [Collections API] GET request received for user:", userId);
 
     // Check if Admin SDK is initialized
     if (!isAdminInitialized) {
@@ -138,31 +169,28 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Authentication is handled by middleware
-    console.log("📚 [Collections API] POST request received");
+    // Authenticate API key first
+    const authResult = await authenticateApiKey(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Return error response
+    }
+
+    const userId = authResult.user.uid;
+    console.log("📚 [Collections API] POST request received for user:", userId);
 
     // Parse and validate request body
     const body = await request.json();
-    
-    // Get authenticated user ID from middleware
-    const authenticatedUserId = request.headers.get("x-user-id");
-    if (!authenticatedUserId) {
-      return NextResponse.json(
-        { error: "Authentication required", message: "User ID not found in authenticated request" },
-        { status: 401 }
-      );
-    }
 
     // Override body userId with authenticated user to prevent privilege escalation
-    body.userId = authenticatedUserId;
-    
+    body.userId = userId;
+
     const validation = await validateCreateCollectionRequest(body);
 
     if (!validation.isValid) {
       return NextResponse.json(validation.error, { status: 400 });
     }
 
-    const { title, description, userId } = validation.data!;
+    const { title, description } = validation.data!;
 
     console.log("🆕 [Collections API] Creating collection:", title, "for user:", userId);
 
