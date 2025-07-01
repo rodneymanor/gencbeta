@@ -1,11 +1,57 @@
 "use client";
 
-import { Bot, User, AlertTriangle, CheckCircle } from "lucide-react";
+import { useState } from "react";
+
+import { Bot, User, AlertTriangle, CheckCircle, ChevronDown, ChevronUp } from "lucide-react";
 
 import { ChatMessage } from "./types";
 
 interface ChatHistoryProps {
   messages: ChatMessage[];
+}
+
+interface ExpandableTextProps {
+  content: string;
+  maxLines?: number;
+  className?: string;
+}
+
+function ExpandableText({ content, maxLines = 4, className = "" }: ExpandableTextProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  // Check if content is long enough to warrant truncation
+  const lines = content.split("\n");
+  const needsTruncation = lines.length > maxLines || content.length > 300;
+
+  if (!needsTruncation) {
+    return <p className={`text-sm leading-relaxed whitespace-pre-wrap ${className}`}>{content}</p>;
+  }
+
+  const truncatedContent = isExpanded
+    ? content
+    : lines.slice(0, maxLines).join("\n") + (lines.length > maxLines ? "..." : "");
+
+  return (
+    <div className="space-y-2">
+      <p className={`text-sm leading-relaxed whitespace-pre-wrap ${className}`}>{truncatedContent}</p>
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs transition-colors"
+      >
+        {isExpanded ? (
+          <>
+            <ChevronUp className="h-3 w-3" />
+            Show less
+          </>
+        ) : (
+          <>
+            <ChevronDown className="h-3 w-3" />
+            Show more
+          </>
+        )}
+      </button>
+    </div>
+  );
 }
 
 export function ChatHistory({ messages }: ChatHistoryProps) {
@@ -66,16 +112,23 @@ export function ChatHistory({ messages }: ChatHistoryProps) {
 
   return (
     <div className="h-full space-y-4 overflow-y-auto">
-      {messages.map((message) => {
+      {messages.map((message, index) => {
         const styles = getMessageStyles(message.type);
         const icon = getMessageIcon(message.type);
+
+        // Use expandable text for user messages (especially the first one which contains the initial idea)
+        const isInitialUserMessage = message.type === "user" && index === 0;
 
         return (
           <div key={message.id} className={`flex gap-3 ${styles.container}`}>
             <div className={`flex max-w-[85%] gap-2 ${styles.wrapper}`}>
               <div className={`flex h-8 w-8 items-center justify-center rounded-full ${styles.avatar}`}>{icon}</div>
               <div className={`rounded-lg p-3 ${styles.bubble}`}>
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                {isInitialUserMessage ? (
+                  <ExpandableText content={message.content} maxLines={3} />
+                ) : (
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                )}
                 {message.metadata?.videoUrl && (
                   <p className="text-muted-foreground mt-2 truncate text-xs">Video: {message.metadata.videoUrl}</p>
                 )}
