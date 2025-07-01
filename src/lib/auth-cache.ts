@@ -1,5 +1,7 @@
 // Auth cache utilities for localStorage persistence
 
+import type { User } from "firebase/auth";
+
 export type AccountLevel = "free" | "pro";
 
 export interface AuthCache {
@@ -8,7 +10,7 @@ export interface AuthCache {
     email: string | null;
     displayName: string | null;
   } | null;
-  userProfile: any | null; // Use any to avoid circular imports
+  userProfile: Record<string, unknown> | null; // Use Record instead of any to avoid circular imports
   accountLevel: AccountLevel;
   timestamp: number;
 }
@@ -40,7 +42,11 @@ export function getAuthCache(): AuthCache | null {
   }
 }
 
-export function setAuthCache(user: any | null, userProfile: any | null, accountLevel: AccountLevel) {
+export function setAuthCache(
+  user: User | null,
+  userProfile: Record<string, unknown> | null,
+  accountLevel: AccountLevel,
+) {
   if (typeof window === "undefined") return;
 
   try {
