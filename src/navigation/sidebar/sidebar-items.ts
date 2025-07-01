@@ -11,6 +11,7 @@ import {
   Binoculars,
   Bot,
   Wrench,
+  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 
@@ -65,6 +66,11 @@ export const sidebarItems: NavGroup[] = [
             comingSoon: true,
           },
         ],
+      },
+      {
+        title: "My Brand",
+        url: "/dashboard/my-brand",
+        icon: Sparkles,
       },
     ],
   },

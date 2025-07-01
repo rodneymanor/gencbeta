@@ -2,18 +2,8 @@
 
 import { useRouter } from "next/navigation";
 
-import {
-  EllipsisVertical,
-  CircleUser,
-  CreditCard,
-  MessageSquareDot,
-  LogOut,
-  User,
-  Settings,
-  Sparkles,
-} from "lucide-react";
+import { EllipsisVertical, CircleUser, CreditCard, MessageSquareDot, LogOut, User, Settings } from "lucide-react";
 
-import { BrandProfileManager } from "@/components/brand/brand-profile-manager";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -111,14 +101,6 @@ function SignedInMenu({ handleLogout }: { handleLogout: () => void }) {
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
-        <BrandProfileManager
-          trigger={
-            <DropdownMenuItem>
-              <Sparkles />
-              Brand Profile
-            </DropdownMenuItem>
-          }
-        />
         <DropdownMenuItem onClick={handleSettingsClick}>
           <Settings />
           Settings
