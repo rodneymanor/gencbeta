@@ -1,68 +1,8 @@
-/* eslint-disable max-lines, complexity, @typescript-eslint/no-unused-vars */
 import { NextRequest, NextResponse } from "next/server";
 
 import { ApiKeyAuthService } from "@/lib/api-key-auth";
+import { uploadToBunnyStream } from "@/lib/bunny-stream";
 import { getAdminDb, isAdminInitialized } from "@/lib/firebase-admin";
-
-interface VideoDownloadResponse {
-  success: boolean;
-  platform: string;
-  hostedOnCDN: boolean;
-  cdnUrl?: string;
-  filename?: string;
-  thumbnailUrl?: string;
-  videoData?: {
-    buffer: number[];
-    size: number;
-    mimeType: string;
-    filename: string;
-  };
-  transcription?: TranscriptionResponse;
-  metrics: {
-    likes: number;
-    views: number;
-    shares: number;
-    comments: number;
-    saves: number;
-  };
-  additionalMetadata: {
-    author: string;
-    duration: number;
-  };
-  metadata: {
-    originalUrl: string;
-    platform: string;
-    downloadedAt: string;
-    readyForTranscription: boolean;
-    transcriptionStatus?: "pending" | "completed" | "failed" | "processing";
-  };
-}
-
-interface TranscriptionResponse {
-  success: boolean;
-  transcript: string;
-  platform: string;
-  components: {
-    hook: string;
-    bridge: string;
-    nugget: string;
-    wta: string;
-  };
-  contentMetadata: {
-    platform: string;
-    author: string;
-    description: string;
-    source: string;
-    hashtags: string[];
-  };
-  visualContext: string;
-  transcriptionMetadata: {
-    method: string;
-    fileSize: number;
-    fileName: string;
-    processedAt: string;
-  };
-}
 
 async function authenticateApiKey(request: NextRequest) {
   console.log("🔐 [Add Video API] Checking API key authentication");
@@ -158,252 +98,147 @@ function validateUrl(url: string): boolean {
   return supportedPlatforms.some((platform) => url.toLowerCase().includes(platform));
 }
 
-async function verifyCollectionOwnership(adminDb: any, collectionId: string, userId: string): Promise<boolean> {
+// Use the same backend processing functions as the add video button
+async function downloadVideo(baseUrl: string, url: string) {
   try {
-    const collectionDoc = await adminDb.collection("collections").doc(collectionId).get();
-    if (!collectionDoc.exists) {
-      return false;
+    console.log("🔄 [Add Video API] Calling downloader service...");
+    
+    const response = await fetch(`${baseUrl}/api/video/downloader`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("❌ [Add Video API] Download failed:", response.status, errorText);
+      return { success: false, error: `Download failed: ${errorText}` };
     }
-    const collectionData = collectionDoc.data();
-    return collectionData?.userId === userId;
+
+    const data = await response.json();
+    console.log("✅ [Add Video API] Download successful");
+    return { success: true, data };
   } catch (error) {
-    console.error("Error verifying collection ownership:", error);
-    return false;
+    console.error("❌ [Add Video API] Download error:", error);
+    return { success: false, error: error instanceof Error ? error.message : "Download failed" };
   }
-}
-
-async function downloadVideo(videoUrl: string, request: NextRequest): Promise<VideoDownloadResponse> {
-  const baseUrl = getBaseUrl(request);
-
-  // Check if it's Instagram - use optimized streaming
-  if (videoUrl.toLowerCase().includes("instagram.com")) {
-    console.log("🌊 [API] Using optimized Instagram-to-Bunny workflow...");
-
-    try {
-      const response = await fetch(`${baseUrl}/api/video/instagram-to-bunny`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ url: videoUrl }),
-      });
-
-      if (!response.ok) {
-        console.log("❌ [API] Optimized workflow failed, falling back to traditional download...");
-        // Fall back to traditional download
-        return await traditionalDownload(videoUrl, baseUrl);
-      }
-
-      const streamData = await response.json();
-      console.log("✅ [API] Optimized workflow response received:", streamData);
-
-      // Convert optimized response to expected format
-      return {
-        success: true,
-        platform: streamData.video.platform,
-        hostedOnCDN: true,
-        cdnUrl: streamData.video.iframeUrl,
-        filename: streamData.video.filename,
-        thumbnailUrl: streamData.video.thumbnailUrl,
-        metrics: {
-          likes: streamData.metadata.likes,
-          views: streamData.metadata.views,
-          shares: streamData.metadata.shares,
-          comments: streamData.metadata.comments,
-          saves: streamData.metadata.saves,
-        },
-        additionalMetadata: {
-          author: streamData.metadata.author,
-          duration: streamData.metadata.duration,
-        },
-        metadata: {
-          originalUrl: videoUrl,
-          platform: streamData.video.platform,
-          downloadedAt: streamData.metadata.processedAt,
-          readyForTranscription: true,
-          transcriptionStatus: "processing",
-        },
-      };
-    } catch (error) {
-      console.error("❌ [API] Optimized workflow error, falling back:", error);
-      return await traditionalDownload(videoUrl, baseUrl);
-    }
-  }
-
-  // Use traditional download for non-Instagram or fallback
-  return await traditionalDownload(videoUrl, baseUrl);
-}
-
-async function traditionalDownload(videoUrl: string, baseUrl: string): Promise<VideoDownloadResponse> {
-  const response = await fetch(`${baseUrl}/api/download-video`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ url: videoUrl }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error ?? "Failed to download video");
-  }
-
-  const data = await response.json();
-  console.log("📥 [API] Traditional download response received:", data);
-  console.log("🖼️ [API] Thumbnail URL from traditional download:", data.thumbnailUrl ? "✅ Found" : "❌ Not found");
-  return data;
-}
-
-function createPlaceholderTranscription(downloadResponse: VideoDownloadResponse): TranscriptionResponse {
-  return {
-    success: true,
-    transcript: "Transcription in progress...",
-    platform: downloadResponse.platform,
-    components: {
-      hook: "Processing...",
-      bridge: "Processing...",
-      nugget: "Processing...",
-      wta: "Processing...",
-    },
-    contentMetadata: {
-      platform: downloadResponse.platform,
-      author: downloadResponse.additionalMetadata.author,
-      description: "Processing...",
-      source: "api",
-      hashtags: [],
-    },
-    visualContext: "Processing...",
-    transcriptionMetadata: {
-      method: "background",
-      fileSize: downloadResponse.videoData?.size ?? 0,
-      fileName: downloadResponse.filename ?? "video.mp4",
-      processedAt: new Date().toISOString(),
-    },
-  };
-}
-
-async function transcribeVideo(downloadResponse: VideoDownloadResponse): Promise<TranscriptionResponse> {
-  console.log("🔍 [API] Checking download response for transcription:", !!downloadResponse.transcription);
-
-  if (downloadResponse.transcription) {
-    console.log("✅ [API] Using existing transcription from download response");
-    return downloadResponse.transcription;
-  }
-
-  // Skip transcription in main API - let background analysis handle it
-  console.log("⏭️ [API] Skipping transcription - will be handled by background analysis");
-  return createPlaceholderTranscription(downloadResponse);
-}
-
-function generatePlaceholderThumbnail(platform: string): string {
-  const canvas = `data:image/svg+xml;base64,${Buffer.from(
-    `
-    <svg width="360" height="640" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" style="stop-color:${platform === "instagram" ? "#833AB4" : "#000000"};stop-opacity:1" />
-          <stop offset="100%" style="stop-color:${platform === "instagram" ? "#FCB045" : "#FF0050"};stop-opacity:1" />
-        </linearGradient>
-      </defs>
-      <rect width="360" height="640" fill="url(#grad)" />
-      <text x="180" y="300" fill="white" text-anchor="middle" font-size="24">📹</text>
-      <text x="180" y="340" fill="white" text-anchor="middle" font-size="16">${platform.toUpperCase()}</text>
-      <text x="180" y="360" fill="white" text-anchor="middle" font-size="16">Video</text>
-    </svg>
-  `,
-  ).toString("base64")}`;
-
-  return canvas;
-}
-
-async function extractVideoThumbnail(downloadResponse: VideoDownloadResponse): Promise<string> {
-  console.log("🖼️ [API] Extracting thumbnail - checking for real thumbnail URL...");
-
-  // First priority: Use actual thumbnail URL from the API response
-  if (downloadResponse.thumbnailUrl) {
-    console.log("✅ [API] Using real thumbnail from API response:", downloadResponse.thumbnailUrl);
-    return downloadResponse.thumbnailUrl;
-  }
-
-  // Fallback: Generate placeholder thumbnail
-  console.log("⚠️ [API] No real thumbnail found, generating placeholder for platform:", downloadResponse.platform);
-  return generatePlaceholderThumbnail(downloadResponse.platform);
-}
-
-function calculateEngagementRate(metrics: VideoDownloadResponse["metrics"]): number {
-  if (metrics.views <= 0) return 0;
-  return ((metrics.likes + metrics.comments + metrics.shares) / metrics.views) * 100;
-}
-
-function getVideoUrl(downloadResponse: VideoDownloadResponse, originalUrl: string): string {
-  return downloadResponse.hostedOnCDN && downloadResponse.cdnUrl ? downloadResponse.cdnUrl : originalUrl;
-}
-
-function getVideoTitle(transcriptionResponse: TranscriptionResponse, providedTitle?: string): string {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  return providedTitle ?? transcriptionResponse.contentMetadata.description ?? "Untitled Video";
-}
-
-function getVideoAuthor(downloadResponse: VideoDownloadResponse, transcriptionResponse: TranscriptionResponse): string {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  return downloadResponse.additionalMetadata.author ?? transcriptionResponse.contentMetadata.author ?? "Unknown";
-}
-
-function createVideoObject(
-  downloadResponse: VideoDownloadResponse,
-  transcriptionResponse: TranscriptionResponse,
-  thumbnailUrl: string,
-  originalUrl: string,
-  providedTitle?: string,
-): Record<string, unknown> {
-  console.log("📦 [API] Creating video object with full processing data");
-
-  const engagementRate = calculateEngagementRate(downloadResponse.metrics);
-
-  const videoObject: Record<string, unknown> = {
-    url: getVideoUrl(downloadResponse, originalUrl),
-    platform: downloadResponse.platform,
-    thumbnailUrl: thumbnailUrl,
-    title: getVideoTitle(transcriptionResponse, providedTitle),
-    author: getVideoAuthor(downloadResponse, transcriptionResponse),
-    transcript: transcriptionResponse.transcript,
-    components: transcriptionResponse.components,
-    contentMetadata: {
-      ...transcriptionResponse.contentMetadata,
-      source: "api",
-    },
-    visualContext: transcriptionResponse.visualContext,
-    insights: {
-      likes: downloadResponse.metrics.likes,
-      comments: downloadResponse.metrics.comments,
-      shares: downloadResponse.metrics.shares,
-      views: downloadResponse.metrics.views,
-      saves: downloadResponse.metrics.saves,
-      engagementRate,
-    },
-    addedAt: new Date(),
-    fileSize: downloadResponse.videoData?.size ?? 0,
-    duration: downloadResponse.additionalMetadata.duration,
-    hostedOnCDN: downloadResponse.hostedOnCDN,
-    originalUrl: originalUrl,
-  };
-
-  if (!downloadResponse.hostedOnCDN && downloadResponse.videoData) {
-    videoObject.videoData = downloadResponse.videoData;
-  }
-
-  return videoObject;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function updateCollectionVideoCount(adminDb: any, collectionId: string, currentVideoCount: number) {
-  await adminDb
-    .collection("collections")
-    .doc(collectionId)
-    .update({
-      videoCount: currentVideoCount + 1,
-      updatedAt: new Date(),
+async function streamToBunny(downloadData: any) {
+  try {
+    console.log("🐰 [Add Video API] Streaming to Bunny CDN...");
+    
+    const buffer = Buffer.from(downloadData.videoData.buffer);
+    const filename = downloadData.videoData.filename || `${downloadData.platform}-video.mp4`;
+    const mimeType = downloadData.videoData.mimeType || 'video/mp4';
+
+    console.log("🔍 [Add Video API] Buffer info:", {
+      bufferSize: buffer.length,
+      filename,
+      mimeType
     });
+
+    const result = await uploadToBunnyStream(buffer, filename, mimeType);
+    
+    console.log("🔍 [Add Video API] Upload result:", result);
+    
+    if (!result) {
+      console.error("❌ [Add Video API] Bunny stream failed - null result");
+      return { success: false, error: "Failed to upload to Bunny CDN" };
+    }
+
+    console.log("✅ [Add Video API] Bunny stream successful:", result.cdnUrl);
+    
+    return { 
+      success: true, 
+      iframeUrl: result.cdnUrl,
+      directUrl: result.cdnUrl,
+      guid: result.filename, // This is actually the GUID
+      thumbnailUrl: null
+    };
+    
+  } catch (error) {
+    console.error("❌ [Add Video API] Bunny stream error:", error);
+    return { success: false, error: error instanceof Error ? error.message : "Bunny stream failed" };
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function addVideoToCollection(collectionId: string, videoData: any) {
+  try {
+    console.log("💾 [Add Video API] Adding video to Firestore collection...");
+    
+    if (!isAdminInitialized) {
+      throw new Error("Firebase Admin SDK not initialized");
+    }
+
+    const adminDb = getAdminDb();
+    if (!adminDb) {
+      throw new Error("Admin database not available");
+    }
+
+    // Add the video document to Firestore
+    const videoRef = await adminDb.collection("videos").add({
+      ...videoData,
+      addedAt: new Date(),
+    });
+
+    console.log("✅ [Add Video API] Video added to collection with ID:", videoRef.id);
+
+    // Update collection video count
+    const collectionRef = adminDb.collection("collections").doc(collectionId);
+    const collectionDoc = await collectionRef.get();
+    
+    if (collectionDoc.exists) {
+      const currentCount = collectionDoc.data()?.videoCount || 0;
+      await collectionRef.update({
+        videoCount: currentCount + 1,
+        updatedAt: new Date(),
+      });
+      console.log("✅ [Add Video API] Collection video count updated:", currentCount + 1);
+    }
+
+    return { success: true, videoId: videoRef.id };
+  } catch (error) {
+    console.error("❌ [Add Video API] Failed to add video to collection:", error);
+    return { success: false, error: error instanceof Error ? error.message : "Failed to add video" };
+  }
+}
+
+function startBackgroundTranscription(
+  baseUrl: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  videoData: any,
+  videoId: string,
+  collectionId: string,
+  platform: string
+) {
+  // Start background transcription process (non-blocking)
+  setTimeout(async () => {
+    try {
+      console.log("🎙️ [Add Video API] Starting background transcription for video:", videoId);
+      
+      const response = await fetch(`${baseUrl}/api/video/transcribe`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          videoData,
+          videoId,
+          collectionId,
+          platform,
+        }),
+      });
+
+      if (response.ok) {
+        console.log("✅ [Add Video API] Background transcription started successfully");
+      } else {
+        console.error("❌ [Add Video API] Background transcription failed to start");
+      }
+    } catch (error) {
+      console.error("❌ [Add Video API] Error starting background transcription:", error);
+    }
+  }, 1000); // Start after 1 second delay
 }
 
 export async function POST(request: NextRequest) {
@@ -478,11 +313,11 @@ export async function POST(request: NextRequest) {
 
     // All validations passed - return immediate success response
     const validationTime = Date.now() - startTime;
-    console.log(`🎉 [${requestId}] All validations passed in ${validationTime}ms - returning immediate response`);
+    console.log(`🎉 [${requestId}] All validations passed in ${validationTime}ms - starting backend processing`);
 
-    // Start background processing (non-blocking)
+    // Start backend processing (non-blocking)
     setTimeout(() => {
-      processVideoInBackground(requestId, videoUrl, collectionId, title, collectionData, adminDb, request, userId);
+      processVideoInBackground(requestId, videoUrl, collectionId, title, userId, request);
     }, 0);
 
     // Return immediate success response
@@ -512,123 +347,91 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Background processing function with comprehensive logging
+// Background processing function using the same backend method as the add video button
 async function processVideoInBackground(
   requestId: string,
   videoUrl: string,
   collectionId: string,
   title: string | undefined,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  collectionData: any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  adminDb: any,
-  request: NextRequest,
   userId: string,
+  request: NextRequest,
 ) {
   const backgroundStartTime = Date.now();
 
   try {
-    console.log(`�� [${requestId}] Background processing started at ${new Date().toISOString()}`);
+    console.log(`🎬 [${requestId}] Background processing started at ${new Date().toISOString()}`);
 
-    // Step 6: Download video
-    console.log(`📥 [${requestId}] Step 6: Starting video download...`);
-    const downloadStartTime = Date.now();
-    const downloadResponse = await downloadVideo(videoUrl, request);
-    const downloadTime = Date.now() - downloadStartTime;
-    console.log(`✅ [${requestId}] Video download completed in ${downloadTime}ms`);
-    console.log(`📊 [${requestId}] Download details:`, {
-      platform: downloadResponse.platform,
-      hostedOnCDN: downloadResponse.hostedOnCDN,
-      filename: downloadResponse.filename,
-      hasVideoData: !!downloadResponse.videoData,
-      author: downloadResponse.additionalMetadata.author,
-      duration: downloadResponse.additionalMetadata.duration,
-      metrics: downloadResponse.metrics,
-    });
+    const baseUrl = getBaseUrl(request);
+    
+    // Decode URL to handle URL encoding issues (like Instagram)
+    const decodedUrl = decodeURIComponent(videoUrl);
+    console.log("🔍 [Add Video API] Decoded URL:", decodedUrl);
 
-    // Step 7: Transcribe video
-    console.log(`🎬 [${requestId}] Step 7: Starting video transcription...`);
-    const transcribeStartTime = Date.now();
-    const transcriptionResponse = await transcribeVideo(downloadResponse);
-    const transcribeTime = Date.now() - transcribeStartTime;
-    console.log(`✅ [${requestId}] Video transcription completed in ${transcribeTime}ms`);
-    console.log(`📝 [${requestId}] Transcription details:`, {
-      success: transcriptionResponse.success,
-      transcriptLength: transcriptionResponse.transcript.length,
-      hasComponents: !!(transcriptionResponse.components.hook && transcriptionResponse.components.bridge),
-      platform: transcriptionResponse.platform,
-      method: transcriptionResponse.transcriptionMetadata?.method,
-    });
+    // Step 1: Download video
+    console.log(`📥 [${requestId}] Step 1: Downloading video...`);
+    const downloadResult = await downloadVideo(baseUrl, decodedUrl);
+    
+    if (!downloadResult.success) {
+      console.error(`❌ [${requestId}] Download failed:`, downloadResult.error);
+      return;
+    }
 
-    // Step 8: Generate thumbnail
-    console.log(`🖼️ [${requestId}] Step 8: Generating thumbnail...`);
-    const thumbnailStartTime = Date.now();
-    const thumbnailUrl = await extractVideoThumbnail(downloadResponse);
-    const thumbnailTime = Date.now() - thumbnailStartTime;
-    console.log(`✅ [${requestId}] Thumbnail generation completed in ${thumbnailTime}ms`);
-    console.log(`🖼️ [${requestId}] Thumbnail URL: ${thumbnailUrl}`);
+    console.log(`✅ [${requestId}] Download successful`);
 
-    // Step 9: Create video object
-    console.log(`📦 [${requestId}] Step 9: Creating comprehensive video object...`);
-    const videoData = createVideoObject(downloadResponse, transcriptionResponse, thumbnailUrl, videoUrl, title);
+    // Step 2: Stream to Bunny CDN
+    console.log(`🎬 [${requestId}] Step 2: Streaming to Bunny CDN...`);
+    const streamResult = await streamToBunny(downloadResult.data);
+    
+    if (!streamResult.success) {
+      console.error(`❌ [${requestId}] Streaming failed:`, streamResult.error);
+      return;
+    }
 
-    videoData.userId = userId;
-    videoData.collectionId = collectionId;
-    videoData.processingMetadata = {
-      requestId: requestId,
-      processedAt: new Date().toISOString(),
-      processingTimes: {
-        download: `${downloadTime}ms`,
-        transcription: `${transcribeTime}ms`,
-        thumbnail: `${thumbnailTime}ms`,
-      },
+    console.log(`✅ [${requestId}] Streaming successful`);
+
+    // Step 3: Add to collection with userId
+    console.log(`💾 [${requestId}] Step 3: Adding to collection...`);
+    const videoData = {
+      originalUrl: decodedUrl,
+      title: title || `Video from ${downloadResult.data.platform}`,
+      platform: downloadResult.data.platform,
+      iframeUrl: streamResult.iframeUrl,
+      directUrl: streamResult.directUrl,
+      guid: streamResult.guid,
+      thumbnailUrl: downloadResult.data.thumbnailUrl || streamResult.thumbnailUrl,
+      metrics: downloadResult.data.metrics || {},
+      metadata: downloadResult.data.metadata || {},
+      transcriptionStatus: 'pending',
+      userId: userId,
+      collectionId: collectionId,
     };
 
-    console.log(`📄 [${requestId}] Video object created:`, {
-      title: videoData.title,
-      platform: videoData.platform,
-      url: videoData.url,
-      author: videoData.author,
-      collectionId: videoData.collectionId,
-      userId: videoData.userId,
-      hasTranscript: !!videoData.transcript,
-      hasComponents: !!videoData.components,
-      fileSize: videoData.fileSize,
-      duration: videoData.duration,
-      thumbnailUrl: videoData.thumbnailUrl,
-      engagementRate: videoData.engagementRate,
-    });
+    const addResult = await addVideoToCollection(collectionId, videoData);
+    
+    if (!addResult.success) {
+      console.error(`❌ [${requestId}] Failed to add to collection:`, addResult.error);
+      return;
+    }
 
-    // Step 10: Save to Firestore
-    console.log(`💾 [${requestId}] Step 10: Saving video to Firestore...`);
-    const saveStartTime = Date.now();
-    const videoDocRef = await adminDb.collection("videos").add(videoData);
-    const saveTime = Date.now() - saveStartTime;
-    console.log(`✅ [${requestId}] Video saved to Firestore in ${saveTime}ms with ID: ${videoDocRef.id}`);
-
-    // Step 11: Update collection video count
-    console.log(`📊 [${requestId}] Step 11: Updating collection video count...`);
-    const currentVideoCount = collectionData?.videoCount ?? 0;
-    const updateStartTime = Date.now();
-    await updateCollectionVideoCount(adminDb, collectionId, currentVideoCount);
-    const updateTime = Date.now() - updateStartTime;
-    console.log(
-      `✅ [${requestId}] Collection video count updated in ${updateTime}ms: ${currentVideoCount} → ${currentVideoCount + 1}`,
+    // Step 4: Start background transcription
+    console.log(`🎙️ [${requestId}] Step 4: Starting background transcription...`);
+    startBackgroundTranscription(
+      baseUrl,
+      downloadResult.data.videoData,
+      addResult.videoId,
+      collectionId,
+      downloadResult.data.platform
     );
 
     const totalProcessingTime = Date.now() - backgroundStartTime;
     console.log(`🎉 [${requestId}] PROCESSING COMPLETED SUCCESSFULLY in ${totalProcessingTime}ms`);
     console.log(`📈 [${requestId}] Final processing summary:`, {
-      videoId: videoDocRef.id,
+      videoId: addResult.videoId,
       collectionId: collectionId,
+      platform: downloadResult.data.platform,
+      iframe: streamResult.iframeUrl,
+      transcriptionStatus: 'processing',
       totalTime: `${totalProcessingTime}ms`,
-      breakdown: {
-        download: `${downloadTime}ms`,
-        transcription: `${transcribeTime}ms`,
-        thumbnail: `${thumbnailTime}ms`,
-        save: `${saveTime}ms`,
-        update: `${updateTime}ms`,
-      },
       success: true,
       completedAt: new Date().toISOString(),
     });
@@ -644,9 +447,6 @@ async function processVideoInBackground(
       failedAt: new Date().toISOString(),
       processingTime: `${totalTime}ms`,
     });
-
-    // TODO: Consider implementing a retry mechanism or error notification system
-    // For now, we log the error but don't notify the client since they already got a success response
   }
 }
 
@@ -671,7 +471,7 @@ async function getCollectionVideos(adminDb: any, collectionId: string) {
   });
 
   // Sort in memory by addedAt (most recent first)
-  return videos.sort((a: any, b: any) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime());
+  return videos.sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime());
 }
 
 export async function GET(request: NextRequest) {

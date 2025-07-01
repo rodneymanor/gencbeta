@@ -422,7 +422,6 @@ function CollectionsPageContent() {
               <ManageModeHeader
                 manageMode={manageMode}
                 selectedVideos={selectedVideos}
-                videosLength={videos.length}
                 collections={collections}
                 selectedCollectionId={selectedCollectionId}
                 onManageModeToggle={() => userProfile?.role !== "creator" && setManageMode(true)}
@@ -431,7 +430,6 @@ function CollectionsPageContent() {
                 onClearSelection={clearSelection}
                 onSelectAll={selectAllVideos}
                 onVideoAdded={handleVideoAdded}
-                onCollectionDeleted={handleCollectionDeleted}
               />
             </div>
           </div>

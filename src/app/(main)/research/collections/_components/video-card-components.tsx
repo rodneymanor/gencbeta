@@ -1,12 +1,9 @@
 "use client";
 
-import { useState, memo } from "react";
-
 import { MoreVertical, Trash2, ExternalLink, Clock, TrendingUp, Zap, RefreshCw } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -16,78 +13,28 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { VideoEmbed } from "@/components/video-embed";
 
 import type { VideoWithPlayer } from "./collections-helpers";
 
 // Legacy video type for backward compatibility
-type LegacyVideo = VideoWithPlayer & {
+export type LegacyVideo = VideoWithPlayer & {
   url?: string; // Legacy field that might contain Bunny.net URLs
 };
 
-// Helper function to get the correct video URL
-const getVideoUrl = (video: LegacyVideo): string => {
-  console.log("🔍 [VideoCard] Video data:", {
-    id: video.id,
-    iframeUrl: video.iframeUrl,
-    url: video.url,
-    originalUrl: video.originalUrl,
-  });
-
-  // Priority order: iframeUrl -> legacy url (if Bunny) -> originalUrl -> empty
-  if (video.iframeUrl) {
-    console.log("✅ [VideoCard] Using iframeUrl:", video.iframeUrl);
-    return video.iframeUrl;
-  }
-
-  if (video.url && video.url.includes("iframe.mediadelivery.net")) {
-    console.log("✅ [VideoCard] Using legacy Bunny URL:", video.url);
-    return video.url;
-  }
-
-  if (video.originalUrl) {
-    console.log("⚠️ [VideoCard] Falling back to originalUrl (will be rejected):", video.originalUrl);
-    return video.originalUrl;
-  }
-
-  console.log("❌ [VideoCard] No valid URL found - returning empty string");
-  return "";
-};
-
-interface VideoCardProps {
-  video: VideoWithPlayer;
-  isManageMode: boolean;
-  isSelected: boolean;
-  isDeleting: boolean;
-  isReprocessing?: boolean;
-  onToggleSelection: () => void;
-  onDelete: () => void;
-  onReprocess?: (video: VideoWithPlayer) => void;
-  className?: string;
-}
-
 // Coming Soon Modal Component
-const ComingSoonModal = ({ isOpen, onClose, title }: { isOpen: boolean; onClose: () => void; title: string }) => (
+export const ComingSoonModal = ({ isOpen, onClose, title }: { isOpen: boolean; onClose: () => void; title: string }) => (
   <Dialog open={isOpen} onOpenChange={onClose}>
-    <DialogContent className="border-border/60 shadow-lg sm:max-w-md">
-      <DialogHeader className="space-y-3 text-center">
-        <DialogTitle className="text-xl font-semibold">{title}</DialogTitle>
-        <DialogDescription className="text-muted-foreground leading-relaxed">
-          This feature is coming soon! We&apos;re working hard to bring you powerful video analysis and content
-          repurposing tools.
-        </DialogDescription>
+    <DialogContent className="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle>{title}</DialogTitle>
+        <DialogDescription>This feature is coming soon! Stay tuned for updates.</DialogDescription>
       </DialogHeader>
-      <div className="flex justify-center pt-4">
-        <Button onClick={onClose} className="shadow-xs transition-all duration-200 hover:shadow-sm">
-          Got it
-        </Button>
-      </div>
     </DialogContent>
   </Dialog>
 );
 
 // Video actions dropdown component to reduce complexity
-const VideoActionsDropdown = ({ onDelete }: { onDelete: () => void }) => (
+export const VideoActionsDropdown = ({ onDelete }: { onDelete: () => void }) => (
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
       <Button
@@ -114,7 +61,7 @@ const VideoActionsDropdown = ({ onDelete }: { onDelete: () => void }) => (
 );
 
 // Helper Components
-const ManagementModeSelection = ({
+export const ManagementModeSelection = ({
   isManageMode,
   isSelected,
   onToggleSelection,
@@ -140,7 +87,7 @@ const ManagementModeSelection = ({
 };
 
 // Reprocess Video Component for Legacy Videos
-const ReprocessVideoOverlay = ({
+export const ReprocessVideoOverlay = ({
   video,
   onReprocess,
   onDelete,
@@ -187,7 +134,7 @@ const ReprocessVideoOverlay = ({
   );
 };
 
-const PlatformBadge = ({ platform }: { platform: string }) => (
+export const PlatformBadge = ({ platform }: { platform: string }) => (
   <div className="absolute top-3 right-3 z-15">
     <Badge
       variant="secondary"
@@ -198,7 +145,7 @@ const PlatformBadge = ({ platform }: { platform: string }) => (
   </div>
 );
 
-const DurationBadge = ({ duration }: { duration?: number }) => {
+export const DurationBadge = ({ duration }: { duration?: number }) => {
   if (!duration) return null;
 
   return (
@@ -214,7 +161,7 @@ const DurationBadge = ({ duration }: { duration?: number }) => {
   );
 };
 
-const HoverActions = ({ showActions, onDelete }: { showActions: boolean; onDelete: () => void }) => {
+export const HoverActions = ({ showActions, onDelete }: { showActions: boolean; onDelete: () => void }) => {
   if (!showActions) return null;
 
   return (
@@ -224,7 +171,7 @@ const HoverActions = ({ showActions, onDelete }: { showActions: boolean; onDelet
   );
 };
 
-const ActionButtons = ({
+export const ActionButtons = ({
   onShowInsights,
   onShowRepurpose,
 }: {
@@ -251,99 +198,4 @@ const ActionButtons = ({
       Repurpose
     </Button>
   </div>
-);
-
-export const VideoCard = memo<VideoCardProps>(
-  ({
-    video,
-    isManageMode,
-    isSelected,
-    isDeleting,
-    isReprocessing,
-    onToggleSelection,
-    onDelete,
-    onReprocess,
-    className = "",
-  }) => {
-    const [isHovered, setIsHovered] = useState(false);
-    const [showInsightsModal, setShowInsightsModal] = useState(false);
-    const [showRepurposeModal, setShowRepurposeModal] = useState(false);
-
-    const cardClassName = `group relative overflow-hidden transition-all duration-200 hover:shadow-lg border-border/50 hover:border-border ${className} ${
-      isSelected ? "ring-2 ring-primary shadow-md" : ""
-    } ${isDeleting ? "opacity-50 pointer-events-none" : ""}`;
-
-    const showActions = (isHovered || isManageMode) && !isDeleting;
-
-    return (
-      <>
-        <Card
-          className={cardClassName}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-        >
-          {/* Management Mode Selection */}
-          <ManagementModeSelection
-            isManageMode={isManageMode}
-            isSelected={isSelected}
-            onToggleSelection={onToggleSelection}
-            videoTitle={video.title}
-          />
-
-          {/* Video Content */}
-          <div className="bg-muted/30 relative aspect-[9/16] overflow-hidden">
-            <VideoEmbed url={getVideoUrl(video as LegacyVideo)} className="absolute inset-0 h-full w-full" />
-
-            {/* Reprocess Video Overlay for Legacy Videos */}
-            {onReprocess && (
-              <ReprocessVideoOverlay
-                video={video as LegacyVideo}
-                onReprocess={onReprocess}
-                onDelete={onDelete}
-                isReprocessing={isReprocessing}
-              />
-            )}
-
-            {/* Platform Badge */}
-            <PlatformBadge platform={video.platform} />
-
-            {/* Duration Badge */}
-            <DurationBadge duration={video.duration} />
-
-            {/* Hover Actions */}
-            <HoverActions showActions={showActions} onDelete={onDelete} />
-          </div>
-
-          {/* Action Buttons */}
-          <ActionButtons
-            onShowInsights={() => setShowInsightsModal(true)}
-            onShowRepurpose={() => setShowRepurposeModal(true)}
-          />
-        </Card>
-
-        {/* Coming Soon Modals */}
-        <ComingSoonModal
-          isOpen={showInsightsModal}
-          onClose={() => setShowInsightsModal(false)}
-          title="Video Insights"
-        />
-        <ComingSoonModal
-          isOpen={showRepurposeModal}
-          onClose={() => setShowRepurposeModal(false)}
-          title="Content Repurposing"
-        />
-      </>
-    );
-  },
-  (prevProps, nextProps) => {
-    return (
-      prevProps.video.id === nextProps.video.id &&
-      prevProps.isManageMode === nextProps.isManageMode &&
-      prevProps.isSelected === nextProps.isSelected &&
-      prevProps.isDeleting === nextProps.isDeleting &&
-      prevProps.isReprocessing === nextProps.isReprocessing
-    );
-  },
-);
-
-VideoCard.displayName = "VideoCard";
+); 
