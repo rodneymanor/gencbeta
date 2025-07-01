@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/auth-context";
-import { CollectionsService, type Collection } from "@/lib/collections";
+import { CollectionsService, type Collection, type Video } from "@/lib/collections";
 import { CollectionsRBACService } from "@/lib/collections-rbac";
 
 import { CollectionBadgeMenu } from "./_components/collection-badge-menu";

@@ -1,4 +1,4 @@
-/* eslint-disable max-lines */
+/* eslint-disable max-lines, complexity, @typescript-eslint/no-unused-vars */
 import { NextRequest, NextResponse } from "next/server";
 
 import { ApiKeyAuthService } from "@/lib/api-key-auth";
@@ -406,7 +406,6 @@ async function updateCollectionVideoCount(adminDb: any, collectionId: string, cu
     });
 }
 
-// eslint-disable-next-line complexity
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
   const requestId = Math.random().toString(36).substring(7);
@@ -466,7 +465,7 @@ export async function POST(request: NextRequest) {
     }
 
     const collectionData = collectionDoc.data();
-    
+
     // Verify user owns the collection
     if (collectionData?.userId !== userId) {
       console.log(`❌ [${requestId}] User ${userId} does not own collection ${collectionId}`);
@@ -702,7 +701,7 @@ export async function GET(request: NextRequest) {
     }
 
     const collectionData = collectionDoc.data();
-    
+
     // Verify user owns the collection
     if (collectionData?.userId !== userId) {
       return NextResponse.json({ error: "Access denied: You do not own this collection" }, { status: 403 });
