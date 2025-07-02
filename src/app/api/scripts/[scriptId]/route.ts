@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { adminDb } from "@/lib/firebase-admin";
 import { authenticateApiKey } from "@/lib/api-key-auth";
+import { adminDb } from "@/lib/firebase-admin";
 import { UpdateScriptRequest, Script, ScriptResponse } from "@/types/script";
 
 // Helper function to calculate estimated duration from word count
@@ -9,19 +9,19 @@ function calculateDuration(content: string): string {
   const words = content.trim().split(/\s+/).length;
   const wordsPerMinute = 150; // Average speaking rate
   const minutes = Math.ceil(words / wordsPerMinute);
-  
+
   if (minutes < 1) {
     const seconds = Math.ceil((words / wordsPerMinute) * 60);
     return `${seconds}s`;
   }
-  
-  return `${minutes}:${String(Math.round((words % wordsPerMinute) / wordsPerMinute * 60)).padStart(2, '0')}`;
+
+  return `${minutes}:${String(Math.round(((words % wordsPerMinute) / wordsPerMinute) * 60)).padStart(2, "0")}`;
 }
 
 // GET: Fetch a specific script
 export async function GET(
   request: NextRequest,
-  { params }: { params: { scriptId: string } }
+  { params }: { params: { scriptId: string } },
 ): Promise<NextResponse<ScriptResponse>> {
   try {
     console.log("📖 [Script API] GET request for script:", params.scriptId);
@@ -43,11 +43,11 @@ export async function GET(
           success: false,
           error: "Script not found",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
-    const scriptData = scriptDoc.data() as Omit<Script, 'id'>;
+    const scriptData = scriptDoc.data() as Omit<Script, "id">;
 
     // Verify ownership
     if (scriptData.userId !== userId) {
@@ -56,7 +56,7 @@ export async function GET(
           success: false,
           error: "Access denied",
         },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -84,15 +84,36 @@ export async function GET(
         success: false,
         error: "Failed to fetch script",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
+}
+
+// Helper function to prepare update data
+function prepareUpdateData(body: UpdateScriptRequest): Partial<Script> {
+  const updateData: Partial<Script> = {
+    updatedAt: new Date().toISOString(),
+    ...(body.title && { title: body.title }),
+    ...(body.category && { category: body.category }),
+    ...(body.tags && { tags: body.tags }),
+    ...(body.summary && { summary: body.summary }),
+    ...(body.status && { status: body.status }),
+  };
+
+  // Handle content update separately due to additional calculations
+  if (body.content) {
+    updateData.content = body.content;
+    updateData.duration = calculateDuration(body.content);
+    updateData.wordCount = body.content.trim().split(/\s+/).length;
+  }
+
+  return updateData;
 }
 
 // PUT: Update a script
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { scriptId: string } }
+  { params }: { params: { scriptId: string } },
 ): Promise<NextResponse<ScriptResponse>> {
   try {
     console.log("✏️ [Script API] PUT request for script:", params.scriptId);
@@ -115,11 +136,11 @@ export async function PUT(
           success: false,
           error: "Script not found",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
-    const existingData = scriptDoc.data() as Omit<Script, 'id'>;
+    const existingData = scriptDoc.data() as Omit<Script, "id">;
 
     // Verify ownership
     if (existingData.userId !== userId) {
@@ -128,30 +149,14 @@ export async function PUT(
           success: false,
           error: "Access denied",
         },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
-    console.log("💾 [Script API] Updating script:", body.title || existingData.title);
+    console.log("💾 [Script API] Updating script:", body.title ?? existingData.title);
 
-    // Prepare update data
-    const updateData: Partial<Script> = {
-      updatedAt: new Date().toISOString(),
-    };
-
-    // Update fields if provided
-    if (body.title) updateData.title = body.title;
-    if (body.content) {
-      updateData.content = body.content;
-      updateData.duration = calculateDuration(body.content);
-      updateData.wordCount = body.content.trim().split(/\s+/).length;
-    }
-    if (body.category) updateData.category = body.category;
-    if (body.tags) updateData.tags = body.tags;
-    if (body.summary) updateData.summary = body.summary;
-    if (body.status) updateData.status = body.status;
-
-    // Update in Firestore
+    // Prepare and apply update
+    const updateData = prepareUpdateData(body);
     await adminDb.collection("scripts").doc(params.scriptId).update(updateData);
 
     // Fetch updated script
@@ -174,7 +179,7 @@ export async function PUT(
         success: false,
         error: "Failed to update script",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -182,7 +187,7 @@ export async function PUT(
 // DELETE: Delete a script
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { scriptId: string } }
+  { params }: { params: { scriptId: string } },
 ): Promise<NextResponse<{ success: boolean; error?: string }>> {
   try {
     console.log("🗑️ [Script API] DELETE request for script:", params.scriptId);
@@ -204,11 +209,11 @@ export async function DELETE(
           success: false,
           error: "Script not found",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
-    const scriptData = scriptDoc.data() as Omit<Script, 'id'>;
+    const scriptData = scriptDoc.data() as Omit<Script, "id">;
 
     // Verify ownership
     if (scriptData.userId !== userId) {
@@ -217,7 +222,7 @@ export async function DELETE(
           success: false,
           error: "Access denied",
         },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -236,7 +241,7 @@ export async function DELETE(
         success: false,
         error: "Failed to delete script",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
-} 
+}

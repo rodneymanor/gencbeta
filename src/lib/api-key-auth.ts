@@ -1,6 +1,9 @@
 import { createHash } from "crypto";
 
+import { NextResponse } from "next/server";
+
 import { getAdminDb, isAdminInitialized } from "./firebase-admin";
+import { authenticateWithFirebaseToken } from "./firebase-auth-helpers";
 import { UserManagementAdminService } from "./user-management-admin";
 
 interface ApiKeyDocument {
@@ -261,5 +264,88 @@ export class ApiKeyAuthService {
     }
 
     return null;
+  }
+}
+
+/**
+ * Helper function to authenticate via API key
+ */
+async function authenticateWithApiKey(
+  apiKey: string,
+): Promise<{ user: AuthenticatedUser; rateLimitResult: RateLimitResult } | NextResponse> {
+  console.log("🔑 [Auth] Attempting API key authentication");
+
+  // Validate API key
+  const authResult = await ApiKeyAuthService.validateApiKey(apiKey);
+  if (!authResult) {
+    console.log("❌ [Auth] Invalid API key");
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Invalid API key. Please check your API key and try again.",
+      },
+      { status: 401 },
+    );
+  }
+
+  // Check rate limiting
+  if (!authResult.rateLimitResult.allowed) {
+    console.log("🚫 [Auth] Request blocked by rate limiting");
+    return NextResponse.json(
+      {
+        success: false,
+        error: authResult.rateLimitResult.reason ?? "Rate limit exceeded",
+        resetTime: authResult.rateLimitResult.resetTime,
+      },
+      { status: 429 },
+    );
+  }
+
+  console.log("✅ [Auth] API key authenticated successfully for user:", authResult.user.email);
+  return authResult;
+}
+
+/**
+ * Standalone authentication function for API routes
+ * Supports both API key authentication (for external access) and Firebase Auth tokens (for internal frontend)
+ * Returns authenticated user context or NextResponse error
+ */
+export async function authenticateApiKey(
+  request: Request,
+): Promise<{ user: AuthenticatedUser; rateLimitResult: RateLimitResult } | NextResponse> {
+  try {
+    console.log("🔐 [Auth] Authenticating API request");
+
+    // First, try API key authentication
+    const apiKey = ApiKeyAuthService.extractApiKey(request);
+    if (apiKey) {
+      return await authenticateWithApiKey(apiKey);
+    }
+
+    // If no API key, try Firebase Auth token
+    const authHeader = request.headers.get("authorization");
+
+    if (!authHeader?.startsWith("Bearer ")) {
+      console.log("❌ [Auth] No valid authentication provided");
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Authentication required. Please provide either an API key or Firebase Auth token.",
+        },
+        { status: 401 },
+      );
+    }
+
+    const token = authHeader.substring(7);
+    return await authenticateWithFirebaseToken(token);
+  } catch (error) {
+    console.error("❌ [Auth] Authentication error:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Authentication failed. Please try again.",
+      },
+      { status: 500 },
+    );
   }
 }

@@ -7,7 +7,6 @@ import { Download, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { TableLoading } from "@/components/ui/loading-animations";
-
 import { useScripts } from "@/hooks/use-scripts";
 import { Script } from "@/types/script";
 
@@ -23,24 +22,17 @@ interface ColumnVisibility {
   summary: boolean;
 }
 
-
-
 // Helper functions
 const getSortValue = (script: Script, sortBy: string): string | number => {
-  switch (sortBy) {
-    case "title":
-      return script.title;
-    case "authors":
-      return script.authors;
-    case "added":
-      return new Date(script.createdAt).getTime();
-    case "viewed":
-      return new Date(script.viewedAt).getTime();
-    case "fileType":
-      return script.fileType;
-    default:
-      return script.title;
-  }
+  const sortMap: Record<string, string | number> = {
+    title: script.title,
+    authors: script.authors,
+    added: new Date(script.createdAt).getTime(),
+    viewed: new Date(script.viewedAt).getTime(),
+    fileType: script.fileType,
+  };
+
+  return sortMap[sortBy] ?? script.title;
 };
 
 const sortScripts = (scripts: Script[], sortBy: string, sortOrder: "asc" | "desc"): Script[] => {
@@ -112,7 +104,7 @@ export default function ScriptsLibraryPage() {
 
   const handleDeleteSelected = async () => {
     if (selectedScripts.length === 0) return;
-    
+
     const deletePromises = selectedScripts.map((scriptId) => deleteScript(scriptId));
     await Promise.all(deletePromises);
     setSelectedScripts([]);
@@ -134,8 +126,8 @@ export default function ScriptsLibraryPage() {
         <Card className="border-destructive/20 bg-destructive/5">
           <CardContent className="p-6">
             <div className="text-center">
-              <h3 className="text-lg font-semibold text-destructive">Failed to load scripts</h3>
-              <p className="text-sm text-muted-foreground mt-2">
+              <h3 className="text-destructive text-lg font-semibold">Failed to load scripts</h3>
+              <p className="text-muted-foreground mt-2 text-sm">
                 {error instanceof Error ? error.message : "An unknown error occurred"}
               </p>
             </div>
@@ -171,9 +163,9 @@ export default function ScriptsLibraryPage() {
                   <Download className="mr-2 h-4 w-4" />
                   Export
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="text-destructive"
                   onClick={handleDeleteSelected}
                   disabled={isDeleting}

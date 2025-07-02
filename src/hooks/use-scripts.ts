@@ -1,16 +1,34 @@
 "use client";
 
 import { useState, useCallback } from "react";
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Script, CreateScriptRequest, UpdateScriptRequest, ScriptsResponse, ScriptResponse } from "@/types/script";
 
+// Helper function to get auth headers
+async function getAuthHeaders(): Promise<HeadersInit> {
+  // Import auth here to avoid SSR issues
+  const { auth } = await import("@/lib/firebase");
+
+  if (!auth?.currentUser) {
+    throw new Error("User not authenticated");
+  }
+
+  const token = await auth.currentUser.getIdToken();
+
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  };
+}
+
 // API Functions
 async function fetchScripts(): Promise<Script[]> {
+  const headers = await getAuthHeaders();
+
   const response = await fetch("/api/scripts", {
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -18,20 +36,20 @@ async function fetchScripts(): Promise<Script[]> {
   }
 
   const data: ScriptsResponse = await response.json();
-  
+
   if (!data.success) {
-    throw new Error(data.error || "Failed to fetch scripts");
+    throw new Error(data.error ?? "Failed to fetch scripts");
   }
 
   return data.scripts;
 }
 
 async function createScript(scriptData: CreateScriptRequest): Promise<Script> {
+  const headers = await getAuthHeaders();
+
   const response = await fetch("/api/scripts", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers,
     body: JSON.stringify(scriptData),
   });
 
@@ -40,20 +58,20 @@ async function createScript(scriptData: CreateScriptRequest): Promise<Script> {
   }
 
   const data: ScriptResponse = await response.json();
-  
+
   if (!data.success || !data.script) {
-    throw new Error(data.error || "Failed to create script");
+    throw new Error(data.error ?? "Failed to create script");
   }
 
   return data.script;
 }
 
 async function updateScript(scriptId: string, updates: UpdateScriptRequest): Promise<Script> {
+  const headers = await getAuthHeaders();
+
   const response = await fetch(`/api/scripts/${scriptId}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers,
     body: JSON.stringify(updates),
   });
 
@@ -62,20 +80,20 @@ async function updateScript(scriptId: string, updates: UpdateScriptRequest): Pro
   }
 
   const data: ScriptResponse = await response.json();
-  
+
   if (!data.success || !data.script) {
-    throw new Error(data.error || "Failed to update script");
+    throw new Error(data.error ?? "Failed to update script");
   }
 
   return data.script;
 }
 
 async function deleteScript(scriptId: string): Promise<void> {
+  const headers = await getAuthHeaders();
+
   const response = await fetch(`/api/scripts/${scriptId}`, {
     method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -83,17 +101,17 @@ async function deleteScript(scriptId: string): Promise<void> {
   }
 
   const data = await response.json();
-  
+
   if (!data.success) {
-    throw new Error(data.error || "Failed to delete script");
+    throw new Error(data.error ?? "Failed to delete script");
   }
 }
 
 async function fetchScript(scriptId: string): Promise<Script> {
+  const headers = await getAuthHeaders();
+
   const response = await fetch(`/api/scripts/${scriptId}`, {
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -101,9 +119,9 @@ async function fetchScript(scriptId: string): Promise<Script> {
   }
 
   const data: ScriptResponse = await response.json();
-  
+
   if (!data.success || !data.script) {
-    throw new Error(data.error || "Failed to fetch script");
+    throw new Error(data.error ?? "Failed to fetch script");
   }
 
   return data.script;
@@ -147,7 +165,7 @@ export function useScripts() {
     onSuccess: (updatedScript) => {
       // Update the script in the cache
       queryClient.setQueryData(["scripts"], (oldScripts: Script[] = []) =>
-        oldScripts.map((script) => (script.id === updatedScript.id ? updatedScript : script))
+        oldScripts.map((script) => (script.id === updatedScript.id ? updatedScript : script)),
       );
     },
     onError: (error) => {
@@ -161,7 +179,7 @@ export function useScripts() {
     onSuccess: (_, scriptId) => {
       // Remove the script from the cache
       queryClient.setQueryData(["scripts"], (oldScripts: Script[] = []) =>
-        oldScripts.filter((script) => script.id !== scriptId)
+        oldScripts.filter((script) => script.id !== scriptId),
       );
     },
     onError: (error) => {
@@ -183,7 +201,7 @@ export function useScripts() {
         setIsCreating(false);
       }
     },
-    [createScriptMutation]
+    [createScriptMutation],
   );
 
   const handleUpdateScript = useCallback(
@@ -199,7 +217,7 @@ export function useScripts() {
         setIsUpdating(false);
       }
     },
-    [updateScriptMutation]
+    [updateScriptMutation],
   );
 
   const handleDeleteScript = useCallback(
@@ -215,7 +233,7 @@ export function useScripts() {
         setIsDeleting(false);
       }
     },
-    [deleteScriptMutation]
+    [deleteScriptMutation],
   );
 
   return {
@@ -245,4 +263,4 @@ export function useScript(scriptId: string | null) {
     enabled: !!scriptId,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
-} 
+}
