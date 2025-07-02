@@ -50,10 +50,19 @@ export default function NewScriptPage() {
   const [speedWriteResponse, setSpeedWriteResponse] = useState<SpeedWriteResponse | null>(null);
 
   const callSpeedWriteAPI = async (idea: string): Promise<SpeedWriteResponse> => {
+    // Get Firebase Auth token
+    const { auth } = await import("@/lib/firebase");
+    if (!auth?.currentUser) {
+      throw new Error("User not authenticated");
+    }
+
+    const token = await auth.currentUser.getIdToken();
+
     const response = await fetch("/api/script/speed-write", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
       },
       body: JSON.stringify({
         idea,

@@ -3,13 +3,13 @@ import { AIVoicesService } from "@/lib/ai-voices-service";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { voiceId: string } }
+  { params }: { params: Promise<{ voiceId: string }> }
 ) {
   try {
     // TODO: Get user ID from auth context
     const userId = "temp-user-id"; // Temporary until auth is implemented
 
-    const { voiceId } = params;
+    const { voiceId } = await params;
 
     if (!voiceId) {
       return NextResponse.json(

@@ -126,15 +126,24 @@ export default function ScriptEditorPage() {
       setIsGenerating(true);
 
       try {
+        // Get Firebase Auth token
+        const { auth } = await import("@/lib/firebase");
+        if (!auth?.currentUser) {
+          throw new Error("User not authenticated");
+        }
+
+        const token = await auth.currentUser.getIdToken();
+
         const response = await fetch("/api/script/speed-write", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
           },
           body: JSON.stringify({
             idea,
             length: length as "20" | "60" | "90",
-            userId: "user-id", // Replace with actual user ID when available
+            userId: auth.currentUser.uid,
           }),
         });
 
@@ -177,7 +186,7 @@ export default function ScriptEditorPage() {
           };
           setChatHistory((prev) => [...prev, aiMessage]);
         } else {
-          throw new Error(data.error || "Failed to generate scripts");
+          throw new Error(data.error ?? "Failed to generate scripts");
         }
       } catch (error) {
         console.error("❌ Script generation failed:", error);
@@ -272,7 +281,7 @@ export default function ScriptEditorPage() {
 
   // Parse URL parameters on mount
   useEffect(() => {
-    const { idea, videoUrl, mode, length, inputType, hasSpeedWriteResults } = parseUrlParameters();
+    const { idea, videoUrl, mode, length, inputType } = parseUrlParameters();
 
     // Handle different input types
     if (inputType === "video" && videoUrl) {

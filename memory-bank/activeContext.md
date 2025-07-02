@@ -1,9 +1,203 @@
-# Active Context: Brand Profile System & UI Enhancements
+# Active Context: Production-Ready Usage Tracking System
 
-## Current State: Brand Profile System Production Ready ✅
-The Gen C Beta application now features a complete brand profile generation system with AI-powered content strategies, alongside the existing production-ready video collection system. Recent focus has been on fixing UI/UX issues and database integration problems.
+## Current State: Complete Credit-Based Usage Tracking System ✅
+The Gen C Beta application now features a comprehensive, production-ready usage tracking system with real-time credit deduction, alongside the existing brand profile generation and video collection systems. The system enforces credit limits, tracks detailed usage analytics, and provides real-time UI feedback.
 
-## 🎉 **LATEST COMPLETION: Brand Profile System Fully Operational (January 2, 2025)**
+## 🎉 **LATEST COMPLETION: Usage Tracking System Fully Operational (January 2, 2025)**
+
+### **Production-Ready Credit Management System**
+**Complete Real-Time Usage Tracking**: Users now have credit-based access control with automatic deduction, period resets, and comprehensive analytics.
+
+**Technical Implementation**:
+- **CreditsService Class**: Comprehensive credit management with atomic transactions
+- **Firestore Integration**: Three new collections for credits, transactions, and usage tracking
+- **Real-Time UI Components**: UsageTracker sidebar component with 30-second refresh intervals
+- **API Integration**: Credit checking and deduction in speed-write API
+- **Account Level Enforcement**: Different limits for free vs pro users
+
+### **Credit System Design**
+
+#### **🎯 Credit Allocation & Costs**
+**Free Users**: 3 credits/day (resets daily at midnight)
+**Pro Users**: 5,000 credits/month (resets monthly)
+
+**Credit Costs**:
+- Script Generation: 1 credit
+- Voice Training: 80 credits (analyzing ~100 videos)
+- Video Analysis/Collection Add: 1 credit
+- API Calls: 1 credit
+
+#### **🔄 Real-Time Credit Deduction**
+**Automatic Enforcement**: Credits are checked before operations and deducted immediately upon success
+**Atomic Transactions**: Firestore batches ensure data consistency
+**Period Management**: Automatic daily/monthly resets with proper timezone handling
+
+### **UI Components Implementation**
+
+#### **📊 UsageTracker Component (Sidebar Footer)**
+```typescript
+// Real-time credit display with 30-second refresh
+const UsageTracker = () => {
+  // Auto-refresh every 30 seconds for real-time updates
+  useEffect(() => {
+    const interval = setInterval(fetchUsageStats, 30000);
+    return () => clearInterval(interval);
+  }, [user]);
+  
+  // Color-coded progress bar: green → yellow → red
+  const isLowCredits = usageStats.percentageUsed >= 80;
+  const isOutOfCredits = usageStats.creditsRemaining === 0;
+};
+```
+
+**Features**:
+- Real-time credit balance display
+- Color-coded progress bar (green/yellow/red)
+- Reset timer countdown
+- Account level badge (Free/Pro)
+- Upgrade prompt for free users
+
+#### **📈 SocialStats Component (Header)**
+```typescript
+// Auto-rotating carousel for social media stats
+const SocialStats = () => {
+  // Auto-rotate through platforms every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % socialStats.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [socialStats.length]);
+};
+```
+
+**Features**:
+- Auto-rotating carousel for Instagram/TikTok stats
+- Follower count with weekly change indicators
+- Stock ticker-style design with trend arrows
+- Platform icons and manual navigation controls
+
+### **Backend Credit Management**
+
+#### **🏗️ CreditsService Architecture**
+```typescript
+export class CreditsService {
+  // Core credit operations
+  static async initializeUserCredits(userId: string, accountLevel: AccountLevel): Promise<UserCredits>
+  static async getUserCredits(userId: string, accountLevel: AccountLevel): Promise<UserCredits>
+  static async canPerformAction(userId: string, operation: CreditOperation, accountLevel: AccountLevel)
+  static async deductCredits(userId: string, operation: CreditOperation, accountLevel: AccountLevel)
+  static async getUsageStats(userId: string, accountLevel: AccountLevel): Promise<UsageStats>
+  static async trackUsageAndDeductCredits() // One-call operation for API routes
+  
+  // Period management
+  private static async checkAndResetPeriod(userCredits: UserCredits, accountLevel: AccountLevel)
+  private static formatTimeUntilReset(periodEnd: Date, now: Date): string
+}
+```
+
+#### **💾 Database Schema**
+**user_credits Collection**:
+```typescript
+interface UserCredits {
+  userId: string;
+  accountLevel: "free" | "pro";
+  creditsUsed: number;
+  creditsLimit: number;
+  currentPeriodStart: string;
+  currentPeriodEnd: string;
+  // Period-specific tracking
+  dailyCreditsUsed?: number;    // Free users
+  monthlyCreditsUsed?: number;  // Pro users
+  // Analytics
+  totalCreditsUsed: number;
+  totalScriptsGenerated: number;
+  totalVoicesCreated: number;
+  totalVideosProcessed: number;
+}
+```
+
+**credit_transactions Collection**:
+```typescript
+interface CreditTransaction {
+  userId: string;
+  creditsUsed: number;
+  operation: "script_generation" | "voice_training" | "video_analysis" | "api_request" | "collection_add";
+  balanceBefore: number;
+  balanceAfter: number;
+  timestamp: string;
+  metadata?: Record<string, unknown>;
+}
+```
+
+### **API Integration & Security**
+
+#### **🔐 Credit Enforcement in APIs**
+```typescript
+// Speed-write API with credit checking
+export async function POST(request: NextRequest) {
+  // 1. Authenticate user
+  const authResult = await authenticateApiKey(request);
+  
+  // 2. Check rate limiting
+  if (!rateLimitResult.allowed) {
+    return createErrorResponse(rateLimitResult.reason ?? "Rate limit exceeded", 429);
+  }
+  
+  // 3. Check credit availability
+  const creditCheck = await CreditsService.canPerformAction(userId, "SCRIPT_GENERATION", accountLevel);
+  if (!creditCheck.canPerform) {
+    return createErrorResponse(creditCheck.reason ?? "Insufficient credits", 402);
+  }
+  
+  // 4. Process operation
+  const { speedWriteResult, educationalResult } = await processSpeedWriteRequest(body, userId);
+  
+  // 5. Deduct credits on success
+  await CreditsService.trackUsageAndDeductCredits(userId, "SCRIPT_GENERATION", accountLevel, usageData);
+}
+```
+
+#### **🛡️ Firebase SDK Usage Patterns**
+**Critical Learning Documented**: Always use appropriate Firebase SDK based on execution context
+- **Client-Side (React components)**: Use client SDK (`@/lib/firebase`)
+- **Server-Side (API routes)**: Use admin SDK (`@/lib/firebase-admin`)
+
+### **Business Intelligence & Analytics**
+
+#### **📊 Comprehensive Usage Tracking**
+**Real-Time Analytics**:
+- Credits used/remaining per user
+- Operation-specific usage patterns
+- Account level distribution
+- Peak usage times and patterns
+
+**Transaction Audit Trail**:
+- Complete history of all credit transactions
+- Operation metadata for detailed analysis
+- User behavior patterns for pricing optimization
+- Billing integration ready with dispute resolution data
+
+### **Layout & UI Restructuring**
+
+#### **🎨 Updated Application Layout**
+**Header (Top-Right)**:
+- SocialStats component (carousel)
+- Account badge (Free/Pro)
+- User profile dropdown
+
+**Sidebar Footer (Bottom to Top)**:
+- Settings gear (bottom)
+- UsageTracker component
+- User profile section
+
+**Design Principles Applied**:
+- Industry-standard user profile placement (top-right)
+- Dedicated sidebar space for core navigation
+- Real-time feedback without cluttering interface
+- Scalable design for future feature additions
+
+## 🎉 **PREVIOUSLY COMPLETED: Brand Profile System Fully Operational (January 2, 2025)**
 
 ### **Brand Profile Generation System**
 **Complete AI-Powered Brand Strategy Creation**: Users can now generate comprehensive brand profiles with personalized content pillars, keywords, and strategic insights.

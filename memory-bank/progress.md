@@ -1,11 +1,92 @@
 # Progress
 
-## �� **MAJOR MILESTONE: Complete Brand Profile & Video Collection System** (Jan 2, 2025)
+## 🎯 **MAJOR MILESTONE: Production-Ready Usage Tracking System** (Jan 2, 2025)
 
-### **System Status: Fully Production Ready** ✅
-Gen C Beta now features both a complete video collection system AND a comprehensive brand profile generation system with AI-powered content strategies. All critical functionality is working reliably in production.
+### **System Status: Complete Credit-Based Platform** ✅
+Gen C Beta now features a comprehensive usage tracking system with real-time credit deduction, alongside the existing brand profile generation and video collection systems. The platform enforces credit limits, tracks detailed analytics, and provides real-time user feedback.
 
-### **🔥 LATEST COMPLETIONS (January 2, 2025)**
+### **🔥 LATEST COMPLETION: Usage Tracking System (January 2, 2025)**
+
+#### **Production-Ready Credit Management System** ✅
+**The Achievement**: Complete real-time usage tracking with credit-based access control and comprehensive analytics.
+**Technical Implementation**:
+- **CreditsService Class**: Comprehensive credit management with atomic Firestore transactions
+- **Three New Collections**: user_credits, credit_transactions, usage_tracking
+- **Real-Time UI Components**: UsageTracker sidebar component with 30-second refresh intervals
+- **API Integration**: Credit checking and deduction in speed-write API with authentication
+- **Account Level Enforcement**: Different limits for free (3/day) vs pro (5000/month) users
+- **Result**: Users have real-time credit feedback with automatic enforcement
+
+#### **Credit System Implementation** ✅
+**Credit Allocation & Costs**:
+- **Free Users**: 3 credits/day (resets daily at midnight)
+- **Pro Users**: 5,000 credits/month (resets monthly)
+- **Script Generation**: 1 credit per generation
+- **Voice Training**: 80 credits (analyzing ~100 videos)
+- **Video Analysis/Collection Add**: 1 credit each
+- **API Calls**: 1 credit each
+
+**Real-Time Credit Deduction**:
+- **Pre-flight Checks**: Credits verified before operations
+- **Atomic Deduction**: Credits deducted immediately upon success
+- **Period Management**: Automatic daily/monthly resets with timezone handling
+- **Transaction Audit**: Complete history for billing and dispute resolution
+
+#### **UI Components & Layout Restructuring** ✅
+**UsageTracker Component (Sidebar Footer)**:
+- Real-time credit balance with color-coded progress bar (green/yellow/red)
+- Reset timer countdown showing time until next reset
+- Account level badge (Free/Pro) with upgrade prompts
+- Auto-refresh every 30 seconds for real-time updates
+
+**SocialStats Component (Header)**:
+- Auto-rotating carousel for Instagram/TikTok follower stats
+- Weekly change indicators with trend arrows (up/down)
+- Stock ticker-style design with platform icons
+- Manual navigation controls and platform indicators
+
+**Updated Application Layout**:
+- **Header**: SocialStats carousel + Account badge + User profile dropdown
+- **Sidebar Footer**: Settings gear (bottom) → UsageTracker → User profile
+- **Design Principles**: Industry-standard placement, scalable for future features
+
+#### **Backend Architecture & Security** ✅
+**CreditsService Class Methods**:
+```typescript
+// Core credit operations
+static async initializeUserCredits(userId: string, accountLevel: AccountLevel)
+static async getUserCredits(userId: string, accountLevel: AccountLevel)
+static async canPerformAction(userId: string, operation: CreditOperation, accountLevel: AccountLevel)
+static async deductCredits(userId: string, operation: CreditOperation, accountLevel: AccountLevel)
+static async getUsageStats(userId: string, accountLevel: AccountLevel)
+static async trackUsageAndDeductCredits() // One-call operation for API routes
+```
+
+**Database Schema**:
+- **user_credits**: Account balances, limits, period tracking, analytics
+- **credit_transactions**: Complete audit trail with before/after balances
+- **usage_tracking**: Detailed operation logs with metadata
+
+**API Integration & Security**:
+- **Speed-write API**: Credit checking before generation, deduction after success
+- **Authentication Integration**: Works with existing Firebase Auth and API key systems
+- **Rate Limiting**: Continues to work alongside credit enforcement
+- **Error Handling**: Graceful failures with proper HTTP status codes (402 for insufficient credits)
+
+#### **Business Intelligence & Analytics** ✅
+**Real-Time Analytics**:
+- Credits used/remaining per user with percentage calculations
+- Operation-specific usage patterns and trends
+- Account level distribution and upgrade opportunities
+- Peak usage times for capacity planning
+
+**Transaction Audit Trail**:
+- Complete history of all credit transactions with timestamps
+- Operation metadata for detailed business analysis
+- User behavior patterns for pricing optimization
+- Billing integration ready with dispute resolution capabilities
+
+### **🔥 PREVIOUSLY COMPLETED: Brand Profile System (January 2, 2025)**
 
 #### **Complete Brand Profile Generation System** ✅
 **The Achievement**: Full AI-powered brand strategy creation with personalized content pillars, keywords, and insights.

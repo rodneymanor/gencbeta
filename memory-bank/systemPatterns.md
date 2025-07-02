@@ -1,6 +1,194 @@
 # System Patterns
 
-## 🎉 **NEW: Brand Profile System Architecture** (January 2, 2025)
+## 🎉 **NEW: Production-Ready Usage Tracking System** (January 2, 2025)
+
+### Credit-Based Usage Management Architecture
+
+#### **CreditsService Class Pattern**
+**Problem**: Need comprehensive credit management with real-time tracking and enforcement.
+**Solution**: Centralized service class with atomic transactions and period management.
+
+```typescript
+export class CreditsService {
+  private static readonly COLLECTIONS = {
+    USER_CREDITS: "user_credits",
+    CREDIT_TRANSACTIONS: "credit_transactions", 
+    USAGE_TRACKING: "usage_tracking",
+  } as const;
+
+  // Core credit operations with automatic period reset
+  static async getUserCredits(userId: string, accountLevel: AccountLevel): Promise<UserCredits> {
+    const userCredits = await this.fetchUserCredits(userId);
+    
+    // Check if period reset is needed
+    const needsReset = await this.checkAndResetPeriod(userCredits, accountLevel);
+    if (needsReset) {
+      return this.getUserCredits(userId, accountLevel); // Recurse after reset
+    }
+    
+    return userCredits;
+  }
+
+  // Atomic credit deduction with transaction logging
+  static async deductCredits(userId: string, operation: CreditOperation, accountLevel: AccountLevel) {
+    const batch = adminDb.batch();
+    
+    // Update user credits
+    const userCreditsRef = adminDb.collection(this.COLLECTIONS.USER_CREDITS).doc(userCredits.id!);
+    batch.update(userCreditsRef, updateData);
+    
+    // Add transaction record
+    const transactionRef = adminDb.collection(this.COLLECTIONS.CREDIT_TRANSACTIONS).doc();
+    batch.set(transactionRef, transaction);
+    
+    await batch.commit(); // Atomic operation
+  }
+}
+```
+
+#### **Benefits of CreditsService Pattern**
+- **Atomic Operations**: Firestore batches ensure data consistency
+- **Automatic Resets**: Period management handles daily/monthly resets
+- **Comprehensive Tracking**: Detailed transaction logs for analytics
+- **Account Level Support**: Different limits for free vs pro users
+
+### Real-Time UI Update Pattern
+
+#### **UsageTracker Component with Auto-Refresh**
+**Problem**: Users need real-time feedback on credit usage without manual refresh.
+**Solution**: Auto-refreshing component with color-coded progress indicators.
+
+```typescript
+export function UsageTracker() {
+  const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
+
+  const fetchUsageStats = async () => {
+    const response = await fetch("/api/usage/stats", {
+      headers: { "Authorization": `Bearer ${await user.getIdToken()}` },
+    });
+    const data = await response.json();
+    setUsageStats(data);
+  };
+
+  useEffect(() => {
+    fetchUsageStats();
+    
+    // Refresh every 30 seconds for real-time updates
+    const interval = setInterval(fetchUsageStats, 30000);
+    return () => clearInterval(interval);
+  }, [user]);
+
+  // Color-coded progress bar based on usage percentage
+  const isLowCredits = usageStats.percentageUsed >= 80;
+  const isOutOfCredits = usageStats.creditsRemaining === 0;
+}
+```
+
+#### **Benefits of Real-Time Updates**
+- **Immediate Feedback**: Users see credit changes within 30 seconds
+- **Visual Indicators**: Color-coded progress bars (green/yellow/red)
+- **Automatic Refresh**: No manual interaction required
+- **Performance Optimized**: Only updates when user is active
+
+### API Credit Enforcement Pattern
+
+#### **Pre-flight Credit Checking with Deduction**
+**Problem**: Need to enforce credit limits before expensive operations.
+**Solution**: Check credits before processing, deduct after successful completion.
+
+```typescript
+export async function POST(request: NextRequest) {
+  // 1. Authenticate user
+  const authResult = await authenticateApiKey(request);
+  
+  // 2. Check rate limiting
+  if (!rateLimitResult.allowed) {
+    return createErrorResponse(rateLimitResult.reason ?? "Rate limit exceeded", 429);
+  }
+  
+  // 3. Check credit availability BEFORE processing
+  const creditCheck = await CreditsService.canPerformAction(userId, "SCRIPT_GENERATION", accountLevel);
+  if (!creditCheck.canPerform) {
+    return createErrorResponse(creditCheck.reason ?? "Insufficient credits", 402);
+  }
+  
+  // 4. Process expensive operation
+  const { speedWriteResult, educationalResult } = await processSpeedWriteRequest(body, userId);
+  
+  // 5. Deduct credits ONLY on success
+  if (optionA || optionB) {
+    await CreditsService.trackUsageAndDeductCredits(userId, "SCRIPT_GENERATION", accountLevel, usageData);
+  }
+  
+  return NextResponse.json({ success: true, optionA, optionB });
+}
+```
+
+#### **Benefits of Credit Enforcement Pattern**
+- **Pre-flight Validation**: Prevents expensive operations without credits
+- **Success-Based Deduction**: Only charges for successful operations
+- **Proper HTTP Status**: 402 Payment Required for insufficient credits
+- **Atomic Tracking**: Single call for deduction and usage logging
+
+### Social Media Stats Carousel Pattern
+
+#### **Auto-Rotating Component with Manual Control**
+**Problem**: Display multiple social media stats in limited header space.
+**Solution**: Auto-rotating carousel with manual navigation controls.
+
+```typescript
+export function SocialStats() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [socialStats] = useState<SocialMediaStats[]>(mockSocialStats);
+
+  // Auto-rotate through platforms every 5 seconds
+  useEffect(() => {
+    if (socialStats.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % socialStats.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [socialStats.length]);
+
+  const currentStat = socialStats[currentIndex];
+  const isPositiveChange = currentStat.weeklyChange > 0;
+  
+  return (
+    <Card className="min-w-[200px]">
+      <CardContent className="p-3">
+        <div className="flex items-center justify-between">
+          {/* Platform info + follower count + weekly change */}
+          <div className="flex items-center gap-3">
+            <span>{getPlatformIcon(currentStat.platform)}</span>
+            <span>{formatFollowerCount(currentStat.followerCount)} followers</span>
+            {getTrendIcon(isPositiveChange)}
+            <span className={getChangeColor(isPositiveChange)}>
+              {formatChange(currentStat.weeklyChange)}
+            </span>
+          </div>
+        </div>
+        
+        {/* Platform indicators */}
+        <div className="flex items-center justify-center gap-1 mt-2">
+          {socialStats.map((_, index) => (
+            <div className={`h-1 w-1 rounded-full ${index === currentIndex ? "bg-primary" : "bg-muted"}`} />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+#### **Benefits of Carousel Pattern**
+- **Space Efficient**: Multiple stats in compact header space
+- **Auto-Rotation**: Passive information display every 5 seconds
+- **Manual Control**: Users can navigate manually if needed
+- **Visual Indicators**: Clear platform indicators and trend arrows
+
+## 🎉 **PREVIOUSLY DOCUMENTED: Brand Profile System Architecture** (January 2, 2025)
 
 ### AI-Powered Brand Profile Generation
 

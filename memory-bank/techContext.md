@@ -5,11 +5,325 @@
 ### **Current Production Status**
 - **Live Environment**: https://gencbeta-amiaxhp94-rodneymanors-projects.vercel.app
 - **Last Deployment**: January 2, 2025
-- **New Features**: Complete brand profile generation system with AI integration
+- **Latest Features**: Complete usage tracking system with credit management
 - **Build Performance**: 55-second optimized Vercel builds
 - **Status**: All features operational and verified in production
 
-## 🎉 **NEW: Brand Profile System Technical Architecture** (January 2, 2025)
+## 🎉 **NEW: Usage Tracking System Technical Architecture** (January 2, 2025)
+
+### **Credit Management Stack**
+
+#### **CreditsService Class Architecture**
+```typescript
+export class CreditsService {
+  private static readonly COLLECTIONS = {
+    USER_CREDITS: "user_credits",
+    CREDIT_TRANSACTIONS: "credit_transactions",
+    USAGE_TRACKING: "usage_tracking",
+  } as const;
+
+  private static readonly CREDIT_COSTS: Record<CreditOperation, number> = {
+    SCRIPT_GENERATION: 1,
+    VOICE_TRAINING: 80,
+    VIDEO_ANALYSIS: 1,
+    API_REQUEST: 1,
+    COLLECTION_ADD: 1,
+  };
+
+  private static readonly ACCOUNT_LIMITS: Record<AccountLevel, AccountLimits> = {
+    free: { dailyLimit: 3, monthlyLimit: null, resetPeriod: "daily" },
+    pro: { dailyLimit: null, monthlyLimit: 5000, resetPeriod: "monthly" },
+  };
+}
+```
+
+#### **Database Schema - Usage Tracking**
+```typescript
+interface UserCredits {
+  id?: string;
+  userId: string;
+  accountLevel: "free" | "pro";
+  creditsUsed: number;
+  creditsLimit: number;
+  currentPeriodStart: string;
+  currentPeriodEnd: string;
+  dailyCreditsUsed?: number;    // Free users only
+  monthlyCreditsUsed?: number;  // Pro users only
+  totalCreditsUsed: number;
+  totalScriptsGenerated: number;
+  totalVoicesCreated: number;
+  totalVideosProcessed: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface CreditTransaction {
+  id?: string;
+  userId: string;
+  creditsUsed: number;
+  operation: CreditOperation;
+  balanceBefore: number;
+  balanceAfter: number;
+  timestamp: string;
+  metadata?: Record<string, unknown>;
+}
+
+interface UsageTracking {
+  id?: string;
+  userId: string;
+  operation: CreditOperation;
+  creditsUsed: number;
+  timestamp: string;
+  metadata: Record<string, unknown>;
+  accountLevel: AccountLevel;
+}
+```
+
+#### **Firestore Collections & Indexes**
+```json
+{
+  "indexes": [
+    {
+      "collectionGroup": "user_credits",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "accountLevel", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "credit_transactions",
+      "queryScope": "COLLECTION", 
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "usage_tracking",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "operation", "order": "ASCENDING" },
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    }
+  ]
+}
+```
+
+### **Real-Time UI Architecture**
+
+#### **UsageTracker Component**
+```typescript
+export function UsageTracker() {
+  const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+
+  const fetchUsageStats = useCallback(async () => {
+    if (!user) return;
+    
+    try {
+      const idToken = await user.getIdToken();
+      const response = await fetch("/api/usage/stats", {
+        headers: { "Authorization": `Bearer ${idToken}` },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setUsageStats(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch usage stats:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    fetchUsageStats();
+    
+    // Auto-refresh every 30 seconds for real-time updates
+    const interval = setInterval(fetchUsageStats, 30000);
+    return () => clearInterval(interval);
+  }, [fetchUsageStats]);
+}
+```
+
+#### **SocialStats Carousel Component**
+```typescript
+export function SocialStats() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [socialStats] = useState<SocialMediaStats[]>(mockSocialStats);
+
+  // Auto-rotate every 5 seconds
+  useEffect(() => {
+    if (socialStats.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % socialStats.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [socialStats.length]);
+
+  const formatFollowerCount = (count: number): string => {
+    if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
+    if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
+    return count.toString();
+  };
+}
+```
+
+### **API Integration Architecture**
+
+#### **Credit Enforcement in Speed-Write API**
+```typescript
+export async function POST(request: NextRequest) {
+  try {
+    // 1. Authentication
+    const authResult = await authenticateApiKey(request);
+    if (!authResult.success) {
+      return createErrorResponse(authResult.error, 401);
+    }
+
+    // 2. Rate limiting
+    const rateLimitResult = await checkRateLimit(userId);
+    if (!rateLimitResult.allowed) {
+      return createErrorResponse(rateLimitResult.reason ?? "Rate limit exceeded", 429);
+    }
+
+    // 3. Credit availability check
+    const creditCheck = await CreditsService.canPerformAction(userId, "SCRIPT_GENERATION", accountLevel);
+    if (!creditCheck.canPerform) {
+      return createErrorResponse(creditCheck.reason ?? "Insufficient credits", 402);
+    }
+
+    // 4. Process operation
+    const { speedWriteResult, educationalResult } = await processSpeedWriteRequest(body, userId);
+
+    // 5. Deduct credits on success
+    if (speedWriteResult || educationalResult) {
+      await CreditsService.trackUsageAndDeductCredits(userId, "SCRIPT_GENERATION", accountLevel, {
+        prompt: body.prompt,
+        optionA: !!speedWriteResult,
+        optionB: !!educationalResult,
+      });
+    }
+
+    return NextResponse.json({ success: true, optionA: speedWriteResult, optionB: educationalResult });
+  } catch (error) {
+    console.error("🚨 Speed-write API error:", error);
+    return createErrorResponse("Internal server error", 500);
+  }
+}
+```
+
+#### **Usage Stats API Endpoint**
+```typescript
+export async function GET(request: NextRequest) {
+  try {
+    const authResult = await authenticateApiKey(request);
+    if (!authResult.success) {
+      return createErrorResponse(authResult.error, 401);
+    }
+
+    const { userId, accountLevel } = authResult;
+    const usageStats = await CreditsService.getUsageStats(userId, accountLevel);
+
+    return NextResponse.json(usageStats);
+  } catch (error) {
+    console.error("🚨 Usage stats API error:", error);
+    return createErrorResponse("Failed to fetch usage stats", 500);
+  }
+}
+```
+
+### **Firebase SDK Usage Patterns**
+
+#### **Critical SDK Context Rule**
+```typescript
+// ✅ CORRECT - Client SDK in React components
+import { db } from "@/lib/firebase";
+import { useAuth } from "@/contexts/auth-context";
+
+export function MyComponent() {
+  const { user } = useAuth();
+  
+  useEffect(() => {
+    if (user) {
+      // Client SDK with user context
+      const unsubscribe = onSnapshot(collection(db, "user_data"), (snapshot) => {
+        // Handle real-time updates
+      });
+      return unsubscribe;
+    }
+  }, [user]);
+}
+
+// ✅ CORRECT - Admin SDK in API routes
+import { adminDb } from "@/lib/firebase-admin";
+
+export async function GET(request: NextRequest) {
+  // Admin SDK with elevated permissions
+  const snapshot = await adminDb.collection("user_credits").get();
+  return NextResponse.json(snapshot.docs.map(doc => doc.data()));
+}
+```
+
+#### **SDK Selection Matrix**
+| Context | SDK | Import | Use Case |
+|---------|-----|--------|----------|
+| React Components | Client | `@/lib/firebase` | Real-time subscriptions, user-scoped queries |
+| Custom Hooks | Client | `@/lib/firebase` | Authentication state, user data |
+| API Routes | Admin | `@/lib/firebase-admin` | Server-side operations, elevated permissions |
+| Middleware | Admin | `@/lib/firebase-admin` | Authentication verification |
+| Server Actions | Admin | `@/lib/firebase-admin` | Server-side mutations |
+
+### **Layout & Component Architecture**
+
+#### **Updated Application Layout Structure**
+```typescript
+// Header layout with SocialStats
+<header className="flex items-center justify-between p-4">
+  <div className="flex items-center gap-4">
+    <AppLogo />
+    <Navigation />
+  </div>
+  
+  <div className="flex items-center gap-4">
+    <SocialStats />           {/* Auto-rotating carousel */}
+    <AccountBadge />          {/* Free/Pro indicator */}
+    <UserProfileDropdown />   {/* User menu */}
+  </div>
+</header>
+
+// Sidebar footer with UsageTracker
+<div className="mt-auto space-y-4">
+  <UsageTracker />           {/* Credit display with progress */}
+  <UserProfileSection />     {/* User info */}
+  <SettingsButton />         {/* Settings gear */}
+</div>
+```
+
+#### **Component Hierarchy**
+```
+Dashboard Layout
+├── Header
+│   ├── SocialStats (carousel)
+│   ├── AccountBadge (Free/Pro)
+│   └── UserProfileDropdown
+├── Sidebar
+│   ├── Navigation (main content)
+│   └── Footer
+│       ├── UsageTracker (credits)
+│       ├── UserProfileSection
+│       └── SettingsButton
+└── Main Content Area
+```
+
+## 🎉 **PREVIOUSLY DOCUMENTED: Brand Profile System Technical Architecture** (January 2, 2025)
 
 ### **AI Integration Stack**
 
