@@ -19,6 +19,7 @@ type TabValue = "overview" | "questions" | "pillars" | "keywords";
 
 export function BrandProfileTabs() {
   const [activeTab, setActiveTab] = useState<TabValue>("questions");
+  const [hasAutoSwitched, setHasAutoSwitched] = useState(false);
 
   // Fetch brand profiles
   const { data: profilesData, isLoading } = useQuery({
@@ -60,12 +61,17 @@ export function BrandProfileTabs() {
     },
   ];
 
-  // Auto-switch to overview tab after generation
+  // Auto-switch to overview tab after generation (only once)
   useEffect(() => {
-    if (hasGeneratedProfile && activeTab === "questions") {
+    if (hasGeneratedProfile && activeTab === "questions" && !hasAutoSwitched) {
       setActiveTab("overview");
+      setHasAutoSwitched(true);
     }
-  }, [hasGeneratedProfile, activeTab]);
+    // Reset auto-switch flag when profile is removed
+    if (!hasGeneratedProfile) {
+      setHasAutoSwitched(false);
+    }
+  }, [hasGeneratedProfile, activeTab, hasAutoSwitched]);
 
   if (isLoading) {
     return (
