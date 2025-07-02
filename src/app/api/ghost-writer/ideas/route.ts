@@ -45,6 +45,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
 
       // Generate new ideas
+      console.log(`🎨 [GhostWriter] Generating ideas with brand profile:`, JSON.stringify(brandProfile, null, 2));
       ideas = await GhostWriterService.generateIdeasForUser(userId, brandProfile, currentCycle.id);
       
       // Update user data with new cycle
@@ -81,7 +82,7 @@ async function getBrandProfileForUser(userId: string): Promise<BrandProfileForId
     const { adminDb } = await import("@/lib/firebase-admin");
     
     const snapshot = await adminDb
-      .collection("brand_profiles")
+      .collection("brandProfiles")
       .where("userId", "==", userId)
       .where("isActive", "==", true)
       .limit(1)
@@ -92,20 +93,27 @@ async function getBrandProfileForUser(userId: string): Promise<BrandProfileForId
     }
 
     const brandData = snapshot.docs[0].data();
+    console.log("🔍 [GhostWriter] Found brand profile data:", JSON.stringify(brandData, null, 2));
     
     // Map brand profile to the format needed for idea generation
+    const questionnaire = brandData.questionnaire || {};
+    const profile = brandData.profile || {};
+    
+    console.log("🔍 [GhostWriter] Mapped questionnaire:", JSON.stringify(questionnaire, null, 2));
+    console.log("🔍 [GhostWriter] Mapped profile:", JSON.stringify(profile, null, 2));
+    
     return {
-      businessProfession: brandData.businessDescription || brandData.industry || "Content Creator",
-      brandPersonality: brandData.brandVoice || brandData.personality || "Professional and helpful",
-      universalProblem: brandData.targetAudience?.painPoints?.[0] || "Struggling to create engaging content",
-      initialHurdle: brandData.targetAudience?.challenges?.[0] || "Getting started with content creation",
-      persistentStruggle: brandData.targetAudience?.painPoints?.[1] || "Maintaining consistent content quality",
-      visibleTriumph: brandData.goals?.[0] || "Building a strong online presence",
-      ultimateTransformation: brandData.vision || "Becoming a recognized authority in their field",
-      contentPillars: brandData.contentPillars || [],
-      targetAudience: brandData.targetAudience?.description || "Content creators and entrepreneurs",
-      brandVoice: brandData.brandVoice || "Professional and approachable",
-      industry: brandData.industry || "Content Creation",
+      businessProfession: questionnaire.profession || "Content Creator",
+      brandPersonality: questionnaire.brandPersonality || "Professional and helpful",
+      universalProblem: questionnaire.universalProblem || "Struggling to create engaging content",
+      initialHurdle: questionnaire.initialHurdle || "Getting started with content creation",
+      persistentStruggle: questionnaire.persistentStruggle || "Maintaining consistent content quality",
+      visibleTriumph: questionnaire.visibleTriumph || "Building a strong online presence",
+      ultimateTransformation: questionnaire.ultimateTransformation || "Becoming a recognized authority in their field",
+      contentPillars: profile.content_pillars?.map((pillar: any) => pillar.pillar_name) || [],
+      targetAudience: "Content creators and entrepreneurs",
+      brandVoice: questionnaire.brandPersonality || "Professional and approachable",
+      industry: questionnaire.profession || "Content Creation",
     };
   } catch (error) {
     console.error("❌ [GhostWriter] Error fetching brand profile:", error);

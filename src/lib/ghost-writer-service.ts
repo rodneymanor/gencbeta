@@ -106,10 +106,8 @@ export class GhostWriterService {
   ): Promise<ContentIdea[]> {
     try {
       console.log(`🎯 [GhostWriter] Generating ideas for user ${userId}`);
-      console.log(`📋 [GhostWriter] Brand profile:`, brandProfile);
 
       const prompt = this.buildIdeaGenerationPrompt(brandProfile);
-      console.log(`📝 [GhostWriter] Generated prompt (first 200 chars):`, prompt.substring(0, 200) + "...");
       
       const result = await GeminiService.generateContent({
         prompt,
@@ -117,15 +115,12 @@ export class GhostWriterService {
         temperature: 0.8,
       });
 
-      console.log(`🤖 [GhostWriter] Gemini result:`, result);
-
       if (!result.success) {
-        console.error(`❌ [GhostWriter] Gemini failed:`, result.error);
         throw new Error(result.error || "Failed to generate content with Gemini");
       }
 
       const text = result.content!;
-      console.log(`📄 [GhostWriter] Generated text:`, text.substring(0, 500) + "...");
+      console.log("🤖 [GhostWriter] Raw AI response:", text);
 
       // Parse the JSON response
       let parsedIdeas;
@@ -133,15 +128,15 @@ export class GhostWriterService {
         // Extract JSON from the response (in case there's extra text)
         const jsonMatch = text.match(/\{[\s\S]*\}/);
         if (!jsonMatch) {
-          console.error("❌ [GhostWriter] No JSON found in response. Full text:", text);
+          console.error("❌ [GhostWriter] No JSON found in AI response");
           throw new Error("No JSON found in response");
         }
-        console.log(`🔍 [GhostWriter] Extracted JSON:`, jsonMatch[0].substring(0, 300) + "...");
+        console.log("🔍 [GhostWriter] Extracted JSON:", jsonMatch[0]);
         parsedIdeas = JSON.parse(jsonMatch[0]);
-        console.log(`✅ [GhostWriter] Parsed ideas:`, parsedIdeas);
+        console.log("✅ [GhostWriter] Parsed ideas:", JSON.stringify(parsedIdeas, null, 2));
       } catch (parseError) {
         console.error("❌ [GhostWriter] Failed to parse AI response:", parseError);
-        console.error("❌ [GhostWriter] Raw text:", text);
+        console.error("❌ [GhostWriter] Raw text was:", text);
         throw new Error("Failed to parse AI response");
       }
 
