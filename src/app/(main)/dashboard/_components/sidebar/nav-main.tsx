@@ -6,12 +6,7 @@ import { usePathname } from "next/navigation";
 import { Zap, ChevronRight, FolderPlus } from "lucide-react";
 
 import { CreateCollectionDialog } from "@/app/(main)/research/collections/_components/create-collection-dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -48,8 +43,8 @@ const NavItem = ({
   return (
     <SidebarMenuItem key={item.title}>
       {item.subItems ? (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+        <HoverCard openDelay={150} closeDelay={300}>
+          <HoverCardTrigger asChild>
             <SidebarMenuButton
               disabled={item.comingSoon}
               tooltip={item.title}
@@ -58,39 +53,35 @@ const NavItem = ({
               {item.icon && <item.icon />}
               <span>{item.title}</span>
               {isBrandItem && <BrandProfileIndicator />}
-              <ChevronRight />
+              <ChevronRight className="ml-auto h-4 w-4" />
             </SidebarMenuButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-50 space-y-1" side="right" align="start">
+          </HoverCardTrigger>
+          <HoverCardContent className="w-60 space-y-1 p-2" side="right" align="start" sideOffset={8}>
             {item.subItems.map((subItem) => (
-              <DropdownMenuItem key={subItem.title} asChild>
-                <SidebarMenuSubButton
-                  key={subItem.title}
-                  asChild
-                  className="focus-visible:ring-0"
-                  aria-disabled={subItem.comingSoon}
-                  isActive={isActive(subItem.url)}
-                >
-                  <Link href={subItem.url} target={subItem.newTab ? "_blank" : undefined}>
-                    {subItem.icon && <subItem.icon className="[&>svg]:text-sidebar-foreground" />}
-                    <span>{subItem.title}</span>
-                    {subItem.comingSoon && <IsComingSoon />}
-                  </Link>
-                </SidebarMenuSubButton>
-              </DropdownMenuItem>
+              <SidebarMenuSubButton
+                key={subItem.title}
+                asChild
+                className="w-full justify-start"
+                aria-disabled={subItem.comingSoon}
+                isActive={isActive(subItem.url)}
+              >
+                <Link href={subItem.url} target={subItem.newTab ? "_blank" : undefined}>
+                  {subItem.icon && <subItem.icon className="h-4 w-4" />}
+                  <span>{subItem.title}</span>
+                  {subItem.comingSoon && <IsComingSoon />}
+                </Link>
+              </SidebarMenuSubButton>
             ))}
             {item.title === "Collections" && item.subItems.length === 1 && (
-              <DropdownMenuItem asChild>
-                <CreateCollectionDialog onCollectionCreated={onCollectionCreated}>
-                  <SidebarMenuSubButton className="text-muted-foreground hover:text-foreground cursor-pointer focus-visible:ring-0">
-                    <FolderPlus />
-                    <span>Create your first collection</span>
-                  </SidebarMenuSubButton>
-                </CreateCollectionDialog>
-              </DropdownMenuItem>
+              <CreateCollectionDialog onCollectionCreated={onCollectionCreated}>
+                <SidebarMenuSubButton className="text-muted-foreground hover:text-foreground w-full cursor-pointer justify-start">
+                  <FolderPlus className="h-4 w-4" />
+                  <span>Create your first collection</span>
+                </SidebarMenuSubButton>
+              </CreateCollectionDialog>
             )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+          </HoverCardContent>
+        </HoverCard>
       ) : (
         <SidebarMenuButton asChild aria-disabled={item.comingSoon} isActive={isActive(item.url)} tooltip={item.title}>
           <Link href={item.url} target={item.newTab ? "_blank" : undefined}>
