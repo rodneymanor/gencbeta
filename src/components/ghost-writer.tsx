@@ -199,7 +199,7 @@ export function GhostWriter() {
     );
   }
 
-  if (!data || data.ideas.length === 0) {
+  if (!data || !data.ideas || data.ideas.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -250,11 +250,11 @@ export function GhostWriter() {
       
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {data.ideas.map((idea) => (
+          {data.ideas && data.ideas.map((idea) => (
             <GhostWriterCard
               key={idea.id}
               idea={idea}
-              isSaved={data.userData.savedIdeas.includes(idea.id)}
+              isSaved={data.userData?.savedIdeas?.includes(idea.id) || false}
               onSave={(ideaId) => handleIdeaAction(ideaId, "save")}
               onDismiss={(ideaId) => handleIdeaAction(ideaId, "dismiss")}
               onUse={handleUseIdea}
@@ -262,7 +262,7 @@ export function GhostWriter() {
           ))}
         </div>
         
-        {data.ideas.length < 6 && (
+        {data.ideas && data.ideas.length < 6 && (
           <div className="mt-6 text-center">
             <p className="text-sm text-muted-foreground mb-2">
               Some ideas were dismissed. New ideas will be available in the next cycle.

@@ -1,5 +1,5 @@
 import { adminDb } from "@/lib/firebase-admin";
-import { geminiModel } from "@/lib/gemini";
+import { GeminiService } from "@/lib/gemini";
 import { 
   ContentIdea, 
   ContentPillar, 
@@ -109,9 +109,17 @@ export class GhostWriterService {
 
       const prompt = this.buildIdeaGenerationPrompt(brandProfile);
       
-      const result = await geminiModel.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
+      const result = await GeminiService.generateContent({
+        prompt,
+        maxTokens: 2000,
+        temperature: 0.8,
+      });
+
+      if (!result.success) {
+        throw new Error(result.error || "Failed to generate content with Gemini");
+      }
+
+      const text = result.content!;
 
       // Parse the JSON response
       let parsedIdeas;
