@@ -61,6 +61,19 @@ function inferCategory(content: string, approach: string): string {
   return approachMap[approach] ?? "General";
 }
 
+// Helper function to remove undefined values from object for Firestore
+function removeUndefinedFields<T extends Record<string, any>>(obj: T): Partial<T> {
+  const result: Partial<T> = {};
+
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== undefined) {
+      result[key as keyof T] = value;
+    }
+  }
+
+  return result;
+}
+
 // GET: Fetch user's scripts
 export async function GET(request: NextRequest): Promise<NextResponse<ScriptsResponse>> {
   try {
@@ -164,8 +177,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<ScriptRes
       wordCount,
     };
 
+    // Remove undefined fields for Firestore compatibility
+    const cleanScriptData = removeUndefinedFields(scriptData);
+
     // Save to Firestore
-    const docRef = await adminDb.collection("scripts").add(scriptData);
+    const docRef = await adminDb.collection("scripts").add(cleanScriptData);
 
     const script: Script = {
       id: docRef.id,
