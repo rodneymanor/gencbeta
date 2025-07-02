@@ -1,7 +1,24 @@
 import { AIVoice, VoiceTemplate } from "@/types/ai-voices";
 
+// Define proper types for template data
+interface RawTemplate {
+  hook?: string;
+  bridge?: string;
+  nugget?: string;
+  wta?: string;
+  sourceVideoId?: string;
+  sourceMetadata?: {
+    viewCount?: number;
+    likeCount?: number;
+  };
+}
+
+interface TemplateData {
+  allTemplates: RawTemplate[];
+}
+
 // Fallback data structure
-const fallbackTemplates = {
+const fallbackTemplates: TemplateData = {
   allTemplates: [
     {
       hook: "Sample hook template",
@@ -13,33 +30,60 @@ const fallbackTemplates = {
 };
 
 // Read the Alex Hormozi templates JSON file
-let hermoziData: { allTemplates: any[] } = fallbackTemplates;
+let hermoziData: TemplateData = fallbackTemplates;
 try {
   if (typeof window === "undefined") {
-    // Server-side only
-    const { readFileSync } = require("fs");
-    const { join } = require("path");
-    const filePath = join(process.cwd(), ".cursor/rules/alexhermozi templates.txt");
-    const fileContent = readFileSync(filePath, "utf-8");
-    hermoziData = JSON.parse(fileContent);
+    // Server-side only - using synchronous require in try-catch for safety
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const fs = require("fs");
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const path = require("path");
+      const filePath = path.join(process.cwd(), ".cursor/rules/alexhermozi templates.txt");
+      const fileContent = fs.readFileSync(filePath, "utf-8");
+      hermoziData = JSON.parse(fileContent) as TemplateData;
+    } catch (requireError) {
+      console.warn("Could not load Alex Hormozi templates with require:", requireError);
+    }
   }
 } catch (error) {
   console.warn("Could not load Alex Hormozi templates:", error);
   hermoziData = fallbackTemplates;
 }
 
-function createVoiceTemplate(template: any, index: number): VoiceTemplate {
+function getTemplateValue(template: RawTemplate, field: keyof RawTemplate, fallback: string): string {
+  // Use safer property access to avoid object injection
+  switch (field) {
+    case "hook":
+      return typeof template.hook === "string" ? template.hook : fallback;
+    case "bridge":
+      return typeof template.bridge === "string" ? template.bridge : fallback;
+    case "nugget":
+      return typeof template.nugget === "string" ? template.nugget : fallback;
+    case "wta":
+      return typeof template.wta === "string" ? template.wta : fallback;
+    default:
+      return fallback;
+  }
+}
+
+function createVoiceTemplate(template: RawTemplate, index: number): VoiceTemplate {
+  const hook = getTemplateValue(template, "hook", "Sample hook template");
+  const bridge = getTemplateValue(template, "bridge", "Sample bridge template");
+  const nugget = getTemplateValue(template, "nugget", "Sample nugget template");
+  const wta = getTemplateValue(template, "wta", "Sample WTA template");
+
   return {
     id: `hermozi_template_${index + 1}`,
-    hook: template.hook ?? "Sample hook template",
-    bridge: template.bridge ?? "Sample bridge template",
-    nugget: template.nugget ?? "Sample nugget template",
-    wta: template.wta ?? "Sample WTA template",
+    hook,
+    bridge,
+    nugget,
+    wta,
     originalContent: {
-      Hook: template.hook ?? "Sample hook content",
-      Bridge: template.bridge ?? "Sample bridge content",
-      "Golden Nugget": template.nugget ?? "Sample nugget content",
-      WTA: template.wta ?? "Sample WTA content",
+      Hook: hook,
+      Bridge: bridge,
+      "Golden Nugget": nugget,
+      WTA: wta,
     },
     sourceVideoId: template.sourceVideoId,
     sourceMetadata: {
@@ -51,11 +95,16 @@ function createVoiceTemplate(template: any, index: number): VoiceTemplate {
   };
 }
 
-function createExampleScript(template: any, index: number) {
+function createExampleScript(template: RawTemplate, index: number) {
+  const hook = getTemplateValue(template, "hook", "Sample hook");
+  const bridge = getTemplateValue(template, "bridge", "Sample bridge");
+  const nugget = getTemplateValue(template, "nugget", "Sample nugget");
+  const wta = getTemplateValue(template, "wta", "Sample WTA");
+
   return {
     id: `example_${index + 1}`,
     title: `Alex Hormozi Script ${index + 1}`,
-    content: `${template.hook ?? "Sample hook"} ${template.bridge ?? "Sample bridge"} ${template.nugget ?? "Sample nugget"} ${template.wta ?? "Sample WTA"}`,
+    content: `${hook} ${bridge} ${nugget} ${wta}`,
     source: template.sourceVideoId ? `https://www.tiktok.com/@alexhormozi/video/${template.sourceVideoId}` : undefined,
     platform: "tiktok" as const,
     metrics: {
@@ -63,19 +112,19 @@ function createExampleScript(template: any, index: number) {
       likes: template.sourceMetadata?.likeCount ?? 0,
     },
     segments: {
-      Hook: template.hook ?? "Sample hook",
-      Bridge: template.bridge ?? "Sample bridge",
-      "Golden Nugget": template.nugget ?? "Sample nugget",
-      WTA: template.wta ?? "Sample WTA",
+      Hook: hook,
+      Bridge: bridge,
+      "Golden Nugget": nugget,
+      WTA: wta,
     },
   };
 }
 
 // Convert Alex Hormozi templates to our VoiceTemplate format
-const hermoziVoiceTemplates: VoiceTemplate[] = (hermoziData.allTemplates ?? []).map(createVoiceTemplate);
+const hermoziVoiceTemplates: VoiceTemplate[] = hermoziData.allTemplates.map(createVoiceTemplate);
 
 // Create example scripts from the templates
-const hermoziExampleScripts = (hermoziData.allTemplates ?? []).slice(0, 10).map(createExampleScript);
+const hermoziExampleScripts = hermoziData.allTemplates.slice(0, 10).map(createExampleScript);
 
 export const SAMPLE_VOICES: AIVoice[] = [
   {
@@ -83,7 +132,7 @@ export const SAMPLE_VOICES: AIVoice[] = [
     name: "Alex Hormozi Formula",
     badges: ["Business", "Persuasive", "Educational"],
     description:
-      "Master the art of persuasive business content with Alex Hormozi's proven formula. Features 100+ templates from his highest-performing content, covering sales psychology, business growth, and entrepreneurial mindset.",
+      "Master the art of persuasive business content with Alex Hormozi's proven formula. Features 100+ templates from his highest-performing content, covering sales psychology, business growth, and entrepreneurial mindset. Perfect for creating compelling business content that converts.",
     creatorInspiration: "Alex Hormozi",
     templates: hermoziVoiceTemplates,
     exampleScripts: hermoziExampleScripts,
@@ -98,7 +147,7 @@ export const SAMPLE_VOICES: AIVoice[] = [
     name: "Motivational Speaker",
     badges: ["Inspirational", "Energetic", "Uplifting"],
     description:
-      "Inspire and motivate your audience with powerful, energetic content. Perfect for personal development, success stories, and motivational messaging.",
+      "Inspire and motivate your audience with powerful, energetic content that drives action. Perfect for personal development, success stories, and motivational messaging. Features proven templates that create emotional connection and inspire your audience to take action.",
     templates: [
       {
         id: "motivational_1",
@@ -139,7 +188,7 @@ export const SAMPLE_VOICES: AIVoice[] = [
     name: "Educational Expert",
     badges: ["Teaching", "Clear", "Informative"],
     description:
-      "Break down complex topics into digestible, engaging content. Ideal for tutorials, how-to guides, and educational content that actually teaches.",
+      "Break down complex topics into digestible, engaging content that actually teaches your audience. Ideal for tutorials, how-to guides, and educational content. Features clear, structured templates that make learning easy and keep viewers engaged throughout your content.",
     templates: [
       {
         id: "educational_1",
