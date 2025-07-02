@@ -45,3 +45,6 @@ try {
 export const getAdminDb = () => adminDb;
 export const getAdminAuth = () => adminAuth;
 export const isAdminInitialized = !!(adminDb && adminAuth);
+
+// Export direct references for backward compatibility
+export { adminDb, adminAuth };

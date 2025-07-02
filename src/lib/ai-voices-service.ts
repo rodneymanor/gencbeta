@@ -23,7 +23,6 @@ export class AIVoicesService {
       const sharedSnapshot = await adminDb
         .collection(this.COLLECTION_NAME)
         .where("isShared", "==", true)
-        .orderBy("createdAt", "desc")
         .get();
 
       const sharedVoices = sharedSnapshot.docs.map((doc) => ({
@@ -36,7 +35,6 @@ export class AIVoicesService {
         .collection(this.COLLECTION_NAME)
         .where("userId", "==", userId)
         .where("isShared", "==", false)
-        .orderBy("createdAt", "desc")
         .get();
 
       const customVoices = customSnapshot.docs.map((doc) => ({
