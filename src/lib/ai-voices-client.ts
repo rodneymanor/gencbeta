@@ -68,7 +68,7 @@ export class AIVoicesClient {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Failed to create custom voice");
+        throw new Error(error.message ?? "Failed to create custom voice");
       }
 
       const newVoice = await response.json();
@@ -92,7 +92,7 @@ export class AIVoicesClient {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Failed to activate voice");
+        throw new Error(error.message ?? "Failed to activate voice");
       }
 
       const result = await response.json();
@@ -158,7 +158,7 @@ export class AIVoicesClient {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Failed to delete voice");
+        throw new Error(error.message ?? "Failed to delete voice");
       }
 
       console.log("[AIVoicesClient] Custom voice deleted successfully:", voiceId);

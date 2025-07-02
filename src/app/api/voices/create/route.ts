@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
 
     const body: VoiceCreationRequest = await request.json();
 
-    if (!body.profileUrl || !body.platform) {
+    if (!body.profileUrl) {
       return NextResponse.json(
         { error: "Profile URL and platform are required" },
         { status: 400 }

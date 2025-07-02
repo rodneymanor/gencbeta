@@ -1,4 +1,3 @@
-import { getAuth } from "firebase/auth";
 import { adminDb } from "./firebase-admin";
 import {
   AIVoice,
@@ -13,29 +12,12 @@ export class AIVoicesService {
   private static readonly CUSTOM_VOICE_LIMIT = 3;
   private static readonly COLLECTION_NAME = "aiVoices";
 
-  /**
-   * Get authentication headers for API calls
-   */
-  private static async getAuthHeaders(): Promise<HeadersInit> {
-    const auth = getAuth();
-    const user = auth.currentUser;
-    if (!user) throw new Error("User not authenticated");
 
-    const idToken = await user.getIdToken();
-    return {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${idToken}`,
-    };
-  }
 
   /**
    * Get all available voices (shared + user's custom voices)
    */
-  static async getAvailableVoices(): Promise<{ sharedVoices: AIVoice[]; customVoices: AIVoice[] }> {
-    const auth = getAuth();
-    const user = auth.currentUser;
-    if (!user) throw new Error("User not authenticated");
-
+  static async getAvailableVoices(userId: string): Promise<{ sharedVoices: AIVoice[]; customVoices: AIVoice[] }> {
     try {
       // Get shared voices (isShared = true, userId = null)
       const sharedSnapshot = await adminDb
@@ -52,7 +34,7 @@ export class AIVoicesService {
       // Get user's custom voices
       const customSnapshot = await adminDb
         .collection(this.COLLECTION_NAME)
-        .where("userId", "==", user.uid)
+        .where("userId", "==", userId)
         .where("isShared", "==", false)
         .orderBy("createdAt", "desc")
         .get();
@@ -72,15 +54,11 @@ export class AIVoicesService {
   /**
    * Get user's custom voice limit status
    */
-  static async getCustomVoiceLimit(): Promise<CustomVoiceLimit> {
-    const auth = getAuth();
-    const user = auth.currentUser;
-    if (!user) throw new Error("User not authenticated");
-
+  static async getCustomVoiceLimit(userId: string): Promise<CustomVoiceLimit> {
     try {
       const snapshot = await adminDb
         .collection(this.COLLECTION_NAME)
-        .where("userId", "==", user.uid)
+        .where("userId", "==", userId)
         .where("isShared", "==", false)
         .get();
 
@@ -98,14 +76,10 @@ export class AIVoicesService {
   /**
    * Create a new custom voice from profile URL
    */
-  static async createCustomVoice(request: VoiceCreationRequest): Promise<AIVoice> {
-    const auth = getAuth();
-    const user = auth.currentUser;
-    if (!user) throw new Error("User not authenticated");
-
+  static async createCustomVoice(userId: string, request: VoiceCreationRequest): Promise<AIVoice> {
     try {
       // Check voice limit
-      const limit = await this.getCustomVoiceLimit();
+      const limit = await this.getCustomVoiceLimit(userId);
       if (limit.remaining <= 0) {
         throw new Error(`Voice limit reached. You can create up to ${this.CUSTOM_VOICE_LIMIT} custom voices.`);
       }
@@ -157,7 +131,7 @@ export class AIVoicesService {
         templates,
         exampleScripts: profileContent.scripts,
         isShared: false,
-        userId: user.uid,
+        userId: userId,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         isActive: false,
@@ -182,16 +156,12 @@ export class AIVoicesService {
   /**
    * Activate a voice for the user
    */
-  static async activateVoice(voiceId: string): Promise<VoiceActivationResponse> {
-    const auth = getAuth();
-    const user = auth.currentUser;
-    if (!user) throw new Error("User not authenticated");
-
+  static async activateVoice(userId: string, voiceId: string): Promise<VoiceActivationResponse> {
     try {
       // Deactivate all current voices for the user
       const userVoicesSnapshot = await adminDb
         .collection(this.COLLECTION_NAME)
-        .where("userId", "==", user.uid)
+        .where("userId", "==", userId)
         .where("isActive", "==", true)
         .get();
 
@@ -211,7 +181,7 @@ export class AIVoicesService {
       const voice = voiceDoc.data() as AIVoice;
 
       // Check if user has access to this voice
-      if (!voice.isShared && voice.userId !== user.uid) {
+      if (!voice.isShared && voice.userId !== userId) {
         throw new Error("Access denied to this voice");
       }
 
@@ -236,16 +206,12 @@ export class AIVoicesService {
   /**
    * Get the user's currently active voice
    */
-  static async getActiveVoice(): Promise<AIVoice | null> {
-    const auth = getAuth();
-    const user = auth.currentUser;
-    if (!user) throw new Error("User not authenticated");
-
+  static async getActiveVoice(userId: string): Promise<AIVoice | null> {
     try {
       // Check user's custom voices first
       const customSnapshot = await adminDb
         .collection(this.COLLECTION_NAME)
-        .where("userId", "==", user.uid)
+        .where("userId", "==", userId)
         .where("isActive", "==", true)
         .limit(1)
         .get();
@@ -296,11 +262,7 @@ export class AIVoicesService {
   /**
    * Delete a custom voice
    */
-  static async deleteCustomVoice(voiceId: string): Promise<void> {
-    const auth = getAuth();
-    const user = auth.currentUser;
-    if (!user) throw new Error("User not authenticated");
-
+  static async deleteCustomVoice(userId: string, voiceId: string): Promise<void> {
     try {
       const voiceDoc = await adminDb.collection(this.COLLECTION_NAME).doc(voiceId).get();
       if (!voiceDoc.exists) {
@@ -310,7 +272,7 @@ export class AIVoicesService {
       const voice = voiceDoc.data() as AIVoice;
 
       // Check if user owns this voice
-      if (voice.userId !== user.uid || voice.isShared) {
+      if (voice.userId !== userId || voice.isShared) {
         throw new Error("Access denied - cannot delete this voice");
       }
 
