@@ -15,7 +15,7 @@ interface SearchResultGroupProps {
   formatDate: (dateString: string) => string;
 }
 
-export function SearchResultGroup({ title, items, emptyMessage, onSelect, formatDate }: SearchResultGroupProps) {
+export function SearchResultGroup({ title, items, onSelect, formatDate }: SearchResultGroupProps) {
   if (items.length === 0) return null;
 
   return (
@@ -71,7 +71,7 @@ interface QuickActionProps {
     url: string;
     icon: React.ComponentType<{ className?: string }>;
   };
-  onSelect: (action: any) => void;
+  onSelect: (action: { id: string; title: string; description: string; url: string }) => void;
 }
 
 export function QuickActionItem({ action, onSelect }: QuickActionProps) {

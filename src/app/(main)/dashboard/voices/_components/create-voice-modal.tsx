@@ -9,7 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Instagram, Music, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AIVoicesService } from "@/lib/ai-voices-service";
+import { AIVoicesClient } from "@/lib/ai-voices-client";
 import { VoiceCreationRequest } from "@/types/ai-voices";
 import { toast } from "sonner";
 
@@ -36,7 +36,7 @@ function validateUrl(url: string, platform: "tiktok" | "instagram"): boolean {
 }
 
 async function createVoice(request: VoiceCreationRequest, onSuccess: () => void) {
-  await AIVoicesService.createCustomVoice(request);
+        await AIVoicesClient.createCustomVoice(request);
   onSuccess();
   toast.success("Custom voice created successfully!");
 }

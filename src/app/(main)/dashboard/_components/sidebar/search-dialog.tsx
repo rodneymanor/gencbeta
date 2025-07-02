@@ -2,18 +2,15 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 
-import { Search, ArrowRight, Plus, FileText, StickyNote, Mic, Wand2 } from "lucide-react";
+import { Search, Mic, Wand2 } from "lucide-react";
 
 import {
   CommandDialog,
   CommandEmpty,
   CommandGroup,
   CommandInput,
-  CommandItem,
   CommandList,
-  CommandSeparator,
 } from "@/components/ui/command";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth-context";
 import { SearchService, type SearchData, type SearchResult } from "@/lib/search-service";
 import { SearchResultGroup, SearchLoadingState, QuickActionItem } from "./search-result-components";
@@ -128,11 +125,11 @@ export function SearchDialog() {
 
   const getTotalResultsCount = () => {
     return (
-      searchResults.collections.length +
-      searchResults.videos.length +
-      searchResults.notes.length +
-      searchResults.scripts.length +
-      searchResults.pages.length
+      (searchResults.collections?.length ?? 0) +
+      (searchResults.videos?.length ?? 0) +
+      (searchResults.notes?.length ?? 0) +
+      (searchResults.scripts?.length ?? 0) +
+      (searchResults.pages?.length ?? 0)
     );
   };
 

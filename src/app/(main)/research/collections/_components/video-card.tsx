@@ -2,32 +2,20 @@
 
 import { useState, memo } from "react";
 
-import { MoreVertical, Trash2, ExternalLink, Clock, TrendingUp, Zap, RefreshCw } from "lucide-react";
+import { Clock } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { VideoEmbed } from "@/components/video-embed";
 
 import type { VideoWithPlayer } from "./collections-helpers";
 import {
   ComingSoonModal,
-  VideoActionsDropdown,
   ManagementModeSelection,
   ReprocessVideoOverlay,
   PlatformBadge,
   HoverActions,
   ActionButtons,
-  VideoMetadata,
   getVideoUrl,
 } from "./video-card-components";
 

@@ -91,6 +91,46 @@ export const sidebarItems: NavGroup[] = [
   },
   {
     id: 2,
+    label: "Scripting",
+    items: [
+      {
+        title: "Scripts",
+        url: "/dashboard/scripts",
+        icon: FileText,
+        subItems: [
+          {
+            title: "New Script",
+            url: "/dashboard/scripts/new",
+            icon: WandSparkles,
+          },
+          {
+            title: "My Scripts",
+            url: "/dashboard/scripts",
+            icon: Archive,
+          },
+        ],
+      },
+      {
+        title: "Voices",
+        url: "/dashboard/voices",
+        icon: Mic,
+        subItems: [
+          {
+            title: "Voice Library",
+            url: "/dashboard/voices?tab=library",
+            icon: Search,
+          },
+          {
+            title: "My Custom Voices",
+            url: "/dashboard/voices?tab=custom",
+            icon: Video,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 3,
     label: "Idea Inbox",
     items: [
       {
@@ -109,7 +149,7 @@ export const sidebarItems: NavGroup[] = [
     ],
   },
   {
-    id: 3,
+    id: 4,
     label: "Research",
     items: [
       {
@@ -133,7 +173,7 @@ export const sidebarItems: NavGroup[] = [
     ],
   },
   {
-    id: 4,
+    id: 5,
     label: "Tools",
     items: [
       {
@@ -144,7 +184,7 @@ export const sidebarItems: NavGroup[] = [
     ],
   },
   {
-    id: 5,
+    id: 6,
     label: "Team",
     items: [
       {
@@ -155,7 +195,7 @@ export const sidebarItems: NavGroup[] = [
     ],
   },
   {
-    id: 6,
+    id: 7,
     label: "Administration",
     items: [
       {
@@ -166,7 +206,7 @@ export const sidebarItems: NavGroup[] = [
     ],
   },
   {
-    id: 7,
+    id: 8,
     label: "Settings",
     items: [
       {

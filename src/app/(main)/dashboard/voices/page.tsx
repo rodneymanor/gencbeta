@@ -9,7 +9,7 @@ import { VoiceActivatedModal } from "./_components/voice-activated-modal";
 import { ExampleScriptsModal } from "./_components/example-scripts-modal";
 import { CreateVoiceModal } from "./_components/create-voice-modal";
 import { useQuery } from "@tanstack/react-query";
-import { AIVoicesService } from "@/lib/ai-voices-service";
+import { AIVoicesClient } from "@/lib/ai-voices-client";
 import { AIVoice, VoiceActivationResponse, OriginalScript } from "@/types/ai-voices";
 import { toast } from "sonner";
 
@@ -32,20 +32,20 @@ function VoicesPage() {
     refetch: refetchVoices,
   } = useQuery({
     queryKey: ["ai-voices"],
-    queryFn: () => AIVoicesService.getAvailableVoices(),
+    queryFn: () => AIVoicesClient.getAvailableVoices(),
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   // Fetch custom voice limit
   const { data: voiceLimit, refetch: refetchLimit } = useQuery({
     queryKey: ["voice-limit"],
-    queryFn: () => AIVoicesService.getCustomVoiceLimit(),
+    queryFn: () => AIVoicesClient.getCustomVoiceLimit(),
     staleTime: 5 * 60 * 1000,
   });
 
   const handleUseVoice = async (voice: AIVoice) => {
     try {
-      const response = await AIVoicesService.activateVoice(voice.id);
+      const response = await AIVoicesClient.activateVoice(voice.id);
       setActivationResponse(response);
       setShowActivatedModal(true);
 
@@ -61,7 +61,7 @@ function VoicesPage() {
 
   const handleShowExamples = async (voice: AIVoice) => {
     try {
-      const examples = await AIVoicesService.getVoiceExamples(voice.id);
+      const examples = await AIVoicesClient.getVoiceExamples(voice.id);
       setSelectedVoiceExamples({
         voiceName: voice.name,
         examples,
@@ -86,7 +86,7 @@ function VoicesPage() {
 
   const handleDeleteVoice = async (voiceId: string) => {
     try {
-      await AIVoicesService.deleteCustomVoice(voiceId);
+      await AIVoicesClient.deleteCustomVoice(voiceId);
       await refetchVoices();
       await refetchLimit();
       toast.success("Voice deleted successfully");
