@@ -181,13 +181,26 @@ async function generateProfileWithGemini(questionnaire: BrandQuestionnaire): Pro
   });
 
   try {
-    const profileData = JSON.parse(geminiResponse.content);
+    // Clean the response by removing markdown code blocks
+    const cleanedContent = cleanMarkdownCodeBlocks(geminiResponse.content);
+    const profileData = JSON.parse(cleanedContent);
     console.log("✅ [BRAND] Successfully parsed AI response");
     return profileData;
   } catch (parseError) {
     console.error("❌ [BRAND] Failed to parse AI response:", parseError);
+    console.error("❌ [BRAND] Raw response:", geminiResponse.content);
     throw new Error("Failed to generate valid brand profile");
   }
+}
+
+// Helper function to clean markdown code blocks from AI responses
+function cleanMarkdownCodeBlocks(content: string): string {
+  // Remove ```json and ``` markers, and any other markdown formatting
+  return content
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/```\s*$/i, "")
+    .trim();
 }
 
 // POST - Generate new brand profile
