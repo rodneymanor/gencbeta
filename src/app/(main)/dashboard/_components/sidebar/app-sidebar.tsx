@@ -36,25 +36,33 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }, [smartSidebar.isOpen, setOpen]);
 
   // Filter sidebar items based on user role
-  const filteredSidebarItems = dynamicSidebarItems.filter((group) => {
-    // Show administration section only to super admins
-    if (group.label === "Administration") {
-      return userProfile?.role === "super_admin";
-    }
+  const filteredSidebarItems = dynamicSidebarItems
+    .filter((group) => {
+      // Show team section only to coaches and super admins
+      if (group.label === "Team") {
+        return userProfile?.role === "coach" || userProfile?.role === "super_admin";
+      }
 
-    // Show collections section only to coaches and super admins
-    if (group.label === "Collections") {
-      return userProfile?.role === "coach" || userProfile?.role === "super_admin";
-    }
-
-    // Show team section only to coaches
-    if (group.label === "Team") {
-      return userProfile?.role === "coach";
-    }
-
-    // Show all other sections to everyone
-    return true;
-  });
+      // Show all other sections to everyone
+      return true;
+    })
+    .map((group) => {
+      // Filter team items based on specific roles
+      if (group.label === "Team") {
+        return {
+          ...group,
+          items: group.items.filter((item) => {
+            // Show admin panel only to super admins
+            if (item.title === "Admin") {
+              return userProfile?.role === "super_admin";
+            }
+            // Show creators to coaches and super admins
+            return userProfile?.role === "coach" || userProfile?.role === "super_admin";
+          }),
+        };
+      }
+      return group;
+    });
 
   return (
     <Sidebar
