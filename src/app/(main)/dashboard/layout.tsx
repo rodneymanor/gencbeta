@@ -22,7 +22,7 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
 
   return (
     <SmartSidebarProvider>
-      <SidebarProvider>
+      <SidebarProvider defaultOpen={false}>
         <AppSidebar variant={sidebarVariant} collapsible="icon" />
         <SidebarInset
           className={cn(
