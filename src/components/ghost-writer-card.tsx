@@ -71,7 +71,6 @@ export function GhostWriterCard({
               pillarInfo.color.replace('bg-', 'text-').replace('-500', '-700')
             )}
           >
-            <span className="mr-1">{pillarInfo.icon}</span>
             {pillarInfo.name}
           </Badge>
           <Badge variant="outline" className="text-xs">

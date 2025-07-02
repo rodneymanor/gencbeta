@@ -32,14 +32,21 @@ export function GhostWriter() {
 
     try {
       setError(null);
+      setLoading(true);
+      console.log("🎯 [GhostWriter] Fetching ideas...");
+      
       const response = await fetch("/api/ghost-writer/ideas", {
         headers: {
           "Authorization": `Bearer ${await user.getIdToken()}`,
         },
       });
 
+      console.log("📡 [GhostWriter] Response status:", response.status);
+
       if (!response.ok) {
         const errorData = await response.json();
+        console.error("❌ [GhostWriter] API error:", errorData);
+        
         if (errorData.needsBrandProfile) {
           setNeedsBrandProfile(true);
           setError("Please complete your brand profile to get personalized content ideas.");
@@ -50,10 +57,11 @@ export function GhostWriter() {
       }
 
       const result = await response.json();
+      console.log("✅ [GhostWriter] Received data:", result);
       setData(result);
       setNeedsBrandProfile(false);
     } catch (err) {
-      console.error("Failed to fetch Ghost Writer ideas:", err);
+      console.error("❌ [GhostWriter] Failed to fetch ideas:", err);
       setError(err instanceof Error ? err.message : "Failed to fetch ideas");
     } finally {
       setLoading(false);
