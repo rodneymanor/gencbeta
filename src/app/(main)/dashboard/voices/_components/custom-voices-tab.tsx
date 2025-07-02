@@ -1,12 +1,14 @@
 "use client";
 
-import { AIVoice, CustomVoiceLimit } from "@/types/ai-voices";
-import { VoiceCard } from "./voice-card";
+import { Plus, Mic, AlertCircle } from "lucide-react";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Mic, AlertCircle } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CardGridLoading } from "@/components/ui/loading-animations";
+import { AIVoice, CustomVoiceLimit } from "@/types/ai-voices";
+
+import { VoiceCard } from "./voice-card";
 
 interface CustomVoicesTabProps {
   voices: AIVoice[];
@@ -30,16 +32,23 @@ export function CustomVoicesTab({
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <Skeleton className="h-16 w-full" />
-        <div className="space-y-2">
-          <Skeleton className="h-6 w-48" />
-          <Skeleton className="h-4 w-64" />
+        {/* Alert Loading */}
+        <div className="bg-muted h-16 w-full animate-pulse rounded-lg" />
+
+        {/* Header Loading */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <div className="bg-muted h-6 w-48 animate-pulse rounded" />
+            <div className="bg-muted h-4 w-64 animate-pulse rounded" />
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="bg-muted h-4 w-32 animate-pulse rounded" />
+            <div className="bg-muted h-9 w-32 animate-pulse rounded" />
+          </div>
         </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-64 w-full" />
-          ))}
-        </div>
+
+        {/* Grid Loading */}
+        <CardGridLoading count={3} showBorder={true} columns={3} />
       </div>
     );
   }

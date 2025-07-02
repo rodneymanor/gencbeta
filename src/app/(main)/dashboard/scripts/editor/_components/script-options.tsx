@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ContentLoading } from "@/components/ui/loading-animations";
 
 import { ScriptOption } from "./types";
 
@@ -15,10 +16,26 @@ interface ScriptOptionsProps {
 export function ScriptOptions({ optionA, optionB, onSelect, isGenerating }: ScriptOptionsProps) {
   if (isGenerating) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="space-y-4 text-center">
-          <div className="border-primary mx-auto h-8 w-8 animate-spin rounded-full border-b-2"></div>
-          <p className="text-muted-foreground">Generating your script options...</p>
+      <div className="space-y-4">
+        <div className="grid h-full grid-cols-1 gap-4 md:grid-cols-2">
+          <Card className="flex flex-col">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <div className="bg-muted h-6 w-20 animate-pulse rounded" />
+              <div className="bg-muted h-8 w-16 animate-pulse rounded" />
+            </CardHeader>
+            <CardContent className="flex-1">
+              <ContentLoading />
+            </CardContent>
+          </Card>
+          <Card className="flex flex-col">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <div className="bg-muted h-6 w-20 animate-pulse rounded" />
+              <div className="bg-muted h-8 w-16 animate-pulse rounded" />
+            </CardHeader>
+            <CardContent className="flex-1">
+              <ContentLoading />
+            </CardContent>
+          </Card>
         </div>
       </div>
     );

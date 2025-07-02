@@ -1,8 +1,9 @@
 "use client";
 
+import { CardGridLoading } from "@/components/ui/loading-animations";
 import { AIVoice } from "@/types/ai-voices";
+
 import { VoiceCard } from "./voice-card";
-import { Skeleton } from "@/components/ui/skeleton";
 
 interface VoiceLibraryTabProps {
   voices: AIVoice[];
@@ -16,14 +17,10 @@ export function VoiceLibraryTab({ voices, isLoading, onUseVoice, onShowExamples 
     return (
       <div className="space-y-6">
         <div className="space-y-2">
-          <Skeleton className="h-6 w-32" />
-          <Skeleton className="h-4 w-96" />
+          <div className="bg-muted h-6 w-32 animate-pulse rounded" />
+          <div className="bg-muted h-4 w-96 animate-pulse rounded" />
         </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-64 w-full" />
-          ))}
-        </div>
+        <CardGridLoading count={6} showBorder={true} columns={3} />
       </div>
     );
   }
