@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { adminDb } from "@/lib/firebase-admin";
 import { generateScript } from "@/lib/gemini";
-import { trackApiUsage, UsageTracker } from "@/lib/usage-tracker";
+import { trackApiUsageAdmin, UsageTrackerAdmin } from "@/lib/usage-tracker-admin";
 import { AIVoice } from "@/types/ai-voices";
 
 // Validate environment setup
@@ -282,7 +282,7 @@ async function trackUsageResults(
   processingTime: number,
 ): Promise<void> {
   await Promise.allSettled([
-    trackApiUsage(
+    trackApiUsageAdmin(
       userId,
       "speed-write",
       "speed-write-a",
@@ -294,7 +294,7 @@ async function trackUsageResults(
       },
       { scriptLength: body.length, inputLength: body.idea.length },
     ),
-    trackApiUsage(
+    trackApiUsageAdmin(
       userId,
       "speed-write",
       "speed-write-b",
@@ -324,7 +324,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
     }
 
     // Rate limiting check
-    const rateLimitOk = await UsageTracker.checkRateLimit(userId);
+    const rateLimitOk = await UsageTrackerAdmin.checkRateLimit(userId);
     if (!rateLimitOk) {
       return createErrorResponse("Rate limit exceeded. Please try again in a few minutes.", 429);
     }
