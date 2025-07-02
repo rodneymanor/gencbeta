@@ -14,6 +14,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { UsageTracker } from "@/components/ui/usage-tracker";
 import { useAuth } from "@/contexts/auth-context";
 import { useCollectionsSidebar } from "@/hooks/use-collections-sidebar";
 import { sidebarItems } from "@/navigation/sidebar/sidebar-items";
@@ -79,7 +80,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser />
+        <div className="space-y-2">
+          <UsageTracker />
+          <NavUser />
+        </div>
       </SidebarFooter>
     </Sidebar>
   );

@@ -182,6 +182,44 @@ const profilesSnapshot = await adminDb
 - **Scalability**: Supports large datasets with proper index optimization
 - **RBAC Compliance**: Enables user-scoped data access patterns
 
+## 🔥 **CRITICAL: Firebase SDK Usage Patterns** (January 2, 2025)
+
+### Client vs Admin SDK Context Rule
+
+#### **The Critical Learning**
+**Problem**: Usage tracking failed with "Permission Denied" errors because we used client SDK in API routes.
+**Root Cause**: Client SDK requires user authentication context, which doesn't exist in server-side API routes.
+
+#### **The Golden Rule**
+**Always match Firebase SDK to execution context:**
+- **Client-Side (React components, hooks)** → Client SDK (`@/lib/firebase`)
+- **Server-Side (API routes, middleware)** → Admin SDK (`@/lib/firebase-admin`)
+
+#### **Usage Tracking Implementation Pattern**
+```typescript
+// ❌ WRONG - Client SDK in API route causes permission errors
+import { db } from "@/lib/firebase";
+await addDoc(collection(db, "usage_tracking"), data); // FAILS
+
+// ✅ CORRECT - Admin SDK in API route
+import { adminDb } from "@/lib/firebase-admin";
+await adminDb.collection("usage_tracking").add(data); // WORKS
+```
+
+#### **File Organization Pattern**
+For services needing both contexts:
+- `usage-tracker.ts` → Client version (React components)
+- `usage-tracker-admin.ts` → Server version (API routes)
+
+#### **Business Impact**
+Usage tracking is critical for:
+- Customer billing (AI API costs per user)
+- Rate limiting and abuse prevention
+- Cost attribution and pricing strategy
+- Feature usage analytics
+
+**Documentation**: See `docs/firebase-sdk-usage-patterns.md` for complete guide.
+
 ## Video Processing Microservices Architecture
 
 ### Overview

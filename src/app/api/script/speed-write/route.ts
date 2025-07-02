@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { authenticateApiKey } from "@/lib/api-key-auth";
+import { CreditsService } from "@/lib/credits-service";
 import { adminDb } from "@/lib/firebase-admin";
 import { generateScript } from "@/lib/gemini";
 import { trackApiUsageAdmin, UsageTrackerAdmin } from "@/lib/usage-tracker-admin";
@@ -314,8 +316,16 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
   console.log("🚀 [SpeedWrite] Starting A/B script generation...");
 
   try {
+    // Authenticate user
+    const authResult = await authenticateApiKey(request);
+    if (authResult instanceof NextResponse) {
+      return authResult as NextResponse<SpeedWriteResponse>;
+    }
+
+    const { user, rateLimitResult } = authResult;
+    const userId = user.uid;
+    const accountLevel = user.role === "super_admin" || user.role === "coach" ? "pro" : "free";
     const body: SpeedWriteRequest = await request.json();
-    const { userId = "anonymous" } = body;
 
     // Validate request
     const validation = validateRequest(body);
@@ -323,10 +333,15 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
       return createErrorResponse(validation.error!, 400);
     }
 
-    // Rate limiting check
-    const rateLimitOk = await UsageTrackerAdmin.checkRateLimit(userId);
-    if (!rateLimitOk) {
-      return createErrorResponse("Rate limit exceeded. Please try again in a few minutes.", 429);
+    // Check rate limiting from auth result
+    if (!rateLimitResult.allowed) {
+      return createErrorResponse(rateLimitResult.reason ?? "Rate limit exceeded", 429);
+    }
+
+    // Check if user has enough credits
+    const creditCheck = await CreditsService.canPerformAction(userId, "SCRIPT_GENERATION", accountLevel);
+    if (!creditCheck.canPerform) {
+      return createErrorResponse(creditCheck.reason ?? "Insufficient credits", 402);
     }
 
     // Process scripts
@@ -340,15 +355,31 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
       body.length,
     );
 
-    // Track usage
-    await trackUsageResults(userId, body, speedWriteResult, educationalResult, processingTime);
-
     // Check if at least one script was generated successfully
     if (!optionA && !optionB) {
       const error =
         speedWriteResult.status === "rejected" ? speedWriteResult.reason?.message : "Failed to generate scripts";
       return createErrorResponse(error ?? "Failed to generate scripts. Please try again.", 500);
     }
+
+    // Deduct credits for successful generation
+    await CreditsService.trackUsageAndDeductCredits(
+      userId,
+      "SCRIPT_GENERATION",
+      accountLevel,
+      {
+        service: "gemini",
+        tokensUsed: (speedWriteResult.status === "fulfilled" ? speedWriteResult.value.tokensUsed : 0) +
+                   (educationalResult.status === "fulfilled" ? educationalResult.value.tokensUsed : 0),
+        responseTime: processingTime,
+        success: true,
+        timestamp: new Date().toISOString(),
+        metadata: { scriptLength: body.length, inputLength: body.idea.length },
+      }
+    );
+
+    // Track usage
+    await trackUsageResults(userId, body, speedWriteResult, educationalResult, processingTime);
 
     console.log(`✅ [SpeedWrite] Generated ${optionA ? 1 : 0} + ${optionB ? 1 : 0} scripts in ${processingTime}ms`);
 
