@@ -1,10 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Minus } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Instagram, Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { SocialMediaStats } from "@/types/usage-tracking";
 
 interface SocialStatsProps {
@@ -35,24 +33,16 @@ export function SocialStats({ className }: SocialStatsProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [socialStats, setSocialStats] = useState<SocialMediaStats[]>(mockSocialStats);
 
-  // Auto-rotate through platforms every 5 seconds
+  // Auto-rotate through platforms every 4 seconds
   useEffect(() => {
     if (socialStats.length <= 1) return;
 
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % socialStats.length);
-    }, 5000);
+    }, 4000);
 
     return () => clearInterval(interval);
   }, [socialStats.length]);
-
-  const nextStat = () => {
-    setCurrentIndex((prev) => (prev + 1) % socialStats.length);
-  };
-
-  const prevStat = () => {
-    setCurrentIndex((prev) => (prev - 1 + socialStats.length) % socialStats.length);
-  };
 
   if (socialStats.length === 0) {
     return null;
@@ -60,7 +50,6 @@ export function SocialStats({ className }: SocialStatsProps) {
 
   const currentStat = socialStats[currentIndex];
   const isPositiveChange = currentStat.weeklyChange > 0;
-  const isNegativeChange = currentStat.weeklyChange < 0;
 
   const formatFollowerCount = (count: number): string => {
     if (count >= 1000000) {
@@ -82,105 +71,62 @@ export function SocialStats({ className }: SocialStatsProps) {
   const getPlatformIcon = (platform: string) => {
     switch (platform) {
       case "instagram":
-        return "📷";
+        return <Instagram className="h-3.5 w-3.5 text-pink-500" />;
       case "tiktok":
-        return "🎵";
+        return <Music className="h-3.5 w-3.5 text-black dark:text-white" />;
       default:
-        return "📱";
-    }
-  };
-
-  const getTrendIcon = () => {
-    if (isPositiveChange) {
-      return <TrendingUp className="h-3 w-3 text-green-500" />;
-    } else if (isNegativeChange) {
-      return <TrendingDown className="h-3 w-3 text-red-500" />;
-    } else {
-      return <Minus className="h-3 w-3 text-muted-foreground" />;
+        return <Instagram className="h-3.5 w-3.5 text-muted-foreground" />;
     }
   };
 
   const getChangeColor = () => {
     if (isPositiveChange) {
-      return "text-green-500";
-    } else if (isNegativeChange) {
-      return "text-red-500";
+      return "text-green-600 dark:text-green-400";
     } else {
-      return "text-muted-foreground";
+      return "text-red-600 dark:text-red-400";
     }
   };
 
   return (
-    <Card className={`${className} min-w-[200px]`}>
-      <CardContent className="p-3">
-        <div className="flex items-center justify-between">
-          {/* Navigation Button */}
-          {socialStats.length > 1 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0"
-              onClick={prevStat}
-            >
-              <ChevronLeft className="h-3 w-3" />
-            </Button>
-          )}
-
-          {/* Stats Content */}
-          <div className="flex-1 flex items-center justify-center gap-3">
-            {/* Platform */}
-            <div className="flex items-center gap-1">
-              <span className="text-sm">{getPlatformIcon(currentStat.platform)}</span>
-              <span className="text-xs text-muted-foreground capitalize">
-                {currentStat.platform}
-              </span>
-            </div>
-
-            {/* Follower Count */}
-            <div className="flex items-center gap-1">
-              <span className="text-sm font-medium">
-                {formatFollowerCount(currentStat.followerCount)}
-              </span>
-              <span className="text-xs text-muted-foreground">followers</span>
-            </div>
-
-            {/* Weekly Change */}
-            <div className="flex items-center gap-1">
-              {getTrendIcon()}
-              <span className={`text-xs font-medium ${getChangeColor()}`}>
-                {currentStat.weeklyChange !== 0 && (isPositiveChange ? "+" : "")}
-                {formatChange(currentStat.weeklyChange)}
-              </span>
-            </div>
-          </div>
-
-          {/* Navigation Button */}
-          {socialStats.length > 1 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0"
-              onClick={nextStat}
-            >
-              <ChevronRight className="h-3 w-3" />
-            </Button>
-          )}
-        </div>
-
-        {/* Platform Indicators */}
+    <Button
+      variant="ghost"
+      size="sm"
+      className={`${className} h-8 px-2 text-xs hover:bg-muted/50 transition-all duration-300`}
+      onClick={() => setCurrentIndex((prev) => (prev + 1) % socialStats.length)}
+    >
+      <div className="flex items-center gap-1.5">
+        {/* Platform Icon */}
+        {getPlatformIcon(currentStat.platform)}
+        
+        {/* Follower Count */}
+        <span className="font-medium text-foreground">
+          {formatFollowerCount(currentStat.followerCount)}
+        </span>
+        
+        {/* Weekly Change - only show if significant */}
+        {Math.abs(currentStat.weeklyChange) > 0 && (
+          <span className={`font-medium ${getChangeColor()}`}>
+            {isPositiveChange ? "+" : ""}
+            {formatChange(currentStat.weeklyChange)}
+          </span>
+        )}
+        
+        {/* Subtle platform indicators */}
         {socialStats.length > 1 && (
-          <div className="flex items-center justify-center gap-1 mt-2">
+          <div className="flex gap-0.5 ml-1">
             {socialStats.map((_, index) => (
               <div
                 key={index}
-                className={`h-1 w-1 rounded-full transition-colors ${
-                  index === currentIndex ? "bg-primary" : "bg-muted"
+                className={`h-1 w-1 rounded-full transition-all duration-200 ${
+                  index === currentIndex 
+                    ? "bg-primary scale-110" 
+                    : "bg-muted-foreground/30"
                 }`}
               />
             ))}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </Button>
   );
 } 
