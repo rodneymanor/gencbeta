@@ -1,21 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
-import { Clock, Wand2, Bookmark } from "lucide-react";
+import { Clock } from "lucide-react";
 
+import { GhostWriter } from "@/components/ghost-writer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useAuth } from "@/contexts/auth-context";
 
 import { IdeaInboxDialog } from "./_components/idea-inbox-dialog";
 import { InputModeToggle, InputMode } from "./_components/input-mode-toggle";
-import { DailyIdea, ScriptMode, mockDailyIdeas, scriptModes, getSourceIcon, getSourceColor } from "./_components/types";
+import { ScriptMode, scriptModes } from "./_components/types";
 
 interface ScriptOption {
   id: string;
@@ -35,6 +35,7 @@ interface SpeedWriteResponse {
 
 export default function NewScriptPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { userProfile } = useAuth();
 
   // Input mode state
@@ -45,9 +46,38 @@ export default function NewScriptPage() {
   // Other state
   const [selectedMode, setSelectedMode] = useState<ScriptMode["id"]>("speed-write");
   const [scriptLength, setScriptLength] = useState("20");
-  const [dailyIdeas, setDailyIdeas] = useState(mockDailyIdeas);
   const [isGenerating, setIsGenerating] = useState(false);
   const [speedWriteResponse, setSpeedWriteResponse] = useState<SpeedWriteResponse | null>(null);
+
+  // Handle URL parameters from Ghost Writer
+  useEffect(() => {
+    const ideaParam = searchParams.get("idea");
+    const hookParam = searchParams.get("hook");
+    const outlineParam = searchParams.get("outline");
+    const lengthParam = searchParams.get("length");
+    const pillarParam = searchParams.get("pillar");
+
+    if (ideaParam) {
+      // Pre-fill the form with Ghost Writer data
+      let fullIdea = ideaParam;
+      if (hookParam) {
+        fullIdea += `\n\nHook: ${hookParam}`;
+      }
+      if (outlineParam) {
+        fullIdea += `\n\nOutline: ${outlineParam}`;
+      }
+      
+      setScriptIdea(fullIdea);
+      
+      if (lengthParam) {
+        setScriptLength(lengthParam);
+      }
+      
+      // Clear URL parameters after setting state
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, [searchParams]);
 
   const callSpeedWriteAPI = async (idea: string): Promise<SpeedWriteResponse> => {
     // Get Firebase Auth token
@@ -153,28 +183,7 @@ export default function NewScriptPage() {
     }
   };
 
-  const handleMagicWand = async (idea: DailyIdea) => {
-    if (selectedMode === "speed-write") {
-      await handleSpeedWrite(idea.text);
-    } else {
-      // Legacy mode handling
-      const params = new URLSearchParams({
-        idea: encodeURIComponent(idea.text),
-        mode: selectedMode,
-        length: scriptLength,
-        source: idea.source,
-        inputType: "text",
-      });
 
-      router.push(`/dashboard/scripts/editor?${params.toString()}`);
-    }
-  };
-
-  const handleBookmark = (ideaId: string) => {
-    setDailyIdeas((prev) =>
-      prev.map((idea) => (idea.id === ideaId ? { ...idea, isBookmarked: !idea.isBookmarked } : idea)),
-    );
-  };
 
   return (
     <div className="bg-background min-h-screen p-6">
@@ -272,81 +281,8 @@ export default function NewScriptPage() {
           </div>
         </div>
 
-        {/* Daily Ideas Table */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold">Daily Ideas for You</h3>
-            <Button variant="ghost" size="sm">
-              Refresh Ideas
-            </Button>
-          </div>
-
-          <Card>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[50%]">Idea</TableHead>
-                  <TableHead className="w-[15%]">Source</TableHead>
-                  <TableHead className="w-[15%]">Category</TableHead>
-                  <TableHead className="w-[10%] text-center">Saved</TableHead>
-                  <TableHead className="w-[10%] text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {dailyIdeas.map((idea) => {
-                  const SourceIcon = getSourceIcon(idea.source);
-
-                  return (
-                    <TableRow key={idea.id} className="group">
-                      <TableCell className="font-medium">
-                        <p
-                          className="text-sm leading-relaxed"
-                          style={{
-                            display: "-webkit-box",
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: "vertical",
-                            overflow: "hidden",
-                          }}
-                        >
-                          {idea.text}
-                        </p>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={`text-xs capitalize ${getSourceColor(idea.source)}`}>
-                          <SourceIcon className="mr-1 h-3 w-3" />
-                          {idea.source === "google-trends" ? "Trends" : idea.source}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-muted-foreground text-sm">{idea.category}</span>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleBookmark(idea.id)}
-                          className={`h-8 w-8 p-0 ${idea.isBookmarked ? "text-yellow-500" : ""}`}
-                        >
-                          <Bookmark className={`h-4 w-4 ${idea.isBookmarked ? "fill-current" : ""}`} />
-                        </Button>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          size="sm"
-                          onClick={() => handleMagicWand(idea)}
-                          className="gap-2 opacity-0 transition-opacity group-hover:opacity-100"
-                        >
-                          <Wand2 className="h-4 w-4" />
-                          Script
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </Card>
-        </div>
+        {/* Ghost Writer Section */}
+        <GhostWriter />
       </div>
     </div>
   );
