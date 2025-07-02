@@ -17,18 +17,26 @@ import {
 import type { VideoWithPlayer } from "./collections-helpers";
 
 // Legacy video type for backward compatibility
-export type LegacyVideo = VideoWithPlayer & {
+type LegacyVideo = VideoWithPlayer & {
   url?: string; // Legacy field that might contain Bunny.net URLs
 };
 
 // Coming Soon Modal Component
 export const ComingSoonModal = ({ isOpen, onClose, title }: { isOpen: boolean; onClose: () => void; title: string }) => (
   <Dialog open={isOpen} onOpenChange={onClose}>
-    <DialogContent className="sm:max-w-md">
-      <DialogHeader>
-        <DialogTitle>{title}</DialogTitle>
-        <DialogDescription>This feature is coming soon! Stay tuned for updates.</DialogDescription>
+    <DialogContent className="border-border/60 shadow-lg sm:max-w-md">
+      <DialogHeader className="space-y-3 text-center">
+        <DialogTitle className="text-xl font-semibold">{title}</DialogTitle>
+        <DialogDescription className="text-muted-foreground leading-relaxed">
+          This feature is coming soon! We&apos;re working hard to bring you powerful video analysis and content
+          repurposing tools.
+        </DialogDescription>
       </DialogHeader>
+      <div className="flex justify-center pt-4">
+        <Button onClick={onClose} className="shadow-xs transition-all duration-200 hover:shadow-sm">
+          Got it
+        </Button>
+      </div>
     </DialogContent>
   </Dialog>
 );
@@ -108,7 +116,7 @@ export const ReprocessVideoOverlay = ({
         <div className="mx-auto max-w-[200px] text-xs text-white/70">
           {isReprocessing ? "Converting video for playback..." : "This video needs reprocessing to enable playback"}
         </div>
-        <div className="flex gap-2 justify-center">
+        <div className="flex justify-center gap-2">
           <Button
             size="sm"
             onClick={() => onReprocess(video)}
@@ -165,7 +173,7 @@ export const HoverActions = ({ showActions, onDelete }: { showActions: boolean; 
   if (!showActions) return null;
 
   return (
-    <div className="absolute top-3 right-3 z-15 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+    <div className="absolute top-3 right-3 z-20 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
       <VideoActionsDropdown onDelete={onDelete} />
     </div>
   );
@@ -178,24 +186,79 @@ export const ActionButtons = ({
   onShowInsights: () => void;
   onShowRepurpose: () => void;
 }) => (
-  <div className="flex gap-1.5 p-2">
+  <div className="flex gap-2">
     <Button
-      variant="outline"
       size="sm"
-      className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 h-8 flex-1 text-xs shadow-xs transition-all duration-200 hover:shadow-sm"
+      variant="outline"
       onClick={onShowInsights}
+      className="border-border/60 hover:bg-accent/50 flex-1 shadow-sm transition-all duration-200 hover:shadow-md"
     >
       <TrendingUp className="mr-1.5 h-3.5 w-3.5" />
       Insights
     </Button>
     <Button
-      variant="outline"
       size="sm"
-      className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 h-8 flex-1 text-xs shadow-xs transition-all duration-200 hover:shadow-sm"
+      variant="outline"
       onClick={onShowRepurpose}
+      className="border-border/60 hover:bg-accent/50 flex-1 shadow-sm transition-all duration-200 hover:shadow-md"
     >
       <Zap className="mr-1.5 h-3.5 w-3.5" />
       Repurpose
     </Button>
   </div>
-); 
+);
+
+export const VideoMetadata = ({ video }: { video: VideoWithPlayer }) => (
+  <div className="space-y-3">
+    <div className="space-y-1">
+      <h3 className="text-sm font-semibold leading-tight">{video.title}</h3>
+      {video.description && (
+        <p className="text-muted-foreground text-xs leading-relaxed line-clamp-2">{video.description}</p>
+      )}
+    </div>
+
+    {/* Video metadata */}
+    <div className="flex items-center gap-3 text-xs">
+      {video.duration && (
+        <div className="text-muted-foreground flex items-center gap-1">
+          <Clock className="h-3 w-3" />
+          <span>{video.duration}</span>
+        </div>
+      )}
+      {video.views && (
+        <div className="text-muted-foreground">
+          <span>{video.views.toLocaleString()} views</span>
+        </div>
+      )}
+    </div>
+  </div>
+);
+
+// Helper function to get the correct video URL
+export const getVideoUrl = (video: LegacyVideo): string => {
+  console.log("🔍 [VideoCard] Video data:", {
+    id: video.id,
+    iframeUrl: video.iframeUrl,
+    url: video.url,
+    originalUrl: video.originalUrl,
+  });
+
+  // Priority order: iframeUrl -> legacy url (if Bunny) -> originalUrl -> empty
+  if (video.iframeUrl) {
+    console.log("✅ [VideoCard] Using iframeUrl:", video.iframeUrl);
+    return video.iframeUrl;
+  }
+
+  if (video.url && video.url.includes("iframe.mediadelivery.net")) {
+    console.log("✅ [VideoCard] Using legacy Bunny URL:", video.url);
+    return video.url;
+  }
+
+  if (video.originalUrl) {
+    console.log("⚠️ [VideoCard] Falling back to originalUrl (will be rejected):", video.originalUrl);
+    return video.originalUrl;
+  }
+
+  console.log("❌ [VideoCard] No valid URL found - returning empty string");
+  return "";
+};

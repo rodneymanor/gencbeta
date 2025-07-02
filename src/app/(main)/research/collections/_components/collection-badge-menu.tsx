@@ -21,11 +21,7 @@ interface CollectionBadgeMenuProps {
   className?: string;
 }
 
-export function CollectionBadgeMenu({
-  collection,
-  onCollectionDeleted,
-  className = "",
-}: CollectionBadgeMenuProps) {
+export function CollectionBadgeMenu({ collection, onCollectionDeleted, className = "" }: CollectionBadgeMenuProps) {
   const { userProfile } = useAuth();
   const isAdmin = userProfile?.role === "coach" || userProfile?.role === "super_admin";
 
@@ -40,7 +36,7 @@ export function CollectionBadgeMenu({
         <Button
           variant="ghost"
           size="sm"
-          className={`h-6 w-6 p-0 opacity-0 transition-opacity hover:opacity-100 group-hover:opacity-100 ${className}`}
+          className={`h-6 w-6 p-0 opacity-0 transition-opacity group-hover:opacity-100 hover:opacity-100 ${className}`}
         >
           <MoreHorizontal className="h-3 w-3" />
           <span className="sr-only">Collection options</span>
@@ -56,12 +52,9 @@ export function CollectionBadgeMenu({
           Edit Collection
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DeleteCollectionDialog
-          collection={collection}
-          onCollectionDeleted={onCollectionDeleted}
-        >
+        <DeleteCollectionDialog collection={collection} onCollectionDeleted={onCollectionDeleted}>
           <DropdownMenuItem
-            className="gap-2 text-destructive focus:text-destructive"
+            className="text-destructive focus:text-destructive gap-2"
             onSelect={(e) => e.preventDefault()}
           >
             <Trash2 className="h-4 w-4" />
@@ -71,4 +64,4 @@ export function CollectionBadgeMenu({
       </DropdownMenuContent>
     </DropdownMenu>
   );
-} 
+}

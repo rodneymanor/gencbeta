@@ -102,7 +102,7 @@ function validateUrl(url: string): boolean {
 async function downloadVideo(baseUrl: string, url: string) {
   try {
     console.log("🔄 [Add Video API] Calling downloader service...");
-    
+
     const response = await fetch(`${baseUrl}/api/video/downloader`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -128,36 +128,35 @@ async function downloadVideo(baseUrl: string, url: string) {
 async function streamToBunny(downloadData: any) {
   try {
     console.log("🐰 [Add Video API] Streaming to Bunny CDN...");
-    
+
     const buffer = Buffer.from(downloadData.videoData.buffer);
     const filename = downloadData.videoData.filename || `${downloadData.platform}-video.mp4`;
-    const mimeType = downloadData.videoData.mimeType || 'video/mp4';
+    const mimeType = downloadData.videoData.mimeType || "video/mp4";
 
     console.log("🔍 [Add Video API] Buffer info:", {
       bufferSize: buffer.length,
       filename,
-      mimeType
+      mimeType,
     });
 
     const result = await uploadToBunnyStream(buffer, filename, mimeType);
-    
+
     console.log("🔍 [Add Video API] Upload result:", result);
-    
+
     if (!result) {
       console.error("❌ [Add Video API] Bunny stream failed - null result");
       return { success: false, error: "Failed to upload to Bunny CDN" };
     }
 
     console.log("✅ [Add Video API] Bunny stream successful:", result.cdnUrl);
-    
-    return { 
-      success: true, 
+
+    return {
+      success: true,
       iframeUrl: result.cdnUrl,
       directUrl: result.cdnUrl,
       guid: result.filename, // This is actually the GUID
-      thumbnailUrl: null
+      thumbnailUrl: null,
     };
-    
   } catch (error) {
     console.error("❌ [Add Video API] Bunny stream error:", error);
     return { success: false, error: error instanceof Error ? error.message : "Bunny stream failed" };
@@ -168,7 +167,7 @@ async function streamToBunny(downloadData: any) {
 async function addVideoToCollection(collectionId: string, videoData: any) {
   try {
     console.log("💾 [Add Video API] Adding video to Firestore collection...");
-    
+
     if (!isAdminInitialized) {
       throw new Error("Firebase Admin SDK not initialized");
     }
@@ -189,7 +188,7 @@ async function addVideoToCollection(collectionId: string, videoData: any) {
     // Update collection video count
     const collectionRef = adminDb.collection("collections").doc(collectionId);
     const collectionDoc = await collectionRef.get();
-    
+
     if (collectionDoc.exists) {
       const currentCount = collectionDoc.data()?.videoCount || 0;
       await collectionRef.update({
@@ -212,13 +211,13 @@ function startBackgroundTranscription(
   videoData: any,
   videoId: string,
   collectionId: string,
-  platform: string
+  platform: string,
 ) {
   // Start background transcription process (non-blocking)
   setTimeout(async () => {
     try {
       console.log("🎙️ [Add Video API] Starting background transcription for video:", videoId);
-      
+
       const response = await fetch(`${baseUrl}/api/video/transcribe`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -362,7 +361,7 @@ async function processVideoInBackground(
     console.log(`🎬 [${requestId}] Background processing started at ${new Date().toISOString()}`);
 
     const baseUrl = getBaseUrl(request);
-    
+
     // Decode URL to handle URL encoding issues (like Instagram)
     const decodedUrl = decodeURIComponent(videoUrl);
     console.log("🔍 [Add Video API] Decoded URL:", decodedUrl);
@@ -370,7 +369,7 @@ async function processVideoInBackground(
     // Step 1: Download video
     console.log(`📥 [${requestId}] Step 1: Downloading video...`);
     const downloadResult = await downloadVideo(baseUrl, decodedUrl);
-    
+
     if (!downloadResult.success) {
       console.error(`❌ [${requestId}] Download failed:`, downloadResult.error);
       return;
@@ -381,7 +380,7 @@ async function processVideoInBackground(
     // Step 2: Stream to Bunny CDN
     console.log(`🎬 [${requestId}] Step 2: Streaming to Bunny CDN...`);
     const streamResult = await streamToBunny(downloadResult.data);
-    
+
     if (!streamResult.success) {
       console.error(`❌ [${requestId}] Streaming failed:`, streamResult.error);
       return;
@@ -401,13 +400,13 @@ async function processVideoInBackground(
       thumbnailUrl: downloadResult.data.thumbnailUrl || streamResult.thumbnailUrl,
       metrics: downloadResult.data.metrics || {},
       metadata: downloadResult.data.metadata || {},
-      transcriptionStatus: 'pending',
+      transcriptionStatus: "pending",
       userId: userId,
       collectionId: collectionId,
     };
 
     const addResult = await addVideoToCollection(collectionId, videoData);
-    
+
     if (!addResult.success) {
       console.error(`❌ [${requestId}] Failed to add to collection:`, addResult.error);
       return;
@@ -420,7 +419,7 @@ async function processVideoInBackground(
       downloadResult.data.videoData,
       addResult.videoId,
       collectionId,
-      downloadResult.data.platform
+      downloadResult.data.platform,
     );
 
     const totalProcessingTime = Date.now() - backgroundStartTime;
@@ -430,7 +429,7 @@ async function processVideoInBackground(
       collectionId: collectionId,
       platform: downloadResult.data.platform,
       iframe: streamResult.iframeUrl,
-      transcriptionStatus: 'processing',
+      transcriptionStatus: "processing",
       totalTime: `${totalProcessingTime}ms`,
       success: true,
       completedAt: new Date().toISOString(),

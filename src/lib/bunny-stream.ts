@@ -294,7 +294,7 @@ async function createBunnyVideoObject(filename: string): Promise<string | null> 
   try {
     console.log("📝 [BUNNY_STREAM] Creating video object for filename:", filename);
     console.log("🔍 [BUNNY_STREAM] Using library ID:", process.env.BUNNY_STREAM_LIBRARY_ID);
-    
+
     const response = await fetch(`https://video.bunnycdn.com/library/${process.env.BUNNY_STREAM_LIBRARY_ID}/videos`, {
       method: "POST",
       headers: {
@@ -317,7 +317,7 @@ async function createBunnyVideoObject(filename: string): Promise<string | null> 
     console.log("✅ [BUNNY_STREAM] Video object created successfully");
     console.log("🔍 [BUNNY_STREAM] Response data:", data);
     console.log("🔍 [BUNNY_STREAM] Generated GUID:", data.guid);
-    
+
     return data.guid;
   } catch (error) {
     console.error("❌ [BUNNY_STREAM] Create video object error:", error);

@@ -7,7 +7,7 @@ import { getAdminAuth, getAdminDb, isAdminInitialized } from "@/lib/firebase-adm
 export async function POST(request: NextRequest) {
   try {
     console.log("🚀 [VIDEO_PROCESS] Starting complete video processing workflow...");
-    
+
     // Check if Firebase Admin is initialized (it auto-initializes on import)
     if (!isAdminInitialized) {
       throw new Error("Firebase Admin SDK not initialized - check environment variables");
@@ -16,35 +16,41 @@ export async function POST(request: NextRequest) {
     // Extract and verify user authentication
     const authHeader = request.headers.get("Authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json({
-        error: "Unauthorized - Missing or invalid authorization header"
-      }, { status: 401 });
+      return NextResponse.json(
+        {
+          error: "Unauthorized - Missing or invalid authorization header",
+        },
+        { status: 401 },
+      );
     }
 
     const idToken = authHeader.split("Bearer ")[1];
     let userId: string;
-    
+
     try {
       const adminAuth = getAdminAuth();
       if (!adminAuth) {
         throw new Error("Admin auth not available");
       }
-      
+
       const decodedToken = await adminAuth.verifyIdToken(idToken);
       userId = decodedToken.uid;
       console.log("✅ [VIDEO_PROCESS] User authenticated:", userId);
     } catch (authError) {
       console.error("❌ [VIDEO_PROCESS] Authentication failed:", authError);
-      return NextResponse.json({
-        error: "Unauthorized - Invalid token"
-      }, { status: 401 });
+      return NextResponse.json(
+        {
+          error: "Unauthorized - Invalid token",
+        },
+        { status: 401 },
+      );
     }
 
     const { videoUrl, collectionId, title } = await request.json();
     const baseUrl = getBaseUrl(request);
 
     console.log("🔍 [VIDEO_PROCESS] Original URL:", videoUrl);
-    
+
     // Decode URL to handle URL encoding issues (like Instagram)
     const decodedUrl = decodeURIComponent(videoUrl);
     console.log("🔍 [VIDEO_PROCESS] Decoded URL:", decodedUrl);
@@ -52,12 +58,15 @@ export async function POST(request: NextRequest) {
     // Step 1: Download video
     console.log("📥 [VIDEO_PROCESS] Step 1: Downloading video...");
     const downloadResult = await downloadVideo(baseUrl, decodedUrl);
-    
+
     if (!downloadResult.success) {
-      return NextResponse.json({
-        error: "Failed to download video",
-        details: downloadResult.error
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          error: "Failed to download video",
+          details: downloadResult.error,
+        },
+        { status: 500 },
+      );
     }
 
     console.log("✅ [VIDEO_PROCESS] Download successful");
@@ -65,12 +74,15 @@ export async function POST(request: NextRequest) {
     // Step 2: Stream to Bunny CDN
     console.log("🎬 [VIDEO_PROCESS] Step 2: Streaming to Bunny CDN...");
     const streamResult = await streamToBunny(downloadResult.data);
-    
+
     if (!streamResult.success) {
-      return NextResponse.json({
-        error: "Failed to stream video to CDN",
-        details: streamResult.error || "Failed to upload to Bunny CDN"
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          error: "Failed to stream video to CDN",
+          details: streamResult.error || "Failed to upload to Bunny CDN",
+        },
+        { status: 500 },
+      );
     }
 
     console.log("✅ [VIDEO_PROCESS] Streaming successful");
@@ -87,17 +99,20 @@ export async function POST(request: NextRequest) {
       thumbnailUrl: downloadResult.data.thumbnailUrl || streamResult.thumbnailUrl,
       metrics: downloadResult.data.metrics || {},
       metadata: downloadResult.data.metadata || {},
-      transcriptionStatus: 'pending',
-      userId: userId
+      transcriptionStatus: "pending",
+      userId: userId,
     };
 
     const addResult = await addVideoToCollection(collectionId, videoData);
-    
+
     if (!addResult.success) {
-      return NextResponse.json({
-        error: "Failed to add video to collection",
-        details: addResult.error
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          error: "Failed to add video to collection",
+          details: addResult.error,
+        },
+        { status: 500 },
+      );
     }
 
     // Step 4: Start background transcription (real-time updates)
@@ -107,27 +122,29 @@ export async function POST(request: NextRequest) {
       downloadResult.data.videoData,
       addResult.videoId,
       collectionId,
-      downloadResult.data.platform
+      downloadResult.data.platform,
     );
 
     console.log("✅ [VIDEO_PROCESS] Complete workflow successful!");
-    
+
     return NextResponse.json({
       success: true,
       videoId: addResult.videoId,
       iframe: streamResult.iframeUrl,
       directUrl: streamResult.directUrl,
       platform: downloadResult.data.platform,
-      transcriptionStatus: 'processing',
-      message: "Video added successfully. Transcription in progress."
+      transcriptionStatus: "processing",
+      message: "Video added successfully. Transcription in progress.",
     });
-
   } catch (error) {
     console.error("❌ [VIDEO_PROCESS] Workflow error:", error);
-    return NextResponse.json({
-      error: "Video processing failed",
-      details: error instanceof Error ? error.message : "Unknown error"
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: "Video processing failed",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
+    );
   }
 }
 
@@ -142,7 +159,7 @@ function getBaseUrl(request: NextRequest): string {
 async function downloadVideo(baseUrl: string, url: string) {
   try {
     console.log("🔄 [VIDEO_PROCESS] Calling downloader service...");
-    
+
     const response = await fetch(`${baseUrl}/api/video/downloader`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -167,39 +184,38 @@ async function downloadVideo(baseUrl: string, url: string) {
 async function streamToBunny(downloadData: any) {
   try {
     console.log("🐰 [VIDEO_PROCESS] Streaming to Bunny CDN...");
-    
+
     const buffer = Buffer.from(downloadData.videoData.buffer);
     const filename = downloadData.videoData.filename || `${downloadData.platform}-video.mp4`;
-    const mimeType = downloadData.videoData.mimeType || 'video/mp4';
+    const mimeType = downloadData.videoData.mimeType || "video/mp4";
 
     console.log("🔍 [VIDEO_PROCESS] Buffer info:", {
       bufferSize: buffer.length,
       filename,
-      mimeType
+      mimeType,
     });
 
     const result = await uploadToBunnyStream(buffer, filename, mimeType);
-    
+
     console.log("🔍 [VIDEO_PROCESS] Upload result:", result);
-    
+
     if (!result) {
       console.error("❌ [VIDEO_PROCESS] Bunny stream failed - null result");
       return { success: false, error: "Failed to upload to Bunny CDN" };
     }
 
     console.log("✅ [VIDEO_PROCESS] Bunny stream successful:", result.cdnUrl);
-    
-    const returnValue = { 
-      success: true, 
+
+    const returnValue = {
+      success: true,
       iframeUrl: result.cdnUrl,
       directUrl: result.cdnUrl,
       guid: result.filename, // This is actually the GUID
-      thumbnailUrl: null
+      thumbnailUrl: null,
     };
-    
+
     console.log("🔍 [VIDEO_PROCESS] Returning:", returnValue);
     return returnValue;
-    
   } catch (error) {
     console.error("❌ [VIDEO_PROCESS] Bunny stream error:", error);
     return { success: false, error: error instanceof Error ? error.message : "Bunny stream failed" };
@@ -209,7 +225,7 @@ async function streamToBunny(downloadData: any) {
 async function addVideoToCollection(collectionId: string, videoData: any) {
   try {
     console.log("💾 [VIDEO_PROCESS] Adding video to Firestore collection...");
-    
+
     if (!isAdminInitialized) {
       throw new Error("Firebase Admin SDK not initialized");
     }
@@ -220,26 +236,26 @@ async function addVideoToCollection(collectionId: string, videoData: any) {
     }
 
     // Add video to collection
-    const videoRef = adminDb.collection('videos').doc();
+    const videoRef = adminDb.collection("videos").doc();
     const timestamp = new Date().toISOString();
     await videoRef.set({
       ...videoData,
       collectionId,
       id: videoRef.id,
-      addedAt: timestamp,      // ✅ Required by RBAC queries
+      addedAt: timestamp, // ✅ Required by RBAC queries
       createdAt: timestamp,
-      updatedAt: timestamp
+      updatedAt: timestamp,
     });
 
     // Update collection video count
-    const collectionRef = adminDb.collection('collections').doc(collectionId);
+    const collectionRef = adminDb.collection("collections").doc(collectionId);
     await adminDb.runTransaction(async (transaction) => {
       const collectionDoc = await transaction.get(collectionRef);
       if (collectionDoc.exists) {
         const currentCount = collectionDoc.data()?.videoCount || 0;
         transaction.update(collectionRef, {
           videoCount: currentCount + 1,
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
         });
       }
     });
@@ -257,7 +273,7 @@ function startBackgroundTranscription(
   videoData: any,
   videoId: string,
   collectionId: string,
-  platform: string
+  platform: string,
 ) {
   // Use setTimeout to ensure response is sent before starting background work
   setTimeout(async () => {
@@ -268,29 +284,29 @@ function startBackgroundTranscription(
       const buffer = Buffer.from(videoData.buffer);
       const blob = new Blob([buffer], { type: videoData.mimeType });
       const formData = new FormData();
-      formData.append('video', blob, videoData.filename);
+      formData.append("video", blob, videoData.filename);
 
       const response = await fetch(`${baseUrl}/api/video/transcribe`, {
-        method: 'POST',
-        body: formData
+        method: "POST",
+        body: formData,
       });
 
       if (response.ok) {
         const transcriptionResult = await response.json();
         console.log("✅ [BACKGROUND] Transcription completed");
-        
+
         // Update video with transcription results
         await updateVideoTranscription(videoId, transcriptionResult);
-        
+
         // Real-time update could be sent via WebSocket here if implemented
         console.log("📡 [BACKGROUND] Transcription ready for video:", videoId);
       } else {
         console.error("❌ [BACKGROUND] Transcription failed:", response.status);
-        await updateVideoTranscriptionStatus(videoId, 'failed');
+        await updateVideoTranscriptionStatus(videoId, "failed");
       }
     } catch (error) {
       console.error("❌ [BACKGROUND] Transcription error:", error);
-      await updateVideoTranscriptionStatus(videoId, 'failed');
+      await updateVideoTranscriptionStatus(videoId, "failed");
     }
   }, 100);
 }
@@ -302,9 +318,9 @@ async function updateVideoTranscription(videoId: string, transcriptionData: any)
 
     // Filter out undefined values to prevent Firestore errors
     const updateData: any = {
-      transcriptionStatus: 'completed',
+      transcriptionStatus: "completed",
       transcriptionCompletedAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
     // Only add fields that are not undefined
@@ -321,7 +337,7 @@ async function updateVideoTranscription(videoId: string, transcriptionData: any)
       updateData.visualContext = transcriptionData.visualContext;
     }
 
-    await adminDb.collection('videos').doc(videoId).update(updateData);
+    await adminDb.collection("videos").doc(videoId).update(updateData);
 
     console.log("✅ [BACKGROUND] Video transcription updated:", videoId);
   } catch (error) {
@@ -334,11 +350,11 @@ async function updateVideoTranscriptionStatus(videoId: string, status: string) {
     const adminDb = getAdminDb();
     if (!adminDb) return;
 
-    await adminDb.collection('videos').doc(videoId).update({
+    await adminDb.collection("videos").doc(videoId).update({
       transcriptionStatus: status,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     });
   } catch (error) {
     console.error("❌ [BACKGROUND] Failed to update transcription status:", error);
   }
-} 
+}

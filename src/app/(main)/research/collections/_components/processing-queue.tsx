@@ -41,42 +41,41 @@ export function ProcessingQueue({ onVideoAdded, className = "" }: ProcessingQueu
     try {
       // For now, we'll use a placeholder since we don't have a get user jobs endpoint yet
       // In production, you'd call: /api/internal/video-processing/jobs
-      
+
       // Placeholder data for demonstration
       const placeholderJobs: VideoProcessingJob[] = [
         {
-          id: 'job_1234567890_abc123',
+          id: "job_1234567890_abc123",
           userId: user.uid,
-          collectionId: 'collection_1',
-          videoUrl: 'https://www.tiktok.com/@example/video/123',
-          title: 'Sample TikTok Video',
-          status: 'processing',
-          priority: 'normal',
+          collectionId: "collection_1",
+          videoUrl: "https://www.tiktok.com/@example/video/123",
+          title: "Sample TikTok Video",
+          status: "processing",
+          priority: "normal",
           attempts: 1,
           maxAttempts: 3,
           createdAt: new Date(Date.now() - 30000).toISOString(),
           updatedAt: new Date().toISOString(),
           startedAt: new Date(Date.now() - 20000).toISOString(),
           progress: {
-            stage: 'downloading',
+            stage: "downloading",
             percentage: 45,
-            message: 'Downloading video content...',
-            estimatedTimeRemaining: 15000
-          }
-        }
+            message: "Downloading video content...",
+            estimatedTimeRemaining: 15000,
+          },
+        },
       ];
 
       setJobs(placeholderJobs);
-      
     } catch (error) {
-      console.error('Error fetching user jobs:', error);
+      console.error("Error fetching user jobs:", error);
     } finally {
       setIsLoading(false);
     }
   }, [user]);
 
   const toggleJobDetails = (jobId: string) => {
-    setExpandedJobs(prev => {
+    setExpandedJobs((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(jobId)) {
         newSet.delete(jobId);
@@ -89,8 +88,8 @@ export function ProcessingQueue({ onVideoAdded, className = "" }: ProcessingQueu
 
   const getJobUrl = (job: VideoProcessingJob) => {
     const url = new URL(job.videoUrl);
-    const platform = url.hostname.includes('tiktok') ? 'TikTok' : 'Instagram';
-    const shortUrl = `${platform}: ${url.pathname.split('/').pop()?.substring(0, 12) ?? 'unknown'}...`;
+    const platform = url.hostname.includes("tiktok") ? "TikTok" : "Instagram";
+    const shortUrl = `${platform}: ${url.pathname.split("/").pop()?.substring(0, 12) ?? "unknown"}...`;
     return { platform, shortUrl };
   };
 
@@ -99,13 +98,13 @@ export function ProcessingQueue({ onVideoAdded, className = "" }: ProcessingQueu
     const date = new Date(dateString);
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / (1000 * 60));
-    
-    if (diffMins < 1) return 'Just now';
+
+    if (diffMins < 1) return "Just now";
     if (diffMins < 60) return `${diffMins}m ago`;
-    
+
     const diffHours = Math.floor(diffMins / 60);
     if (diffHours < 24) return `${diffHours}h ago`;
-    
+
     const diffDays = Math.floor(diffHours / 24);
     return `${diffDays}d ago`;
   };
@@ -117,7 +116,7 @@ export function ProcessingQueue({ onVideoAdded, className = "" }: ProcessingQueu
 
   useEffect(() => {
     fetchUserJobs();
-    
+
     // Poll for updates every 5 seconds
     const interval = setInterval(fetchUserJobs, 5000);
 
@@ -134,10 +133,10 @@ export function ProcessingQueue({ onVideoAdded, className = "" }: ProcessingQueu
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {[1, 2].map(i => (
-              <div key={i} className="animate-pulse bg-secondary/20 rounded-lg p-4">
-                <div className="h-4 bg-secondary/40 rounded mb-2"></div>
-                <div className="h-2 bg-secondary/40 rounded"></div>
+            {[1, 2].map((i) => (
+              <div key={i} className="bg-secondary/20 animate-pulse rounded-lg p-4">
+                <div className="bg-secondary/40 mb-2 h-4 rounded"></div>
+                <div className="bg-secondary/40 h-2 rounded"></div>
               </div>
             ))}
           </div>
@@ -153,8 +152,8 @@ export function ProcessingQueue({ onVideoAdded, className = "" }: ProcessingQueu
           <CardTitle className="text-lg">Processing Queue</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <div className="text-muted-foreground py-8 text-center">
+            <Clock className="mx-auto mb-4 h-12 w-12 opacity-50" />
             <p>No videos in processing queue</p>
             <p className="text-sm">Videos you add will appear here while being processed</p>
           </div>
@@ -163,13 +162,11 @@ export function ProcessingQueue({ onVideoAdded, className = "" }: ProcessingQueu
     );
   }
 
-  const activeJobs = jobs.filter(job => 
-    ['queued', 'processing', 'downloading', 'transcribing', 'analyzing', 'uploading', 'retrying'].includes(job.status)
+  const activeJobs = jobs.filter((job) =>
+    ["queued", "processing", "downloading", "transcribing", "analyzing", "uploading", "retrying"].includes(job.status),
   );
-  
-  const completedJobs = jobs.filter(job => 
-    ['completed', 'failed', 'cancelled'].includes(job.status)
-  );
+
+  const completedJobs = jobs.filter((job) => ["completed", "failed", "cancelled"].includes(job.status));
 
   return (
     <Card className={className}>
@@ -181,52 +178,39 @@ export function ProcessingQueue({ onVideoAdded, className = "" }: ProcessingQueu
       </CardHeader>
       <CardContent className="space-y-3">
         {/* Active Jobs */}
-        {activeJobs.map(job => {
+        {activeJobs.map((job) => {
           const { platform, shortUrl } = getJobUrl(job);
           const isExpanded = expandedJobs.has(job.id);
-          
+
           return (
-            <div key={job.id} className="border rounded-lg p-3 space-y-2">
+            <div key={job.id} className="space-y-2 rounded-lg border p-3">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3 flex-1">
-                  <Badge className={STATUS_COLORS[job.status]}>
-                    {job.status}
-                  </Badge>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm truncate">
-                      {job.title ?? shortUrl}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
+                <div className="flex flex-1 items-center gap-3">
+                  <Badge className={STATUS_COLORS[job.status]}>{job.status}</Badge>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-medium">{job.title ?? shortUrl}</div>
+                    <div className="text-muted-foreground text-xs">
                       {platform} • {getTimeAgo(job.createdAt)}
                     </div>
                   </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => toggleJobDetails(job.id)}
-                  className="h-7 w-7 p-0"
-                >
+                <Button variant="ghost" size="sm" onClick={() => toggleJobDetails(job.id)} className="h-7 w-7 p-0">
                   <Eye className="h-3 w-3" />
                 </Button>
               </div>
-              
+
               {/* Quick Progress */}
               <div className="space-y-1">
                 <Progress value={job.progress.percentage} className="h-1" />
-                <div className="text-xs text-muted-foreground">
+                <div className="text-muted-foreground text-xs">
                   {job.progress.message} ({job.progress.percentage}%)
                 </div>
               </div>
 
               {/* Detailed Status */}
               {isExpanded && (
-                <div className="pt-2 border-t">
-                  <VideoProcessingStatus 
-                    jobId={job.id}
-                    onComplete={handleJobComplete}
-                    className="bg-secondary/20"
-                  />
+                <div className="border-t pt-2">
+                  <VideoProcessingStatus jobId={job.id} onComplete={handleJobComplete} className="bg-secondary/20" />
                 </div>
               )}
             </div>
@@ -235,33 +219,28 @@ export function ProcessingQueue({ onVideoAdded, className = "" }: ProcessingQueu
 
         {/* Completed Jobs (last 3) */}
         {completedJobs.length > 0 && (
-          <div className="pt-4 border-t">
-            <h4 className="font-medium text-sm text-muted-foreground mb-3">Recent Completed</h4>
+          <div className="border-t pt-4">
+            <h4 className="text-muted-foreground mb-3 text-sm font-medium">Recent Completed</h4>
             <div className="space-y-2">
-              {completedJobs.slice(0, 3).map(job => {
+              {completedJobs.slice(0, 3).map((job) => {
                 const { platform, shortUrl } = getJobUrl(job);
-                
+
                 return (
-                  <div key={job.id} className="flex items-center justify-between p-2 bg-secondary/10 rounded">
-                    <div className="flex items-center gap-3 flex-1">
-                      {job.status === 'completed' ? (
+                  <div key={job.id} className="bg-secondary/10 flex items-center justify-between rounded p-2">
+                    <div className="flex flex-1 items-center gap-3">
+                      {job.status === "completed" ? (
                         <CheckCircle className="h-4 w-4 text-green-600" />
                       ) : (
                         <XCircle className="h-4 w-4 text-red-600" />
                       )}
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm truncate">
-                          {job.title ?? shortUrl}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-medium">{job.title ?? shortUrl}</div>
+                        <div className="text-muted-foreground text-xs">
                           {platform} • {getTimeAgo(job.completedAt ?? job.updatedAt)}
                         </div>
                       </div>
                     </div>
-                    <Badge 
-                      variant="outline" 
-                      className={job.status === 'completed' ? 'text-green-600' : 'text-red-600'}
-                    >
+                    <Badge variant="outline" className={job.status === "completed" ? "text-green-600" : "text-red-600"}>
                       {job.status}
                     </Badge>
                   </div>
@@ -272,18 +251,13 @@ export function ProcessingQueue({ onVideoAdded, className = "" }: ProcessingQueu
         )}
 
         {/* Refresh Button */}
-        <div className="pt-3 border-t">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchUserJobs}
-            className="w-full"
-          >
-            <RefreshCw className="h-3 w-3 mr-2" />
+        <div className="border-t pt-3">
+          <Button variant="outline" size="sm" onClick={fetchUserJobs} className="w-full">
+            <RefreshCw className="mr-2 h-3 w-3" />
             Refresh Queue
           </Button>
         </div>
       </CardContent>
     </Card>
   );
-} 
+}

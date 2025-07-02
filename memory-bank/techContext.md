@@ -1,12 +1,239 @@
 # Technical Context
 
-## 🎉 **PRODUCTION-READY TECHNICAL STACK** (Dec 30, 2024)
+## 🎉 **PRODUCTION-READY TECHNICAL STACK** (January 2, 2025)
 
 ### **Current Production Status**
-- **Live Environment**: https://gencbeta-f38hbrvqe-rodneymanors-projects.vercel.app
-- **Last Deployment**: December 30, 2024
+- **Live Environment**: https://gencbeta-amiaxhp94-rodneymanors-projects.vercel.app
+- **Last Deployment**: January 2, 2025
+- **New Features**: Complete brand profile generation system with AI integration
 - **Build Performance**: 55-second optimized Vercel builds
 - **Status**: All features operational and verified in production
+
+## 🎉 **NEW: Brand Profile System Technical Architecture** (January 2, 2025)
+
+### **AI Integration Stack**
+
+#### **Gemini 2.0 Flash Integration**
+```typescript
+// Brand profile generation configuration
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+
+const generationConfig = {
+  temperature: 0.7,
+  topK: 40,
+  topP: 0.95,
+  maxOutputTokens: 4096,
+};
+
+// Robust JSON parsing with markdown cleanup
+const cleanMarkdownCodeBlocks = (text: string): string => {
+  return text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+};
+```
+
+#### **AI Response Processing**
+- **Markdown Cleanup**: Handles AI responses wrapped in code blocks
+- **JSON Validation**: Type-safe parsing of AI-generated content
+- **Error Handling**: Comprehensive fallbacks for AI generation failures
+- **Rate Limiting**: Proper API usage management
+
+### **Database Architecture - Brand Profiles**
+
+#### **Firestore Schema**
+```typescript
+interface BrandProfile {
+  id: string;
+  userId: string;                    // User ownership for RBAC
+  questionnaire: BrandQuestionnaire; // 7-question framework
+  profile: BrandProfileData;         // AI-generated strategy
+  createdAt: string;                 // Firestore timestamp
+  updatedAt: string;                 // Last modification
+  isActive: boolean;                 // Active profile flag
+  version: number;                   // Profile version tracking
+}
+
+interface BrandQuestionnaire {
+  businessDescription: string;
+  targetAudience: string;
+  mainGoals: string;
+  uniqueValue: string;
+  contentTypes: string;
+  brandPersonality: string;
+  challenges: string;
+}
+
+interface BrandProfileData {
+  contentPillars: ContentPillar[];
+  keywords: KeywordStrategy;
+  summary: string;
+  recommendations: string[];
+}
+```
+
+#### **Firestore Composite Indexes**
+```json
+{
+  "collectionGroup": "brandProfiles",
+  "queryScope": "COLLECTION",
+  "fields": [
+    { "fieldPath": "userId", "order": "ASCENDING" },
+    { "fieldPath": "createdAt", "order": "DESCENDING" }
+  ]
+}
+```
+
+### **Frontend Architecture - Brand Profile System**
+
+#### **React Query Integration**
+```typescript
+// Optimized query configuration
+const { data: profilesData, isLoading } = useQuery({
+  queryKey: ["brand-profiles"],
+  queryFn: () => BrandProfileService.getBrandProfiles(),
+  staleTime: 5 * 60 * 1000, // 5 minutes - profiles don't change frequently
+});
+
+// Mutation with immediate UI updates
+const generateProfileMutation = useMutation({
+  mutationFn: (questionnaire: BrandQuestionnaire) => BrandProfileService.generateBrandProfile(questionnaire),
+  onSuccess: async () => {
+    // Force immediate refetch for instant UI updates
+    await queryClient.refetchQueries({ queryKey: ["brand-profiles"] });
+    BrandProfileService.markOnboardingComplete();
+  },
+});
+```
+
+#### **State Management Pattern**
+```typescript
+// Smart navigation with user control
+const [activeTab, setActiveTab] = useState<TabValue>("questions");
+const [hasAutoSwitched, setHasAutoSwitched] = useState(false);
+
+// One-time auto-switch to Overview after generation
+useEffect(() => {
+  if (hasGeneratedProfile && activeTab === "questions" && !hasAutoSwitched) {
+    setActiveTab("overview");
+    setHasAutoSwitched(true);
+  }
+  if (!hasGeneratedProfile) {
+    setHasAutoSwitched(false);
+  }
+}, [hasGeneratedProfile, activeTab, hasAutoSwitched]);
+```
+
+### **Service Layer Architecture**
+
+#### **BrandProfileService**
+```typescript
+export class BrandProfileService {
+  // Authentication headers for API calls
+  private static async getAuthHeaders(): Promise<HeadersInit> {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user) throw new Error("User not authenticated");
+    
+    const idToken = await user.getIdToken();
+    return {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${idToken}`,
+    };
+  }
+
+  // Core CRUD operations
+  static async generateBrandProfile(questionnaire: BrandQuestionnaire): Promise<BrandProfile>
+  static async getBrandProfiles(): Promise<{ profiles: BrandProfile[]; activeProfile: BrandProfile | null; }>
+  static async updateBrandProfile(profileId: string, updates: Partial<BrandProfile>): Promise<void>
+  
+  // Onboarding state management
+  static shouldShowOnboarding(): boolean
+  static markOnboardingComplete(): void
+  static setNeverShowAgain(): void
+}
+```
+
+#### **API Route Structure**
+```
+/api/brand/
+├── route.ts                 # GET: Fetch profiles, POST: Generate profile
+├── activate/
+│   └── route.ts            # PUT: Activate specific profile
+└── [profileId]/
+    └── route.ts            # PUT: Update profile, DELETE: Remove profile
+```
+
+### **UI Component Architecture**
+
+#### **Multi-Tab Interface**
+```typescript
+// Tab configuration with dynamic states
+const tabs = [
+  { value: "overview", label: "Overview", disabled: !hasGeneratedProfile },
+  { value: "questions", label: "Questions", disabled: false },
+  { value: "content-pillars", label: "Content Pillars", disabled: !hasGeneratedProfile },
+  { value: "keywords", label: "Keywords", disabled: !hasGeneratedProfile },
+];
+
+// Smart tab navigation component
+<Tabs value={activeTab} onValueChange={setActiveTab}>
+  <TabsList className="grid w-full grid-cols-4">
+    {tabs.map((tab) => (
+      <TabsTrigger 
+        key={tab.value} 
+        value={tab.value} 
+        disabled={tab.disabled}
+        className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+      >
+        {tab.label}
+      </TabsTrigger>
+    ))}
+  </TabsList>
+</Tabs>
+```
+
+#### **Form Validation & Voice Input**
+```typescript
+// React Hook Form with Zod validation
+const form = useForm<BrandQuestionnaire>({
+  resolver: zodResolver(brandQuestionnaireSchema),
+  defaultValues: initialValues,
+});
+
+// Voice input integration
+<VoiceInput
+  value={form.watch("businessDescription")}
+  onChange={(value) => form.setValue("businessDescription", value)}
+  placeholder="Describe your business or personal brand..."
+  className="min-h-[100px]"
+/>
+```
+
+### **Notification System**
+
+#### **Context-Aware Onboarding**
+```typescript
+// Enhanced provider with profile awareness
+export function BrandOnboardingProvider({ children }: BrandOnboardingProviderProps) {
+  const { user, initializing } = useAuth();
+  
+  const { data: profilesData } = useQuery({
+    queryKey: ["brand-profiles"],
+    queryFn: () => BrandProfileService.getBrandProfiles(),
+    enabled: !initializing && !!user,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const hasGeneratedProfile = Boolean(profilesData?.activeProfile?.profile);
+
+  useEffect(() => {
+    if (!initializing && user && hasGeneratedProfile) {
+      // Automatically mark onboarding complete if profile exists
+      BrandProfileService.markOnboardingComplete();
+    }
+  }, [user, initializing, hasGeneratedProfile]);
+}
+```
 
 ## Video Processing System Technical Stack
 
@@ -114,6 +341,9 @@ const ExpandableText = memo<ExpandableTextProps>(({ content, maxLines = 4 }) => 
 #### API Endpoint Structure
 ```
 /api/
+├── brand/                 # 🎉 NEW: Brand profile endpoints
+│   ├── route.ts          # GET/POST brand profiles
+│   └── activate/         # Profile activation
 ├── video/
 │   ├── downloader/         # Social media video downloading
 │   ├── uploader/          # CDN upload functionality  
@@ -173,6 +403,37 @@ const response = await fetch(`${baseUrl}/api/video/downloader`, {
 
 ### Data Models
 
+#### **🎉 NEW: Brand Profile Data Structure**
+```typescript
+interface BrandProfile {
+  id: string;
+  userId: string;                    // User ownership for RBAC
+  questionnaire: BrandQuestionnaire; // 7-question framework
+  profile: BrandProfileData;         // AI-generated strategy
+  createdAt: string;                 // Firestore timestamp
+  updatedAt: string;                 // Last modification
+  isActive: boolean;                 // Active profile flag
+  version: number;                   // Profile version tracking
+}
+
+interface BrandProfileData {
+  contentPillars: ContentPillar[];
+  keywords: {
+    core: string[];
+    audience: string[];
+    problemAware: string[];
+    solutionAware: string[];
+  };
+  hashtags: {
+    broad: string[];
+    niche: string[];
+    community: string[];
+  };
+  summary: string;
+  recommendations: string[];
+}
+```
+
 #### **🎉 UPDATED: Video Data Structure with RBAC Fields**
 ```typescript
 interface Video {
@@ -198,291 +459,202 @@ interface Video {
   videoData?: {
     buffer: number[];
     size: number;
-    mimeType: string;
-    filename: string;
+    type: string;
   };
 }
 ```
 
-#### Collection Data Structure
+### Authentication & Authorization
+
+#### Firebase Admin SDK Configuration
 ```typescript
-interface Collection {
-  id?: string;
-  title: string;
-  description: string;
-  userId: string; // Coach's UID
-  videoCount: number;
-  createdAt: string;
-  updatedAt: string;
+// Server-side authentication
+import { initializeApp, getApps, cert } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
+import { getFirestore } from "firebase-admin/firestore";
+
+const firebaseAdminConfig = {
+  credential: cert({
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+  }),
+};
+
+// Initialize admin SDK
+const adminApp = getApps().find(app => app.name === 'admin') || 
+  initializeApp(firebaseAdminConfig, 'admin');
+
+export const adminAuth = getAuth(adminApp);
+export const adminDb = getFirestore(adminApp);
+```
+
+#### JWT Token Validation
+```typescript
+// Authentication middleware pattern
+export async function validateAuthToken(request: Request): Promise<DecodedIdToken> {
+  const authHeader = request.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    throw new Error("Missing or invalid authorization header");
+  }
+
+  const idToken = authHeader.split("Bearer ")[1];
+  const decodedToken = await adminAuth.verifyIdToken(idToken);
+  
+  return decodedToken;
 }
 ```
 
-#### **🎉 UPDATED: Transcription Response Structure**
+### Performance Optimizations
+
+#### React Query Configuration
 ```typescript
-interface TranscriptionResponse {
-  success: boolean;
-  transcript: string;
-  platform: string;
-  components: {
-    hook: string;
-    bridge: string;
-    nugget: string;
-    wta: string;
-  };
-  contentMetadata: {
-    platform: string;
-    author: string;
-    description: string;
-    source: string;
-    hashtags: string[];
-  };
-  visualContext: string;
-  transcriptionMetadata: {
-    method: string;
-    fileSize: number;
-    fileName: string;
-    processedAt: string;
-  };
-}
+// Optimized query client setup
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      gcTime: 1000 * 60 * 30,   // 30 minutes
+      retry: (failureCount, error) => {
+        if (error instanceof Error && error.message.includes('auth')) {
+          return false; // Don't retry auth errors
+        }
+        return failureCount < 3;
+      },
+    },
+    mutations: {
+      retry: 1,
+    },
+  },
+});
+```
+
+#### Component Memoization
+```typescript
+// Prevent unnecessary re-renders
+const VideoEmbed = memo<VideoEmbedProps>(({ url, className = "" }) => {
+  // Component implementation
+});
+
+const BrandProfileTabs = memo(() => {
+  // Component implementation
+});
+
+const ExpandableText = memo<ExpandableTextProps>(({ content, maxLines = 4 }) => {
+  // Component implementation
+});
 ```
 
 ### Environment Configuration
 
-#### **Production Environment Variables**
-```bash
-# Firebase Configuration (Client)
-NEXT_PUBLIC_FIREBASE_API_KEY=
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
-NEXT_PUBLIC_FIREBASE_APP_ID=
-
-# Firebase Admin (Server-side)
-FIREBASE_ADMIN_PRIVATE_KEY=
-FIREBASE_ADMIN_CLIENT_EMAIL=
-FIREBASE_ADMIN_PROJECT_ID=
-
-# Bunny Stream CDN
-BUNNY_STREAM_LIBRARY_ID=
-BUNNY_STREAM_API_KEY=
-BUNNY_CDN_HOSTNAME=
-
-# AI Services
-GEMINI_API_KEY=
-
-# API Security
-VIDEO_API_KEY=
-
-# Deployment (Vercel Auto-managed)
-VERCEL_URL=
-NODE_ENV=production
+#### Production Environment Variables
+```typescript
+// Required environment variables
+interface EnvironmentConfig {
+  // Firebase Configuration
+  FIREBASE_PROJECT_ID: string;
+  FIREBASE_CLIENT_EMAIL: string;
+  FIREBASE_PRIVATE_KEY: string;
+  
+  // AI Integration
+  GEMINI_API_KEY: string;
+  
+  // CDN Configuration
+  BUNNY_STREAM_LIBRARY_ID: string;
+  BUNNY_STREAM_API_KEY: string;
+  BUNNY_CDN_HOSTNAME: string;
+  
+  // Deployment
+  VERCEL_URL?: string;
+  NODE_ENV: 'development' | 'production';
+}
 ```
 
-#### **🎉 NEW: Service Configuration Validation**
+#### Development vs Production
 ```typescript
-// Production-ready configuration checks
-const isBunnyStreamConfigured = () => {
-  return !!(
-    process.env.BUNNY_STREAM_LIBRARY_ID &&
-    process.env.BUNNY_STREAM_API_KEY &&
-    process.env.BUNNY_CDN_HOSTNAME
-  );
-};
-
-const isProductionEnvironment = () => {
-  return process.env.NODE_ENV === 'production' && process.env.VERCEL_URL;
-};
-
-const getAuthenticatedBaseUrl = () => {
+// Environment-aware configuration
+const getBaseUrl = () => {
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}`;
   }
   return "http://localhost:3000";
 };
+
+const isDevelopment = process.env.NODE_ENV === 'development';
+const isProduction = process.env.NODE_ENV === 'production';
 ```
 
-### Performance Optimizations
+### Build & Deployment
 
-#### **🎉 NEW: React Performance Patterns**
+#### Next.js Configuration
 ```typescript
-// Memoization for expensive video components
-export const VideoEmbed = memo<VideoEmbedProps>(({ url, className }) => {
-  // Iframe recreation logic
-});
-
-export const ExpandableText = memo<ExpandableTextProps>(({ content, maxLines }) => {
-  // Smart truncation logic
-});
-
-// Optimized context updates
-const setCurrentlyPlaying = useCallback((videoId: string | null) => {
-  if (videoId !== currentlyPlayingId) {
-    pauseAllVideos();
-    setCurrentlyPlayingId(videoId);
-  }
-}, [currentlyPlayingId, pauseAllVideos]);
-```
-
-#### Background Processing Implementation
-```typescript
-// Fire-and-forget pattern with authentication
-setTimeout(async () => {
-  try {
-    const formData = new FormData();
-    const buffer = Buffer.from(videoData.buffer);
-    const blob = new Blob([buffer], { type: videoData.mimeType });
-    formData.append("video", blob, videoData.filename);
-
-    const response = await fetch(`${baseUrl}/api/video/analyze-complete`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${idToken}` // ✅ Authentication
-      },
-      body: formData,
-    });
-
-    if (response.ok) {
-      const analysisResult = await response.json();
-      // Background analysis completes automatically
-    }
-  } catch (error) {
-    console.error("🔥 Background analysis error:", error);
-  }
-}, 100);
-```
-
-#### **🎉 NEW: CDN Upload with Enhanced Security**
-```typescript
-// Bunny.net upload with validation
-const uploadToBunnyCDN = async (videoData: VideoBuffer) => {
-  if (!isBunnyStreamConfigured()) {
-    throw new Error("Bunny Stream not configured");
-  }
-  
-  const formData = new FormData();
-  formData.append("video", videoData.blob, videoData.filename);
-  
-  const response = await fetch(`${bunnyApiUrl}/upload`, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${process.env.BUNNY_STREAM_API_KEY}`,
-      "Content-Type": "multipart/form-data"
-    },
-    body: formData
-  });
-  
-  if (!response.ok) {
-    throw new Error(`CDN upload failed: ${response.statusText}`);
-  }
-  
-  return await response.json();
-};
-```
-
-### **🎉 PRODUCTION DEPLOYMENT ARCHITECTURE**
-
-#### **Vercel Platform Integration**
-- **Build Optimization**: Next.js App Router with static optimization
-- **Environment Management**: Secure variable handling across environments
-- **Edge Functions**: Optimized API routes with serverless architecture
-- **CDN Integration**: Vercel Edge Network + Bunny Stream CDN
-
-#### **Security Implementation**
-```typescript
-// Firebase Auth integration with API routes
-const authenticateRequest = async (request: Request) => {
-  const authHeader = request.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    throw new Error("Missing or invalid authorization header");
-  }
-  
-  const idToken = authHeader.split("Bearer ")[1];
-  const decodedToken = await admin.auth().verifyIdToken(idToken);
-  return decodedToken;
-};
-
-// RBAC enforcement
-const enforceRBAC = async (userId: string, resource: string, action: string) => {
-  // Role-based access control logic
-  const userRoles = await getUserRoles(userId);
-  return hasPermission(userRoles, resource, action);
-};
-```
-
-#### **Build and Deployment Process**
-```bash
-# Vercel deployment pipeline
-1. Git push to main branch
-2. Vercel auto-build with Next.js optimization
-3. Environment variable injection
-4. Static analysis and optimization
-5. Edge function deployment
-6. CDN cache invalidation
-7. Health check verification
-8. Live traffic routing
-
-# Build performance metrics
-- Build time: ~55 seconds
-- Bundle size: Optimized for performance
-- Lighthouse score: 90+ across all metrics
-```
-
-### **Monitoring and Analytics**
-
-#### **Production Monitoring**
-```typescript
-// Performance tracking
-const trackVideoProcessing = async (metrics: ProcessingMetrics) => {
-  await analytics.track("video_processed", {
-    platform: metrics.platform,
-    duration: metrics.processingTime,
-    success: metrics.success,
-    userId: metrics.userId,
-    timestamp: new Date().toISOString()
-  });
-};
-
-// Error tracking with context
-const logError = (error: Error, context: Record<string, any>) => {
-  console.error(`🔥 [${context.service}] ${error.message}`, {
-    error: error.stack,
-    context,
-    timestamp: new Date().toISOString()
-  });
-};
-```
-
-#### **Health Check Implementation**
-```typescript
-// API health monitoring
-GET /api/health
-{
-  status: "healthy",
-  services: {
-    firebase: "connected",
-    bunnyStream: "configured",
-    gemini: "available"
+// next.config.mjs
+const nextConfig = {
+  experimental: {
+    forceSwcTransforms: true,
   },
-  version: "1.0.0",
-  timestamp: "2024-12-30T..."
+  images: {
+    domains: ['iframe.mediadelivery.net', 'bunnycdn.com'],
+  },
+  env: {
+    CUSTOM_KEY: process.env.CUSTOM_KEY,
+  },
+};
+
+export default nextConfig;
+```
+
+#### Vercel Deployment
+- **Build Time**: ~55 seconds optimized
+- **Bundle Analysis**: Automatic bundle size optimization
+- **Edge Functions**: Serverless API routes
+- **Static Generation**: Pre-rendered pages where possible
+- **Environment Variables**: Secure configuration management
+
+### Security Implementation
+
+#### Content Security Policy
+```typescript
+// CSP headers for iframe security
+const securityHeaders = [
+  {
+    key: 'Content-Security-Policy',
+    value: `
+      frame-src 'self' https://iframe.mediadelivery.net https://*.bunnycdn.com;
+      script-src 'self' 'unsafe-eval' 'unsafe-inline';
+      style-src 'self' 'unsafe-inline';
+    `.replace(/\s{2,}/g, ' ').trim()
+  }
+];
+```
+
+#### API Security
+```typescript
+// Rate limiting and authentication
+export async function POST(request: Request) {
+  try {
+    // Validate authentication
+    const decodedToken = await validateAuthToken(request);
+    
+    // Rate limiting check
+    const rateLimitResult = await checkRateLimit(decodedToken.uid);
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        { error: "Rate limit exceeded" },
+        { status: 429 }
+      );
+    }
+    
+    // Process request...
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Authentication failed" },
+      { status: 401 }
+    );
+  }
 }
 ```
 
-### **Quality Assurance**
-
-#### **Code Quality Standards**
-- **ESLint**: 100% compliance across all TypeScript files
-- **TypeScript**: 95% type coverage with minimal any types
-- **Prettier**: Consistent code formatting
-- **Import Organization**: Alphabetical with grouped external/internal imports
-
-#### **Production Testing**
-- **Manual Testing**: All user workflows verified in production
-- **Cross-device**: Mobile and desktop compatibility confirmed
-- **Performance**: Load testing with realistic user scenarios
-- **Security**: Authentication and authorization verified
-
 ---
 
-**Status**: Technical stack is production-ready with all major components optimized, secured, and verified working in live Vercel environment. 
+*Technical Context: Complete brand profile and video collection system with production-ready architecture, AI integration, and comprehensive security implementation* 

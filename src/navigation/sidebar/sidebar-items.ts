@@ -14,6 +14,20 @@ import {
   Sparkles,
   Chrome,
   type LucideIcon,
+  AudioWaveform,
+  BookOpen,
+  Command,
+  Frame,
+  GalleryVerticalEnd,
+  Map,
+  PieChart,
+  Settings2,
+  SquareTerminal,
+  Mic,
+  Video,
+  FileText,
+  Search,
+  Archive,
 } from "lucide-react";
 
 export interface NavSubItem {
@@ -163,3 +177,158 @@ export const sidebarItems: NavGroup[] = [
     ],
   },
 ];
+
+export const data = {
+  user: {
+    name: "shadcn",
+    email: "m@example.com",
+    avatar: "/avatars/shadcn.jpg",
+  },
+  teams: [
+    {
+      name: "Acme Inc",
+      logo: GalleryVerticalEnd,
+      plan: "Enterprise",
+    },
+    {
+      name: "Acme Corp.",
+      logo: AudioWaveform,
+      plan: "Startup",
+    },
+    {
+      name: "Evil Corp.",
+      logo: Command,
+      plan: "Free",
+    },
+  ],
+  navMain: [
+    {
+      title: "Home",
+      url: "/dashboard/home",
+      icon: Home,
+    },
+    {
+      title: "Scripts",
+      url: "/dashboard/scripts",
+      icon: FileText,
+      items: [
+        {
+          title: "All Scripts",
+          url: "/dashboard/scripts",
+        },
+        {
+          title: "New Script",
+          url: "/dashboard/scripts/new",
+        },
+        {
+          title: "Script Editor",
+          url: "/dashboard/scripts/editor",
+        },
+      ],
+    },
+    {
+      title: "Voices",
+      url: "/dashboard/voices",
+      icon: Mic,
+      items: [
+        {
+          title: "Voice Library",
+          url: "/dashboard/voices",
+        },
+        {
+          title: "My Custom Voices",
+          url: "/dashboard/voices?tab=custom",
+        },
+      ],
+    },
+    {
+      title: "Research",
+      url: "/dashboard/research",
+      icon: Search,
+      items: [
+        {
+          title: "Collections",
+          url: "/dashboard/research/collections",
+        },
+        {
+          title: "AI Ideas",
+          url: "/dashboard/research/aideas",
+        },
+      ],
+    },
+    {
+      title: "Capture",
+      url: "/dashboard/capture",
+      icon: Video,
+      items: [
+        {
+          title: "Voice Notes",
+          url: "/dashboard/capture/voice",
+        },
+        {
+          title: "Recordings",
+          url: "/dashboard/capture/recordings",
+        },
+        {
+          title: "Notes",
+          url: "/dashboard/capture/notes",
+        },
+      ],
+    },
+    {
+      title: "My Brand",
+      url: "/dashboard/my-brand",
+      icon: Sparkles,
+    },
+  ],
+  navSecondary: [
+    {
+      title: "Tools",
+      url: "/dashboard/tools",
+      icon: Settings2,
+      items: [
+        {
+          title: "Chrome Extension",
+          url: "/dashboard/tools/chrome-extension",
+        },
+      ],
+    },
+    {
+      title: "Settings",
+      url: "/dashboard/settings",
+      icon: Settings2,
+    },
+    {
+      title: "Content Creator",
+      url: "/dashboard/content-creator",
+      icon: Users,
+    },
+    {
+      title: "Creators",
+      url: "/dashboard/creators",
+      icon: Users,
+    },
+    {
+      title: "About",
+      url: "/dashboard/about",
+      icon: Archive,
+    },
+  ],
+  projects: [
+    {
+      name: "Design Engineering",
+      url: "#",
+      icon: Frame,
+    },
+    {
+      name: "Sales & Marketing",
+      url: "#",
+      icon: PieChart,
+    },
+    {
+      name: "Travel",
+      url: "#",
+      icon: Map,
+    },
+  ],
+};

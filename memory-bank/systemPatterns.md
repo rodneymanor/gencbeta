@@ -1,5 +1,187 @@
 # System Patterns
 
+## 🎉 **NEW: Brand Profile System Architecture** (January 2, 2025)
+
+### AI-Powered Brand Profile Generation
+
+#### **Gemini 2.0 Flash Integration Pattern**
+**Problem**: Generate comprehensive brand strategies from user questionnaires.
+**Solution**: Robust AI integration with JSON parsing and error handling.
+
+```typescript
+// Brand profile generation with markdown cleanup
+const generateProfileWithGemini = async (questionnaire: BrandQuestionnaire): Promise<BrandProfileData> => {
+  const prompt = constructBrandProfilePrompt(questionnaire);
+  
+  const result = await genAI.generateContent({
+    contents: [{ role: "user", parts: [{ text: prompt }] }],
+    generationConfig: {
+      temperature: 0.7,
+      topK: 40,
+      topP: 0.95,
+      maxOutputTokens: 4096,
+    },
+  });
+
+  // Critical: Clean markdown code blocks from AI response
+  const cleanMarkdownCodeBlocks = (text: string): string => {
+    return text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+  };
+
+  const cleanedResponse = cleanMarkdownCodeBlocks(result.response.text());
+  const profileData = JSON.parse(cleanedResponse);
+  
+  return profileData;
+};
+```
+
+#### **Benefits of Markdown Cleanup Pattern**
+- **Robust Parsing**: Handles AI responses wrapped in markdown code blocks
+- **Error Prevention**: Prevents JSON.parse failures from markdown formatting
+- **Consistent Output**: Ensures clean JSON regardless of AI response format
+- **Production Reliability**: Tested with Gemini 2.0 Flash responses
+
+### React Query Optimization Pattern
+
+#### **Immediate UI Updates with Refetch Strategy**
+**Problem**: `invalidateQueries` doesn't immediately update UI after mutations.
+**Solution**: Use `refetchQueries` with async/await for instant data refresh.
+
+```typescript
+// Optimized mutation pattern for immediate UI updates
+const generateProfileMutation = useMutation({
+  mutationFn: (questionnaire: BrandQuestionnaire) => BrandProfileService.generateBrandProfile(questionnaire),
+  onSuccess: async () => {
+    toast.success("Brand profile generated successfully!");
+    // Force immediate refetch for instant UI updates
+    await queryClient.refetchQueries({ queryKey: ["brand-profiles"] });
+    // Mark onboarding complete to stop notifications
+    BrandProfileService.markOnboardingComplete();
+    onProfileGenerated();
+  },
+  onError: (error) => {
+    toast.error("Failed to generate brand profile", {
+      description: error instanceof Error ? error.message : "Please try again",
+    });
+  },
+});
+```
+
+#### **Benefits of Refetch Strategy**
+- **Immediate Updates**: UI reflects changes instantly without waiting for cache invalidation
+- **Predictable Timing**: Async/await ensures proper sequencing of operations
+- **User Experience**: No delay between action completion and UI update
+- **Consistency**: Same pattern applied across all brand profile mutations
+
+### Smart Navigation Pattern
+
+#### **Tab Auto-Switching with User Control**
+**Problem**: Auto-switching to Overview tab after generation prevented manual navigation back to Questions.
+**Solution**: One-time auto-switch with state flag to preserve user control.
+
+```typescript
+// Smart navigation with user control preservation
+export function BrandProfileTabs() {
+  const [activeTab, setActiveTab] = useState<TabValue>("questions");
+  const [hasAutoSwitched, setHasAutoSwitched] = useState(false);
+
+  // Auto-switch to overview tab after generation (only once)
+  useEffect(() => {
+    if (hasGeneratedProfile && activeTab === "questions" && !hasAutoSwitched) {
+      setActiveTab("overview");
+      setHasAutoSwitched(true);
+    }
+    // Reset auto-switch flag when profile is removed
+    if (!hasGeneratedProfile) {
+      setHasAutoSwitched(false);
+    }
+  }, [hasGeneratedProfile, activeTab, hasAutoSwitched]);
+}
+```
+
+#### **Benefits of Smart Navigation**
+- **One-Time Auto-Switch**: Automatically shows generated profile once
+- **User Control**: Allows manual navigation after initial auto-switch
+- **State Management**: Tracks auto-switch state to prevent continuous switching
+- **Reset Capability**: Resets behavior when profile is removed
+
+### Context-Aware Notification Pattern
+
+#### **Profile-Based Notification Control**
+**Problem**: Onboarding notifications continued showing after profile completion.
+**Solution**: Check actual profile existence, not just localStorage state.
+
+```typescript
+// Enhanced notification provider with profile awareness
+export function BrandOnboardingProvider({ children }: BrandOnboardingProviderProps) {
+  const { user, initializing } = useAuth();
+
+  // Fetch brand profiles to check if user has one
+  const { data: profilesData } = useQuery({
+    queryKey: ["brand-profiles"],
+    queryFn: () => BrandProfileService.getBrandProfiles(),
+    enabled: !initializing && !!user,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const hasGeneratedProfile = Boolean(profilesData?.activeProfile?.profile);
+
+  useEffect(() => {
+    if (!initializing && user) {
+      // If user has a generated profile, mark onboarding as complete
+      if (hasGeneratedProfile) {
+        BrandProfileService.markOnboardingComplete();
+        return;
+      }
+
+      const shouldShow = BrandProfileService.shouldShowOnboarding();
+      if (shouldShow) {
+        // Show notification logic...
+      }
+    }
+  }, [user, initializing, hasGeneratedProfile]);
+}
+```
+
+#### **Benefits of Context-Aware Notifications**
+- **Real State Checking**: Verifies actual profile existence, not just localStorage
+- **Automatic Completion**: Marks onboarding complete when profile exists
+- **Dual Protection**: Both provider-level and generation-level safeguards
+- **User Experience**: Stops notifications immediately after profile creation
+
+### Firestore Composite Index Pattern
+
+#### **Complex Query Index Configuration**
+**Problem**: Queries filtering by `userId` and ordering by `createdAt` require composite indexes.
+**Solution**: Proper index configuration in `firestore.indexes.json`.
+
+```json
+{
+  "collectionGroup": "brandProfiles",
+  "queryScope": "COLLECTION",
+  "fields": [
+    { "fieldPath": "userId", "order": "ASCENDING" },
+    { "fieldPath": "createdAt", "order": "DESCENDING" }
+  ]
+}
+```
+
+#### **Query Pattern Requiring Index**
+```typescript
+// Firestore query requiring composite index
+const profilesSnapshot = await adminDb
+  .collection("brandProfiles")
+  .where("userId", "==", userId)      // Filter by user
+  .orderBy("createdAt", "desc")       // Order by creation time
+  .get();
+```
+
+#### **Benefits of Proper Indexing**
+- **Query Performance**: Enables efficient filtering and ordering
+- **Error Prevention**: Prevents `FAILED_PRECONDITION` errors
+- **Scalability**: Supports large datasets with proper index optimization
+- **RBAC Compliance**: Enables user-scoped data access patterns
+
 ## Video Processing Microservices Architecture
 
 ### Overview
@@ -198,234 +380,198 @@ await CollectionsService.addVideoToCollection(user.uid, targetCollectionId, vide
 const downloadResult = await callDownloaderService(baseUrl, url);
 
 // Step 2: Validate constraints
-const sizeValidationResult = validateVideoSize(downloadResult.videoData.size);
+const validationResult = validateVideoConstraints(downloadResult);
 
-// Step 3: Upload to CDN (optional)
-const uploadResult = await callUploaderService(baseUrl, downloadResult.videoData);
+// Step 3: Upload to CDN (with graceful fallback)
+const uploadResult = await callUploaderService(baseUrl, downloadResult);
 
-// Step 4: Background analysis (fire-and-forget)
-startBackgroundAnalysis(downloadResult.videoData);
-
-// Step 5: Return combined response
-return createWorkflowResponse(downloadResult, uploadResult);
-```
-
-#### Service Orchestrator Pattern
-**Location**: `CollectionsService.addVideoToCollection()`
-```typescript
-// Firestore transaction coordination
-const batch = writeBatch(db);
-batch.set(videoRef, videoData);
-await updateCollectionVideoCount(batch, collectionId, userId, 1);
-await batch.commit();
-```
-
-### Background Processing Architecture
-
-#### Fire-and-Forget Pattern
-```typescript
-// Start analysis without blocking response
-setTimeout(async () => {
-  const analysisResult = await fetch(`${baseUrl}/api/video/analyze-complete`, {
-    method: "POST",
-    body: formData,
-  });
-  // TODO: Update video record with results
-}, 100);
-```
-
-#### Performance Benefits
-- **10x Faster**: 2-5 seconds vs 30-60 seconds
-- **Immediate UI Response**: Video appears instantly with placeholder
-- **Background Completion**: Full analysis completes invisibly
-
-### Transcription Intelligence System
-
-#### Smart Transcription Hierarchy
-1. **Pre-existing Transcription** (fastest)
-   - Already included in download response
-   - No additional API calls needed
-
-2. **Background Processing Placeholder** (optimal UX)
-   - Immediate placeholder with loading indicators
-   - Real transcription happens in background
-
-3. **Synchronous CDN Transcription** (fallback)
-   - Additional API call with CDN URL
-   - Complete but slower
-
-4. **Synchronous Buffer Transcription** (last resort)
-   - Local video buffer processing
-   - Guaranteed to work but slowest
-
-#### Placeholder Transcription System
-**Location**: `video-processing-utils.ts`
-```typescript
-export function createPlaceholderTranscription(platform: string, author: string): TranscriptionResponse {
-  return {
-    transcript: "🔄 Transcription is being processed in the background...",
-    components: {
-      hook: "⏳ Analyzing video hook...",
-      bridge: "⏳ Extracting bridge content...",
-      nugget: "⏳ Identifying key insights...",
-      wta: "⏳ Determining call-to-action...",
-    },
-    // ... structured placeholder data
-  };
-}
-```
-
-## 🎉 **NEW: RBAC Data Integrity Patterns** (Dec 30, 2024)
-
-### Comprehensive Video Save Pattern
-
-#### **Required Fields for RBAC Compliance**
-**Issue**: RBAC queries failing due to missing required fields.
-**Solution**: Standardized video save operation with all required fields.
-
-```typescript
-// Complete video save pattern
-const processAndAddVideo = async (url: string, collectionId: string, title?: string) => {
-  // ... processing logic ...
-  
-  const timestamp = new Date().toISOString();
-  await videoRef.set({
-    ...videoData,
-    collectionId,
-    id: videoRef.id,
-    userId: decodedToken.uid,  // ✅ Required for RBAC ownership
-    addedAt: timestamp,        // ✅ Required for RBAC ordering
-    createdAt: timestamp,
-    updatedAt: timestamp
-  });
-};
-```
-
-#### **URL Decoding for Instagram Compatibility**
-**Issue**: Instagram URLs arriving URL-encoded causing regex failures.
-**Solution**: Decode before processing.
-
-```typescript
-// Instagram URL processing pattern
-const extractInstagramShortcode = (url: string): string | null => {
-  const decodedUrl = decodeURIComponent(url);  // ✅ Handle URL encoding
-  const match = decodedUrl.match(/(?:instagram\.com|instagr\.am)\/(?:p|reels?)\/([A-Za-z0-9_-]+)/);
-  return match ? match[1] : null;
-};
-```
-
-### Graceful Fallback Patterns
-
-#### CDN Upload Fallbacks
-```typescript
-// Primary: Bunny Stream CDN
-if (isBunnyStreamConfigured()) {
-  const cdnResult = await uploadToBunnyCDN(videoData);
-  if (cdnResult) return cdnResult.cdnUrl;
+// Step 4: Trigger background analysis
+if (uploadResult.success) {
+  triggerBackgroundAnalysis(uploadResult.videoId);
 }
 
-// Fallback: Local video buffer
 return {
-  videoData: downloadResult.videoData,
-  hostedOnCDN: false
+  success: true,
+  video: combinedVideoData,
+  hostedOnCDN: uploadResult.success
 };
 ```
 
-#### Transcription Fallbacks
-```typescript
-// Check for existing transcription
-if (downloadResponse.transcription) return downloadResponse.transcription;
+### Service Communication Pattern
 
-// Use placeholder for background processing
-if (downloadResponse.metadata.transcriptionStatus === "pending") {
-  return createPlaceholderTranscription(platform, author);
+#### Internal API Calls
+```typescript
+// Pattern for internal service communication
+const baseUrl = process.env.VERCEL_URL 
+  ? `https://${process.env.VERCEL_URL}` 
+  : "http://localhost:3000";
+
+const response = await fetch(`${baseUrl}/api/video/downloader`, {
+  method: "POST",
+  headers: { 
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${idToken}` // Required for authentication
+  },
+  body: JSON.stringify({ url }),
+});
+
+if (!response.ok) {
+  throw new Error(`Service call failed: ${response.status}`);
 }
 
-// Fallback to synchronous transcription
-return await transcribeFromSource(downloadResponse);
+const result = await response.json();
+```
+
+#### Benefits of Service Communication Pattern
+- **Environment Agnostic**: Works in both development and production
+- **Authentication Consistent**: Proper token passing between services
+- **Error Handling**: Consistent error propagation
+- **Type Safety**: Structured request/response interfaces
+
+### Background Processing Patterns
+
+#### Fire-and-Forget Analysis
+```typescript
+// Trigger background analysis without blocking response
+const triggerBackgroundAnalysis = async (videoId: string) => {
+  // Don't await - let it run in background
+  setTimeout(async () => {
+    try {
+      await fetch(`${baseUrl}/api/video/analyze-complete`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ videoId }),
+      });
+    } catch (error) {
+      console.error("Background analysis failed:", error);
+      // Log but don't throw - background process shouldn't affect user experience
+    }
+  }, 100); // Small delay to ensure main response completes first
+};
+```
+
+#### Background Update Loop
+```typescript
+// Pattern for updating video records with analysis results
+POST /api/video/update-transcription
+{
+  videoId: string;
+  transcriptionData: VideoAnalysis;
+}
+
+// Updates existing video record with completed analysis
+const videoRef = db.collection("videos").doc(videoId);
+await videoRef.update({
+  transcript: transcriptionData.transcript,
+  components: transcriptionData.components,
+  insights: transcriptionData.insights,
+  updatedAt: new Date().toISOString()
+});
 ```
 
 ### Error Handling Patterns
 
-#### Service-Level Error Handling
-- Each service has focused error responses
-- Comprehensive logging with emoji prefixes
-- Graceful degradation rather than complete failure
-
-#### Orchestrator-Level Error Handling
-- Catches service failures and provides fallbacks
-- Returns partial success when possible
-- Clear error messages for UI feedback
-
-### Configuration Management
-
-#### Environment-Based Service Discovery
+#### Graceful Fallback Pattern
 ```typescript
-const isBunnyStreamConfigured = () => {
-  return !!(
-    process.env.BUNNY_STREAM_LIBRARY_ID &&
-    process.env.BUNNY_STREAM_API_KEY &&
-    process.env.BUNNY_CDN_HOSTNAME
+// CDN upload with local fallback
+let hostedOnCDN = false;
+let iframeUrl = "";
+
+try {
+  const uploadResult = await callUploaderService(baseUrl, downloadResult);
+  if (uploadResult.success) {
+    hostedOnCDN = true;
+    iframeUrl = uploadResult.iframeUrl;
+  }
+} catch (error) {
+  console.warn("CDN upload failed, using local fallback:", error);
+  // Continue with local video data - don't fail the entire operation
+}
+
+return {
+  success: true,
+  video: {
+    ...videoData,
+    hostedOnCDN,
+    iframeUrl: hostedOnCDN ? iframeUrl : "",
+  }
+};
+```
+
+#### User-Friendly Error Messages
+```typescript
+// Consistent error response format
+const createErrorResponse = (message: string, details?: string) => {
+  return NextResponse.json(
+    { 
+      success: false, 
+      error: message,
+      details: details || "Please try again or contact support if the issue persists"
+    },
+    { status: 500 }
   );
 };
 ```
 
-#### Production URL Resolution
+### Data Consistency Patterns
+
+#### RBAC-Compliant Video Storage
 ```typescript
-const getBaseUrl = () => {
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-  return "http://localhost:3000";
+// Ensure all required fields for RBAC queries
+const videoData = {
+  id: videoRef.id,
+  userId: decodedToken.uid,     // Required for user ownership
+  addedAt: timestamp,           // Required for RBAC ordering queries
+  createdAt: timestamp,
+  updatedAt: timestamp,
+  collectionId,
+  // ... other video properties
 };
+
+await videoRef.set(videoData);
 ```
 
-## **Performance Optimization Patterns**
-
-### React Memo for Video Components
+#### Atomic Operations
 ```typescript
-// Prevent unnecessary re-renders of video components
-export const VideoEmbed = memo<VideoEmbedProps>(({ url, className }) => {
+// Use Firestore batch operations for consistency
+const batch = db.batch();
+
+// Deactivate existing profiles
+existingProfilesSnapshot.docs.forEach((doc) => {
+  batch.update(doc.ref, { isActive: false, updatedAt: now });
+});
+
+// Create new active profile
+const newProfileRef = db.collection("brandProfiles").doc();
+batch.set(newProfileRef, brandProfile);
+
+await batch.commit();
+```
+
+### Performance Optimization Patterns
+
+#### React Query with Stale Time
+```typescript
+// Optimize network requests with appropriate stale time
+const { data: profilesData } = useQuery({
+  queryKey: ["brand-profiles"],
+  queryFn: () => BrandProfileService.getBrandProfiles(),
+  staleTime: 5 * 60 * 1000, // 5 minutes - profiles don't change frequently
+});
+```
+
+#### Memoized Components
+```typescript
+// Prevent unnecessary re-renders for expensive components
+const VideoEmbed = memo<VideoEmbedProps>(({ url, className = "" }) => {
   // Component implementation
 });
 
-export const ExpandableText = memo<ExpandableTextProps>(({ content, maxLines }) => {
-  // Component implementation  
+const ExpandableText = memo<ExpandableTextProps>(({ content, maxLines = 4 }) => {
+  // Component implementation
 });
 ```
-
-### Efficient State Management
-```typescript
-// Video playback context with optimized updates
-const VideoPlaybackContext = createContext<VideoPlaybackState>({
-  currentlyPlayingId: null,
-  setCurrentlyPlaying: () => {},
-  pauseAllVideos: () => {}
-});
-
-// Only update when necessary
-const setCurrentlyPlaying = useCallback((videoId: string | null) => {
-  if (videoId !== currentlyPlayingId) {
-    pauseAllVideos();
-    setCurrentlyPlayingId(videoId);
-  }
-}, [currentlyPlayingId, pauseAllVideos]);
-```
-
-## **Production Deployment Patterns**
-
-### Vercel Optimization
-- **Build Performance**: 55-second optimized builds
-- **Environment Variables**: Secure configuration management
-- **Static Optimization**: Next.js App Router with optimal bundle splitting
-- **CDN Integration**: Vercel Edge Network with Bunny Stream CDN
-
-### Security Implementation
-- **Content Security Policy**: Strict iframe src validation
-- **Authentication**: Firebase Admin SDK with proper token validation
-- **RBAC Enforcement**: Role-based access control at data layer
-- **API Security**: Protected endpoints with authentication middleware
 
 ---
 
-**Status**: System patterns now include production-ready video playback control, security policies, and UI enhancement patterns tested in live environment. 
+These patterns represent battle-tested solutions for both video processing and brand profile systems, ensuring reliable, performant, and maintainable code across the entire application. 

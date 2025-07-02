@@ -1,13 +1,13 @@
 // Production-ready video processing queue system
 
 import { getAdminDb, isAdminInitialized } from "./firebase-admin";
-import type { 
-  VideoProcessingJob, 
-  VideoProcessingStatus, 
-  VideoProcessingError, 
+import type {
+  VideoProcessingJob,
+  VideoProcessingStatus,
+  VideoProcessingError,
   ProcessingProgress,
   ProcessedVideoResult,
-  JobPriority
+  JobPriority,
 } from "@/types/video-processing";
 
 export class VideoProcessingQueue {
@@ -22,7 +22,7 @@ export class VideoProcessingQueue {
     collectionId: string,
     videoUrl: string,
     title?: string,
-    priority: JobPriority = 'normal'
+    priority: JobPriority = "normal",
   ): Promise<VideoProcessingJob> {
     const adminDb = getAdminDb();
     if (!isAdminInitialized || !adminDb) {
@@ -38,21 +38,21 @@ export class VideoProcessingQueue {
       collectionId,
       videoUrl,
       title: title ?? `Video - ${new Date().toLocaleDateString()}`,
-      status: 'queued',
+      status: "queued",
       priority,
       attempts: 0,
       maxAttempts: this.MAX_RETRY_ATTEMPTS,
       createdAt: now,
       updatedAt: now,
       progress: {
-        stage: 'queued',
+        stage: "queued",
         percentage: 0,
-        message: 'Video queued for processing...'
-      }
+        message: "Video queued for processing...",
+      },
     };
 
     await adminDb.collection(this.JOBS_COLLECTION).doc(jobId).set(job);
-    
+
     // Start processing immediately (in production, this would be picked up by workers)
     setTimeout(() => this.processJob(jobId), 100);
 
@@ -69,13 +69,13 @@ export class VideoProcessingQueue {
     }
 
     const jobDoc = await adminDb.collection(this.JOBS_COLLECTION).doc(jobId).get();
-    
+
     if (!jobDoc.exists) {
       return null;
     }
 
     const job = jobDoc.data() as VideoProcessingJob;
-    
+
     // Verify user owns this job
     if (job.userId !== userId) {
       throw new Error("Access denied");
@@ -95,12 +95,12 @@ export class VideoProcessingQueue {
 
     const querySnapshot = await adminDb
       .collection(this.JOBS_COLLECTION)
-      .where('userId', '==', userId)
-      .orderBy('createdAt', 'desc')
+      .where("userId", "==", userId)
+      .orderBy("createdAt", "desc")
       .limit(limit)
       .get();
 
-    return querySnapshot.docs.map(doc => doc.data() as VideoProcessingJob);
+    return querySnapshot.docs.map((doc) => doc.data() as VideoProcessingJob);
   }
 
   /**
@@ -117,7 +117,7 @@ export class VideoProcessingQueue {
       throw new Error("Job not found");
     }
 
-    if (job.status !== 'failed') {
+    if (job.status !== "failed") {
       throw new Error("Can only retry failed jobs");
     }
 
@@ -126,18 +126,18 @@ export class VideoProcessingQueue {
     }
 
     const updates = {
-      status: 'queued' as VideoProcessingStatus,
+      status: "queued" as VideoProcessingStatus,
       updatedAt: new Date().toISOString(),
       progress: {
-        stage: 'queued' as VideoProcessingStatus,
+        stage: "queued" as VideoProcessingStatus,
         percentage: 0,
-        message: 'Job queued for retry...'
+        message: "Job queued for retry...",
       },
-      error: null
+      error: null,
     };
 
     await adminDb.collection(this.JOBS_COLLECTION).doc(jobId).update(updates);
-    
+
     // Start processing
     setTimeout(() => this.processJob(jobId), 100);
 
@@ -158,18 +158,18 @@ export class VideoProcessingQueue {
       throw new Error("Job not found");
     }
 
-    if (['completed', 'failed', 'cancelled'].includes(job.status)) {
+    if (["completed", "failed", "cancelled"].includes(job.status)) {
       return false; // Cannot cancel completed jobs
     }
 
     const updates = {
-      status: 'cancelled' as VideoProcessingStatus,
+      status: "cancelled" as VideoProcessingStatus,
       updatedAt: new Date().toISOString(),
       progress: {
-        stage: 'cancelled' as VideoProcessingStatus,
+        stage: "cancelled" as VideoProcessingStatus,
         percentage: 100,
-        message: 'Job cancelled by user'
-      }
+        message: "Job cancelled by user",
+      },
     };
 
     await adminDb.collection(this.JOBS_COLLECTION).doc(jobId).update(updates);
@@ -193,17 +193,17 @@ export class VideoProcessingQueue {
       }
 
       const job = jobDoc.data() as VideoProcessingJob;
-      
-      if (job.status !== 'queued') {
+
+      if (job.status !== "queued") {
         console.log(`Job ${jobId} is not queued, current status: ${job.status}`);
         return;
       }
 
       // Update job to processing
-      await this.updateJobStatus(jobId, 'processing', {
-        stage: 'processing',
+      await this.updateJobStatus(jobId, "processing", {
+        stage: "processing",
         percentage: 0,
-        message: 'Starting video processing...'
+        message: "Starting video processing...",
       });
 
       // Increment attempts
@@ -214,10 +214,9 @@ export class VideoProcessingQueue {
       await this.transcribeStage(jobId);
       await this.analyzeStage(jobId);
       await this.uploadStage(jobId);
-      
+
       // Mark as completed
       await this.completeJob(jobId);
-
     } catch (error) {
       console.error(`Error processing job ${jobId}:`, error);
       await this.failJob(jobId, error);
@@ -228,15 +227,15 @@ export class VideoProcessingQueue {
    * Download stage processing
    */
   private static async downloadStage(jobId: string): Promise<void> {
-    await this.updateJobStatus(jobId, 'downloading', {
-      stage: 'downloading',
+    await this.updateJobStatus(jobId, "downloading", {
+      stage: "downloading",
       percentage: 20,
-      message: 'Downloading video content...'
+      message: "Downloading video content...",
     });
 
     // Simulate download process
     await this.delay(2000);
-    
+
     console.log(`✅ Download completed for job ${jobId}`);
   }
 
@@ -244,14 +243,14 @@ export class VideoProcessingQueue {
    * Transcription stage processing
    */
   private static async transcribeStage(jobId: string): Promise<void> {
-    await this.updateJobStatus(jobId, 'transcribing', {
-      stage: 'transcribing',
+    await this.updateJobStatus(jobId, "transcribing", {
+      stage: "transcribing",
       percentage: 50,
-      message: 'Transcribing video content...'
+      message: "Transcribing video content...",
     });
 
     await this.delay(3000);
-    
+
     console.log(`✅ Transcription completed for job ${jobId}`);
   }
 
@@ -259,14 +258,14 @@ export class VideoProcessingQueue {
    * Analysis stage processing
    */
   private static async analyzeStage(jobId: string): Promise<void> {
-    await this.updateJobStatus(jobId, 'analyzing', {
-      stage: 'analyzing',
+    await this.updateJobStatus(jobId, "analyzing", {
+      stage: "analyzing",
       percentage: 80,
-      message: 'Analyzing video content...'
+      message: "Analyzing video content...",
     });
 
     await this.delay(1500);
-    
+
     console.log(`✅ Analysis completed for job ${jobId}`);
   }
 
@@ -274,14 +273,14 @@ export class VideoProcessingQueue {
    * Upload stage processing
    */
   private static async uploadStage(jobId: string): Promise<void> {
-    await this.updateJobStatus(jobId, 'uploading', {
-      stage: 'uploading',
+    await this.updateJobStatus(jobId, "uploading", {
+      stage: "uploading",
       percentage: 95,
-      message: 'Saving to collection...'
+      message: "Saving to collection...",
     });
 
     await this.delay(1000);
-    
+
     console.log(`✅ Upload completed for job ${jobId}`);
   }
 
@@ -295,15 +294,15 @@ export class VideoProcessingQueue {
     const result: ProcessedVideoResult = this.createMockResult();
 
     const updates = {
-      status: 'completed' as VideoProcessingStatus,
+      status: "completed" as VideoProcessingStatus,
       completedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       progress: {
-        stage: 'completed' as VideoProcessingStatus,
+        stage: "completed" as VideoProcessingStatus,
         percentage: 100,
-        message: 'Video successfully processed and added to collection!'
+        message: "Video successfully processed and added to collection!",
       },
-      result
+      result,
     };
 
     await adminDb.collection(this.JOBS_COLLECTION).doc(jobId).update(updates);
@@ -317,23 +316,23 @@ export class VideoProcessingQueue {
     if (!adminDb) return;
 
     const processingError: VideoProcessingError = {
-      code: 'SERVER_ERROR',
-      message: error instanceof Error ? error.message : 'Unknown error occurred',
+      code: "SERVER_ERROR",
+      message: error instanceof Error ? error.message : "Unknown error occurred",
       details: { error: String(error) },
       timestamp: new Date().toISOString(),
       retryable: true,
-      userMessage: 'Video processing failed. You can retry this operation.'
+      userMessage: "Video processing failed. You can retry this operation.",
     };
 
     const updates = {
-      status: 'failed' as VideoProcessingStatus,
+      status: "failed" as VideoProcessingStatus,
       updatedAt: new Date().toISOString(),
       progress: {
-        stage: 'failed' as VideoProcessingStatus,
+        stage: "failed" as VideoProcessingStatus,
         percentage: 0,
-        message: processingError.userMessage
+        message: processingError.userMessage,
       },
-      error: processingError
+      error: processingError,
     };
 
     await adminDb.collection(this.JOBS_COLLECTION).doc(jobId).update(updates);
@@ -343,17 +342,17 @@ export class VideoProcessingQueue {
   private static createMockResult(): ProcessedVideoResult {
     return {
       videoId: `video_${Date.now()}`,
-      url: 'https://example.com/processed-video.mp4',
-      thumbnailUrl: 'https://example.com/thumbnail.jpg',
-      title: 'Processed Video',
-      author: 'Video Author',
-      platform: 'TikTok',
+      url: "https://example.com/processed-video.mp4",
+      thumbnailUrl: "https://example.com/thumbnail.jpg",
+      title: "Processed Video",
+      author: "Video Author",
+      platform: "TikTok",
       duration: 30,
-      transcript: 'Sample transcript...',
+      transcript: "Sample transcript...",
       fileSize: 1024000,
       metadata: {
-        originalUrl: 'https://example.com/original',
-        platform: 'TikTok',
+        originalUrl: "https://example.com/original",
+        platform: "TikTok",
         downloadedAt: new Date().toISOString(),
         processedAt: new Date().toISOString(),
         metrics: {
@@ -361,16 +360,16 @@ export class VideoProcessingQueue {
           views: 5000,
           shares: 100,
           comments: 50,
-          saves: 25
-        }
-      }
+          saves: 25,
+        },
+      },
     };
   }
 
   private static async updateJobStatus(
-    jobId: string, 
-    status: VideoProcessingStatus, 
-    progress: ProcessingProgress
+    jobId: string,
+    status: VideoProcessingStatus,
+    progress: ProcessingProgress,
   ): Promise<void> {
     const adminDb = getAdminDb();
     if (!adminDb) return;
@@ -379,9 +378,10 @@ export class VideoProcessingQueue {
       status,
       updatedAt: new Date().toISOString(),
       progress,
-      ...(status === 'processing' && !progress.estimatedTimeRemaining && {
-        startedAt: new Date().toISOString()
-      })
+      ...(status === "processing" &&
+        !progress.estimatedTimeRemaining && {
+          startedAt: new Date().toISOString(),
+        }),
     };
 
     await adminDb.collection(this.JOBS_COLLECTION).doc(jobId).update(updates);
@@ -394,10 +394,13 @@ export class VideoProcessingQueue {
     const jobDoc = await adminDb.collection(this.JOBS_COLLECTION).doc(jobId).get();
     if (jobDoc.exists) {
       const job = jobDoc.data() as VideoProcessingJob;
-      await adminDb.collection(this.JOBS_COLLECTION).doc(jobId).update({
-        attempts: job.attempts + 1,
-        updatedAt: new Date().toISOString()
-      });
+      await adminDb
+        .collection(this.JOBS_COLLECTION)
+        .doc(jobId)
+        .update({
+          attempts: job.attempts + 1,
+          updatedAt: new Date().toISOString(),
+        });
     }
   }
 
@@ -406,6 +409,6 @@ export class VideoProcessingQueue {
   }
 
   private static delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
-} 
+}

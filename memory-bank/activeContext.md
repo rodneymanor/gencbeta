@@ -1,190 +1,233 @@
-# Active Context: Production Video Collection System
+# Active Context: Brand Profile System & UI Enhancements
 
-## Current State: Fully Production Ready ✅
-The Gen C Beta application is live on Vercel with complete video processing functionality. All major video collection issues have been resolved, and the system is operating reliably in production with single video playback controls and enhanced UI features.
+## Current State: Brand Profile System Production Ready ✅
+The Gen C Beta application now features a complete brand profile generation system with AI-powered content strategies, alongside the existing production-ready video collection system. Recent focus has been on fixing UI/UX issues and database integration problems.
 
-## 🎉 **LATEST COMPLETION: Video Collection System Production Ready (Dec 30, 2024)**
+## 🎉 **LATEST COMPLETION: Brand Profile System Fully Operational (January 2, 2025)**
 
-### **Critical RBAC Fix - Videos Now Appear in Collections**
-**Root Cause Resolved**: Videos were being saved without the `addedAt` timestamp field required by RBAC filtering queries.
+### **Brand Profile Generation System**
+**Complete AI-Powered Brand Strategy Creation**: Users can now generate comprehensive brand profiles with personalized content pillars, keywords, and strategic insights.
 
+**Technical Implementation**:
+- **Gemini 2.0 Flash Integration**: AI-powered brand profile generation with JSON parsing
+- **Firestore Database**: Complete CRUD operations for brand profiles with user ownership
+- **React Query Integration**: Real-time UI updates with optimistic mutations
+- **Multi-Tab Interface**: Overview, Questions, Content Pillars, and Keywords tabs
+- **Local Storage Management**: Onboarding state persistence and notification control
+
+### **Critical Database & UI Fixes Resolved**
+
+#### **🔧 Firestore Index Fix - Brand Profiles Now Load**
+**Root Cause**: Missing composite index for `userId + createdAt` queries in Firestore.
+**Error**: `FAILED_PRECONDITION: The query requires an index`
 **Solution Applied**:
-- Added missing `addedAt` field to video save operation in `/api/video/process-and-add`
-- Fixed Instagram URL encoding issues with proper decoding before regex matching
-- Enhanced authentication to include `userId` field for proper ownership tracking
-- All videos now appear immediately in collections after processing
+- Added composite index for `brandProfiles` collection in `firestore.indexes.json`
+- Deployed index to Firebase console: `userId (ASCENDING) + createdAt (DESCENDING)`
+- Fixed brand profile fetching with proper query support
+- **Result**: Brand profiles now load immediately after generation
 
-### **Production-Ready Single Video Playback**
-**Problem Solved**: Multiple videos were playing simultaneously when switching between them.
+#### **🔧 UI Update Fix - React Query Refetch Strategy**
+**Root Cause**: `invalidateQueries` wasn't immediately updating UI after profile generation.
+**Problem**: Generated profiles existed in database but didn't appear in UI.
+**Solution Applied**:
+- Replaced `invalidateQueries` with `refetchQueries` in all brand profile mutations
+- Added `async/await` pattern for immediate data refresh
+- Updated Questions, Content Pillars, and Keywords tabs consistently
+- **Result**: UI instantly reflects generated brand profile data
 
-**Technical Solution - Iframe Recreation Strategy**:
-- Complete iframe destruction and recreation when pausing videos
-- `iframeKey` state increment forces React to unmount/remount iframes
-- Conditional rendering for thumbnail vs playing states
-- Bunny.net CDN URL validation - rejects all non-Bunny URLs
-- Production-tested solution ensuring only one video plays at a time
+#### **🔧 Questions Tab Clickability Fix**
+**Root Cause**: Overly aggressive auto-switching prevented manual tab navigation.
+**Problem**: Questions tab appeared unclickable after profile generation.
+**Solution Applied**:
+- Added `hasAutoSwitched` state flag to prevent continuous auto-switching
+- Auto-switch to Overview only happens once after initial generation
+- Users can freely navigate between tabs after generation
+- **Result**: Full tab navigation functionality restored
 
-### **Enhanced Script Editor - Expandable Text Feature**
-**User Experience Improvement**: Long script ideas now have smart truncation.
+#### **🔧 Brand Profile Notification Control**
+**Root Cause**: Notifications continued showing even after profile completion.
+**Problem**: `shouldShowOnboarding()` only checked localStorage, not actual profile existence.
+**Solution Applied**:
+- Enhanced `BrandOnboardingProvider` to check for existing profiles
+- Automatically mark onboarding complete when profile exists
+- Added safeguard in profile generation success handler
+- **Result**: Notifications stop immediately after profile creation
 
-**Implementation**:
-- ExpandableText component with 3-line initial display
-- "Show more/Show less" toggle with chevron icons
-- Smart detection - only truncates content >3 lines or >300 characters
-- Applied specifically to initial user messages (bubble ideas)
-- Maintains clean chat interface without overwhelming long content
+### **Brand Profile System Features**
 
-## **Production Deployment Status**
-- **Live URL**: https://gencbeta-f38hbrvqe-rodneymanors-projects.vercel.app
-- **Last Deployment**: December 30, 2024
-- **Build Time**: ~55 seconds with full optimization
-- **All Features**: Working correctly in production environment
-
-## **Core System Overview**
-
-### **Video Processing Pipeline**
-✅ **Complete Workflow**: URL → Download → Stream to Bunny CDN → Add to collections → Background transcription  
-✅ **Platform Support**: TikTok and Instagram with proper URL decoding  
-✅ **Real-time Updates**: Videos appear in collections with 1.5-second reliability delay  
-✅ **Background Processing**: Transcription completes automatically without user intervention  
-✅ **RBAC Compliance**: Proper user ownership tracking with `userId` and `addedAt` fields  
-
-### **Video Playback System**
-✅ **Single Video Enforcement**: Only one video plays at a time across all collections  
-✅ **Bunny.net CDN Only**: Strict URL validation blocks direct social media URLs  
-✅ **Iframe Recreation**: Complete iframe lifecycle management for reliable playback control  
-✅ **Production Security**: CSP compliance by rejecting TikTok/Instagram direct embedding  
-✅ **User-Friendly Errors**: Clear messaging for unsupported video types  
-
-### **User Experience Enhancements**
-✅ **Expandable Text**: Smart truncation for long script ideas in editor  
-✅ **Real-time Feedback**: Immediate video appearance with processing indicators  
-✅ **Error Recovery**: Comprehensive error handling with retry capabilities  
-✅ **Mobile Responsive**: Full functionality across all device types  
-
-## **Recent Technical Achievements**
-
-### **RBAC Video Query Fix**
+#### **AI-Powered Profile Generation**
 ```typescript
-// Fixed: Videos now saved with required fields
-await videoRef.set({
-  ...videoData,
-  collectionId,
-  id: videoRef.id,
-  addedAt: timestamp,      // ✅ Required by RBAC queries
-  createdAt: timestamp,
-  updatedAt: timestamp,
-  userId: decodedToken.uid  // ✅ Proper ownership tracking
+// Gemini 2.0 Flash integration with JSON cleaning
+const cleanMarkdownCodeBlocks = (text: string): string => {
+  return text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+};
+
+const cleanedResponse = cleanMarkdownCodeBlocks(result.response.text());
+const profileData = JSON.parse(cleanedResponse);
+```
+
+#### **Complete Brand Strategy Output**
+- **Content Pillars**: 3-5 strategic content themes with suggested topics
+- **Keyword Strategy**: Core, audience, problem-aware, and solution-aware keywords
+- **Hashtag Categories**: Broad, niche, and community hashtags for discovery
+- **Brand Questionnaire**: 7-question framework for brand identity definition
+
+#### **Multi-Tab Interface with Smart Navigation**
+- **Overview Tab**: Complete brand profile summary with generation metadata
+- **Questions Tab**: Interactive questionnaire with voice input support
+- **Content Pillars Tab**: Editable content themes with export functionality
+- **Keywords Tab**: Comprehensive keyword and hashtag management
+
+#### **Real-Time UI Updates**
+```typescript
+// Optimized React Query pattern
+const generateProfileMutation = useMutation({
+  mutationFn: (questionnaire: BrandQuestionnaire) => BrandProfileService.generateBrandProfile(questionnaire),
+  onSuccess: async () => {
+    toast.success("Brand profile generated successfully!");
+    // Force immediate refetch for instant UI updates
+    await queryClient.refetchQueries({ queryKey: ["brand-profiles"] });
+    // Mark onboarding complete to stop notifications
+    BrandProfileService.markOnboardingComplete();
+    onProfileGenerated();
+  },
 });
 ```
 
-### **Single Video Playback Solution**
+## **Production Deployment Status**
+- **Live URL**: https://gencbeta-amiaxhp94-rodneymanors-projects.vercel.app
+- **Last Deployment**: January 2, 2025
+- **Features Added**: Complete brand profile system with AI generation
+- **Status**: All brand profile and video collection features operational
+
+## **Video Collection System Status** (Previously Completed)
+
+### **Production-Ready Video Processing**
+✅ **Complete Workflow**: URL → Download → Stream to Bunny CDN → Add to collections → Background transcription  
+✅ **Platform Support**: TikTok and Instagram with proper URL decoding  
+✅ **Single Video Playback**: Iframe recreation strategy for reliable playback control  
+✅ **RBAC Compliance**: Proper user ownership tracking with required database fields  
+✅ **Background Processing**: Automatic transcription completion without user intervention  
+
+### **Script Generation System**
+✅ **Speed Write A/B Generation**: Two distinct approaches with complete script output  
+✅ **Educational Format**: Instructional scripts with problem-solution structure  
+✅ **Session Management**: Seamless transfer between script editor pages  
+✅ **Enhanced UI**: Expandable text for long script ideas with smart truncation  
+
+## **Current System Architecture**
+
+### **Brand Profile Service Layer**
 ```typescript
-// Production iframe recreation strategy
-useEffect(() => {
-  if (currentlyPlayingId !== videoId) {
-    setIsPlaying(false);
-    setIsLoading(false);
-    // Force iframe to be completely destroyed and recreated
-    setIframeKey((prev) => prev + 1);
-  }
-}, [currentlyPlayingId, videoId, isPlaying]);
+export class BrandProfileService {
+  // Core CRUD operations
+  static async generateBrandProfile(questionnaire: BrandQuestionnaire): Promise<BrandProfile>
+  static async getBrandProfiles(): Promise<{ profiles: BrandProfile[]; activeProfile: BrandProfile | null; }>
+  static async updateBrandProfile(profileId: string, updates: Partial<BrandProfile>): Promise<void>
+  
+  // Onboarding state management
+  static shouldShowOnboarding(): boolean
+  static markOnboardingComplete(): void
+  static setNeverShowAgain(): void
+}
 ```
 
-### **Bunny.net URL Validation**
+### **Database Schema - Brand Profiles**
 ```typescript
-// Strict security policy - Bunny.net only
-const isBunnyUrl = url && (
-  url.includes("iframe.mediadelivery.net") || 
-  url.includes("bunnycdn.com") ||
-  url.includes("b-cdn.net")
-);
+interface BrandProfile {
+  id: string;
+  userId: string;                    // User ownership
+  questionnaire: BrandQuestionnaire; // 7-question framework
+  profile: BrandProfileData;         // AI-generated strategy
+  createdAt: string;                 // Firestore timestamp
+  updatedAt: string;                 // Last modification
+  isActive: boolean;                 // Active profile flag
+  version: number;                   // Profile version tracking
+}
 ```
 
-## **Speed Write A/B Generation System**
+### **Firestore Indexes Configuration**
+```json
+{
+  "collectionGroup": "brandProfiles",
+  "queryScope": "COLLECTION",
+  "fields": [
+    { "fieldPath": "userId", "order": "ASCENDING" },
+    { "fieldPath": "createdAt", "order": "DESCENDING" }
+  ]
+}
+```
 
-### **Current State: Production Ready**
-✅ **Complete Script Output**: Users get ready-to-record content  
-✅ **Two Distinct Approaches**: Speed Write vs Educational, both complete  
-✅ **Length-Appropriate**: Word counts match target video duration  
-✅ **Streamlined Navigation**: Scripting-first design with Poppins typography  
-✅ **Session Management**: Seamless transfer between pages  
+## **Recent Technical Achievements**
 
-### **Prompt Specifications**
-**Speed Write Formula (Exact Structure)**:
-- Hook: "If..." format (8-12 words)
-- Simple actionable advice with clear steps
-- Reasoning: "This is..." explanation
-- Benefit: "So you don't..." outcome
-- Grade 3 reading level, FaceTime conversational tone
+### **AI Integration Robustness**
+- **Gemini 2.0 Flash**: Reliable JSON response parsing with markdown cleanup
+- **Error Handling**: Comprehensive fallbacks for AI generation failures
+- **Response Validation**: Type-safe parsing of AI-generated brand strategies
 
-**Educational Approach**:
-- Complete instructional scripts with specific hooks
-- Problem → solution → examples → call to action structure
-- Professional but conversational delivery
+### **Database Integration**
+- **Composite Indexing**: Proper Firestore index configuration for complex queries
+- **RBAC Compliance**: User-scoped data access with proper authentication
+- **Real-time Updates**: Optimistic UI updates with React Query integration
 
-## **System Architecture Status**
+### **User Experience Enhancements**
+- **Smart Navigation**: Tab auto-switching with user control preservation
+- **Notification Management**: Context-aware onboarding notifications
+- **Form Validation**: Comprehensive questionnaire validation with helpful errors
+- **Export Functionality**: JSON export for content pillars and keywords
 
-### **Microservice Infrastructure**
-✅ **Focused Services**: Download, transcription, upload, and orchestration  
-✅ **Graceful Fallbacks**: System works even when CDN upload fails  
-✅ **Background Processing**: 10x performance improvement (2-5s vs 30-60s)  
-✅ **Error Boundaries**: Comprehensive error recovery and user feedback  
+## **No Outstanding Critical Issues** ✅
 
-### **Authentication & Security**
-✅ **Firebase Admin SDK**: Proper server-side authentication  
-✅ **RBAC Implementation**: Role-based access control for coaches and creators  
-✅ **API Security**: Protected endpoints with authentication validation  
-✅ **CSP Compliance**: Content Security Policy adherence for video embedding  
-
-## **No Outstanding Critical Issues**
 All major functionality is implemented and working in production:
-- ✅ Videos process and appear in collections immediately
-- ✅ Single video playback working reliably
-- ✅ Script editor with enhanced UX for long content
-- ✅ Background transcription completing automatically
-- ✅ Complete authentication and authorization system
+- ✅ Brand profiles generate successfully with AI integration
+- ✅ Database queries work with proper Firestore indexing
+- ✅ UI updates immediately after profile generation
+- ✅ Tab navigation fully functional with smart auto-switching
+- ✅ Notifications properly controlled based on profile existence
+- ✅ Video collection system continues working reliably
+- ✅ Script generation producing complete content
 
 ## **Next Enhancement Opportunities**
 
-### **Real-time Features (Future)**
-- WebSocket integration for live transcription updates
-- Real-time collection synchronization across users
-- Live notifications for processing completion
+### **Brand Profile System Enhancements**
+- **Profile Templates**: Pre-built questionnaire templates for different industries
+- **Advanced Analytics**: Brand profile performance tracking and insights
+- **Collaboration Features**: Team-based brand profile development
+- **Integration**: Connect brand profiles to script generation for personalized content
 
-### **Advanced Video Features (Future)**
-- Batch video processing capabilities
-- Enhanced AI analysis with custom models
-- Advanced search and filtering across collections
+### **Cross-System Integration**
+- **Brand-Aware Scripts**: Use brand profile data to personalize script generation
+- **Content Strategy**: Connect brand pillars to video collection organization
+- **Performance Tracking**: Measure content performance against brand strategy
 
-### **Performance Monitoring (Future)**
-- Background processing success rate tracking
-- User experience analytics and optimization
-- System health monitoring and alerting
+### **Advanced AI Features**
+- **Profile Evolution**: AI-suggested profile updates based on content performance
+- **Competitive Analysis**: Brand positioning relative to competitors
+- **Trend Integration**: Incorporate trending topics into brand strategy
 
 ## 🚀 **PRODUCTION STATUS SUMMARY**
-*All Critical Features Working in Live Environment*
+*Complete Brand Profile & Video Collection System*
 
 ### **Deployment Information**
 - **Environment**: Vercel Production
-- **Last Updated**: December 30, 2024
+- **Last Updated**: January 2, 2025
 - **Status**: Fully operational with all features working
-- **Performance**: Optimized build with 55-second deployment time
+- **New Features**: Complete brand profile generation system
 
 ### **User-Ready Features**
-1. **Video Collection System**: Complete TikTok/Instagram processing with real-time collection updates
-2. **Single Video Playback**: Reliable iframe management ensuring only one video plays at a time
+1. **Brand Profile System**: AI-powered brand strategy generation with comprehensive output
+2. **Video Collection System**: Complete TikTok/Instagram processing with real-time updates
 3. **Script Generation**: Ready-to-record A/B scripts with Speed Write and Educational approaches
-4. **Enhanced Editor**: Smart text truncation for improved long-content handling
-5. **Authentication**: Complete RBAC system with coach, creator, and admin roles
+4. **Enhanced UI/UX**: Smart navigation, expandable text, and notification management
+5. **Authentication**: Complete RBAC system with proper database integration
 
 ### **Quality Assurance**
-- ✅ Production deployment successful
-- ✅ All video processing workflows tested
-- ✅ Single video playback verified
-- ✅ Script generation producing complete content
-- ✅ UI/UX enhancements functioning correctly
+- ✅ Brand profile generation tested with AI integration
+- ✅ Database queries verified with proper indexing
+- ✅ UI responsiveness confirmed with React Query optimization
+- ✅ Tab navigation and notification control validated
+- ✅ Cross-system compatibility maintained
 
 ---
 
-*Status: Gen C Beta is production-ready with all major video collection and script generation features working reliably* 
+*Status: Gen C Beta is production-ready with complete brand profile and video collection systems working reliably* 

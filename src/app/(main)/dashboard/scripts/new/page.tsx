@@ -181,15 +181,10 @@ export default function NewScriptPage() {
         {/* Error Display */}
         {speedWriteResponse && !speedWriteResponse.success && (
           <Card className="border-destructive bg-destructive/5 p-4">
-            <div className="flex items-center gap-2 text-destructive">
+            <div className="text-destructive flex items-center gap-2">
               <span className="font-medium">Generation Failed:</span>
               <span>{speedWriteResponse.error}</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSpeedWriteResponse(null)}
-                className="ml-auto"
-              >
+              <Button variant="outline" size="sm" onClick={() => setSpeedWriteResponse(null)} className="ml-auto">
                 Dismiss
               </Button>
             </div>
@@ -258,7 +253,12 @@ export default function NewScriptPage() {
             </div>
 
             <div className="text-muted-foreground ml-auto text-sm">
-              Press ⌘+Enter to {selectedMode === "speed-write" ? "generate scripts" : inputMode === "video" ? "process video" : "create script"}
+              Press ⌘+Enter to{" "}
+              {selectedMode === "speed-write"
+                ? "generate scripts"
+                : inputMode === "video"
+                  ? "process video"
+                  : "create script"}
             </div>
           </div>
         </div>

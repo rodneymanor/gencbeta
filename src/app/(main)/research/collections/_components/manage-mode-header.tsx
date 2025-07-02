@@ -37,49 +37,49 @@ const ManageModeControls = ({
   onExitManageMode: () => void;
 }) => (
   <div className="flex items-center gap-3">
-    <div className="flex items-center gap-2 px-3 py-2 bg-secondary/40 border border-border/60 rounded-md text-sm font-medium shadow-xs">
+    <div className="bg-secondary/40 border-border/60 flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium shadow-xs">
       <span className="text-muted-foreground">Selected:</span>
       <Badge variant="secondary" className="bg-primary text-primary-foreground shadow-sm">
         {selectedVideos.size}
       </Badge>
     </div>
-    
+
     <div className="flex items-center gap-2">
-      <Button 
-        variant="outline" 
-        size="sm" 
+      <Button
+        variant="outline"
+        size="sm"
         onClick={onSelectAll}
-        className="shadow-xs hover:shadow-sm transition-all duration-200 border-border/60 hover:border-border bg-background hover:bg-secondary/60"
+        className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 shadow-xs transition-all duration-200 hover:shadow-sm"
       >
         <CheckSquare className="mr-2 h-4 w-4" />
         Select All
       </Button>
-      <Button 
-        variant="outline" 
-        size="sm" 
+      <Button
+        variant="outline"
+        size="sm"
         onClick={onClearSelection}
-        className="shadow-xs hover:shadow-sm transition-all duration-200 border-border/60 hover:border-border bg-background hover:bg-secondary/60"
+        className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 shadow-xs transition-all duration-200 hover:shadow-sm"
       >
         <X className="mr-2 h-4 w-4" />
         Clear
       </Button>
       {selectedVideos.size > 0 && (
-        <Button 
-          variant="destructive" 
-          size="sm" 
+        <Button
+          variant="destructive"
+          size="sm"
           onClick={onBulkDelete}
-          className="shadow-xs hover:shadow-sm transition-all duration-200"
+          className="shadow-xs transition-all duration-200 hover:shadow-sm"
         >
           <Trash2 className="mr-2 h-4 w-4" />
           Delete ({selectedVideos.size})
         </Button>
       )}
     </div>
-    
-    <div className="ml-2 border-l border-border/40 pl-3">
-      <Button 
-        variant="ghost" 
-        size="sm" 
+
+    <div className="border-border/40 ml-2 border-l pl-3">
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={onExitManageMode}
         className="text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all duration-200"
       >
@@ -102,20 +102,20 @@ const AdminControls = ({
   onVideoAdded: () => void;
 }) => (
   <div className="flex items-center gap-3">
-    <Button 
-      variant="outline" 
-      size="sm" 
+    <Button
+      variant="outline"
+      size="sm"
       onClick={onManageModeToggle}
-      className="shadow-xs hover:shadow-sm transition-all duration-200 border-border/60 hover:border-border bg-background hover:bg-secondary/60"
+      className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 shadow-xs transition-all duration-200 hover:shadow-sm"
     >
       <Settings className="mr-2 h-4 w-4" />
       Manage
     </Button>
     <CreateCollectionDialog onCollectionCreated={onVideoAdded}>
-      <Button 
-        variant="outline" 
+      <Button
+        variant="outline"
         size="sm"
-        className="shadow-xs hover:shadow-sm transition-all duration-200 border-border/60 hover:border-border bg-background hover:bg-secondary/60"
+        className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 shadow-xs transition-all duration-200 hover:shadow-sm"
       >
         <Plus className="mr-2 h-4 w-4" />
         Create Collection

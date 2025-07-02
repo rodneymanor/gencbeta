@@ -181,4 +181,4 @@ export const InsightsDialogContent = ({ insights, metrics }: { insights: VideoIn
       </div>
     </div>
   );
-}; 
+};

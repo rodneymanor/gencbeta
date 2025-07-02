@@ -1,0 +1,43 @@
+{
+  "name": "template-generator-service",
+  "version": "1.0.0",
+  "description": "Standalone service for generating reusable script templates from original content",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "echo \"No tests specified\" && exit 0",
+    "start": "node dist/index.js",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean"
+  },
+  "keywords": [
+    "template-generation",
+    "script-templates",
+    "marketing-segments",
+    "content-analysis",
+    "gemini-api"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "your-repository-url"
+  },
+  "bugs": {
+    "url": "your-repository-url/issues"
+  },
+  "homepage": "your-repository-url#readme"
+} 

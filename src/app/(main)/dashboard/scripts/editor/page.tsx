@@ -13,13 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { ChatHistory } from "./_components/chat-history";
 import { ScriptOptions } from "./_components/script-options";
-import {
-  ChatMessage,
-  ScriptOption,
-  UrlParams,
-  ViewMode,
-  generateUniqueId,
-} from "./_components/types";
+import { ChatMessage, ScriptOption, UrlParams, ViewMode, generateUniqueId } from "./_components/types";
 import { VideoProcessor } from "./_components/video-processor";
 
 export default function ScriptEditorPage() {
@@ -71,7 +65,7 @@ export default function ScriptEditorPage() {
       if (!resultsData) return null;
 
       const results = JSON.parse(resultsData);
-      
+
       // Clear the sessionStorage to avoid stale data
       sessionStorage.removeItem("speedWriteResults");
 
@@ -105,94 +99,99 @@ export default function ScriptEditorPage() {
   }, []);
 
   // Generate scripts from text idea (for non-Speed Write modes)
-  const generateInitialScripts = useCallback(async (idea: string, mode: string, length: string) => {
-    // Check if we have Speed Write results to load instead
-    if (mode === "speed-write") {
-      const speedWriteResults = loadSpeedWriteResults();
-      if (speedWriteResults) {
-        setScriptOptions(speedWriteResults);
+  const generateInitialScripts = useCallback(
+    async (idea: string, mode: string, length: string) => {
+      // Check if we have Speed Write results to load instead
+      if (mode === "speed-write") {
+        const speedWriteResults = loadSpeedWriteResults();
+        if (speedWriteResults) {
+          setScriptOptions(speedWriteResults);
 
-        const aiMessage: ChatMessage = {
-          id: generateUniqueId(),
-          type: "ai",
-          content: "I've generated two unique script approaches for you using AI. Option A follows the Speed Write formula for maximum engagement, while Option B takes an educational approach. Choose the one that best fits your style!",
-          timestamp: new Date(),
-        };
-        setChatHistory((prev) => [...prev, aiMessage]);
-        return;
-      }
-    }
-
-    // For all modes, use the Speed Write API to generate real scripts
-    setIsGenerating(true);
-
-    try {
-      const response = await fetch("/api/script/speed-write", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          idea,
-          length: length as "20" | "60" | "90",
-          userId: "user-id", // Replace with actual user ID when available
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to generate scripts");
-      }
-
-      const data = await response.json();
-
-      if (data.success && (data.optionA || data.optionB)) {
-        const scriptOptions: { optionA: ScriptOption | null; optionB: ScriptOption | null } = {
-          optionA: null,
-          optionB: null,
-        };
-
-        if (data.optionA) {
-          scriptOptions.optionA = {
-            id: data.optionA.id,
-            title: `${data.optionA.title} (${data.optionA.estimatedDuration})`,
-            content: data.optionA.content,
+          const aiMessage: ChatMessage = {
+            id: generateUniqueId(),
+            type: "ai",
+            content:
+              "I've generated two unique script approaches for you using AI. Option A follows the Speed Write formula for maximum engagement, while Option B takes an educational approach. Choose the one that best fits your style!",
+            timestamp: new Date(),
           };
+          setChatHistory((prev) => [...prev, aiMessage]);
+          return;
+        }
+      }
+
+      // For all modes, use the Speed Write API to generate real scripts
+      setIsGenerating(true);
+
+      try {
+        const response = await fetch("/api/script/speed-write", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            idea,
+            length: length as "20" | "60" | "90",
+            userId: "user-id", // Replace with actual user ID when available
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to generate scripts");
         }
 
-        if (data.optionB) {
-          scriptOptions.optionB = {
-            id: data.optionB.id,
-            title: `${data.optionB.title} (${data.optionB.estimatedDuration})`,
-            content: data.optionB.content,
+        const data = await response.json();
+
+        if (data.success && (data.optionA || data.optionB)) {
+          const scriptOptions: { optionA: ScriptOption | null; optionB: ScriptOption | null } = {
+            optionA: null,
+            optionB: null,
           };
+
+          if (data.optionA) {
+            scriptOptions.optionA = {
+              id: data.optionA.id,
+              title: `${data.optionA.title} (${data.optionA.estimatedDuration})`,
+              content: data.optionA.content,
+            };
+          }
+
+          if (data.optionB) {
+            scriptOptions.optionB = {
+              id: data.optionB.id,
+              title: `${data.optionB.title} (${data.optionB.estimatedDuration})`,
+              content: data.optionB.content,
+            };
+          }
+
+          setScriptOptions(scriptOptions);
+
+          const aiMessage: ChatMessage = {
+            id: generateUniqueId(),
+            type: "ai",
+            content:
+              "I've generated two complete scripts for you using AI. Choose the one that best fits your vision and style!",
+            timestamp: new Date(),
+          };
+          setChatHistory((prev) => [...prev, aiMessage]);
+        } else {
+          throw new Error(data.error || "Failed to generate scripts");
         }
+      } catch (error) {
+        console.error("❌ Script generation failed:", error);
 
-        setScriptOptions(scriptOptions);
-
-        const aiMessage: ChatMessage = {
+        const errorMessage: ChatMessage = {
           id: generateUniqueId(),
-          type: "ai",
-          content: "I've generated two complete scripts for you using AI. Choose the one that best fits your vision and style!",
+          type: "error",
+          content: "Failed to generate scripts. Please try again or check your connection.",
           timestamp: new Date(),
         };
-        setChatHistory((prev) => [...prev, aiMessage]);
-      } else {
-        throw new Error(data.error || "Failed to generate scripts");
+        setChatHistory((prev) => [...prev, errorMessage]);
+      } finally {
+        setIsGenerating(false);
       }
-    } catch (error) {
-      console.error("❌ Script generation failed:", error);
-      
-      const errorMessage: ChatMessage = {
-        id: generateUniqueId(),
-        type: "error",
-        content: "Failed to generate scripts. Please try again or check your connection.",
-        timestamp: new Date(),
-      };
-      setChatHistory((prev) => [...prev, errorMessage]);
-    } finally {
-      setIsGenerating(false);
-    }
-  }, [loadSpeedWriteResults]);
+    },
+    [loadSpeedWriteResults],
+  );
 
   // Handle video transcription completion
   const handleVideoTranscriptReady = useCallback(
@@ -364,13 +363,19 @@ export default function ScriptEditorPage() {
                       value={chatInput}
                       onChange={(e) => setChatInput(e.target.value)}
                       onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey && !isGenerating && !isProcessingVideo && chatInput.trim()) {
+                        if (
+                          e.key === "Enter" &&
+                          !e.shiftKey &&
+                          !isGenerating &&
+                          !isProcessingVideo &&
+                          chatInput.trim()
+                        ) {
                           e.preventDefault();
                           handleChatSubmit();
                         }
                       }}
                       placeholder="Ask me to adjust the tone, add details, or make changes..."
-                      className="flex-1 min-h-[44px] max-h-[100px] resize-none"
+                      className="max-h-[100px] min-h-[44px] flex-1 resize-none"
                       disabled={isGenerating || isProcessingVideo}
                     />
                     <Button

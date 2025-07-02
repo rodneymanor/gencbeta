@@ -1,0 +1,10 @@
+node_modules/
+.next/
+out/
+build/
+dist/
+.env*
+*.log
+.DS_Store
+src/lib/template-generator-service/dist/
+src/lib/template-generator-service/examples/ 

@@ -146,10 +146,10 @@ export class CollectionsRBACAdminService {
    * Build the appropriate Firestore query for videos based on user role
    */
   private static async buildVideosQuery(
-    adminDb: FirebaseFirestore.Firestore, 
-    userProfile: { role: string }, 
-    userId: string, 
-    collectionId?: string
+    adminDb: FirebaseFirestore.Firestore,
+    userProfile: { role: string },
+    userId: string,
+    collectionId?: string,
   ) {
     // Super admins can see all videos
     if (userProfile.role === "super_admin") {
@@ -183,9 +183,9 @@ export class CollectionsRBACAdminService {
    * Build query for regular users
    */
   private static buildRegularUserQuery(
-    adminDb: FirebaseFirestore.Firestore, 
-    accessibleCoaches: string[], 
-    collectionId?: string
+    adminDb: FirebaseFirestore.Firestore,
+    accessibleCoaches: string[],
+    collectionId?: string,
   ) {
     if (!collectionId || collectionId === "all-videos") {
       return adminDb.collection(this.VIDEOS_PATH).where("userId", "in", accessibleCoaches).orderBy("addedAt", "desc");
@@ -257,10 +257,7 @@ export class CollectionsRBACAdminService {
       const batch = adminDb.batch();
 
       // Delete all videos in the collection
-      const videosQuery = await adminDb
-        .collection(this.VIDEOS_PATH)
-        .where("collectionId", "==", collectionId)
-        .get();
+      const videosQuery = await adminDb.collection(this.VIDEOS_PATH).where("collectionId", "==", collectionId).get();
 
       console.log("🗑️ [ADMIN_RBAC] Found videos to delete:", videosQuery.docs.length);
 

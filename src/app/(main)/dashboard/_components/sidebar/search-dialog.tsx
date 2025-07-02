@@ -13,10 +13,10 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth-context";
 import { SearchService, type SearchData, type SearchResult } from "@/lib/search-service";
+import { SearchResultGroup, SearchLoadingState, QuickActionItem } from "./search-result-components";
 
 // Default actions available to all users
 const defaultActions = [
@@ -39,7 +39,7 @@ const defaultActions = [
 export function SearchDialog() {
   const router = useRouter();
   const { user, userProfile } = useAuth();
-  
+
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
   const [searchData, setSearchData] = React.useState<SearchData | null>(null);
@@ -119,7 +119,7 @@ export function SearchDialog() {
     return () => document.removeEventListener("keydown", down);
   }, []);
 
-  const handleSelect = (result: SearchResult | typeof defaultActions[0]) => {
+  const handleSelect = (result: SearchResult | (typeof defaultActions)[0]) => {
     console.log("🔍 [SearchDialog] Navigating to:", result.url);
     setOpen(false);
     setQuery("");
@@ -127,11 +127,13 @@ export function SearchDialog() {
   };
 
   const getTotalResultsCount = () => {
-    return searchResults.collections.length + 
-           searchResults.videos.length + 
-           searchResults.notes.length + 
-           searchResults.scripts.length +
-           searchResults.pages.length;
+    return (
+      searchResults.collections.length +
+      searchResults.videos.length +
+      searchResults.notes.length +
+      searchResults.scripts.length +
+      searchResults.pages.length
+    );
   };
 
   const formatDate = (dateString: string) => {
@@ -147,7 +149,7 @@ export function SearchDialog() {
 
   const getRecentScripts = () => {
     if (!searchData) return [];
-    
+
     return searchData.scripts
       .sort((a, b) => {
         const dateA = new Date(a.metadata?.createdAt || "");
@@ -159,7 +161,7 @@ export function SearchDialog() {
 
   const renderDefaultContent = () => {
     if (isLoading || isInitialLoad) {
-      return renderLoadingState();
+      return <SearchLoadingState />;
     }
 
     const recentScripts = getRecentScripts();
@@ -169,155 +171,30 @@ export function SearchDialog() {
         {/* Quick Actions */}
         <CommandGroup heading="Actions">
           {defaultActions.map((action) => (
-            <CommandItem
-              key={action.id}
-              className="!py-2 cursor-pointer"
-              onSelect={() => handleSelect(action)}
-            >
-              <action.icon className="mr-2 h-4 w-4" />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">{action.title}</span>
-                </div>
-                <div className="text-muted-foreground text-xs mt-1">
-                  {action.description}
-                </div>
-              </div>
-              <ArrowRight className="ml-2 h-3 w-3 opacity-50" />
-            </CommandItem>
+            <QuickActionItem key={action.id} action={action} onSelect={handleSelect} />
           ))}
         </CommandGroup>
 
         {/* Recent Scripts */}
-        {recentScripts.length > 0 && (
-          <>
-            <CommandSeparator />
-            <CommandGroup heading="Recent Scripts">
-              {recentScripts.map((script) => (
-                <CommandItem
-                  key={`script-${script.id}`}
-                  className="!py-2 cursor-pointer"
-                  onSelect={() => handleSelect(script)}
-                >
-                  <script.icon className="mr-2 h-4 w-4" />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium truncate">{script.title}</span>
-                      {script.metadata?.author && (
-                        <Badge variant="outline" className="text-xs">
-                          {script.metadata.author}
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="text-muted-foreground text-xs truncate mt-1">
-                      {script.description}
-                    </div>
-                    {script.metadata?.createdAt && (
-                      <div className="text-muted-foreground text-xs mt-1">
-                        {formatDate(script.metadata.createdAt)}
-                      </div>
-                    )}
-                  </div>
-                  <ArrowRight className="ml-2 h-3 w-3 opacity-50" />
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </>
-        )}
-
-        {/* Empty state when no recent scripts */}
-        {recentScripts.length === 0 && !isLoading && (
-          <>
-            <CommandSeparator />
-            <CommandGroup heading="Recent Scripts">
-              <CommandItem disabled>
-                <FileText className="mr-2 h-4 w-4 opacity-50" />
-                <span className="text-muted-foreground text-sm">No recent scripts found</span>
-              </CommandItem>
-            </CommandGroup>
-          </>
-        )}
+        <SearchResultGroup
+          title="Recent Scripts"
+          items={recentScripts}
+          emptyMessage="No recent scripts found"
+          onSelect={handleSelect}
+          formatDate={formatDate}
+        />
       </>
     );
   };
-
-  const renderSearchGroup = (title: string, items: SearchResult[], emptyMessage: string) => {
-    if (items.length === 0 && query.trim()) return null;
-
-    return (
-      <>
-        <CommandSeparator />
-        <CommandGroup heading={title}>
-          {items.length === 0 ? (
-            query.trim() && (
-              <CommandItem disabled>
-                <span className="text-muted-foreground text-sm">{emptyMessage}</span>
-              </CommandItem>
-            )
-          ) : (
-            items.map((item) => (
-              <CommandItem
-                key={`${item.type}-${item.id}`}
-                className="!py-2 cursor-pointer"
-                onSelect={() => handleSelect(item)}
-              >
-                <item.icon className="mr-2 h-4 w-4" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium truncate">{item.title}</span>
-                    {item.metadata?.author && (
-                      <Badge variant="outline" className="text-xs">
-                        {item.metadata.author}
-                      </Badge>
-                    )}
-                    {item.metadata?.category && item.type === "page" && (
-                      <Badge variant="secondary" className="text-xs">
-                        {item.metadata.category}
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="text-muted-foreground text-xs truncate mt-1">
-                    {item.description}
-                  </div>
-                  {item.metadata?.createdAt && item.type !== "page" && (
-                    <div className="text-muted-foreground text-xs mt-1">
-                      {formatDate(item.metadata.createdAt)}
-                    </div>
-                  )}
-                </div>
-                <ArrowRight className="ml-2 h-3 w-3 opacity-50" />
-              </CommandItem>
-            ))
-          )}
-        </CommandGroup>
-      </>
-    );
-  };
-
-  const renderLoadingState = () => (
-    <>
-      <CommandGroup heading="Loading...">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <CommandItem key={i} disabled>
-            <Skeleton className="mr-2 h-4 w-4" />
-            <div className="flex-1">
-              <Skeleton className="h-4 w-full mb-1" />
-              <Skeleton className="h-3 w-3/4" />
-            </div>
-          </CommandItem>
-        ))}
-      </CommandGroup>
-    </>
-  );
 
   const renderSearchResults = () => {
     if (getTotalResultsCount() === 0) {
       return (
         <CommandEmpty>
-          <div className="text-center py-6">
-            <Search className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
+          <div className="py-6 text-center">
+            <Search className="text-muted-foreground mx-auto mb-2 h-8 w-8" />
             <p className="text-muted-foreground">No results found for &quot;{query}&quot;</p>
-            <p className="text-muted-foreground text-sm mt-1">
+            <p className="text-muted-foreground mt-1 text-sm">
               Try searching for pages, collections, videos, notes, or scripts
             </p>
           </div>
@@ -327,39 +204,15 @@ export function SearchDialog() {
 
     return (
       <>
-        <div className="px-2 py-1.5 text-xs text-muted-foreground border-b">
-          {getTotalResultsCount()} result{getTotalResultsCount() !== 1 ? 's' : ''} found
+        <div className="text-muted-foreground border-b px-2 py-1.5 text-xs">
+          {getTotalResultsCount()} result{getTotalResultsCount() !== 1 ? "s" : ""} found
         </div>
-        
-        {renderSearchGroup(
-          "Pages", 
-          searchResults.pages, 
-          "No pages found"
-        )}
-        
-        {renderSearchGroup(
-          "Collections", 
-          searchResults.collections, 
-          "No collections found"
-        )}
-        
-        {renderSearchGroup(
-          "Videos", 
-          searchResults.videos, 
-          "No videos found"
-        )}
-        
-        {renderSearchGroup(
-          "Notes", 
-          searchResults.notes, 
-          "No notes found"
-        )}
-        
-        {renderSearchGroup(
-          "Scripts", 
-          searchResults.scripts, 
-          "No scripts found"
-        )}
+
+        <SearchResultGroup title="Pages" items={searchResults.pages} emptyMessage="No pages found" onSelect={handleSelect} formatDate={formatDate} />
+        <SearchResultGroup title="Collections" items={searchResults.collections} emptyMessage="No collections found" onSelect={handleSelect} formatDate={formatDate} />
+        <SearchResultGroup title="Videos" items={searchResults.videos} emptyMessage="No videos found" onSelect={handleSelect} formatDate={formatDate} />
+        <SearchResultGroup title="Notes" items={searchResults.notes} emptyMessage="No notes found" onSelect={handleSelect} formatDate={formatDate} />
+        <SearchResultGroup title="Scripts" items={searchResults.scripts} emptyMessage="No scripts found" onSelect={handleSelect} formatDate={formatDate} />
       </>
     );
   };
@@ -377,17 +230,13 @@ export function SearchDialog() {
         </kbd>
       </div>
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput 
-          placeholder="Search or create..."
-          value={query}
-          onValueChange={setQuery}
-        />
+        <CommandInput placeholder="Search or create..." value={query} onValueChange={setQuery} />
         <CommandList>
           {!searchData ? (
             <CommandEmpty>
-              <div className="text-center py-6">
+              <div className="py-6 text-center">
                 <p className="text-muted-foreground">Failed to load search data</p>
-                <p className="text-muted-foreground text-sm mt-1">Please try again</p>
+                <p className="text-muted-foreground mt-1 text-sm">Please try again</p>
               </div>
             </CommandEmpty>
           ) : query.trim() ? (

@@ -1,0 +1,163 @@
+"use client";
+
+import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { VoiceLibraryTab } from "./_components/voice-library-tab";
+import { CustomVoicesTab } from "./_components/custom-voices-tab";
+import { VoiceActivatedModal } from "./_components/voice-activated-modal";
+import { ExampleScriptsModal } from "./_components/example-scripts-modal";
+import { CreateVoiceModal } from "./_components/create-voice-modal";
+import { useQuery } from "@tanstack/react-query";
+import { AIVoicesService } from "@/lib/ai-voices-service";
+import { AIVoice, VoiceActivationResponse, OriginalScript } from "@/types/ai-voices";
+import { toast } from "sonner";
+
+function VoicesPage() {
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get("tab") === "custom" ? "custom" : "library");
+  const [showActivatedModal, setShowActivatedModal] = useState(false);
+  const [showExamplesModal, setShowExamplesModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [activationResponse, setActivationResponse] = useState<VoiceActivationResponse | null>(null);
+  const [selectedVoiceExamples, setSelectedVoiceExamples] = useState<{
+    voiceName: string;
+    examples: OriginalScript[];
+  } | null>(null);
+
+  // Fetch available voices
+  const {
+    data: voicesData,
+    isLoading: voicesLoading,
+    refetch: refetchVoices,
+  } = useQuery({
+    queryKey: ["ai-voices"],
+    queryFn: () => AIVoicesService.getAvailableVoices(),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Fetch custom voice limit
+  const { data: voiceLimit, refetch: refetchLimit } = useQuery({
+    queryKey: ["voice-limit"],
+    queryFn: () => AIVoicesService.getCustomVoiceLimit(),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const handleUseVoice = async (voice: AIVoice) => {
+    try {
+      const response = await AIVoicesService.activateVoice(voice.id);
+      setActivationResponse(response);
+      setShowActivatedModal(true);
+
+      // Refetch to update active states
+      await refetchVoices();
+
+      toast.success(`${voice.name} activated successfully!`);
+    } catch (error) {
+      console.error("Failed to activate voice:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to activate voice");
+    }
+  };
+
+  const handleShowExamples = async (voice: AIVoice) => {
+    try {
+      const examples = await AIVoicesService.getVoiceExamples(voice.id);
+      setSelectedVoiceExamples({
+        voiceName: voice.name,
+        examples,
+      });
+      setShowExamplesModal(true);
+    } catch (error) {
+      console.error("Failed to load examples:", error);
+      toast.error("Failed to load example scripts");
+    }
+  };
+
+  const handleCreateVoice = () => {
+    setShowCreateModal(true);
+  };
+
+  const handleVoiceCreated = async () => {
+    await refetchVoices();
+    await refetchLimit();
+    setShowCreateModal(false);
+    toast.success("Custom voice created successfully!");
+  };
+
+  const handleDeleteVoice = async (voiceId: string) => {
+    try {
+      await AIVoicesService.deleteCustomVoice(voiceId);
+      await refetchVoices();
+      await refetchLimit();
+      toast.success("Voice deleted successfully");
+    } catch (error) {
+      console.error("Failed to delete voice:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to delete voice");
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-6 p-6">
+      {/* Header */}
+      <div className="space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight">AI Voice Studio</h1>
+        <p className="text-muted-foreground">
+          Choose from our library of ready-made voices or create your own custom voice. Generate content that sounds
+          exactly how you want it to.
+        </p>
+      </div>
+
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="custom">My Custom Voices</TabsTrigger>
+          <TabsTrigger value="library">Voice Library</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="library" className="mt-6">
+          <VoiceLibraryTab
+            voices={voicesData?.sharedVoices ?? []}
+            isLoading={voicesLoading}
+            onUseVoice={handleUseVoice}
+            onShowExamples={handleShowExamples}
+          />
+        </TabsContent>
+
+        <TabsContent value="custom" className="mt-6">
+          <CustomVoicesTab
+            voices={voicesData?.customVoices ?? []}
+            voiceLimit={voiceLimit}
+            isLoading={voicesLoading}
+            onCreateVoice={handleCreateVoice}
+            onUseVoice={handleUseVoice}
+            onShowExamples={handleShowExamples}
+            onDeleteVoice={handleDeleteVoice}
+          />
+        </TabsContent>
+      </Tabs>
+
+      {/* Modals */}
+      <VoiceActivatedModal
+        open={showActivatedModal}
+        onOpenChange={setShowActivatedModal}
+        activationResponse={activationResponse}
+      />
+
+      <ExampleScriptsModal
+        open={showExamplesModal}
+        onOpenChange={setShowExamplesModal}
+        voiceName={selectedVoiceExamples?.voiceName ?? ""}
+        examples={selectedVoiceExamples?.examples ?? []}
+      />
+
+      <CreateVoiceModal
+        open={showCreateModal}
+        onOpenChange={setShowCreateModal}
+        onVoiceCreated={handleVoiceCreated}
+        remainingVoices={voiceLimit?.remaining ?? 0}
+      />
+    </div>
+  );
+}
+
+export default VoicesPage;

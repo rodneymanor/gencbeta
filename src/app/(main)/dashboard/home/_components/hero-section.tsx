@@ -6,13 +6,7 @@ import { Sparkles, Wand, Bot, X, CheckCircle2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -121,7 +115,7 @@ export default function HeroSection() {
     // eslint-disable-next-line security/detect-object-injection
     return templateVariables.every((variable: string) => templateInputs[variable]?.trim() !== "");
   }, [templateVariables, templateInputs]);
-  
+
   const handleGenerateStory = () => {
     if (!selectedTemplate) return;
     let finalScript = selectedTemplate.template;
@@ -137,17 +131,17 @@ export default function HeroSection() {
 
   const handleTemplateInputChange = (variable: string, value: string) => {
     // eslint-disable-next-line security/detect-object-injection
-    setTemplateInputs(prev => ({ ...prev, [variable]: value }));
+    setTemplateInputs((prev) => ({ ...prev, [variable]: value }));
   };
 
   return (
     <div className="py-16 sm:py-24">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8 text-center">
+      <div className="mx-auto max-w-7xl px-6 text-center lg:px-8">
         <Sparkles className="mx-auto h-8 w-8 text-indigo-500" />
-        <h1 className="mt-6 text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
+        <h1 className="text-foreground mt-6 text-4xl font-bold tracking-tight sm:text-6xl">
           What will You Script Today?
         </h1>
-        <p className="mt-8 text-lg leading-8 text-muted-foreground">
+        <p className="text-muted-foreground mt-8 text-lg leading-8">
           Start with an idea, fix an existing script, or create a structured story from scratch.
         </p>
       </div>
@@ -156,16 +150,16 @@ export default function HeroSection() {
         layout
         className={cn(
           "mx-auto mt-12 grid gap-8 px-6 lg:px-8",
-          isStoryPanelOpen
-            ? "max-w-7xl grid-cols-1 lg:grid-cols-2"
-            : "max-w-4xl grid-cols-1"
+          isStoryPanelOpen ? "max-w-7xl grid-cols-1 lg:grid-cols-2" : "max-w-4xl grid-cols-1",
         )}
       >
         <motion.div layout className="flex flex-col gap-4">
-           {customScript && (
-            <Badge variant="secondary" className="flex items-center justify-between w-full p-2">
+          {customScript && (
+            <Badge variant="secondary" className="flex w-full items-center justify-between p-2">
               <span className="font-semibold">Custom Script Template Active</span>
-              <Button variant="ghost" size="sm" className="h-auto px-2 py-1" onClick={() => setCustomScript(null)}>Clear</Button>
+              <Button variant="ghost" size="sm" className="h-auto px-2 py-1" onClick={() => setCustomScript(null)}>
+                Clear
+              </Button>
             </Badge>
           )}
           <Textarea
@@ -174,7 +168,7 @@ export default function HeroSection() {
             placeholder={inputModes[inputMode]}
             className="min-h-52 text-base"
           />
-          <div className="flex flex-col sm:flex-row gap-4 justify-between">
+          <div className="flex flex-col justify-between gap-4 sm:flex-row">
             <Select value={inputMode} onValueChange={(v: InputMode) => setInputMode(v)}>
               <SelectTrigger className="w-full sm:w-44">
                 <SelectValue placeholder="Input Mode" />
@@ -186,11 +180,7 @@ export default function HeroSection() {
               </SelectContent>
             </Select>
             <div className="flex gap-4">
-              <Button
-                size="lg"
-                disabled={!videoIdea.trim()}
-                className="w-full bg-indigo-600 hover:bg-indigo-700"
-              >
+              <Button size="lg" disabled={!videoIdea.trim()} className="w-full bg-indigo-600 hover:bg-indigo-700">
                 <Wand className="mr-2 h-4 w-4" />
                 Fast Write
               </Button>
@@ -223,11 +213,11 @@ export default function HeroSection() {
                     <X className="h-4 w-4" />
                   </Button>
                 </CardHeader>
-                <CardContent className="space-y-6 overflow-y-auto max-h-[60vh] p-6">
+                <CardContent className="max-h-[60vh] space-y-6 overflow-y-auto p-6">
                   {/* Step 1: Tone */}
                   <div className="space-y-4">
                     <h3 className="font-semibold">1. Choose a Tone of Voice</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                       {tones.map((tone) => (
                         <Card
                           key={tone.id}
@@ -235,13 +225,13 @@ export default function HeroSection() {
                           onClick={() => setSelectedTone(tone.id)}
                           className={cn(
                             "cursor-pointer transition-all",
-                            selectedTone === tone.id && "border-indigo-500 ring-2 ring-indigo-500"
+                            selectedTone === tone.id && "border-indigo-500 ring-2 ring-indigo-500",
                           )}
                         >
                           <CardContent className="p-6 text-center">
                             <span className="text-2xl">{tone.emoji}</span>
                             <p className="font-bold">{tone.name}</p>
-                            <p className="text-xs text-muted-foreground">{tone.description}</p>
+                            <p className="text-muted-foreground text-xs">{tone.description}</p>
                           </CardContent>
                         </Card>
                       ))}
@@ -265,12 +255,12 @@ export default function HeroSection() {
                               onClick={() => setSelectedTemplate(template)}
                               className={cn(
                                 "cursor-pointer transition-all",
-                                selectedTemplate?.id === template.id && "border-indigo-500 bg-secondary"
+                                selectedTemplate?.id === template.id && "bg-secondary border-indigo-500",
                               )}
                             >
                               <CardContent className="p-6">
                                 <p className="font-bold">{template.name}</p>
-                                <p className="text-xs text-muted-foreground">{template.structure}</p>
+                                <p className="text-muted-foreground text-xs">{template.structure}</p>
                               </CardContent>
                             </Card>
                           ))}
@@ -278,43 +268,43 @@ export default function HeroSection() {
                       </motion.div>
                     )}
                   </AnimatePresence>
-                  
+
                   {/* Step 3: Fill Blanks */}
                   <AnimatePresence>
-                  {selectedTemplate && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      className="space-y-4"
-                    >
-                      <h3 className="font-semibold">3. Fill in the Blanks</h3>
-                      <div className="space-y-8">
-                        {templateVariables.map((variable: string) => (
-                          <Input
-                            key={variable}
-                            placeholder={variable.replace(/_/g, " ")}
-                            // eslint-disable-next-line security/detect-object-injection
-                            value={templateInputs[variable] ?? ""}
-                            onChange={(e) => handleTemplateInputChange(variable, e.target.value)}
-                          />
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
+                    {selectedTemplate && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        className="space-y-4"
+                      >
+                        <h3 className="font-semibold">3. Fill in the Blanks</h3>
+                        <div className="space-y-8">
+                          {templateVariables.map((variable: string) => (
+                            <Input
+                              key={variable}
+                              placeholder={variable.replace(/_/g, " ")}
+                              // eslint-disable-next-line security/detect-object-injection
+                              value={templateInputs[variable] ?? ""}
+                              onChange={(e) => handleTemplateInputChange(variable, e.target.value)}
+                            />
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
                   </AnimatePresence>
 
                   {/* Step 4: Generate */}
-                   {selectedTemplate && (
-                     <Button 
-                       size="lg" 
-                       className="w-full bg-purple-600 hover:bg-purple-700"
-                       disabled={!areAllTemplateInputsFilled}
-                       onClick={handleGenerateStory}
-                      >
-                       <CheckCircle2 className="mr-2 h-4 w-4" />
-                       Generate Story
-                     </Button>
-                   )}
+                  {selectedTemplate && (
+                    <Button
+                      size="lg"
+                      className="w-full bg-purple-600 hover:bg-purple-700"
+                      disabled={!areAllTemplateInputsFilled}
+                      onClick={handleGenerateStory}
+                    >
+                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                      Generate Story
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>

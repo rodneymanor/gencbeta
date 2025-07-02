@@ -1,4 +1,15 @@
-import { type LucideIcon, FolderOpen, StickyNote, FileText, Play, Home, Binoculars, Settings, Users, WandSparkles } from "lucide-react";
+import {
+  type LucideIcon,
+  FolderOpen,
+  StickyNote,
+  FileText,
+  Play,
+  Home,
+  Binoculars,
+  Settings,
+  Users,
+  WandSparkles,
+} from "lucide-react";
 
 import { CollectionsRBACService } from "./collections-rbac";
 import { UserManagementService } from "./user-management";
@@ -78,7 +89,7 @@ export class SearchService {
       return searchData;
     } catch (error) {
       console.error("❌ [SEARCH] Error loading search data:", error);
-      
+
       // Return empty data on error
       const emptyData: SearchData = {
         collections: [],
@@ -88,7 +99,7 @@ export class SearchService {
         pages: [],
         all: [],
       };
-      
+
       return emptyData;
     }
   }
@@ -100,16 +111,17 @@ export class SearchService {
     if (!query.trim()) return [];
 
     const searchTerm = query.toLowerCase().trim();
-    
-    return data.all
-      .filter(item => this.matchesSearchTerm(item, searchTerm))
-      .slice(0, 20); // Limit results
+
+    return data.all.filter((item) => this.matchesSearchTerm(item, searchTerm)).slice(0, 20); // Limit results
   }
 
   /**
    * Search with categories
    */
-  static searchByCategory(data: SearchData, query: string): {
+  static searchByCategory(
+    data: SearchData,
+    query: string,
+  ): {
     collections: SearchResult[];
     videos: SearchResult[];
     notes: SearchResult[];
@@ -127,11 +139,9 @@ export class SearchService {
     }
 
     const searchTerm = query.toLowerCase().trim();
-    
+
     const filterItems = (items: SearchResult[]) =>
-      items
-        .filter(item => this.matchesSearchTerm(item, searchTerm))
-        .slice(0, 5); // Limit per category
+      items.filter((item) => this.matchesSearchTerm(item, searchTerm)).slice(0, 5); // Limit per category
 
     return {
       collections: filterItems(data.collections),
@@ -146,11 +156,13 @@ export class SearchService {
    * Check if an item matches the search term
    */
   private static matchesSearchTerm(item: SearchResult, searchTerm: string): boolean {
-    return item.title.toLowerCase().includes(searchTerm) ||
-           item.description.toLowerCase().includes(searchTerm) ||
-           (item.metadata?.author?.toLowerCase().includes(searchTerm) ?? false) ||
-           (item.metadata?.tags?.some(tag => tag.toLowerCase().includes(searchTerm)) ?? false) ||
-           (item.metadata?.category?.toLowerCase().includes(searchTerm) ?? false);
+    return (
+      item.title.toLowerCase().includes(searchTerm) ||
+      item.description.toLowerCase().includes(searchTerm) ||
+      (item.metadata?.author?.toLowerCase().includes(searchTerm) ?? false) ||
+      (item.metadata?.tags?.some((tag) => tag.toLowerCase().includes(searchTerm)) ?? false) ||
+      (item.metadata?.category?.toLowerCase().includes(searchTerm) ?? false)
+    );
   }
 
   /**
@@ -280,8 +292,8 @@ export class SearchService {
   private static async getCollectionsData(userUid: string): Promise<SearchResult[]> {
     try {
       const collections = await CollectionsRBACService.getUserCollections(userUid);
-      
-      return collections.map(collection => ({
+
+      return collections.map((collection) => ({
         id: collection.id!,
         title: collection.title,
         description: collection.description ?? "No description",
@@ -307,15 +319,13 @@ export class SearchService {
     try {
       // Get all videos across all collections for this user
       const videos = await CollectionsRBACService.getCollectionVideos(userUid, "all-videos");
-      
-      return videos.map(video => ({
+
+      return videos.map((video) => ({
         id: video.id!,
         title: video.title,
-        description: video.transcript ? 
-          video.transcript.substring(0, 100) + "..." : 
-          "No transcript available",
+        description: video.transcript ? video.transcript.substring(0, 100) + "..." : "No transcript available",
         type: "video" as const,
-        url: `/research/collections/${video.collectionId ?? 'all-videos'}?video=${video.id}`,
+        url: `/research/collections/${video.collectionId ?? "all-videos"}?video=${video.id}`,
         icon: Play,
         metadata: {
           author: video.author,
@@ -346,7 +356,7 @@ export class SearchService {
           createdAt: "2024-01-15",
         },
         {
-          id: "2", 
+          id: "2",
           title: "Content Strategy Notes",
           content: "Ideas for improving content strategy and engagement",
           tags: ["content", "strategy"],
@@ -354,7 +364,7 @@ export class SearchService {
         },
       ];
 
-      return mockNotes.map(note => ({
+      return mockNotes.map((note) => ({
         id: note.id,
         title: note.title,
         description: note.content,
@@ -392,17 +402,17 @@ export class SearchService {
         },
         {
           id: "2",
-          title: "Tech Product Review Template", 
+          title: "Tech Product Review Template",
           summary: "Comprehensive tech review framework",
           authors: "Jane Smith",
           status: "Draft",
-          category: "Technology", 
+          category: "Technology",
           createdAt: "2024-01-20",
           tags: ["tech", "review"],
         },
       ];
 
-      return mockScripts.map(script => ({
+      return mockScripts.map((script) => ({
         id: script.id,
         title: script.title,
         description: script.summary,
@@ -421,4 +431,4 @@ export class SearchService {
       return [];
     }
   }
-} 
+}

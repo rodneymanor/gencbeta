@@ -95,10 +95,7 @@ async function validateCreateCollectionRequest(body: { title?: string; descripti
   };
 }
 
-async function createCollectionInFirestore(
-  adminDb: any,
-  collectionData: Record<string, unknown>,
-) {
+async function createCollectionInFirestore(adminDb: any, collectionData: Record<string, unknown>) {
   const docRef = await adminDb.collection("collections").add(collectionData);
   return docRef;
 }

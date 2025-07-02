@@ -45,29 +45,28 @@ export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded
     if (result.success) {
       console.log("✅ [ADD_VIDEO] Processing successful:", result);
       const platform = result.platform ?? detectPlatform(url);
-      const collection = collections.find(c => c.id === collectionId);
-      
-      setSuccess(`${platform.toUpperCase()} video added to "${collection?.title}"! ${result.message ?? ''}`);
-      
+      const collection = collections.find((c) => c.id === collectionId);
+
+      setSuccess(`${platform.toUpperCase()} video added to "${collection?.title}"! ${result.message ?? ""}`);
+
       // Clear form
       setUrl("");
       setTitle("");
-      
+
       // Add delay before refresh
       setTimeout(() => {
         onVideoAdded?.();
       }, 15000);
-      
+
       // Auto-close dialog after showing success message
       setTimeout(() => {
         setIsOpen(false);
         setSuccess(null);
       }, 2000);
-      
     } else {
       console.error("❌ [ADD_VIDEO] Processing failed:", result);
       setError(result.error ?? "Failed to process video");
-      
+
       if (result.details) {
         console.error("❌ [ADD_VIDEO] Error details:", result.details);
       }
@@ -76,7 +75,7 @@ export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!url.trim() || !collectionId) {
       setError("Please enter a video URL and select a collection");
       return;
@@ -131,8 +130,8 @@ export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded
         <DialogHeader>
           <DialogTitle>Add Video to Collection</DialogTitle>
           <DialogDescription>
-            Add a TikTok or Instagram video to your collection. The video will be automatically downloaded, 
-            streamed to our CDN, and transcribed for analysis.
+            Add a TikTok or Instagram video to your collection. The video will be automatically downloaded, streamed to
+            our CDN, and transcribed for analysis.
           </DialogDescription>
         </DialogHeader>
 
@@ -184,7 +183,7 @@ export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded
 
           {/* Error Display */}
           {error && (
-            <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-md">
+            <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 p-3">
               <AlertCircle className="h-4 w-4 text-red-600" />
               <span className="text-sm text-red-800">{error}</span>
             </div>
@@ -192,7 +191,7 @@ export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded
 
           {/* Success Display */}
           {success && (
-            <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-md">
+            <div className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 p-3">
               <CheckCircle className="h-4 w-4 text-green-600" />
               <span className="text-sm text-green-800">{success}</span>
             </div>
@@ -200,8 +199,8 @@ export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded
 
           {/* Loading Display */}
           {isLoading && (
-            <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
-              <Loader2 className="h-4 w-4 text-blue-600 animate-spin" />
+            <div className="flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 p-3">
+              <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
               <span className="text-sm text-blue-800">
                 Processing video... This may take a few moments for download, streaming, and transcription.
               </span>
@@ -210,23 +209,18 @@ export function AddVideoDialog({ collections, selectedCollectionId, onVideoAdded
 
           {/* Submit Button */}
           <div className="flex justify-end gap-2 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsOpen(false)}
-              disabled={isLoading}
-            >
+            <Button type="button" variant="outline" onClick={() => setIsOpen(false)} disabled={isLoading}>
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading || !url.trim() || !collectionId}>
               {isLoading ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Processing...
                 </>
               ) : (
                 <>
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="mr-2 h-4 w-4" />
                   Add Video
                 </>
               )}

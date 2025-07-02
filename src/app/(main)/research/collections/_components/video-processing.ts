@@ -16,24 +16,24 @@ interface VideoProcessResult {
  * Handles: URL decoding, download, Bunny streaming, collection addition, transcription
  */
 export const processAndAddVideo = async (
-  videoUrl: string, 
-  collectionId: string, 
-  title?: string
+  videoUrl: string,
+  collectionId: string,
+  title?: string,
 ): Promise<VideoProcessResult> => {
   console.log("🚀 [VIDEO_PROCESS] Starting comprehensive video processing...");
   console.log("🔗 [VIDEO_PROCESS] URL:", videoUrl);
   console.log("📂 [VIDEO_PROCESS] Collection:", collectionId);
-  
+
   try {
     const response = await fetch("/api/video/process-and-add", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ 
-        videoUrl, 
-        collectionId, 
-        title 
+      body: JSON.stringify({
+        videoUrl,
+        collectionId,
+        title,
       }),
     });
 
@@ -44,7 +44,7 @@ export const processAndAddVideo = async (
       return {
         success: false,
         error: data.error || "Video processing failed",
-        details: data.details
+        details: data.details,
       };
     }
 
@@ -56,15 +56,14 @@ export const processAndAddVideo = async (
       directUrl: data.directUrl,
       platform: data.platform,
       transcriptionStatus: data.transcriptionStatus,
-      message: data.message
+      message: data.message,
     };
-
   } catch (error) {
     console.error("❌ [VIDEO_PROCESS] Network error:", error);
     return {
       success: false,
       error: "Network error during video processing",
-      details: error instanceof Error ? error.message : "Unknown error"
+      details: error instanceof Error ? error.message : "Unknown error",
     };
   }
 };
@@ -203,8 +202,10 @@ export const transcribeVideo = async (downloadResponse: VideoDownloadResponse): 
 };
 
 export const extractVideoThumbnail = async (downloadResponse: VideoDownloadResponse): Promise<string> => {
-  console.warn("⚠️ [DEPRECATED] extractVideoThumbnail is deprecated. Thumbnails are handled automatically in processAndAddVideo.");
-  
+  console.warn(
+    "⚠️ [DEPRECATED] extractVideoThumbnail is deprecated. Thumbnails are handled automatically in processAndAddVideo.",
+  );
+
   console.log("🖼️ [ADD_VIDEO] Extracting thumbnail - checking for real thumbnail URL...");
   console.log("🖼️ [ADD_VIDEO] Thumbnail URL from API:", downloadResponse.thumbnailUrl ? "✅ Found" : "❌ Not found");
 
@@ -299,12 +300,12 @@ export const extractVideoThumbnail = async (downloadResponse: VideoDownloadRespo
 
 const generatePlaceholderThumbnail = (platform: string): string => {
   const placeholders = {
-    tiktok: '/images/tiktok-placeholder.jpg',
-    instagram: '/images/instagram-placeholder.jpg',
-    youtube: '/images/youtube-placeholder.jpg'
+    tiktok: "/images/tiktok-placeholder.jpg",
+    instagram: "/images/instagram-placeholder.jpg",
+    youtube: "/images/youtube-placeholder.jpg",
   };
-  
-  return placeholders[platform as keyof typeof placeholders] || '/images/video-placeholder.jpg';
+
+  return placeholders[platform as keyof typeof placeholders] || "/images/video-placeholder.jpg";
 };
 
 const calculateEngagementRate = (metrics: VideoDownloadResponse["metrics"]): number => {
@@ -334,17 +335,19 @@ export const createVideoObject = (
   thumbnailUrl: string,
   originalUrl: string,
 ): Record<string, unknown> => {
-  console.warn("⚠️ [DEPRECATED] createVideoObject is deprecated. Video objects are created automatically in processAndAddVideo.");
-  
+  console.warn(
+    "⚠️ [DEPRECATED] createVideoObject is deprecated. Video objects are created automatically in processAndAddVideo.",
+  );
+
   return {
     url: originalUrl,
     title: transcriptionResponse.contentMetadata.description.substring(0, 100) || "Untitled Video",
-    iframe: downloadResponse.cdnUrl || '',
+    iframe: downloadResponse.cdnUrl || "",
     platform: downloadResponse.platform,
     author: downloadResponse.additionalMetadata.author,
     thumbnail: thumbnailUrl,
     transcript: transcriptionResponse.transcript,
-    addedAt: new Date().toISOString()
+    addedAt: new Date().toISOString(),
   };
 };
 
@@ -352,10 +355,8 @@ export const validateUrl = (url: string): boolean => {
   try {
     const urlObj = new URL(url);
     const domain = urlObj.hostname.toLowerCase();
-    
-    return domain.includes('tiktok.com') || 
-           domain.includes('instagram.com') || 
-           domain.includes('youtube.com');
+
+    return domain.includes("tiktok.com") || domain.includes("instagram.com") || domain.includes("youtube.com");
   } catch {
     return false;
   }

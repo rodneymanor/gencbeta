@@ -19,19 +19,19 @@ export interface VideoProcessingJob {
   result?: ProcessedVideoResult;
 }
 
-export type VideoProcessingStatus = 
-  | 'queued'
-  | 'processing'
-  | 'downloading'
-  | 'transcribing'
-  | 'analyzing'
-  | 'uploading'
-  | 'completed'
-  | 'failed'
-  | 'retrying'
-  | 'cancelled';
+export type VideoProcessingStatus =
+  | "queued"
+  | "processing"
+  | "downloading"
+  | "transcribing"
+  | "analyzing"
+  | "uploading"
+  | "completed"
+  | "failed"
+  | "retrying"
+  | "cancelled";
 
-export type JobPriority = 'low' | 'normal' | 'high' | 'urgent';
+export type JobPriority = "low" | "normal" | "high" | "urgent";
 
 export interface VideoProcessingError {
   code: string;
@@ -75,8 +75,8 @@ export interface VideoInsights {
   engagementRate: number;
   contentType: string;
   keyTopics: string[];
-  sentiment: 'positive' | 'negative' | 'neutral';
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  sentiment: "positive" | "negative" | "neutral";
+  difficulty: "beginner" | "intermediate" | "advanced";
 }
 
 export interface VideoMetadata {
@@ -154,19 +154,19 @@ export interface ProcessingStatusResponse {
 
 // Error codes for better error handling
 export const VIDEO_PROCESSING_ERRORS = {
-  INVALID_URL: 'INVALID_URL',
-  UNSUPPORTED_PLATFORM: 'UNSUPPORTED_PLATFORM',
-  DOWNLOAD_FAILED: 'DOWNLOAD_FAILED',
-  TRANSCRIPTION_FAILED: 'TRANSCRIPTION_FAILED',
-  UPLOAD_FAILED: 'UPLOAD_FAILED',
-  RATE_LIMITED: 'RATE_LIMITED',
-  QUOTA_EXCEEDED: 'QUOTA_EXCEEDED',
-  NETWORK_ERROR: 'NETWORK_ERROR',
-  SERVER_ERROR: 'SERVER_ERROR',
-  TIMEOUT: 'TIMEOUT',
-  INSUFFICIENT_PERMISSIONS: 'INSUFFICIENT_PERMISSIONS',
-  COLLECTION_NOT_FOUND: 'COLLECTION_NOT_FOUND',
-  USER_NOT_FOUND: 'USER_NOT_FOUND',
+  INVALID_URL: "INVALID_URL",
+  UNSUPPORTED_PLATFORM: "UNSUPPORTED_PLATFORM",
+  DOWNLOAD_FAILED: "DOWNLOAD_FAILED",
+  TRANSCRIPTION_FAILED: "TRANSCRIPTION_FAILED",
+  UPLOAD_FAILED: "UPLOAD_FAILED",
+  RATE_LIMITED: "RATE_LIMITED",
+  QUOTA_EXCEEDED: "QUOTA_EXCEEDED",
+  NETWORK_ERROR: "NETWORK_ERROR",
+  SERVER_ERROR: "SERVER_ERROR",
+  TIMEOUT: "TIMEOUT",
+  INSUFFICIENT_PERMISSIONS: "INSUFFICIENT_PERMISSIONS",
+  COLLECTION_NOT_FOUND: "COLLECTION_NOT_FOUND",
+  USER_NOT_FOUND: "USER_NOT_FOUND",
 } as const;
 
-export type VideoProcessingErrorCode = typeof VIDEO_PROCESSING_ERRORS[keyof typeof VIDEO_PROCESSING_ERRORS]; 
+export type VideoProcessingErrorCode = (typeof VIDEO_PROCESSING_ERRORS)[keyof typeof VIDEO_PROCESSING_ERRORS];

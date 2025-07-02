@@ -5,13 +5,7 @@ import { Plus, AlertTriangle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import type { RateLimitResult } from "@/types/video-processing";
@@ -58,28 +52,25 @@ export function ProcessingForm({
       {error && (
         <Alert variant="destructive" className="py-3">
           <AlertTriangle className="h-4 w-4" />
-          <AlertDescription className="text-sm">
-            {error}
-          </AlertDescription>
+          <AlertDescription className="text-sm">{error}</AlertDescription>
         </Alert>
       )}
 
       {/* Rate Limit Warning */}
       {rateLimitInfo && !rateLimitInfo.allowed && (
-        <Alert className="py-3 border-orange-200 bg-orange-50">
+        <Alert className="border-orange-200 bg-orange-50 py-3">
           <Clock className="h-4 w-4 text-orange-600" />
-          <AlertDescription className="text-sm text-orange-800">
-            {getRateLimitMessage(rateLimitInfo)}
-          </AlertDescription>
+          <AlertDescription className="text-sm text-orange-800">{getRateLimitMessage(rateLimitInfo)}</AlertDescription>
         </Alert>
       )}
 
       {/* Rate Limit Info */}
       {rateLimitInfo && rateLimitInfo.allowed && rateLimitInfo.remaining < 5 && (
-        <Alert className="py-2 border-yellow-200 bg-yellow-50">
+        <Alert className="border-yellow-200 bg-yellow-50 py-2">
           <AlertTriangle className="h-4 w-4 text-yellow-600" />
           <AlertDescription className="text-sm text-yellow-800">
-            You have {rateLimitInfo.remaining} video{rateLimitInfo.remaining !== 1 ? 's' : ''} remaining in this time window.
+            You have {rateLimitInfo.remaining} video{rateLimitInfo.remaining !== 1 ? "s" : ""} remaining in this time
+            window.
           </AlertDescription>
         </Alert>
       )}
@@ -95,11 +86,15 @@ export function ProcessingForm({
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           required
-          className="shadow-xs focus:shadow-sm transition-all duration-200 border-border/60 focus:border-border bg-background"
+          className="border-border/60 focus:border-border bg-background shadow-xs transition-all duration-200 focus:shadow-sm"
         />
-        <div className="flex gap-2 text-xs text-muted-foreground">
-          <Badge variant="outline" className="text-xs">TikTok</Badge>
-          <Badge variant="outline" className="text-xs">Instagram</Badge>
+        <div className="text-muted-foreground flex gap-2 text-xs">
+          <Badge variant="outline" className="text-xs">
+            TikTok
+          </Badge>
+          <Badge variant="outline" className="text-xs">
+            Instagram
+          </Badge>
           <span>supported platforms</span>
         </div>
       </div>
@@ -114,11 +109,9 @@ export function ProcessingForm({
           placeholder="Custom title for this video..."
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="shadow-xs focus:shadow-sm transition-all duration-200 border-border/60 focus:border-border bg-background"
+          className="border-border/60 focus:border-border bg-background shadow-xs transition-all duration-200 focus:shadow-sm"
         />
-        <div className="text-xs text-muted-foreground">
-          Leave empty to auto-generate from video content
-        </div>
+        <div className="text-muted-foreground text-xs">Leave empty to auto-generate from video content</div>
       </div>
 
       <div className="space-y-2">
@@ -126,18 +119,18 @@ export function ProcessingForm({
           Collection
         </Label>
         <Select value={collectionId} onValueChange={setCollectionId} required>
-          <SelectTrigger 
+          <SelectTrigger
             id="collection-select"
-            className="shadow-xs focus:shadow-sm transition-all duration-200 border-border/60 focus:border-border bg-background"
+            className="border-border/60 focus:border-border bg-background shadow-xs transition-all duration-200 focus:shadow-sm"
           >
             <SelectValue placeholder="Select a collection" />
           </SelectTrigger>
-          <SelectContent className="shadow-lg border-border/60">
+          <SelectContent className="border-border/60 shadow-lg">
             {collections.map((collection) => (
-              <SelectItem 
-                key={collection.id} 
+              <SelectItem
+                key={collection.id}
                 value={collection.id}
-                className="cursor-pointer hover:bg-secondary/60 focus:bg-secondary/60"
+                className="hover:bg-secondary/60 focus:bg-secondary/60 cursor-pointer"
               >
                 {collection.title}
               </SelectItem>
@@ -147,22 +140,22 @@ export function ProcessingForm({
       </div>
 
       <div className="flex justify-end gap-3 pt-2">
-        <Button 
-          type="button" 
-          variant="outline" 
+        <Button
+          type="button"
+          variant="outline"
           onClick={onCancel}
-          className="shadow-xs hover:shadow-sm transition-all duration-200 border-border/60 hover:border-border bg-background hover:bg-secondary/60"
+          className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 shadow-xs transition-all duration-200 hover:shadow-sm"
         >
           Cancel
         </Button>
-        <Button 
-          type="submit" 
-          disabled={!url.trim() || !collectionId || isLoading || (rateLimitInfo?.allowed === false)}
-          className="shadow-xs hover:shadow-sm transition-all duration-200 min-w-[120px]"
+        <Button
+          type="submit"
+          disabled={!url.trim() || !collectionId || isLoading || rateLimitInfo?.allowed === false}
+          className="min-w-[120px] shadow-xs transition-all duration-200 hover:shadow-sm"
         >
           {isLoading ? (
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
               Queueing...
             </div>
           ) : (
@@ -175,4 +168,4 @@ export function ProcessingForm({
       </div>
     </form>
   );
-} 
+}
