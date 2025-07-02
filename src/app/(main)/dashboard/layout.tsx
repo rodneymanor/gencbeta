@@ -16,19 +16,13 @@ import { SmartSidebarTrigger } from "./_components/sidebar/smart-sidebar-trigger
 import DashboardClientLayout from "./dashboard-client-layout";
 
 export default async function Layout({ children }: Readonly<{ children: ReactNode }>) {
-  const cookieStore = await cookies();
-
-  // Read sidebar state from cookie with proper fallback
-  const sidebarStateCookie = cookieStore.get("sidebar_state")?.value;
-  const defaultOpen = sidebarStateCookie === "true" || (sidebarStateCookie === undefined && true); // Default to true if no cookie exists
-
   const sidebarVariant = await getSidebarVariant();
   const sidebarCollapsible = await getSidebarCollapsible();
   const contentLayout = await getContentLayout();
 
   return (
     <SmartSidebarProvider>
-      <SidebarProvider defaultOpen={defaultOpen}>
+      <SidebarProvider>
         <AppSidebar variant={sidebarVariant} collapsible="icon" />
         <SidebarInset
           className={cn(
