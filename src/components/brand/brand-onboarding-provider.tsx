@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { useAuth } from "@/contexts/auth-context";
@@ -14,9 +15,25 @@ interface BrandOnboardingProviderProps {
 export function BrandOnboardingProvider({ children }: BrandOnboardingProviderProps) {
   const { user, initializing } = useAuth();
 
+  // Fetch brand profiles to check if user has one
+  const { data: profilesData } = useQuery({
+    queryKey: ["brand-profiles"],
+    queryFn: () => BrandProfileService.getBrandProfiles(),
+    enabled: !initializing && !!user, // Only fetch when user is authenticated
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  const hasGeneratedProfile = Boolean(profilesData?.activeProfile?.profile);
+
   useEffect(() => {
     // Only check for onboarding after auth is complete and user is signed in
     if (!initializing && user) {
+      // If user has a generated profile, mark onboarding as complete
+      if (hasGeneratedProfile) {
+        BrandProfileService.markOnboardingComplete();
+        return;
+      }
+
       const shouldShow = BrandProfileService.shouldShowOnboarding();
 
       if (shouldShow) {
@@ -37,7 +54,7 @@ export function BrandOnboardingProvider({ children }: BrandOnboardingProviderPro
         return () => clearTimeout(timer);
       }
     }
-  }, [user, initializing]);
+  }, [user, initializing, hasGeneratedProfile]);
 
   return <>{children}</>;
 }

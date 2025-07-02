@@ -134,6 +134,8 @@ export function QuestionsTab({ profile, onProfileGenerated }: QuestionsTabProps)
       toast.success("Brand profile generated successfully!");
       // Force immediate refetch
       await queryClient.refetchQueries({ queryKey: ["brand-profiles"] });
+      // Mark onboarding as complete to stop showing notifications
+      BrandProfileService.markOnboardingComplete();
       setHasUnsavedChanges(false);
       onProfileGenerated();
     },
