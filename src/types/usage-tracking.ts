@@ -96,11 +96,11 @@ export interface UserSocialStats {
 
 // Credit cost constants
 export const CREDIT_COSTS = {
-  SCRIPT_GENERATION: 1,
-  VOICE_TRAINING: 80,
-  VIDEO_ANALYSIS: 1,
-  API_CALL: 1,
-  COLLECTION_ADD: 1,
+  script_generation: 1,
+  voice_training: 80,
+  video_analysis: 1,
+  api_request: 1,
+  collection_add: 1,
 } as const;
 
 // Account limits

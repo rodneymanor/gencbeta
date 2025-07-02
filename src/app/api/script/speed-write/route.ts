@@ -339,7 +339,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
     }
 
     // Check if user has enough credits
-    const creditCheck = await CreditsService.canPerformAction(userId, "SCRIPT_GENERATION", accountLevel);
+    const creditCheck = await CreditsService.canPerformAction(userId, "script_generation", accountLevel);
     if (!creditCheck.canPerform) {
       return createErrorResponse(creditCheck.reason ?? "Insufficient credits", 402);
     }
@@ -365,7 +365,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
     // Deduct credits for successful generation
     await CreditsService.trackUsageAndDeductCredits(
       userId,
-      "SCRIPT_GENERATION",
+      "script_generation",
       accountLevel,
       {
         service: "gemini",

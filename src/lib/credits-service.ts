@@ -154,14 +154,14 @@ export class CreditsService {
       };
 
       switch (operation) {
-        case "SCRIPT_GENERATION":
+        case "script_generation":
           updateData.totalScriptsGenerated = (userCredits.totalScriptsGenerated ?? 0) + 1;
           break;
-        case "VOICE_TRAINING":
+        case "voice_training":
           updateData.totalVoicesCreated = (userCredits.totalVoicesCreated ?? 0) + 1;
           break;
-        case "VIDEO_ANALYSIS":
-        case "COLLECTION_ADD":
+        case "video_analysis":
+        case "collection_add":
           updateData.totalVideosProcessed = (userCredits.totalVideosProcessed ?? 0) + 1;
           break;
       }
