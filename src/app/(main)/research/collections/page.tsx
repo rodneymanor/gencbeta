@@ -8,6 +8,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { Badge } from "@/components/ui/badge";
+import { VideoCollectionLoading, PageHeaderLoading } from "@/components/ui/loading-animations";
 import { useAuth } from "@/contexts/auth-context";
 import { CollectionsService, type Collection, type Video } from "@/lib/collections";
 import { CollectionsRBACService } from "@/lib/collections-rbac";
@@ -20,7 +21,6 @@ import {
   getPageDescription,
   createVideoSelectionHandlers,
 } from "./_components/collections-helpers";
-import { LoadingSkeleton } from "./_components/loading-skeleton";
 import { ManageModeHeader } from "./_components/manage-mode-header";
 import { VideoGrid } from "./_components/video-grid";
 
@@ -405,7 +405,14 @@ function CollectionsPageContent() {
 
   // Show loading only for initial load
   if (isLoading) {
-    return <LoadingSkeleton />;
+    return (
+      <div className="@container/main">
+        <div className="mx-auto max-w-7xl space-y-8 p-4 md:space-y-10 md:p-6">
+          <PageHeaderLoading />
+          <VideoCollectionLoading count={12} />
+        </div>
+      </div>
+    );
   }
 
   return (
