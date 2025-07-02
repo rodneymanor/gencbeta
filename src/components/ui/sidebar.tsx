@@ -112,25 +112,19 @@ function SidebarProvider({
 }) {
   const isMobile = useIsMobile()
   const [openMobile, setOpenMobile] = React.useState(false)
+  const [isHydrated, setIsHydrated] = React.useState(false)
 
-  // Initialize state from persisted value or default
-  const [_open, _setOpen] = React.useState(() => {
-    // On initial load, try to get the persisted state
-    if (typeof window !== 'undefined') {
-      return getSidebarState(defaultOpen)
-    }
-    return defaultOpen
-  })
+  // Initialize with default state to ensure server/client consistency
+  const [_open, _setOpen] = React.useState(defaultOpen)
 
-  // Sync with persisted state on hydration
+  // Only sync with persisted state after hydration to prevent mismatches
   React.useEffect(() => {
+    setIsHydrated(true)
     if (typeof window !== 'undefined') {
       const persistedState = getSidebarState(defaultOpen)
-      if (persistedState !== _open) {
-        _setOpen(persistedState)
-      }
+      _setOpen(persistedState)
     }
-  }, [defaultOpen, _open])
+  }, [defaultOpen])
 
   const open = openProp ?? _open
   const setOpen = React.useCallback(
@@ -143,10 +137,12 @@ function SidebarProvider({
         _setOpen(openState)
       }
 
-      // Persist the state
-      setSidebarState(openState)
+      // Only persist after hydration
+      if (isHydrated) {
+        setSidebarState(openState)
+      }
     },
-    [setOpenProp, open]
+    [setOpenProp, open, isHydrated]
   )
 
   // Helper to toggle the sidebar.

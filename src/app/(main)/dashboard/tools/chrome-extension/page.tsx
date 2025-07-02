@@ -241,7 +241,7 @@ export default function ChromeExtensionPage() {
                   </ol>
                   
                   <Button asChild variant="outline" className="gap-2">
-                    <a href="https://gencapp.pro/dashboard/settings" target="_blank" rel="noopener noreferrer">
+                    <a href="/dashboard/settings">
                       <Settings className="h-4 w-4" />
                       Go to Settings
                       <ExternalLink className="h-4 w-4" />
@@ -505,7 +505,7 @@ export default function ChromeExtensionPage() {
                 <h3 className="text-lg font-semibold">Need More Help?</h3>
                 <div className="space-y-3">
                   <Button variant="outline" className="gap-2 w-full" asChild>
-                    <a href="https://gencapp.pro/dashboard/settings" target="_blank" rel="noopener noreferrer">
+                    <a href="/dashboard/settings">
                       <Key className="h-4 w-4" />
                       Check API Key Status
                       <ArrowRight className="h-4 w-4 ml-auto" />

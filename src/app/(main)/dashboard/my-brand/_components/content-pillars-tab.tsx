@@ -36,9 +36,9 @@ export function ContentPillarsTab({ profile }: ContentPillarsTabProps) {
   const updateProfileMutation = useMutation({
     mutationFn: (data: { profile: Partial<BrandProfileData> }) =>
       BrandProfileService.updateBrandProfile(profile!.id, data),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success("Content pillars saved successfully!");
-      queryClient.invalidateQueries({ queryKey: ["brand-profiles"] });
+      await queryClient.refetchQueries({ queryKey: ["brand-profiles"] });
       setHasUnsavedChanges(false);
     },
     onError: () => {

@@ -135,9 +135,9 @@ export function KeywordsTab({ profile }: KeywordsTabProps) {
   const updateProfileMutation = useMutation({
     mutationFn: (data: { profile: Partial<BrandProfileData> }) =>
       BrandProfileService.updateBrandProfile(profile!.id, data),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success("Keywords saved successfully!");
-      queryClient.invalidateQueries({ queryKey: ["brand-profiles"] });
+      await queryClient.refetchQueries({ queryKey: ["brand-profiles"] });
       setHasUnsavedChanges(false);
     },
     onError: () => {

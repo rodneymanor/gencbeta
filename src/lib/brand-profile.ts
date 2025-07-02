@@ -41,7 +41,7 @@ export class BrandProfileService {
     return data.profile;
   }
 
-  static async fetchBrandProfiles(): Promise<{
+  static async getBrandProfiles(): Promise<{
     profiles: BrandProfile[];
     activeProfile: BrandProfile | null;
   }> {

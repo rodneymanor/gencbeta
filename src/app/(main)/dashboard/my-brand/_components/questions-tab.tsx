@@ -130,9 +130,10 @@ export function QuestionsTab({ profile, onProfileGenerated }: QuestionsTabProps)
   // Generate profile mutation
   const generateProfileMutation = useMutation({
     mutationFn: (questionnaire: BrandQuestionnaire) => BrandProfileService.generateBrandProfile(questionnaire),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success("Brand profile generated successfully!");
-      queryClient.invalidateQueries({ queryKey: ["brand-profiles"] });
+      // Force immediate refetch
+      await queryClient.refetchQueries({ queryKey: ["brand-profiles"] });
       setHasUnsavedChanges(false);
       onProfileGenerated();
     },
@@ -147,9 +148,9 @@ export function QuestionsTab({ profile, onProfileGenerated }: QuestionsTabProps)
   const updateProfileMutation = useMutation({
     mutationFn: (data: { questionnaire: BrandQuestionnaire }) =>
       BrandProfileService.updateBrandProfile(profile!.id, data),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success("Questions saved successfully!");
-      queryClient.invalidateQueries({ queryKey: ["brand-profiles"] });
+      await queryClient.refetchQueries({ queryKey: ["brand-profiles"] });
       setHasUnsavedChanges(false);
     },
     onError: () => {
