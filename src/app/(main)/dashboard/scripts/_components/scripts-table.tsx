@@ -15,20 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-interface Script {
-  id: number;
-  title: string;
-  authors: string;
-  status: string;
-  performance: { views: number; engagement: number };
-  category: string;
-  createdAt: string;
-  viewedAt: string;
-  duration: string;
-  tags: string[];
-  fileType: string;
-  summary: string;
-}
+import { Script } from "@/types/script";
 
 interface ColumnVisibility {
   title: boolean;
@@ -41,10 +28,10 @@ interface ColumnVisibility {
 
 interface ScriptsTableProps {
   scripts: Script[];
-  selectedScripts: number[];
+  selectedScripts: string[];
   columnVisibility: ColumnVisibility;
   sortBy: string;
-  onSelectScript: (scriptId: number) => void;
+  onSelectScript: (scriptId: string) => void;
   onSelectAll: () => void;
   onSort: (column: string) => void;
 }

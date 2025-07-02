@@ -4,12 +4,13 @@ import { useCallback, useEffect, useState } from "react";
 
 import { useSearchParams } from "next/navigation";
 
-import { ArrowUp, Bot, FileText } from "lucide-react";
+import { ArrowUp, Bot, FileText, Save } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { useScripts } from "@/hooks/use-scripts";
 
 import { ChatHistory } from "./_components/chat-history";
 import { ScriptOptions } from "./_components/script-options";
@@ -18,6 +19,7 @@ import { VideoProcessor } from "./_components/video-processor";
 
 export default function ScriptEditorPage() {
   const searchParams = useSearchParams();
+  const { createScript, isCreating } = useScripts();
 
   // URL Parameters
   const [urlParams, setUrlParams] = useState<UrlParams>({
@@ -33,6 +35,7 @@ export default function ScriptEditorPage() {
   const [chatInput, setChatInput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isProcessingVideo, setIsProcessingVideo] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   // Script Options
   const [scriptOptions, setScriptOptions] = useState<{
@@ -319,6 +322,30 @@ export default function ScriptEditorPage() {
     }, 1000);
   };
 
+  // Handle script save
+  const handleSaveScript = async () => {
+    if (!workingDraft) return;
+
+    try {
+      await createScript({
+        title: workingDraft.title,
+        content: workingDraft.content,
+        approach: "speed-write", // Default approach
+        originalIdea: urlParams.idea,
+        targetLength: urlParams.length,
+      });
+
+      setIsSaved(true);
+
+      // Reset saved state after 3 seconds
+      setTimeout(() => {
+        setIsSaved(false);
+      }, 3000);
+    } catch (error) {
+      console.error("Failed to save script:", error);
+    }
+  };
+
   return (
     <div className="bg-background min-h-screen">
       <div className="mx-auto max-w-7xl p-4">
@@ -401,9 +428,20 @@ export default function ScriptEditorPage() {
                   {viewMode === "ab-comparison" ? "Choose Your Script" : "Script Editor"}
                 </CardTitle>
                 {workingDraft && (
-                  <Badge variant="outline" className="w-fit">
-                    Working on: {workingDraft.title}
-                  </Badge>
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className="w-fit">
+                      Working on: {workingDraft.title}
+                    </Badge>
+                    <Button
+                      onClick={handleSaveScript}
+                      disabled={isCreating}
+                      size="sm"
+                      className="ml-2"
+                    >
+                      <Save className="mr-2 h-4 w-4" />
+                      {isCreating ? "Saving..." : isSaved ? "Saved!" : "Save Script"}
+                    </Button>
+                  </div>
                 )}
               </CardHeader>
               <CardContent className="flex-1 overflow-auto">

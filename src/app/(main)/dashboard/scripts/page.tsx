@@ -6,24 +6,13 @@ import { Download, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { TableLoading } from "@/components/ui/loading-animations";
+
+import { useScripts } from "@/hooks/use-scripts";
+import { Script } from "@/types/script";
 
 import { ScriptsControls } from "./_components/scripts-controls";
 import { ScriptsTable } from "./_components/scripts-table";
-
-interface Script {
-  id: number;
-  title: string;
-  authors: string;
-  status: string;
-  performance: { views: number; engagement: number };
-  category: string;
-  createdAt: string;
-  viewedAt: string;
-  duration: string;
-  tags: string[];
-  fileType: string;
-  summary: string;
-}
 
 interface ColumnVisibility {
   title: boolean;
@@ -34,51 +23,7 @@ interface ColumnVisibility {
   summary: boolean;
 }
 
-// Mock data for scripts
-const mockScripts: Script[] = [
-  {
-    id: 1,
-    title: "Morning Routine Success",
-    authors: "John Doe",
-    status: "Published",
-    performance: { views: 12500, engagement: 8.2 },
-    category: "Lifestyle",
-    createdAt: "2024-01-15",
-    viewedAt: "2024-01-20",
-    duration: "2:34",
-    tags: ["morning", "productivity"],
-    fileType: "Script",
-    summary: "Complete morning routine guide for productivity",
-  },
-  {
-    id: 2,
-    title: "Tech Product Review Template",
-    authors: "Jane Smith",
-    status: "Draft",
-    performance: { views: 0, engagement: 0 },
-    category: "Technology",
-    createdAt: "2024-01-20",
-    viewedAt: "2024-01-22",
-    duration: "3:45",
-    tags: ["tech", "review"],
-    fileType: "Template",
-    summary: "Comprehensive tech review framework",
-  },
-  {
-    id: 3,
-    title: "Quick Cooking Tutorial",
-    authors: "Mike Johnson",
-    status: "Scheduled",
-    performance: { views: 0, engagement: 0 },
-    category: "Food",
-    createdAt: "2024-01-18",
-    viewedAt: "2024-01-19",
-    duration: "1:56",
-    tags: ["cooking", "tutorial"],
-    fileType: "Script",
-    summary: "Fast and easy cooking techniques",
-  },
-];
+
 
 // Helper functions
 const getSortValue = (script: Script, sortBy: string): string | number => {
@@ -113,7 +58,7 @@ const sortScripts = (scripts: Script[], sortBy: string, sortOrder: "asc" | "desc
 
 export default function ScriptsLibraryPage() {
   const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedScripts, setSelectedScripts] = useState<number[]>([]);
+  const [selectedScripts, setSelectedScripts] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("title");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>({
@@ -125,13 +70,16 @@ export default function ScriptsLibraryPage() {
     summary: true,
   });
 
-  const filteredScripts = mockScripts.filter((script) => {
+  // Fetch scripts using the custom hook
+  const { scripts, isLoading, error, deleteScript, isDeleting } = useScripts();
+
+  const filteredScripts = scripts.filter((script) => {
     return statusFilter === "all" || script.status.toLowerCase() === statusFilter;
   });
 
   const sortedScripts = sortScripts(filteredScripts, sortBy, sortOrder);
 
-  const handleSelectScript = (scriptId: number) => {
+  const handleSelectScript = (scriptId: string) => {
     setSelectedScripts((prev) =>
       prev.includes(scriptId) ? prev.filter((id) => id !== scriptId) : [...prev, scriptId],
     );
@@ -162,6 +110,41 @@ export default function ScriptsLibraryPage() {
     });
   };
 
+  const handleDeleteSelected = async () => {
+    if (selectedScripts.length === 0) return;
+    
+    const deletePromises = selectedScripts.map((scriptId) => deleteScript(scriptId));
+    await Promise.all(deletePromises);
+    setSelectedScripts([]);
+  };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="mx-auto max-w-7xl space-y-6 p-6">
+        <TableLoading />
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="mx-auto max-w-7xl space-y-6 p-6">
+        <Card className="border-destructive/20 bg-destructive/5">
+          <CardContent className="p-6">
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-destructive">Failed to load scripts</h3>
+              <p className="text-sm text-muted-foreground mt-2">
+                {error instanceof Error ? error.message : "An unknown error occurred"}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
       {/* Header with Controls */}
@@ -188,9 +171,15 @@ export default function ScriptsLibraryPage() {
                   <Download className="mr-2 h-4 w-4" />
                   Export
                 </Button>
-                <Button variant="outline" size="sm" className="text-destructive">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-destructive"
+                  onClick={handleDeleteSelected}
+                  disabled={isDeleting}
+                >
                   <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
+                  {isDeleting ? "Deleting..." : "Delete"}
                 </Button>
               </div>
             </div>

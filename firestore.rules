@@ -13,6 +13,12 @@ service cloud.firestore {
       allow create: if request.auth != null;
     }
     
+    // Scripts: Allow authenticated users to manage their own scripts
+    match /scripts/{scriptId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+    }
+    
     // Allow users to read their own user document
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
