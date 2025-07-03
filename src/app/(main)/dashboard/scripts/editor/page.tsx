@@ -5,11 +5,10 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Eye, FileText, Loader2, MessageCircle, Save, Settings, Sparkles } from "lucide-react";
+import { Eye, FileText, Loader2, MessageCircle, Settings, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useUsage } from "@/contexts/usage-context";
@@ -24,9 +23,7 @@ export default function ScriptEditorPage() {
 
   const scriptId = searchParams.get("id");
   const [script, setScript] = useState("");
-  const [title, setTitle] = useState("Untitled Script");
   const [isSaving, setIsSaving] = useState(false);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // Fetch scripts data
   const {
@@ -48,22 +45,9 @@ export default function ScriptEditorPage() {
       const existingScript = scripts.find((s: any) => s.id === scriptId);
       if (existingScript) {
         setScript(existingScript.content);
-        setTitle(existingScript.title);
       }
     }
   }, [scriptId, scripts]);
-
-  // Track unsaved changes
-  useEffect(() => {
-    if (scriptId && scripts.length > 0) {
-      const existingScript = scripts.find((s: any) => s.id === scriptId);
-      if (existingScript) {
-        setHasUnsavedChanges(script !== existingScript.content || title !== existingScript.title);
-      }
-    } else {
-      setHasUnsavedChanges(script.trim() !== "" || title !== "Untitled Script");
-    }
-  }, [script, title, scriptId, scripts]);
 
   // Handle script content change
   const handleScriptChange = (newContent: string) => {
@@ -96,7 +80,7 @@ export default function ScriptEditorPage() {
         },
         body: JSON.stringify({
           id: scriptId,
-          title: title.trim(),
+          title: "Untitled Script",
           content: script.trim(),
         }),
       });
@@ -114,7 +98,7 @@ export default function ScriptEditorPage() {
       refetch();
 
       toast.success("Script Saved", {
-        description: `Your script "${title}" has been saved successfully.`,
+        description: "Your script has been saved successfully.",
       });
 
       // If this was a new script, redirect to edit mode
@@ -129,18 +113,7 @@ export default function ScriptEditorPage() {
     } finally {
       setIsSaving(false);
     }
-  }, [script, scriptId, title, triggerUsageUpdate, refetch, router]);
-
-  // Handle back navigation
-  const handleBack = () => {
-    if (hasUnsavedChanges) {
-      if (confirm("You have unsaved changes. Are you sure you want to leave?")) {
-        router.push("/dashboard/scripts");
-      }
-    } else {
-      router.push("/dashboard/scripts");
-    }
-  };
+  }, [script, scriptId, triggerUsageUpdate, refetch, router]);
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -169,46 +142,6 @@ export default function ScriptEditorPage() {
   return (
     // Container that works with the dashboard's full-width system
     <div className="bg-background flex min-h-screen flex-col p-4 md:p-6">
-      {/* Header */}
-      <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 flex items-center justify-between border-b p-4 backdrop-blur">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" onClick={handleBack} className="flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Back
-          </Button>
-
-          <Separator orientation="vertical" className="h-6" />
-
-          <div className="flex items-center gap-2">
-            <FileText className="text-muted-foreground h-5 w-5" />
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="focus:bg-muted/50 rounded border-none bg-transparent px-2 py-1 text-lg font-semibold outline-none"
-              placeholder="Enter script title..."
-            />
-            {hasUnsavedChanges && (
-              <Badge variant="secondary" className="text-xs">
-                Unsaved
-              </Badge>
-            )}
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-xs">
-            <Sparkles className="mr-1 h-3 w-3" />
-            AI-Powered
-          </Badge>
-
-          <Button onClick={handleSave} disabled={isSaving || !script.trim()} className="flex items-center gap-2">
-            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            {isSaving ? "Saving..." : "Save"}
-          </Button>
-        </div>
-      </div>
-
       {/* Main Content - Responsive Card Layout */}
       <div className="flex flex-1 flex-col gap-4 overflow-hidden p-4 lg:flex-row">
         {/* Chat Assistant Card */}
