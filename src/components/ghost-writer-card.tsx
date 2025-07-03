@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+
 import { Bookmark, BookmarkCheck, X } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ContentIdea } from "@/types/ghost-writer";
@@ -15,14 +17,7 @@ interface GhostWriterCardProps {
   className?: string;
 }
 
-export function GhostWriterCard({
-  idea,
-  onSave,
-  onDismiss,
-  onUse,
-  isSaved = false,
-  className,
-}: GhostWriterCardProps) {
+export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = false, className }: GhostWriterCardProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSave = async () => {
@@ -54,12 +49,12 @@ export function GhostWriterCard({
   return (
     <div
       className={cn(
-        "group relative flex w-full flex-col gap-6 overflow-hidden rounded-2xl bg-white border border-gray-100 p-6 shadow-sm transition-all duration-200 hover:shadow-lg hover:border-gray-200",
+        "group relative flex w-full flex-col gap-6 overflow-hidden rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-200 hover:border-gray-200 hover:shadow-lg",
         className,
       )}
     >
       {/* Action buttons - minimal and subtle */}
-      <div className="absolute top-4 right-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="absolute top-4 right-4 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
         <Button
           variant="ghost"
           size="sm"
@@ -67,11 +62,7 @@ export function GhostWriterCard({
           onClick={handleSave}
           disabled={isLoading || isSaved}
         >
-          {isSaved ? (
-            <BookmarkCheck className="h-4 w-4 text-blue-500" />
-          ) : (
-            <Bookmark className="h-4 w-4" />
-          )}
+          {isSaved ? <BookmarkCheck className="h-4 w-4 text-blue-500" /> : <Bookmark className="h-4 w-4" />}
         </Button>
         <Button
           variant="ghost"
@@ -86,38 +77,29 @@ export function GhostWriterCard({
 
       {/* Main content */}
       <div className="space-y-4">
-        {/* Hook - main content, prominent */}
-        <p className="text-gray-900 text-lg leading-relaxed line-clamp-4 font-medium">
-          {idea.hook}
-        </p>
-
-        {/* Call to action - subtle */}
-        <p className="text-sm text-gray-500 line-clamp-2">
-          {idea.callToAction}
-        </p>
+        {/* Complete script - main content, prominent */}
+        <div className="line-clamp-6 text-base leading-relaxed font-medium whitespace-pre-line text-gray-900">
+          {(idea as any).script ?? idea.hook}
+        </div>
       </div>
 
       {/* Footer with action */}
-      <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+      <div className="flex items-center justify-between border-t border-gray-100 pt-4">
         <div className="flex items-center gap-3">
-          <span className="text-xs text-gray-400 font-medium uppercase tracking-wide">
-            {idea.estimatedDuration}s
-          </span>
+          <span className="text-xs font-medium tracking-wide text-gray-400 uppercase">{idea.estimatedDuration}s</span>
           <span className="text-xs text-gray-300">•</span>
-          <span className="text-xs text-gray-400 capitalize">
-            {idea.difficulty}
-          </span>
+          <span className="text-xs text-gray-400 capitalize">{idea.difficulty}</span>
         </div>
-        
-        <Button 
+
+        <Button
           onClick={handleUse}
           size="sm"
           variant="ghost"
-          className="h-8 px-4 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+          className="h-8 px-4 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
         >
           Use Idea
         </Button>
       </div>
     </div>
   );
-} 
+}
