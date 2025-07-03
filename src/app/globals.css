@@ -48,6 +48,16 @@
   --shadow-lg: 0px 0px 1px 0px hsl(0 0% 0% / 0.13), 0px 4px 6px -1px hsl(0 0% 0% / 0.13);
   --shadow-xl: 0px 0px 1px 0px hsl(0 0% 0% / 0.13), 0px 8px 10px -1px hsl(0 0% 0% / 0.13);
   --shadow-2xl: 0px 0px 1px 0px hsl(0 0% 0% / 0.33);
+  
+  /* Script Element Highlighting Colors */
+  --script-hook: oklch(0.75 0.15 12.17);
+  --script-hook-foreground: oklch(0.15 0 0);
+  --script-bridge: oklch(0.78 0.12 180.75);
+  --script-bridge-foreground: oklch(0.15 0 0);
+  --script-golden-nugget: oklch(0.72 0.13 240.01);
+  --script-golden-nugget-foreground: oklch(0.15 0 0);
+  --script-wta: oklch(0.85 0.15 85.87);
+  --script-wta-foreground: oklch(0.15 0 0);
 }
 
 .dark {
@@ -95,6 +105,16 @@
   --shadow-lg: 0px 0px 1px 0px hsl(0 0% 0% / 0.13), 0px 4px 6px -1px hsl(0 0% 0% / 0.13);
   --shadow-xl: 0px 0px 1px 0px hsl(0 0% 0% / 0.13), 0px 8px 10px -1px hsl(0 0% 0% / 0.13);
   --shadow-2xl: 0px 0px 1px 0px hsl(0 0% 0% / 0.33);
+  
+  /* Script Element Highlighting Colors - Dark Mode */
+  --script-hook: oklch(0.45 0.12 12.17);
+  --script-hook-foreground: oklch(0.92 0 0);
+  --script-bridge: oklch(0.48 0.1 180.75);
+  --script-bridge-foreground: oklch(0.92 0 0);
+  --script-golden-nugget: oklch(0.52 0.11 240.01);
+  --script-golden-nugget-foreground: oklch(0.92 0 0);
+  --script-wta: oklch(0.55 0.12 85.87);
+  --script-wta-foreground: oklch(0.92 0 0);
 }
 
 @theme inline {
@@ -130,6 +150,16 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  
+  /* Script Element Colors */
+  --color-script-hook: var(--script-hook);
+  --color-script-hook-foreground: var(--script-hook-foreground);
+  --color-script-bridge: var(--script-bridge);
+  --color-script-bridge-foreground: var(--script-bridge-foreground);
+  --color-script-golden-nugget: var(--script-golden-nugget);
+  --color-script-golden-nugget-foreground: var(--script-golden-nugget-foreground);
+  --color-script-wta: var(--script-wta);
+  --color-script-wta-foreground: var(--script-wta-foreground);
 
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
@@ -203,4 +233,88 @@
 .dark .negative-keyword {
   background-color: hsl(var(--destructive) / 0.2);
   color: hsl(var(--destructive-foreground));
+  border: 1px solid hsl(var(--destructive) / 0.4);
+}
+
+/* Script Element Highlighting Styles */
+.script-highlight {
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 2px solid transparent;
+  position: relative;
+}
+
+.script-highlight:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.script-highlight-hook {
+  background-color: hsl(var(--script-hook) / 0.15);
+  color: hsl(var(--script-hook-foreground));
+  border-bottom-color: hsl(var(--script-hook));
+}
+
+.script-highlight-hook:hover {
+  background-color: hsl(var(--script-hook) / 0.25);
+}
+
+.script-highlight-bridge {
+  background-color: hsl(var(--script-bridge) / 0.15);
+  color: hsl(var(--script-bridge-foreground));
+  border-bottom-color: hsl(var(--script-bridge));
+}
+
+.script-highlight-bridge:hover {
+  background-color: hsl(var(--script-bridge) / 0.25);
+}
+
+.script-highlight-golden-nugget {
+  background-color: hsl(var(--script-golden-nugget) / 0.15);
+  color: hsl(var(--script-golden-nugget-foreground));
+  border-bottom-color: hsl(var(--script-golden-nugget));
+}
+
+.script-highlight-golden-nugget:hover {
+  background-color: hsl(var(--script-golden-nugget) / 0.25);
+}
+
+.script-highlight-wta {
+  background-color: hsl(var(--script-wta) / 0.15);
+  color: hsl(var(--script-wta-foreground));
+  border-bottom-color: hsl(var(--script-wta));
+}
+
+.script-highlight-wta:hover {
+  background-color: hsl(var(--script-wta) / 0.25);
+}
+
+/* Split Pane Styles */
+.split-pane-container {
+  height: 100%;
+  display: flex;
+}
+
+.gutter {
+  background-color: hsl(var(--border));
+  background-repeat: no-repeat;
+  background-position: 50%;
+  cursor: col-resize;
+  transition: background-color 0.2s ease;
+  position: relative;
+}
+
+.gutter:hover {
+  background-color: hsl(var(--muted));
+}
+
+.gutter.gutter-horizontal {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="30"><path d="M2 0v30M6 0v30" stroke="rgba(0,0,0,0.1)" stroke-width="1"/></svg>');
+  width: 8px;
+}
+
+.gutter.gutter-horizontal:hover {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="30"><path d="M2 0v30M6 0v30" stroke="rgba(0,0,0,0.2)" stroke-width="1"/></svg>');
 }

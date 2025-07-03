@@ -36,7 +36,7 @@ function ExpandableText({ content, maxLines = 4, className = "" }: ExpandableTex
       <p className={`text-sm leading-relaxed whitespace-pre-wrap ${className}`}>{truncatedContent}</p>
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="flex items-center gap-1 text-xs transition-colors opacity-70 hover:opacity-100"
+        className="flex items-center gap-1 text-xs opacity-70 transition-colors hover:opacity-100"
       >
         {isExpanded ? (
           <>

@@ -69,6 +69,22 @@ const config = {
           900: "#1e3a8a",
           950: "#172554",
         },
+        "script-hook": {
+          DEFAULT: "hsl(var(--script-hook))",
+          foreground: "hsl(var(--script-hook-foreground))",
+        },
+        "script-bridge": {
+          DEFAULT: "hsl(var(--script-bridge))",
+          foreground: "hsl(var(--script-bridge-foreground))",
+        },
+        "script-golden-nugget": {
+          DEFAULT: "hsl(var(--script-golden-nugget))",
+          foreground: "hsl(var(--script-golden-nugget-foreground))",
+        },
+        "script-wta": {
+          DEFAULT: "hsl(var(--script-wta))",
+          foreground: "hsl(var(--script-wta-foreground))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
