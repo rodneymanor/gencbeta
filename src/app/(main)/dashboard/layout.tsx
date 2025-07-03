@@ -1,7 +1,5 @@
 import { ReactNode } from "react";
 
-
-
 import { AppSidebar } from "@/app/(main)/dashboard/_components/sidebar/app-sidebar";
 import { SmartSidebarProvider } from "@/components/providers/smart-sidebar-provider";
 import { Separator } from "@/components/ui/separator";
@@ -27,10 +25,11 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
         <AppSidebar variant={sidebarVariant} collapsible="icon" />
         <SidebarInset
           className={cn(
-            contentLayout === "centered" && "!mx-auto max-w-screen-2xl",
-            // Adds right margin for inset sidebar in centered layout up to 113rem.
-            // On wider screens with collapsed sidebar, removes margin and sets margin auto for alignment.
-            "max-[113rem]:peer-data-[variant=inset]:!mr-2 min-[101rem]:peer-data-[variant=inset]:peer-data-[state=collapsed]:!mr-auto",
+            // Remove the max-width constraint to allow full-width layouts
+            // Only apply centering when explicitly set to centered
+            contentLayout === "centered" && "mx-auto max-w-screen-2xl",
+            // Responsive margin adjustments for inset sidebar variants
+            "max-[113rem]:peer-data-[variant=inset]:mr-2 min-[101rem]:peer-data-[variant=inset]:peer-data-[state=collapsed]:mr-auto",
           )}
         >
           <header className="flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
@@ -48,7 +47,15 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
             </div>
           </header>
           <DashboardClientLayout>
-            <div className="p-4 md:p-6">{children}</div>
+            <div
+              className={cn(
+                "p-4 md:p-6",
+                // Allow content to be centered within the full-width container when needed
+                contentLayout === "centered" && "mx-auto max-w-screen-2xl",
+              )}
+            >
+              {children}
+            </div>
           </DashboardClientLayout>
         </SidebarInset>
       </SidebarProvider>
