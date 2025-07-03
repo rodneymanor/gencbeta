@@ -1,66 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { CreditCard, Clock, Zap } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/auth-context";
-import { UsageStats } from "@/types/usage-tracking";
+import { useUsage } from "@/contexts/usage-context";
 
 interface UsageTrackerProps {
   className?: string;
 }
 
 export function UsageTracker({ className }: UsageTrackerProps) {
-  const { user, accountLevel } = useAuth();
+  const { user } = useAuth();
   const { state } = useSidebar();
-  const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { usageStats, loading, error, refreshUsageStats } = useUsage();
 
-  const fetchUsageStats = async () => {
-    if (!user) return;
-
-    try {
-      const response = await fetch("/api/usage/stats", {
-        headers: {
-          "Authorization": `Bearer ${await user.getIdToken()}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch usage stats");
-      }
-
-      const data = await response.json();
-      console.log("🔍 [UsageTracker] Received usage stats:", data);
-      
-      // Validate that we have the required fields
-      if (data && typeof data.creditsUsed === 'number' && typeof data.creditsLimit === 'number') {
-        setUsageStats(data);
-        setError(null);
-      } else {
-        console.error("❌ [UsageTracker] Invalid usage stats data:", data);
-        setError("Invalid usage data received");
-      }
-    } catch (err) {
-      console.error("Failed to fetch usage stats:", err);
-      setError("Failed to load usage data");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Initial load when user changes
   useEffect(() => {
-    fetchUsageStats();
-    
-    // Refresh every 30 seconds for real-time updates
-    const interval = setInterval(fetchUsageStats, 30000);
-    
-    return () => clearInterval(interval);
-  }, [user]);
+    if (user) {
+      refreshUsageStats();
+    }
+  }, [user, refreshUsageStats]);
 
   // Hide when sidebar is collapsed (after all hooks are called)
   if (state === "collapsed") {
@@ -100,66 +63,56 @@ export function UsageTracker({ className }: UsageTrackerProps) {
 
   return (
     <Card className={className}>
-      <CardContent className="p-3 space-y-3">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Credits</span>
-          </div>
-          <Badge variant={accountLevel === "pro" ? "default" : "secondary"} className="text-xs">
-            {accountLevel === "pro" ? "Pro" : "Free"}
-          </Badge>
-        </div>
-
-        {/* Usage Display */}
+      <CardContent className="p-3">
         <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">
-              {usageStats.creditsUsed ?? 0} / {usageStats.creditsLimit ?? 0} used
-            </span>
-            <span className={`font-medium ${isOutOfCredits ? 'text-destructive' : isLowCredits ? 'text-warning' : 'text-muted-foreground'}`}>
-              {usageStats.creditsRemaining ?? 0} left
-            </span>
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CreditCard className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Credits</span>
+            </div>
+            {isOutOfCredits ? (
+              <Badge variant="destructive" className="text-xs">
+                <Zap className="mr-1 h-3 w-3" />
+                Depleted
+              </Badge>
+            ) : isLowCredits ? (
+              <Badge variant="secondary" className="text-xs">
+                <Clock className="mr-1 h-3 w-3" />
+                Low
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="text-xs">
+                Active
+              </Badge>
+            )}
           </div>
 
           {/* Progress Bar */}
-          <Progress 
-            value={usageStats.percentageUsed ?? 0} 
-            className="h-2"
-            indicatorClassName={
-              isOutOfCredits 
-                ? "bg-destructive" 
-                : isLowCredits 
-                  ? "bg-warning" 
-                  : "bg-primary"
-            }
-          />
+          <div className="space-y-1">
+            <Progress 
+              value={usageStats.percentageUsed} 
+              className={`h-2 ${isLowCredits ? 'text-orange-500' : isOutOfCredits ? 'text-red-500' : 'text-green-500'}`}
+            />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>{usageStats.creditsUsed} used</span>
+              <span>{usageStats.creditsRemaining} left</span>
+            </div>
+          </div>
 
-          {/* Reset Timer */}
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Clock className="h-3 w-3" />
-            <span>
-              Resets in {usageStats.timeUntilReset ?? 'unknown'}
-            </span>
+          {/* Period Info */}
+          <div className="text-xs text-muted-foreground">
+            <div className="flex items-center justify-between">
+              <span className="capitalize">{usageStats.periodType} limit</span>
+              <span>{usageStats.creditsLimit} total</span>
+            </div>
+            {usageStats.timeUntilReset && (
+              <div className="mt-1 text-center">
+                <span>Resets in {usageStats.timeUntilReset}</span>
+              </div>
+            )}
           </div>
         </div>
-
-        {/* Action Button */}
-        {accountLevel === "free" && (
-          <div className="pt-1">
-            <button 
-              className="w-full flex items-center justify-center gap-2 text-xs py-2 px-3 rounded-md bg-secondary hover:bg-secondary/80 transition-colors"
-              onClick={() => {
-                // TODO: Navigate to upgrade page
-                console.log("Navigate to upgrade");
-              }}
-            >
-              <Zap className="h-3 w-3" />
-              Upgrade for more credits
-            </button>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

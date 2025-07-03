@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/auth-context";
+import { useUsage } from "@/contexts/usage-context";
 
 import { IdeaInboxDialog } from "./_components/idea-inbox-dialog";
 import { InputModeToggle, InputMode } from "./_components/input-mode-toggle";
@@ -37,6 +38,7 @@ export default function NewScriptPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { userProfile } = useAuth();
+  const { triggerUsageUpdate } = useUsage();
 
   // Input mode state
   const [inputMode, setInputMode] = useState<InputMode>("text");
@@ -146,6 +148,10 @@ export default function NewScriptPage() {
       setSpeedWriteResponse(data);
 
       if (data.success && (data.optionA || data.optionB)) {
+        // Trigger usage stats update after successful script generation
+        console.log("💳 [Scripts] Triggering usage stats update after script generation");
+        triggerUsageUpdate();
+
         navigateToEditor(idea, data);
       }
     } catch (error) {

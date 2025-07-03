@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { useUsage } from "@/contexts/usage-context";
 import { useScripts } from "@/hooks/use-scripts";
 
 import { ChatHistory } from "./_components/chat-history";
@@ -20,6 +21,7 @@ import { VideoProcessor } from "./_components/video-processor";
 export default function ScriptEditorPage() {
   const searchParams = useSearchParams();
   const { createScript, isCreating } = useScripts();
+  const { triggerUsageUpdate } = useUsage();
 
   // URL Parameters
   const [urlParams, setUrlParams] = useState<UrlParams>({
@@ -154,6 +156,10 @@ export default function ScriptEditorPage() {
         const data = await response.json();
 
         if (data.success && (data.optionA || data.optionB)) {
+          // Trigger usage stats update after successful script generation
+          console.log("💳 [Scripts] Triggering usage stats update after script generation");
+          triggerUsageUpdate();
+
           const scriptOptions: { optionA: ScriptOption | null; optionB: ScriptOption | null } = {
             optionA: null,
             optionB: null,
@@ -202,7 +208,7 @@ export default function ScriptEditorPage() {
         setIsGenerating(false);
       }
     },
-    [loadSpeedWriteResults],
+    [loadSpeedWriteResults, triggerUsageUpdate],
   );
 
   // Handle video transcription completion
@@ -375,25 +381,25 @@ export default function ScriptEditorPage() {
               </CardHeader>
 
               {/* Chat Content */}
-              <CardContent className="flex flex-1 flex-col overflow-hidden p-0">
-                {/* Video Processing */}
-                {isProcessingVideo && urlParams.videoUrl && (
-                  <div className="border-b p-3">
+              <CardContent className="flex flex-1 flex-col p-4">
+                <div className="flex flex-1 flex-col gap-3">
+                  {/* Chat History */}
+                  <div className="flex-1 overflow-y-auto">
+                    <ChatHistory
+                      messages={chatHistory}
+                    />
+                  </div>
+
+                  {/* Video Processor */}
+                  {urlParams.inputType === "video" && urlParams.videoUrl && (
                     <VideoProcessor
                       videoUrl={urlParams.videoUrl}
                       onTranscriptReady={handleVideoTranscriptReady}
                       onError={handleVideoError}
                     />
-                  </div>
-                )}
+                  )}
 
-                {/* Chat History */}
-                <div className="flex-1 overflow-auto p-3">
-                  <ChatHistory messages={chatHistory} />
-                </div>
-
-                {/* Sticky Chat Input */}
-                <div className="bg-background flex-shrink-0 border-t p-4">
+                  {/* Chat Input */}
                   <div className="flex items-center gap-3">
                     <Textarea
                       value={chatInput}

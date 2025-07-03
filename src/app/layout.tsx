@@ -11,6 +11,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { APP_CONFIG } from "@/config/app-config";
 import { AppStateProvider } from "@/contexts/app-state-context";
 import { AuthProvider } from "@/contexts/auth-context";
+import { UsageProvider } from "@/contexts/usage-context";
 
 import "./globals.css";
 
@@ -31,12 +32,14 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
       <body className={`${poppins.className} min-h-screen antialiased`}>
         <QueryProvider>
           <AuthProvider>
-            <AppStateProvider>
-              <ThemeProvider attribute="class" defaultTheme="light" disableTransitionOnChange enableSystem={false}>
-                <ClipboardDetectionProvider>{children}</ClipboardDetectionProvider>
-                <Toaster />
-              </ThemeProvider>
-            </AppStateProvider>
+            <UsageProvider>
+              <AppStateProvider>
+                <ThemeProvider attribute="class" defaultTheme="light" disableTransitionOnChange enableSystem={false}>
+                  <ClipboardDetectionProvider>{children}</ClipboardDetectionProvider>
+                  <Toaster />
+                </ThemeProvider>
+              </AppStateProvider>
+            </UsageProvider>
           </AuthProvider>
         </QueryProvider>
       </body>
