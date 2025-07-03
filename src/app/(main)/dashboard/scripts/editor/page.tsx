@@ -15,6 +15,22 @@ import { useUsage } from "@/contexts/usage-context";
 
 import { ChatInterface } from "./_components/chat-interface";
 import { HemingwayEditor } from "./_components/hemingway-editor";
+import { ScriptOptions } from "./_components/script-options";
+
+interface SpeedWriteResponse {
+  success: boolean;
+  optionA: {
+    id: string;
+    title: string;
+    content: string;
+  } | null;
+  optionB: {
+    id: string;
+    title: string;
+    content: string;
+  } | null;
+  error?: string;
+}
 
 export default function ScriptEditorPage() {
   const router = useRouter();
@@ -22,8 +38,13 @@ export default function ScriptEditorPage() {
   const { triggerUsageUpdate } = useUsage();
 
   const scriptId = searchParams.get("id");
+  const mode = searchParams.get("mode"); // "speed-write" or null
+  const hasSpeedWriteResults = searchParams.get("hasSpeedWriteResults") === "true";
+
   const [script, setScript] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [speedWriteData, setSpeedWriteData] = useState<SpeedWriteResponse | null>(null);
+  const [showScriptOptions, setShowScriptOptions] = useState(false);
 
   // Fetch scripts data
   const {
@@ -39,6 +60,27 @@ export default function ScriptEditorPage() {
     },
   });
 
+  // Handle speed-write workflow on component mount
+  useEffect(() => {
+    if (mode === "speed-write" && hasSpeedWriteResults) {
+      // Load speed-write results from sessionStorage
+      const storedResults = sessionStorage.getItem("speedWriteResults");
+      if (storedResults) {
+        try {
+          const data: SpeedWriteResponse = JSON.parse(storedResults);
+          setSpeedWriteData(data);
+          setShowScriptOptions(true);
+
+          // Clear the stored results
+          sessionStorage.removeItem("speedWriteResults");
+        } catch (error) {
+          console.error("Failed to parse speed-write results:", error);
+          toast.error("Failed to load script options");
+        }
+      }
+    }
+  }, [mode, hasSpeedWriteResults]);
+
   // Load script if editing existing one
   useEffect(() => {
     if (scriptId && scripts.length > 0) {
@@ -49,12 +91,21 @@ export default function ScriptEditorPage() {
     }
   }, [scriptId, scripts]);
 
+  // Handle script option selection (fast workflow)
+  const handleScriptOptionSelect = (option: { id: string; title: string; content: string }) => {
+    setScript(option.content);
+    setShowScriptOptions(false);
+    toast.success("Script Selected", {
+      description: `You selected ${option.title}. You can now edit and refine it.`,
+    });
+  };
+
   // Handle script content change
   const handleScriptChange = (newContent: string) => {
     setScript(newContent);
   };
 
-  // Handle script generation from chat
+  // Handle script generation from chat (notes/recording workflow)
   const handleScriptGenerated = (generatedScript: string) => {
     setScript(generatedScript);
     toast.success("Script Generated", {
@@ -139,25 +190,43 @@ export default function ScriptEditorPage() {
     );
   }
 
+  // Show script options for speed-write workflow
+  if (showScriptOptions && speedWriteData?.optionA && speedWriteData?.optionB) {
+    return (
+      <ScriptOptions
+        optionA={speedWriteData.optionA}
+        optionB={speedWriteData.optionB}
+        onSelect={handleScriptOptionSelect}
+        isGenerating={false}
+      />
+    );
+  }
+
+  // Determine if this is a notes/recording workflow (show chat) or speed-write workflow (hide chat)
+  const isSpeedWriteWorkflow = mode === "speed-write";
+  const isNotesWorkflow = !isSpeedWriteWorkflow;
+
   return (
     // Content that works within the scrollable panel with production-ready spacing
     <div className="flex h-full flex-col gap-6 p-6 lg:flex-row">
-      {/* Chat Assistant Card */}
-      <Card className="flex flex-1 flex-col border-2 shadow-lg lg:max-w-[40%]">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <MessageCircle className="h-5 w-5 text-blue-500" />
-            AI Script Assistant
-            <Badge variant="secondary" className="ml-auto text-xs">
-              <Sparkles className="mr-1 h-3 w-3" />
-              Beta
-            </Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex-1 overflow-hidden p-0">
-          <ChatInterface onScriptGenerated={handleScriptGenerated} currentScript={script} className="h-full" />
-        </CardContent>
-      </Card>
+      {/* Chat Assistant Card - Only show for notes/recording workflow */}
+      {isNotesWorkflow && (
+        <Card className="flex flex-1 flex-col border-2 shadow-lg lg:max-w-[40%]">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <MessageCircle className="h-5 w-5 text-blue-500" />
+              AI Script Assistant
+              <Badge variant="secondary" className="ml-auto text-xs">
+                <Sparkles className="mr-1 h-3 w-3" />
+                Beta
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex-1 overflow-hidden p-0">
+            <ChatInterface onScriptGenerated={handleScriptGenerated} currentScript={script} className="h-full" />
+          </CardContent>
+        </Card>
+      )}
 
       {/* Script Editor Card */}
       <Card className="flex flex-1 flex-col border-2 shadow-lg">
@@ -175,7 +244,11 @@ export default function ScriptEditorPage() {
           <HemingwayEditor
             value={script}
             onChange={handleScriptChange}
-            placeholder="Start writing your script here... The AI will analyze it in real-time and highlight hooks, bridges, golden nuggets, and calls-to-action."
+            placeholder={
+              isSpeedWriteWorkflow
+                ? "Your selected script will appear here. Start editing to refine it..."
+                : "Start writing your script here... The AI will analyze it in real-time and highlight hooks, bridges, golden nuggets, and calls-to-action."
+            }
             className="h-full"
             autoFocus={!scriptId}
           />
