@@ -5,6 +5,7 @@ import { CreditCard, Clock, Zap } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { useSidebar } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/auth-context";
 import { UsageStats } from "@/types/usage-tracking";
 
@@ -14,9 +15,15 @@ interface UsageTrackerProps {
 
 export function UsageTracker({ className }: UsageTrackerProps) {
   const { user, accountLevel } = useAuth();
+  const { state } = useSidebar();
   const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Hide when sidebar is collapsed
+  if (state === "collapsed") {
+    return null;
+  }
 
   const fetchUsageStats = async () => {
     if (!user) return;
