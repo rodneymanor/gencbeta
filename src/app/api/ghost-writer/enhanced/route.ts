@@ -8,6 +8,7 @@ import { AIVoice } from "@/types/ai-voices";
 
 interface EnhancedGhostWriterRequest {
   generateMore?: boolean;
+  refresh?: boolean;
 }
 
 interface EnhancedGhostWriterResponse {
@@ -110,12 +111,13 @@ export async function GET(request: NextRequest): Promise<NextResponse<EnhancedGh
 
     const url = new URL(request.url);
     const generateMore = url.searchParams.get("generateMore") === "true";
+    const refresh = url.searchParams.get("refresh") === "true";
 
     let ideas: EnhancedContentIdea[] = existingIdeas;
 
-    // Generate new ideas if none exist or if generateMore is requested
-    if (existingIdeas.length === 0 || generateMore) {
-      console.log(`💡 [EnhancedGhostWriter] Generating ${generateMore ? "additional" : "new"} ideas`);
+    // Generate new ideas if none exist, if generateMore is requested, or if refresh is requested
+    if (existingIdeas.length === 0 || generateMore || refresh) {
+      console.log(`💡 [EnhancedGhostWriter] Generating ${refresh ? "refreshed" : generateMore ? "additional" : "new"} ideas`);
       
       const generationResult = await EnhancedGhostWriterService.generateEnhancedIdeas(
         userId,
@@ -125,14 +127,17 @@ export async function GET(request: NextRequest): Promise<NextResponse<EnhancedGh
       );
 
       if (generationResult.success && generationResult.ideas) {
-        if (generateMore) {
+        if (refresh) {
+          // Replace all existing ideas with new ones
+          ideas = generationResult.ideas;
+        } else if (generateMore) {
           // Combine existing and new ideas
           ideas = [...existingIdeas, ...generationResult.ideas];
         } else {
           ideas = generationResult.ideas;
         }
 
-        console.log(`✅ [EnhancedGhostWriter] Generated ${generationResult.ideas.length} new ideas`);
+        console.log(`✅ [EnhancedGhostWriter] Generated ${generationResult.ideas.length} ${refresh ? "refreshed" : "new"} ideas`);
       } else {
         console.error("❌ [EnhancedGhostWriter] Failed to generate ideas:", generationResult.error);
         throw new Error(generationResult.error || "Failed to generate ideas");
