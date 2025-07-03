@@ -49,9 +49,8 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
           <DashboardClientLayout>
             <div
               className={cn(
-                "p-4 md:p-6",
-                // Allow content to be centered within the full-width container when needed
-                contentLayout === "centered" && "mx-auto max-w-screen-2xl",
+                "w-full overflow-visible",
+                contentLayout === "centered" ? "mx-auto max-w-screen-2xl p-4 md:p-6" : "h-full p-4 md:p-6",
               )}
             >
               {children}

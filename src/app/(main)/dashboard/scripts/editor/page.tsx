@@ -167,7 +167,7 @@ export default function ScriptEditorPage() {
   }
 
   return (
-    // Full-height container that works within the dashboard layout system
+    // Container that works with the dashboard's full-width system
     <div className="bg-background flex h-full flex-col">
       {/* Header */}
       <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 flex items-center justify-between border-b p-4 backdrop-blur">
