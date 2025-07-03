@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Eye, FileText, Loader2, MessageCircle, Save, Settings, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
@@ -12,11 +13,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useUsage } from "@/contexts/usage-context";
-import { useScripts } from "@/hooks/use-scripts";
 
 import { ChatInterface } from "./_components/chat-interface";
 import { HemingwayEditor } from "./_components/hemingway-editor";
-import { SplitLayout } from "./_components/split-layout";
 
 export default function ScriptEditorPage() {
   const router = useRouter();
@@ -29,12 +28,24 @@ export default function ScriptEditorPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  const { scripts, isLoading: scriptsLoading, refetch } = useScripts();
+  // Fetch scripts data
+  const {
+    data: scripts = [],
+    isLoading: scriptsLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["scripts"],
+    queryFn: async () => {
+      const response = await fetch("/api/scripts");
+      if (!response.ok) throw new Error("Failed to fetch scripts");
+      return response.json();
+    },
+  });
 
   // Load script if editing existing one
   useEffect(() => {
     if (scriptId && scripts.length > 0) {
-      const existingScript = scripts.find((s) => s.id === scriptId);
+      const existingScript = scripts.find((s: any) => s.id === scriptId);
       if (existingScript) {
         setScript(existingScript.content);
         setTitle(existingScript.title);
@@ -45,7 +56,7 @@ export default function ScriptEditorPage() {
   // Track unsaved changes
   useEffect(() => {
     if (scriptId && scripts.length > 0) {
-      const existingScript = scripts.find((s) => s.id === scriptId);
+      const existingScript = scripts.find((s: any) => s.id === scriptId);
       if (existingScript) {
         setHasUnsavedChanges(script !== existingScript.content || title !== existingScript.title);
       }
@@ -204,13 +215,38 @@ export default function ScriptEditorPage() {
         </div>
       </div>
 
-      {/* Main Content - Split Layout */}
-      <div className="flex-1 overflow-hidden">
-        <SplitLayout
-          leftPanel={
+      {/* Main Content - Responsive Card Layout */}
+      <div className="flex flex-1 flex-col gap-4 overflow-hidden p-4 lg:flex-row">
+        {/* Chat Assistant Card */}
+        <Card className="flex flex-1 flex-col border-2 shadow-lg lg:max-w-[40%]">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <MessageCircle className="h-5 w-5 text-blue-500" />
+              AI Script Assistant
+              <Badge variant="secondary" className="ml-auto text-xs">
+                <Sparkles className="mr-1 h-3 w-3" />
+                Beta
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex-1 overflow-hidden p-0">
             <ChatInterface onScriptGenerated={handleScriptGenerated} currentScript={script} className="h-full" />
-          }
-          rightPanel={
+          </CardContent>
+        </Card>
+
+        {/* Script Editor Card */}
+        <Card className="flex flex-1 flex-col border-2 shadow-lg">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <FileText className="h-5 w-5 text-orange-500" />
+              Hemingway Editor
+              <Badge variant="outline" className="ml-auto text-xs">
+                <Eye className="mr-1 h-3 w-3" />
+                Real-time Analysis
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex-1 overflow-hidden p-0">
             <HemingwayEditor
               value={script}
               onChange={handleScriptChange}
@@ -218,36 +254,27 @@ export default function ScriptEditorPage() {
               className="h-full"
               autoFocus={!scriptId}
             />
-          }
-          defaultSizes={[40, 60]}
-          minSizes={[300, 400]}
-          className="h-full"
-        />
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Footer */}
-      <div className="bg-muted/20 text-muted-foreground flex items-center justify-between border-t p-4 text-sm">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <MessageCircle className="h-4 w-4" />
-            <span>AI Chat Assistant</span>
-          </div>
-          <span>•</span>
-          <div className="flex items-center gap-2">
-            <Eye className="h-4 w-4" />
-            <span>Real-time Analysis</span>
-          </div>
-          <span>•</span>
-          <div className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
-            <span>Hemingway Editor</span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <kbd className="bg-muted rounded px-2 py-1 text-xs">⌘S</kbd>
-          <span>to save</span>
-        </div>
+      {/* Floating Editor Controls */}
+      <div className="fixed right-6 bottom-6 z-20">
+        <Card className="bg-background/95 border-2 shadow-2xl backdrop-blur">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                <Settings className="h-4 w-4" />
+                <span>Editor Controls</span>
+              </div>
+              <Separator orientation="vertical" className="h-6" />
+              <div className="flex items-center gap-2">
+                <kbd className="bg-muted rounded px-2 py-1 text-xs">⌘S</kbd>
+                <span className="text-muted-foreground text-sm">to save</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
