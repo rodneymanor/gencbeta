@@ -1,8 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Disable development indicators (Next.js logo, etc.)
+  // Completely disable all development indicators (Next.js logo, etc.)
   devIndicators: {
     buildActivity: false,
+    buildActivityPosition: 'bottom-right',
   },
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
@@ -60,7 +61,7 @@ const nextConfig = {
       'cdninstagram.com'
     ],
   },
-  // Force dynamic rendering for problematic pages
+  // Force dynamic rendering and disable development features
   experimental: {
     forceSwcTransforms: true,
   },
