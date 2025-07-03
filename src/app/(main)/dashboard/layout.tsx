@@ -25,6 +25,8 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
         <AppSidebar variant={sidebarVariant} collapsible="icon" />
         <SidebarInset
           className={cn(
+            // Prevent flexbox shrinking - key fix for full width
+            "flex-shrink-0",
             // Override default SidebarInset margins for full-width layout
             contentLayout === "full-width" && [
               // Remove all default margins and ensure full width
@@ -61,7 +63,7 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
             <div
               className={cn(
                 "w-full overflow-visible",
-                contentLayout === "centered" ? "mx-auto max-w-screen-2xl p-4 md:p-6" : "min-h-screen",
+                contentLayout === "centered" ? "mx-auto max-w-screen-2xl p-4 md:p-6" : "min-h-screen flex-shrink-0",
               )}
             >
               {children}
