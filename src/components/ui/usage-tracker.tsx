@@ -35,8 +35,16 @@ export function UsageTracker({ className }: UsageTrackerProps) {
       }
 
       const data = await response.json();
-      setUsageStats(data);
-      setError(null);
+      console.log("🔍 [UsageTracker] Received usage stats:", data);
+      
+      // Validate that we have the required fields
+      if (data && typeof data.creditsUsed === 'number' && typeof data.creditsLimit === 'number') {
+        setUsageStats(data);
+        setError(null);
+      } else {
+        console.error("❌ [UsageTracker] Invalid usage stats data:", data);
+        setError("Invalid usage data received");
+      }
     } catch (err) {
       console.error("Failed to fetch usage stats:", err);
       setError("Failed to load usage data");
@@ -108,16 +116,16 @@ export function UsageTracker({ className }: UsageTrackerProps) {
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">
-              {usageStats.creditsUsed} / {usageStats.creditsLimit} used
+              {usageStats.creditsUsed ?? 0} / {usageStats.creditsLimit ?? 0} used
             </span>
             <span className={`font-medium ${isOutOfCredits ? 'text-destructive' : isLowCredits ? 'text-warning' : 'text-muted-foreground'}`}>
-              {usageStats.creditsRemaining} left
+              {usageStats.creditsRemaining ?? 0} left
             </span>
           </div>
 
           {/* Progress Bar */}
           <Progress 
-            value={usageStats.percentageUsed} 
+            value={usageStats.percentageUsed ?? 0} 
             className="h-2"
             indicatorClassName={
               isOutOfCredits 
@@ -132,7 +140,7 @@ export function UsageTracker({ className }: UsageTrackerProps) {
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <Clock className="h-3 w-3" />
             <span>
-              Resets in {usageStats.timeUntilReset}
+              Resets in {usageStats.timeUntilReset ?? 'unknown'}
             </span>
           </div>
         </div>

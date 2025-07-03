@@ -8,14 +8,26 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     // Authenticate user
     const authResult = await authenticateApiKey(request);
-    if (!authResult.success) {
-      return NextResponse.json(
-        { error: authResult.error },
-        { status: authResult.status }
-      );
+    if (authResult instanceof NextResponse) {
+      return authResult;
     }
 
-    const { userId, accountLevel } = authResult;
+    const { user } = authResult;
+    const userId = user.uid;
+
+    // Get user's account level from their profile
+    const { getAdminDb } = await import("@/lib/firebase-admin");
+    const adminDb = getAdminDb();
+    
+    if (!adminDb) {
+      throw new Error("Database not available");
+    }
+
+    const userDoc = await adminDb.collection("users").doc(userId).get();
+    const userData = userDoc.data();
+    const accountLevel = userData?.accountLevel || "free";
+
+    console.log(`📊 [Usage Stats] Getting stats for user ${userId} (${accountLevel})`);
 
     // Get usage statistics
     const usageStats = await CreditsService.getUsageStats(userId, accountLevel);
