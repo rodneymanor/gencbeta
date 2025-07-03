@@ -17,17 +17,26 @@ import { ChatInterface } from "./_components/chat-interface";
 import { HemingwayEditor } from "./_components/hemingway-editor";
 import { ScriptOptions } from "./_components/script-options";
 
+interface ScriptElements {
+  hook: string;
+  bridge: string;
+  goldenNugget: string;
+  wta: string;
+}
+
 interface SpeedWriteResponse {
   success: boolean;
   optionA: {
     id: string;
     title: string;
     content: string;
+    elements?: ScriptElements;
   } | null;
   optionB: {
     id: string;
     title: string;
     content: string;
+    elements?: ScriptElements;
   } | null;
   error?: string;
 }
@@ -45,6 +54,7 @@ export default function ScriptEditorPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [speedWriteData, setSpeedWriteData] = useState<SpeedWriteResponse | null>(null);
   const [showScriptOptions, setShowScriptOptions] = useState(false);
+  const [scriptElements, setScriptElements] = useState<ScriptElements | undefined>(undefined);
 
   // Fetch scripts data
   const {
@@ -84,7 +94,7 @@ export default function ScriptEditorPage() {
   // Load script if editing existing one
   useEffect(() => {
     if (scriptId && scripts.length > 0) {
-      const existingScript = scripts.find((s: any) => s.id === scriptId);
+      const existingScript = scripts.find((s: { id: string; content: string }) => s.id === scriptId);
       if (existingScript) {
         setScript(existingScript.content);
       }
@@ -92,8 +102,9 @@ export default function ScriptEditorPage() {
   }, [scriptId, scripts]);
 
   // Handle script option selection (fast workflow)
-  const handleScriptOptionSelect = (option: { id: string; title: string; content: string }) => {
+  const handleScriptOptionSelect = (option: { id: string; title: string; content: string; elements?: ScriptElements }) => {
     setScript(option.content);
+    setScriptElements(option.elements);
     setShowScriptOptions(false);
     toast.success("Script Selected", {
       description: `You selected ${option.title}. You can now edit and refine it.`,
@@ -103,6 +114,10 @@ export default function ScriptEditorPage() {
   // Handle script content change
   const handleScriptChange = (newContent: string) => {
     setScript(newContent);
+    // Clear elements when user starts editing, since the structure may have changed
+    if (scriptElements) {
+      setScriptElements(undefined);
+    }
   };
 
   // Handle script generation from chat (notes/recording workflow)
@@ -191,7 +206,7 @@ export default function ScriptEditorPage() {
   }
 
   // Show script options for speed-write workflow
-  if (showScriptOptions && speedWriteData?.optionA && speedWriteData?.optionB) {
+  if (showScriptOptions && speedWriteData && speedWriteData.optionA && speedWriteData.optionB) {
     return (
       <ScriptOptions
         optionA={speedWriteData.optionA}
@@ -251,6 +266,7 @@ export default function ScriptEditorPage() {
             }
             className="h-full"
             autoFocus={!scriptId}
+            elements={scriptElements}
           />
         </CardContent>
       </Card>

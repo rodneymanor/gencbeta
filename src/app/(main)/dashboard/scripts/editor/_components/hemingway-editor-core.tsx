@@ -14,6 +14,13 @@ import {
 
 import { ContextualActionMenu } from "./contextual-action-menu";
 
+interface ScriptElements {
+  hook: string;
+  bridge: string;
+  goldenNugget: string;
+  wta: string;
+}
+
 interface HemingwayEditorCoreProps {
   value: string;
   onChange: (value: string) => void;
@@ -23,6 +30,7 @@ interface HemingwayEditorCoreProps {
   readOnly?: boolean;
   autoFocus?: boolean;
   highlightConfig: HighlightConfig;
+  elements?: ScriptElements; // New prop for structured elements
 }
 
 export function HemingwayEditorCore({
@@ -34,6 +42,7 @@ export function HemingwayEditorCore({
   readOnly = false,
   autoFocus = false,
   highlightConfig,
+  elements,
 }: HemingwayEditorCoreProps) {
   const [analysis, setAnalysis] = useState<ScriptAnalysis>({
     hooks: [],
@@ -49,6 +58,52 @@ export function HemingwayEditorCore({
   const editorRef = useRef<HTMLDivElement>(null);
   const analysisTimeoutRef = useRef<NodeJS.Timeout>();
 
+  // Create analysis from structured elements
+  const createAnalysisFromElements = useCallback(
+    (text: string, structuredElements: ScriptElements): ScriptAnalysis => {
+      const analysis: ScriptAnalysis = {
+        hooks: [],
+        bridges: [],
+        goldenNuggets: [],
+        wtas: [],
+      };
+
+      let currentIndex = 0;
+
+      // Process each element type in order
+      const elementTypes = ['hook', 'bridge', 'goldenNugget', 'wta'] as const;
+      
+      elementTypes.forEach((elementType) => {
+        const elementText = structuredElements[elementType];
+        if (!elementText.trim()) return;
+
+        const startIndex = text.indexOf(elementText, currentIndex);
+        if (startIndex === -1) return;
+
+        const endIndex = startIndex + elementText.length;
+        const element: ScriptElement = {
+          type: elementType === 'goldenNugget' ? 'golden-nugget' : elementType === 'wta' ? 'wta' : elementType as 'hook' | 'bridge',
+          startIndex,
+          endIndex,
+          text: elementText,
+          confidence: 1.0, // High confidence for structured elements
+          suggestions: [],
+        };
+
+        // Add to appropriate array
+        if (elementType === 'hook') analysis.hooks.push(element);
+        else if (elementType === 'bridge') analysis.bridges.push(element);
+        else if (elementType === 'goldenNugget') analysis.goldenNuggets.push(element);
+        else if (elementType === 'wta') analysis.wtas.push(element);
+
+        currentIndex = endIndex;
+      });
+
+      return analysis;
+    },
+    [],
+  );
+
   // Debounced analysis
   const analyzeText = useCallback(
     async (text: string) => {
@@ -58,13 +113,19 @@ export function HemingwayEditorCore({
       }
 
       try {
-        const result = await analyzeScriptElements(text, highlightConfig);
-        setAnalysis(result);
+        // Use structured elements if available, otherwise fall back to pattern-based analysis
+        if (elements && (elements.hook || elements.bridge || elements.goldenNugget || elements.wta)) {
+          const result = createAnalysisFromElements(text, elements);
+          setAnalysis(result);
+        } else {
+          const result = await analyzeScriptElements(text, highlightConfig);
+          setAnalysis(result);
+        }
       } catch (error) {
         console.error("Analysis failed:", error);
       }
     },
-    [highlightConfig],
+    [highlightConfig, elements, createAnalysisFromElements],
   );
 
   // Trigger analysis on text change

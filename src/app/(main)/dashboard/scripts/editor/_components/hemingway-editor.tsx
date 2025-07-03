@@ -2,15 +2,21 @@
 
 import { useState } from "react";
 
-import { Eye, EyeOff, Zap, FileText, BarChart3, Settings, Palette } from "lucide-react";
+import { BarChart3, Settings, Palette } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { type HighlightConfig } from "@/lib/script-analysis";
 
 import { HemingwayEditorCore } from "./hemingway-editor-core";
+
+interface ScriptElements {
+  hook: string;
+  bridge: string;
+  goldenNugget: string;
+  wta: string;
+}
 
 interface HemingwayEditorProps {
   value: string;
@@ -21,6 +27,7 @@ interface HemingwayEditorProps {
   maxRows?: number;
   readOnly?: boolean;
   autoFocus?: boolean;
+  elements?: ScriptElements; // New prop for structured elements
 }
 
 interface AnalysisStats {
@@ -169,6 +176,7 @@ export function HemingwayEditor({
   maxRows = 50,
   readOnly = false,
   autoFocus = false,
+  elements,
 }: HemingwayEditorProps) {
   const [highlightConfig, setHighlightConfig] = useState<HighlightConfig>({
     hooks: true,
@@ -177,7 +185,7 @@ export function HemingwayEditor({
     wtas: true,
   });
 
-  const [showAnalysis, setShowAnalysis] = useState(true);
+  const [showAnalysis] = useState(true);
 
   // Get analysis stats (simplified for now)
   const getAnalysisStats = (): AnalysisStats => {
@@ -205,6 +213,7 @@ export function HemingwayEditor({
         readOnly={readOnly}
         autoFocus={autoFocus}
         highlightConfig={highlightConfig}
+        elements={elements}
       />
 
       <EditorFooter

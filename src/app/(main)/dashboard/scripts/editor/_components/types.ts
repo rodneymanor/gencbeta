@@ -11,10 +11,18 @@ export interface ChatMessage {
   };
 }
 
+export interface ScriptElements {
+  hook: string;
+  bridge: string;
+  goldenNugget: string;
+  wta: string;
+}
+
 export interface ScriptOption {
   id: string;
   title: string;
   content: string;
+  elements?: ScriptElements;
 }
 
 export interface RefinementControls {

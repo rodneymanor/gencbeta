@@ -22,10 +22,18 @@ interface SpeedWriteRequest {
   userId?: string;
 }
 
+interface ScriptElements {
+  hook: string;
+  bridge: string;
+  goldenNugget: string;
+  wta: string;
+}
+
 interface ScriptOption {
   id: string;
   title: string;
   content: string;
+  elements?: ScriptElements; // New structured elements
   estimatedDuration: string;
   approach: "speed-write" | "educational" | "ai-voice";
   voice?: {
@@ -86,59 +94,37 @@ function createVoicePrompt(activeVoice: AIVoice, idea: string, length: string, n
 You are an expert content strategist and copywriter. Your primary skill is deconstructing information and skillfully reassembling it into a different, predefined narrative or structural framework.
 
 OBJECTIVE:
-Your task is to take the [1. Source Content] and rewrite it so that it perfectly fits the structure, tone, and cadence of the [2. Structural Template]. The goal is to produce a new, seamless piece of content that accomplishes the goal of the Source Content while flawlessly embodying the style of the Structural Template.
+Your task is to take the [1. Source Content] and rewrite it so that it perfectly fits the structure, tone, and cadence of the [2. Structural Template]. Return the result in a structured JSON format with each element clearly separated.
 
 CRITICAL PLACEHOLDER REPLACEMENT RULE:
 Any text in square brackets [like this] in the template are PLACEHOLDERS that MUST be replaced with actual, specific content from your source material. NEVER leave any square brackets or placeholder text in your final output. Every [placeholder] must become real words.
 
-PRIMARY CONSTRAINT:
-The final output must adhere closely to the provided template. The deviation from the template's core structure and language should be minimal, ideally less than 15%. The new content should feel as though it was originally created for this specific format.
-
 [1. SOURCE CONTENT - The "What"]
-(This is the information you want to communicate.)
-
 ${idea}
 
 [2. STRUCTURAL TEMPLATE - The "How"]
-(This is the format, style, and narrative structure you want to follow.)
-
 Hook: ${randomTemplate.hook}
-
 Bridge: ${randomTemplate.bridge}
-
 Golden Nugget: ${randomTemplate.nugget}
-
 What To Act: ${randomTemplate.wta}
 
-Execution Instructions for AI:
-Your task is to adapt my source content into a script using the provided template. Follow these instructions precisely to ensure a high-quality, coherent, and effective result.
+INSTRUCTIONS:
+1. Replace ALL placeholders [like this] with actual content from the source material
+2. Maintain the template's tone and narrative voice
+3. Ensure smooth transitions between sections
+4. Target approximately ${targetWordCount} words for a ${length}-second read
 
-1. Analyze and Deconstruct
-First, thoroughly analyze the chosen template's components (hook, bridge, nugget, wta). Identify its core narrative function (e.g., is it a personal story, a persuasion framework, a step-by-step guide, or a philosophical lesson?). Concurrently, analyze the core components of my source content to identify the main problem, solution, key facts, and central message.
+${negativeKeywordInstruction}
 
-2. Interpret and Map Concepts - REPLACE ALL PLACEHOLDERS
-Your primary goal is to logically map the key ideas from my source content onto the [placeholders] in the template. Do not perform a literal word replacement; interpret the contextual meaning of each placeholder (e.g., [Negative Consequence], [Desired Outcome]) and fill it with the most fitting concept from my source material. 
+Return your response in this exact JSON format:
+{
+  "hook": "Your adapted hook section with all placeholders replaced",
+  "bridge": "Your adapted bridge section with all placeholders replaced",
+  "goldenNugget": "Your adapted golden nugget section with all placeholders replaced", 
+  "wta": "Your adapted what-to-act section with all placeholders replaced"
+}
 
-CRITICAL: Every single placeholder in square brackets [like this] must be replaced with actual words. No square brackets should remain in your final output.
-
-3. Adopt the Narrative Voice
-You must adopt the specific tone and narrative voice implied by the template's structure and language. If the template is written in the first person, your script should be too. If it is authoritative, your tone should be confident. The final output must feel authentic to the template's style.
-
-4. Ensure Cohesion and Flow
-Assemble the filled hook, bridge, nugget, and wta sections into a single, seamless script. The transition from one section to the next must be smooth and natural. The final script should not sound like a form that has been filled out, but like a story or argument that flows logically from beginning to end.
-
-5. Format the Final Output
-Present the final, complete script as a single block of text.
-
-Do not use labels like hook:, bridge:, etc. in your final answer.
-
-Separate the content generated for each section (hook, bridge, nugget, and wta) with a single line break.
-
-The output must be a clean script, ready to be copied and pasted, with NO square brackets or placeholder text remaining.
-
-Target approximately ${targetWordCount} words for a ${length}-second read.${negativeKeywordInstruction}
-
-FINAL CHECK: Before submitting your response, scan through your entire script and ensure there are NO square brackets [like this] remaining. If you find any, replace them with actual content immediately.`;
+FINAL CHECK: Ensure NO square brackets [like this] remain in your JSON response.`;
 }
 
 async function generateAIVoiceScript(idea: string, length: string, activeVoice: AIVoice, userId: string) {
@@ -158,14 +144,42 @@ async function generateAIVoiceScript(idea: string, length: string, activeVoice: 
 
     // Clean and validate the content
     const cleanedContent = cleanScriptContent(result.content ?? "");
-    const validation = validateScript(cleanedContent);
+    
+    // Parse the structured response
+    let elements: ScriptElements;
+    try {
+      const parsed = JSON.parse(cleanedContent);
+      elements = {
+        hook: parsed.hook ?? "",
+        bridge: parsed.bridge ?? "",
+        goldenNugget: parsed.goldenNugget ?? "",
+        wta: parsed.wta ?? ""
+      };
+    } catch (parseError) {
+      console.warn("[SpeedWrite] Failed to parse AI voice structured response, falling back to plain text");
+      // Fallback: return as single content block
+      elements = {
+        hook: "",
+        bridge: "",
+        goldenNugget: "",
+        wta: cleanedContent
+      };
+    }
 
+    // Combine elements into full script content
+    const fullContent = [elements.hook, elements.bridge, elements.goldenNugget, elements.wta]
+      .filter(Boolean)
+      .join('\n\n');
+
+    const validation = validateScript(fullContent);
     if (!validation.isValid) {
       console.warn(`⚠️ [SpeedWrite] AI Voice script has validation issues:`, validation.issues);
     }
+    
     return {
       ...result,
-      content: cleanedContent,
+      content: fullContent,
+      elements,
       approach: "ai-voice" as const,
       voice: {
         id: activeVoice.id,
@@ -186,21 +200,23 @@ async function generateSpeedWriteScript(idea: string, length: string, userId: st
   const negativeKeywords = await NegativeKeywordsService.getEffectiveNegativeKeywordsForUser(userId);
   const negativeKeywordInstruction = createNegativeKeywordPromptInstruction(negativeKeywords);
 
-  const prompt = `Write a complete, ready-to-read video script using the Speed Write formula. This is the exact script the creator will read out loud.
+  const prompt = `Write a video script using the Speed Write formula. Return the script in a structured JSON format with each element clearly separated.
 
-IMPORTANT: Write the complete script with actual words, not descriptions or instructions. The output should be the finished script ready to record. Do not include any placeholder text in square brackets [like this].
+IMPORTANT: Write actual words, not descriptions or instructions. Each section should be complete and ready to record.
 
 Target Length: ${length} seconds (~${targetWords} words)
 
-Speed Write Formula:
-1. HOOK: Start with attention-grabbing opener
-2. BRIDGE: Connect hook to main content
-3. GOLDEN NUGGET: Deliver core value/insight
-4. WHAT TO ACT (WTA): Clear call to action
-
 Script Topic: ${idea}${negativeKeywordInstruction}
 
-Write the complete script now:`;
+Return your response in this exact JSON format:
+{
+  "hook": "Your attention-grabbing opener that hooks the viewer immediately",
+  "bridge": "Your transition that connects the hook to the main content", 
+  "goldenNugget": "Your core value, insight, or main teaching point",
+  "wta": "Your clear call to action that tells viewers what to do next"
+}
+
+Make sure each section flows naturally into the next when read aloud.`;
 
   try {
     const result = await generateScriptWithValidation(
@@ -210,9 +226,37 @@ Write the complete script now:`;
     );
 
     const cleanedContent = cleanScriptContent(result.content ?? "");
+    
+    // Parse the structured response
+    let elements: ScriptElements;
+    try {
+      const parsed = JSON.parse(cleanedContent);
+      elements = {
+        hook: parsed.hook ?? "",
+        bridge: parsed.bridge ?? "",
+        goldenNugget: parsed.goldenNugget ?? "",
+        wta: parsed.wta ?? ""
+      };
+    } catch (parseError) {
+      console.warn("[SpeedWrite] Failed to parse structured response, falling back to plain text");
+      // Fallback: return as single content block
+      elements = {
+        hook: "",
+        bridge: "",
+        goldenNugget: "",
+        wta: cleanedContent
+      };
+    }
+
+    // Combine elements into full script content
+    const fullContent = [elements.hook, elements.bridge, elements.goldenNugget, elements.wta]
+      .filter(Boolean)
+      .join('\n\n');
+
     return {
       ...result,
-      content: cleanedContent
+      content: fullContent,
+      elements
     };
   } catch (error) {
     console.error("[SpeedWrite] Speed Write script generation failed:", error);
@@ -269,11 +313,13 @@ function createScriptOption(
   content: string,
   approach: "speed-write" | "educational" | "ai-voice",
   voice?: { id: string; name: string; badges: string[] },
+  elements?: ScriptElements,
 ): ScriptOption {
   return {
     id,
     title,
     content,
+    elements,
     estimatedDuration: "60s", // This could be calculated based on word count
     approach,
     voice,
@@ -325,16 +371,29 @@ async function createScriptOptions(
     const optionA = createScriptOption(
       "option-a",
       `${aiVoiceResult.value.voice.name} Voice`,
-      aiVoiceResult.value.content!,
+      aiVoiceResult.value.content,
       "ai-voice",
       aiVoiceResult.value.voice,
+      aiVoiceResult.value.elements,
     );
 
     const optionB =
       speedWriteResult.status === "fulfilled" && speedWriteResult.value.success
-        ? createScriptOption("option-b", "Speed Write Formula", speedWriteResult.value.content!, "speed-write")
+        ? createScriptOption(
+            "option-b",
+            "Speed Write Formula",
+            speedWriteResult.value.content,
+            "speed-write",
+            undefined,
+            speedWriteResult.value.elements,
+          )
         : educationalResult.status === "fulfilled" && educationalResult.value.success
-          ? createScriptOption("option-b", "Educational Approach", educationalResult.value.content!, "educational")
+          ? createScriptOption(
+              "option-b",
+              "Educational Approach",
+              educationalResult.value.content,
+              "educational",
+            )
           : null;
 
     return { optionA, optionB };
@@ -343,12 +402,24 @@ async function createScriptOptions(
   // Default to original A/B structure
   const optionA =
     speedWriteResult.status === "fulfilled" && speedWriteResult.value.success
-      ? createScriptOption("option-a", "Speed Write Formula", speedWriteResult.value.content!, "speed-write")
+      ? createScriptOption(
+          "option-a",
+          "Speed Write Formula",
+          speedWriteResult.value.content,
+          "speed-write",
+          undefined,
+          speedWriteResult.value.elements,
+        )
       : null;
 
   const optionB =
     educationalResult.status === "fulfilled" && educationalResult.value.success
-      ? createScriptOption("option-b", "Educational Approach", educationalResult.value.content!, "educational")
+      ? createScriptOption(
+          "option-b",
+          "Educational Approach",
+          educationalResult.value.content,
+          "educational",
+        )
       : null;
 
   return { optionA, optionB };
