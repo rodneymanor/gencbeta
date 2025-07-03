@@ -165,6 +165,7 @@ export const DEFAULT_NEGATIVE_KEYWORDS = [
   "spearhead",
   "stand the test of time",
   "strides",
+  "stunning",
   "supercharge",
   "sure",
   "synergy",
