@@ -33,45 +33,7 @@ interface AnalysisStats {
   characters: number;
 }
 
-// Header component
-function EditorHeader({
-  showAnalysis,
-  setShowAnalysis,
-  isAnalyzing,
-}: {
-  showAnalysis: boolean;
-  setShowAnalysis: (show: boolean) => void;
-  isAnalyzing: boolean;
-}) {
-  return (
-    <div className="flex items-center justify-between border-b p-4">
-      <div className="flex items-center gap-2">
-        <FileText className="text-muted-foreground h-5 w-5" />
-        <h2 className="text-lg font-semibold">Script Editor</h2>
-        {isAnalyzing && (
-          <Badge variant="secondary" className="animate-pulse">
-            <Zap className="mr-1 h-3 w-3" />
-            Analyzing...
-          </Badge>
-        )}
-      </div>
-
-      <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowAnalysis(!showAnalysis)}
-          className="flex items-center gap-1"
-        >
-          {showAnalysis ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-          {showAnalysis ? "Hide" : "Show"} Analysis
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-// Analysis controls component
+// Analysis controls component (now for footer)
 function AnalysisControls({
   highlightConfig,
   setHighlightConfig,
@@ -82,7 +44,7 @@ function AnalysisControls({
   stats: AnalysisStats;
 }) {
   return (
-    <div className="bg-muted/20 border-b p-4">
+    <div className="bg-muted/20 border-t p-4">
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Settings className="text-muted-foreground h-4 w-4" />
@@ -148,33 +110,51 @@ function AnalysisControls({
 }
 
 // Footer stats component
-function EditorFooter({ stats, showAnalysis }: { stats: AnalysisStats; showAnalysis: boolean }) {
+function EditorFooter({
+  stats,
+  showAnalysis,
+  highlightConfig,
+  setHighlightConfig,
+}: {
+  stats: AnalysisStats;
+  showAnalysis: boolean;
+  highlightConfig: HighlightConfig;
+  setHighlightConfig: (config: HighlightConfig) => void;
+}) {
   return (
-    <div className="bg-muted/20 text-muted-foreground flex items-center justify-between border-t p-4 text-sm">
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-1">
-          <BarChart3 className="h-4 w-4" />
-          <span>{stats.words} words</span>
+    <div className="bg-muted/20 text-muted-foreground border-t text-sm">
+      {/* Word count and stats */}
+      <div className="flex items-center justify-between p-4">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1">
+            <BarChart3 className="h-4 w-4" />
+            <span>{stats.words} words</span>
+          </div>
+          <span>•</span>
+          <span>{stats.characters} characters</span>
         </div>
-        <span>•</span>
-        <span>{stats.characters} characters</span>
+
+        {showAnalysis && stats.total > 0 && (
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-xs">
+              {stats.hooks} hooks
+            </Badge>
+            <Badge variant="outline" className="text-xs">
+              {stats.bridges} bridges
+            </Badge>
+            <Badge variant="outline" className="text-xs">
+              {stats.goldenNuggets} nuggets
+            </Badge>
+            <Badge variant="outline" className="text-xs">
+              {stats.wtas} CTAs
+            </Badge>
+          </div>
+        )}
       </div>
 
-      {showAnalysis && stats.total > 0 && (
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-xs">
-            {stats.hooks} hooks
-          </Badge>
-          <Badge variant="outline" className="text-xs">
-            {stats.bridges} bridges
-          </Badge>
-          <Badge variant="outline" className="text-xs">
-            {stats.goldenNuggets} nuggets
-          </Badge>
-          <Badge variant="outline" className="text-xs">
-            {stats.wtas} CTAs
-          </Badge>
-        </div>
+      {/* Highlight settings */}
+      {showAnalysis && (
+        <AnalysisControls highlightConfig={highlightConfig} setHighlightConfig={setHighlightConfig} stats={stats} />
       )}
     </div>
   );
@@ -216,12 +196,6 @@ export function HemingwayEditor({
 
   return (
     <div className={`flex h-full flex-col ${className}`}>
-      <EditorHeader showAnalysis={showAnalysis} setShowAnalysis={setShowAnalysis} isAnalyzing={false} />
-
-      {showAnalysis && (
-        <AnalysisControls highlightConfig={highlightConfig} setHighlightConfig={setHighlightConfig} stats={stats} />
-      )}
-
       <HemingwayEditorCore
         value={value}
         onChange={onChange}
@@ -233,7 +207,12 @@ export function HemingwayEditor({
         highlightConfig={highlightConfig}
       />
 
-      <EditorFooter stats={stats} showAnalysis={showAnalysis} />
+      <EditorFooter
+        stats={stats}
+        showAnalysis={showAnalysis}
+        highlightConfig={highlightConfig}
+        setHighlightConfig={setHighlightConfig}
+      />
     </div>
   );
 }

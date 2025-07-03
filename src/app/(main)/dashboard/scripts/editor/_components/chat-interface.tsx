@@ -164,18 +164,6 @@ What specific aspect would you like to focus on?`;
     onScriptGenerated(content);
   };
 
-  // Clear chat
-  const handleClearChat = () => {
-    setMessages([
-      {
-        id: "1",
-        type: "assistant",
-        content: "Chat cleared! How can I help you with your script today?",
-        timestamp: new Date(),
-      },
-    ]);
-  };
-
   // Handle keyboard shortcuts
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
@@ -186,27 +174,6 @@ What specific aspect would you like to focus on?`;
 
   return (
     <div className={`flex h-full flex-col ${className}`}>
-      {/* Header */}
-      <div className="flex items-center justify-between border-b p-4">
-        <div className="flex items-center gap-2">
-          <MessageCircle className="text-muted-foreground h-5 w-5" />
-          <h2 className="text-lg font-semibold">AI Script Assistant</h2>
-          <Badge variant="secondary" className="text-xs">
-            <Sparkles className="mr-1 h-3 w-3" />
-            Beta
-          </Badge>
-        </div>
-
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleClearChat}
-          className="text-muted-foreground hover:text-foreground"
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </div>
-
       {/* Messages */}
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-4">
@@ -271,13 +238,12 @@ What specific aspect would you like to focus on?`;
         <form onSubmit={handleSubmit} className="flex gap-2">
           <div className="flex-1">
             <Textarea
-              ref={inputRef}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Ask me anything about your script... (⌘+Enter to send)"
               className="min-h-[60px] resize-none"
-              rows={2}
+              disabled={isLoading}
             />
           </div>
           <Button type="submit" disabled={!inputValue.trim() || isLoading} className="self-end">
