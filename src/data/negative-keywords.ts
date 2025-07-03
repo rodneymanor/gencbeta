@@ -28,7 +28,6 @@ export const DEFAULT_NEGATIVE_KEYWORDS = [
   "also",
   "as a result",
   "consequently",
-  "furthermore",
   "hence",
   "however",
   "indeed",
@@ -67,8 +66,6 @@ export const DEFAULT_NEGATIVE_KEYWORDS = [
   "facilitate",
   "in-depth",
   "innovative",
-  "leverage",
-  "meticulous",
   "paradigm",
   "plethora",
   "proficiency",
@@ -90,7 +87,6 @@ export const DEFAULT_NEGATIVE_KEYWORDS = [
   "melody",
   "metamorphosis",
   "symphony",
-  "tapestry",
   "treasure trove",
   "whispering",
 
@@ -184,7 +180,7 @@ export const DEFAULT_NEGATIVE_KEYWORDS = [
   "vital",
   "welcome your thoughts",
   "when it comes to",
-  "yield"
+  "yield",
 ];
 
 export interface NegativeKeywordSettings {
@@ -207,16 +203,19 @@ export interface UserNegativeKeywords {
  */
 export function getEffectiveNegativeKeywords(settings: NegativeKeywordSettings): string[] {
   const defaultKeywords = DEFAULT_NEGATIVE_KEYWORDS.filter(
-    keyword => !settings.userRemovedKeywords.includes(keyword)
+    (keyword) => !settings.userRemovedKeywords.includes(keyword),
   );
-  
+
   return [...defaultKeywords, ...settings.userAddedKeywords];
 }
 
 /**
  * Check if text contains any negative keywords
  */
-export function detectNegativeKeywords(text: string, negativeKeywords: string[]): {
+export function detectNegativeKeywords(
+  text: string,
+  negativeKeywords: string[],
+): {
   hasNegativeKeywords: boolean;
   detectedKeywords: string[];
   highlightedText: string;
@@ -226,17 +225,17 @@ export function detectNegativeKeywords(text: string, negativeKeywords: string[])
 
   // Convert to lowercase for case-insensitive matching
   const lowerText = text.toLowerCase();
-  
-  negativeKeywords.forEach(keyword => {
+
+  negativeKeywords.forEach((keyword) => {
     const lowerKeyword = keyword.toLowerCase();
-    
+
     // Check for exact word matching (with word boundaries)
-    const escapedKeyword = lowerKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(`\\b${escapedKeyword}\\b`, 'gi');
-    
+    const escapedKeyword = lowerKeyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(`\\b${escapedKeyword}\\b`, "gi");
+
     if (regex.test(lowerText)) {
       detectedKeywords.push(keyword);
-      
+
       // Highlight the detected keywords in the original text
       highlightedText = highlightedText.replace(regex, `<mark class="negative-keyword">$&</mark>`);
     }
@@ -245,7 +244,7 @@ export function detectNegativeKeywords(text: string, negativeKeywords: string[])
   return {
     hasNegativeKeywords: detectedKeywords.length > 0,
     detectedKeywords,
-    highlightedText
+    highlightedText,
   };
 }
 
@@ -262,7 +261,7 @@ export function createNegativeKeywordPromptInstruction(negativeKeywords: string[
 CRITICAL CONTENT RESTRICTION:
 You MUST avoid using any of the following overused words and phrases in your response. These words make content sound robotic and AI-generated:
 
-${negativeKeywords.map(keyword => `- "${keyword}"`).join('\n')}
+${negativeKeywords.map((keyword) => `- "${keyword}"`).join("\n")}
 
 Instead, use natural, conversational language that sounds human and authentic. Choose simpler, more direct alternatives that a real person would use in everyday conversation.`;
-} 
+}

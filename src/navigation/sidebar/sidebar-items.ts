@@ -12,6 +12,7 @@ import {
   Chrome,
   Wrench,
   Pen,
+  Shield,
   type LucideIcon,
 } from "lucide-react";
 
@@ -72,6 +73,11 @@ export const sidebarItems: NavGroup[] = [
             title: "Custom Voices",
             url: "/dashboard/voices?tab=custom",
             icon: Video,
+          },
+          {
+            title: "Negative Keywords",
+            url: "/dashboard/voices?tab=negative-keywords",
+            icon: Shield,
           },
         ],
       },
