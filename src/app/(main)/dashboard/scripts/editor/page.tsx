@@ -140,50 +140,47 @@ export default function ScriptEditorPage() {
   }
 
   return (
-    // Simplified container - let dashboard handle the outer padding
-    <>
-      {/* Main Content - Responsive Card Layout */}
-      <div className="flex min-h-screen flex-col gap-4 overflow-hidden p-2 lg:flex-row">
-        {/* Chat Assistant Card */}
-        <Card className="flex flex-1 flex-col border-2 shadow-lg lg:max-w-[40%]">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <MessageCircle className="h-5 w-5 text-blue-500" />
-              AI Script Assistant
-              <Badge variant="secondary" className="ml-auto text-xs">
-                <Sparkles className="mr-1 h-3 w-3" />
-                Beta
-              </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex-1 overflow-hidden p-0">
-            <ChatInterface onScriptGenerated={handleScriptGenerated} currentScript={script} className="h-full" />
-          </CardContent>
-        </Card>
+    // Content that works within the scrollable panel
+    <div className="flex h-full flex-col gap-4 lg:flex-row">
+      {/* Chat Assistant Card */}
+      <Card className="flex flex-1 flex-col border-2 shadow-lg lg:max-w-[40%]">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <MessageCircle className="h-5 w-5 text-blue-500" />
+            AI Script Assistant
+            <Badge variant="secondary" className="ml-auto text-xs">
+              <Sparkles className="mr-1 h-3 w-3" />
+              Beta
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex-1 overflow-hidden p-0">
+          <ChatInterface onScriptGenerated={handleScriptGenerated} currentScript={script} className="h-full" />
+        </CardContent>
+      </Card>
 
-        {/* Script Editor Card */}
-        <Card className="flex flex-1 flex-col border-2 shadow-lg">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <FileText className="h-5 w-5 text-orange-500" />
-              Hemingway Editor
-              <Badge variant="outline" className="ml-auto text-xs">
-                <Eye className="mr-1 h-3 w-3" />
-                Real-time Analysis
-              </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex-1 overflow-hidden p-0">
-            <HemingwayEditor
-              value={script}
-              onChange={handleScriptChange}
-              placeholder="Start writing your script here... The AI will analyze it in real-time and highlight hooks, bridges, golden nuggets, and calls-to-action."
-              className="h-full"
-              autoFocus={!scriptId}
-            />
-          </CardContent>
-        </Card>
-      </div>
+      {/* Script Editor Card */}
+      <Card className="flex flex-1 flex-col border-2 shadow-lg">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <FileText className="h-5 w-5 text-orange-500" />
+            Hemingway Editor
+            <Badge variant="outline" className="ml-auto text-xs">
+              <Eye className="mr-1 h-3 w-3" />
+              Real-time Analysis
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex-1 overflow-hidden p-0">
+          <HemingwayEditor
+            value={script}
+            onChange={handleScriptChange}
+            placeholder="Start writing your script here... The AI will analyze it in real-time and highlight hooks, bridges, golden nuggets, and calls-to-action."
+            className="h-full"
+            autoFocus={!scriptId}
+          />
+        </CardContent>
+      </Card>
 
       {/* Floating Editor Controls */}
       <div className="fixed right-6 bottom-6 z-20">
@@ -203,6 +200,6 @@ export default function ScriptEditorPage() {
           </CardContent>
         </Card>
       </div>
-    </>
+    </div>
   );
 }

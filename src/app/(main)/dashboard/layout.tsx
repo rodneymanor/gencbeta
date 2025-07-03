@@ -25,8 +25,8 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
         <AppSidebar variant={sidebarVariant} collapsible="icon" />
         <SidebarInset
           className={cn(
-            // Prevent flexbox shrinking - key fix for full width
-            "flex-shrink-0",
+            // V0.dev-like layout: fill entire viewport
+            "flex h-dvh w-screen overflow-hidden",
             // Override default SidebarInset margins for full-width layout
             contentLayout === "full-width" && [
               // Remove all default margins and ensure full width
@@ -38,8 +38,6 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
               // Remove rounded corners and shadow for edge-to-edge appearance
               "md:peer-data-[variant=inset]:rounded-none",
               "md:peer-data-[variant=inset]:shadow-none",
-              // Ensure full height
-              "min-h-screen",
             ],
             // Only apply centering and max-width to centered layout
             contentLayout === "centered" && ["mx-auto", "max-w-screen-2xl"],
@@ -62,12 +60,12 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
           <DashboardClientLayout>
             <div
               className={cn(
-                // Base classes for all layouts
-                "w-full overflow-visible",
+                // Scrollable panel that fills remaining space
+                "flex-1 overflow-auto",
                 // Centered layout: apply padding, centering, and max-width
                 contentLayout === "centered" && "mx-auto max-w-screen-2xl p-4 md:p-6",
-                // Full-width layout: no constraints, just height and flex behavior
-                contentLayout === "full-width" && "min-h-screen flex-shrink-0",
+                // Full-width layout: just padding, no constraints
+                contentLayout === "full-width" && "p-4 md:p-6",
               )}
             >
               {children}
