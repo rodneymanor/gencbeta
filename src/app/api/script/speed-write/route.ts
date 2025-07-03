@@ -6,6 +6,7 @@ import { CreditsService } from "@/lib/credits-service";
 import { adminDb } from "@/lib/firebase-admin";
 import { generateScript } from "@/lib/gemini";
 import { NegativeKeywordsService } from "@/lib/negative-keywords-service";
+import { generateScriptWithValidation, validateScript, cleanScriptContent } from "@/lib/script-validation";
 import { trackApiUsageAdmin, UsageTrackerAdmin } from "@/lib/usage-tracker-admin";
 import { VoiceTemplateProcessor } from "@/lib/voice-template-processor";
 import { AIVoice } from "@/types/ai-voices";
@@ -87,6 +88,9 @@ You are an expert content strategist and copywriter. Your primary skill is decon
 OBJECTIVE:
 Your task is to take the [1. Source Content] and rewrite it so that it perfectly fits the structure, tone, and cadence of the [2. Structural Template]. The goal is to produce a new, seamless piece of content that accomplishes the goal of the Source Content while flawlessly embodying the style of the Structural Template.
 
+CRITICAL PLACEHOLDER REPLACEMENT RULE:
+Any text in square brackets [like this] in the template are PLACEHOLDERS that MUST be replaced with actual, specific content from your source material. NEVER leave any square brackets or placeholder text in your final output. Every [placeholder] must become real words.
+
 PRIMARY CONSTRAINT:
 The final output must adhere closely to the provided template. The deviation from the template's core structure and language should be minimal, ideally less than 15%. The new content should feel as though it was originally created for this specific format.
 
@@ -112,8 +116,10 @@ Your task is to adapt my source content into a script using the provided templat
 1. Analyze and Deconstruct
 First, thoroughly analyze the chosen template's components (hook, bridge, nugget, wta). Identify its core narrative function (e.g., is it a personal story, a persuasion framework, a step-by-step guide, or a philosophical lesson?). Concurrently, analyze the core components of my source content to identify the main problem, solution, key facts, and central message.
 
-2. Interpret and Map Concepts
-Your primary goal is to logically map the key ideas from my source content onto the [placeholders] in the template. Do not perform a literal word replacement; interpret the contextual meaning of each placeholder (e.g., [Negative Consequence], [Desired Outcome]) and fill it with the most fitting concept from my source material.
+2. Interpret and Map Concepts - REPLACE ALL PLACEHOLDERS
+Your primary goal is to logically map the key ideas from my source content onto the [placeholders] in the template. Do not perform a literal word replacement; interpret the contextual meaning of each placeholder (e.g., [Negative Consequence], [Desired Outcome]) and fill it with the most fitting concept from my source material. 
+
+CRITICAL: Every single placeholder in square brackets [like this] must be replaced with actual words. No square brackets should remain in your final output.
 
 3. Adopt the Narrative Voice
 You must adopt the specific tone and narrative voice implied by the template's structure and language. If the template is written in the first person, your script should be too. If it is authoritative, your tone should be confident. The final output must feel authentic to the template's style.
@@ -128,9 +134,11 @@ Do not use labels like hook:, bridge:, etc. in your final answer.
 
 Separate the content generated for each section (hook, bridge, nugget, and wta) with a single line break.
 
-The output must be a clean script, ready to be copied and pasted.
+The output must be a clean script, ready to be copied and pasted, with NO square brackets or placeholder text remaining.
 
-Target approximately ${targetWordCount} words for a ${length}-second read.${negativeKeywordInstruction}`;
+Target approximately ${targetWordCount} words for a ${length}-second read.${negativeKeywordInstruction}
+
+FINAL CHECK: Before submitting your response, scan through your entire script and ensure there are NO square brackets [like this] remaining. If you find any, replace them with actual content immediately.`;
 }
 
 async function generateAIVoiceScript(idea: string, length: string, activeVoice: AIVoice, userId: string) {
@@ -141,9 +149,23 @@ async function generateAIVoiceScript(idea: string, length: string, activeVoice: 
   const prompt = createVoicePrompt(activeVoice, idea, length, negativeKeywordInstruction);
 
   try {
-    const result = await generateScript(prompt);
+    // Use validation wrapper to ensure no placeholders remain
+    const result = await generateScriptWithValidation(
+      () => generateScript(prompt),
+      (result) => result.content ?? "",
+      { maxRetries: 3, retryDelay: 1000 }
+    );
+
+    // Clean and validate the content
+    const cleanedContent = cleanScriptContent(result.content ?? "");
+    const validation = validateScript(cleanedContent);
+
+    if (!validation.isValid) {
+      console.warn(`⚠️ [SpeedWrite] AI Voice script has validation issues:`, validation.issues);
+    }
     return {
       ...result,
+      content: cleanedContent,
       approach: "ai-voice" as const,
       voice: {
         id: activeVoice.id,
@@ -166,13 +188,13 @@ async function generateSpeedWriteScript(idea: string, length: string, userId: st
 
   const prompt = `Write a complete, ready-to-read video script using the Speed Write formula. This is the exact script the creator will read out loud.
 
-IMPORTANT: Write the complete script with actual words, not descriptions or instructions. The output should be the finished script ready to record.
+IMPORTANT: Write the complete script with actual words, not descriptions or instructions. The output should be the finished script ready to record. Do not include any placeholder text in square brackets [like this].
 
 Target Length: ${length} seconds (~${targetWords} words)
 
 Speed Write Formula:
 1. HOOK: Start with attention-grabbing opener
-2. BRIDGE: Connect hook to main content  
+2. BRIDGE: Connect hook to main content
 3. GOLDEN NUGGET: Deliver core value/insight
 4. WHAT TO ACT (WTA): Clear call to action
 
@@ -180,7 +202,22 @@ Script Topic: ${idea}${negativeKeywordInstruction}
 
 Write the complete script now:`;
 
-  return generateScript(prompt);
+  try {
+    const result = await generateScriptWithValidation(
+      () => generateScript(prompt),
+      (result) => result.content ?? "",
+      { maxRetries: 2, retryDelay: 500 }
+    );
+
+    const cleanedContent = cleanScriptContent(result.content ?? "");
+    return {
+      ...result,
+      content: cleanedContent
+    };
+  } catch (error) {
+    console.error("[SpeedWrite] Speed Write script generation failed:", error);
+    throw error;
+  }
 }
 
 async function generateEducationalScript(idea: string, length: string, userId: string) {
@@ -192,7 +229,7 @@ async function generateEducationalScript(idea: string, length: string, userId: s
 
   const prompt = `Write a complete, ready-to-read video script for an educational video about the topic below. This is the exact script the creator will read out loud.
 
-IMPORTANT: Write the complete script with actual words, not descriptions or instructions. The output should be the finished script ready to record.
+IMPORTANT: Write the complete script with actual words, not descriptions or instructions. The output should be the finished script ready to record. Do not include any placeholder text in square brackets [like this].
 
 Target Length: ${length} seconds (~${targetWords} words)
 
@@ -208,7 +245,22 @@ Video Topic: ${idea}${negativeKeywordInstruction}
 
 Write the complete script now:`;
 
-  return generateScript(prompt);
+  try {
+    const result = await generateScriptWithValidation(
+      () => generateScript(prompt),
+      (result) => result.content ?? "",
+      { maxRetries: 2, retryDelay: 500 }
+    );
+
+    const cleanedContent = cleanScriptContent(result.content ?? "");
+    return {
+      ...result,
+      content: cleanedContent
+    };
+  } catch (error) {
+    console.error("[SpeedWrite] Educational script generation failed:", error);
+    throw error;
+  }
 }
 
 function createScriptOption(
