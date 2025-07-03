@@ -1,0 +1,185 @@
+import { NextRequest, NextResponse } from "next/server";
+import { authenticateApiKey } from "@/lib/api-key-auth";
+import { adminDb } from "@/lib/firebase-admin";
+import { EnhancedGhostWriterService, EnhancedContentIdea } from "@/lib/enhanced-ghost-writer-service";
+import { GhostWriterService } from "@/lib/ghost-writer-service";
+import { BrandProfile } from "@/types/brand-profile";
+import { AIVoice } from "@/types/ai-voices";
+
+interface EnhancedGhostWriterRequest {
+  generateMore?: boolean;
+}
+
+interface EnhancedGhostWriterResponse {
+  success: boolean;
+  ideas?: EnhancedContentIdea[];
+  cycle?: {
+    id: string;
+    expiresAt: string;
+    timeRemaining: number;
+  };
+  error?: string;
+  metadata?: {
+    peqEnabled: boolean;
+    voiceActive: boolean;
+    conceptsGenerated: number;
+    scriptsGenerated: number;
+    processingTime: number;
+  };
+}
+
+export async function GET(request: NextRequest): Promise<NextResponse<EnhancedGhostWriterResponse>> {
+  try {
+    console.log("🚀 [EnhancedGhostWriter] API request received");
+
+    // Authenticate user
+    const authResult = await authenticateApiKey(request);
+    if (authResult instanceof NextResponse) {
+      return authResult as NextResponse<EnhancedGhostWriterResponse>;
+    }
+
+    const { user } = authResult;
+    const userId = user.uid;
+
+    console.log(`👤 [EnhancedGhostWriter] Processing request for user: ${userId}`);
+
+    // Get current global cycle
+    const currentCycle = await GhostWriterService.getCurrentCycle();
+    console.log(`🔄 [EnhancedGhostWriter] Current cycle: ${currentCycle.id}`);
+
+    // Check if user has brand profile
+    const brandProfileSnapshot = await adminDb
+      .collection("brandProfiles")
+      .where("userId", "==", userId)
+      .where("isActive", "==", true)
+      .limit(1)
+      .get();
+
+    if (brandProfileSnapshot.empty) {
+      console.log("⚠️ [EnhancedGhostWriter] No brand profile found, falling back to legacy system");
+      
+      // Fallback to legacy Ghost Writer system
+      const legacyResponse = await fetch(
+        new URL("/api/ghost-writer/ideas", request.url),
+        {
+          method: "GET",
+          headers: request.headers,
+        }
+      );
+
+      if (legacyResponse.ok) {
+        const legacyData = await legacyResponse.json();
+        return NextResponse.json({
+          success: legacyData.success,
+          ideas: legacyData.ideas?.map((idea: any) => ({
+            ...idea,
+            concept: idea.description || idea.hook,
+            script: idea.scriptOutline || idea.description,
+            peqCategory: "problem" as const,
+            sourceText: "Legacy content",
+            wordCount: (idea.scriptOutline || idea.description || "").split(/\s+/).length,
+          })),
+          cycle: legacyData.cycle,
+          error: legacyData.error,
+          metadata: {
+            peqEnabled: false,
+            voiceActive: false,
+            conceptsGenerated: legacyData.ideas?.length || 0,
+            scriptsGenerated: legacyData.ideas?.length || 0,
+            processingTime: 0,
+          },
+        });
+      } else {
+        throw new Error("Failed to get legacy Ghost Writer data");
+      }
+    }
+
+    const brandProfile = {
+      id: brandProfileSnapshot.docs[0].id,
+      ...brandProfileSnapshot.docs[0].data(),
+    } as BrandProfile;
+
+    console.log("✅ [EnhancedGhostWriter] Brand profile found, using PEQ system");
+
+    // Get user's active voice
+    const activeVoice = await GhostWriterService.getActiveVoice(userId);
+    console.log(`🎤 [EnhancedGhostWriter] Active voice: ${activeVoice ? activeVoice.name : "None"}`);
+
+    // Check if user already has ideas for this cycle
+    const existingIdeas = await EnhancedGhostWriterService.getEnhancedIdeasForUser(userId, currentCycle.id);
+
+    const url = new URL(request.url);
+    const generateMore = url.searchParams.get("generateMore") === "true";
+
+    let ideas: EnhancedContentIdea[] = existingIdeas;
+
+    // Generate new ideas if none exist or if generateMore is requested
+    if (existingIdeas.length === 0 || generateMore) {
+      console.log(`💡 [EnhancedGhostWriter] Generating ${generateMore ? "additional" : "new"} ideas`);
+      
+      const generationResult = await EnhancedGhostWriterService.generateEnhancedIdeas(
+        userId,
+        brandProfile,
+        currentCycle.id,
+        activeVoice
+      );
+
+      if (generationResult.success && generationResult.ideas) {
+        if (generateMore) {
+          // Combine existing and new ideas
+          ideas = [...existingIdeas, ...generationResult.ideas];
+        } else {
+          ideas = generationResult.ideas;
+        }
+
+        console.log(`✅ [EnhancedGhostWriter] Generated ${generationResult.ideas.length} new ideas`);
+      } else {
+        console.error("❌ [EnhancedGhostWriter] Failed to generate ideas:", generationResult.error);
+        throw new Error(generationResult.error || "Failed to generate ideas");
+      }
+    } else {
+      console.log(`📋 [EnhancedGhostWriter] Using ${existingIdeas.length} existing ideas`);
+    }
+
+    // Calculate time remaining in cycle
+    const now = new Date();
+    const expiresAt = new Date(currentCycle.expiresAt);
+    const timeRemaining = Math.max(0, expiresAt.getTime() - now.getTime());
+
+    console.log(`🎉 [EnhancedGhostWriter] Returning ${ideas.length} ideas`);
+
+    return NextResponse.json({
+      success: true,
+      ideas,
+      cycle: {
+        id: currentCycle.id,
+        expiresAt: currentCycle.expiresAt,
+        timeRemaining,
+      },
+      metadata: {
+        peqEnabled: true,
+        voiceActive: !!activeVoice,
+        conceptsGenerated: ideas.length,
+        scriptsGenerated: ideas.filter(idea => idea.voiceTemplateId).length,
+        processingTime: 0,
+      },
+    });
+  } catch (error) {
+    console.error("❌ [EnhancedGhostWriter] API error:", error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "An unexpected error occurred",
+        metadata: {
+          peqEnabled: false,
+          voiceActive: false,
+          conceptsGenerated: 0,
+          scriptsGenerated: 0,
+          processingTime: 0,
+        },
+      },
+      { status: 500 }
+    );
+  }
+} 

@@ -5,6 +5,7 @@ import { CreditsService } from "@/lib/credits-service";
 import { adminDb } from "@/lib/firebase-admin";
 import { generateScript } from "@/lib/gemini";
 import { trackApiUsageAdmin, UsageTrackerAdmin } from "@/lib/usage-tracker-admin";
+import { VoiceTemplateProcessor } from "@/lib/voice-template-processor";
 import { AIVoice } from "@/types/ai-voices";
 
 // Validate environment setup
@@ -76,24 +77,58 @@ async function getActiveVoice(userId: string): Promise<AIVoice | null> {
 
 function createVoicePrompt(activeVoice: AIVoice, idea: string, length: string): string {
   const randomTemplate = activeVoice.templates[Math.floor(Math.random() * activeVoice.templates.length)];
+  const targetWordCount = VoiceTemplateProcessor.calculateTargetWordCount(randomTemplate, parseInt(length));
 
-  return `Take this exact template and replace the bracketed placeholders with content about "${idea}":
+  return `ROLE:
+You are an expert content strategist and copywriter. Your primary skill is deconstructing information and skillfully reassembling it into a different, predefined narrative or structural framework.
 
-${randomTemplate.hook}
+OBJECTIVE:
+Your task is to take the [1. Source Content] and rewrite it so that it perfectly fits the structure, tone, and cadence of the [2. Structural Template]. The goal is to produce a new, seamless piece of content that accomplishes the goal of the Source Content while flawlessly embodying the style of the Structural Template.
 
-${randomTemplate.bridge}
+PRIMARY CONSTRAINT:
+The final output must adhere closely to the provided template. The deviation from the template's core structure and language should be minimal, ideally less than 15%. The new content should feel as though it was originally created for this specific format.
 
-${randomTemplate.nugget}
+[1. SOURCE CONTENT - The "What"]
+(This is the information you want to communicate.)
 
-${randomTemplate.wta}
+${idea}
 
-INSTRUCTIONS:
-- Only replace text inside [brackets] with content about "${idea}"
-- Keep everything else exactly the same
-- Don't add extra words or change the structure
-- Make it about ${length} seconds when read aloud
+[2. STRUCTURAL TEMPLATE - The "How"]
+(This is the format, style, and narrative structure you want to follow.)
 
-Output the complete script:`;
+Hook: ${randomTemplate.hook}
+
+Bridge: ${randomTemplate.bridge}
+
+Golden Nugget: ${randomTemplate.nugget}
+
+What To Act: ${randomTemplate.wta}
+
+Execution Instructions for AI:
+Your task is to adapt my source content into a script using the provided template. Follow these instructions precisely to ensure a high-quality, coherent, and effective result.
+
+1. Analyze and Deconstruct
+First, thoroughly analyze the chosen template's components (hook, bridge, nugget, wta). Identify its core narrative function (e.g., is it a personal story, a persuasion framework, a step-by-step guide, or a philosophical lesson?). Concurrently, analyze the core components of my source content to identify the main problem, solution, key facts, and central message.
+
+2. Interpret and Map Concepts
+Your primary goal is to logically map the key ideas from my source content onto the [placeholders] in the template. Do not perform a literal word replacement; interpret the contextual meaning of each placeholder (e.g., [Negative Consequence], [Desired Outcome]) and fill it with the most fitting concept from my source material.
+
+3. Adopt the Narrative Voice
+You must adopt the specific tone and narrative voice implied by the template's structure and language. If the template is written in the first person, your script should be too. If it is authoritative, your tone should be confident. The final output must feel authentic to the template's style.
+
+4. Ensure Cohesion and Flow
+Assemble the filled hook, bridge, nugget, and wta sections into a single, seamless script. The transition from one section to the next must be smooth and natural. The final script should not sound like a form that has been filled out, but like a story or argument that flows logically from beginning to end.
+
+5. Format the Final Output
+Present the final, complete script as a single block of text.
+
+Do not use labels like hook:, bridge:, etc. in your final answer.
+
+Separate the content generated for each section (hook, bridge, nugget, and wta) with a single line break.
+
+The output must be a clean script, ready to be copied and pasted.
+
+Target approximately ${targetWordCount} words for a ${length}-second read.`;
 }
 
 async function generateAIVoiceScript(idea: string, length: string, activeVoice: AIVoice) {
