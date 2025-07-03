@@ -1,14 +1,25 @@
 "use client";
 
 import { AIVoice, VoiceCreationRequest, VoiceActivationResponse, CustomVoiceLimit, OriginalScript } from "@/types/ai-voices";
+import { auth } from "@/lib/firebase";
 
 export class AIVoicesClient {
   private static async getAuthHeaders(): Promise<HeadersInit> {
-    // This will be implemented when we have proper auth context
-    // For now, return empty headers
-    return {
-      "Content-Type": "application/json",
-    };
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        throw new Error("User not authenticated");
+      }
+
+      const token = await currentUser.getIdToken();
+      return {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      };
+    } catch (error) {
+      console.error("[AIVoicesClient] Failed to get auth headers:", error);
+      throw new Error("Authentication failed");
+    }
   }
 
   /**

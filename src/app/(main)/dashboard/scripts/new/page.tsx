@@ -52,27 +52,36 @@ export default function NewScriptPage() {
   // Handle URL parameters from Ghost Writer
   useEffect(() => {
     const ideaParam = searchParams.get("idea");
+    const scriptParam = searchParams.get("script");
     const hookParam = searchParams.get("hook");
     const outlineParam = searchParams.get("outline");
     const lengthParam = searchParams.get("length");
-    const pillarParam = searchParams.get("pillar");
 
-    if (ideaParam) {
+    if (ideaParam || scriptParam) {
       // Pre-fill the form with Ghost Writer data
-      let fullIdea = ideaParam;
-      if (hookParam) {
-        fullIdea += `\n\nHook: ${hookParam}`;
+      let fullIdea = "";
+
+      // Priority: use script content if available, otherwise use idea
+      if (scriptParam) {
+        fullIdea = scriptParam;
+      } else if (ideaParam) {
+        fullIdea = ideaParam;
+
+        // Add additional sections if available
+        if (hookParam) {
+          fullIdea += `\n\nHook: ${hookParam}`;
+        }
+        if (outlineParam) {
+          fullIdea += `\n\nOutline: ${outlineParam}`;
+        }
       }
-      if (outlineParam) {
-        fullIdea += `\n\nOutline: ${outlineParam}`;
-      }
-      
+
       setScriptIdea(fullIdea);
-      
+
       if (lengthParam) {
         setScriptLength(lengthParam);
       }
-      
+
       // Clear URL parameters after setting state
       const newUrl = window.location.pathname;
       window.history.replaceState({}, '', newUrl);
@@ -182,8 +191,6 @@ export default function NewScriptPage() {
       router.push(`/dashboard/scripts/editor?${params.toString()}`);
     }
   };
-
-
 
   return (
     <div className="bg-background min-h-screen p-6">

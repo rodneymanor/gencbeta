@@ -11,7 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { 
   Play, 
   Pause, 
@@ -74,7 +74,6 @@ export function CreateVoiceFromProfile({
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
   const [error, setError] = useState<string | null>(null);
   
-  const { toast } = useToast();
   const router = useRouter();
 
   // Cleanup polling on unmount
@@ -165,10 +164,7 @@ export function CreateVoiceFromProfile({
       // Start polling for status updates
       startStatusPolling(data.jobId);
 
-      toast({
-        title: "Processing Started",
-        description: `Started processing ${username}'s ${platform} profile. This may take ${Math.ceil(data.estimatedProcessingTime / 60)} minutes.`
-      });
+      toast.success(`Processing Started: ${username}'s ${platform} profile. This may take ${Math.ceil(data.estimatedProcessingTime / 60)} minutes.`);
 
     } catch (error) {
       console.error('Failed to start processing:', error);
@@ -195,20 +191,13 @@ export function CreateVoiceFromProfile({
               onVoiceCreated(data.voiceId);
             }
 
-            toast({
-              title: "Voice Created Successfully!",
-              description: `Your AI voice "${data.metadata?.voiceName}" has been created and is ready to use.`
-            });
+            toast.success(`Voice Created Successfully! Your AI voice "${data.metadata?.voiceName}" has been created and is ready to use.`);
           } else if (data.status === "failed") {
             clearInterval(interval);
             setIsProcessing(false);
             setError(data.error || "Processing failed");
             
-            toast({
-              title: "Processing Failed",
-              description: data.error || "An error occurred during processing",
-              variant: "destructive"
-            });
+            toast.error(data.error || "An error occurred during processing");
           }
         }
       } catch (error) {
@@ -235,10 +224,7 @@ export function CreateVoiceFromProfile({
         setProcessingStatus(null);
         setCurrentJobId(null);
         
-        toast({
-          title: "Processing Cancelled",
-          description: "Voice creation has been cancelled."
-        });
+        toast.success("Processing Cancelled: Voice creation has been cancelled.");
       }
     } catch (error) {
       console.error('Failed to cancel processing:', error);
