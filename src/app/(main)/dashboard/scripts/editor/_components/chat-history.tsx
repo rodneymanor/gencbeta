@@ -36,7 +36,7 @@ function ExpandableText({ content, maxLines = 4, className = "" }: ExpandableTex
       <p className={`text-sm leading-relaxed whitespace-pre-wrap ${className}`}>{truncatedContent}</p>
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs transition-colors"
+        className="flex items-center gap-1 text-xs transition-colors opacity-70 hover:opacity-100"
       >
         {isExpanded ? (
           <>
@@ -58,15 +58,15 @@ export function ChatHistory({ messages }: ChatHistoryProps) {
   const getMessageIcon = (type: ChatMessage["type"]) => {
     switch (type) {
       case "user":
-        return <User className="text-primary-foreground h-4 w-4" />;
+        return <User className="h-4 w-4 text-white" />;
       case "ai":
-        return <Bot className="text-muted-foreground h-4 w-4" />;
+        return <Bot className="h-4 w-4 text-white" />;
       case "system":
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+        return <CheckCircle className="h-4 w-4 text-white" />;
       case "error":
-        return <AlertTriangle className="text-destructive h-4 w-4" />;
+        return <AlertTriangle className="h-4 w-4 text-white" />;
       default:
-        return <Bot className="text-muted-foreground h-4 w-4" />;
+        return <Bot className="h-4 w-4 text-white" />;
     }
   };
 
@@ -74,44 +74,39 @@ export function ChatHistory({ messages }: ChatHistoryProps) {
     switch (type) {
       case "user":
         return {
-          container: "justify-end",
-          wrapper: "flex-row-reverse",
-          avatar: "bg-primary",
-          bubble: "bg-primary text-primary-foreground",
+          avatar: "bg-blue-500",
+          bubble: "bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800",
+          text: "text-blue-900 dark:text-blue-100",
         };
       case "ai":
         return {
-          container: "justify-start",
-          wrapper: "flex-row",
-          avatar: "bg-muted",
-          bubble: "bg-muted",
+          avatar: "bg-gray-500",
+          bubble: "bg-gray-50 dark:bg-gray-950/50 border border-gray-200 dark:border-gray-800",
+          text: "text-gray-900 dark:text-gray-100",
         };
       case "system":
         return {
-          container: "justify-start",
-          wrapper: "flex-row",
-          avatar: "bg-green-100 dark:bg-green-900",
-          bubble: "bg-green-50 dark:bg-green-900/50 border border-green-200 dark:border-green-700",
+          avatar: "bg-green-500",
+          bubble: "bg-green-50 dark:bg-green-950/50 border border-green-200 dark:border-green-800",
+          text: "text-green-900 dark:text-green-100",
         };
       case "error":
         return {
-          container: "justify-start",
-          wrapper: "flex-row",
-          avatar: "bg-destructive/10",
-          bubble: "bg-destructive/5 border border-destructive/20",
+          avatar: "bg-red-500",
+          bubble: "bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800",
+          text: "text-red-900 dark:text-red-100",
         };
       default:
         return {
-          container: "justify-start",
-          wrapper: "flex-row",
-          avatar: "bg-muted",
-          bubble: "bg-muted",
+          avatar: "bg-gray-500",
+          bubble: "bg-gray-50 dark:bg-gray-950/50 border border-gray-200 dark:border-gray-800",
+          text: "text-gray-900 dark:text-gray-100",
         };
     }
   };
 
   return (
-    <div className="h-full space-y-4 overflow-y-auto">
+    <div className="h-full space-y-3 overflow-y-auto">
       {messages.map((message, index) => {
         const styles = getMessageStyles(message.type);
         const icon = getMessageIcon(message.type);
@@ -120,19 +115,19 @@ export function ChatHistory({ messages }: ChatHistoryProps) {
         const isInitialUserMessage = message.type === "user" && index === 0;
 
         return (
-          <div key={message.id} className={`flex gap-3 ${styles.container}`}>
-            <div className={`flex max-w-[85%] gap-2 ${styles.wrapper}`}>
-              <div className={`flex h-8 w-8 items-center justify-center rounded-full ${styles.avatar}`}>{icon}</div>
-              <div className={`rounded-lg p-3 ${styles.bubble}`}>
-                {isInitialUserMessage ? (
-                  <ExpandableText content={message.content} maxLines={3} />
-                ) : (
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
-                )}
-                {message.metadata?.videoUrl && (
-                  <p className="text-muted-foreground mt-2 truncate text-xs">Video: {message.metadata.videoUrl}</p>
-                )}
-              </div>
+          <div key={message.id} className="flex gap-3">
+            <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${styles.avatar}`}>
+              {icon}
+            </div>
+            <div className={`flex-1 rounded-2xl p-3 ${styles.bubble}`}>
+              {isInitialUserMessage ? (
+                <ExpandableText content={message.content} maxLines={3} className={styles.text} />
+              ) : (
+                <p className={`text-sm leading-relaxed whitespace-pre-wrap ${styles.text}`}>{message.content}</p>
+              )}
+              {message.metadata?.videoUrl && (
+                <p className="text-muted-foreground mt-2 truncate text-xs">Video: {message.metadata.videoUrl}</p>
+              )}
             </div>
           </div>
         );
