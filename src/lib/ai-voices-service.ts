@@ -294,24 +294,43 @@ export class AIVoicesService {
     scripts: OriginalScript[];
   }> {
     // This would integrate with existing video processing services
-    // For now, return mock data
+    // For now, return mock data with realistic script content
     console.log("[AIVoicesService] Extracting content from profile:", profileUrl);
 
     // Simulate processing delay
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
+    // Generate realistic mock scripts that can be properly analyzed
+    const mockScripts = [
+      {
+        id: "script_1",
+        title: "Business Growth Script",
+        content: "If you want to scale your business but keep hitting the same revenue ceiling, here's what you're missing. Most entrepreneurs think they need more customers, but that's not the real problem. The real issue is you're not maximizing the value of your existing customers. Here's what successful businesses do differently: they focus on increasing customer lifetime value through strategic upsells and retention programs. Start implementing a customer success program today and watch your revenue grow without spending more on acquisition.",
+        source: profileUrl,
+        platform,
+        metrics: { views: 125000, likes: 8500 },
+      },
+      {
+        id: "script_2", 
+        title: "Productivity Hack",
+        content: "If you're working 12-hour days but still falling behind, you're doing it wrong. I used to be the same way until I discovered this simple system. The problem isn't that you don't have enough time, it's that you're not protecting your energy. Here's the game-changer: batch similar tasks together and eliminate decision fatigue. Block out 2-hour focused work sessions and turn off all notifications. Try this for one week and you'll accomplish more in 6 hours than you used to in 12.",
+        source: profileUrl,
+        platform,
+        metrics: { views: 89000, likes: 6200 },
+      },
+      {
+        id: "script_3",
+        title: "Marketing Strategy",
+        content: "If your marketing feels like you're shouting into the void, here's why. Everyone's trying to be everywhere at once, but that's a recipe for mediocrity. The secret successful brands know is this: dominate one platform before expanding. Pick the platform where your ideal customers spend the most time and become the go-to expert there. Focus all your energy on creating incredible content for that one platform for 90 days and watch your audience explode.",
+        source: profileUrl,
+        platform,
+        metrics: { views: 156000, likes: 11300 },
+      }
+    ];
+
     return {
-      creatorName: "Creator Name",
-      scripts: [
-        {
-          id: "script_1",
-          title: "Sample Script 1",
-          content: "Sample script content for template generation...",
-          source: profileUrl,
-          platform,
-          metrics: { views: 100000, likes: 5000 },
-        },
-      ],
+      creatorName: "Sample Creator",
+      scripts: mockScripts,
     };
   }
 

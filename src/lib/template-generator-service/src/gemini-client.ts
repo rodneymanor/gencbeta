@@ -9,7 +9,7 @@ export class GeminiClient {
   private apiKey: string;
 
   constructor(apiKey?: string) {
-    this.apiKey = apiKey || process.env["GEMINI_API_KEY"] || "";
+    this.apiKey = apiKey ?? process.env["GEMINI_API_KEY"] ?? "";
 
     if (!this.apiKey) {
       throw new Error(
@@ -108,13 +108,13 @@ export class GeminiClient {
         throw new Error(errorMessage);
       }
 
-      const data = (await response.json()) as any;
+      const data = await response.json();
 
       if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
         throw new Error("Invalid response format from Gemini API");
       }
 
-      const text = data.candidates[0].content.parts?.map((part: any) => part.text).join("") || "";
+      const text = data.candidates[0].content.parts?.map((part: any) => part.text).join("") ?? "";
 
       if (!text.trim()) {
         throw new Error("Empty response from Gemini API");
@@ -124,9 +124,9 @@ export class GeminiClient {
         text: text.trim(),
         usage: data.usageMetadata
           ? {
-              promptTokens: data.usageMetadata.promptTokenCount || 0,
-              completionTokens: data.usageMetadata.candidatesTokenCount || 0,
-              totalTokens: data.usageMetadata.totalTokenCount || 0,
+              promptTokens: data.usageMetadata.promptTokenCount ?? 0,
+              completionTokens: data.usageMetadata.candidatesTokenCount ?? 0,
+              totalTokens: data.usageMetadata.totalTokenCount ?? 0,
             }
           : undefined,
       };
@@ -141,24 +141,48 @@ export class GeminiClient {
    */
   static parseJsonResponse(text: string): any {
     try {
+      console.log("[GeminiClient] Parsing JSON response, length:", text.length);
+      
       // Clean up the response text - remove markdown code blocks and extra text
       let cleanedResponse = text.trim();
 
       // Remove markdown code blocks
       cleanedResponse = cleanedResponse.replace(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/i, "$1");
 
-      // Find JSON object
-      const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0]);
-        return parsed;
-      } else {
-        throw new Error("No JSON object found in response");
+      // Remove any leading/trailing text that isn't part of the JSON
+      const jsonStart = cleanedResponse.indexOf('{');
+      const jsonEnd = cleanedResponse.lastIndexOf('}');
+      
+      if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+        cleanedResponse = cleanedResponse.substring(jsonStart, jsonEnd + 1);
       }
+
+      console.log("[GeminiClient] Cleaned response:", cleanedResponse.substring(0, 200) + "...");
+
+      // Try to parse the JSON
+      const parsed = JSON.parse(cleanedResponse);
+      
+      console.log("[GeminiClient] Successfully parsed JSON with keys:", Object.keys(parsed));
+      
+      return parsed;
     } catch (parseError) {
       console.error("[GeminiClient] Failed to parse JSON response:", text);
+      console.error("[GeminiClient] Parse error:", parseError);
+      
+      // Try to extract any JSON-like structure as a fallback
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          const fallbackParsed = JSON.parse(jsonMatch[0]);
+          console.log("[GeminiClient] Fallback parsing successful");
+          return fallbackParsed;
+        } catch (fallbackError) {
+          console.error("[GeminiClient] Fallback parsing also failed:", fallbackError);
+        }
+      }
+      
       throw new Error(
-        `Failed to parse JSON response: ${parseError instanceof Error ? parseError.message : "Unknown error"}`,
+        `Failed to parse JSON response: ${parseError instanceof Error ? parseError.message : "Unknown error"}. Response: ${text.substring(0, 500)}...`,
       );
     }
   }

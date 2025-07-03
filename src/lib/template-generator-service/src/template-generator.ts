@@ -303,21 +303,40 @@ export class TemplateGenerator {
   ): Promise<{ success: boolean; segments?: MarketingSegments; error?: string }> {
     try {
       console.log("[TemplateGenerator] Analyzing transcription for marketing segments");
+      console.log("[TemplateGenerator] Transcription length:", transcription.length);
 
       const prompt = TEMPLATE_GENERATION_PROMPTS.analyzeTranscription(transcription);
       const response = await this.geminiClient.makeTextRequest(prompt);
 
+      console.log("[TemplateGenerator] Raw API response:", response.text.substring(0, 200) + "...");
+
       // Parse the JSON response
       const parsedResponse = GeminiClient.parseJsonResponse(response.text);
 
+      console.log("[TemplateGenerator] Parsed response keys:", Object.keys(parsedResponse));
+
       if (!parsedResponse.marketingSegments) {
+        console.error("[TemplateGenerator] Missing marketingSegments in response:", parsedResponse);
         throw new Error("No marketing segments found in API response");
       }
 
       const segments = parsedResponse.marketingSegments;
+      console.log("[TemplateGenerator] Marketing segments found:", {
+        Hook: segments.Hook ? segments.Hook.length : 0,
+        Bridge: segments.Bridge ? segments.Bridge.length : 0,
+        "Golden Nugget": segments["Golden Nugget"] ? segments["Golden Nugget"].length : 0,
+        WTA: segments.WTA ? segments.WTA.length : 0,
+      });
 
       // Validate segments
       if (!this.validateMarketingSegments(segments)) {
+        console.error("[TemplateGenerator] Invalid segments structure:", segments);
+        console.error("[TemplateGenerator] Validation details:", {
+          hasHook: typeof segments.Hook === "string" && segments.Hook.trim().length > 0,
+          hasBridge: typeof segments.Bridge === "string" && segments.Bridge.trim().length > 0,
+          hasGoldenNugget: typeof segments["Golden Nugget"] === "string" && segments["Golden Nugget"].trim().length > 0,
+          hasWTA: typeof segments.WTA === "string" && segments.WTA.trim().length > 0,
+        });
         throw new Error("Invalid marketing segments structure in API response");
       }
 
@@ -329,6 +348,7 @@ export class TemplateGenerator {
       };
     } catch (error) {
       console.error("[TemplateGenerator] Failed to analyze transcription:", error);
+      console.error("[TemplateGenerator] Transcription that failed:", transcription);
 
       return {
         success: false,
