@@ -167,14 +167,8 @@ export default function ScriptEditorPage() {
   }
 
   return (
-    // Full-width container that overrides dashboard layout constraints
-    <div
-      className="bg-background fixed inset-0 z-10 flex flex-col"
-      style={{
-        left: "var(--sidebar-width, 16rem)",
-        top: "3rem", // Account for the dashboard header
-      }}
-    >
+    // Full-height container that responds to sidebar state changes
+    <div className="bg-background flex h-full flex-col">
       {/* Header */}
       <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 flex items-center justify-between border-b p-4 backdrop-blur">
         <div className="flex items-center gap-3">
