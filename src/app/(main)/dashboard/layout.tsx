@@ -39,8 +39,6 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
               "md:peer-data-[variant=inset]:rounded-none",
               "md:peer-data-[variant=inset]:shadow-none",
             ],
-            // Only apply centering and max-width to centered layout
-            contentLayout === "centered" && ["mx-auto", "max-w-screen-2xl"],
           )}
         >
           <header className="flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
@@ -58,18 +56,7 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
             </div>
           </header>
           <DashboardClientLayout>
-            <div
-              className={cn(
-                // Scrollable panel that fills remaining space
-                "flex-1 overflow-auto",
-                // Centered layout: apply padding, centering, and max-width
-                contentLayout === "centered" && "mx-auto max-w-screen-2xl p-4 md:p-6",
-                // Full-width layout: just padding, no constraints
-                contentLayout === "full-width" && "p-4 md:p-6",
-              )}
-            >
-              {children}
-            </div>
+            <div className="flex-1 overflow-auto p-4 md:p-6">{children}</div>
           </DashboardClientLayout>
         </SidebarInset>
       </SidebarProvider>
