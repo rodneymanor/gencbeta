@@ -1,14 +1,14 @@
-import { adminDb } from "@/lib/firebase-admin";
-import { 
-  UserCredits, 
-  CreditTransaction, 
-  UsageStats, 
+import { AccountLevel } from "@/lib/auth-cache";
+import { getAdminDb } from "@/lib/firebase-admin";
+import {
+  UserCredits,
+  CreditTransaction,
+  UsageStats,
   UsageRecord,
   CREDIT_COSTS,
   ACCOUNT_LIMITS,
-  CreditOperation 
+  CreditOperation
 } from "@/types/usage-tracking";
-import { AccountLevel } from "@/lib/auth-cache";
 
 export class CreditsService {
   private static readonly COLLECTIONS = {
@@ -19,12 +19,17 @@ export class CreditsService {
 
   static async initializeUserCredits(userId: string, accountLevel: AccountLevel): Promise<UserCredits> {
     try {
+      const adminDb = getAdminDb();
+      if (!adminDb) {
+        throw new Error("Database not available");
+      }
+
       const now = new Date().toISOString();
       const isProAccount = accountLevel === "pro";
-      
+
       const periodStart = isProAccount ? this.getMonthStart() : this.getDayStart();
       const periodEnd = isProAccount ? this.getMonthEnd() : this.getDayEnd();
-      
+
       const userCredits: Omit<UserCredits, "id"> = {
         userId,
         accountLevel: isProAccount ? "pro" : "free",
@@ -51,9 +56,9 @@ export class CreditsService {
       }
 
       const docRef = await adminDb.collection(this.COLLECTIONS.USER_CREDITS).add(userCredits);
-      
+
       console.log(`📊 [Credits] Initialized credits for user ${userId} (${accountLevel})`);
-      
+
       return {
         id: docRef.id,
         ...userCredits,
@@ -66,6 +71,11 @@ export class CreditsService {
 
   static async getUserCredits(userId: string, accountLevel: AccountLevel): Promise<UserCredits> {
     try {
+      const adminDb = getAdminDb();
+      if (!adminDb) {
+        throw new Error("Database not available");
+      }
+
       const snapshot = await adminDb
         .collection(this.COLLECTIONS.USER_CREDITS)
         .where("userId", "==", userId)
@@ -78,7 +88,7 @@ export class CreditsService {
         userCredits = await this.initializeUserCredits(userId, accountLevel);
       } else {
         userCredits = { id: snapshot.docs[0].id, ...snapshot.docs[0].data() } as UserCredits;
-        
+
         const needsReset = await this.checkAndResetPeriod(userCredits, accountLevel);
         if (needsReset) {
           userCredits = await this.getUserCredits(userId, accountLevel);
@@ -93,8 +103,8 @@ export class CreditsService {
   }
 
   static async canPerformAction(
-    userId: string, 
-    operation: CreditOperation, 
+    userId: string,
+    operation: CreditOperation,
     accountLevel: AccountLevel
   ): Promise<{ canPerform: boolean; reason?: string; creditsNeeded: number }> {
     try {
@@ -107,10 +117,10 @@ export class CreditsService {
       }
 
       const periodType = accountLevel === "pro" ? "monthly" : "daily";
-      return { 
-        canPerform: false, 
+      return {
+        canPerform: false,
         reason: `Insufficient credits. Need ${creditsNeeded}, have ${creditsRemaining}. Resets ${periodType}.`,
-        creditsNeeded 
+        creditsNeeded
       };
     } catch (error) {
       console.error("❌ [Credits] Failed to check action permission:", error);
@@ -125,13 +135,18 @@ export class CreditsService {
     metadata?: Record<string, unknown>
   ): Promise<{ success: boolean; newBalance: number; transaction?: CreditTransaction }> {
     try {
+      const adminDb = getAdminDb();
+      if (!adminDb) {
+        throw new Error("Database not available");
+      }
+
       const userCredits = await this.getUserCredits(userId, accountLevel);
       const creditsToDeduct = CREDIT_COSTS[operation];
-      
+
       const creditsRemaining = userCredits.creditsLimit - userCredits.creditsUsed;
       if (creditsRemaining < creditsToDeduct) {
-        return { 
-          success: false, 
+        return {
+          success: false,
           newBalance: creditsRemaining,
         };
       }
@@ -173,13 +188,13 @@ export class CreditsService {
       }
 
       const batch = adminDb.batch();
-      
+
       const userCreditsRef = adminDb.collection(this.COLLECTIONS.USER_CREDITS).doc(userCredits.id!);
       batch.update(userCreditsRef, updateData);
-      
+
       const transactionRef = adminDb.collection(this.COLLECTIONS.CREDIT_TRANSACTIONS).doc();
       batch.set(transactionRef, transaction);
-      
+
       await batch.commit();
 
       console.log(`💳 [Credits] Deducted ${creditsToDeduct} credits for ${operation} (user: ${userId})`);
@@ -200,10 +215,10 @@ export class CreditsService {
       const userCredits = await this.getUserCredits(userId, accountLevel);
       const creditsRemaining = userCredits.creditsLimit - userCredits.creditsUsed;
       const percentageUsed = (userCredits.creditsUsed / userCredits.creditsLimit) * 100;
-      
+
       const isProAccount = accountLevel === "pro";
       const periodType = isProAccount ? "monthly" : "daily";
-      
+
       const periodEnd = new Date(userCredits.currentPeriodEnd);
       const now = new Date();
       const timeUntilReset = this.formatTimeUntilReset(periodEnd, now);
@@ -232,8 +247,13 @@ export class CreditsService {
     usageData: Omit<UsageRecord, "userId" | "creditsUsed" | "operation">
   ): Promise<{ success: boolean; newBalance: number }> {
     try {
+      const adminDb = getAdminDb();
+      if (!adminDb) {
+        throw new Error("Database not available");
+      }
+
       const deductResult = await this.deductCredits(userId, operation, accountLevel, usageData.metadata);
-      
+
       if (!deductResult.success) {
         return deductResult;
       }
@@ -248,7 +268,7 @@ export class CreditsService {
       await adminDb.collection(this.COLLECTIONS.USAGE_TRACKING).add(usageRecord);
 
       console.log(`📊 [Credits] Tracked usage and deducted credits for ${operation}`);
-      
+
       return deductResult;
     } catch (error) {
       console.error("❌ [Credits] Failed to track usage and deduct credits:", error);
@@ -257,19 +277,24 @@ export class CreditsService {
   }
 
   private static async checkAndResetPeriod(
-    userCredits: UserCredits, 
+    userCredits: UserCredits,
     accountLevel: AccountLevel
   ): Promise<boolean> {
+    const adminDb = getAdminDb();
+    if (!adminDb) {
+      throw new Error("Database not available");
+    }
+
     const now = new Date();
     const isProAccount = accountLevel === "pro";
-    
+
     let needsReset = false;
     const updateData: Partial<UserCredits> = {};
 
     if (isProAccount) {
-      const lastReset = new Date(userCredits.lastMonthlyReset || userCredits.createdAt);
+      const lastReset = new Date(userCredits.lastMonthlyReset ?? userCredits.createdAt);
       const monthStart = this.getMonthStart();
-      
+
       if (now >= new Date(monthStart) && lastReset < new Date(monthStart)) {
         needsReset = true;
         updateData.monthlyCreditsUsed = 0;
@@ -279,9 +304,9 @@ export class CreditsService {
         updateData.currentPeriodEnd = this.getMonthEnd();
       }
     } else {
-      const lastReset = new Date(userCredits.lastDailyReset || userCredits.createdAt);
+      const lastReset = new Date(userCredits.lastDailyReset ?? userCredits.createdAt);
       const dayStart = this.getDayStart();
-      
+
       if (now >= new Date(dayStart) && lastReset < new Date(dayStart)) {
         needsReset = true;
         updateData.dailyCreditsUsed = 0;
@@ -294,12 +319,12 @@ export class CreditsService {
 
     if (needsReset) {
       updateData.updatedAt = now.toISOString();
-      
+
       await adminDb
         .collection(this.COLLECTIONS.USER_CREDITS)
         .doc(userCredits.id!)
         .update(updateData);
-        
+
       console.log(`🔄 [Credits] Reset ${isProAccount ? 'monthly' : 'daily'} credits for user ${userCredits.userId}`);
     }
 
@@ -337,7 +362,7 @@ export class CreditsService {
     const diff = periodEnd.getTime() - now.getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    
+
     if (hours > 24) {
       const days = Math.floor(hours / 24);
       return `${days} day${days !== 1 ? 's' : ''}`;
