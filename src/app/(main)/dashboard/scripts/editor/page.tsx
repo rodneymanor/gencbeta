@@ -140,8 +140,8 @@ export default function ScriptEditorPage() {
   }
 
   return (
-    // Content that works within the scrollable panel
-    <div className="flex h-full flex-col gap-4 lg:flex-row">
+    // Content that works within the scrollable panel with production-ready spacing
+    <div className="flex h-full flex-col gap-6 p-6 lg:flex-row">
       {/* Chat Assistant Card */}
       <Card className="flex flex-1 flex-col border-2 shadow-lg lg:max-w-[40%]">
         <CardHeader className="pb-3">

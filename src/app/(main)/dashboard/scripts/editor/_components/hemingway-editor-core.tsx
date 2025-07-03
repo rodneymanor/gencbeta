@@ -111,7 +111,7 @@ export function HemingwayEditorCore({
           maxRows={maxRows}
           readOnly={readOnly}
           autoFocus={autoFocus}
-          className={`h-full w-full resize-none border-0 bg-transparent p-3 font-mono text-sm focus:ring-0 focus:outline-none ${
+          className={`h-full w-full resize-none border-0 bg-transparent p-6 font-mono text-sm focus:ring-0 focus:outline-none ${
             readOnly ? "cursor-default" : ""
           }`}
           style={{
