@@ -76,7 +76,7 @@ export const sidebarItems: NavGroup[] = [
           },
           {
             title: "Negative Keywords",
-            url: "/dashboard/voices?tab=negative-keywords",
+            url: "/dashboard/voices?tab=keywords",
             icon: Shield,
           },
         ],
