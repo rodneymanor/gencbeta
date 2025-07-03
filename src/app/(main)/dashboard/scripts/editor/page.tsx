@@ -140,10 +140,10 @@ export default function ScriptEditorPage() {
   }
 
   return (
-    // Container that works with the dashboard's full-width system
-    <div className="bg-background flex min-h-screen flex-col p-4 md:p-6">
+    // Simplified container - let dashboard handle the outer padding
+    <>
       {/* Main Content - Responsive Card Layout */}
-      <div className="flex flex-1 flex-col gap-4 overflow-hidden p-4 lg:flex-row">
+      <div className="flex min-h-screen flex-col gap-4 overflow-hidden p-2 lg:flex-row">
         {/* Chat Assistant Card */}
         <Card className="flex flex-1 flex-col border-2 shadow-lg lg:max-w-[40%]">
           <CardHeader className="pb-3">
@@ -203,6 +203,6 @@ export default function ScriptEditorPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </>
   );
 }
