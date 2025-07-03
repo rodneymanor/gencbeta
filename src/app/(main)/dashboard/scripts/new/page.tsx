@@ -7,7 +7,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Clock } from "lucide-react";
 
 import { GhostWriter } from "@/components/ghost-writer";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -16,7 +15,6 @@ import { useUsage } from "@/contexts/usage-context";
 
 import { IdeaInboxDialog } from "./_components/idea-inbox-dialog";
 import { InputModeToggle, InputMode } from "./_components/input-mode-toggle";
-import { ScriptMode, scriptModes } from "./_components/types";
 
 interface ScriptOption {
   id: string;
@@ -46,7 +44,6 @@ export default function NewScriptPage() {
   const [videoUrl, setVideoUrl] = useState("");
 
   // Other state
-  const [selectedMode, setSelectedMode] = useState<ScriptMode["id"]>("speed-write");
   const [scriptLength, setScriptLength] = useState("20");
   const [isGenerating, setIsGenerating] = useState(false);
   const [speedWriteResponse, setSpeedWriteResponse] = useState<SpeedWriteResponse | null>(null);
@@ -86,7 +83,7 @@ export default function NewScriptPage() {
 
       // Clear URL parameters after setting state
       const newUrl = window.location.pathname;
-      window.history.replaceState({}, '', newUrl);
+      window.history.replaceState({}, "", newUrl);
     }
   }, [searchParams]);
 
@@ -103,7 +100,7 @@ export default function NewScriptPage() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         idea,
@@ -170,26 +167,13 @@ export default function NewScriptPage() {
   const handleSubmit = async () => {
     if (inputMode === "text") {
       if (!scriptIdea.trim()) return;
-
-      if (selectedMode === "speed-write") {
-        await handleSpeedWrite(scriptIdea);
-      } else {
-        // Legacy mode handling for other modes
-        const params = new URLSearchParams({
-          idea: encodeURIComponent(scriptIdea),
-          mode: selectedMode,
-          length: scriptLength,
-          inputType: "text",
-        });
-
-        router.push(`/dashboard/scripts/editor?${params.toString()}`);
-      }
+      await handleSpeedWrite(scriptIdea);
     } else {
       if (!videoUrl.trim()) return;
 
       const params = new URLSearchParams({
         videoUrl: encodeURIComponent(videoUrl),
-        mode: selectedMode,
+        mode: "speed-write",
         length: scriptLength,
         inputType: "video",
       });
@@ -222,7 +206,7 @@ export default function NewScriptPage() {
           </Card>
         )}
 
-        {/* Main Input Section with Mode Toggle */}
+        {/* Main Input Section */}
         <div className="space-y-6">
           <InputModeToggle
             inputMode={inputMode}
@@ -253,44 +237,7 @@ export default function NewScriptPage() {
               </Select>
             </div>
 
-            <div className="bg-border h-4 w-px" />
-
-            {/* Script Mode Buttons - Horizontal Layout */}
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground text-sm font-medium">Mode:</span>
-              {scriptModes.map((mode) => {
-                const IconComponent = mode.icon;
-                const isSelected = selectedMode === mode.id;
-
-                return (
-                  <Button
-                    key={mode.id}
-                    variant={isSelected ? "default" : "outline"}
-                    size="sm"
-                    disabled={!mode.available || isGenerating}
-                    className={`gap-2 ${!mode.available ? "opacity-50" : ""}`}
-                    onClick={() => mode.available && setSelectedMode(mode.id)}
-                  >
-                    <IconComponent className="h-4 w-4" />
-                    {mode.label}
-                    {!mode.available && (
-                      <Badge variant="secondary" className="ml-1 text-xs">
-                        Soon
-                      </Badge>
-                    )}
-                  </Button>
-                );
-              })}
-            </div>
-
-            <div className="text-muted-foreground ml-auto text-sm">
-              Press ⌘+Enter to{" "}
-              {selectedMode === "speed-write"
-                ? "generate scripts"
-                : inputMode === "video"
-                  ? "process video"
-                  : "create script"}
-            </div>
+            <div className="text-muted-foreground ml-auto text-sm">Press ⌘+Enter to generate scripts</div>
           </div>
         </div>
 
