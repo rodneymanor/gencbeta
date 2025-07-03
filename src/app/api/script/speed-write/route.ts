@@ -80,19 +80,22 @@ function createVoicePrompt(activeVoice: AIVoice, idea: string, length: string): 
 
   return `Write a complete, ready-to-read video script in the style of ${activeVoice.name}${activeVoice.creatorInspiration ? ` (inspired by ${activeVoice.creatorInspiration})` : ""}.
 
-Use this template structure for the topic "${idea}":
+Follow this template structure for the topic "${idea}":
 
-HOOK: ${randomTemplate.hook}
-BRIDGE: ${randomTemplate.bridge}
-GOLDEN NUGGET: ${randomTemplate.nugget}
-WHAT TO ACT (WTA): ${randomTemplate.wta}
+Template to follow:
+- Hook: ${randomTemplate.hook}
+- Bridge: ${randomTemplate.bridge}  
+- Golden Nugget: ${randomTemplate.nugget}
+- What To Act: ${randomTemplate.wta}
+
+IMPORTANT: Do NOT include the labels "HOOK:", "BRIDGE:", etc. in your output. Just write the complete script following the template structure above.
 
 Requirements:
 - Target length: ${length} seconds (~${targetWords} words)
 - Replace bracketed placeholders with content specific to "${idea}"
 - Maintain voice characteristics: ${activeVoice.badges.join(", ")}
 - Keep the same energy and tone as the original template
-- Write the complete script ready to record
+- Write the complete script ready to record, not an outline
 
 Script Topic: ${idea}
 Target Length: ${length} seconds
