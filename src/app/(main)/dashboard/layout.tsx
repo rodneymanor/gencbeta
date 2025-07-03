@@ -41,8 +41,8 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
               // Ensure full height
               "min-h-screen",
             ],
-            // Centered layout keeps default behavior
-            contentLayout === "centered" && "mx-auto max-w-screen-2xl",
+            // Only apply centering and max-width to centered layout
+            contentLayout === "centered" && ["mx-auto", "max-w-screen-2xl"],
           )}
         >
           <header className="flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
@@ -62,8 +62,12 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
           <DashboardClientLayout>
             <div
               className={cn(
+                // Base classes for all layouts
                 "w-full overflow-visible",
-                contentLayout === "centered" ? "mx-auto max-w-screen-2xl p-4 md:p-6" : "min-h-screen flex-shrink-0",
+                // Centered layout: apply padding, centering, and max-width
+                contentLayout === "centered" && "mx-auto max-w-screen-2xl p-4 md:p-6",
+                // Full-width layout: no constraints, just height and flex behavior
+                contentLayout === "full-width" && "min-h-screen flex-shrink-0",
               )}
             >
               {children}
