@@ -20,11 +20,6 @@ export function UsageTracker({ className }: UsageTrackerProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Hide when sidebar is collapsed
-  if (state === "collapsed") {
-    return null;
-  }
-
   const fetchUsageStats = async () => {
     if (!user) return;
 
@@ -58,6 +53,11 @@ export function UsageTracker({ className }: UsageTrackerProps) {
     
     return () => clearInterval(interval);
   }, [user]);
+
+  // Hide when sidebar is collapsed (after all hooks are called)
+  if (state === "collapsed") {
+    return null;
+  }
 
   if (!user || loading) {
     return (
