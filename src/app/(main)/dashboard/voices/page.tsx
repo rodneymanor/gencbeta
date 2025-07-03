@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { VoiceLibraryTab } from "./_components/voice-library-tab";
 import { CustomVoicesTab } from "./_components/custom-voices-tab";
 import { NegativeKeywordsTab } from "./_components/negative-keywords-tab";
+import { CreateVoiceFromProfile } from "./_components/create-voice-from-profile";
 import { VoiceActivatedModal } from "./_components/voice-activated-modal";
 import { ExampleScriptsModal } from "./_components/example-scripts-modal";
 import { CreateVoiceModal } from "./_components/create-voice-modal";
@@ -18,7 +19,7 @@ function VoicesPage() {
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState(() => {
     const tab = searchParams.get("tab");
-    if (tab === "custom" || tab === "keywords") return tab;
+    if (tab === "custom" || tab === "keywords" || tab === "create") return tab;
     return "library";
   });
   const [showActivatedModal, setShowActivatedModal] = useState(false);
@@ -114,9 +115,10 @@ function VoicesPage() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full max-w-lg grid-cols-3">
+        <TabsList className="grid w-full max-w-2xl grid-cols-4">
           <TabsTrigger value="custom">My Custom Voices</TabsTrigger>
           <TabsTrigger value="library">Voice Library</TabsTrigger>
+          <TabsTrigger value="create">Create from Profile</TabsTrigger>
           <TabsTrigger value="keywords">Negative Keywords</TabsTrigger>
         </TabsList>
 
@@ -138,6 +140,15 @@ function VoicesPage() {
             onUseVoice={handleUseVoice}
             onShowExamples={handleShowExamples}
             onDeleteVoice={handleDeleteVoice}
+          />
+        </TabsContent>
+
+        <TabsContent value="create" className="mt-6">
+          <CreateVoiceFromProfile 
+            onVoiceCreated={handleVoiceCreated}
+            onCollectionCreated={(collectionId) => {
+              toast.success("Collection created! Videos are being processed.");
+            }}
           />
         </TabsContent>
 
