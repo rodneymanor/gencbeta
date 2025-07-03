@@ -159,10 +159,10 @@ export class GhostWriterService {
           for (const ideaData of parsedIdeas[pillar]) {
             const idea: ContentIdea = {
               id: `${cycleId}_${pillar}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-              title: ideaData.title || ideaData.hook || "Untitled Idea",
+              title: ideaData.hook || "Content Idea", // Keep for backend compatibility
               description: ideaData.description || ideaData.script_outline || "",
               pillar,
-              hook: ideaData.hook || ideaData.title || "",
+              hook: ideaData.hook || "",
               scriptOutline: ideaData.script_outline || ideaData.description || "",
               targetAudience: ideaData.target_audience || brandProfile.targetAudience,
               callToAction: ideaData.call_to_action || "Follow for more tips!",
@@ -235,7 +235,7 @@ export class GhostWriterService {
     }
   }
 
-  /**
+    /**
    * Build the AI prompt for idea generation
    */
   private static buildIdeaGenerationPrompt(brandProfile: BrandProfileForIdeas, activeVoice?: AIVoice | null): string {
@@ -247,8 +247,18 @@ ACTIVE VOICE PROFILE:
 - Voice Characteristics: ${activeVoice.badges.join(", ")}
 - Creator Inspiration: ${activeVoice.creatorInspiration || "N/A"}
 - Voice Description: ${activeVoice.description}
+- Available Templates: ${activeVoice.templates.length} voice templates
 
-IMPORTANT: Generate ideas that align with the active voice characteristics. The content should feel natural for someone using the "${activeVoice.name}" voice style.`
+VOICE TEMPLATE EXAMPLES:
+${activeVoice.templates.slice(0, 2).map((template, index) => `
+Template ${index + 1}:
+- Hook: ${template.hook}
+- Bridge: ${template.bridge}
+- Golden Nugget: ${template.nugget}
+- WTA: ${template.wta}
+`).join('')}
+
+CRITICAL: Generate ideas that can be executed using these specific voice templates. Each idea should map to the Hook→Bridge→Golden Nugget→WTA structure. The hooks should be designed to work with the template patterns above.`
       : `
 
 No active voice selected - use the brand voice characteristics below.`;
@@ -257,7 +267,7 @@ No active voice selected - use the brand voice characteristics below.`;
 
 BRAND PROFILE:
 - Business/Profession: ${brandProfile.businessProfession}
-- Brand Personality: ${brandProfile.brandPersonality}  
+- Brand Personality: ${brandProfile.brandPersonality}
 - Universal Problem: ${brandProfile.universalProblem}
 - Initial Hurdle: ${brandProfile.initialHurdle}
 - Persistent Struggle: ${brandProfile.persistentStruggle}
@@ -282,9 +292,8 @@ REQUIRED JSON FORMAT:
 {
   "hyper_focused_value": [
     {
-      "title": "Compelling video title",
-      "hook": "Attention-grabbing opening line",
-      "script_outline": "Brief outline of video flow",
+      "hook": "Attention-grabbing opening line that fits voice templates",
+      "script_outline": "Brief outline following Hook→Bridge→Golden Nugget→WTA structure",
       "target_audience": "Specific audience segment",
       "call_to_action": "Clear next step",
       "estimated_duration": "60",
@@ -298,13 +307,13 @@ REQUIRED JSON FORMAT:
   "inspiration_bomb": [...]
 }
 
-Make each idea specific to the brand voice (${brandProfile.brandVoice}) and directly address the problems/excuses/questions from the brand profile. Ensure variety in difficulty and duration.${
+${
       activeVoice
-        ? `
+        ? `IMPORTANT: Each hook must be designed to work with the ${activeVoice.name} voice templates. The script_outline should follow the Hook→Bridge→Golden Nugget→WTA structure that matches the voice template patterns.`
+        : `Make each idea specific to the brand voice (${brandProfile.brandVoice}) and directly address the problems/excuses/questions from the brand profile.`
+    }
 
-Since the user has an active voice (${activeVoice.name}), ensure the ideas would work well with ${activeVoice.badges.join(", ").toLowerCase()} content styles.`
-        : ""
-    }`;
+Ensure variety in difficulty and duration.`;
   }
 
   /**

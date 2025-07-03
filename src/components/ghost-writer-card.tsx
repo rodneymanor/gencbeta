@@ -86,13 +86,8 @@ export function GhostWriterCard({
 
       {/* Main content */}
       <div className="space-y-4">
-        {/* Title - clean and prominent */}
-        <h3 className="font-semibold text-lg text-gray-900 leading-tight line-clamp-3">
-          {idea.title}
-        </h3>
-
-        {/* Hook - italicized and prominent */}
-        <p className="text-gray-700 line-clamp-3 leading-relaxed">
+        {/* Hook - main content, prominent */}
+        <p className="text-gray-900 text-lg leading-relaxed line-clamp-4 font-medium">
           {idea.hook}
         </p>
 
