@@ -76,31 +76,24 @@ async function getActiveVoice(userId: string): Promise<AIVoice | null> {
 
 function createVoicePrompt(activeVoice: AIVoice, idea: string, length: string): string {
   const randomTemplate = activeVoice.templates[Math.floor(Math.random() * activeVoice.templates.length)];
-  const targetWords = Math.round(parseInt(length) * 2.2);
 
-  return `Write a complete, ready-to-read video script in the style of ${activeVoice.name}${activeVoice.creatorInspiration ? ` (inspired by ${activeVoice.creatorInspiration})` : ""}.
+  return `Take this exact template and replace the bracketed placeholders with content about "${idea}":
 
-Follow this template structure for the topic "${idea}":
+${randomTemplate.hook}
 
-Template to follow:
-- Hook: ${randomTemplate.hook}
-- Bridge: ${randomTemplate.bridge}  
-- Golden Nugget: ${randomTemplate.nugget}
-- What To Act: ${randomTemplate.wta}
+${randomTemplate.bridge}
 
-IMPORTANT: Do NOT include the labels "HOOK:", "BRIDGE:", etc. in your output. Just write the complete script following the template structure above.
+${randomTemplate.nugget}
 
-Requirements:
-- Target length: ${length} seconds (~${targetWords} words)
-- Replace bracketed placeholders with content specific to "${idea}"
-- Maintain voice characteristics: ${activeVoice.badges.join(", ")}
-- Keep the same energy and tone as the original template
-- Write the complete script ready to record, not an outline
+${randomTemplate.wta}
 
-Script Topic: ${idea}
-Target Length: ${length} seconds
+INSTRUCTIONS:
+- Only replace text inside [brackets] with content about "${idea}"
+- Keep everything else exactly the same
+- Don't add extra words or change the structure
+- Make it about ${length} seconds when read aloud
 
-Write the complete script now:`;
+Output the complete script:`;
 }
 
 async function generateAIVoiceScript(idea: string, length: string, activeVoice: AIVoice) {
