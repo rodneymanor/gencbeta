@@ -1,5 +1,6 @@
 import { adminDb } from "@/lib/firebase-admin";
 import { GeminiService } from "@/lib/gemini";
+import { AIVoice } from "@/types/ai-voices";
 import { 
   ContentIdea, 
   ContentPillar, 
@@ -13,7 +14,7 @@ import {
 export class GhostWriterService {
   private static readonly COLLECTIONS = {
     GHOST_WRITER_CYCLES: "ghost_writer_cycles",
-    CONTENT_IDEAS: "content_ideas", 
+    CONTENT_IDEAS: "content_ideas",
     USER_GHOST_WRITER_DATA: "user_ghost_writer_data",
   } as const;
 
@@ -25,31 +26,38 @@ export class GhostWriterService {
    */
   static async getCurrentCycle(): Promise<GhostWriterCycle> {
     const now = new Date();
-    
-    // Check for active global cycle
+
+    // Check for active global cycle - simplified query to avoid index requirement
     const activeCycleSnapshot = await adminDb
       .collection(this.COLLECTIONS.GHOST_WRITER_CYCLES)
       .where("status", "==", "active")
       .where("globalCycle", "==", true)
-      .orderBy("generatedAt", "desc")
-      .limit(1)
+      .limit(10)
       .get();
 
     if (!activeCycleSnapshot.empty) {
-      const cycle = { 
-        id: activeCycleSnapshot.docs[0].id, 
-        ...activeCycleSnapshot.docs[0].data() 
-      } as GhostWriterCycle;
-      
+      // Find the most recent active cycle
+      const cycles = activeCycleSnapshot.docs.map(
+        (doc: FirebaseFirestore.QueryDocumentSnapshot) =>
+          ({
+            id: doc.id,
+            ...doc.data(),
+          }) as GhostWriterCycle,
+      );
+
+      // Sort by generatedAt descending to get the most recent
+      cycles.sort(
+        (a: GhostWriterCycle, b: GhostWriterCycle) =>
+          new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime(),
+      );
+      const cycle = cycles[0];
+
       // Check if cycle is still valid
       if (new Date(cycle.expiresAt) > now) {
         return cycle;
       } else {
         // Mark as expired
-        await adminDb
-          .collection(this.COLLECTIONS.GHOST_WRITER_CYCLES)
-          .doc(cycle.id)
-          .update({ status: "expired" });
+        await adminDb.collection(this.COLLECTIONS.GHOST_WRITER_CYCLES).doc(cycle.id).update({ status: "expired" });
       }
     }
 
@@ -62,8 +70,8 @@ export class GhostWriterService {
    */
   private static async createNewCycle(): Promise<GhostWriterCycle> {
     const now = new Date();
-    const expiresAt = new Date(now.getTime() + (this.CYCLE_DURATION_HOURS * 60 * 60 * 1000));
-    
+    const expiresAt = new Date(now.getTime() + this.CYCLE_DURATION_HOURS * 60 * 60 * 1000);
+
     // Get the latest cycle number
     const latestCycleSnapshot = await adminDb
       .collection(this.COLLECTIONS.GHOST_WRITER_CYCLES)
@@ -71,8 +79,8 @@ export class GhostWriterService {
       .limit(1)
       .get();
 
-    const cycleNumber = latestCycleSnapshot.empty 
-      ? 1 
+    const cycleNumber = latestCycleSnapshot.empty
+      ? 1
       : (latestCycleSnapshot.docs[0].data().cycleNumber + 1);
 
     const newCycle: Omit<GhostWriterCycle, "id"> = {
@@ -84,9 +92,7 @@ export class GhostWriterService {
       globalCycle: true,
     };
 
-    const docRef = await adminDb
-      .collection(this.COLLECTIONS.GHOST_WRITER_CYCLES)
-      .add(newCycle);
+    const docRef = await adminDb.collection(this.COLLECTIONS.GHOST_WRITER_CYCLES).add(newCycle);
 
     console.log(`🔄 [GhostWriter] Created new global cycle ${cycleNumber}`);
 
@@ -100,15 +106,19 @@ export class GhostWriterService {
    * Generate content ideas for a user based on their brand profile
    */
   static async generateIdeasForUser(
-    userId: string, 
+    userId: string,
     brandProfile: BrandProfileForIdeas,
-    cycleId: string
+    cycleId: string,
   ): Promise<ContentIdea[]> {
     try {
       console.log(`🎯 [GhostWriter] Generating ideas for user ${userId}`);
 
-      const prompt = this.buildIdeaGenerationPrompt(brandProfile);
-      
+      // Get user's active voice
+      const activeVoice = await this.getActiveVoice(userId);
+      console.log(`🎤 [GhostWriter] Active voice:`, activeVoice ? activeVoice.name : "None");
+
+      const prompt = this.buildIdeaGenerationPrompt(brandProfile, activeVoice);
+
       const result = await GeminiService.generateContent({
         prompt,
         maxTokens: 2000,
@@ -143,7 +153,7 @@ export class GhostWriterService {
       // Convert to ContentIdea objects
       const ideas: ContentIdea[] = [];
       const pillars = Object.keys(parsedIdeas) as ContentPillar[];
-      
+
       for (const pillar of pillars) {
         if (parsedIdeas[pillar] && Array.isArray(parsedIdeas[pillar])) {
           for (const ideaData of parsedIdeas[pillar]) {
@@ -181,7 +191,6 @@ export class GhostWriterService {
 
       console.log(`✅ [GhostWriter] Generated ${selectedIdeas.length} ideas for user ${userId}`);
       return selectedIdeas;
-
     } catch (error) {
       console.error("❌ [GhostWriter] Failed to generate ideas:", error);
       throw error;
@@ -189,9 +198,61 @@ export class GhostWriterService {
   }
 
   /**
+   * Get the user's currently active voice
+   */
+  static async getActiveVoice(userId: string): Promise<AIVoice | null> {
+    try {
+      // Check user's custom voices first
+      const customSnapshot = await adminDb
+        .collection("aiVoices")
+        .where("userId", "==", userId)
+        .where("isActive", "==", true)
+        .limit(1)
+        .get();
+
+      if (!customSnapshot.empty) {
+        const doc = customSnapshot.docs[0];
+        return { id: doc.id, ...doc.data() } as AIVoice;
+      }
+
+      // Check shared voices
+      const sharedSnapshot = await adminDb
+        .collection("aiVoices")
+        .where("isShared", "==", true)
+        .where("isActive", "==", true)
+        .limit(1)
+        .get();
+
+      if (!sharedSnapshot.empty) {
+        const doc = sharedSnapshot.docs[0];
+        return { id: doc.id, ...doc.data() } as AIVoice;
+      }
+
+      return null;
+    } catch (error) {
+      console.error("❌ [GhostWriter] Failed to get active voice:", error);
+      return null;
+    }
+  }
+
+  /**
    * Build the AI prompt for idea generation
    */
-  private static buildIdeaGenerationPrompt(brandProfile: BrandProfileForIdeas): string {
+  private static buildIdeaGenerationPrompt(brandProfile: BrandProfileForIdeas, activeVoice?: AIVoice | null): string {
+    const voiceSection = activeVoice
+      ? `
+
+ACTIVE VOICE PROFILE:
+- Voice Name: ${activeVoice.name}
+- Voice Characteristics: ${activeVoice.badges.join(", ")}
+- Creator Inspiration: ${activeVoice.creatorInspiration || "N/A"}
+- Voice Description: ${activeVoice.description}
+
+IMPORTANT: Generate ideas that align with the active voice characteristics. The content should feel natural for someone using the "${activeVoice.name}" voice style.`
+      : `
+
+No active voice selected - use the brand voice characteristics below.`;
+
     return `You are a world-class content strategist and viral video specialist. Generate 6 highly-tailored short-form video content ideas based on the brand profile below.
 
 BRAND PROFILE:
@@ -205,7 +266,7 @@ BRAND PROFILE:
 - Content Pillars: ${brandProfile.contentPillars.join(", ")}
 - Target Audience: ${brandProfile.targetAudience}
 - Brand Voice: ${brandProfile.brandVoice}
-- Industry: ${brandProfile.industry}
+- Industry: ${brandProfile.industry}${voiceSection}
 
 Generate ideas using the "Problems, Excuses, Questions" (PEQ) framework, addressing the audience's struggles, justifications for inaction, and direct questions.
 
@@ -237,7 +298,13 @@ REQUIRED JSON FORMAT:
   "inspiration_bomb": [...]
 }
 
-Make each idea specific to the brand voice (${brandProfile.brandVoice}) and directly address the problems/excuses/questions from the brand profile. Ensure variety in difficulty and duration.`;
+Make each idea specific to the brand voice (${brandProfile.brandVoice}) and directly address the problems/excuses/questions from the brand profile. Ensure variety in difficulty and duration.${
+      activeVoice
+        ? `
+
+Since the user has an active voice (${activeVoice.name}), ensure the ideas would work well with ${activeVoice.badges.join(", ").toLowerCase()} content styles.`
+        : ""
+    }`;
   }
 
   /**
@@ -247,24 +314,24 @@ Make each idea specific to the brand voice (${brandProfile.brandVoice}) and dire
     const pillars = Object.keys(CONTENT_PILLARS) as ContentPillar[];
     const ideasPerPillar = Math.floor(targetCount / pillars.length);
     const remainder = targetCount % pillars.length;
-    
+
     const selected: ContentIdea[] = [];
-    
+
     for (let i = 0; i < pillars.length; i++) {
       const pillar = pillars[i];
-      const pillarIdeas = ideas.filter(idea => idea.pillar === pillar);
+      const pillarIdeas = ideas.filter((idea) => idea.pillar === pillar);
       const count = ideasPerPillar + (i < remainder ? 1 : 0);
-      
+
       selected.push(...pillarIdeas.slice(0, count));
     }
-    
+
     // Fill remaining slots if needed
     const remaining = targetCount - selected.length;
     if (remaining > 0) {
-      const unusedIdeas = ideas.filter(idea => !selected.includes(idea));
+      const unusedIdeas = ideas.filter((idea) => !selected.includes(idea));
       selected.push(...unusedIdeas.slice(0, remaining));
     }
-    
+
     return selected.slice(0, targetCount);
   }
 
@@ -276,13 +343,20 @@ Make each idea specific to the brand voice (${brandProfile.brandVoice}) and dire
       .collection(this.COLLECTIONS.CONTENT_IDEAS)
       .where("userId", "==", userId)
       .where("cycleId", "==", cycleId)
-      .orderBy("createdAt", "desc")
       .get();
 
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    } as ContentIdea));
+    const ideas = snapshot.docs.map(
+      (doc: FirebaseFirestore.QueryDocumentSnapshot) =>
+        ({
+          id: doc.id,
+          ...doc.data(),
+        }) as ContentIdea,
+    );
+
+    // Sort in memory by createdAt descending until index is ready
+    return ideas.sort(
+      (a: ContentIdea, b: ContentIdea) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
   }
 
   /**
@@ -298,7 +372,7 @@ Make each idea specific to the brand voice (${brandProfile.brandVoice}) and dire
     if (!snapshot.empty) {
       return {
         id: snapshot.docs[0].id,
-        ...snapshot.docs[0].data()
+        ...snapshot.docs[0].data(),
       } as UserGhostWriterData;
     }
 
@@ -320,9 +394,7 @@ Make each idea specific to the brand voice (${brandProfile.brandVoice}) and dire
       updatedAt: new Date().toISOString(),
     };
 
-    const docRef = await adminDb
-      .collection(this.COLLECTIONS.USER_GHOST_WRITER_DATA)
-      .add(userData);
+    const docRef = await adminDb.collection(this.COLLECTIONS.USER_GHOST_WRITER_DATA).add(userData);
 
     return {
       id: docRef.id,
@@ -335,7 +407,7 @@ Make each idea specific to the brand voice (${brandProfile.brandVoice}) and dire
    */
   static async saveIdea(userId: string, ideaId: string): Promise<void> {
     const userData = await this.getUserData(userId);
-    
+
     if (!userData.savedIdeas.includes(ideaId)) {
       await adminDb
         .collection(this.COLLECTIONS.USER_GHOST_WRITER_DATA)
@@ -352,7 +424,7 @@ Make each idea specific to the brand voice (${brandProfile.brandVoice}) and dire
    */
   static async dismissIdea(userId: string, ideaId: string): Promise<void> {
     const userData = await this.getUserData(userId);
-    
+
     if (!userData.dismissedIdeas.includes(ideaId)) {
       await adminDb
         .collection(this.COLLECTIONS.USER_GHOST_WRITER_DATA)
@@ -363,4 +435,4 @@ Make each idea specific to the brand voice (${brandProfile.brandVoice}) and dire
         });
     }
   }
-} 
+}

@@ -26,34 +26,48 @@ export function GhostWriter() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [needsBrandProfile, setNeedsBrandProfile] = useState(false);
+  const [generatingMore, setGeneratingMore] = useState(false);
 
   const fetchIdeas = async () => {
-    if (!user) return;
+    console.log("🎯 [GhostWriter Component] fetchIdeas called, user:", !!user);
+    if (!user) {
+      console.log("❌ [GhostWriter Component] No user found, returning early");
+      return;
+    }
 
     try {
+      console.log("🔄 [GhostWriter Component] Starting to fetch ideas...");
       setError(null);
+      
+      const token = await user.getIdToken();
+      console.log("🔑 [GhostWriter Component] Got user token:", token ? "✅" : "❌");
+      
       const response = await fetch("/api/ghost-writer/ideas", {
         headers: {
-          "Authorization": `Bearer ${await user.getIdToken()}`,
+          "Authorization": `Bearer ${token}`,
         },
       });
 
+      console.log("📡 [GhostWriter Component] API response status:", response.status);
+
       if (!response.ok) {
         const errorData = await response.json();
+        console.log("❌ [GhostWriter Component] API error response:", errorData);
         if (errorData.needsBrandProfile) {
           setNeedsBrandProfile(true);
           setError("Please complete your brand profile to get personalized content ideas.");
         } else {
-          throw new Error(errorData.error || "Failed to fetch ideas");
+          throw new Error(errorData.error ?? "Failed to fetch ideas");
         }
         return;
       }
 
       const result = await response.json();
+      console.log("✅ [GhostWriter Component] API success response:", result);
       setData(result);
       setNeedsBrandProfile(false);
     } catch (err) {
-      console.error("Failed to fetch Ghost Writer ideas:", err);
+      console.error("❌ [GhostWriter Component] Failed to fetch Ghost Writer ideas:", err);
       setError(err instanceof Error ? err.message : "Failed to fetch ideas");
     } finally {
       setLoading(false);
@@ -113,6 +127,31 @@ export function GhostWriter() {
     router.push(`/dashboard/scripts/new?${queryParams.toString()}`);
   };
 
+  const handleWriteMore = async () => {
+    if (!user) return;
+    
+    setGeneratingMore(true);
+    try {
+      const response = await fetch("/api/ghost-writer/ideas?generateMore=true", {
+        headers: {
+          "Authorization": `Bearer ${await user.getIdToken()}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate more ideas");
+      }
+
+      const result = await response.json();
+      setData(result);
+    } catch (err) {
+      console.error("Failed to generate more ideas:", err);
+      setError(err instanceof Error ? err.message : "Failed to generate more ideas");
+    } finally {
+      setGeneratingMore(false);
+    }
+  };
+
   const formatTimeUntilRefresh = (expiresAt: string) => {
     const now = new Date();
     const expires = new Date(expiresAt);
@@ -131,6 +170,7 @@ export function GhostWriter() {
   };
 
   useEffect(() => {
+    console.log("🔄 [GhostWriter Component] useEffect triggered, user:", !!user);
     fetchIdeas();
   }, [user]);
 
@@ -139,7 +179,6 @@ export function GhostWriter() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
             Ghost Writer
           </CardTitle>
           <CardDescription>
@@ -160,7 +199,6 @@ export function GhostWriter() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
             Ghost Writer
           </CardTitle>
           <CardDescription>
@@ -204,7 +242,6 @@ export function GhostWriter() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
             Ghost Writer
           </CardTitle>
           <CardDescription>
@@ -227,23 +264,25 @@ export function GhostWriter() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
+        <div className="relative">
+          {/* Time in upper left corner */}
+          <div className="absolute top-0 left-0 flex items-center gap-2 text-sm text-muted-foreground">
+            <Clock className="h-4 w-4" />
+            <span>{formatTimeUntilRefresh(data.cycle.expiresAt)}</span>
+          </div>
+          
+          {/* Centered headlines */}
+          <div className="text-center pt-6">
+            <CardTitle className="flex items-center justify-center gap-2">
               <Sparkles className="h-5 w-5 text-primary" />
               Ghost Writer
               <span className="text-sm font-normal text-muted-foreground">
                 Cycle #{data.cycle.cycleNumber}
               </span>
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="mt-2">
               AI-powered content ideas based on your brand profile
             </CardDescription>
-          </div>
-          
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Clock className="h-4 w-4" />
-            <span>{formatTimeUntilRefresh(data.cycle.expiresAt)}</span>
           </div>
         </div>
       </CardHeader>
@@ -262,17 +301,26 @@ export function GhostWriter() {
           ))}
         </div>
         
-        {data.ideas && data.ideas.length < 6 && (
-          <div className="mt-6 text-center">
-            <p className="text-sm text-muted-foreground mb-2">
-              Some ideas were dismissed. New ideas will be available in the next cycle.
-            </p>
-            <Button onClick={fetchIdeas} variant="outline" size="sm">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Check for Updates
-            </Button>
-          </div>
-        )}
+        <div className="mt-6 text-center">
+          <Button 
+            onClick={handleWriteMore} 
+            variant="outline" 
+            size="sm"
+            disabled={generatingMore}
+          >
+            {generatingMore ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4 mr-2" />
+                Write More
+              </>
+            )}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

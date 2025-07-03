@@ -157,16 +157,6 @@
       ]
     },
     {
-      "collectionGroup": "user_credits",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "userId",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
       "collectionGroup": "credit_transactions",
       "queryScope": "COLLECTION",
       "fields": [
@@ -190,6 +180,42 @@
         },
         {
           "fieldPath": "timestamp",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "ghost_writer_cycles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "globalCycle",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "generatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "content_ideas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "userId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "cycleId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
           "order": "DESCENDING"
         }
       ]

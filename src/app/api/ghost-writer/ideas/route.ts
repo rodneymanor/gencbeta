@@ -5,31 +5,45 @@ import { BrandProfileForIdeas } from "@/types/ghost-writer";
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    console.log("🎯 [GhostWriter] Fetching content ideas...");
+    console.log("🎯 [GhostWriter API] Starting to fetch content ideas...");
+
+    // Check if this is a "generate more" request
+    const { searchParams } = new URL(request.url);
+    const generateMore = searchParams.get("generateMore") === "true";
+    console.log("🔄 [GhostWriter API] Generate more request:", generateMore);
 
     // Authenticate user
     const authResult = await authenticateApiKey(request);
-    if (!authResult.success) {
-      return NextResponse.json(
-        { error: authResult.error },
-        { status: authResult.status }
-      );
+    
+    // Check if authResult is a NextResponse (error case)
+    if (authResult instanceof NextResponse) {
+      console.log("🔐 [GhostWriter API] Auth result: ❌ Authentication failed");
+      return authResult;
     }
-
-    const { userId } = authResult;
+    
+    console.log("🔐 [GhostWriter API] Auth result: ✅ Success");
+    const { user } = authResult;
+    const userId = user.uid;
+    console.log("👤 [GhostWriter API] User ID:", userId);
 
     // Get current cycle
+    console.log("🔄 [GhostWriter API] Getting current cycle...");
     const currentCycle = await GhostWriterService.getCurrentCycle();
+    console.log("📅 [GhostWriter API] Current cycle:", currentCycle.id);
     
     // Get user data
+    console.log("👤 [GhostWriter API] Getting user data...");
     const userData = await GhostWriterService.getUserData(userId);
+    console.log("📊 [GhostWriter API] User data:", { savedIdeas: userData.savedIdeas.length, dismissedIdeas: userData.dismissedIdeas.length });
 
     // Check if user already has ideas for current cycle
+    console.log("💡 [GhostWriter API] Getting existing ideas for cycle...");
     let ideas = await GhostWriterService.getIdeasForUser(userId, currentCycle.id);
+    console.log("📝 [GhostWriter API] Found existing ideas:", ideas.length);
 
-    // If no ideas exist for current cycle, generate them
-    if (ideas.length === 0) {
-      console.log(`🔄 [GhostWriter] No ideas found for cycle ${currentCycle.id}, checking brand profile...`);
+    // If no ideas exist for current cycle or user wants to generate more, generate them
+    if (ideas.length === 0 || generateMore) {
+      console.log(`🔄 [GhostWriter] ${generateMore ? "Generating more ideas" : "No ideas found for cycle"} ${currentCycle.id}, checking brand profile...`);
       
       // Get user's brand profile
       const brandProfile = await getBrandProfileForUser(userId);
@@ -45,11 +59,18 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
 
       // Generate new ideas
-      console.log(`🎨 [GhostWriter] Generating ideas with brand profile:`, JSON.stringify(brandProfile, null, 2));
-      ideas = await GhostWriterService.generateIdeasForUser(userId, brandProfile, currentCycle.id);
+      console.log(`🎨 [GhostWriter] Generating ${generateMore ? "additional" : "new"} ideas with brand profile:`, JSON.stringify(brandProfile, null, 2));
+      const newIdeas = await GhostWriterService.generateIdeasForUser(userId, brandProfile, currentCycle.id);
+      
+      // If generating more, combine with existing ideas
+      if (generateMore) {
+        ideas = [...ideas, ...newIdeas];
+      } else {
+        ideas = newIdeas;
+      }
       
       // Update user data with new cycle
-      await updateUserCycleData(userId, currentCycle.id, ideas.length);
+      await updateUserCycleData(userId, currentCycle.id, newIdeas.length);
     }
 
     // Filter out dismissed ideas
