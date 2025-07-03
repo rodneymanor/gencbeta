@@ -1,3 +1,5 @@
+import { ContentIdea } from "@/types/ghost-writer";
+
 export const formatTimeUntilRefresh = (expiresAt: string): string => {
   const now = new Date();
   const expires = new Date(expiresAt);
@@ -12,7 +14,7 @@ export const formatTimeUntilRefresh = (expiresAt: string): string => {
   return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 };
 
-export const createScriptQueryParams = (idea: any): URLSearchParams => {
+export const createScriptQueryParams = (idea: ContentIdea & { concept?: string; script?: string; peqCategory?: string }): URLSearchParams => {
   return new URLSearchParams({
     idea: idea.concept ?? idea.title ?? "Content Idea",
     script: idea.script ?? idea.hook,

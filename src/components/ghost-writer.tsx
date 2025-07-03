@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+
 import { useRouter } from "next/navigation";
+
 import { Loader2, RefreshCw, AlertCircle, ExternalLink } from "lucide-react";
 
 import { GhostWriterCard } from "@/components/ghost-writer-card";
@@ -76,12 +78,15 @@ export function GhostWriter() {
 
       if (!response.ok) throw new Error("Failed to manage idea");
 
+      // Initialize userData if it doesn't exist
+      const currentUserData = data.userData || { savedIdeas: [], dismissedIdeas: [] };
+
       setData({
         ...data,
         userData: {
-          ...data.userData,
-          savedIdeas: action === "save" ? [...data.userData.savedIdeas, ideaId] : data.userData.savedIdeas,
-          dismissedIdeas: action === "dismiss" ? [...data.userData.dismissedIdeas, ideaId] : data.userData.dismissedIdeas,
+          ...currentUserData,
+          savedIdeas: action === "save" ? [...currentUserData.savedIdeas, ideaId] : currentUserData.savedIdeas,
+          dismissedIdeas: action === "dismiss" ? [...currentUserData.dismissedIdeas, ideaId] : currentUserData.dismissedIdeas,
         },
         ideas: action === "dismiss" ? data.ideas.filter((idea) => idea.id !== ideaId) : data.ideas,
       });
@@ -91,7 +96,7 @@ export function GhostWriter() {
   };
 
   const handleUseIdea = (idea: ContentIdea) => {
-    const queryParams = createScriptQueryParams(idea as any);
+    const queryParams = createScriptQueryParams(idea as ContentIdea & { concept?: string; script?: string; peqCategory?: string });
     router.push(`/dashboard/scripts/new?${queryParams.toString()}`);
   };
 

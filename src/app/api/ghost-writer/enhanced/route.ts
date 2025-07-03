@@ -1,15 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { authenticateApiKey } from "@/lib/api-key-auth";
-import { adminDb } from "@/lib/firebase-admin";
 import { EnhancedGhostWriterService, EnhancedContentIdea } from "@/lib/enhanced-ghost-writer-service";
+import { adminDb } from "@/lib/firebase-admin";
 import { GhostWriterService } from "@/lib/ghost-writer-service";
 import { BrandProfile } from "@/types/brand-profile";
-import { AIVoice } from "@/types/ai-voices";
-
-interface EnhancedGhostWriterRequest {
-  generateMore?: boolean;
-  refresh?: boolean;
-}
 
 interface EnhancedGhostWriterResponse {
   success: boolean;
@@ -18,6 +13,10 @@ interface EnhancedGhostWriterResponse {
     id: string;
     expiresAt: string;
     timeRemaining: number;
+  };
+  userData?: {
+    savedIdeas: string[];
+    dismissedIdeas: string[];
   };
   error?: string;
   metadata?: {
@@ -28,6 +27,40 @@ interface EnhancedGhostWriterResponse {
     processingTime: number;
   };
 }
+
+const createLegacyFallbackResponse = async (request: NextRequest): Promise<NextResponse<EnhancedGhostWriterResponse>> => {
+  const legacyResponse = await fetch(new URL("/api/ghost-writer/ideas", request.url), {
+    method: "GET",
+    headers: request.headers,
+  });
+
+  if (legacyResponse.ok) {
+    const legacyData = await legacyResponse.json();
+    return NextResponse.json({
+      success: legacyData.success,
+      ideas: legacyData.ideas?.map((idea: any) => ({
+        ...idea,
+        concept: idea.description ?? idea.hook,
+        script: idea.scriptOutline ?? idea.description,
+        peqCategory: "problem" as const,
+        sourceText: "Legacy content",
+        wordCount: (idea.scriptOutline ?? idea.description ?? "").split(/\s+/).length,
+      })),
+      cycle: legacyData.cycle,
+      userData: legacyData.userData || { savedIdeas: [], dismissedIdeas: [] },
+      error: legacyData.error,
+      metadata: {
+        peqEnabled: false,
+        voiceActive: false,
+        conceptsGenerated: legacyData.ideas?.length ?? 0,
+        scriptsGenerated: legacyData.ideas?.length ?? 0,
+        processingTime: 0,
+      },
+    });
+  } else {
+    throw new Error("Failed to get legacy Ghost Writer data");
+  }
+};
 
 export async function GET(request: NextRequest): Promise<NextResponse<EnhancedGhostWriterResponse>> {
   try {
@@ -58,41 +91,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<EnhancedGh
 
     if (brandProfileSnapshot.empty) {
       console.log("⚠️ [EnhancedGhostWriter] No brand profile found, falling back to legacy system");
-      
-      // Fallback to legacy Ghost Writer system
-      const legacyResponse = await fetch(
-        new URL("/api/ghost-writer/ideas", request.url),
-        {
-          method: "GET",
-          headers: request.headers,
-        }
-      );
-
-      if (legacyResponse.ok) {
-        const legacyData = await legacyResponse.json();
-        return NextResponse.json({
-          success: legacyData.success,
-          ideas: legacyData.ideas?.map((idea: any) => ({
-            ...idea,
-            concept: idea.description || idea.hook,
-            script: idea.scriptOutline || idea.description,
-            peqCategory: "problem" as const,
-            sourceText: "Legacy content",
-            wordCount: (idea.scriptOutline || idea.description || "").split(/\s+/).length,
-          })),
-          cycle: legacyData.cycle,
-          error: legacyData.error,
-          metadata: {
-            peqEnabled: false,
-            voiceActive: false,
-            conceptsGenerated: legacyData.ideas?.length || 0,
-            scriptsGenerated: legacyData.ideas?.length || 0,
-            processingTime: 0,
-          },
-        });
-      } else {
-        throw new Error("Failed to get legacy Ghost Writer data");
-      }
+      return createLegacyFallbackResponse(request);
     }
 
     const brandProfile = {
@@ -117,13 +116,15 @@ export async function GET(request: NextRequest): Promise<NextResponse<EnhancedGh
 
     // Generate new ideas if none exist, if generateMore is requested, or if refresh is requested
     if (existingIdeas.length === 0 || generateMore || refresh) {
-      console.log(`💡 [EnhancedGhostWriter] Generating ${refresh ? "refreshed" : generateMore ? "additional" : "new"} ideas`);
-      
+      console.log(
+        `💡 [EnhancedGhostWriter] Generating ${refresh ? "refreshed" : generateMore ? "additional" : "new"} ideas`,
+      );
+
       const generationResult = await EnhancedGhostWriterService.generateEnhancedIdeas(
         userId,
         brandProfile,
         currentCycle.id,
-        activeVoice
+        activeVoice,
       );
 
       if (generationResult.success && generationResult.ideas) {
@@ -137,10 +138,12 @@ export async function GET(request: NextRequest): Promise<NextResponse<EnhancedGh
           ideas = generationResult.ideas;
         }
 
-        console.log(`✅ [EnhancedGhostWriter] Generated ${generationResult.ideas.length} ${refresh ? "refreshed" : "new"} ideas`);
+        console.log(
+          `✅ [EnhancedGhostWriter] Generated ${generationResult.ideas.length} ${refresh ? "refreshed" : "new"} ideas`,
+        );
       } else {
         console.error("❌ [EnhancedGhostWriter] Failed to generate ideas:", generationResult.error);
-        throw new Error(generationResult.error || "Failed to generate ideas");
+        throw new Error(generationResult.error ?? "Failed to generate ideas");
       }
     } else {
       console.log(`📋 [EnhancedGhostWriter] Using ${existingIdeas.length} existing ideas`);
@@ -150,6 +153,16 @@ export async function GET(request: NextRequest): Promise<NextResponse<EnhancedGh
     const now = new Date();
     const expiresAt = new Date(currentCycle.expiresAt);
     const timeRemaining = Math.max(0, expiresAt.getTime() - now.getTime());
+
+    // Get user data (saved and dismissed ideas)
+    const userDataSnapshot = await adminDb
+      .collection("users")
+      .doc(userId)
+      .get();
+    
+    const userData = userDataSnapshot.exists 
+      ? userDataSnapshot.data() 
+      : { savedIdeas: [], dismissedIdeas: [] };
 
     console.log(`🎉 [EnhancedGhostWriter] Returning ${ideas.length} ideas`);
 
@@ -161,11 +174,15 @@ export async function GET(request: NextRequest): Promise<NextResponse<EnhancedGh
         expiresAt: currentCycle.expiresAt,
         timeRemaining,
       },
+      userData: {
+        savedIdeas: userData.savedIdeas || [],
+        dismissedIdeas: userData.dismissedIdeas || [],
+      },
       metadata: {
         peqEnabled: true,
         voiceActive: !!activeVoice,
         conceptsGenerated: ideas.length,
-        scriptsGenerated: ideas.filter(idea => idea.voiceTemplateId).length,
+        scriptsGenerated: ideas.filter((idea) => idea.voiceTemplateId).length,
         processingTime: 0,
       },
     });
@@ -184,7 +201,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<EnhancedGh
           processingTime: 0,
         },
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 } 
