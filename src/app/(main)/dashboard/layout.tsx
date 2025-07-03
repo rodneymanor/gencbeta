@@ -25,11 +25,22 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
         <AppSidebar variant={sidebarVariant} collapsible="icon" />
         <SidebarInset
           className={cn(
-            // Remove the max-width constraint to allow full-width layouts
-            // Only apply centering when explicitly set to centered
+            // Override default SidebarInset margins for full-width layout
+            contentLayout === "full-width" && [
+              // Remove all default margins and ensure full width
+              "md:peer-data-[variant=inset]:m-0",
+              "md:peer-data-[variant=inset]:ml-0",
+              "md:peer-data-[variant=inset]:mr-0",
+              "md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-0",
+              "md:peer-data-[variant=inset]:peer-data-[state=collapsed]:mr-0",
+              // Remove rounded corners and shadow for edge-to-edge appearance
+              "md:peer-data-[variant=inset]:rounded-none",
+              "md:peer-data-[variant=inset]:shadow-none",
+              // Ensure full height
+              "min-h-screen",
+            ],
+            // Centered layout keeps default behavior
             contentLayout === "centered" && "mx-auto max-w-screen-2xl",
-            // Responsive margin adjustments for inset sidebar variants
-            "max-[113rem]:peer-data-[variant=inset]:mr-2 min-[101rem]:peer-data-[variant=inset]:peer-data-[state=collapsed]:mr-auto",
           )}
         >
           <header className="flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
@@ -50,7 +61,7 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
             <div
               className={cn(
                 "w-full overflow-visible",
-                contentLayout === "centered" ? "mx-auto max-w-screen-2xl p-4 md:p-6" : "h-full p-4 md:p-6",
+                contentLayout === "centered" ? "mx-auto max-w-screen-2xl p-4 md:p-6" : "min-h-screen",
               )}
             >
               {children}
