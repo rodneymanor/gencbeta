@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Bookmark, BookmarkCheck, X, Sparkles, Clock, Target } from "lucide-react";
+import { Bookmark, BookmarkCheck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { ContentIdea, CONTENT_PILLARS } from "@/types/ghost-writer";
+import { ContentIdea } from "@/types/ghost-writer";
 
 interface GhostWriterCardProps {
   idea: ContentIdea;
@@ -25,7 +24,6 @@ export function GhostWriterCard({
   className,
 }: GhostWriterCardProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const pillarInfo = CONTENT_PILLARS[idea.pillar];
 
   const handleSave = async () => {
     if (isLoading || !onSave) return;
@@ -56,114 +54,71 @@ export function GhostWriterCard({
   return (
     <div
       className={cn(
-        "group relative flex w-full flex-col gap-4 overflow-hidden rounded-xl border bg-card p-6 shadow-sm transition-all duration-200 hover:shadow-md hover:border-primary/20",
+        "group relative flex w-full flex-col gap-6 overflow-hidden rounded-2xl bg-white border border-gray-100 p-6 shadow-sm transition-all duration-200 hover:shadow-lg hover:border-gray-200",
         className,
       )}
     >
-      {/* Header with pillar badge and actions */}
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-2">
-          <Badge 
-            variant="secondary" 
-            className={cn(
-              "text-xs font-medium",
-              pillarInfo.color.replace('bg-', 'bg-').replace('-500', '-100'),
-              pillarInfo.color.replace('bg-', 'text-').replace('-500', '-700')
-            )}
-          >
-            <span className="mr-1">{pillarInfo.icon}</span>
-            {pillarInfo.name}
-          </Badge>
-          <Badge variant="outline" className="text-xs">
-            {idea.estimatedDuration}s
-          </Badge>
-        </div>
-        
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
-            onClick={handleSave}
-            disabled={isLoading || isSaved}
-          >
-            {isSaved ? (
-              <BookmarkCheck className="h-4 w-4 text-green-600" />
-            ) : (
-              <Bookmark className="h-4 w-4" />
-            )}
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
-            onClick={handleDismiss}
-            disabled={isLoading}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
+      {/* Action buttons - minimal and subtle */}
+      <div className="absolute top-4 right-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 w-7 p-0 text-gray-400 hover:text-gray-600"
+          onClick={handleSave}
+          disabled={isLoading || isSaved}
+        >
+          {isSaved ? (
+            <BookmarkCheck className="h-4 w-4 text-blue-500" />
+          ) : (
+            <Bookmark className="h-4 w-4" />
+          )}
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 w-7 p-0 text-gray-400 hover:text-red-500"
+          onClick={handleDismiss}
+          disabled={isLoading}
+        >
+          <X className="h-4 w-4" />
+        </Button>
       </div>
 
-      {/* Content */}
-      <div className="space-y-3">
-        {/* Title */}
-        <h3 className="font-semibold text-lg leading-tight line-clamp-2">
+      {/* Main content */}
+      <div className="space-y-4">
+        {/* Title - clean and prominent */}
+        <h3 className="font-semibold text-lg text-gray-900 leading-tight line-clamp-3">
           {idea.title}
         </h3>
 
-        {/* Hook */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Sparkles className="h-3 w-3" />
-            <span className="font-medium">Hook</span>
-          </div>
-          <p className="text-sm text-foreground/90 line-clamp-2 italic">
-            "{idea.hook}"
-          </p>
-        </div>
+        {/* Hook - italicized and prominent */}
+        <p className="text-gray-700 line-clamp-3 leading-relaxed">
+          {idea.hook}
+        </p>
 
-        {/* Description/Outline */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Target className="h-3 w-3" />
-            <span className="font-medium">Outline</span>
-          </div>
-          <p className="text-sm text-muted-foreground line-clamp-3">
-            {idea.scriptOutline || idea.description}
-          </p>
-        </div>
-
-        {/* Tags */}
-        {idea.tags && idea.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {idea.tags.slice(0, 3).map((tag, index) => (
-              <Badge key={index} variant="outline" className="text-xs px-2 py-0.5">
-                #{tag}
-              </Badge>
-            ))}
-            {idea.tags.length > 3 && (
-              <Badge variant="outline" className="text-xs px-2 py-0.5">
-                +{idea.tags.length - 3}
-              </Badge>
-            )}
-          </div>
-        )}
+        {/* Call to action - subtle */}
+        <p className="text-sm text-gray-500 line-clamp-2">
+          {idea.callToAction}
+        </p>
       </div>
 
-      {/* Footer */}
-      <div className="flex items-center justify-between pt-2 border-t">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Clock className="h-3 w-3" />
-          <span className="capitalize">{idea.difficulty}</span>
-          <span>•</span>
-          <span>{idea.targetAudience}</span>
+      {/* Footer with action */}
+      <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-gray-400 font-medium uppercase tracking-wide">
+            {idea.estimatedDuration}s
+          </span>
+          <span className="text-xs text-gray-300">•</span>
+          <span className="text-xs text-gray-400 capitalize">
+            {idea.difficulty}
+          </span>
         </div>
         
         <Button 
           onClick={handleUse}
           size="sm"
-          className="h-8 px-3 text-xs font-medium"
+          variant="ghost"
+          className="h-8 px-4 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50"
         >
           Use Idea
         </Button>

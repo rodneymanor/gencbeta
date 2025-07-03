@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, RefreshCw, Sparkles, Clock, AlertCircle, ExternalLink } from "lucide-react";
+import { Loader2, RefreshCw, Clock, AlertCircle, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -157,16 +157,13 @@ export function GhostWriter() {
     const expires = new Date(expiresAt);
     const diff = expires.getTime() - now.getTime();
     
-    if (diff <= 0) return "Refreshing soon...";
+    if (diff <= 0) return "00:00:00";
     
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
     
-    if (hours > 0) {
-      return `${hours}h ${minutes}m until refresh`;
-    } else {
-      return `${minutes}m until refresh`;
-    }
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
   useEffect(() => {
@@ -176,14 +173,16 @@ export function GhostWriter() {
 
   if (loading) {
     return (
-      <Card>
+      <Card className="border-0 shadow-none">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            Ghost Writer
-          </CardTitle>
-          <CardDescription>
-            AI-powered content ideas based on your brand profile
-          </CardDescription>
+          <div className="text-center">
+            <CardTitle className="text-3xl font-bold">
+              Ghost Writer
+            </CardTitle>
+            <CardDescription className="mt-2 text-base">
+              AI-powered content ideas based on your brand profile
+            </CardDescription>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-12">
@@ -196,14 +195,16 @@ export function GhostWriter() {
 
   if (error) {
     return (
-      <Card>
+      <Card className="border-0 shadow-none">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            Ghost Writer
-          </CardTitle>
-          <CardDescription>
-            AI-powered content ideas based on your brand profile
-          </CardDescription>
+          <div className="text-center">
+            <CardTitle className="text-3xl font-bold">
+              Ghost Writer
+            </CardTitle>
+            <CardDescription className="mt-2 text-base">
+              AI-powered content ideas based on your brand profile
+            </CardDescription>
+          </div>
         </CardHeader>
         <CardContent>
           <Alert>
@@ -239,14 +240,16 @@ export function GhostWriter() {
 
   if (!data || !data.ideas || data.ideas.length === 0) {
     return (
-      <Card>
+      <Card className="border-0 shadow-none">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            Ghost Writer
-          </CardTitle>
-          <CardDescription>
-            AI-powered content ideas based on your brand profile
-          </CardDescription>
+          <div className="text-center">
+            <CardTitle className="text-3xl font-bold">
+              Ghost Writer
+            </CardTitle>
+            <CardDescription className="mt-2 text-base">
+              AI-powered content ideas based on your brand profile
+            </CardDescription>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
@@ -262,25 +265,22 @@ export function GhostWriter() {
   }
 
   return (
-    <Card>
+    <Card className="border-0 shadow-none">
       <CardHeader>
         <div className="relative">
-          {/* Time in upper left corner */}
-          <div className="absolute top-0 left-0 flex items-center gap-2 text-sm text-muted-foreground">
-            <Clock className="h-4 w-4" />
-            <span>{formatTimeUntilRefresh(data.cycle.expiresAt)}</span>
+          {/* Countdown in upper left corner */}
+          <div className="absolute top-0 left-0">
+            <div className="text-sm text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-md border">
+              New posts coming in: <span className="font-mono text-blue-600">{formatTimeUntilRefresh(data.cycle.expiresAt)}</span>
+            </div>
           </div>
           
           {/* Centered headlines */}
-          <div className="text-center pt-6">
-            <CardTitle className="flex items-center justify-center gap-2">
-              <Sparkles className="h-5 w-5 text-primary" />
+          <div className="text-center pt-12">
+            <CardTitle className="text-3xl font-bold">
               Ghost Writer
-              <span className="text-sm font-normal text-muted-foreground">
-                Cycle #{data.cycle.cycleNumber}
-              </span>
             </CardTitle>
-            <CardDescription className="mt-2">
+            <CardDescription className="mt-2 text-base">
               AI-powered content ideas based on your brand profile
             </CardDescription>
           </div>
@@ -301,12 +301,13 @@ export function GhostWriter() {
           ))}
         </div>
         
-        <div className="mt-6 text-center">
+        <div className="mt-8 text-center">
           <Button 
             onClick={handleWriteMore} 
             variant="outline" 
-            size="sm"
+            size="lg"
             disabled={generatingMore}
+            className="px-8"
           >
             {generatingMore ? (
               <>
@@ -314,10 +315,7 @@ export function GhostWriter() {
                 Generating...
               </>
             ) : (
-              <>
-                <Sparkles className="h-4 w-4 mr-2" />
-                Write More
-              </>
+              "Write More"
             )}
           </Button>
         </div>
