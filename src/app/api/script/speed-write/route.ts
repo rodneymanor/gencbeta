@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { createNegativeKeywordPromptInstruction } from "@/data/negative-keywords";
 import { authenticateApiKey } from "@/lib/api-key-auth";
 import { CreditsService } from "@/lib/credits-service";
 import { adminDb } from "@/lib/firebase-admin";
 import { generateScript } from "@/lib/gemini";
+import { NegativeKeywordsService } from "@/lib/negative-keywords-service";
 import { trackApiUsageAdmin, UsageTrackerAdmin } from "@/lib/usage-tracker-admin";
 import { VoiceTemplateProcessor } from "@/lib/voice-template-processor";
 import { AIVoice } from "@/types/ai-voices";
@@ -75,7 +77,7 @@ async function getActiveVoice(userId: string): Promise<AIVoice | null> {
   }
 }
 
-function createVoicePrompt(activeVoice: AIVoice, idea: string, length: string): string {
+function createVoicePrompt(activeVoice: AIVoice, idea: string, length: string, negativeKeywordInstruction: string): string {
   const randomTemplate = activeVoice.templates[Math.floor(Math.random() * activeVoice.templates.length)];
   const targetWordCount = VoiceTemplateProcessor.calculateTargetWordCount(randomTemplate, parseInt(length));
 
@@ -128,11 +130,15 @@ Separate the content generated for each section (hook, bridge, nugget, and wta) 
 
 The output must be a clean script, ready to be copied and pasted.
 
-Target approximately ${targetWordCount} words for a ${length}-second read.`;
+Target approximately ${targetWordCount} words for a ${length}-second read.${negativeKeywordInstruction}`;
 }
 
-async function generateAIVoiceScript(idea: string, length: string, activeVoice: AIVoice) {
-  const prompt = createVoicePrompt(activeVoice, idea, length);
+async function generateAIVoiceScript(idea: string, length: string, activeVoice: AIVoice, userId: string) {
+  // Get user's negative keywords
+  const negativeKeywords = await NegativeKeywordsService.getEffectiveNegativeKeywordsForUser(userId);
+  const negativeKeywordInstruction = createNegativeKeywordPromptInstruction(negativeKeywords);
+  
+  const prompt = createVoicePrompt(activeVoice, idea, length, negativeKeywordInstruction);
 
   try {
     const result = await generateScript(prompt);
@@ -151,8 +157,12 @@ async function generateAIVoiceScript(idea: string, length: string, activeVoice: 
   }
 }
 
-async function generateSpeedWriteScript(idea: string, length: string) {
+async function generateSpeedWriteScript(idea: string, length: string, userId: string) {
   const targetWords = Math.round(parseInt(length) * 2.2);
+
+  // Get user's negative keywords
+  const negativeKeywords = await NegativeKeywordsService.getEffectiveNegativeKeywordsForUser(userId);
+  const negativeKeywordInstruction = createNegativeKeywordPromptInstruction(negativeKeywords);
 
   const prompt = `Write a complete, ready-to-read video script using the Speed Write formula. This is the exact script the creator will read out loud.
 
@@ -166,15 +176,19 @@ Speed Write Formula:
 3. GOLDEN NUGGET: Deliver core value/insight
 4. WHAT TO ACT (WTA): Clear call to action
 
-Script Topic: ${idea}
+Script Topic: ${idea}${negativeKeywordInstruction}
 
 Write the complete script now:`;
 
   return generateScript(prompt);
 }
 
-async function generateEducationalScript(idea: string, length: string) {
+async function generateEducationalScript(idea: string, length: string, userId: string) {
   const targetWords = Math.round(parseInt(length) * 2.2);
+
+  // Get user's negative keywords
+  const negativeKeywords = await NegativeKeywordsService.getEffectiveNegativeKeywordsForUser(userId);
+  const negativeKeywordInstruction = createNegativeKeywordPromptInstruction(negativeKeywords);
 
   const prompt = `Write a complete, ready-to-read video script for an educational video about the topic below. This is the exact script the creator will read out loud.
 
@@ -190,7 +204,7 @@ Script Structure:
 
 Tone: Conversational, confident, and helpful. Use "you" frequently. Keep sentences short and punchy.
 
-Video Topic: ${idea}
+Video Topic: ${idea}${negativeKeywordInstruction}
 
 Write the complete script now:`;
 
@@ -230,12 +244,12 @@ async function processSpeedWriteRequest(
   // Check for active AI voice
   const activeVoice = await getActiveVoice(userId);
 
-  const promises: Promise<any>[] = [generateSpeedWriteScript(idea, length), generateEducationalScript(idea, length)];
+  const promises: Promise<any>[] = [generateSpeedWriteScript(idea, length, userId), generateEducationalScript(idea, length, userId)];
 
   // Add AI voice generation if available
   if (activeVoice && activeVoice.templates && activeVoice.templates.length > 0) {
     console.log(`[SpeedWrite] Including AI Voice: ${activeVoice.name}`);
-    promises.push(generateAIVoiceScript(idea, length, activeVoice));
+    promises.push(generateAIVoiceScript(idea, length, activeVoice, userId));
   }
 
   const results = await Promise.allSettled(promises);

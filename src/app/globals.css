@@ -189,3 +189,18 @@
     -webkit-line-clamp: 4;
   }
 }
+
+/* Negative Keywords Highlighting */
+.negative-keyword {
+  background-color: hsl(var(--destructive) / 0.1);
+  color: hsl(var(--destructive));
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-weight: 600;
+  border: 1px solid hsl(var(--destructive) / 0.3);
+}
+
+.dark .negative-keyword {
+  background-color: hsl(var(--destructive) / 0.2);
+  color: hsl(var(--destructive-foreground));
+}

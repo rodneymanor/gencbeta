@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { VoiceLibraryTab } from "./_components/voice-library-tab";
 import { CustomVoicesTab } from "./_components/custom-voices-tab";
+import { NegativeKeywordsTab } from "./_components/negative-keywords-tab";
 import { VoiceActivatedModal } from "./_components/voice-activated-modal";
 import { ExampleScriptsModal } from "./_components/example-scripts-modal";
 import { CreateVoiceModal } from "./_components/create-voice-modal";
@@ -15,7 +16,11 @@ import { toast } from "sonner";
 
 function VoicesPage() {
   const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState(searchParams.get("tab") === "custom" ? "custom" : "library");
+  const [activeTab, setActiveTab] = useState(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "custom" || tab === "keywords") return tab;
+    return "library";
+  });
   const [showActivatedModal, setShowActivatedModal] = useState(false);
   const [showExamplesModal, setShowExamplesModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -109,9 +114,10 @@ function VoicesPage() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid w-full max-w-lg grid-cols-3">
           <TabsTrigger value="custom">My Custom Voices</TabsTrigger>
           <TabsTrigger value="library">Voice Library</TabsTrigger>
+          <TabsTrigger value="keywords">Negative Keywords</TabsTrigger>
         </TabsList>
 
         <TabsContent value="library" className="mt-6">
@@ -133,6 +139,10 @@ function VoicesPage() {
             onShowExamples={handleShowExamples}
             onDeleteVoice={handleDeleteVoice}
           />
+        </TabsContent>
+
+        <TabsContent value="keywords" className="mt-6">
+          <NegativeKeywordsTab />
         </TabsContent>
       </Tabs>
 
