@@ -29,7 +29,7 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
             <SidebarInset
               className={cn(
                 // V0.dev-like layout: fill entire viewport
-                "flex h-dvh",
+                "flex w-screen flex-1",
                 // Override default SidebarInset margins for full-width layout
                 contentLayout === "full-width" && [
                   // Remove all default margins and ensure full width
