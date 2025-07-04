@@ -56,7 +56,7 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
   return (
     <div
       className={cn(
-        "border-border/50 bg-card hover:shadow-subtle hover:ring-border/50 focus-visible:ring-primary/50 divide-border/50 relative flex min-h-[280px] w-full max-w-lg cursor-pointer flex-col gap-3 divide-y overflow-hidden rounded-xl border p-4 transition-all duration-200 select-none hover:scale-[1.02] hover:ring-1 focus-visible:ring-2 focus-visible:outline-none",
+        "border-border/50 bg-card hover:shadow-subtle hover:ring-border/50 focus-visible:ring-primary/50 divide-border/50 relative flex w-full max-w-lg cursor-pointer flex-col gap-3 divide-y overflow-hidden rounded-xl border p-4 transition-all duration-200 select-none hover:scale-[1.02] hover:ring-1 focus-visible:ring-2 focus-visible:outline-none",
         className,
       )}
       onClick={handleUse}
@@ -101,7 +101,7 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
       </div>
 
       {/* Script content */}
-      <div className="text-foreground line-clamp-6 pb-3 text-sm leading-relaxed whitespace-pre-wrap">
+      <div className="text-foreground line-clamp-6 min-h-[140px] pb-3 text-sm leading-relaxed whitespace-pre-wrap">
         {(idea as ContentIdea & { script?: string }).script ?? idea.hook}
       </div>
 
