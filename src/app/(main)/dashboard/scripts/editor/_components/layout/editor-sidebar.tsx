@@ -2,7 +2,19 @@
 
 import { useState } from "react";
 
-import { Palette, BarChart3, Target, Clock, Eye, EyeOff, Lightbulb, Zap, Link, Megaphone } from "lucide-react";
+import {
+  Palette,
+  BarChart3,
+  Target,
+  Clock,
+  Eye,
+  EyeOff,
+  Lightbulb,
+  Zap,
+  Link,
+  Megaphone,
+  BookOpen,
+} from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,6 +29,7 @@ interface EditorSidebarProps {
     bridges: boolean;
     goldenNuggets: boolean;
     ctas: boolean;
+    readability: boolean;
   };
   onHighlightToggle: (type: keyof EditorSidebarProps["highlightSettings"]) => void;
 }
@@ -63,6 +76,23 @@ export function EditorSidebar({ script, highlightSettings, onHighlightToggle }: 
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
+            {/* Readability Highlighting */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full bg-gradient-to-r from-green-500 to-red-500" />
+                <span className="text-sm">Readability</span>
+                <Badge variant="secondary" className="text-xs">
+                  Sentences
+                </Badge>
+              </div>
+              <Switch
+                checked={highlightSettings.readability}
+                onCheckedChange={() => onHighlightToggle("readability")}
+              />
+            </div>
+
+            <Separator />
+
             {/* Hooks */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -168,6 +198,10 @@ export function EditorSidebar({ script, highlightSettings, onHighlightToggle }: 
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="text-muted-foreground space-y-1 text-xs">
+              <div className="flex items-start gap-2">
+                <BookOpen className="mt-0.5 h-3 w-3 text-purple-500" />
+                <span>Use readability highlighting to identify complex sentences</span>
+              </div>
               <div className="flex items-start gap-2">
                 <Zap className="mt-0.5 h-3 w-3 text-orange-500" />
                 <span>Start with a strong hook to grab attention</span>

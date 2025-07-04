@@ -2,8 +2,11 @@
 
 import { useState, useEffect, useRef } from "react";
 
+import { analyzeReadability } from "@/lib/readability-analysis";
+
 import { EditorSidebar } from "./editor-sidebar";
 import { EditorToolbar } from "./editor-toolbar";
+import { ReadabilitySidebar } from "./readability-sidebar";
 
 interface EnhancedEditorProps {
   initialScript?: string;
@@ -18,6 +21,7 @@ export function EnhancedEditor({ initialScript = "", onScriptChange, onSave }: E
     bridges: true,
     goldenNuggets: true,
     ctas: true,
+    readability: true,
   });
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -36,12 +40,91 @@ export function EnhancedEditor({ initialScript = "", onScriptChange, onSave }: E
     }
   };
 
-  const handleHighlightToggle = (type: keyof typeof highlightSettings) => {
-    setHighlightSettings((prev) => {
-      const newSettings = { ...prev };
-      newSettings[type] = !newSettings[type];
-      return newSettings;
-    });
+  const handleHighlightToggle = (type: string) => {
+    if (type in highlightSettings) {
+      setHighlightSettings((prev) => ({
+        ...prev,
+        [type]: !prev[type as keyof typeof prev],
+      }));
+    }
+  };
+
+  // Analyze sentence readability
+  const getSentenceReadabilityColor = (sentence: string): string => {
+    if (!sentence.trim() || sentence.length < 10) return "";
+
+    try {
+      const analysis = analyzeReadability(sentence);
+      const score = analysis.readabilityLevel.score;
+
+      if (score >= 80) return "bg-green-100/30"; // Very easy
+      if (score >= 70) return "bg-emerald-100/30"; // Easy
+      if (score >= 60) return "bg-yellow-100/30"; // Standard
+      if (score >= 50) return "bg-orange-100/30"; // Fairly difficult
+      if (score >= 30) return "bg-red-100/30"; // Difficult
+      return "bg-rose-100/30"; // Very difficult
+    } catch {
+      return "";
+    }
+  };
+
+  // Apply readability highlighting
+  const applyReadabilityHighlighting = (text: string): string => {
+    const sentences = text.split(/([.!?]+)/);
+    let processedText = "";
+
+    for (let i = 0; i < sentences.length; i += 2) {
+      const sentence = sentences[i];
+      const punctuation = sentences[i + 1] || "";
+
+      if (sentence && sentence.trim()) {
+        const readabilityClass = getSentenceReadabilityColor(sentence);
+        if (readabilityClass) {
+          processedText += `<span class="${readabilityClass} px-1 rounded">${sentence}</span>${punctuation}`;
+        } else {
+          processedText += sentence + punctuation;
+        }
+      } else {
+        processedText += sentence + punctuation;
+      }
+    }
+
+    return processedText;
+  };
+
+  // Apply script element highlighting
+  const applyScriptElementHighlighting = (text: string): string => {
+    let highlightedText = text;
+
+    if (highlightSettings.hooks) {
+      highlightedText = highlightedText.replace(
+        /\b(imagine|what if|did you know|here's why|the secret|shocking|amazing|incredible)\b/gi,
+        '<span class="bg-orange-500/40 text-orange-800 px-1 rounded font-medium">$1</span>',
+      );
+    }
+
+    if (highlightSettings.bridges) {
+      highlightedText = highlightedText.replace(
+        /\b(but|however|now|so|because|that's why|here's the thing)\b/gi,
+        '<span class="bg-cyan-500/40 text-cyan-800 px-1 rounded font-medium">$1</span>',
+      );
+    }
+
+    if (highlightSettings.goldenNuggets) {
+      highlightedText = highlightedText.replace(
+        /\b(fact|tip|secret|trick|hack|pro tip|remember|key point)\b/gi,
+        '<span class="bg-blue-500/40 text-blue-800 px-1 rounded font-medium">$1</span>',
+      );
+    }
+
+    if (highlightSettings.ctas) {
+      highlightedText = highlightedText.replace(
+        /\b(subscribe|like|comment|share|follow|click|buy|get|download|sign up)\b/gi,
+        '<span class="bg-green-500/40 text-green-800 px-1 rounded font-medium">$1</span>',
+      );
+    }
+
+    return highlightedText;
   };
 
   // Apply highlighting to the text
@@ -50,41 +133,20 @@ export function EnhancedEditor({ initialScript = "", onScriptChange, onSave }: E
 
     let highlightedText = script;
 
-    // Apply highlighting based on settings
-    if (highlightSettings.hooks) {
-      highlightedText = highlightedText.replace(
-        /\b(imagine|what if|did you know|here's why|the secret|shocking|amazing|incredible)\b/gi,
-        '<span class="bg-orange-500/20 text-orange-700 px-1 rounded">$1</span>',
-      );
+    // Apply readability highlighting first (sentence-level)
+    if (highlightSettings.readability) {
+      highlightedText = applyReadabilityHighlighting(highlightedText);
     }
 
-    if (highlightSettings.bridges) {
-      highlightedText = highlightedText.replace(
-        /\b(but|however|now|so|because|that's why|here's the thing)\b/gi,
-        '<span class="bg-cyan-500/20 text-cyan-700 px-1 rounded">$1</span>',
-      );
-    }
-
-    if (highlightSettings.goldenNuggets) {
-      highlightedText = highlightedText.replace(
-        /\b(fact|tip|secret|trick|hack|pro tip|remember|key point)\b/gi,
-        '<span class="bg-blue-500/20 text-blue-700 px-1 rounded">$1</span>',
-      );
-    }
-
-    if (highlightSettings.ctas) {
-      highlightedText = highlightedText.replace(
-        /\b(subscribe|like|comment|share|follow|click|buy|get|download|sign up)\b/gi,
-        '<span class="bg-green-500/20 text-green-700 px-1 rounded">$1</span>',
-      );
-    }
+    // Apply script element highlighting on top
+    highlightedText = applyScriptElementHighlighting(highlightedText);
 
     return highlightedText;
   };
 
   return (
     <div className="bg-background flex h-screen">
-      {/* Sidebar */}
+      {/* Left Sidebar - Writing Tools */}
       <EditorSidebar script={script} highlightSettings={highlightSettings} onHighlightToggle={handleHighlightToggle} />
 
       {/* Main Editor Area */}
@@ -123,6 +185,9 @@ export function EnhancedEditor({ initialScript = "", onScriptChange, onSave }: E
           />
         </div>
       </div>
+
+      {/* Right Sidebar - Readability Analysis */}
+      <ReadabilitySidebar script={script} />
     </div>
   );
 }
