@@ -108,25 +108,19 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
       {/* Engagement metrics */}
       <div className="flex items-center justify-between pt-2">
         <div className="flex items-center space-x-6">
-          <button className="border-primary/20 bg-primary/20 hover:bg-primary/30 hover:border-primary/40 text-primary group/button relative inline-flex h-8 cursor-pointer items-center justify-center rounded-full border pr-3 pl-3 text-center font-sans text-sm outline-transparent transition duration-300 ease-out outline-none select-none focus:outline-none active:scale-[0.97] active:duration-150 active:ease-out">
-            <div className="flex min-w-0 items-center justify-center gap-1.5 font-medium">
-              <Heart className="h-4 w-4" />
-              <span className="text-foreground text-sm font-medium">{engagement.likes.toLocaleString()}</span>
-            </div>
+          <button className="text-muted-foreground hover:text-destructive flex items-center space-x-2 transition-colors">
+            <Heart className="h-4 w-4" />
+            <span className="text-sm font-medium">{engagement.likes.toLocaleString()}</span>
           </button>
 
-          <button className="border-primary/20 bg-primary/20 hover:bg-primary/30 hover:border-primary/40 text-primary group/button relative inline-flex h-8 cursor-pointer items-center justify-center rounded-full border pr-3 pl-3 text-center font-sans text-sm outline-transparent transition duration-300 ease-out outline-none select-none focus:outline-none active:scale-[0.97] active:duration-150 active:ease-out">
-            <div className="flex min-w-0 items-center justify-center gap-1.5 font-medium">
-              <MessageCircle className="h-4 w-4" />
-              <span className="text-foreground text-sm font-medium">{engagement.comments}</span>
-            </div>
+          <button className="text-muted-foreground hover:text-primary flex items-center space-x-2 transition-colors">
+            <MessageCircle className="h-4 w-4" />
+            <span className="text-sm font-medium">{engagement.comments}</span>
           </button>
 
-          <button className="border-primary/20 bg-primary/20 hover:bg-primary/30 hover:border-primary/40 text-primary group/button relative inline-flex h-8 cursor-pointer items-center justify-center rounded-full border pr-3 pl-3 text-center font-sans text-sm outline-transparent transition duration-300 ease-out outline-none select-none focus:outline-none active:scale-[0.97] active:duration-150 active:ease-out">
-            <div className="flex min-w-0 items-center justify-center gap-1.5 font-medium">
-              <Share className="h-4 w-4" />
-              <span className="text-foreground text-sm font-medium">{engagement.shares}</span>
-            </div>
+          <button className="text-muted-foreground hover:text-primary flex items-center space-x-2 transition-colors">
+            <Share className="h-4 w-4" />
+            <span className="text-sm font-medium">{engagement.shares}</span>
           </button>
         </div>
       </div>
