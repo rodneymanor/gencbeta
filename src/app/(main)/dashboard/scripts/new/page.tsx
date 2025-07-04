@@ -10,12 +10,10 @@ import { GhostWriter } from "@/components/ghost-writer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/auth-context";
 import { useUsage } from "@/contexts/usage-context";
 import { useVoice } from "@/contexts/voice-context";
 
-import { IdeaInboxDialog } from "./_components/idea-inbox-dialog";
 import { InputModeToggle, InputMode } from "./_components/input-mode-toggle";
 
 interface ScriptOption {
@@ -188,20 +186,18 @@ export default function NewScriptPage() {
   return (
     <div className="bg-background min-h-screen">
       {/* Centered Content Container - Raised Higher */}
-      <div className="flex min-h-screen flex-col items-center justify-start pt-8 px-4">
+      <div className="flex flex-col items-center justify-start px-4 pt-8 pb-8">
         {/* Header */}
-        <div className="text-center mb-6">
-          <h1 className="text-5xl font-bold text-foreground mb-2 font-inter">
-            What&apos;s your script idea?
-          </h1>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+        <div className="mb-6 text-center">
+          <h1 className="text-foreground font-inter mb-2 text-5xl font-bold">What&apos;s your script idea?</h1>
+          <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
             Transform your ideas into engaging scripts with AI assistance
           </p>
         </div>
 
         {/* Error Display */}
         {speedWriteResponse && !speedWriteResponse.success && (
-          <Card className="border-destructive bg-destructive/5 p-4 mb-6 max-w-2xl w-full">
+          <Card className="border-destructive bg-destructive/5 mb-6 w-full max-w-2xl p-4">
             <div className="text-destructive flex items-center gap-2">
               <span className="font-medium">Generation Failed:</span>
               <span>{speedWriteResponse.error}</span>
@@ -213,11 +209,11 @@ export default function NewScriptPage() {
         )}
 
         {/* Main Input Section - 66% Viewport Width */}
-        <div className="w-full max-w-none" style={{ width: '66vw' }}>
+        <div className="w-full max-w-none" style={{ width: "66vw" }}>
           {/* Voice Badge */}
           <div className="mb-4 flex justify-center">
-            <Badge variant="outline" className="px-3 py-1 text-sm border-primary/30 text-primary bg-primary/5">
-              <Mic className="h-3 w-3 mr-1" />
+            <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5 px-3 py-1 text-sm">
+              <Mic className="mr-1 h-3 w-3" />
               {currentVoice} Voice
             </Badge>
           </div>
@@ -235,14 +231,14 @@ export default function NewScriptPage() {
           />
 
           {/* Controls Row - Simplified */}
-          <div className="flex items-center justify-center gap-4 mt-4">
+          <div className="mt-4 flex items-center justify-center gap-4">
             <div className="text-muted-foreground text-sm">Press ⌘+Enter to generate scripts</div>
           </div>
         </div>
       </div>
 
-      {/* Ghost Writer Section - Full Width */}
-      <div className="px-6 pb-12">
+      {/* Ghost Writer Section - Raised Higher */}
+      <div className="px-6 pt-4 pb-12">
         <div className="mx-auto max-w-7xl">
           <GhostWriter />
         </div>

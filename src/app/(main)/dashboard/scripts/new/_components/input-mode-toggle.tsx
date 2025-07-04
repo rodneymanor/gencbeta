@@ -1,6 +1,6 @@
 "use client";
 
-import { Type, Video, ExternalLink, Inbox } from "lucide-react";
+import { Type, Video, ExternalLink } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -198,7 +198,7 @@ export function InputModeToggle({
             value={textValue}
             onChange={(e) => onTextChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="min-h-[160px] resize-none pr-32 text-base leading-relaxed border-border/50 focus:border-primary/50 focus:ring-primary/20 rounded-lg shadow-sm"
+            className="border-border/50 focus:border-primary/50 focus:ring-primary/20 min-h-[160px] resize-none rounded-lg pr-32 text-base leading-relaxed shadow-sm"
             disabled={disabled}
             style={{
               fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
@@ -206,12 +206,7 @@ export function InputModeToggle({
           />
           <div className="absolute right-4 bottom-4 flex items-center gap-2">
             {showIdeaInbox && <IdeaInboxDialog />}
-            <Button
-              onClick={onSubmit}
-              disabled={finalSubmitDisabled}
-              size="sm"
-              className="h-10 w-10 p-0 shadow-sm"
-            >
+            <Button onClick={onSubmit} disabled={finalSubmitDisabled} size="sm" className="h-10 w-10 p-0 shadow-sm">
               <ExternalLink className="h-5 w-5" />
             </Button>
           </div>
@@ -225,7 +220,7 @@ export function InputModeToggle({
               value={videoUrl}
               onChange={(e) => onVideoUrlChange(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="h-14 pr-16 text-base border-border/50 focus:border-primary/50 focus:ring-primary/20 rounded-lg shadow-sm"
+              className="border-border/50 focus:border-primary/50 focus:ring-primary/20 h-14 rounded-lg pr-16 text-base shadow-sm"
               disabled={disabled}
               style={{
                 fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
@@ -248,7 +243,7 @@ export function InputModeToggle({
                 <p className="text-destructive text-sm">{urlValidation.error}</p>
               ) : urlValidation.platform ? (
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="capitalize border-primary/20 text-primary">
+                  <Badge variant="outline" className="border-primary/20 text-primary capitalize">
                     {urlValidation.platform} detected
                   </Badge>
                   <span className="text-muted-foreground text-sm">Ready to transcribe and script</span>

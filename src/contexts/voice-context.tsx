@@ -14,26 +14,19 @@ const VoiceContext = createContext<VoiceContextType | undefined>(undefined);
 
 export function VoiceProvider({ children }: { children: ReactNode }) {
   const [currentVoice, setCurrentVoice] = useState<VoiceType>("Professional");
-  
-  const availableVoices: VoiceType[] = [
-    "Professional",
-    "Casual", 
-    "Friendly",
-    "Authoritative",
-    "Conversational"
-  ];
 
-  const value = useMemo(() => ({
-    currentVoice,
-    setCurrentVoice,
-    availableVoices
-  }), [currentVoice]);
+  const availableVoices: VoiceType[] = ["Professional", "Casual", "Friendly", "Authoritative", "Conversational"];
 
-  return (
-    <VoiceContext.Provider value={value}>
-      {children}
-    </VoiceContext.Provider>
+  const value = useMemo(
+    () => ({
+      currentVoice,
+      setCurrentVoice,
+      availableVoices,
+    }),
+    [currentVoice, availableVoices],
   );
+
+  return <VoiceContext.Provider value={value}>{children}</VoiceContext.Provider>;
 }
 
 export function useVoice() {
@@ -42,4 +35,4 @@ export function useVoice() {
     throw new Error("useVoice must be used within a VoiceProvider");
   }
   return context;
-} 
+}
