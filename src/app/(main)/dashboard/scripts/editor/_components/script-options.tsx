@@ -104,7 +104,7 @@ export function ScriptOptions({ optionA, optionB, onSelect, isGenerating }: Scri
         {/* Footer */}
         <div className="text-center mt-8">
           <p className="text-muted-foreground text-sm">
-            After selecting a script, you'll be taken to the Hemingway Editor to refine and perfect your content.
+            After selecting a script, you&apos;ll be taken to the Hemingway Editor to refine and perfect your content.
           </p>
         </div>
       </div>

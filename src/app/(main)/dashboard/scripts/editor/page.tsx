@@ -5,18 +5,16 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { useQuery } from "@tanstack/react-query";
-import { Eye, FileText, Loader2, MessageCircle, Settings, Sparkles } from "lucide-react";
+import { Eye, FileText, Loader2, MessageCircle, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { useUsage } from "@/contexts/usage-context";
 
 import { ChatInterface } from "./_components/chat-interface";
+import { FloatingToolbar } from "./_components/floating-toolbar";
 import { HemingwayEditor } from "./_components/hemingway-editor";
 import { ScriptOptions } from "./_components/script-options";
-import { FloatingToolbar } from "./_components/floating-toolbar";
 
 interface ScriptElements {
   hook: string;
@@ -47,15 +45,18 @@ export default function ScriptEditorPage() {
   const searchParams = useSearchParams();
   const { triggerUsageUpdate } = useUsage();
 
-  const scriptId = searchParams.get("id");
-  const mode = searchParams.get("mode"); // "speed-write" or null
+  // Get URL parameters
+  const mode = searchParams.get("mode") ?? "notes";
+  const idea = searchParams.get("idea") ?? "";
+  const videoUrl = searchParams.get("videoUrl") ?? "";
+  const scriptId = searchParams.get("scriptId");
   const hasSpeedWriteResults = searchParams.get("hasSpeedWriteResults") === "true";
 
+  // State
   const [script, setScript] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
+  const [scriptElements, setScriptElements] = useState<ScriptElements | undefined>();
+  const [showScriptOptions, setShowScriptOptions] = useState(hasSpeedWriteResults);
   const [speedWriteData, setSpeedWriteData] = useState<SpeedWriteResponse | null>(null);
-  const [showScriptOptions, setShowScriptOptions] = useState(false);
-  const [scriptElements, setScriptElements] = useState<ScriptElements | undefined>(undefined);
 
   // Fetch scripts data
   const {
@@ -138,7 +139,6 @@ export default function ScriptEditorPage() {
       return;
     }
 
-    setIsSaving(true);
     try {
       const response = await fetch("/api/scripts", {
         method: scriptId ? "PUT" : "POST",
@@ -177,8 +177,6 @@ export default function ScriptEditorPage() {
       toast.error("Save Failed", {
         description: "There was an error saving your script. Please try again.",
       });
-    } finally {
-      setIsSaving(false);
     }
   }, [script, scriptId, triggerUsageUpdate, refetch, router]);
 

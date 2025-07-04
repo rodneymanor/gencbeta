@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Download, Save, Mic, RefreshCw, Sparkles, Settings, MoreHorizontal } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Download, Save, Mic, RefreshCw, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,17 +14,19 @@ import {
   DropdownMenuSeparator 
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { useVoice, type VoiceType } from "@/contexts/voice-context";
 
 interface FloatingToolbarProps {
   script: string;
   onScriptChange: (script: string) => void;
 }
 
-export function FloatingToolbar({ script, onScriptChange }: FloatingToolbarProps) {
+export function FloatingToolbar({ script }: FloatingToolbarProps) {
   const [isRewriting, setIsRewriting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const { currentVoice, setCurrentVoice, availableVoices } = useVoice();
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     if (!script.trim()) return;
     
     setIsSaving(true);
@@ -32,12 +34,12 @@ export function FloatingToolbar({ script, onScriptChange }: FloatingToolbarProps
       // TODO: Implement actual save functionality
       await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
       toast.success("Script saved successfully!");
-    } catch (error) {
+    } catch {
       toast.error("Failed to save script");
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [script]);
 
   // Add keyboard shortcut support
   useEffect(() => {
@@ -50,7 +52,7 @@ export function FloatingToolbar({ script, onScriptChange }: FloatingToolbarProps
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [script]);
+  }, [handleSave]);
 
   const handleDownload = () => {
     if (!script.trim()) return;
@@ -68,15 +70,22 @@ export function FloatingToolbar({ script, onScriptChange }: FloatingToolbarProps
     toast.success("Script downloaded!");
   };
 
-  const handleRewriteWithVoice = async (voiceType: string) => {
+  const handleChangeVoice = (voiceType: VoiceType) => {
+    setCurrentVoice(voiceType);
+    toast.success(`Voice changed to ${voiceType}`);
+  };
+
+  const handleRewriteWithVoice = async (voiceType: VoiceType) => {
     if (!script.trim()) return;
     
     setIsRewriting(true);
     try {
+      // Change the voice first
+      setCurrentVoice(voiceType);
       // TODO: Implement actual AI rewrite functionality
       await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
       toast.success(`Script rewritten with ${voiceType} voice!`);
-    } catch (error) {
+    } catch {
       toast.error("Failed to rewrite script");
     } finally {
       setIsRewriting(false);
@@ -91,7 +100,7 @@ export function FloatingToolbar({ script, onScriptChange }: FloatingToolbarProps
       // TODO: Implement actual AI rewrite functionality
       await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
       toast.success("Script rewritten!");
-    } catch (error) {
+    } catch {
       toast.error("Failed to rewrite script");
     } finally {
       setIsRewriting(false);
@@ -129,36 +138,46 @@ export function FloatingToolbar({ script, onScriptChange }: FloatingToolbarProps
 
             <Separator orientation="vertical" className="h-6" />
 
-            {/* Voice Rewrite Dropdown */}
+            {/* Voice Selection & Rewrite Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
                   size="sm"
-                  disabled={isRewriting || !script.trim()}
+                  disabled={isRewriting}
                   className="h-8 px-3"
                 >
                   <Mic className="h-4 w-4 mr-1" />
-                  Voice
+                  {currentVoice}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => handleRewriteWithVoice("Professional")}>
-                  <Mic className="h-4 w-4 mr-2" />
-                  Professional Voice
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleRewriteWithVoice("Casual")}>
-                  <Mic className="h-4 w-4 mr-2" />
-                  Casual Voice
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleRewriteWithVoice("Friendly")}>
-                  <Mic className="h-4 w-4 mr-2" />
-                  Friendly Voice
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleRewriteWithVoice("Authoritative")}>
-                  <Mic className="h-4 w-4 mr-2" />
-                  Authoritative Voice
-                </DropdownMenuItem>
+                {/* Voice Selection */}
+                {availableVoices.map((voice) => (
+                  <DropdownMenuItem 
+                    key={voice}
+                    onClick={() => handleChangeVoice(voice)}
+                    className={voice === currentVoice ? "bg-accent" : ""}
+                  >
+                    <Mic className="h-4 w-4 mr-2" />
+                    {voice} Voice
+                    {voice === currentVoice && <span className="ml-auto">✓</span>}
+                  </DropdownMenuItem>
+                ))}
+                
+                <DropdownMenuSeparator />
+                
+                {/* Rewrite with Voice Options */}
+                {availableVoices.map((voice) => (
+                  <DropdownMenuItem 
+                    key={`rewrite-${voice}`}
+                    onClick={() => handleRewriteWithVoice(voice)}
+                    disabled={!script.trim()}
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Rewrite as {voice}
+                  </DropdownMenuItem>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
 

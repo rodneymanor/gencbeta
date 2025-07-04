@@ -7,6 +7,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { SocialStats } from "@/components/ui/social-stats";
 import { getSidebarVariant, getSidebarCollapsible, getContentLayout } from "@/lib/layout-preferences";
 import { cn } from "@/lib/utils";
+import { VoiceProvider } from "@/contexts/voice-context";
 
 import { AccountBadge } from "./_components/sidebar/account-badge";
 import { NavUser } from "./_components/sidebar/nav-user";
@@ -20,46 +21,50 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
   const contentLayout = await getContentLayout();
 
   return (
-    <SmartSidebarProvider>
-      <SidebarProvider defaultOpen={false}>
-        <AppSidebar variant={sidebarVariant} collapsible="icon" />
-        <SidebarInset
-          className={cn(
-            // V0.dev-like layout: fill entire viewport
-            "flex h-dvh w-screen overflow-hidden",
-            // Override default SidebarInset margins for full-width layout
-            contentLayout === "full-width" && [
-              // Remove all default margins and ensure full width
-              "md:peer-data-[variant=inset]:m-0",
-              "md:peer-data-[variant=inset]:ml-0",
-              "md:peer-data-[variant=inset]:mr-0",
-              "md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-0",
-              "md:peer-data-[variant=inset]:peer-data-[state=collapsed]:mr-0",
-              // Remove rounded corners and shadow for edge-to-edge appearance
-              "md:peer-data-[variant=inset]:rounded-none",
-              "md:peer-data-[variant=inset]:shadow-none",
-            ],
-          )}
-        >
-          <header className="flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-            <div className="flex w-full items-center justify-between px-4 lg:px-6">
-              <div className="flex items-center gap-1 lg:gap-2">
-                <SmartSidebarTrigger className="-ml-1" />
-                <Separator orientation="vertical" className="mx-2 data-[orientation=vertical]:h-4" />
-                <SearchDialog />
-              </div>
-              <div className="flex items-center gap-2">
-                <SocialStats />
-                <AccountBadge />
-                <NavUser layoutSettings={{ contentLayout, variant: sidebarVariant, collapsible: sidebarCollapsible }} />
-              </div>
-            </div>
-          </header>
-          <DashboardClientLayout>
-            <div className="flex-1 overflow-auto p-4 md:p-6">{children}</div>
-          </DashboardClientLayout>
-        </SidebarInset>
-      </SidebarProvider>
-    </SmartSidebarProvider>
+    <SidebarProvider>
+      <SmartSidebarProvider>
+        <VoiceProvider>
+          <div className="flex h-screen w-full">
+            <AppSidebar variant={sidebarVariant} collapsible="icon" />
+            <SidebarInset
+              className={cn(
+                // V0.dev-like layout: fill entire viewport
+                "flex h-dvh w-screen overflow-hidden",
+                // Override default SidebarInset margins for full-width layout
+                contentLayout === "full-width" && [
+                  // Remove all default margins and ensure full width
+                  "md:peer-data-[variant=inset]:m-0",
+                  "md:peer-data-[variant=inset]:ml-0",
+                  "md:peer-data-[variant=inset]:mr-0",
+                  "md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-0",
+                  "md:peer-data-[variant=inset]:peer-data-[state=collapsed]:mr-0",
+                  // Remove rounded corners and shadow for edge-to-edge appearance
+                  "md:peer-data-[variant=inset]:rounded-none",
+                  "md:peer-data-[variant=inset]:shadow-none",
+                ],
+              )}
+            >
+              <header className="flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+                <div className="flex w-full items-center justify-between px-4 lg:px-6">
+                  <div className="flex items-center gap-1 lg:gap-2">
+                    <SmartSidebarTrigger className="-ml-1" />
+                    <Separator orientation="vertical" className="mx-2 data-[orientation=vertical]:h-4" />
+                    <SearchDialog />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <SocialStats />
+                    <AccountBadge />
+                    <NavUser layoutSettings={{ contentLayout, variant: sidebarVariant, collapsible: sidebarCollapsible }} />
+                  </div>
+                </div>
+              </header>
+              <DashboardClientLayout>
+                <div className="flex-1 overflow-auto p-4 md:p-6">{children}</div>
+              </DashboardClientLayout>
+            </SidebarInset>
+          </div>
+        </VoiceProvider>
+      </SmartSidebarProvider>
+    </SidebarProvider>
   );
 }

@@ -4,14 +4,16 @@ import { useState, useEffect } from "react";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { Clock } from "lucide-react";
+import { Clock, Mic } from "lucide-react";
 
 import { GhostWriter } from "@/components/ghost-writer";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/auth-context";
 import { useUsage } from "@/contexts/usage-context";
+import { useVoice } from "@/contexts/voice-context";
 
 import { IdeaInboxDialog } from "./_components/idea-inbox-dialog";
 import { InputModeToggle, InputMode } from "./_components/input-mode-toggle";
@@ -37,6 +39,7 @@ export default function NewScriptPage() {
   const searchParams = useSearchParams();
   const { userProfile } = useAuth();
   const { triggerUsageUpdate } = useUsage();
+  const { currentVoice } = useVoice();
 
   // Input mode state
   const [inputMode, setInputMode] = useState<InputMode>("text");
@@ -207,8 +210,16 @@ export default function NewScriptPage() {
           </Card>
         )}
 
-        {/* Main Input Section - Constrained Width */}
-        <div className="w-full max-w-[600px] space-y-6">
+        {/* Main Input Section - 66% Viewport Width */}
+        <div className="w-full max-w-none" style={{ width: '66vw' }}>
+          {/* Voice Badge */}
+          <div className="mb-4 flex justify-center">
+            <Badge variant="outline" className="px-3 py-1 text-sm border-primary/30 text-primary bg-primary/5">
+              <Mic className="h-3 w-3 mr-1" />
+              {currentVoice} Voice
+            </Badge>
+          </div>
+
           <InputModeToggle
             inputMode={inputMode}
             onInputModeChange={setInputMode}

@@ -61,7 +61,7 @@ export function HemingwayEditorCore({
   // Create analysis from structured elements
   const createAnalysisFromElements = useCallback(
     (text: string, structuredElements: ScriptElements): ScriptAnalysis => {
-      const analysis: ScriptAnalysis = {
+      const analysisResult: ScriptAnalysis = {
         hooks: [],
         bridges: [],
         goldenNuggets: [],
@@ -82,7 +82,9 @@ export function HemingwayEditorCore({
 
         const endIndex = startIndex + elementText.length;
         const element: ScriptElement = {
-          type: elementType === 'goldenNugget' ? 'golden-nugget' : elementType === 'wta' ? 'wta' : elementType as 'hook' | 'bridge',
+          type: elementType === 'goldenNugget' ? 'golden-nugget' : 
+                elementType === 'wta' ? 'wta' : 
+                elementType as 'hook' | 'bridge',
           startIndex,
           endIndex,
           text: elementText,
@@ -91,15 +93,15 @@ export function HemingwayEditorCore({
         };
 
         // Add to appropriate array
-        if (elementType === 'hook') analysis.hooks.push(element);
-        else if (elementType === 'bridge') analysis.bridges.push(element);
-        else if (elementType === 'goldenNugget') analysis.goldenNuggets.push(element);
-        else if (elementType === 'wta') analysis.wtas.push(element);
+        if (elementType === 'hook') analysisResult.hooks.push(element);
+        else if (elementType === 'bridge') analysisResult.bridges.push(element);
+        else if (elementType === 'goldenNugget') analysisResult.goldenNuggets.push(element);
+        else if (elementType === 'wta') analysisResult.wtas.push(element);
 
         currentIndex = endIndex;
       });
 
-      return analysis;
+      return analysisResult;
     },
     [],
   );
