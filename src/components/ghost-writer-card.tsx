@@ -108,19 +108,19 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
       {/* Engagement metrics */}
       <div className="flex items-center justify-between pt-2">
         <div className="flex items-center space-x-6">
-          <button className="text-muted-foreground hover:text-destructive flex items-center space-x-2 transition-colors">
+          <button className="bg-primary/40 text-primary hover:bg-primary/50 flex items-center space-x-2 rounded-md px-2 py-1 transition-colors">
             <Heart className="h-4 w-4" />
-            <span className="text-sm font-medium">{engagement.likes.toLocaleString()}</span>
+            <span className="text-foreground text-sm font-medium">{engagement.likes.toLocaleString()}</span>
           </button>
 
-          <button className="text-muted-foreground hover:text-primary flex items-center space-x-2 transition-colors">
+          <button className="bg-primary/40 text-primary hover:bg-primary/50 flex items-center space-x-2 rounded-md px-2 py-1 transition-colors">
             <MessageCircle className="h-4 w-4" />
-            <span className="text-sm font-medium">{engagement.comments}</span>
+            <span className="text-foreground text-sm font-medium">{engagement.comments}</span>
           </button>
 
-          <button className="text-muted-foreground hover:text-primary flex items-center space-x-2 transition-colors">
+          <button className="bg-primary/40 text-primary hover:bg-primary/50 flex items-center space-x-2 rounded-md px-2 py-1 transition-colors">
             <Share className="h-4 w-4" />
-            <span className="text-sm font-medium">{engagement.shares}</span>
+            <span className="text-foreground text-sm font-medium">{engagement.shares}</span>
           </button>
         </div>
       </div>
