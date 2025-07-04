@@ -192,24 +192,30 @@ export function InputModeToggle({
 
       {/* Input Content */}
       {inputMode === "text" ? (
-        <div className="border-border bg-card relative rounded-2xl border shadow-sm transition-all duration-75 focus-within:shadow-[0_0_0_1px_hsl(var(--primary))]">
-          <Textarea
-            placeholder="My script idea is about productivity tips for remote workers..."
-            value={textValue}
-            onChange={(e) => onTextChange(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="text-foreground placeholder-muted-foreground caret-primary selection:bg-primary/30 selection:text-foreground scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent max-h-[45vh] min-h-[160px] w-full resize-none border-0 bg-transparent px-4 py-3 pr-32 text-base leading-relaxed outline-none sm:max-h-[25vh] lg:max-h-[40vh]"
-            disabled={disabled}
-            style={{
-              fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-            }}
-          />
-          <div className="absolute right-4 bottom-4 flex items-center gap-2">
-            {showIdeaInbox && <IdeaInboxDialog />}
-            <Button onClick={onSubmit} disabled={finalSubmitDisabled} size="sm" className="h-10 w-10 p-0 shadow-sm">
-              <ExternalLink className="h-5 w-5" />
-            </Button>
+        <div className="space-y-4">
+          <div className="border-border bg-card relative rounded-2xl border shadow-sm transition-all duration-75 focus-within:shadow-[0_0_0_1px_hsl(var(--primary))]">
+            <Textarea
+              placeholder="My script idea is about productivity tips for remote workers..."
+              value={textValue}
+              onChange={(e) => onTextChange(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="text-foreground placeholder-muted-foreground caret-primary selection:bg-primary/30 selection:text-foreground scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent max-h-[45vh] min-h-[160px] w-full resize-none border-0 bg-transparent px-4 py-3 pr-16 text-base leading-relaxed outline-none sm:max-h-[25vh] lg:max-h-[40vh]"
+              disabled={disabled}
+              style={{
+                fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+              }}
+            />
+            <div className="absolute right-4 bottom-4 flex items-center gap-2">
+              <Button onClick={onSubmit} disabled={finalSubmitDisabled} size="sm" className="h-10 w-10 p-0 shadow-sm">
+                <ExternalLink className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
+          {showIdeaInbox && (
+            <div className="flex justify-center">
+              <IdeaInboxDialog />
+            </div>
+          )}
         </div>
       ) : (
         <div className="space-y-4">
