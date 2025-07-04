@@ -222,7 +222,9 @@ Make sure each section flows naturally into the next when read aloud.`;
     // Parse the structured response
     let elements: ScriptElements;
     try {
+      console.log("[SpeedWrite] Raw content from AI:", rawContent.substring(0, 200) + "...");
       const parsed = JSON.parse(rawContent);
+      console.log("[SpeedWrite] Successfully parsed JSON:", parsed);
       elements = {
         hook: parsed.hook ?? "",
         bridge: parsed.bridge ?? "",
@@ -231,6 +233,8 @@ Make sure each section flows naturally into the next when read aloud.`;
       };
     } catch (parseError) {
       console.warn("[SpeedWrite] Failed to parse structured response, falling back to plain text");
+      console.warn("[SpeedWrite] Parse error:", parseError);
+      console.warn("[SpeedWrite] Raw content that failed to parse:", rawContent);
       // Fallback: return as single content block with cleaned content
       const cleanedContent = cleanScriptContent(rawContent);
       elements = {

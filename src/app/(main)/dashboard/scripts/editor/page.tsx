@@ -62,7 +62,19 @@ export default function ScriptEditorPage() {
   } = useQuery({
     queryKey: ["scripts"],
     queryFn: async () => {
-      const response = await fetch("/api/scripts");
+      // Get Firebase Auth token
+      const { auth } = await import("@/lib/firebase");
+      if (!auth?.currentUser) {
+        throw new Error("User not authenticated");
+      }
+
+      const token = await auth.currentUser.getIdToken();
+
+      const response = await fetch("/api/scripts", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (!response.ok) throw new Error("Failed to fetch scripts");
       return response.json();
     },

@@ -22,9 +22,20 @@ export function useScriptSave({ script, scriptId, refetch }: UseScriptSaveProps)
     }
 
     try {
+      // Get Firebase Auth token
+      const { auth } = await import("@/lib/firebase");
+      if (!auth?.currentUser) {
+        throw new Error("User not authenticated");
+      }
+
+      const token = await auth.currentUser.getIdToken();
+
       const response = await fetch("/api/scripts", {
         method: scriptId ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           id: scriptId,
           title: "Untitled Script",

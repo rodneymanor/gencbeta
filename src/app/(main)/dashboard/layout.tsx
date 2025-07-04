@@ -62,7 +62,7 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
                 </div>
               </header>
               <DashboardClientLayout>
-                <div className="hide-scrollbar flex-1 overflow-auto p-4 md:p-6">{children}</div>
+                <div className="flex-1 overflow-auto p-4 md:p-6 hide-scrollbar">{children}</div>
               </DashboardClientLayout>
             </SidebarInset>
           </div>

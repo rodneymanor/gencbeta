@@ -13,7 +13,6 @@ import { Card } from "@/components/ui/card";
 import { useAuth } from "@/contexts/auth-context";
 import { useUsage } from "@/contexts/usage-context";
 import { useVoice } from "@/contexts/voice-context";
-import { useScrollIndicator } from "@/hooks/use-scroll-indicator";
 
 import { InputModeToggle, InputMode } from "./_components/input-mode-toggle";
 
@@ -39,7 +38,6 @@ export default function NewScriptPage() {
   const { userProfile } = useAuth();
   const { triggerUsageUpdate } = useUsage();
   const { currentVoice } = useVoice();
-  const scrollRef = useScrollIndicator();
 
   // Input mode state
   const [inputMode, setInputMode] = useState<InputMode>("text");
@@ -186,7 +184,7 @@ export default function NewScriptPage() {
   };
 
   return (
-    <div ref={scrollRef} className="bg-background pretty-scrollbar scroll-indicator scroll-fade h-screen">
+    <div className="bg-background h-screen overflow-y-auto hide-scrollbar">
       {/* Centered Content Container - Raised Higher */}
       <div className="flex flex-col items-center justify-start px-4 pt-8 pb-8">
         {/* Header */}
