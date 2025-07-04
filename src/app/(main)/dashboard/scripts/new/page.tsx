@@ -183,19 +183,20 @@ export default function NewScriptPage() {
   };
 
   return (
-    <div className="bg-background min-h-screen p-6">
-      <div className="mx-auto max-w-7xl space-y-8">
-        {/* Header */}
-        <div className="space-y-2">
-          <h1 className="text-4xl font-bold">What will you Script today?</h1>
-          <p className="text-muted-foreground text-lg">
+    <div className="bg-background min-h-screen">
+      {/* Centered Content Container */}
+      <div className="flex min-h-screen flex-col items-center justify-center px-6 py-12">
+        {/* Header Section - Centered */}
+        <div className="mb-8 text-center">
+          <h1 className="text-5xl font-bold mb-4">What will you Script today?</h1>
+          <p className="text-muted-foreground text-xl max-w-2xl">
             Start with an idea, analyze a viral video, or create a structured story from scratch.
           </p>
         </div>
 
         {/* Error Display */}
         {speedWriteResponse && !speedWriteResponse.success && (
-          <Card className="border-destructive bg-destructive/5 p-4">
+          <Card className="border-destructive bg-destructive/5 p-4 mb-6 max-w-2xl w-full">
             <div className="text-destructive flex items-center gap-2">
               <span className="font-medium">Generation Failed:</span>
               <span>{speedWriteResponse.error}</span>
@@ -206,8 +207,8 @@ export default function NewScriptPage() {
           </Card>
         )}
 
-        {/* Main Input Section */}
-        <div className="space-y-6">
+        {/* Main Input Section - Constrained Width */}
+        <div className="w-full max-w-[600px] space-y-6">
           <InputModeToggle
             inputMode={inputMode}
             onInputModeChange={setInputMode}
@@ -220,7 +221,7 @@ export default function NewScriptPage() {
           />
 
           {/* Controls Row */}
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             <IdeaInboxDialog />
 
             <div className="flex items-center gap-2">
@@ -237,12 +238,16 @@ export default function NewScriptPage() {
               </Select>
             </div>
 
-            <div className="text-muted-foreground ml-auto text-sm">Press ⌘+Enter to generate scripts</div>
+            <div className="text-muted-foreground text-sm">Press ⌘+Enter to generate scripts</div>
           </div>
         </div>
+      </div>
 
-        {/* Ghost Writer Section */}
-        <GhostWriter />
+      {/* Ghost Writer Section - Full Width */}
+      <div className="px-6 pb-12">
+        <div className="mx-auto max-w-7xl">
+          <GhostWriter />
+        </div>
       </div>
     </div>
   );

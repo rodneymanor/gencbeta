@@ -1,12 +1,97 @@
-# Active Context: Production-Ready Usage Tracking System
+# Active Context: Streamlined Script Writing Experience ✅
 
-## Current State: Complete Credit-Based Usage Tracking System ✅
-The Gen C Beta application now features a comprehensive, production-ready usage tracking system with real-time credit deduction, alongside the existing brand profile generation and video collection systems. The system enforces credit limits, tracks detailed usage analytics, and provides real-time UI feedback.
+## Current State: Elegant Script Writing UI Redesign Complete (January 2, 2025)
+The Gen C Beta application now features a completely redesigned script writing experience with a more minimal, focused, and production-ready interface. The new design maintains the existing A/B script selection workflow while dramatically improving the user experience with centered layouts, elegant typography, and immersive editing.
 
-## 🎉 **LATEST COMPLETION: Usage Tracking System Fully Operational (January 2, 2025)**
+## 🎉 **LATEST COMPLETION: Script Writing Page Redesign (January 2, 2025)**
 
-### **Production-Ready Credit Management System**
-**Complete Real-Time Usage Tracking**: Users now have credit-based access control with automatic deduction, period resets, and comprehensive analytics.
+### **New Script Page - Centered & Elegant Design**
+**Complete Layout Restructuring**: The script creation page now features a vertically and horizontally centered design for better focus and visual hierarchy.
+
+**Key Improvements**:
+- **Centered Input Field**: Constrained to 600px max width and centered on the page
+- **Enhanced Typography**: Headline increased to text-5xl (from text-4xl) and positioned directly above input
+- **Improved Spacing**: Better vertical centering with proper padding and margins
+- **Refined Input Styling**: Enhanced borders, focus states, and Inter font family
+- **Elegant Controls**: Cleaner control row with better spacing and visual hierarchy
+
+### **Hemingway Editor - Borderless & Immersive**
+**Production-Ready Minimal Design**: Removed heavy card borders and created a clean, distraction-free writing environment.
+
+**Technical Implementation**:
+```typescript
+// Borderless panel design
+<div className="flex flex-1 flex-col relative">
+  {/* Clean Header */}
+  <div className="flex items-center justify-between px-6 py-4 border-b border-border/50">
+    <div className="flex items-center gap-2">
+      <FileText className="h-5 w-5 text-orange-500" />
+      <span className="text-lg font-medium">Hemingway Editor</span>
+      <Badge variant="outline" className="ml-2 text-xs">
+        <Eye className="mr-1 h-3 w-3" />
+        Real-time Analysis
+      </Badge>
+    </div>
+  </div>
+
+  {/* Borderless Editor */}
+  <div className="flex-1 overflow-hidden">
+    <HemingwayEditor />
+  </div>
+
+  {/* Floating Toolbar */}
+  <FloatingToolbar script={script} onScriptChange={handleScriptChange} />
+</div>
+```
+
+### **Floating Toolbar - Professional Writing Tools**
+**New Component**: Created a sophisticated floating toolbar with essential writing and AI tools.
+
+**Features**:
+- **Save & Export**: One-click save and download functionality
+- **Voice Rewriting**: Professional, Casual, Friendly, and Authoritative voice options
+- **AI Tools**: Script rewriting, hook improvement, CTA strengthening, and flow optimization
+- **Keyboard Shortcuts**: Cmd+S for save functionality
+- **Visual Feedback**: Loading states and toast notifications
+
+**Component Structure**:
+```typescript
+export function FloatingToolbar({ script, onScriptChange }: FloatingToolbarProps) {
+  // Save, download, and AI rewriting functionality
+  // Keyboard shortcut support (Cmd+S)
+  // Dropdown menus for voice and AI tools
+  // Professional styling with backdrop blur
+}
+```
+
+### **Enhanced Typography & Visual Design**
+**Consistent Font System**: Implemented Inter font family across all input and editor components for better readability and professional appearance.
+
+**Improved Visual Hierarchy**:
+- **Input Fields**: Enhanced borders, focus states, and shadow effects
+- **Script Options**: Elegant card design with hover effects and better spacing
+- **Editor Core**: Increased font size to 16px with 1.7 line height for optimal reading
+- **Subtle Borders**: Reduced border opacity (border-border/50) for cleaner appearance
+
+### **Maintained Workflow Integrity**
+**A/B Script Selection**: Preserved the existing workflow where users select between two script options before entering the Hemingway editor.
+
+**Enhanced Script Options Page**:
+- **Centered Layout**: Professional header with clear instructions
+- **Improved Cards**: Better spacing, typography, and visual feedback
+- **Clear CTAs**: "Select This Script" buttons with proper sizing and styling
+- **Elegant Content Display**: Script content shown in styled containers with proper typography
+
+### **Production-Ready Features**
+**Keyboard Shortcuts**: Implemented Cmd+S for save functionality across the editor
+**Error Handling**: Proper error states and loading indicators
+**Accessibility**: Maintained proper focus states and keyboard navigation
+**Performance**: Optimized rendering with proper React patterns
+
+## 🎉 **PREVIOUSLY COMPLETED: Production-Ready Usage Tracking System** (January 2, 2025)
+
+### **Complete Credit-Based Usage Tracking System**
+**Real-Time Credit Management**: Users now have credit-based access control with automatic deduction, period resets, and comprehensive analytics.
 
 **Technical Implementation**:
 - **CreditsService Class**: Comprehensive credit management with atomic transactions
@@ -77,125 +162,70 @@ const SocialStats = () => {
 - Stock ticker-style design with trend arrows
 - Platform icons and manual navigation controls
 
-### **Backend Credit Management**
+## **Design Principles Applied**
 
-#### **🏗️ CreditsService Architecture**
-```typescript
-export class CreditsService {
-  // Core credit operations
-  static async initializeUserCredits(userId: string, accountLevel: AccountLevel): Promise<UserCredits>
-  static async getUserCredits(userId: string, accountLevel: AccountLevel): Promise<UserCredits>
-  static async canPerformAction(userId: string, operation: CreditOperation, accountLevel: AccountLevel)
-  static async deductCredits(userId: string, operation: CreditOperation, accountLevel: AccountLevel)
-  static async getUsageStats(userId: string, accountLevel: AccountLevel): Promise<UsageStats>
-  static async trackUsageAndDeductCredits() // One-call operation for API routes
-  
-  // Period management
-  private static async checkAndResetPeriod(userCredits: UserCredits, accountLevel: AccountLevel)
-  private static formatTimeUntilReset(periodEnd: Date, now: Date): string
-}
+### **Minimal & Elegant**
+- Removed unnecessary borders and visual clutter
+- Implemented subtle shadows and refined spacing
+- Used consistent typography hierarchy
+- Applied professional color palette with reduced opacity borders
+
+### **Focused User Experience**
+- Centered layouts for better attention and focus
+- Constrained input widths to prevent overwhelming interfaces
+- Clear visual hierarchy with proper heading sizes
+- Distraction-free writing environment
+
+### **Production-Ready Quality**
+- Consistent Inter font family across all components
+- Proper error handling and loading states
+- Keyboard shortcuts for power users
+- Responsive design patterns
+- Accessibility considerations maintained
+
+### **Immersive Writing Environment**
+- Borderless editor for distraction-free writing
+- Floating toolbar with essential tools
+- Real-time script analysis with minimal visual impact
+- Elegant typography optimized for readability
+
+## **Next Steps & Future Enhancements**
+
+### **Immediate Priorities**
+1. **AI Integration**: Connect floating toolbar AI tools to actual rewriting APIs
+2. **Save Functionality**: Implement backend save/load script functionality
+3. **Voice Integration**: Connect voice rewriting to existing voice processing systems
+4. **User Testing**: Gather feedback on new streamlined interface
+
+### **Future Enhancements**
+1. **Advanced AI Tools**: More sophisticated script improvement options
+2. **Collaboration Features**: Real-time editing and sharing capabilities
+3. **Template System**: Pre-built script templates and structures
+4. **Analytics**: Writing productivity and improvement metrics
+
+## **Technical Architecture**
+
+### **Component Structure**
+```
+scripts/
+├── new/                    # Redesigned script creation page
+│   ├── page.tsx           # Centered layout with elegant design
+│   └── _components/       # Enhanced input components
+├── editor/                # Immersive Hemingway editor
+│   ├── page.tsx          # Borderless panel design
+│   └── _components/
+│       ├── floating-toolbar.tsx      # New floating toolbar
+│       ├── hemingway-editor.tsx      # Enhanced minimal design
+│       ├── hemingway-editor-core.tsx # Improved typography
+│       └── script-options.tsx       # Elegant A/B selection
 ```
 
-#### **💾 Database Schema**
-**user_credits Collection**:
-```typescript
-interface UserCredits {
-  userId: string;
-  accountLevel: "free" | "pro";
-  creditsUsed: number;
-  creditsLimit: number;
-  currentPeriodStart: string;
-  currentPeriodEnd: string;
-  // Period-specific tracking
-  dailyCreditsUsed?: number;    // Free users
-  monthlyCreditsUsed?: number;  // Pro users
-  // Analytics
-  totalCreditsUsed: number;
-  totalScriptsGenerated: number;
-  totalVoicesCreated: number;
-  totalVideosProcessed: number;
-}
-```
-
-**credit_transactions Collection**:
-```typescript
-interface CreditTransaction {
-  userId: string;
-  creditsUsed: number;
-  operation: "script_generation" | "voice_training" | "video_analysis" | "api_request" | "collection_add";
-  balanceBefore: number;
-  balanceAfter: number;
-  timestamp: string;
-  metadata?: Record<string, unknown>;
-}
-```
-
-### **API Integration & Security**
-
-#### **🔐 Credit Enforcement in APIs**
-```typescript
-// Speed-write API with credit checking
-export async function POST(request: NextRequest) {
-  // 1. Authenticate user
-  const authResult = await authenticateApiKey(request);
-  
-  // 2. Check rate limiting
-  if (!rateLimitResult.allowed) {
-    return createErrorResponse(rateLimitResult.reason ?? "Rate limit exceeded", 429);
-  }
-  
-  // 3. Check credit availability
-  const creditCheck = await CreditsService.canPerformAction(userId, "SCRIPT_GENERATION", accountLevel);
-  if (!creditCheck.canPerform) {
-    return createErrorResponse(creditCheck.reason ?? "Insufficient credits", 402);
-  }
-  
-  // 4. Process operation
-  const { speedWriteResult, educationalResult } = await processSpeedWriteRequest(body, userId);
-  
-  // 5. Deduct credits on success
-  await CreditsService.trackUsageAndDeductCredits(userId, "SCRIPT_GENERATION", accountLevel, usageData);
-}
-```
-
-#### **🛡️ Firebase SDK Usage Patterns**
-**Critical Learning Documented**: Always use appropriate Firebase SDK based on execution context
-- **Client-Side (React components)**: Use client SDK (`@/lib/firebase`)
-- **Server-Side (API routes)**: Use admin SDK (`@/lib/firebase-admin`)
-
-### **Business Intelligence & Analytics**
-
-#### **📊 Comprehensive Usage Tracking**
-**Real-Time Analytics**:
-- Credits used/remaining per user
-- Operation-specific usage patterns
-- Account level distribution
-- Peak usage times and patterns
-
-**Transaction Audit Trail**:
-- Complete history of all credit transactions
-- Operation metadata for detailed analysis
-- User behavior patterns for pricing optimization
-- Billing integration ready with dispute resolution data
-
-### **Layout & UI Restructuring**
-
-#### **🎨 Updated Application Layout**
-**Header (Top-Right)**:
-- SocialStats component (carousel)
-- Account badge (Free/Pro)
-- User profile dropdown
-
-**Sidebar Footer (Bottom to Top)**:
-- Settings gear (bottom)
-- UsageTracker component
-- User profile section
-
-**Design Principles Applied**:
-- Industry-standard user profile placement (top-right)
-- Dedicated sidebar space for core navigation
-- Real-time feedback without cluttering interface
-- Scalable design for future feature additions
+### **Design System Updates**
+- **Typography**: Inter font family for professional appearance
+- **Spacing**: Consistent 8px grid system with refined gaps
+- **Colors**: Reduced border opacity for subtle visual separation
+- **Shadows**: Subtle shadow-sm for depth without heaviness
+- **Focus States**: Enhanced focus rings with primary color theming
 
 ## 🎉 **PREVIOUSLY COMPLETED: Brand Profile System Fully Operational (January 2, 2025)**
 

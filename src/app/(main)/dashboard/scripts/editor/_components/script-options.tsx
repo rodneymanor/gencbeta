@@ -16,63 +16,97 @@ interface ScriptOptionsProps {
 export function ScriptOptions({ optionA, optionB, onSelect, isGenerating }: ScriptOptionsProps) {
   if (isGenerating) {
     return (
-      <div className="space-y-4">
-        <div className="grid h-full grid-cols-1 gap-4 md:grid-cols-2">
-          <Card className="flex flex-col">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <div className="bg-muted h-6 w-20 animate-pulse rounded" />
-              <div className="bg-muted h-8 w-16 animate-pulse rounded" />
-            </CardHeader>
-            <CardContent className="flex-1">
-              <ContentLoading />
-            </CardContent>
-          </Card>
-          <Card className="flex flex-col">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <div className="bg-muted h-6 w-20 animate-pulse rounded" />
-              <div className="bg-muted h-8 w-16 animate-pulse rounded" />
-            </CardHeader>
-            <CardContent className="flex-1">
-              <ContentLoading />
-            </CardContent>
-          </Card>
+      <div className="flex h-full items-center justify-center">
+        <ContentLoading />
+      </div>
+    );
+  }
+
+  if (!optionA && !optionB) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-center">
+          <p className="text-muted-foreground text-lg">No script options available</p>
+          <p className="text-muted-foreground text-sm mt-2">Please try generating scripts again</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <div className="grid h-full grid-cols-1 gap-4 md:grid-cols-2">
-        {/* Option A */}
-        {optionA && (
-          <Card className="flex flex-col">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-lg">Option A</CardTitle>
-              <Button onClick={() => onSelect(optionA)} variant="outline" size="sm" className="ml-4">
-                Select
-              </Button>
-            </CardHeader>
-            <CardContent className="flex-1">
-              <pre className="font-mono text-sm leading-relaxed whitespace-pre-wrap">{optionA.content}</pre>
-            </CardContent>
-          </Card>
-        )}
+    <div className="min-h-screen bg-background p-6">
+      <div className="mx-auto max-w-6xl">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold mb-2">Choose Your Script</h1>
+          <p className="text-muted-foreground text-lg">Select the script that best fits your vision</p>
+        </div>
 
-        {/* Option B */}
-        {optionB && (
-          <Card className="flex flex-col">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-lg">Option B</CardTitle>
-              <Button onClick={() => onSelect(optionB)} variant="outline" size="sm" className="ml-4">
-                Select
-              </Button>
-            </CardHeader>
-            <CardContent className="flex-1">
-              <pre className="font-mono text-sm leading-relaxed whitespace-pre-wrap">{optionB.content}</pre>
-            </CardContent>
-          </Card>
-        )}
+        {/* Options Grid */}
+        <div className="grid h-full grid-cols-1 gap-6 lg:grid-cols-2">
+          {/* Option A */}
+          {optionA && (
+            <Card className="flex flex-col border-border/50 shadow-sm hover:shadow-md transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                <CardTitle className="text-xl font-semibold">Option A</CardTitle>
+                <Button
+                  onClick={() => onSelect(optionA)}
+                  variant="default"
+                  size="sm"
+                  className="ml-4 px-6"
+                >
+                  Select This Script
+                </Button>
+              </CardHeader>
+              <CardContent className="flex-1 pt-0">
+                <div
+                  className="text-base leading-relaxed whitespace-pre-wrap p-4 bg-muted/20 rounded-lg border border-border/30"
+                  style={{
+                    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                    lineHeight: "1.7",
+                  }}
+                >
+                  {optionA.content}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Option B */}
+          {optionB && (
+            <Card className="flex flex-col border-border/50 shadow-sm hover:shadow-md transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                <CardTitle className="text-xl font-semibold">Option B</CardTitle>
+                <Button
+                  onClick={() => onSelect(optionB)}
+                  variant="default"
+                  size="sm"
+                  className="ml-4 px-6"
+                >
+                  Select This Script
+                </Button>
+              </CardHeader>
+              <CardContent className="flex-1 pt-0">
+                <div
+                  className="text-base leading-relaxed whitespace-pre-wrap p-4 bg-muted/20 rounded-lg border border-border/30"
+                  style={{
+                    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                    lineHeight: "1.7",
+                  }}
+                >
+                  {optionB.content}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="text-center mt-8">
+          <p className="text-muted-foreground text-sm">
+            After selecting a script, you'll be taken to the Hemingway Editor to refine and perfect your content.
+          </p>
+        </div>
       </div>
     </div>
   );

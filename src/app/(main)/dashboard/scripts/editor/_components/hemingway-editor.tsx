@@ -40,6 +40,57 @@ interface AnalysisStats {
   characters: number;
 }
 
+// Footer stats component
+function EditorFooter({
+  stats,
+  showAnalysis,
+  highlightConfig,
+  setHighlightConfig,
+}: {
+  stats: AnalysisStats;
+  showAnalysis: boolean;
+  highlightConfig: HighlightConfig;
+  setHighlightConfig: (config: HighlightConfig) => void;
+}) {
+  return (
+    <div className="bg-background/50 text-muted-foreground border-t border-border/30 text-sm">
+      {/* Word count and stats */}
+      <div className="flex items-center justify-between px-6 py-3">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1">
+            <BarChart3 className="h-4 w-4" />
+            <span>{stats.words} words</span>
+          </div>
+          <span>•</span>
+          <span>{stats.characters} characters</span>
+        </div>
+
+        {showAnalysis && stats.total > 0 && (
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-xs border-border/50">
+              {stats.hooks} hooks
+            </Badge>
+            <Badge variant="outline" className="text-xs border-border/50">
+              {stats.bridges} bridges
+            </Badge>
+            <Badge variant="outline" className="text-xs border-border/50">
+              {stats.goldenNuggets} nuggets
+            </Badge>
+            <Badge variant="outline" className="text-xs border-border/50">
+              {stats.wtas} CTAs
+            </Badge>
+          </div>
+        )}
+      </div>
+
+      {/* Highlight settings */}
+      {showAnalysis && (
+        <AnalysisControls highlightConfig={highlightConfig} setHighlightConfig={setHighlightConfig} stats={stats} />
+      )}
+    </div>
+  );
+}
+
 // Analysis controls component (now for footer)
 function AnalysisControls({
   highlightConfig,
@@ -51,7 +102,7 @@ function AnalysisControls({
   stats: AnalysisStats;
 }) {
   return (
-    <div className="bg-muted/20 border-t p-4">
+    <div className="bg-background/30 border-t border-border/20 px-6 py-4">
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Settings className="text-muted-foreground h-4 w-4" />
@@ -112,57 +163,6 @@ function AnalysisControls({
           </Label>
         </div>
       </div>
-    </div>
-  );
-}
-
-// Footer stats component
-function EditorFooter({
-  stats,
-  showAnalysis,
-  highlightConfig,
-  setHighlightConfig,
-}: {
-  stats: AnalysisStats;
-  showAnalysis: boolean;
-  highlightConfig: HighlightConfig;
-  setHighlightConfig: (config: HighlightConfig) => void;
-}) {
-  return (
-    <div className="bg-muted/20 text-muted-foreground border-t text-sm">
-      {/* Word count and stats */}
-      <div className="flex items-center justify-between p-4">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1">
-            <BarChart3 className="h-4 w-4" />
-            <span>{stats.words} words</span>
-          </div>
-          <span>•</span>
-          <span>{stats.characters} characters</span>
-        </div>
-
-        {showAnalysis && stats.total > 0 && (
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-xs">
-              {stats.hooks} hooks
-            </Badge>
-            <Badge variant="outline" className="text-xs">
-              {stats.bridges} bridges
-            </Badge>
-            <Badge variant="outline" className="text-xs">
-              {stats.goldenNuggets} nuggets
-            </Badge>
-            <Badge variant="outline" className="text-xs">
-              {stats.wtas} CTAs
-            </Badge>
-          </div>
-        )}
-      </div>
-
-      {/* Highlight settings */}
-      {showAnalysis && (
-        <AnalysisControls highlightConfig={highlightConfig} setHighlightConfig={setHighlightConfig} stats={stats} />
-      )}
     </div>
   );
 }

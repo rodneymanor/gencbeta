@@ -194,14 +194,17 @@ export function InputModeToggle({
             value={textValue}
             onChange={(e) => onTextChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="min-h-[200px] resize-none pr-16 text-base leading-relaxed"
+            className="min-h-[160px] resize-none pr-16 text-base leading-relaxed border-border/50 focus:border-primary/50 focus:ring-primary/20 rounded-lg shadow-sm"
             disabled={disabled}
+            style={{
+              fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+            }}
           />
           <Button
             onClick={onSubmit}
             disabled={finalSubmitDisabled}
             size="sm"
-            className="absolute right-4 bottom-4 h-10 w-10 p-0"
+            className="absolute right-4 bottom-4 h-10 w-10 p-0 shadow-sm"
           >
             <ExternalLink className="h-5 w-5" />
           </Button>
@@ -215,14 +218,17 @@ export function InputModeToggle({
               value={videoUrl}
               onChange={(e) => onVideoUrlChange(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="h-12 pr-16 text-base"
+              className="h-14 pr-16 text-base border-border/50 focus:border-primary/50 focus:ring-primary/20 rounded-lg shadow-sm"
               disabled={disabled}
+              style={{
+                fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+              }}
             />
             <Button
               onClick={onSubmit}
               disabled={finalSubmitDisabled}
               size="sm"
-              className="absolute top-1/2 right-3 h-8 w-8 -translate-y-1/2 p-0"
+              className="absolute top-1/2 right-3 h-8 w-8 -translate-y-1/2 p-0 shadow-sm"
             >
               <ExternalLink className="h-4 w-4" />
             </Button>
@@ -235,7 +241,7 @@ export function InputModeToggle({
                 <p className="text-destructive text-sm">{urlValidation.error}</p>
               ) : urlValidation.platform ? (
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="capitalize">
+                  <Badge variant="outline" className="capitalize border-primary/20 text-primary">
                     {urlValidation.platform} detected
                   </Badge>
                   <span className="text-muted-foreground text-sm">Ready to transcribe and script</span>

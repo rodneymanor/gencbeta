@@ -16,6 +16,7 @@ import { useUsage } from "@/contexts/usage-context";
 import { ChatInterface } from "./_components/chat-interface";
 import { HemingwayEditor } from "./_components/hemingway-editor";
 import { ScriptOptions } from "./_components/script-options";
+import { FloatingToolbar } from "./_components/floating-toolbar";
 
 interface ScriptElements {
   hook: string;
@@ -223,39 +224,40 @@ export default function ScriptEditorPage() {
 
   return (
     // Content that works within the scrollable panel with production-ready spacing
-    <div className="flex h-full flex-col gap-6 p-6 lg:flex-row">
-      {/* Chat Assistant Card - Only show for notes/recording workflow */}
+    <div className="flex h-full flex-col gap-0 lg:flex-row">
+      {/* Chat Assistant Panel - Only show for notes/recording workflow */}
       {isNotesWorkflow && (
-        <Card className="flex flex-1 flex-col border-2 shadow-lg lg:max-w-[40%]">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <MessageCircle className="h-5 w-5 text-blue-500" />
-              AI Script Assistant
-              <Badge variant="secondary" className="ml-auto text-xs">
-                <Sparkles className="mr-1 h-3 w-3" />
-                Beta
-              </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex-1 overflow-hidden p-0">
+        <div className="flex flex-1 flex-col lg:max-w-[40%] border-r border-border/50">
+          <div className="flex items-center gap-2 px-6 py-4 border-b border-border/50">
+            <MessageCircle className="h-5 w-5 text-blue-500" />
+            <span className="text-lg font-medium">AI Script Assistant</span>
+            <Badge variant="secondary" className="ml-auto text-xs">
+              <Sparkles className="mr-1 h-3 w-3" />
+              Beta
+            </Badge>
+          </div>
+          <div className="flex-1 overflow-hidden">
             <ChatInterface onScriptGenerated={handleScriptGenerated} currentScript={script} className="h-full" />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
-      {/* Script Editor Card */}
-      <Card className="flex flex-1 flex-col border-2 shadow-lg">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
+      {/* Script Editor Panel - Borderless and Immersive */}
+      <div className="flex flex-1 flex-col relative">
+        {/* Clean Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border/50">
+          <div className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-orange-500" />
-            Hemingway Editor
-            <Badge variant="outline" className="ml-auto text-xs">
+            <span className="text-lg font-medium">Hemingway Editor</span>
+            <Badge variant="outline" className="ml-2 text-xs">
               <Eye className="mr-1 h-3 w-3" />
               Real-time Analysis
             </Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex-1 overflow-hidden p-0">
+          </div>
+        </div>
+
+        {/* Borderless Editor */}
+        <div className="flex-1 overflow-hidden">
           <HemingwayEditor
             value={script}
             onChange={handleScriptChange}
@@ -268,26 +270,10 @@ export default function ScriptEditorPage() {
             autoFocus={!scriptId}
             elements={scriptElements}
           />
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Floating Editor Controls */}
-      <div className="fixed right-6 bottom-6 z-20">
-        <Card className="bg-background/95 border-2 shadow-2xl backdrop-blur">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                <Settings className="h-4 w-4" />
-                <span>Editor Controls</span>
-              </div>
-              <Separator orientation="vertical" className="h-6" />
-              <div className="flex items-center gap-2">
-                <kbd className="bg-muted rounded px-2 py-1 text-xs">⌘S</kbd>
-                <span className="text-muted-foreground text-sm">to save</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Floating Toolbar */}
+        <FloatingToolbar script={script} onScriptChange={handleScriptChange} />
       </div>
     </div>
   );

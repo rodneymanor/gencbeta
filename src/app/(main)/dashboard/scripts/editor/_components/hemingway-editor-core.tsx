@@ -172,13 +172,13 @@ export function HemingwayEditorCore({
           maxRows={maxRows}
           readOnly={readOnly}
           autoFocus={autoFocus}
-          className={`h-full w-full resize-none border-0 bg-transparent p-6 font-mono text-sm focus:ring-0 focus:outline-none ${
+          className={`h-full w-full resize-none border-0 bg-transparent px-8 py-8 text-base leading-relaxed focus:ring-0 focus:outline-none ${
             readOnly ? "cursor-default" : ""
           }`}
           style={{
-            fontSize: "inherit",
-            lineHeight: "inherit",
-            fontFamily: "inherit",
+            fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+            fontSize: "16px",
+            lineHeight: "1.7",
           }}
         />
       </div>
