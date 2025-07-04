@@ -240,9 +240,9 @@ export function GhostWriter() {
       <CardHeader>
         <div className="relative">
           <div className="absolute top-0 left-0">
-            <div className="text-muted-foreground bg-muted/50 rounded-md border px-3 py-1.5 text-sm">
+            <div className="border-primary/20 bg-primary/20 hover:bg-primary/30 hover:border-primary/40 text-primary relative items-center rounded-full border px-3 py-1.5 font-sans text-sm outline-transparent transition duration-300 ease-out outline-none select-none focus:outline-none">
               New posts coming in:{" "}
-              <span className="font-mono text-blue-600">{formatTimeUntilRefresh(data.cycle.expiresAt)}</span>
+              <span className="text-primary font-mono">{formatTimeUntilRefresh(data.cycle.expiresAt)}</span>
             </div>
           </div>
           <div className="pt-12 text-center">
