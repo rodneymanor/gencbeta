@@ -9,6 +9,7 @@ export interface GeminiRequest {
   maxTokens?: number;
   temperature?: number;
   model?: string;
+  responseType?: "text" | "json";
 }
 
 export interface GeminiResponse {
@@ -38,12 +39,19 @@ export class GeminiService {
       console.log("🤖 [Gemini] Starting content generation...");
 
       const modelName = request.model ?? GeminiService.DEFAULT_MODEL;
+      const generationConfig: any = {
+        maxOutputTokens: request.maxTokens ?? 1000,
+        temperature: request.temperature ?? 0.7,
+      };
+
+      // Add JSON response type if requested
+      if (request.responseType === "json") {
+        generationConfig.responseMimeType = "application/json";
+      }
+
       const model = genAI.getGenerativeModel({
         model: modelName,
-        generationConfig: {
-          maxOutputTokens: request.maxTokens ?? 1000,
-          temperature: request.temperature ?? 0.7,
-        },
+        generationConfig,
         systemInstruction: request.systemPrompt,
       });
 

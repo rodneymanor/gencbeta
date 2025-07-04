@@ -5,7 +5,9 @@ import { authenticateApiKey } from "@/lib/api-key-auth";
 import { CreditsService } from "@/lib/credits-service";
 import { adminDb } from "@/lib/firebase-admin";
 import { generateScript } from "@/lib/gemini";
+import { parseStructuredResponse, createScriptElements, combineScriptElements } from "@/lib/json-extractor";
 import { NegativeKeywordsService } from "@/lib/negative-keywords-service";
+import { createSpeedWritePrompt, createAIVoicePrompt } from "@/lib/prompt-helpers";
 import { generateScriptWithValidation, validateScript, cleanScriptContent } from "@/lib/script-validation";
 import { trackApiUsageAdmin, UsageTrackerAdmin } from "@/lib/usage-tracker-admin";
 import { VoiceTemplateProcessor } from "@/lib/voice-template-processor";
@@ -131,57 +133,61 @@ async function generateAIVoiceScript(idea: string, length: string, activeVoice: 
   // Get user's negative keywords
   const negativeKeywords = await NegativeKeywordsService.getEffectiveNegativeKeywordsForUser(userId);
   const negativeKeywordInstruction = createNegativeKeywordPromptInstruction(negativeKeywords);
-  
-  const prompt = createVoicePrompt(activeVoice, idea, length, negativeKeywordInstruction);
+
+  const randomTemplate = activeVoice.templates[Math.floor(Math.random() * activeVoice.templates.length)];
+  const targetWordCount = VoiceTemplateProcessor.calculateTargetWordCount(randomTemplate, parseInt(length));
+
+  const prompt = createAIVoicePrompt(
+    idea,
+    length,
+    targetWordCount,
+    randomTemplate.hook,
+    randomTemplate.bridge,
+    randomTemplate.nugget,
+    randomTemplate.wta,
+    negativeKeywordInstruction
+  );
 
   try {
-    // Generate without validation first since we're expecting JSON
-    const result = await generateScript(prompt);
+    // Generate with JSON response type for clean output
+    const result = await generateScript(prompt, { responseType: "json" });
     const rawContent = result.content ?? "";
+
+    // Use bulletproof JSON extraction
+    const parseResult = parseStructuredResponse(rawContent, "AI Voice");
     
-    // Parse the structured response
-    let elements: ScriptElements;
-    try {
-      const parsed = JSON.parse(rawContent);
-      elements = {
-        hook: parsed.hook ?? "",
-        bridge: parsed.bridge ?? "",
-        goldenNugget: parsed.goldenNugget ?? "",
-        wta: parsed.wta ?? ""
-      };
-    } catch (parseError) {
-      console.warn("[SpeedWrite] Failed to parse AI voice structured response, falling back to plain text");
-      // Fallback: return as single content block with cleaned content
+    if (!parseResult.success) {
+      console.warn("[SpeedWrite] AI Voice JSON parsing failed, falling back to plain text");
       const cleanedContent = cleanScriptContent(rawContent);
-      elements = {
-        hook: "",
-        bridge: "",
-        goldenNugget: "",
-        wta: cleanedContent
+      const elements = { hook: "", bridge: "", goldenNugget: "", wta: cleanedContent };
+      const fullContent = combineScriptElements(elements);
+      
+      return {
+        ...result,
+        content: fullContent,
+        elements,
+        approach: "ai-voice" as const,
+        voice: { id: activeVoice.id, name: activeVoice.name, badges: activeVoice.badges },
+        success: false,
+        error: parseResult.error
       };
     }
 
-    // Combine elements into full script content
-    const fullContent = [elements.hook, elements.bridge, elements.goldenNugget, elements.wta]
-      .filter(Boolean)
-      .join('\n\n');
+    const elements = createScriptElements(parseResult.data);
+    const fullContent = combineScriptElements(elements);
 
-    // Validate the combined content (not the raw JSON)
+    // Validate the combined content
     const validation = validateScript(fullContent);
     if (!validation.isValid) {
       console.warn(`⚠️ [SpeedWrite] AI Voice script has validation issues:`, validation.issues);
     }
-    
+
     return {
       ...result,
       content: fullContent,
       elements,
       approach: "ai-voice" as const,
-      voice: {
-        id: activeVoice.id,
-        name: activeVoice.name,
-        badges: activeVoice.badges,
-      },
+      voice: { id: activeVoice.id, name: activeVoice.name, badges: activeVoice.badges },
     };
   } catch (error) {
     console.error("[SpeedWrite] AI Voice script generation failed:", error);
@@ -196,72 +202,40 @@ async function generateSpeedWriteScript(idea: string, length: string, userId: st
   const negativeKeywords = await NegativeKeywordsService.getEffectiveNegativeKeywordsForUser(userId);
   const negativeKeywordInstruction = createNegativeKeywordPromptInstruction(negativeKeywords);
 
-  const prompt = `Write a video script using the Speed Write formula. Return the script in a structured JSON format with each element clearly separated.
-
-IMPORTANT: Write actual words, not descriptions or instructions. Each section should be complete and ready to record.
-
-Target Length: ${length} seconds (~${targetWords} words)
-
-Script Topic: ${idea}${negativeKeywordInstruction}
-
-Return your response in this exact JSON format:
-{
-  "hook": "Your attention-grabbing opener that hooks the viewer immediately",
-  "bridge": "Your transition that connects the hook to the main content",
-  "goldenNugget": "Your core value, insight, or main teaching point",
-  "wta": "Your clear call to action that tells viewers what to do next"
-}
-
-Make sure each section flows naturally into the next when read aloud.`;
+  const prompt = createSpeedWritePrompt(idea, length, targetWords, negativeKeywordInstruction);
 
   try {
-    // Generate without validation first since we're expecting JSON
-    const result = await generateScript(prompt);
+    // Generate with JSON response type and validation
+    const result = await generateScriptWithValidation(
+      () => generateScript(prompt, { responseType: "json" }),
+      (result) => result.content ?? "",
+      { maxRetries: 2, retryDelay: 500 }
+    );
+
     const rawContent = result.content ?? "";
 
-    // Parse the structured response
-    let elements: ScriptElements;
-    try {
-      console.log("[SpeedWrite] Raw content from AI:", rawContent.substring(0, 200) + "...");
-      
-      // Clean the content by removing markdown code blocks
-      let cleanedContent = rawContent.trim();
-      if (cleanedContent.startsWith('```json')) {
-        cleanedContent = cleanedContent.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-      } else if (cleanedContent.startsWith('```')) {
-        cleanedContent = cleanedContent.replace(/^```\s*/, '').replace(/\s*```$/, '');
-      }
-      
-      console.log("[SpeedWrite] Cleaned content for parsing:", cleanedContent.substring(0, 200) + "...");
-      
-      const parsed = JSON.parse(cleanedContent);
-      console.log("[SpeedWrite] Successfully parsed JSON:", parsed);
-      elements = {
-        hook: parsed.hook ?? "",
-        bridge: parsed.bridge ?? "",
-        goldenNugget: parsed.goldenNugget ?? "",
-        wta: parsed.wta ?? ""
-      };
-    } catch (parseError) {
-      console.warn("[SpeedWrite] Failed to parse structured response, falling back to plain text");
-      console.warn("[SpeedWrite] Parse error:", parseError);
-      console.warn("[SpeedWrite] Raw content that failed to parse:", rawContent);
-      // Fallback: return as single content block with cleaned content
+    // Use bulletproof JSON extraction
+    const parseResult = parseStructuredResponse(rawContent, "Speed Write");
+    
+    if (!parseResult.success) {
+      console.warn("[SpeedWrite] Speed Write JSON parsing failed, falling back to plain text");
       const cleanedContent = cleanScriptContent(rawContent);
-      elements = {
-        hook: "",
-        bridge: "",
-        goldenNugget: "",
-        wta: cleanedContent
+      const elements = { hook: "", bridge: "", goldenNugget: "", wta: cleanedContent };
+      const fullContent = combineScriptElements(elements);
+      
+      return {
+        ...result,
+        content: fullContent,
+        elements,
+        success: false,
+        error: parseResult.error
       };
     }
 
-    // Combine elements into full script content
-    const fullContent = [elements.hook, elements.bridge, elements.goldenNugget, elements.wta]
-      .filter(Boolean)
-      .join('\n\n');
+    const elements = createScriptElements(parseResult.data);
+    const fullContent = combineScriptElements(elements);
 
-    // Validate the combined content (not the raw JSON)
+    // Validate the combined content
     const validation = validateScript(fullContent);
     if (!validation.isValid) {
       console.warn(`⚠️ [SpeedWrite] Speed Write script has validation issues:`, validation.issues);
