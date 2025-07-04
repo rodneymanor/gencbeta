@@ -101,8 +101,10 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
       </div>
 
       {/* Script content */}
-      <div className="text-foreground line-clamp-6 py-3 text-sm leading-relaxed whitespace-pre-wrap">
-        {(idea as ContentIdea & { script?: string }).script ?? idea.hook}
+      <div className="py-3">
+        <div className="text-foreground line-clamp-6 text-sm leading-relaxed whitespace-pre-wrap">
+          {(idea as ContentIdea & { script?: string }).script ?? idea.hook}
+        </div>
       </div>
 
       {/* Engagement metrics */}
