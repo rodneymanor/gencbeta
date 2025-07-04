@@ -223,7 +223,18 @@ Make sure each section flows naturally into the next when read aloud.`;
     let elements: ScriptElements;
     try {
       console.log("[SpeedWrite] Raw content from AI:", rawContent.substring(0, 200) + "...");
-      const parsed = JSON.parse(rawContent);
+      
+      // Clean the content by removing markdown code blocks
+      let cleanedContent = rawContent.trim();
+      if (cleanedContent.startsWith('```json')) {
+        cleanedContent = cleanedContent.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      } else if (cleanedContent.startsWith('```')) {
+        cleanedContent = cleanedContent.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      }
+      
+      console.log("[SpeedWrite] Cleaned content for parsing:", cleanedContent.substring(0, 200) + "...");
+      
+      const parsed = JSON.parse(cleanedContent);
       console.log("[SpeedWrite] Successfully parsed JSON:", parsed);
       elements = {
         hook: parsed.hook ?? "",
