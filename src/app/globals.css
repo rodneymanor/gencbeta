@@ -371,3 +371,14 @@
 .gutter.gutter-horizontal:hover {
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="30"><path d="M2 0v30M6 0v30" stroke="rgba(0,0,0,0.2)" stroke-width="1"/></svg>');
 }
+
+/* Hide scrollbars while keeping scroll functionality */
+.hide-scrollbar {
+  overflow: auto;                 /* still scrollable */
+  scrollbar-width: none;          /* Firefox */
+  -ms-overflow-style: none;       /* IE / old Edge */
+}
+
+.hide-scrollbar::-webkit-scrollbar {   /* Chrome, Safari, Opera */
+  display: none;
+}

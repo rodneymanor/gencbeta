@@ -184,7 +184,7 @@ export default function NewScriptPage() {
   };
 
   return (
-    <div className="bg-background min-h-screen">
+    <div className="bg-background hide-scrollbar min-h-screen">
       {/* Centered Content Container - Raised Higher */}
       <div className="flex flex-col items-center justify-start px-4 pt-8 pb-8">
         {/* Header */}
