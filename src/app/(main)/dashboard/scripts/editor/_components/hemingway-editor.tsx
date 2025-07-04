@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { BarChart3, Settings, Palette } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { type HighlightConfig } from "@/lib/script-analysis";
+import { type HighlightConfig, type ScriptAnalysis } from "@/lib/script-analysis";
 
 import { HemingwayEditorCore } from "./hemingway-editor-core";
 
@@ -186,16 +186,27 @@ export function HemingwayEditor({
   });
 
   const [showAnalysis] = useState(true);
+  const [currentAnalysis, setCurrentAnalysis] = useState<ScriptAnalysis>({
+    hooks: [],
+    bridges: [],
+    goldenNuggets: [],
+    wtas: [],
+  });
 
-  // Get analysis stats (simplified for now)
+  // Get analysis stats from current analysis
   const getAnalysisStats = (): AnalysisStats => {
+    const hooks = currentAnalysis.hooks.length;
+    const bridges = currentAnalysis.bridges.length;
+    const goldenNuggets = currentAnalysis.goldenNuggets.length;
+    const wtas = currentAnalysis.wtas.length;
+    
     return {
-      total: 0,
-      hooks: 0,
-      bridges: 0,
-      goldenNuggets: 0,
-      wtas: 0,
-      words: value.trim().split(/\s+/).length,
+      total: hooks + bridges + goldenNuggets + wtas,
+      hooks,
+      bridges,
+      goldenNuggets,
+      wtas,
+      words: value.trim() ? value.trim().split(/\s+/).length : 0,
       characters: value.length,
     };
   };
@@ -214,6 +225,7 @@ export function HemingwayEditor({
         autoFocus={autoFocus}
         highlightConfig={highlightConfig}
         elements={elements}
+        onAnalysisChange={setCurrentAnalysis}
       />
 
       <EditorFooter

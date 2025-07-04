@@ -13,6 +13,7 @@ import {
 } from "@/lib/script-analysis";
 
 import { ContextualActionMenu } from "./contextual-action-menu";
+import { TextHighlightOverlay } from "./text-highlight-overlay";
 
 interface ScriptElements {
   hook: string;
@@ -31,6 +32,7 @@ interface HemingwayEditorCoreProps {
   autoFocus?: boolean;
   highlightConfig: HighlightConfig;
   elements?: ScriptElements; // New prop for structured elements
+  onAnalysisChange?: (analysis: ScriptAnalysis) => void;
 }
 
 export function HemingwayEditorCore({
@@ -43,6 +45,7 @@ export function HemingwayEditorCore({
   autoFocus = false,
   highlightConfig,
   elements,
+  onAnalysisChange,
 }: HemingwayEditorCoreProps) {
   const [analysis, setAnalysis] = useState<ScriptAnalysis>({
     hooks: [],
@@ -110,24 +113,29 @@ export function HemingwayEditorCore({
   const analyzeText = useCallback(
     async (text: string) => {
       if (!text.trim()) {
-        setAnalysis({ hooks: [], bridges: [], goldenNuggets: [], wtas: [] });
+        const emptyAnalysis = { hooks: [], bridges: [], goldenNuggets: [], wtas: [] };
+        setAnalysis(emptyAnalysis);
+        onAnalysisChange?.(emptyAnalysis);
         return;
       }
 
       try {
+        let result: ScriptAnalysis;
+        
         // Use structured elements if available, otherwise fall back to pattern-based analysis
         if (elements && (elements.hook || elements.bridge || elements.goldenNugget || elements.wta)) {
-          const result = createAnalysisFromElements(text, elements);
-          setAnalysis(result);
+          result = createAnalysisFromElements(text, elements);
         } else {
-          const result = await analyzeScriptElements(text, highlightConfig);
-          setAnalysis(result);
+          result = await analyzeScriptElements(text, highlightConfig);
         }
+        
+        setAnalysis(result);
+        onAnalysisChange?.(result);
       } catch (error) {
         console.error("Analysis failed:", error);
       }
     },
-    [highlightConfig, elements, createAnalysisFromElements],
+    [highlightConfig, elements, createAnalysisFromElements, onAnalysisChange],
   );
 
   // Trigger analysis on text change
@@ -146,6 +154,14 @@ export function HemingwayEditorCore({
       }
     };
   }, [value, analyzeText]);
+
+  // Handle element click from overlay
+  const handleElementClick = useCallback((element: ScriptElement, event?: React.MouseEvent) => {
+    if (event) {
+      setContextMenuPosition({ x: event.clientX, y: event.clientY });
+      setSelectedElement(element);
+    }
+  }, []);
 
   // Handle context menu action
   const handleContextAction = useCallback((action: ContextualAction, element: ScriptElement) => {
@@ -182,6 +198,15 @@ export function HemingwayEditorCore({
             fontSize: "16px",
             lineHeight: "1.7",
           }}
+        />
+
+        {/* Text Highlight Overlay */}
+        <TextHighlightOverlay
+          text={value}
+          analysis={analysis}
+          textareaRef={textareaRef}
+          highlightConfig={highlightConfig}
+          onElementClick={handleElementClick}
         />
       </div>
 
