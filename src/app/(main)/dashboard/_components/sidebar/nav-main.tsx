@@ -115,7 +115,15 @@ export function NavMain({ items, onCollectionCreated }: NavMainProps) {
               <SidebarMenuButton
                 asChild
                 tooltip="Write Script"
-                className="bg-secondary text-secondary-foreground hover:bg-secondary/80 hover:text-secondary-foreground active:bg-secondary/80 active:text-secondary-foreground flex h-8 min-w-8 items-center justify-center shadow-md transition-[width,height,padding,box-shadow] duration-200 ease-linear group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:p-0"
+                className="text-secondary-foreground hover:text-secondary-foreground active:text-secondary-foreground flex h-8 min-w-8 items-center justify-center shadow-md transition-[width,height,padding,box-shadow] duration-200 ease-linear group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:p-0"
+                style={
+                  {
+                    "--tw-bg-opacity": 1,
+                    backgroundColor: "oklch(var(--background-color-300)/var(--tw-bg-opacity))",
+                    "--hover-bg": "oklch(var(--background-color-300)/0.8)",
+                    "--active-bg": "oklch(var(--background-color-300)/0.8)",
+                  } as React.CSSProperties
+                }
               >
                 <Link href="/dashboard/scripts/new">
                   <Zap className="group-data-[collapsible=icon]:h-4 group-data-[collapsible=icon]:w-4" />

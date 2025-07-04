@@ -46,7 +46,13 @@ export default function SpeedWriteInput({ onQuickWrite, disabled = false, classN
             onClick={handleSubmit}
             size="sm"
             disabled={!videoIdea.trim() || disabled}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground absolute top-1/2 right-1.5 h-8 -translate-y-1/2 px-3 text-xs font-medium shadow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            className="text-primary-foreground absolute top-1/2 right-1.5 h-8 -translate-y-1/2 px-3 text-xs font-medium shadow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            style={
+              {
+                "--tw-bg-opacity": 1,
+                backgroundColor: "oklch(var(--background-color-300)/var(--tw-bg-opacity))",
+              } as React.CSSProperties
+            }
           >
             <Wand2 className="mr-1.5 h-3 w-3" />
             Quick Write
