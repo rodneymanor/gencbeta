@@ -101,12 +101,12 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
       </div>
 
       {/* Script content */}
-      <div className="text-foreground line-clamp-10 text-sm leading-tight whitespace-pre-wrap">
+      <div className="text-foreground line-clamp-10 pb-3 text-sm leading-tight whitespace-pre-wrap">
         {(idea as ContentIdea & { script?: string }).script ?? idea.hook}
       </div>
 
       {/* Engagement metrics */}
-      <div className="flex items-center justify-between pt-2">
+      <div className="flex items-center justify-between pt-1">
         <div className="flex items-center space-x-6">
           <button className="text-muted-foreground hover:text-destructive flex items-center space-x-2 transition-colors">
             <Heart className="h-4 w-4" />
