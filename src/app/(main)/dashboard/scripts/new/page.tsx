@@ -212,7 +212,7 @@ export default function NewScriptPage() {
         <div className="w-full max-w-none" style={{ width: "66vw" }}>
           {/* Voice Badge */}
           <div className="mb-4 flex justify-center">
-            <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5 px-3 py-1 text-sm">
+            <Badge variant="outline" className="border-orange-500/30 text-orange-600 bg-orange-50 px-3 py-1 text-sm">
               <Mic className="mr-1 h-3 w-3" />
               {currentVoice} Voice
             </Badge>

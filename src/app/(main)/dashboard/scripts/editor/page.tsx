@@ -188,7 +188,7 @@ export default function ScriptEditorPage() {
           <div className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-orange-500" />
             <span className="text-lg font-medium">Hemingway Editor</span>
-            <Badge variant="outline" className="ml-2 text-xs">
+            <Badge variant="outline" className="ml-2 text-xs border-blue-500/30 text-blue-600 bg-blue-50">
               <Eye className="mr-1 h-3 w-3" />
               Real-time Analysis
             </Badge>

@@ -90,7 +90,7 @@ const TabButton = ({ isActive, icon, label, onClick }: TabProps) => (
   >
     {icon}
     {label}
-    {isActive && <div className="bg-primary absolute right-0 bottom-0 left-0 h-0.5 rounded-full" />}
+    {isActive && <div className="bg-cyan-500 absolute right-0 bottom-0 left-0 h-0.5 rounded-full" />}
   </button>
 );
 
@@ -243,7 +243,7 @@ export function InputModeToggle({
                 <p className="text-destructive text-sm">{urlValidation.error}</p>
               ) : urlValidation.platform ? (
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="border-primary/20 text-primary capitalize">
+                  <Badge variant="outline" className="capitalize border-cyan-500/30 text-cyan-600 bg-cyan-50">
                     {urlValidation.platform} detected
                   </Badge>
                   <span className="text-muted-foreground text-sm">Ready to transcribe and script</span>
