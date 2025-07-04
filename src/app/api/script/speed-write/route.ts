@@ -143,12 +143,12 @@ async function generateAIVoiceScript(idea: string, length: string, activeVoice: 
     );
 
     // Clean and validate the content
-    const cleanedContent = cleanScriptContent(result.content ?? "");
+    const rawContent = result.content ?? "";
     
     // Parse the structured response
     let elements: ScriptElements;
     try {
-      const parsed = JSON.parse(cleanedContent);
+      const parsed = JSON.parse(rawContent);
       elements = {
         hook: parsed.hook ?? "",
         bridge: parsed.bridge ?? "",
@@ -157,7 +157,8 @@ async function generateAIVoiceScript(idea: string, length: string, activeVoice: 
       };
     } catch (parseError) {
       console.warn("[SpeedWrite] Failed to parse AI voice structured response, falling back to plain text");
-      // Fallback: return as single content block
+      // Fallback: return as single content block with cleaned content
+      const cleanedContent = cleanScriptContent(rawContent);
       elements = {
         hook: "",
         bridge: "",
@@ -211,7 +212,7 @@ Script Topic: ${idea}${negativeKeywordInstruction}
 Return your response in this exact JSON format:
 {
   "hook": "Your attention-grabbing opener that hooks the viewer immediately",
-  "bridge": "Your transition that connects the hook to the main content", 
+  "bridge": "Your transition that connects the hook to the main content",
   "goldenNugget": "Your core value, insight, or main teaching point",
   "wta": "Your clear call to action that tells viewers what to do next"
 }
@@ -225,12 +226,12 @@ Make sure each section flows naturally into the next when read aloud.`;
       { maxRetries: 2, retryDelay: 500 }
     );
 
-    const cleanedContent = cleanScriptContent(result.content ?? "");
-    
+    const rawContent = result.content ?? "";
+
     // Parse the structured response
     let elements: ScriptElements;
     try {
-      const parsed = JSON.parse(cleanedContent);
+      const parsed = JSON.parse(rawContent);
       elements = {
         hook: parsed.hook ?? "",
         bridge: parsed.bridge ?? "",
@@ -239,7 +240,8 @@ Make sure each section flows naturally into the next when read aloud.`;
       };
     } catch (parseError) {
       console.warn("[SpeedWrite] Failed to parse structured response, falling back to plain text");
-      // Fallback: return as single content block
+      // Fallback: return as single content block with cleaned content
+      const cleanedContent = cleanScriptContent(rawContent);
       elements = {
         hook: "",
         bridge: "",
