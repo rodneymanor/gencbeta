@@ -70,7 +70,7 @@ export function VideoInsightsTabs({ video, copiedField, onCopyToClipboard }: Vid
     { icon: Heart, label: "Likes", value: video.insights.likes, color: "text-red-600" },
     { icon: MessageCircle, label: "Comments", value: video.insights.comments, color: "text-green-600" },
     { icon: Share, label: "Shares", value: video.insights.shares, color: "text-purple-600" },
-    { icon: Bookmark, label: "Saves", value: video.insights.saves, color: "text-[#9a8c98]" },
+    { icon: Bookmark, label: "Saves", value: video.insights.saves, color: "text-[#2d93ad]" },
     {
       icon: TrendingUp,
       label: "Engagement Rate",
@@ -119,7 +119,7 @@ export function VideoInsightsTabs({ video, copiedField, onCopyToClipboard }: Vid
           <div className="grid gap-4">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-[#9a8c98]">Hook</CardTitle>
+                <CardTitle className="text-sm font-medium text-[#2d93ad]">Hook</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm">{video.components.hook}</p>
@@ -140,10 +140,10 @@ export function VideoInsightsTabs({ video, copiedField, onCopyToClipboard }: Vid
       <TabsContent value="components" className="space-y-4">
         <div className="space-y-4">
           {[
-            { key: "hook", label: "Hook", description: "Attention-grabbing opener", color: "text-[#9a8c98]" },
-            { key: "bridge", label: "Bridge", description: "Connects hook to main content", color: "text-[#4a4e69]" },
-            { key: "nugget", label: "Golden Nugget", description: "Core valuable insight", color: "text-[#c9ada7]" },
-            { key: "wta", label: "WTA", description: "Call to action", color: "text-[#9a8c98]" },
+            { key: "hook", label: "Hook", description: "Attention-grabbing opener", color: "text-[#2d93ad]" },
+            { key: "bridge", label: "Bridge", description: "Connects hook to main content", color: "text-[#412722]" },
+            { key: "nugget", label: "Golden Nugget", description: "Core valuable insight", color: "text-[#d9dcd6]" },
+            { key: "wta", label: "WTA", description: "Call to action", color: "text-[#2d93ad]" },
           ].map((component) => (
             <Card key={component.key}>
               <CardHeader>

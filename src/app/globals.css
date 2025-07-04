@@ -5,58 +5,58 @@
 
 :root {
   /* Main backgrounds */
-  --background: oklch(0.95 0.01 60); /* #f2e9e4 - Very light cream */
-  --foreground: oklch(0.25 0.02 270); /* #22223b - Dark navy */
+  --background: oklch(0.96 0.01 110); /* #f2f3ed - Light sage/cream */
+  --foreground: oklch(0.25 0.02 30); /* #412722 - Dark brown */
 
   /* Card and surface colors */
-  --card: oklch(0.95 0.01 60); /* #f2e9e4 - Very light cream */
-  --card-foreground: oklch(0.25 0.02 270); /* #22223b - Dark navy */
+  --card: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
+  --card-foreground: oklch(0.25 0.02 30); /* #412722 - Dark brown */
 
   /* Popover colors */
-  --popover: oklch(0.95 0.01 60); /* #f2e9e4 - Very light cream */
-  --popover-foreground: oklch(0.25 0.02 270); /* #22223b - Dark navy */
+  --popover: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
+  --popover-foreground: oklch(0.25 0.02 30); /* #412722 - Dark brown */
 
   /* Primary colors */
-  --primary: oklch(0.35 0.03 260); /* #4a4e69 - Medium gray-blue */
-  --primary-foreground: oklch(0.95 0.01 60); /* #f2e9e4 - Very light cream */
+  --primary: oklch(0.58 0.08 220); /* #2d93ad - Teal blue */
+  --primary-foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
 
   /* Secondary colors */
-  --secondary: oklch(0.82 0.02 30); /* #c9ada7 - Light warm gray */
-  --secondary-foreground: oklch(0.25 0.02 270); /* #22223b - Dark navy */
+  --secondary: oklch(0.87 0.01 120); /* #d9dcd6 - Light gray-green */
+  --secondary-foreground: oklch(0.25 0.02 30); /* #412722 - Dark brown */
 
   /* Muted colors */
-  --muted: oklch(0.82 0.02 30); /* #c9ada7 - Light warm gray */
-  --muted-foreground: oklch(0.35 0.03 260); /* #4a4e69 - Medium gray-blue */
+  --muted: oklch(0.87 0.01 120); /* #d9dcd6 - Light gray-green */
+  --muted-foreground: oklch(0.45 0.02 30); /* Slightly lighter brown */
 
   /* Accent colors */
-  --accent: oklch(0.62 0.02 320); /* #9a8c98 - Muted purple-gray */
-  --accent-foreground: oklch(0.95 0.01 60); /* #f2e9e4 - Very light cream */
+  --accent: oklch(0.58 0.08 220); /* #2d93ad - Teal blue */
+  --accent-foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
 
   /* Destructive colors */
   --destructive: oklch(0.55 0.15 25); /* Red tone */
-  --destructive-foreground: oklch(0.95 0.01 60); /* #f2e9e4 - Very light cream */
+  --destructive-foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
 
   /* Border and input colors */
-  --border: oklch(0.82 0.02 30); /* #c9ada7 - Light warm gray */
-  --input: oklch(0.82 0.02 30); /* #c9ada7 - Light warm gray */
-  --ring: oklch(0.35 0.03 260); /* #4a4e69 - Medium gray-blue */
+  --border: oklch(0.87 0.01 120); /* #d9dcd6 - Light gray-green */
+  --input: oklch(0.87 0.01 120); /* #d9dcd6 - Light gray-green */
+  --ring: oklch(0.58 0.08 220); /* #2d93ad - Teal blue */
 
   /* Chart colors */
-  --chart-1: oklch(0.35 0.03 260); /* #4a4e69 - Medium gray-blue */
-  --chart-2: oklch(0.62 0.02 320); /* #9a8c98 - Muted purple-gray */
-  --chart-3: oklch(0.82 0.02 30); /* #c9ada7 - Light warm gray */
-  --chart-4: oklch(0.25 0.02 270); /* #22223b - Dark navy */
-  --chart-5: oklch(0.95 0.01 60); /* #f2e9e4 - Very light cream */
+  --chart-1: oklch(0.58 0.08 220); /* #2d93ad - Teal blue */
+  --chart-2: oklch(0.25 0.02 30); /* #412722 - Dark brown */
+  --chart-3: oklch(0.87 0.01 120); /* #d9dcd6 - Light gray-green */
+  --chart-4: oklch(0.96 0.01 110); /* #f2f3ed - Light sage/cream */
+  --chart-5: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
 
   /* Sidebar colors */
-  --sidebar-background: oklch(0.88 0.015 40); /* Slightly darker than main bg */
-  --sidebar-foreground: oklch(0.25 0.02 270); /* #22223b - Dark navy */
-  --sidebar-primary: oklch(0.35 0.03 260); /* #4a4e69 - Medium gray-blue */
-  --sidebar-primary-foreground: oklch(0.95 0.01 60); /* #f2e9e4 - Very light cream */
-  --sidebar-accent: oklch(0.62 0.02 320); /* #9a8c98 - Muted purple-gray */
-  --sidebar-accent-foreground: oklch(0.95 0.01 60); /* #f2e9e4 - Very light cream */
-  --sidebar-border: oklch(0.82 0.02 30); /* #c9ada7 - Light warm gray */
-  --sidebar-ring: oklch(0.35 0.03 260); /* #4a4e69 - Medium gray-blue */
+  --sidebar-background: oklch(0.94 0.01 115); /* Slightly darker than main bg */
+  --sidebar-foreground: oklch(0.25 0.02 30); /* #412722 - Dark brown */
+  --sidebar-primary: oklch(0.58 0.08 220); /* #2d93ad - Teal blue */
+  --sidebar-primary-foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
+  --sidebar-accent: oklch(0.87 0.01 120); /* #d9dcd6 - Light gray-green */
+  --sidebar-accent-foreground: oklch(0.25 0.02 30); /* #412722 - Dark brown */
+  --sidebar-border: oklch(0.87 0.01 120); /* #d9dcd6 - Light gray-green */
+  --sidebar-ring: oklch(0.58 0.08 220); /* #2d93ad - Teal blue */
 
   --font-sans: Poppins, sans-serif;
   --font-serif: Georgia, serif;
@@ -84,58 +84,58 @@
 
 .dark {
   /* Main backgrounds */
-  --background: oklch(0.25 0.02 270); /* #22223b - Dark navy */
-  --foreground: oklch(0.95 0.01 60); /* #f2e9e4 - Very light cream */
+  --background: oklch(0.25 0.02 30); /* #412722 - Dark brown */
+  --foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
 
   /* Card and surface colors */
-  --card: oklch(0.35 0.03 260); /* #4a4e69 - Medium gray-blue */
-  --card-foreground: oklch(0.95 0.01 60); /* #f2e9e4 - Very light cream */
+  --card: oklch(0.30 0.02 25); /* Slightly lighter brown */
+  --card-foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
 
   /* Popover colors */
-  --popover: oklch(0.35 0.03 260); /* #4a4e69 - Medium gray-blue */
-  --popover-foreground: oklch(0.95 0.01 60); /* #f2e9e4 - Very light cream */
+  --popover: oklch(0.30 0.02 25); /* Slightly lighter brown */
+  --popover-foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
 
   /* Primary colors */
-  --primary: oklch(0.62 0.02 320); /* #9a8c98 - Muted purple-gray */
-  --primary-foreground: oklch(0.25 0.02 270); /* #22223b - Dark navy */
+  --primary: oklch(0.58 0.08 220); /* #2d93ad - Teal blue */
+  --primary-foreground: oklch(0.25 0.02 30); /* #412722 - Dark brown */
 
   /* Secondary colors */
-  --secondary: oklch(0.35 0.03 260); /* #4a4e69 - Medium gray-blue */
-  --secondary-foreground: oklch(0.95 0.01 60); /* #f2e9e4 - Very light cream */
+  --secondary: oklch(0.35 0.02 25); /* Darker brown for secondary */
+  --secondary-foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
 
   /* Muted colors */
-  --muted: oklch(0.35 0.03 260); /* #4a4e69 - Medium gray-blue */
-  --muted-foreground: oklch(0.82 0.02 30); /* #c9ada7 - Light warm gray */
+  --muted: oklch(0.35 0.02 25); /* Darker brown for muted */
+  --muted-foreground: oklch(0.87 0.01 120); /* #d9dcd6 - Light gray-green */
 
   /* Accent colors */
-  --accent: oklch(0.82 0.02 30); /* #c9ada7 - Light warm gray */
-  --accent-foreground: oklch(0.25 0.02 270); /* #22223b - Dark navy */
+  --accent: oklch(0.87 0.01 120); /* #d9dcd6 - Light gray-green */
+  --accent-foreground: oklch(0.25 0.02 30); /* #412722 - Dark brown */
 
   /* Destructive colors */
   --destructive: oklch(0.65 0.15 25); /* Red tone */
-  --destructive-foreground: oklch(0.95 0.01 60); /* #f2e9e4 - Very light cream */
+  --destructive-foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
 
   /* Border and input colors */
-  --border: oklch(0.35 0.03 260); /* #4a4e69 - Medium gray-blue */
-  --input: oklch(0.35 0.03 260); /* #4a4e69 - Medium gray-blue */
-  --ring: oklch(0.62 0.02 320); /* #9a8c98 - Muted purple-gray */
+  --border: oklch(0.35 0.02 25); /* Darker brown for borders */
+  --input: oklch(0.35 0.02 25); /* Darker brown for inputs */
+  --ring: oklch(0.58 0.08 220); /* #2d93ad - Teal blue */
 
   /* Chart colors */
-  --chart-1: oklch(0.62 0.02 320); /* #9a8c98 - Muted purple-gray */
-  --chart-2: oklch(0.82 0.02 30); /* #c9ada7 - Light warm gray */
-  --chart-3: oklch(0.35 0.03 260); /* #4a4e69 - Medium gray-blue */
-  --chart-4: oklch(0.95 0.01 60); /* #f2e9e4 - Very light cream */
-  --chart-5: oklch(0.25 0.02 270); /* #22223b - Dark navy */
+  --chart-1: oklch(0.58 0.08 220); /* #2d93ad - Teal blue */
+  --chart-2: oklch(0.87 0.01 120); /* #d9dcd6 - Light gray-green */
+  --chart-3: oklch(0.35 0.02 25); /* Darker brown */
+  --chart-4: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
+  --chart-5: oklch(0.96 0.01 110); /* #f2f3ed - Light sage/cream */
 
   /* Sidebar colors */
-  --sidebar-background: oklch(0.30 0.025 265); /* Slightly lighter than main bg */
-  --sidebar-foreground: oklch(0.95 0.01 60); /* #f2e9e4 - Very light cream */
-  --sidebar-primary: oklch(0.62 0.02 320); /* #9a8c98 - Muted purple-gray */
-  --sidebar-primary-foreground: oklch(0.25 0.02 270); /* #22223b - Dark navy */
-  --sidebar-accent: oklch(0.82 0.02 30); /* #c9ada7 - Light warm gray */
-  --sidebar-accent-foreground: oklch(0.25 0.02 270); /* #22223b - Dark navy */
-  --sidebar-border: oklch(0.35 0.03 260); /* #4a4e69 - Medium gray-blue */
-  --sidebar-ring: oklch(0.62 0.02 320); /* #9a8c98 - Muted purple-gray */
+  --sidebar-background: oklch(0.28 0.02 28); /* Slightly lighter than main bg */
+  --sidebar-foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
+  --sidebar-primary: oklch(0.58 0.08 220); /* #2d93ad - Teal blue */
+  --sidebar-primary-foreground: oklch(0.25 0.02 30); /* #412722 - Dark brown */
+  --sidebar-accent: oklch(0.87 0.01 120); /* #d9dcd6 - Light gray-green */
+  --sidebar-accent-foreground: oklch(0.25 0.02 30); /* #412722 - Dark brown */
+  --sidebar-border: oklch(0.35 0.02 25); /* Darker brown for borders */
+  --sidebar-ring: oklch(0.58 0.08 220); /* #2d93ad - Teal blue */
 
   --font-sans: Poppins, sans-serif;
   --font-serif: Georgia, serif;

@@ -92,7 +92,7 @@ export const CONTENT_PILLARS: Record<ContentPillar, ContentPillarInfo> = {
     id: "hyper_focused_value",
     name: "Deep Dive",
     description: "In-depth, actionable how-to guidance",
-    color: "bg-[#4a4e69]",
+    color: "bg-[#2d93ad]",
     icon: "🎯"
   },
   quick_hit_value: {
@@ -106,21 +106,21 @@ export const CONTENT_PILLARS: Record<ContentPillar, ContentPillarInfo> = {
     id: "major_perspective",
     name: "Game Changer", 
     description: "Industry insights that shift perspectives",
-    color: "bg-[#c9ada7]",
+    color: "bg-[#412722]",
     icon: "💡"
   },
   the_trend: {
     id: "the_trend",
     name: "Trending Now",
     description: "Current events connected to your expertise", 
-    color: "bg-[#9a8c98]",
+    color: "bg-[#2d93ad]",
     icon: "📈"
   },
   inspiration_bomb: {
     id: "inspiration_bomb",
     name: "Motivation",
     description: "Powerful content that inspires action",
-    color: "bg-[#22223b]", 
+    color: "bg-[#412722]", 
     icon: "🚀"
   }
 }; 

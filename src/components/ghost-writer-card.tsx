@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 import { Bookmark, BookmarkCheck, X, Heart, MessageCircle, Share, Sparkles } from "lucide-react";
 
@@ -20,7 +19,6 @@ interface GhostWriterCardProps {
 
 export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = false, className }: GhostWriterCardProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   const handleSave = async () => {
     if (isLoading || !onSave) return;
@@ -65,11 +63,11 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
       {/* Header with profile and actions */}
       <div className="flex items-start justify-between">
         <div className="flex items-center space-x-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#22223b] to-[#4a4e69] shadow-md">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#2d93ad] to-[#412722] shadow-md">
             <Sparkles className="h-5 w-5 text-white" />
           </div>
           <div className="flex items-center space-x-2">
-            <span className="bg-gradient-to-r from-[#22223b] to-[#4a4e69] bg-clip-text font-semibold text-transparent">
+            <span className="bg-gradient-to-r from-[#2d93ad] to-[#412722] bg-clip-text font-semibold text-transparent">
               Ghost Writer
             </span>
             <span className="text-sm text-gray-500">suggests</span>

@@ -49,17 +49,17 @@ export const getSourceColor = (source: DailyIdea["source"]) => {
     case "problems":
       return "bg-red-500/10 text-red-700 border-red-200";
     case "excuses":
-      return "bg-[#9a8c98]/10 text-[#9a8c98] border-[#9a8c98]/20";
+      return "bg-[#2d93ad]/10 text-[#2d93ad] border-[#2d93ad]/20";
     case "questions":
-      return "bg-[#4a4e69]/10 text-[#4a4e69] border-[#4a4e69]/20";
+      return "bg-[#412722]/10 text-[#412722] border-[#412722]/20";
     case "google-trends":
       return "bg-green-500/10 text-green-700 border-green-200";
     case "reddit":
-      return "bg-[#c9ada7]/10 text-[#c9ada7] border-[#c9ada7]/20";
+      return "bg-[#d9dcd6]/10 text-[#412722] border-[#d9dcd6]/20";
     case "x":
-      return "bg-[#22223b]/10 text-[#22223b] border-[#22223b]/20";
+      return "bg-[#412722]/10 text-[#412722] border-[#412722]/20";
     default:
-      return "bg-[#4a4e69]/10 text-[#4a4e69] border-[#4a4e69]/20";
+      return "bg-[#2d93ad]/10 text-[#2d93ad] border-[#2d93ad]/20";
   }
 };
 

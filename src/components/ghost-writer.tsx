@@ -153,7 +153,7 @@ export function GhostWriter() {
       <Card className="border-0 shadow-none">
         <CardHeader>
           <div className="text-center">
-            <CardTitle className="bg-gradient-to-r from-[#22223b] to-[#4a4e69] bg-clip-text text-3xl font-bold text-transparent">
+            <CardTitle className="bg-gradient-to-r from-[#2d93ad] to-[#412722] bg-clip-text text-3xl font-bold text-transparent">
               Ghost Writer
             </CardTitle>
             <CardDescription className="mt-2 text-base">
@@ -175,7 +175,7 @@ export function GhostWriter() {
       <Card className="border-0 shadow-none">
         <CardHeader>
           <div className="text-center">
-            <CardTitle className="bg-gradient-to-r from-[#22223b] to-[#4a4e69] bg-clip-text text-3xl font-bold text-transparent">
+            <CardTitle className="bg-gradient-to-r from-[#2d93ad] to-[#412722] bg-clip-text text-3xl font-bold text-transparent">
               Ghost Writer
             </CardTitle>
             <CardDescription className="mt-2 text-base">
@@ -214,7 +214,7 @@ export function GhostWriter() {
       <Card className="border-0 shadow-none">
         <CardHeader>
           <div className="text-center">
-            <CardTitle className="bg-gradient-to-r from-[#22223b] to-[#4a4e69] bg-clip-text text-3xl font-bold text-transparent">
+            <CardTitle className="bg-gradient-to-r from-[#2d93ad] to-[#412722] bg-clip-text text-3xl font-bold text-transparent">
               Ghost Writer
             </CardTitle>
             <CardDescription className="mt-2 text-base">
@@ -246,7 +246,7 @@ export function GhostWriter() {
             </div>
           </div>
           <div className="pt-12 text-center">
-            <CardTitle className="bg-gradient-to-r from-[#22223b] to-[#4a4e69] bg-clip-text text-3xl font-bold text-transparent">
+            <CardTitle className="bg-gradient-to-r from-[#2d93ad] to-[#412722] bg-clip-text text-3xl font-bold text-transparent">
               Ghost Writer
             </CardTitle>
             <CardDescription className="mt-2 text-base">

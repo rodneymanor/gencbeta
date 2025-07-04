@@ -156,7 +156,7 @@ export function NegativeKeywordsTab() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Disabled Defaults</CardTitle>
-            <X className="h-4 w-4 text-[#9a8c98]" />
+            <X className="h-4 w-4 text-[#2d93ad]" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{removedDefaultKeywords.length}</div>
