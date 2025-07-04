@@ -24,14 +24,14 @@ export class VoiceTemplateProcessor {
    */
   static async processContent(request: VoiceProcessingRequest): Promise<VoiceProcessingResult> {
     const startTime = Date.now();
-    
+
     try {
       console.log("🎯 [VoiceProcessor] Processing content through voice template");
       console.log("📝 [VoiceProcessor] Source content:", request.sourceContent.substring(0, 100) + "...");
       console.log("🎤 [VoiceProcessor] Template ID:", request.voiceTemplate.id);
 
       const prompt = this.buildUniversalVoicePrompt(request);
-      
+
       const result = await GeminiService.generateContent({
         prompt,
         maxTokens: 600,
@@ -39,7 +39,7 @@ export class VoiceTemplateProcessor {
       });
 
       if (!result.success) {
-        throw new Error(result.error || "Failed to process content through voice template");
+        throw new Error(result.error ?? "Failed to process content through voice template");
       }
 
       const script = result.content!.trim();
@@ -60,7 +60,7 @@ export class VoiceTemplateProcessor {
     } catch (error) {
       const processingTime = Date.now() - startTime;
       console.error("❌ [VoiceProcessor] Failed to process content:", error);
-      
+
       return {
         success: false,
         error: error instanceof Error ? error.message : "Unknown error",
@@ -142,9 +142,9 @@ Target approximately ${targetWordCount} words for a one-minute read.`;
 
     const randomIndex = Math.floor(Math.random() * voice.templates.length);
     const selectedTemplate = voice.templates[randomIndex];
-    
+
     console.log(`🎲 [VoiceProcessor] Selected random template ${randomIndex + 1}/${voice.templates.length} for voice: ${voice.name}`);
-    
+
     return selectedTemplate;
   }
 
@@ -157,7 +157,7 @@ Target approximately ${targetWordCount} words for a one-minute read.`;
 
     // Adjust based on template characteristics
     const templateText = `${template.hook} ${template.bridge} ${template.nugget} ${template.wta}`;
-    
+
     // If template has shorter sentences, increase pace
     const avgSentenceLength = templateText.split(/[.!?]/).reduce((acc, sentence) => {
       return acc + sentence.trim().split(/\s+/).length;
@@ -170,9 +170,9 @@ Target approximately ${targetWordCount} words for a one-minute read.`;
     }
 
     const targetWords = Math.round(baseDuration * wordsPerSecond);
-    
+
     console.log(`📊 [VoiceProcessor] Calculated target: ${targetWords} words for ${baseDuration}s (${wordsPerSecond} wps)`);
-    
+
     return targetWords;
   }
 } 
