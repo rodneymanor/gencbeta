@@ -5,15 +5,12 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { useQuery } from "@tanstack/react-query";
-import { Eye, FileText, Loader2, MessageCircle, Sparkles } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { Badge } from "@/components/ui/badge";
 import { useScriptSave } from "@/hooks/use-script-save";
 
-import { ChatInterface } from "./_components/chat-interface";
-import { FloatingToolbar } from "./_components/floating-toolbar";
-import { HemingwayEditor } from "./_components/hemingway-editor";
+import { EnhancedEditor } from "./_components/layout/enhanced-editor";
 import { ScriptOptions } from "./_components/script-options";
 
 interface ScriptElements {
@@ -115,19 +112,6 @@ export default function ScriptEditorPage() {
     }
   }, [scriptId, scripts]);
 
-  // Handle keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "s") {
-        e.preventDefault();
-        handleSave();
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [handleSave]);
-
   const handleScriptOptionSelect = (option: {
     id: string;
     title: string;
@@ -149,11 +133,8 @@ export default function ScriptEditorPage() {
     }
   };
 
-  const handleScriptGenerated = (generatedScript: string) => {
-    setScript(generatedScript);
-    toast.success("Script Generated", {
-      description: "The AI has generated a new script for you.",
-    });
+  const handleScriptSave = async () => {
+    await handleSave();
   };
 
   if (scriptsLoading) {
@@ -178,61 +159,5 @@ export default function ScriptEditorPage() {
     );
   }
 
-  const isNotesWorkflow = mode !== "speed-write";
-  const isSpeedWriteWorkflow = mode === "speed-write";
-
-  return (
-    <div className="flex h-full flex-col gap-0 lg:flex-row">
-      {/* Chat Assistant Panel - Only show for notes/recording workflow */}
-      {isNotesWorkflow && (
-        <div className="border-border/50 flex flex-1 flex-col border-r lg:max-w-[40%]">
-          <div className="border-border/50 flex items-center gap-2 border-b px-6 py-4">
-            <MessageCircle className="h-5 w-5 text-blue-500" />
-            <span className="text-lg font-medium">AI Script Assistant</span>
-            <Badge variant="secondary" className="ml-auto text-xs">
-              <Sparkles className="mr-1 h-3 w-3" />
-              Beta
-            </Badge>
-          </div>
-          <div className="flex-1 overflow-hidden">
-            <ChatInterface onScriptGenerated={handleScriptGenerated} currentScript={script} className="h-full" />
-          </div>
-        </div>
-      )}
-
-      {/* Script Editor Panel - Borderless and Immersive */}
-      <div className="relative flex flex-1 flex-col">
-        {/* Clean Header */}
-        <div className="border-border/50 flex items-center justify-between border-b px-6 py-4">
-          <div className="flex items-center gap-2">
-            <FileText className="text-primary h-5 w-5" />
-            <span className="text-lg font-medium">Hemingway Editor</span>
-            <Badge variant="outline" className="border-primary/30 text-primary bg-primary/10 ml-2 text-xs">
-              <Eye className="mr-1 h-3 w-3" />
-              Real-time Analysis
-            </Badge>
-          </div>
-        </div>
-
-        {/* Borderless Editor */}
-        <div className="flex-1 overflow-hidden">
-          <HemingwayEditor
-            value={script}
-            onChange={handleScriptChange}
-            placeholder={
-              isSpeedWriteWorkflow
-                ? "Your selected script will appear here. Start editing to refine it..."
-                : "Start writing your script here... The AI will analyze it in real-time and highlight hooks, bridges, golden nuggets, and calls-to-action."
-            }
-            className="h-full"
-            autoFocus={!scriptId}
-            elements={scriptElements}
-          />
-        </div>
-
-        {/* Floating Toolbar */}
-        <FloatingToolbar script={script} onScriptChange={handleScriptChange} />
-      </div>
-    </div>
-  );
+  return <EnhancedEditor initialScript={script} onScriptChange={handleScriptChange} onSave={handleScriptSave} />;
 }
