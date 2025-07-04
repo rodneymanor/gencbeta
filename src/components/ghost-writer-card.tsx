@@ -56,9 +56,10 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
   return (
     <div
       className={cn(
-        "relative flex w-full max-w-lg flex-col gap-3 overflow-hidden rounded-lg border bg-white p-4 shadow-sm",
+        "relative flex w-full max-w-lg cursor-pointer flex-col gap-3 overflow-hidden rounded-lg border bg-white p-4 shadow-sm transition-shadow hover:shadow-md",
         className,
       )}
+      onClick={handleUse}
     >
       {/* Header with profile and actions */}
       <div className="flex items-start justify-between">
@@ -75,7 +76,10 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
             variant="ghost"
             size="sm"
             className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
-            onClick={handleSave}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleSave();
+            }}
             disabled={isLoading || isSaved}
           >
             {isSaved ? <BookmarkCheck className="h-4 w-4 text-blue-500" /> : <Bookmark className="h-4 w-4" />}
@@ -84,7 +88,10 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
             variant="ghost"
             size="sm"
             className="h-8 w-8 p-0 text-gray-400 hover:text-red-500"
-            onClick={handleDismiss}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDismiss();
+            }}
             disabled={isLoading}
           >
             <X className="h-4 w-4" />
@@ -115,15 +122,6 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
             <span className="text-sm font-medium">{engagement.shares}</span>
           </button>
         </div>
-
-        <Button
-          onClick={handleUse}
-          size="sm"
-          variant="ghost"
-          className="h-8 px-3 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-        >
-          Use Script
-        </Button>
       </div>
     </div>
   );
