@@ -192,13 +192,13 @@ export function InputModeToggle({
 
       {/* Input Content */}
       {inputMode === "text" ? (
-        <div className="relative">
+        <div className="border-border bg-card focus-within:ring-primary relative rounded-2xl border shadow-sm transition-all duration-75 focus-within:ring-1">
           <Textarea
             placeholder="My script idea is about productivity tips for remote workers..."
             value={textValue}
             onChange={(e) => onTextChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="border-border/50 focus:border-primary/50 focus:ring-primary/20 min-h-[160px] resize-none rounded-lg pr-32 text-base leading-relaxed shadow-sm"
+            className="text-foreground placeholder-muted-foreground caret-primary selection:bg-primary/30 selection:text-foreground scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent max-h-[45vh] min-h-[160px] w-full resize-none border-0 bg-transparent px-4 py-3 pr-32 text-base leading-relaxed outline-none sm:max-h-[25vh] lg:max-h-[40vh]"
             disabled={disabled}
             style={{
               fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
@@ -213,14 +213,14 @@ export function InputModeToggle({
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="relative">
+          <div className="border-border bg-card focus-within:ring-primary relative rounded-2xl border shadow-sm transition-all duration-75 focus-within:ring-1">
             <Input
               type="url"
               placeholder="https://www.tiktok.com/@user/video/123456789..."
               value={videoUrl}
               onChange={(e) => onVideoUrlChange(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="border-border/50 focus:border-primary/50 focus:ring-primary/20 h-14 rounded-lg pr-16 text-base shadow-sm"
+              className="text-foreground placeholder-muted-foreground caret-primary selection:bg-primary/30 selection:text-foreground h-14 w-full border-0 bg-transparent px-4 py-3 text-base outline-none"
               disabled={disabled}
               style={{
                 fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
