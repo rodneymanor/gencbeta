@@ -24,7 +24,7 @@ export default function QuickAccessGrid() {
       case "Scheduled":
         return "bg-blue-500/10 text-blue-600 border-blue-500/20";
       default:
-        return "bg-muted/10 text-muted-foreground border-muted/20";
+        return "bg-[#9a8c98]/10 text-[#9a8c98]";
     }
   };
 
@@ -33,9 +33,9 @@ export default function QuickAccessGrid() {
       case "Very High":
         return "bg-red-500/10 text-red-600";
       case "High":
-        return "bg-orange-500/10 text-orange-600";
+        return "bg-[#9a8c98]/10 text-[#9a8c98]";
       case "Medium":
-        return "bg-blue-500/10 text-blue-600";
+        return "bg-[#4a4e69]/10 text-[#4a4e69]";
       default:
         return "bg-muted/10 text-muted-foreground";
     }

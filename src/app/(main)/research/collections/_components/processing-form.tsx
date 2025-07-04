@@ -58,9 +58,9 @@ export function ProcessingForm({
 
       {/* Rate Limit Warning */}
       {rateLimitInfo && !rateLimitInfo.allowed && (
-        <Alert className="border-orange-200 bg-orange-50 py-3">
-          <Clock className="h-4 w-4 text-orange-600" />
-          <AlertDescription className="text-sm text-orange-800">{getRateLimitMessage(rateLimitInfo)}</AlertDescription>
+        <Alert className="border-[#9a8c98]/20 bg-[#9a8c98]/10 py-3">
+          <Clock className="h-4 w-4 text-[#9a8c98]" />
+          <AlertDescription className="text-sm text-[#9a8c98]">{getRateLimitMessage(rateLimitInfo)}</AlertDescription>
         </Alert>
       )}
 

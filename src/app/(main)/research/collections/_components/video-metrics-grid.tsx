@@ -50,7 +50,7 @@ export function VideoMetricsGrid({ insights }: VideoMetricsGridProps) {
           </div>
         </Card>
         <Card className="p-4 text-center">
-          <div className="text-2xl font-bold text-orange-600">{formatNumber(insights.views)}</div>
+          <div className="text-2xl font-bold text-[#9a8c98]">{formatNumber(insights.views)}</div>
           <div className="text-muted-foreground mt-1 flex items-center justify-center gap-1 text-sm">
             <Eye className="h-4 w-4" />
             Views

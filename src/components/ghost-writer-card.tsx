@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
-import { Bookmark, BookmarkCheck, X, Heart, MessageCircle, Share } from "lucide-react";
+import { Bookmark, BookmarkCheck, X, Heart, MessageCircle, Share, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -19,6 +20,7 @@ interface GhostWriterCardProps {
 
 export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = false, className }: GhostWriterCardProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleSave = async () => {
     if (isLoading || !onSave) return;
@@ -63,11 +65,11 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
       {/* Header with profile and actions */}
       <div className="flex items-start justify-between">
         <div className="flex items-center space-x-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-slate-800 to-slate-900 shadow-md">
-            <span className="text-sm font-semibold text-white">AI</span>
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#22223b] to-[#4a4e69] shadow-md">
+            <Sparkles className="h-5 w-5 text-white" />
           </div>
           <div className="flex items-center space-x-2">
-            <span className="bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text font-semibold text-transparent">
+            <span className="bg-gradient-to-r from-[#22223b] to-[#4a4e69] bg-clip-text font-semibold text-transparent">
               Ghost Writer
             </span>
             <span className="text-sm text-gray-500">suggests</span>
@@ -97,7 +99,7 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
 
       {/* Script content */}
       <div className="line-clamp-10 text-sm leading-tight whitespace-pre-wrap text-gray-800">
-        {(idea as any).script ?? idea.hook}
+        {(idea as ContentIdea & { script?: string }).script ?? idea.hook}
       </div>
 
       {/* Engagement metrics */}

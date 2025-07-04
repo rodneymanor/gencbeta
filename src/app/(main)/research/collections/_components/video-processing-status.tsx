@@ -49,7 +49,7 @@ const STATUS_COLORS = {
   downloading: "bg-blue-500",
   transcribing: "bg-purple-500",
   analyzing: "bg-green-500",
-  uploading: "bg-orange-500",
+  uploading: "bg-[#9a8c98]",
   completed: "bg-green-500",
   failed: "bg-red-500",
   retrying: "bg-yellow-500",

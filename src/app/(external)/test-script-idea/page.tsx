@@ -126,15 +126,15 @@ export default function ScriptIdeaTestPage() {
           <div className="mb-8 grid gap-6 md:grid-cols-3">
             <Card className="border-2 transition-shadow hover:shadow-lg">
               <CardContent className="p-6">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-orange-500/10">
-                  <FileText className="h-6 w-6 text-orange-500" />
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-[#9a8c98]/10">
+                  <FileText className="h-6 w-6 text-[#9a8c98]" />
                 </div>
                 <h3 className="mb-2 font-semibold">Hook Detection</h3>
                 <p className="text-muted-foreground text-sm">
                   Automatically identifies and highlights attention-grabbing opening lines
                 </p>
                 <div className="mt-3">
-                  <span className="inline-block rounded bg-orange-500/20 px-2 py-1 text-xs text-orange-700">
+                  <span className="inline-block rounded bg-[#9a8c98]/20 px-2 py-1 text-xs text-[#9a8c98]">
                     Hook Identified
                   </span>
                 </div>
@@ -143,13 +143,13 @@ export default function ScriptIdeaTestPage() {
 
             <Card className="border-2 transition-shadow hover:shadow-lg">
               <CardContent className="p-6">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-500/10">
-                  <ArrowRight className="h-6 w-6 text-blue-500" />
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-[#9a8c98]/10">
+                  <ArrowRight className="h-6 w-6 text-[#9a8c98]" />
                 </div>
                 <h3 className="mb-2 font-semibold">Bridge Analysis</h3>
                 <p className="text-muted-foreground text-sm">Finds transition sentences that connect ideas smoothly</p>
                 <div className="mt-3">
-                  <span className="inline-block rounded bg-blue-500/20 px-2 py-1 text-xs text-blue-700">
+                  <span className="inline-block rounded bg-[#9a8c98]/20 px-2 py-1 text-xs text-[#9a8c98]">
                     Bridge Found
                   </span>
                 </div>
@@ -158,13 +158,13 @@ export default function ScriptIdeaTestPage() {
 
             <Card className="border-2 transition-shadow hover:shadow-lg">
               <CardContent className="p-6">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-purple-500/10">
-                  <Sparkles className="h-6 w-6 text-purple-500" />
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-[#9a8c98]/10">
+                  <Sparkles className="h-6 w-6 text-[#9a8c98]" />
                 </div>
                 <h3 className="mb-2 font-semibold">Golden Nuggets</h3>
                 <p className="text-muted-foreground text-sm">Highlights key insights and valuable information points</p>
                 <div className="mt-3">
-                  <span className="inline-block rounded bg-purple-500/20 px-2 py-1 text-xs text-purple-700">
+                  <span className="inline-block rounded bg-[#9a8c98]/20 px-2 py-1 text-xs text-[#9a8c98]">
                     Value Detected
                   </span>
                 </div>
@@ -195,34 +195,34 @@ export default function ScriptIdeaTestPage() {
               <div className="bg-background min-h-[400px] p-6">
                 <div className="space-y-4 font-mono text-sm leading-relaxed">
                   <div className="relative">
-                    <div className="absolute top-0 -left-2 h-full w-1 rounded-full bg-orange-500 opacity-60"></div>
-                    <p className="rounded-r-lg border-l-4 border-orange-500 bg-orange-500/10 p-3 pl-4">
-                      <span className="font-medium text-orange-700">Hook:</span> Did you know that just 10 minutes of
+                    <div className="absolute top-0 -left-2 h-full w-1 rounded-full bg-[#9a8c98] opacity-60"></div>
+                    <p className="rounded-r-lg border-l-4 border-[#9a8c98] bg-[#9a8c98]/10 p-3 pl-4">
+                      <span className="font-medium text-[#9a8c98]">Hook:</span> Did you know that just 10 minutes of
                       morning meditation can increase your productivity by 23%?
                     </p>
                   </div>
 
                   <div className="relative">
-                    <div className="absolute top-0 -left-2 h-full w-1 rounded-full bg-blue-500 opacity-60"></div>
-                    <p className="rounded-r-lg border-l-4 border-blue-500 bg-blue-500/10 p-3 pl-4">
-                      <span className="font-medium text-blue-700">Bridge:</span> Here&apos;s the thing - most people
+                    <div className="absolute top-0 -left-2 h-full w-1 rounded-full bg-[#9a8c98] opacity-60"></div>
+                    <p className="rounded-r-lg border-l-4 border-[#9a8c98] bg-[#9a8c98]/10 p-3 pl-4">
+                      <span className="font-medium text-[#9a8c98]">Bridge:</span> Here&apos;s the thing - most people
                       think meditation is about sitting still and doing nothing. But that&apos;s not the whole story.
                     </p>
                   </div>
 
                   <div className="relative">
-                    <div className="absolute top-0 -left-2 h-full w-1 rounded-full bg-purple-500 opacity-60"></div>
-                    <p className="rounded-r-lg border-l-4 border-purple-500 bg-purple-500/10 p-3 pl-4">
-                      <span className="font-medium text-purple-700">Golden Nugget:</span> Studies from Harvard Medical
+                    <div className="absolute top-0 -left-2 h-full w-1 rounded-full bg-[#9a8c98] opacity-60"></div>
+                    <p className="rounded-r-lg border-l-4 border-[#9a8c98] bg-[#9a8c98]/10 p-3 pl-4">
+                      <span className="font-medium text-[#9a8c98]">Golden Nugget:</span> Studies from Harvard Medical
                       School show that meditation literally rewires your brain, strengthening the prefrontal cortex
                       responsible for focus and decision-making.
                     </p>
                   </div>
 
                   <div className="relative">
-                    <div className="absolute top-0 -left-2 h-full w-1 rounded-full bg-green-500 opacity-60"></div>
-                    <p className="rounded-r-lg border-l-4 border-green-500 bg-green-500/10 p-3 pl-4">
-                      <span className="font-medium text-green-700">Call to Action:</span> Start with just 5 minutes
+                    <div className="absolute top-0 -left-2 h-full w-1 rounded-full bg-[#9a8c98] opacity-60"></div>
+                    <p className="rounded-r-lg border-l-4 border-[#9a8c98] bg-[#9a8c98]/10 p-3 pl-4">
+                      <span className="font-medium text-[#9a8c98]">Call to Action:</span> Start with just 5 minutes
                       tomorrow morning. Download a meditation app, find a quiet corner, and watch your productivity
                       soar.
                     </p>
@@ -234,19 +234,19 @@ export default function ScriptIdeaTestPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
-                      <div className="h-3 w-3 rounded-full bg-orange-500"></div>
+                      <div className="h-3 w-3 rounded-full bg-[#9a8c98]"></div>
                       <span className="text-sm">1 Hook</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="h-3 w-3 rounded-full bg-blue-500"></div>
+                      <div className="h-3 w-3 rounded-full bg-[#9a8c98]"></div>
                       <span className="text-sm">1 Bridge</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="h-3 w-3 rounded-full bg-purple-500"></div>
+                      <div className="h-3 w-3 rounded-full bg-[#9a8c98]"></div>
                       <span className="text-sm">1 Nugget</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="h-3 w-3 rounded-full bg-green-500"></div>
+                      <div className="h-3 w-3 rounded-full bg-[#9a8c98]"></div>
                       <span className="text-sm">1 CTA</span>
                     </div>
                   </div>
