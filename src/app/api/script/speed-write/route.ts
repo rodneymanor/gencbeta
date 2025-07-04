@@ -135,14 +135,8 @@ async function generateAIVoiceScript(idea: string, length: string, activeVoice: 
   const prompt = createVoicePrompt(activeVoice, idea, length, negativeKeywordInstruction);
 
   try {
-    // Use validation wrapper to ensure no placeholders remain
-    const result = await generateScriptWithValidation(
-      () => generateScript(prompt),
-      (result) => result.content ?? "",
-      { maxRetries: 3, retryDelay: 1000 }
-    );
-
-    // Clean and validate the content
+    // Generate without validation first since we're expecting JSON
+    const result = await generateScript(prompt);
     const rawContent = result.content ?? "";
     
     // Parse the structured response
@@ -176,6 +170,7 @@ async function generateAIVoiceScript(idea: string, length: string, activeVoice: 
       .filter(Boolean)
       .join('\n\n');
 
+    // Validate the combined content (not the raw JSON)
     const validation = validateScript(fullContent);
     if (!validation.isValid) {
       console.warn(`⚠️ [SpeedWrite] AI Voice script has validation issues:`, validation.issues);
@@ -224,12 +219,8 @@ Return your response in this exact JSON format:
 Make sure each section flows naturally into the next when read aloud.`;
 
   try {
-    const result = await generateScriptWithValidation(
-      () => generateScript(prompt),
-      (result) => result.content ?? "",
-      { maxRetries: 2, retryDelay: 500 }
-    );
-
+    // Generate without validation first since we're expecting JSON
+    const result = await generateScript(prompt);
     const rawContent = result.content ?? "";
 
     // Parse the structured response
@@ -262,6 +253,12 @@ Make sure each section flows naturally into the next when read aloud.`;
     const fullContent = [elements.hook, elements.bridge, elements.goldenNugget, elements.wta]
       .filter(Boolean)
       .join('\n\n');
+
+    // Validate the combined content (not the raw JSON)
+    const validation = validateScript(fullContent);
+    if (!validation.isValid) {
+      console.warn(`⚠️ [SpeedWrite] Speed Write script has validation issues:`, validation.issues);
+    }
 
     return {
       ...result,
