@@ -101,7 +101,7 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
       </div>
 
       {/* Script content */}
-      <div className="text-foreground line-clamp-8 flex-1 pb-3 text-sm leading-relaxed whitespace-pre-wrap">
+      <div className="text-foreground line-clamp-5 flex-1 pb-3 text-sm leading-relaxed whitespace-pre-wrap">
         {(idea as ContentIdea & { script?: string }).script ?? idea.hook}
       </div>
 
