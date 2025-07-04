@@ -56,7 +56,7 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
   return (
     <div
       className={cn(
-        "border-border/50 bg-card hover:shadow-subtle focus-visible:ring-primary/50 relative flex w-full max-w-lg cursor-pointer flex-col gap-3 overflow-hidden rounded-xl border p-4 transition-all duration-200 hover:scale-102 focus-visible:ring-2 focus-visible:outline-none",
+        "border-border/50 bg-card hover:shadow-subtle hover:ring-border/50 focus-visible:ring-primary/50 divide-border/50 relative flex w-full max-w-lg cursor-pointer flex-col gap-3 divide-y overflow-hidden rounded-xl border p-4 transition-all duration-200 select-none hover:scale-[1.02] hover:ring-1 focus-visible:ring-2 focus-visible:outline-none",
         className,
       )}
       onClick={handleUse}
@@ -106,7 +106,7 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
       </div>
 
       {/* Engagement metrics */}
-      <div className="border-border/50 flex items-center justify-between border-t pt-2">
+      <div className="flex items-center justify-between pt-2">
         <div className="flex items-center space-x-6">
           <button className="text-muted-foreground hover:text-destructive flex items-center space-x-2 transition-colors">
             <Heart className="h-4 w-4" />
