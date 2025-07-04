@@ -1,21 +1,20 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 import { useQuery } from "@tanstack/react-query";
 import { Eye, FileText, Loader2, MessageCircle, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
-import { useUsage } from "@/contexts/usage-context";
+import { useScriptSave } from "@/hooks/use-script-save";
 
 import { ChatInterface } from "./_components/chat-interface";
 import { FloatingToolbar } from "./_components/floating-toolbar";
 import { HemingwayEditor } from "./_components/hemingway-editor";
 import { ScriptOptions } from "./_components/script-options";
-import { useScriptSave } from "@/hooks/use-script-save";
 
 interface ScriptElements {
   hook: string;
@@ -42,7 +41,6 @@ interface SpeedWriteResponse {
 }
 
 export default function ScriptEditorPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   // Get URL parameters
@@ -75,19 +73,23 @@ export default function ScriptEditorPage() {
 
   // Handle speed-write workflow on component mount
   useEffect(() => {
-    if (mode === "speed-write" && hasSpeedWriteResults) {
+    const loadSpeedWriteResults = () => {
       const storedResults = sessionStorage.getItem("speedWriteResults");
-      if (storedResults) {
-        try {
-          const data: SpeedWriteResponse = JSON.parse(storedResults);
-          setSpeedWriteData(data);
-          setShowScriptOptions(true);
-          sessionStorage.removeItem("speedWriteResults");
-        } catch (error) {
-          console.error("Failed to parse speed-write results:", error);
-          toast.error("Failed to load script options");
-        }
+      if (!storedResults) return;
+
+      try {
+        const data: SpeedWriteResponse = JSON.parse(storedResults);
+        setSpeedWriteData(data);
+        setShowScriptOptions(true);
+        sessionStorage.removeItem("speedWriteResults");
+      } catch (error) {
+        console.error("Failed to parse speed-write results:", error);
+        toast.error("Failed to load script options");
       }
+    };
+
+    if (mode === "speed-write" && hasSpeedWriteResults) {
+      loadSpeedWriteResults();
     }
   }, [mode, hasSpeedWriteResults]);
 
@@ -114,7 +116,12 @@ export default function ScriptEditorPage() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [handleSave]);
 
-  const handleScriptOptionSelect = (option: { id: string; title: string; content: string; elements?: ScriptElements }) => {
+  const handleScriptOptionSelect = (option: {
+    id: string;
+    title: string;
+    content: string;
+    elements?: ScriptElements;
+  }) => {
     setScript(option.content);
     setScriptElements(option.elements);
     setShowScriptOptions(false);
@@ -148,7 +155,7 @@ export default function ScriptEditorPage() {
     );
   }
 
-  if (showScriptOptions && speedWriteData?.optionA && speedWriteData?.optionB) {
+  if (showScriptOptions && speedWriteData && speedWriteData.optionA && speedWriteData.optionB) {
     return (
       <ScriptOptions
         optionA={speedWriteData.optionA}
@@ -166,8 +173,8 @@ export default function ScriptEditorPage() {
     <div className="flex h-full flex-col gap-0 lg:flex-row">
       {/* Chat Assistant Panel - Only show for notes/recording workflow */}
       {isNotesWorkflow && (
-        <div className="flex flex-1 flex-col lg:max-w-[40%] border-r border-border/50">
-          <div className="flex items-center gap-2 px-6 py-4 border-b border-border/50">
+        <div className="border-border/50 flex flex-1 flex-col border-r lg:max-w-[40%]">
+          <div className="border-border/50 flex items-center gap-2 border-b px-6 py-4">
             <MessageCircle className="h-5 w-5 text-blue-500" />
             <span className="text-lg font-medium">AI Script Assistant</span>
             <Badge variant="secondary" className="ml-auto text-xs">
@@ -182,13 +189,13 @@ export default function ScriptEditorPage() {
       )}
 
       {/* Script Editor Panel - Borderless and Immersive */}
-      <div className="flex flex-1 flex-col relative">
+      <div className="relative flex flex-1 flex-col">
         {/* Clean Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border/50">
+        <div className="border-border/50 flex items-center justify-between border-b px-6 py-4">
           <div className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-orange-500" />
+            <FileText className="text-primary h-5 w-5" />
             <span className="text-lg font-medium">Hemingway Editor</span>
-            <Badge variant="outline" className="ml-2 text-xs border-blue-500/30 text-blue-600 bg-blue-50">
+            <Badge variant="outline" className="border-primary/30 text-primary bg-primary/10 ml-2 text-xs">
               <Eye className="mr-1 h-3 w-3" />
               Real-time Analysis
             </Badge>
