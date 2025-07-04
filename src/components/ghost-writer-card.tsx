@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Bookmark, BookmarkCheck, X, Heart, MessageCircle, Share, Sparkles } from "lucide-react";
+import { Bookmark, BookmarkCheck, X, Heart, MessageCircle, Share } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -63,9 +63,6 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
       {/* Header with profile and actions */}
       <div className="flex items-start justify-between">
         <div className="flex items-center space-x-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#2d93ad] to-[#412722] shadow-md">
-            <Sparkles className="h-5 w-5 text-white" />
-          </div>
           <div className="flex items-center space-x-2">
             <span className="bg-gradient-to-r from-[#2d93ad] to-[#412722] bg-clip-text font-semibold text-transparent">
               Ghost Writer
