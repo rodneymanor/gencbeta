@@ -86,7 +86,8 @@ export function GhostWriter() {
         userData: {
           ...currentUserData,
           savedIdeas: action === "save" ? [...currentUserData.savedIdeas, ideaId] : currentUserData.savedIdeas,
-          dismissedIdeas: action === "dismiss" ? [...currentUserData.dismissedIdeas, ideaId] : currentUserData.dismissedIdeas,
+          dismissedIdeas:
+            action === "dismiss" ? [...currentUserData.dismissedIdeas, ideaId] : currentUserData.dismissedIdeas,
         },
         ideas: action === "dismiss" ? data.ideas.filter((idea) => idea.id !== ideaId) : data.ideas,
       });
@@ -96,7 +97,9 @@ export function GhostWriter() {
   };
 
   const handleUseIdea = (idea: ContentIdea) => {
-    const queryParams = createScriptQueryParams(idea as ContentIdea & { concept?: string; script?: string; peqCategory?: string });
+    const queryParams = createScriptQueryParams(
+      idea as ContentIdea & { concept?: string; script?: string; peqCategory?: string },
+    );
     router.push(`/dashboard/scripts/new?${queryParams.toString()}`);
   };
 
@@ -150,7 +153,9 @@ export function GhostWriter() {
       <Card className="border-0 shadow-none">
         <CardHeader>
           <div className="text-center">
-            <CardTitle className="text-3xl font-bold">Ghost Writer</CardTitle>
+            <CardTitle className="bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-3xl font-bold text-transparent">
+              Ghost Writer
+            </CardTitle>
             <CardDescription className="mt-2 text-base">
               AI-powered content ideas based on your brand profile
             </CardDescription>
@@ -170,7 +175,9 @@ export function GhostWriter() {
       <Card className="border-0 shadow-none">
         <CardHeader>
           <div className="text-center">
-            <CardTitle className="text-3xl font-bold">Ghost Writer</CardTitle>
+            <CardTitle className="bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-3xl font-bold text-transparent">
+              Ghost Writer
+            </CardTitle>
             <CardDescription className="mt-2 text-base">
               AI-powered content ideas based on your brand profile
             </CardDescription>
@@ -207,7 +214,9 @@ export function GhostWriter() {
       <Card className="border-0 shadow-none">
         <CardHeader>
           <div className="text-center">
-            <CardTitle className="text-3xl font-bold">Ghost Writer</CardTitle>
+            <CardTitle className="bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-3xl font-bold text-transparent">
+              Ghost Writer
+            </CardTitle>
             <CardDescription className="mt-2 text-base">
               AI-powered content ideas based on your brand profile
             </CardDescription>
@@ -237,7 +246,9 @@ export function GhostWriter() {
             </div>
           </div>
           <div className="pt-12 text-center">
-            <CardTitle className="text-3xl font-bold">Ghost Writer</CardTitle>
+            <CardTitle className="bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-3xl font-bold text-transparent">
+              Ghost Writer
+            </CardTitle>
             <CardDescription className="mt-2 text-base">
               AI-powered content ideas based on your brand profile
             </CardDescription>

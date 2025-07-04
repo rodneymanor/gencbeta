@@ -63,11 +63,13 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
       {/* Header with profile and actions */}
       <div className="flex items-start justify-between">
         <div className="flex items-center space-x-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-slate-800 to-slate-900 shadow-md">
             <span className="text-sm font-semibold text-white">AI</span>
           </div>
           <div className="flex items-center space-x-2">
-            <span className="font-semibold text-gray-900">Ghost Writer</span>
+            <span className="bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text font-semibold text-transparent">
+              Ghost Writer
+            </span>
             <span className="text-sm text-gray-500">suggests</span>
           </div>
         </div>
