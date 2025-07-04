@@ -142,7 +142,6 @@ async function generateAIVoiceScript(idea: string, length: string, activeVoice: 
     // Parse the structured response
     let elements: ScriptElements;
     try {
-      console.log("[SpeedWrite] Raw AI Voice response:", JSON.stringify(rawContent.substring(0, 200)) + "...");
       const parsed = JSON.parse(rawContent);
       elements = {
         hook: parsed.hook ?? "",
@@ -150,11 +149,8 @@ async function generateAIVoiceScript(idea: string, length: string, activeVoice: 
         goldenNugget: parsed.goldenNugget ?? "",
         wta: parsed.wta ?? ""
       };
-      console.log("[SpeedWrite] Successfully parsed AI voice structured response");
     } catch (parseError) {
       console.warn("[SpeedWrite] Failed to parse AI voice structured response, falling back to plain text");
-      console.warn("[SpeedWrite] AI Voice parse error:", parseError);
-      console.warn("[SpeedWrite] AI Voice raw content length:", rawContent.length);
       // Fallback: return as single content block with cleaned content
       const cleanedContent = cleanScriptContent(rawContent);
       elements = {
@@ -226,7 +222,6 @@ Make sure each section flows naturally into the next when read aloud.`;
     // Parse the structured response
     let elements: ScriptElements;
     try {
-      console.log("[SpeedWrite] Raw Speed Write response:", JSON.stringify(rawContent.substring(0, 200)) + "...");
       const parsed = JSON.parse(rawContent);
       elements = {
         hook: parsed.hook ?? "",
@@ -234,11 +229,8 @@ Make sure each section flows naturally into the next when read aloud.`;
         goldenNugget: parsed.goldenNugget ?? "",
         wta: parsed.wta ?? ""
       };
-      console.log("[SpeedWrite] Successfully parsed Speed Write structured response");
     } catch (parseError) {
       console.warn("[SpeedWrite] Failed to parse structured response, falling back to plain text");
-      console.warn("[SpeedWrite] Speed Write parse error:", parseError);
-      console.warn("[SpeedWrite] Speed Write raw content length:", rawContent.length);
       // Fallback: return as single content block with cleaned content
       const cleanedContent = cleanScriptContent(rawContent);
       elements = {
