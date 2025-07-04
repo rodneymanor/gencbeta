@@ -5,7 +5,7 @@
 
 :root {
   /* Main backgrounds */
-  --background: oklch(0.96 0.01 110); /* #f2f3ed - Light sage/cream */
+  --background: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
   --foreground: oklch(0.25 0.02 30); /* #412722 - Dark brown */
 
   /* Card and surface colors */
@@ -49,7 +49,7 @@
   --chart-5: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
 
   /* Sidebar colors */
-  --sidebar-background: oklch(0.94 0.01 115); /* Slightly darker than main bg */
+  --sidebar-background: oklch(0.96 0.01 110); /* #f2f3ed - Light sage/cream */
   --sidebar-foreground: oklch(0.25 0.02 30); /* #412722 - Dark brown */
   --sidebar-primary: oklch(0.58 0.08 220); /* #2d93ad - Teal blue */
   --sidebar-primary-foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
