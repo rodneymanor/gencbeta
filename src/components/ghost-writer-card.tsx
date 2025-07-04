@@ -56,10 +56,11 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
   return (
     <div
       className={cn(
-        "relative flex w-full max-w-lg cursor-pointer flex-col gap-3 overflow-hidden rounded-lg border bg-white p-4 shadow-sm transition-shadow hover:shadow-md",
+        "border-border/50 bg-card hover:shadow-subtle focus-visible:ring-primary/50 relative flex w-full max-w-lg cursor-pointer flex-col gap-3 overflow-hidden rounded-xl border p-4 transition-all duration-200 hover:scale-102 focus-visible:ring-2 focus-visible:outline-none",
         className,
       )}
       onClick={handleUse}
+      tabIndex={0}
     >
       {/* Header with profile and actions */}
       <div className="flex items-start justify-between">
@@ -68,26 +69,26 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
             <span className="bg-gradient-to-r from-[#2d93ad] to-[#412722] bg-clip-text font-semibold text-transparent">
               Ghost Writer
             </span>
-            <span className="text-sm text-gray-500">suggests</span>
+            <span className="text-muted-foreground text-sm">suggests</span>
           </div>
         </div>
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
+            className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
             onClick={(e) => {
               e.stopPropagation();
               handleSave();
             }}
             disabled={isLoading || isSaved}
           >
-            {isSaved ? <BookmarkCheck className="h-4 w-4 text-blue-500" /> : <Bookmark className="h-4 w-4" />}
+            {isSaved ? <BookmarkCheck className="text-primary h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 p-0 text-gray-400 hover:text-red-500"
+            className="text-muted-foreground hover:text-destructive h-8 w-8 p-0"
             onClick={(e) => {
               e.stopPropagation();
               handleDismiss();
@@ -100,24 +101,24 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
       </div>
 
       {/* Script content */}
-      <div className="line-clamp-10 text-sm leading-tight whitespace-pre-wrap text-gray-800">
+      <div className="text-foreground line-clamp-10 text-sm leading-tight whitespace-pre-wrap">
         {(idea as ContentIdea & { script?: string }).script ?? idea.hook}
       </div>
 
       {/* Engagement metrics */}
-      <div className="flex items-center justify-between border-t border-gray-100 pt-2">
+      <div className="border-border/50 flex items-center justify-between border-t pt-2">
         <div className="flex items-center space-x-6">
-          <button className="flex items-center space-x-2 text-gray-500 transition-colors hover:text-red-500">
+          <button className="text-muted-foreground hover:text-destructive flex items-center space-x-2 transition-colors">
             <Heart className="h-4 w-4" />
             <span className="text-sm font-medium">{engagement.likes.toLocaleString()}</span>
           </button>
 
-          <button className="flex items-center space-x-2 text-gray-500 transition-colors hover:text-blue-500">
+          <button className="text-muted-foreground hover:text-primary flex items-center space-x-2 transition-colors">
             <MessageCircle className="h-4 w-4" />
             <span className="text-sm font-medium">{engagement.comments}</span>
           </button>
 
-          <button className="flex items-center space-x-2 text-gray-500 transition-colors hover:text-green-500">
+          <button className="text-muted-foreground hover:text-primary flex items-center space-x-2 transition-colors">
             <Share className="h-4 w-4" />
             <span className="text-sm font-medium">{engagement.shares}</span>
           </button>
