@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode, useMemo } from "react";
 
 export type VoiceType = "Professional" | "Casual" | "Friendly" | "Authoritative" | "Conversational";
 
@@ -23,14 +23,14 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     "Conversational"
   ];
 
+  const value = useMemo(() => ({
+    currentVoice,
+    setCurrentVoice,
+    availableVoices
+  }), [currentVoice]);
+
   return (
-    <VoiceContext.Provider 
-      value={{ 
-        currentVoice, 
-        setCurrentVoice, 
-        availableVoices 
-      }}
-    >
+    <VoiceContext.Provider value={value}>
       {children}
     </VoiceContext.Provider>
   );

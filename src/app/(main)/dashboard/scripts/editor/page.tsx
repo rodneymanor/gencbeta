@@ -15,6 +15,7 @@ import { ChatInterface } from "./_components/chat-interface";
 import { FloatingToolbar } from "./_components/floating-toolbar";
 import { HemingwayEditor } from "./_components/hemingway-editor";
 import { ScriptOptions } from "./_components/script-options";
+import { useScriptSave } from "@/hooks/use-script-save";
 
 interface ScriptElements {
   hook: string;
@@ -43,12 +44,9 @@ interface SpeedWriteResponse {
 export default function ScriptEditorPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { triggerUsageUpdate } = useUsage();
 
   // Get URL parameters
   const mode = searchParams.get("mode") ?? "notes";
-  const idea = searchParams.get("idea") ?? "";
-  const videoUrl = searchParams.get("videoUrl") ?? "";
   const scriptId = searchParams.get("scriptId");
   const hasSpeedWriteResults = searchParams.get("hasSpeedWriteResults") === "true";
 
@@ -72,18 +70,18 @@ export default function ScriptEditorPage() {
     },
   });
 
+  // Use script save hook
+  const { handleSave } = useScriptSave({ script, scriptId, refetch });
+
   // Handle speed-write workflow on component mount
   useEffect(() => {
     if (mode === "speed-write" && hasSpeedWriteResults) {
-      // Load speed-write results from sessionStorage
       const storedResults = sessionStorage.getItem("speedWriteResults");
       if (storedResults) {
         try {
           const data: SpeedWriteResponse = JSON.parse(storedResults);
           setSpeedWriteData(data);
           setShowScriptOptions(true);
-
-          // Clear the stored results
           sessionStorage.removeItem("speedWriteResults");
         } catch (error) {
           console.error("Failed to parse speed-write results:", error);
@@ -103,83 +101,6 @@ export default function ScriptEditorPage() {
     }
   }, [scriptId, scripts]);
 
-  // Handle script option selection (fast workflow)
-  const handleScriptOptionSelect = (option: { id: string; title: string; content: string; elements?: ScriptElements }) => {
-    setScript(option.content);
-    setScriptElements(option.elements);
-    setShowScriptOptions(false);
-    toast.success("Script Selected", {
-      description: `You selected ${option.title}. You can now edit and refine it.`,
-    });
-  };
-
-  // Handle script content change
-  const handleScriptChange = (newContent: string) => {
-    setScript(newContent);
-    // Clear elements when user starts editing, since the structure may have changed
-    if (scriptElements) {
-      setScriptElements(undefined);
-    }
-  };
-
-  // Handle script generation from chat (notes/recording workflow)
-  const handleScriptGenerated = (generatedScript: string) => {
-    setScript(generatedScript);
-    toast.success("Script Generated", {
-      description: "The AI has generated a new script for you.",
-    });
-  };
-
-  // Save script
-  const handleSave = useCallback(async () => {
-    if (!script.trim()) {
-      toast.error("Cannot Save Empty Script", {
-        description: "Please add some content to your script before saving.",
-      });
-      return;
-    }
-
-    try {
-      const response = await fetch("/api/scripts", {
-        method: scriptId ? "PUT" : "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: scriptId,
-          title: "Untitled Script",
-          content: script.trim(),
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to save script");
-      }
-
-      const result = await response.json();
-
-      // Update usage stats
-      triggerUsageUpdate();
-
-      // Refresh scripts list
-      refetch();
-
-      toast.success("Script Saved", {
-        description: "Your script has been saved successfully.",
-      });
-
-      // If this was a new script, redirect to edit mode
-      if (!scriptId && result.id) {
-        router.push(`/dashboard/scripts/editor?id=${result.id}`);
-      }
-    } catch (error) {
-      console.error("Save failed:", error);
-      toast.error("Save Failed", {
-        description: "There was an error saving your script. Please try again.",
-      });
-    }
-  }, [script, scriptId, triggerUsageUpdate, refetch, router]);
-
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -193,6 +114,29 @@ export default function ScriptEditorPage() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [handleSave]);
 
+  const handleScriptOptionSelect = (option: { id: string; title: string; content: string; elements?: ScriptElements }) => {
+    setScript(option.content);
+    setScriptElements(option.elements);
+    setShowScriptOptions(false);
+    toast.success("Script Selected", {
+      description: `You selected ${option.title}. You can now edit and refine it.`,
+    });
+  };
+
+  const handleScriptChange = (newContent: string) => {
+    setScript(newContent);
+    if (scriptElements) {
+      setScriptElements(undefined);
+    }
+  };
+
+  const handleScriptGenerated = (generatedScript: string) => {
+    setScript(generatedScript);
+    toast.success("Script Generated", {
+      description: "The AI has generated a new script for you.",
+    });
+  };
+
   if (scriptsLoading) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -204,8 +148,7 @@ export default function ScriptEditorPage() {
     );
   }
 
-  // Show script options for speed-write workflow
-  if (showScriptOptions && speedWriteData && speedWriteData.optionA && speedWriteData.optionB) {
+  if (showScriptOptions && speedWriteData?.optionA && speedWriteData?.optionB) {
     return (
       <ScriptOptions
         optionA={speedWriteData.optionA}
@@ -216,12 +159,10 @@ export default function ScriptEditorPage() {
     );
   }
 
-  // Determine if this is a notes/recording workflow (show chat) or speed-write workflow (hide chat)
+  const isNotesWorkflow = mode !== "speed-write";
   const isSpeedWriteWorkflow = mode === "speed-write";
-  const isNotesWorkflow = !isSpeedWriteWorkflow;
 
   return (
-    // Content that works within the scrollable panel with production-ready spacing
     <div className="flex h-full flex-col gap-0 lg:flex-row">
       {/* Chat Assistant Panel - Only show for notes/recording workflow */}
       {isNotesWorkflow && (

@@ -1,11 +1,13 @@
 "use client";
 
-import { Type, Video, ExternalLink } from "lucide-react";
+import { Type, Video, ExternalLink, Inbox } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+
+import { IdeaInboxDialog } from "./idea-inbox-dialog";
 
 export type InputMode = "text" | "video";
 
@@ -18,6 +20,7 @@ export interface InputModeToggleProps {
   onVideoUrlChange: (url: string) => void;
   onSubmit: () => void;
   disabled?: boolean;
+  showIdeaInbox?: boolean;
 }
 
 interface UrlValidation {
@@ -151,6 +154,7 @@ export function InputModeToggle({
   onVideoUrlChange,
   onSubmit,
   disabled = false,
+  showIdeaInbox = false,
 }: InputModeToggleProps) {
   const urlValidation = validateUrl(videoUrl);
   const finalSubmitDisabled = disabled || (inputMode === "text" ? !textValue.trim() : !urlValidation.isValid);
@@ -194,20 +198,23 @@ export function InputModeToggle({
             value={textValue}
             onChange={(e) => onTextChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="min-h-[160px] resize-none pr-16 text-base leading-relaxed border-border/50 focus:border-primary/50 focus:ring-primary/20 rounded-lg shadow-sm"
+            className="min-h-[160px] resize-none pr-32 text-base leading-relaxed border-border/50 focus:border-primary/50 focus:ring-primary/20 rounded-lg shadow-sm"
             disabled={disabled}
             style={{
               fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
             }}
           />
-          <Button
-            onClick={onSubmit}
-            disabled={finalSubmitDisabled}
-            size="sm"
-            className="absolute right-4 bottom-4 h-10 w-10 p-0 shadow-sm"
-          >
-            <ExternalLink className="h-5 w-5" />
-          </Button>
+          <div className="absolute right-4 bottom-4 flex items-center gap-2">
+            {showIdeaInbox && <IdeaInboxDialog />}
+            <Button
+              onClick={onSubmit}
+              disabled={finalSubmitDisabled}
+              size="sm"
+              className="h-10 w-10 p-0 shadow-sm"
+            >
+              <ExternalLink className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="space-y-4">

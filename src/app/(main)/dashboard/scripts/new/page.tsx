@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { Clock, Mic } from "lucide-react";
+import { Mic } from "lucide-react";
 
 import { GhostWriter } from "@/components/ghost-writer";
 import { Badge } from "@/components/ui/badge";
@@ -187,13 +187,15 @@ export default function NewScriptPage() {
 
   return (
     <div className="bg-background min-h-screen">
-      {/* Centered Content Container */}
-      <div className="flex min-h-screen flex-col items-center justify-center px-6 py-12">
-        {/* Header Section - Centered */}
-        <div className="mb-8 text-center">
-          <h1 className="text-5xl font-bold mb-4">What will you Script today?</h1>
-          <p className="text-muted-foreground text-xl max-w-2xl">
-            Start with an idea, analyze a viral video, or create a structured story from scratch.
+      {/* Centered Content Container - Raised Higher */}
+      <div className="flex min-h-screen flex-col items-center justify-start pt-8 px-4">
+        {/* Header */}
+        <div className="text-center mb-6">
+          <h1 className="text-5xl font-bold text-foreground mb-2 font-inter">
+            What&apos;s your script idea?
+          </h1>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            Transform your ideas into engaging scripts with AI assistance
           </p>
         </div>
 
@@ -229,26 +231,11 @@ export default function NewScriptPage() {
             onVideoUrlChange={setVideoUrl}
             onSubmit={handleSubmit}
             disabled={isGenerating}
+            showIdeaInbox={true}
           />
 
-          {/* Controls Row */}
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <IdeaInboxDialog />
-
-            <div className="flex items-center gap-2">
-              <Clock className="text-muted-foreground h-4 w-4" />
-              <Select value={scriptLength} onValueChange={setScriptLength} disabled={isGenerating}>
-                <SelectTrigger className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="20">20 seconds</SelectItem>
-                  <SelectItem value="60">60 seconds</SelectItem>
-                  <SelectItem value="90">90 seconds</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
+          {/* Controls Row - Simplified */}
+          <div className="flex items-center justify-center gap-4 mt-4">
             <div className="text-muted-foreground text-sm">Press ⌘+Enter to generate scripts</div>
           </div>
         </div>
