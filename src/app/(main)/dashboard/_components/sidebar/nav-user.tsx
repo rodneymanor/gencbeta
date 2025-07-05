@@ -2,18 +2,16 @@
 
 import { useRouter } from "next/navigation";
 
-import { EllipsisVertical, CircleUser, CreditCard, MessageSquareDot, LogOut, User, Settings } from "lucide-react";
+import { CircleUser, Crown, CreditCard, MessageSquareDot, LogOut, User, Settings } from "lucide-react";
 
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/auth-context";
 
 interface UserData {
@@ -22,51 +20,69 @@ interface UserData {
   email?: string | null;
 }
 
-function UserAvatar() {
+function ProfileWithBadgeInline({
+  user,
+  accountLevel,
+  initializing,
+}: {
+  user: UserData | null;
+  accountLevel: string;
+  initializing: boolean;
+}) {
+  const isPro = accountLevel === "pro";
+
+  if (initializing) {
+    return (
+      <div className="flex items-center gap-3">
+        <div className="relative">
+          <div className="bg-primary/10 flex h-10 w-10 animate-pulse items-center justify-center rounded-lg">
+            <CircleUser className="text-primary h-5 w-5" />
+          </div>
+          <div className="absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-[9px] shadow-sm">
+            <div className="h-1 w-1 animate-pulse rounded-full bg-gray-400" />
+          </div>
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="animate-pulse text-sm font-medium">Loading...</div>
+          <div className="text-muted-foreground animate-pulse text-xs">Authenticating...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex items-center gap-3">
+        <div className="bg-muted flex h-10 w-10 items-center justify-center rounded-lg">
+          <User className="text-muted-foreground h-5 w-5" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="text-sm font-medium">Not signed in</div>
+          <div className="text-muted-foreground text-xs">Click to sign in</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
-      <CircleUser className="text-primary h-4 w-4" />
+    <div className="flex items-center gap-3">
+      <div className="relative">
+        <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-lg">
+          <CircleUser className="text-primary h-5 w-5" />
+        </div>
+        <div
+          className={`absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white text-[9px] shadow-sm ${
+            isPro ? "bg-gradient-to-r from-amber-400 to-orange-500 text-white" : "bg-gray-100 text-gray-600"
+          }`}
+        >
+          {isPro ? <Crown className="h-2 w-2" /> : <User className="h-2 w-2" />}
+        </div>
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-sm font-medium">{user.displayName ?? "User"}</div>
+        <div className="text-muted-foreground truncate text-xs">{user.email}</div>
+      </div>
     </div>
-  );
-}
-
-function SignedInTrigger({ user }: { user: UserData }) {
-  return (
-    <>
-      <UserAvatar />
-      <div className="grid flex-1 text-left text-sm leading-tight">
-        <span className="truncate font-medium">{user.displayName ?? "User"}</span>
-        <span className="text-muted-foreground truncate text-xs">{user.email}</span>
-      </div>
-    </>
-  );
-}
-
-function InitializingTrigger() {
-  return (
-    <>
-      <div className="bg-primary/10 flex h-8 w-8 animate-pulse items-center justify-center rounded-lg">
-        <CircleUser className="text-primary h-4 w-4" />
-      </div>
-      <div className="grid flex-1 text-left text-sm leading-tight">
-        <span className="animate-pulse truncate font-medium">Loading...</span>
-        <span className="text-muted-foreground animate-pulse truncate text-xs">Authenticating...</span>
-      </div>
-    </>
-  );
-}
-
-function SignedOutTrigger() {
-  return (
-    <>
-      <div className="bg-muted flex h-8 w-8 items-center justify-center rounded-lg">
-        <User className="text-muted-foreground h-4 w-4" />
-      </div>
-      <div className="grid flex-1 text-left text-sm leading-tight">
-        <span className="truncate font-medium">Not signed in</span>
-        <span className="text-muted-foreground truncate text-xs">Click to sign in</span>
-      </div>
-    </>
   );
 }
 
@@ -79,12 +95,6 @@ function SignedInMenu({ handleLogout }: { handleLogout: () => void }) {
 
   return (
     <>
-      <DropdownMenuLabel className="p-0 font-normal">
-        <div className="flex items-center justify-center px-1 py-1.5">
-          <UserAvatar />
-        </div>
-      </DropdownMenuLabel>
-      <DropdownMenuSeparator />
       <DropdownMenuGroup>
         <DropdownMenuItem>
           <CircleUser />
@@ -123,26 +133,15 @@ function SignedOutMenu() {
   };
 
   return (
-    <>
-      <DropdownMenuLabel className="p-0 font-normal">
-        <div className="flex items-center justify-center px-1 py-1.5">
-          <div className="bg-muted flex h-8 w-8 items-center justify-center rounded-lg">
-            <User className="text-muted-foreground h-4 w-4" />
-          </div>
-        </div>
-      </DropdownMenuLabel>
-      <DropdownMenuSeparator />
-      <DropdownMenuItem onClick={handleSignIn}>
-        <LogOut />
-        Sign in
-      </DropdownMenuItem>
-    </>
+    <DropdownMenuItem onClick={handleSignIn}>
+      <LogOut />
+      Sign in
+    </DropdownMenuItem>
   );
 }
 
 export function NavUser() {
-  const { isMobile } = useSidebar();
-  const { user, logout, initializing } = useAuth();
+  const { user, logout, initializing, accountLevel } = useAuth();
 
   const handleLogout = async () => {
     try {
@@ -153,28 +152,17 @@ export function NavUser() {
   };
 
   return (
-    <SidebarMenu>
-      <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            >
-              {initializing ? <InitializingTrigger /> : user ? <SignedInTrigger user={user} /> : <SignedOutTrigger />}
-              <EllipsisVertical className="ml-auto size-4" />
-            </SidebarMenuButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
-            align="end"
-            sideOffset={4}
-          >
-            {user ? <SignedInMenu handleLogout={handleLogout} /> : <SignedOutMenu />}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarMenuItem>
-    </SidebarMenu>
+    <div className="w-full rounded-lg border bg-white p-3">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <div className="cursor-pointer">
+            <ProfileWithBadgeInline user={user} accountLevel={accountLevel} initializing={initializing} />
+          </div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="min-w-56 rounded-lg" side="top" align="start" sideOffset={8}>
+          {user ? <SignedInMenu handleLogout={handleLogout} /> : <SignedOutMenu />}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 }

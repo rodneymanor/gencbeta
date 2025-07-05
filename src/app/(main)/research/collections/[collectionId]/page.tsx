@@ -27,6 +27,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useTopBarConfig } from "@/hooks/use-route-topbar";
 
 const mockCollection = {
   id: 1,
@@ -70,8 +71,9 @@ interface PageProps {
 }
 
 export default function CollectionDetailPage({ params }: PageProps) {
-  const [_collectionId, setCollectionId] = useState<string>("");
-  const [items, _setItems] = useState(mockItems);
+  const [collectionId, setCollectionId] = useState<string>("");
+  const [items] = useState(mockItems);
+  const setTopBarConfig = useTopBarConfig();
 
   useEffect(() => {
     params.then(({ collectionId }) => {
@@ -79,9 +81,15 @@ export default function CollectionDetailPage({ params }: PageProps) {
     });
   }, [params]);
 
+  // Update top bar title
+  useEffect(() => {
+    setTopBarConfig({ title: mockCollection.title });
+  }, [setTopBarConfig]);
+
   const renderItemContent = (item: (typeof mockItems)[0]) => {
     switch (item.type) {
       case "image":
+        // eslint-disable-next-line @next/next/no-img-element
         return <img src={item.content} alt="collection item" className="h-full w-full object-cover" />;
       case "link":
         return (

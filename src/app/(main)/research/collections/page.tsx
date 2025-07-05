@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { VideoCollectionLoading, PageHeaderLoading } from "@/components/ui/loading-animations";
 import { useAuth } from "@/contexts/auth-context";
+import { useTopBarConfig } from "@/hooks/use-route-topbar";
 import { CollectionsService, type Collection, type Video } from "@/lib/collections";
 import { CollectionsRBACService } from "@/lib/collections-rbac";
 
@@ -133,6 +134,7 @@ function CollectionsPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const selectedCollectionId = searchParams.get("collection");
+  const setTopBarConfig = useTopBarConfig();
 
   // Stable references with useCallback to prevent unnecessary re-renders
   const { toggleVideoSelection, selectAllVideos, clearSelection } = useMemo(
@@ -307,6 +309,18 @@ function CollectionsPageContent() {
       loadData();
     }
   }, [user, userProfile, isLoading, loadData]);
+
+  // Update top bar title when collections or selection changes
+  useEffect(() => {
+    if (selectedCollectionId && collections.length > 0) {
+      const collection = collections.find((c) => c.id === selectedCollectionId);
+      if (collection) {
+        setTopBarConfig({ title: collection.title });
+      }
+    } else {
+      setTopBarConfig({ title: "All Videos" });
+    }
+  }, [selectedCollectionId, collections, setTopBarConfig]);
 
   // Video management functions
   const handleVideoAdded = useCallback(async () => {

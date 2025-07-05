@@ -8,8 +8,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { useTopBarConfig } from "@/hooks/use-route-topbar";
 import { useScriptSave } from "@/hooks/use-script-save";
 
+import { EditorTopBarToolbar } from "./_components/layout/editor-topbar-toolbar";
 import { EnhancedEditor } from "./_components/layout/enhanced-editor";
 import { ScriptOptions } from "./_components/script-options";
 
@@ -79,6 +81,15 @@ export default function ScriptEditorPage() {
 
   // Use script save hook
   const { handleSave } = useScriptSave({ script, scriptId, refetch });
+
+  // Configure top bar with toolbar
+  const setTopBarConfig = useTopBarConfig();
+
+  useEffect(() => {
+    setTopBarConfig({
+      customContent: <EditorTopBarToolbar script={script} onSave={handleSave} />,
+    });
+  }, [script, handleSave, setTopBarConfig]);
 
   // Handle speed-write workflow on component mount
   useEffect(() => {
