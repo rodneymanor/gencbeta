@@ -66,6 +66,10 @@
   --font-serif: Georgia, serif;
   --font-mono: Geist Mono, monospace;
   --radius: 0.5rem;
+  --radius-sm: 0.25rem; /* 4px - Small radius for tags */
+  --radius-md: 0.5rem; /* 8px - Standard radius for buttons and inputs */
+  --radius-lg: 0.75rem; /* 12px - Large radius for cards and containers */
+  --radius-xl: calc(var(--radius) + 4px);
   --shadow-2xs: 0px 0px 1px 0px hsl(0 0% 0% / 0.07);
   --shadow-xs: 0px 0px 1px 0px hsl(0 0% 0% / 0.07);
   --shadow-sm: 0px 0px 1px 0px hsl(0 0% 0% / 0.13), 0px 1px 2px -1px hsl(0 0% 0% / 0.13);
@@ -149,6 +153,9 @@
   --font-serif: Georgia, serif;
   --font-mono: Geist Mono, monospace;
   --radius: 0.5rem;
+  --radius-sm: 0.25rem; /* 4px - Small radius for tags */
+  --radius-md: 0.5rem; /* 8px - Standard radius for buttons and inputs */
+  --radius-lg: 0.75rem; /* 12px - Large radius for cards and containers */
   --shadow-2xs: 0px 0px 1px 0px hsl(0 0% 0% / 0.07);
   --shadow-xs: 0px 0px 1px 0px hsl(0 0% 0% / 0.07);
   --shadow-sm: 0px 0px 1px 0px hsl(0 0% 0% / 0.13), 0px 1px 2px -1px hsl(0 0% 0% / 0.13);
@@ -218,9 +225,9 @@
   --font-mono: var(--font-mono);
   --font-serif: var(--font-serif);
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
   --radius-xl: calc(var(--radius) + 4px);
 
   --shadow-2xs: var(--shadow-2xs);
