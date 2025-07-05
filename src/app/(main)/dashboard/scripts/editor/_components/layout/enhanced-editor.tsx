@@ -2,11 +2,21 @@
 
 import { useState, useEffect, useRef } from "react";
 
-import { analyzeReadability } from "@/lib/readability-analysis";
+
+import { 
+  enhanceHook, 
+  strengthenBridge, 
+  amplifyGoldenNugget, 
+  optimizeCTA,
+  analyzeElement,
+  generateAlternatives
+} from "@/lib/script-element-actions";
 
 import { EditorSidebar } from "./editor-sidebar";
 import { EditorToolbar } from "./editor-toolbar";
 import { ReadabilitySidebar } from "./readability-sidebar";
+import { HighlightOverlay } from "./highlight-overlay";
+import { type ScriptElementType } from "./contextual-menu";
 
 interface EnhancedEditorProps {
   initialScript?: string;
@@ -49,100 +59,83 @@ export function EnhancedEditor({ initialScript = "", onScriptChange, onSave }: E
     }
   };
 
-  // Analyze sentence readability
-  const getSentenceReadabilityColor = (sentence: string): string => {
-    if (!sentence.trim() || sentence.length < 10) return "";
-
+  // Handle element actions from contextual menu
+  const handleElementAction = async (action: string, elementType: ScriptElementType, elementText: string) => {
+    console.log('Element action:', action, elementType, elementText);
+    
     try {
-      const analysis = analyzeReadability(sentence);
-      const score = analysis.readabilityLevel.score;
-
-      if (score >= 80) return "bg-green-100/30"; // Very easy
-      if (score >= 70) return "bg-emerald-100/30"; // Easy
-      if (score >= 60) return "bg-yellow-100/30"; // Standard
-      if (score >= 50) return "bg-orange-100/30"; // Fairly difficult
-      if (score >= 30) return "bg-red-100/30"; // Difficult
-      return "bg-rose-100/30"; // Very difficult
-    } catch {
-      return "";
-    }
-  };
-
-  // Apply readability highlighting
-  const applyReadabilityHighlighting = (text: string): string => {
-    const sentences = text.split(/([.!?]+)/);
-    let processedText = "";
-
-    for (let i = 0; i < sentences.length; i += 2) {
-      const sentence = sentences[i];
-      const punctuation = sentences[i + 1] || "";
-
-      if (sentence && sentence.trim()) {
-        const readabilityClass = getSentenceReadabilityColor(sentence);
-        if (readabilityClass) {
-          processedText += `<span class="${readabilityClass} px-1 rounded">${sentence}</span>${punctuation}`;
-        } else {
-          processedText += sentence + punctuation;
+      let result;
+      
+      switch (action) {
+        case 'enhance': {
+          if (elementType === 'hook') {
+            result = await enhanceHook(elementText);
+          }
+          break;
         }
-      } else {
-        processedText += sentence + punctuation;
+        case 'strengthen': {
+          if (elementType === 'bridge') {
+            result = await strengthenBridge(elementText);
+          }
+          break;
+        }
+        case 'amplify': {
+          if (elementType === 'golden-nugget') {
+            result = await amplifyGoldenNugget(elementText);
+          }
+          break;
+        }
+        case 'optimize': {
+          if (elementType === 'cta') {
+            result = await optimizeCTA(elementText);
+          }
+          break;
+        }
+        case 'analyze': {
+          const analysis = analyzeElement(elementType, elementText);
+          console.log('Element analysis:', analysis);
+          // Could show analysis in a dialog
+          break;
+        }
+        case 'alternatives': {
+          result = await generateAlternatives(elementType, elementText);
+          console.log('Generated alternatives:', result);
+          break;
+        }
+        case 'copy': {
+          await navigator.clipboard.writeText(elementText);
+          break;
+        }
+        case 'edit': {
+          // Focus on the text area and select the element text
+          if (textareaRef.current) {
+            const startIndex = script.indexOf(elementText);
+            if (startIndex !== -1) {
+              textareaRef.current.focus();
+              textareaRef.current.setSelectionRange(startIndex, startIndex + elementText.length);
+            }
+          }
+          break;
+        }
+        case 'delete': {
+          // Remove the element text from script
+          const newScript = script.replace(elementText, '');
+          handleScriptChange(newScript);
+          break;
+        }
       }
+      
+      // If we got a result with enhanced text, replace it in the script
+      if (result?.success && result.result) {
+        const newScript = script.replace(elementText, result.result);
+        handleScriptChange(newScript);
+      }
+    } catch (error) {
+      console.error('Failed to handle element action:', error);
     }
-
-    return processedText;
   };
 
-  // Apply script element highlighting
-  const applyScriptElementHighlighting = (text: string): string => {
-    let highlightedText = text;
 
-    if (highlightSettings.hooks) {
-      highlightedText = highlightedText.replace(
-        /\b(imagine|what if|did you know|here's why|the secret|shocking|amazing|incredible)\b/gi,
-        '<span class="bg-orange-500/40 text-orange-800 px-1 rounded font-medium">$1</span>',
-      );
-    }
-
-    if (highlightSettings.bridges) {
-      highlightedText = highlightedText.replace(
-        /\b(but|however|now|so|because|that's why|here's the thing)\b/gi,
-        '<span class="bg-cyan-500/40 text-cyan-800 px-1 rounded font-medium">$1</span>',
-      );
-    }
-
-    if (highlightSettings.goldenNuggets) {
-      highlightedText = highlightedText.replace(
-        /\b(fact|tip|secret|trick|hack|pro tip|remember|key point)\b/gi,
-        '<span class="bg-blue-500/40 text-blue-800 px-1 rounded font-medium">$1</span>',
-      );
-    }
-
-    if (highlightSettings.ctas) {
-      highlightedText = highlightedText.replace(
-        /\b(subscribe|like|comment|share|follow|click|buy|get|download|sign up)\b/gi,
-        '<span class="bg-green-500/40 text-green-800 px-1 rounded font-medium">$1</span>',
-      );
-    }
-
-    return highlightedText;
-  };
-
-  // Apply highlighting to the text
-  const getHighlightedText = () => {
-    if (!script) return "";
-
-    let highlightedText = script;
-
-    // Apply readability highlighting first (sentence-level)
-    if (highlightSettings.readability) {
-      highlightedText = applyReadabilityHighlighting(highlightedText);
-    }
-
-    // Apply script element highlighting on top
-    highlightedText = applyScriptElementHighlighting(highlightedText);
-
-    return highlightedText;
-  };
 
   return (
     <div className="bg-background flex h-screen">
@@ -156,19 +149,6 @@ export function EnhancedEditor({ initialScript = "", onScriptChange, onSave }: E
 
         {/* Editor Content */}
         <div className="relative flex-1">
-          {/* Highlighted Text Overlay */}
-          <div
-            className="pointer-events-none absolute inset-0 p-6 break-words whitespace-pre-wrap text-transparent"
-            style={{
-              font: "inherit",
-              fontSize: "16px",
-              lineHeight: "1.7",
-              fontFamily: "Inter, sans-serif",
-              zIndex: 1,
-            }}
-            dangerouslySetInnerHTML={{ __html: getHighlightedText() }}
-          />
-
           {/* Textarea */}
           <textarea
             ref={textareaRef}
@@ -182,6 +162,13 @@ export function EnhancedEditor({ initialScript = "", onScriptChange, onSave }: E
               fontFamily: "Inter, sans-serif",
               caretColor: "currentColor",
             }}
+          />
+
+          {/* Enhanced Highlight Overlay with Contextual Menus */}
+          <HighlightOverlay
+            text={script}
+            highlightSettings={highlightSettings}
+            onElementAction={handleElementAction}
           />
         </div>
       </div>
