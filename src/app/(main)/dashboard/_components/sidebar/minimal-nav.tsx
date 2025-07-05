@@ -31,64 +31,77 @@ const NavItem = ({
   onCollectionCreated?: () => void;
 }) => {
   const isBrandItem = item.title === "My Brand";
+  const isItemActive = isActive(item.url, item.subItems);
 
-  return (
-    <div key={item.title}>
-      {item.subItems ? (
+  const renderSubItems = () => (
+    <HoverCardContent className="w-60 space-y-1 p-2" side="right" align="start" sideOffset={8}>
+      {item.subItems?.map((subItem) => (
+        <Button
+          key={subItem.title}
+          variant="ghost"
+          asChild
+          className={`w-full justify-start ${isActive(subItem.url) ? 'bg-accent text-accent-foreground' : ''}`}
+          disabled={subItem.comingSoon}
+        >
+          <Link href={subItem.url} target={subItem.newTab ? "_blank" : undefined}>
+            {subItem.icon && <subItem.icon className="h-4 w-4 mr-2" />}
+            <span>{subItem.title}</span>
+            {subItem.comingSoon && <IsComingSoon />}
+          </Link>
+        </Button>
+      ))}
+      {item.title === "Collections" && item.subItems && item.subItems.length === 1 && (
+        <CreateCollectionDialog onCollectionCreated={onCollectionCreated}>
+          <Button variant="ghost" className="text-muted-foreground hover:text-foreground w-full justify-start">
+            <FolderPlus className="h-4 w-4 mr-2" />
+            <span>Create your first collection</span>
+          </Button>
+        </CreateCollectionDialog>
+      )}
+    </HoverCardContent>
+  );
+
+  const renderButtonContent = () => (
+    <>
+      {item.icon && <item.icon className="h-4 w-4 mr-2" />}
+      <span>{item.title}</span>
+      {isBrandItem && <BrandProfileIndicator />}
+      {item.comingSoon && <IsComingSoon />}
+    </>
+  );
+
+  if (item.subItems) {
+    return (
+      <div key={item.title}>
         <HoverCard openDelay={150} closeDelay={300}>
           <HoverCardTrigger asChild>
             <Button
               variant="ghost"
               disabled={item.comingSoon}
-              className={`w-full justify-start ${isActive(item.url, item.subItems) ? 'bg-accent text-accent-foreground' : ''}`}
+              className={`w-full justify-start ${isItemActive ? 'bg-accent text-accent-foreground' : ''}`}
             >
-              {item.icon && <item.icon className="h-4 w-4 mr-2" />}
-              <span>{item.title}</span>
-              {isBrandItem && <BrandProfileIndicator />}
+              {renderButtonContent()}
               <ChevronRight className="ml-auto h-4 w-4" />
             </Button>
           </HoverCardTrigger>
-          <HoverCardContent className="w-60 space-y-1 p-2" side="right" align="start" sideOffset={8}>
-            {item.subItems.map((subItem) => (
-              <Button
-                key={subItem.title}
-                variant="ghost"
-                asChild
-                className={`w-full justify-start ${isActive(subItem.url) ? 'bg-accent text-accent-foreground' : ''}`}
-                disabled={subItem.comingSoon}
-              >
-                <Link href={subItem.url} target={subItem.newTab ? "_blank" : undefined}>
-                  {subItem.icon && <subItem.icon className="h-4 w-4 mr-2" />}
-                  <span>{subItem.title}</span>
-                  {subItem.comingSoon && <IsComingSoon />}
-                </Link>
-              </Button>
-            ))}
-            {item.title === "Collections" && item.subItems.length === 1 && (
-              <CreateCollectionDialog onCollectionCreated={onCollectionCreated}>
-                <Button variant="ghost" className="text-muted-foreground hover:text-foreground w-full justify-start">
-                  <FolderPlus className="h-4 w-4 mr-2" />
-                  <span>Create your first collection</span>
-                </Button>
-              </CreateCollectionDialog>
-            )}
-          </HoverCardContent>
+          {renderSubItems()}
         </HoverCard>
-      ) : (
-        <Button
-          variant="ghost"
-          asChild
-          disabled={item.comingSoon}
-          className={`w-full justify-start ${isActive(item.url) ? 'bg-accent text-accent-foreground' : ''}`}
-        >
-          <Link href={item.url} target={item.newTab ? "_blank" : undefined}>
-            {item.icon && <item.icon className="h-4 w-4 mr-2" />}
-            <span>{item.title}</span>
-            {isBrandItem && <BrandProfileIndicator />}
-            {item.comingSoon && <IsComingSoon />}
-          </Link>
-        </Button>
-      )}
+      </div>
+    );
+  }
+
+  return (
+    <div key={item.title}>
+      <Button
+        variant="ghost"
+        asChild
+        disabled={item.comingSoon}
+        className={`w-full justify-start ${isItemActive ? 'bg-accent text-accent-foreground' : ''}`}
+      >
+        <Link href={item.url} target={item.newTab ? "_blank" : undefined}>
+          {renderButtonContent()}
+        </Link>
+      </Button>
     </div>
   );
 };

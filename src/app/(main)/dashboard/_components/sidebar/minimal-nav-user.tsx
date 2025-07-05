@@ -40,13 +40,13 @@ const InitializingTrigger = () => (
 const SignedInTrigger = ({ user }: { user: UserData }) => (
   <div className="flex items-center gap-2">
     <Avatar className="h-8 w-8">
-      <AvatarImage src={user.photoURL || ""} alt={user.displayName || "User"} />
+      <AvatarImage src={user.photoURL ?? ""} alt={user.displayName ?? "User"} />
       <AvatarFallback>
-        {user.displayName?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || "U"}
+        {user.displayName?.charAt(0)?.toUpperCase() ?? user.email?.charAt(0)?.toUpperCase() ?? "U"}
       </AvatarFallback>
     </Avatar>
     <div className="grid flex-1 text-left text-sm leading-tight">
-      <span className="truncate font-semibold">{user.displayName || "User"}</span>
+      <span className="truncate font-semibold">{user.displayName ?? "User"}</span>
       <span className="truncate text-xs">{user.email}</span>
     </div>
   </div>

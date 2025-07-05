@@ -8,56 +8,9 @@ import { Button } from "@/components/ui/button";
 import { MinimalCard, MinimalCardHeader, MinimalCardTitle, MinimalCardContent } from "@/components/ui/minimal-card";
 import { TableLoading } from "@/components/ui/loading-animations";
 import { useScripts } from "@/hooks/use-scripts";
-import { Script } from "@/types/script";
-
-interface ColumnVisibility {
-  title: boolean;
-  authors: boolean;
-  added: boolean;
-  viewed: boolean;
-  fileType: boolean;
-  summary: boolean;
-}
-
-// Helper functions
-const getSortValue = (script: Script, sortBy: string): string | number => {
-  const sortMap: Record<string, string | number> = {
-    title: script.title,
-    authors: script.authors,
-    added: new Date(script.createdAt).getTime(),
-    viewed: new Date(script.viewedAt).getTime(),
-    fileType: script.fileType,
-  };
-
-  return sortMap[sortBy] ?? script.title;
-};
-
-const sortScripts = (scripts: Script[], sortBy: string, sortOrder: "asc" | "desc"): Script[] => {
-  return [...scripts].sort((a, b) => {
-    const aValue = getSortValue(a, sortBy);
-    const bValue = getSortValue(b, sortBy);
-
-    if (typeof aValue === "string" && typeof bValue === "string") {
-      return sortOrder === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
-    }
-
-    return sortOrder === "asc" ? (aValue as number) - (bValue as number) : (bValue as number) - (aValue as number);
-  });
-};
 
 export default function ScriptsLibraryPage() {
   const [selectedScripts, setSelectedScripts] = useState<string[]>([]);
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [sortBy, setSortBy] = useState("added");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>({
-    title: true,
-    authors: true,
-    added: true,
-    viewed: true,
-    fileType: true,
-    summary: true,
-  });
 
   const { scripts, isLoading, error } = useScripts();
 
@@ -65,26 +18,6 @@ export default function ScriptsLibraryPage() {
     setSelectedScripts((prev) =>
       prev.includes(scriptId) ? prev.filter((id) => id !== scriptId) : [...prev, scriptId]
     );
-  };
-
-  const handleSelectAll = () => {
-    setSelectedScripts(selectedScripts.length === scripts.length ? [] : scripts.map((s) => s.id));
-  };
-
-  const handleSort = (column: string) => {
-    if (sortBy === column) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortBy(column);
-      setSortOrder("asc");
-    }
-  };
-
-  const toggleColumnVisibility = (column: keyof ColumnVisibility) => {
-    setColumnVisibility((prev) => ({
-      ...prev,
-      [column]: !prev[column],
-    }));
   };
 
   // Show loading state

@@ -1,163 +1,97 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
-import { useSearchParams } from "next/navigation";
-
-import { useQuery } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
-
-import { useScriptSave } from "@/hooks/use-script-save";
-
-import { EnhancedEditor } from "./_components/layout/enhanced-editor";
-import { ScriptOptions } from "./_components/script-options";
-
-interface ScriptElements {
-  hook: string;
-  bridge: string;
-  goldenNugget: string;
-  wta: string;
-}
-
-interface SpeedWriteResponse {
-  success: boolean;
-  optionA: {
-    id: string;
-    title: string;
-    content: string;
-    elements?: ScriptElements;
-  } | null;
-  optionB: {
-    id: string;
-    title: string;
-    content: string;
-    elements?: ScriptElements;
-  } | null;
-  error?: string;
-}
+import { MinimalEnhancedEditor } from "./_components/layout/minimal-enhanced-editor";
 
 export default function ScriptEditorPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-
-  // Get URL parameters
-  const mode = searchParams.get("mode") ?? "notes";
-  const scriptId = searchParams.get("scriptId");
-  const hasSpeedWriteResults = searchParams.get("hasSpeedWriteResults") === "true";
-
-  // State
   const [script, setScript] = useState("");
-  const [scriptElements, setScriptElements] = useState<ScriptElements | undefined>();
-  const [showScriptOptions, setShowScriptOptions] = useState(hasSpeedWriteResults);
-  const [speedWriteData, setSpeedWriteData] = useState<SpeedWriteResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch scripts data
-  const {
-    data: scripts = [],
-    isLoading: scriptsLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ["scripts"],
-    queryFn: async () => {
-      // Get Firebase Auth token
-      const { auth } = await import("@/lib/firebase");
-      if (!auth?.currentUser) {
-        throw new Error("User not authenticated");
-      }
-
-      const token = await auth.currentUser.getIdToken();
-
-      const response = await fetch("/api/scripts", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) throw new Error("Failed to fetch scripts");
-      return response.json();
-    },
-  });
-
-  // Use script save hook
-  const { handleSave } = useScriptSave({ script, scriptId, refetch });
-
-  // Handle speed-write workflow on component mount
   useEffect(() => {
-    const loadSpeedWriteResults = () => {
-      const storedResults = sessionStorage.getItem("speedWriteResults");
-      if (!storedResults) return;
-
+    // Load script from various sources
+    const loadScript = () => {
       try {
-        const data: SpeedWriteResponse = JSON.parse(storedResults);
-        setSpeedWriteData(data);
-        setShowScriptOptions(true);
-        sessionStorage.removeItem("speedWriteResults");
+        // 1. Check URL params for script content
+        const urlScript = searchParams.get("script");
+        if (urlScript) {
+          setScript(decodeURIComponent(urlScript));
+          setIsLoading(false);
+          return;
+        }
+
+        // 2. Check sessionStorage for speed write results
+        const speedWriteResults = sessionStorage.getItem("speedWriteResults");
+        if (speedWriteResults) {
+          const parsed = JSON.parse(speedWriteResults);
+          if (parsed.selectedScript) {
+            setScript(parsed.selectedScript);
+            setIsLoading(false);
+            return;
+          }
+        }
+
+        // 3. Check localStorage for draft
+        const draft = localStorage.getItem("scriptDraft");
+        if (draft) {
+          setScript(draft);
+          setIsLoading(false);
+          return;
+        }
+
+        // 4. Default empty state
+        setScript("");
+        setIsLoading(false);
       } catch (error) {
-        console.error("Failed to parse speed-write results:", error);
-        toast.error("Failed to load script options");
+        console.error("Error loading script:", error);
+        setScript("");
+        setIsLoading(false);
       }
     };
 
-    if (mode === "speed-write" && hasSpeedWriteResults) {
-      loadSpeedWriteResults();
-    }
-  }, [mode, hasSpeedWriteResults]);
+    loadScript();
+  }, [searchParams]);
 
-  // Load script if editing existing one
-  useEffect(() => {
-    if (scriptId && scripts.length > 0) {
-      const existingScript = scripts.find((s: { id: string; content: string }) => s.id === scriptId);
-      if (existingScript) {
-        setScript(existingScript.content);
-      }
-    }
-  }, [scriptId, scripts]);
-
-  const handleScriptOptionSelect = (option: {
-    id: string;
-    title: string;
-    content: string;
-    elements?: ScriptElements;
-  }) => {
-    setScript(option.content);
-    setScriptElements(option.elements);
-    setShowScriptOptions(false);
-    toast.success("Script Selected", {
-      description: `You selected ${option.title}. You can now edit and refine it.`,
-    });
+  const handleScriptChange = (newScript: string) => {
+    setScript(newScript);
+    // Auto-save to localStorage
+    localStorage.setItem("scriptDraft", newScript);
   };
 
-  const handleScriptChange = (newContent: string) => {
-    setScript(newContent);
-    if (scriptElements) {
-      setScriptElements(undefined);
-    }
+  const handleScriptSave = (scriptToSave: string) => {
+    // TODO: Implement actual save functionality
+    console.log("Saving script:", scriptToSave);
+    
+    // For now, just update localStorage
+    localStorage.setItem("scriptDraft", scriptToSave);
+    
+    // Show success message or redirect
+    // router.push("/dashboard/scripts");
   };
 
-  const handleScriptSave = async () => {
-    await handleSave();
-  };
-
-  if (scriptsLoading) {
+  if (isLoading) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <div className="flex items-center gap-2">
-          <Loader2 className="h-5 w-5 animate-spin" />
-          <span>Loading script editor...</span>
+      <div className="center-column">
+        <div className="section">
+          <div className="flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading editor...</p>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
-  if (showScriptOptions && speedWriteData && speedWriteData.optionA && speedWriteData.optionB) {
-    return (
-      <ScriptOptions
-        optionA={speedWriteData.optionA}
-        optionB={speedWriteData.optionB}
-        onSelect={handleScriptOptionSelect}
-        isGenerating={false}
-      />
-    );
-  }
-
-  return <EnhancedEditor initialText={script} onTextChange={handleScriptChange} onSave={handleScriptSave} />;
+  return (
+    <MinimalEnhancedEditor 
+      initialText={script} 
+      onTextChange={handleScriptChange} 
+      onSave={handleScriptSave} 
+    />
+  );
 }
