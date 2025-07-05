@@ -16,7 +16,7 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
   const contentLayout = await getContentLayout();
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <SmartSidebarProvider>
         <VoiceProvider>
           <TopBarProvider>
