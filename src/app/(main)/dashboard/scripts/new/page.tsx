@@ -184,11 +184,11 @@ export default function NewScriptPage() {
   };
 
   return (
-    <div className="bg-background h-screen overflow-y-auto hide-scrollbar">
-      {/* Centered Content Container - Raised Higher */}
-      <div className="flex flex-col items-center justify-start px-4 pt-8 pb-8">
+    <div className="bg-background hide-scrollbar flex min-h-screen items-center justify-center overflow-y-auto">
+      {/* Vertically Centered Content Container */}
+      <div className="flex w-full flex-col items-center justify-center px-4 py-8">
         {/* Header */}
-        <div className="mb-6 text-center">
+        <div className="mb-8 text-center">
           <h1 className="text-foreground font-inter mb-2 text-5xl font-bold">What&apos;s your script idea?</h1>
           <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
             Transform your ideas into engaging scripts with AI assistance
@@ -208,8 +208,8 @@ export default function NewScriptPage() {
           </Card>
         )}
 
-        {/* Main Input Section - 66% Viewport Width */}
-        <div className="w-full max-w-none" style={{ width: "66vw" }}>
+        {/* Main Input Section - 700px width */}
+        <div className="w-full max-w-2xl">
           {/* Voice Badge */}
           <div className="mb-4 flex justify-center">
             <Badge variant="outline" className="border-primary/30 text-primary bg-primary/10 px-3 py-1 text-sm">
@@ -235,11 +235,9 @@ export default function NewScriptPage() {
             <div className="text-muted-foreground text-sm">Press ⌘+Enter to generate scripts</div>
           </div>
         </div>
-      </div>
 
-      {/* Ghost Writer Section - Raised Higher */}
-      <div className="px-6 pt-4 pb-12">
-        <div className="mx-auto max-w-7xl">
+        {/* Ghost Writer Section */}
+        <div className="mt-12 w-full max-w-7xl">
           <GhostWriter />
         </div>
       </div>
