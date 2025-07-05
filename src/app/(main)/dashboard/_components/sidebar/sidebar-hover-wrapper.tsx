@@ -10,7 +10,7 @@ export function SidebarHoverWrapper({ children }: SidebarHoverWrapperProps) {
   const { handleMouseEnter, handleMouseLeave } = useSmartSidebarContext();
 
   return (
-    <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} className="h-full">
+    <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
       {children}
     </div>
   );

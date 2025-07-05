@@ -73,12 +73,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         className={`transition-all duration-200 ${smartSidebar.visualState === "hover-open" ? "hover:shadow-lg" : ""}`}
       >
         <SidebarHeader>
-          <SidebarPinControl />
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
-                <a href="#">
+                <a href="#" className="flex w-full items-center justify-between">
                   <GenCLogo iconSize="sm" textSize="sm" />
+                  <SidebarPinControl />
                 </a>
               </SidebarMenuButton>
             </SidebarMenuItem>

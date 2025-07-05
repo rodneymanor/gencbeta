@@ -13,19 +13,21 @@ export function SidebarPinControl() {
   if (!isOpen) return null;
 
   return (
-    <div className="flex justify-end p-2">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={togglePin}
-        className={cn(
-          "hover:bg-accent/50 h-8 w-8 p-0 transition-all duration-200",
-          isPinned && "bg-accent text-accent-foreground",
-        )}
-        aria-label={isPinned ? "Unpin sidebar" : "Pin sidebar"}
-      >
-        <Pin className={cn("h-4 w-4 transition-transform duration-200", isPinned ? "rotate-0" : "rotate-45")} />
-      </Button>
-    </div>
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        togglePin();
+      }}
+      className={cn(
+        "hover:bg-accent/50 h-6 w-6 flex-shrink-0 p-0 transition-all duration-200",
+        isPinned && "bg-accent text-accent-foreground",
+      )}
+      aria-label={isPinned ? "Unpin sidebar" : "Pin sidebar"}
+    >
+      <Pin className={cn("h-3 w-3 transition-transform duration-200", isPinned ? "rotate-0" : "rotate-45")} />
+    </Button>
   );
 }
