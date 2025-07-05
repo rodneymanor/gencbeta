@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { 
   Eye, 
-  EyeOff, 
   Palette, 
   Sliders, 
   Zap, 

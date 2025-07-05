@@ -84,6 +84,13 @@ export function EnhancedEditor({ initialText = '', onTextChange, onSave }: Enhan
     }
   }, []);
 
+  // Update text when initialText prop changes
+  useEffect(() => {
+    if (initialText !== text) {
+      setText(initialText);
+    }
+  }, [initialText, text]);
+
   // Update services when settings change
   useEffect(() => {
     readabilityService.updateSettings(readabilitySettings);
@@ -92,17 +99,6 @@ export function EnhancedEditor({ initialText = '', onTextChange, onSave }: Enhan
   useEffect(() => {
     elementDetectionService.updateSettings(elementDetectionSettings);
   }, [elementDetectionSettings, elementDetectionService]);
-
-  // Auto-save settings
-  useEffect(() => {
-    if (editorSettings.advanced.autoSave) {
-      const interval = setInterval(() => {
-        saveCurrentSettings();
-      }, editorSettings.advanced.saveInterval * 1000);
-
-      return () => clearInterval(interval);
-    }
-  }, [editorSettings.advanced.autoSave, editorSettings.advanced.saveInterval]);
 
   const saveCurrentSettings = useCallback(() => {
     const settings: HemingwayEditorSettings = {
@@ -123,6 +119,17 @@ export function EnhancedEditor({ initialText = '', onTextChange, onSave }: Enhan
 
     saveEditorSettings(settings);
   }, [editorSettings, highlightSettings, uiPreferences, readabilitySettings, elementDetectionSettings]);
+
+  // Auto-save settings
+  useEffect(() => {
+    if (editorSettings.advanced.autoSave) {
+      const interval = setInterval(() => {
+        saveCurrentSettings();
+      }, editorSettings.advanced.saveInterval * 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [editorSettings.advanced.autoSave, editorSettings.advanced.saveInterval, saveCurrentSettings]);
 
   const handleExportSettings = useCallback(() => {
     const settings: HemingwayEditorSettings = {

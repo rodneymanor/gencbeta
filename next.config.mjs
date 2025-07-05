@@ -1,9 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Completely disable all development indicators (Next.js logo, etc.)
-  devIndicators: {
-    position: 'bottom-left',
-  },
+  devIndicators: false,
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },

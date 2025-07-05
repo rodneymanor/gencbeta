@@ -1,39 +1,17 @@
 "use client";
 
-import { useEffect } from "react";
-
-import { useSmartSidebarContext } from "@/components/providers/smart-sidebar-provider";
 import { GenCLogo } from "@/components/ui/gen-c-logo";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from "@/components/ui/sidebar";
 import { UsageTracker } from "@/components/ui/usage-tracker";
 import { useAuth } from "@/contexts/auth-context";
 import { useCollectionsSidebar } from "@/hooks/use-collections-sidebar";
 import { sidebarItems } from "@/navigation/sidebar/sidebar-items";
 
-import { NavMain } from "./nav-main";
-import { NavUser } from "./nav-user";
+import { MinimalNav } from "./minimal-nav";
+import { MinimalNavUser } from "./minimal-nav-user";
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar() {
   const { userProfile } = useAuth();
   const { sidebarItems: dynamicSidebarItems, refreshCollections } = useCollectionsSidebar(sidebarItems);
-  const { setOpen } = useSidebar();
-
-  // Use smart sidebar for proper manual/hover state management
-  const smartSidebar = useSmartSidebarContext();
-
-  // Sync smart sidebar state with the main sidebar context
-  useEffect(() => {
-    setOpen(smartSidebar.isOpen);
-  }, [smartSidebar.isOpen, setOpen]);
 
   // Filter sidebar items based on user role
   const filteredSidebarItems = dynamicSidebarItems
@@ -65,34 +43,24 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     });
 
   return (
-    <Sidebar
-      {...props}
-      onMouseEnter={smartSidebar.handleMouseEnter}
-      onMouseLeave={smartSidebar.handleMouseLeave}
-      className={`transition-all duration-200 ${smartSidebar.visualState === "hover-open" ? "hover:shadow-lg" : ""}`}
-    >
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
-              <a href="#">
-                <GenCLogo iconSize="sm" textSize="sm" />
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-      <SidebarContent>
-        <NavMain items={filteredSidebarItems} onCollectionCreated={refreshCollections} />
-        {/* <NavDocuments items={data.documents} /> */}
-        {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
-      </SidebarContent>
-      <SidebarFooter>
-        <div className="space-y-2">
-          <UsageTracker />
-          <NavUser />
+    <div className="flex h-full flex-col">
+      {/* Header */}
+      <div className="flex flex-col gap-2 p-4 border-b">
+        <div className="flex items-center gap-2">
+          <GenCLogo iconSize="sm" textSize="sm" />
         </div>
-      </SidebarFooter>
-    </Sidebar>
+      </div>
+      
+      {/* Content */}
+      <div className="flex-1 overflow-auto p-4">
+        <MinimalNav items={filteredSidebarItems} onCollectionCreated={refreshCollections} />
+      </div>
+      
+      {/* Footer */}
+      <div className="border-t p-4 space-y-2">
+        <UsageTracker />
+        <MinimalNavUser />
+      </div>
+    </div>
   );
 }

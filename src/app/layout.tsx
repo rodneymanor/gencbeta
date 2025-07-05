@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en" className="light" suppressHydrationWarning>
+    <html lang="en" className="light overflow-y-auto" suppressHydrationWarning>
       <body className={`${poppins.className} min-h-screen antialiased`}>
         <QueryProvider>
           <AuthProvider>

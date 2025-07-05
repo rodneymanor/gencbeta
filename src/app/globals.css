@@ -84,6 +84,14 @@
   --script-golden-nugget-foreground: oklch(1 0 0);
   --script-wta: oklch(0 0 0); /* Black for WTA */
   --script-wta-foreground: oklch(1 0 0);
+
+  /* 1. Core layout tokens for minimalistic design */
+  --max-column-width: 72ch;           /* readable line-length */
+  --page-horizontal-padding: 2rem;    /* 32px side-padding */
+  --section-spacing: 4rem;            /* 64px vertical breathing room */
+  --section-spacing-tight: 2rem;      /* 32px for related subsections */
+  --content-spacing: 1.5rem;          /* 24px for content elements */
+  --element-spacing: 1rem;            /* 16px for related elements */
 }
 
 .dark {
@@ -381,4 +389,68 @@
 
 .hide-scrollbar::-webkit-scrollbar {   /* Chrome, Safari, Opera */
   display: none;
+}
+
+/* Global scrollbar settings */
+html, body {
+  height: auto;           /* allow page to grow */
+  overflow-y: auto;       /* scrollbar lives here */
+  scrollbar-gutter: stable; /* prevents layout shift when scrollbar appears */
+}
+
+/* 2. Utility wrapper – use everywhere for centered single-column layout */
+.center-column {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: var(--max-column-width);
+  padding-left: var(--page-horizontal-padding);
+  padding-right: var(--page-horizontal-padding);
+}
+
+/* 3. Remove visual noise - minimalistic approach */
+* {
+  box-shadow: none !important;          /* kill global shadows */
+}
+
+.card, .popover, .sidebar {
+  border: none !important;              /* no borders – rely on whitespace */
+  background: transparent !important;   /* content lives on page bg */
+}
+
+/* 4. Whitespace scale overrides for consistent spacing */
+.section {
+  padding-block: var(--section-spacing);       /* 64px vertical breathing room */
+}
+
+.section--tight {
+  padding-block: var(--section-spacing-tight); /* for related subsections */
+}
+
+.content-spacing {
+  margin-bottom: var(--content-spacing);       /* 24px for content elements */
+}
+
+.element-spacing {
+  margin-bottom: var(--element-spacing);       /* 16px for related elements */
+}
+
+/* 5. Focus on content - minimal visual hierarchy */
+.minimal-card {
+  background: transparent;
+  border: none;
+  padding: var(--content-spacing) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.minimal-card:last-child {
+  border-bottom: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: inherit;
 }
