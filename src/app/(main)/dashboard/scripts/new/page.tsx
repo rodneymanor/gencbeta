@@ -184,9 +184,9 @@ export default function NewScriptPage() {
   };
 
   return (
-    <div className="bg-background hide-scrollbar flex min-h-screen items-center justify-center overflow-y-auto">
+    <div className="hide-scrollbar flex min-h-[calc(100vh-6rem)] items-center justify-center overflow-y-auto">
       {/* Vertically Centered Content Container */}
-      <div className="flex w-full flex-col items-center justify-center px-4 py-8">
+      <div className="flex w-full flex-col items-center justify-center py-8">
         {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="text-foreground font-inter mb-2 text-5xl font-bold">What&apos;s your script idea?</h1>
