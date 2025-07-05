@@ -320,7 +320,7 @@ function calculateCTAScore(text: string): number {
 }
 
 // AI-powered generation functions (simplified versions)
-async function generateEnhancedHook(original: string, analysis: ElementAnalysis): Promise<string> {
+async function generateEnhancedHook(original: string, _analysis: ElementAnalysis): Promise<string> {
   // In a real implementation, this would call an AI service
   // For now, return a template-based enhancement
   
@@ -334,7 +334,7 @@ async function generateEnhancedHook(original: string, analysis: ElementAnalysis)
   return templates[Math.floor(Math.random() * templates.length)];
 }
 
-async function generateStrengthenedBridge(original: string, analysis: ElementAnalysis): Promise<string> {
+async function generateStrengthenedBridge(original: string, _analysis: ElementAnalysis): Promise<string> {
   const templates = [
     `But here's the thing: ${original.toLowerCase()}`,
     `Now, this is where it gets interesting - ${original.toLowerCase()}`,
@@ -345,7 +345,7 @@ async function generateStrengthenedBridge(original: string, analysis: ElementAna
   return templates[Math.floor(Math.random() * templates.length)];
 }
 
-async function generateAmplifiedNugget(original: string, analysis: ElementAnalysis): Promise<string> {
+async function generateAmplifiedNugget(original: string, _analysis: ElementAnalysis): Promise<string> {
   const templates = [
     `🔑 Here's the secret: ${original.toLowerCase()}`,
     `This is the game-changer: ${original.toLowerCase()}`,
@@ -356,7 +356,7 @@ async function generateAmplifiedNugget(original: string, analysis: ElementAnalys
   return templates[Math.floor(Math.random() * templates.length)];
 }
 
-async function generateOptimizedCTA(original: string, analysis: ElementAnalysis): Promise<string> {
+async function generateOptimizedCTA(original: string, _analysis: ElementAnalysis): Promise<string> {
   const templates = [
     `👆 ${original.replace(/^(click|tap)/i, 'Click')} now!`,
     `Don't wait - ${original.toLowerCase()} today!`,
@@ -367,7 +367,7 @@ async function generateOptimizedCTA(original: string, analysis: ElementAnalysis)
   return templates[Math.floor(Math.random() * templates.length)];
 }
 
-async function generateElementAlternatives(elementType: ScriptElementType, text: string): Promise<string[]> {
+async function generateElementAlternatives(elementType: ScriptElementType, _text: string): Promise<string[]> {
   const alternatives: Record<ScriptElementType, string[]> = {
     hook: [
       'Did you know that...',
