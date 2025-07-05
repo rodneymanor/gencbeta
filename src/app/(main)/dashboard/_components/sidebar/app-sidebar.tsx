@@ -21,6 +21,8 @@ import { sidebarItems } from "@/navigation/sidebar/sidebar-items";
 
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
+import { SidebarHoverWrapper } from "./sidebar-hover-wrapper";
+import { SidebarPinControl } from "./sidebar-pin-control";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { userProfile } = useAuth();
@@ -65,34 +67,35 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     });
 
   return (
-    <Sidebar
-      {...props}
-      onMouseEnter={smartSidebar.handleMouseEnter}
-      onMouseLeave={smartSidebar.handleMouseLeave}
-      className={`transition-all duration-200 ${smartSidebar.visualState === "hover-open" ? "hover:shadow-lg" : ""}`}
-    >
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
-              <a href="#">
-                <GenCLogo iconSize="sm" textSize="sm" />
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-      <SidebarContent>
-        <NavMain items={filteredSidebarItems} onCollectionCreated={refreshCollections} />
-        {/* <NavDocuments items={data.documents} /> */}
-        {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
-      </SidebarContent>
-      <SidebarFooter>
-        <div className="space-y-2">
-          <UsageTracker />
-          <NavUser />
-        </div>
-      </SidebarFooter>
-    </Sidebar>
+    <SidebarHoverWrapper>
+      <Sidebar
+        {...props}
+        className={`transition-all duration-200 ${smartSidebar.visualState === "hover-open" ? "hover:shadow-lg" : ""}`}
+      >
+        <SidebarHeader>
+          <SidebarPinControl />
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
+                <a href="#">
+                  <GenCLogo iconSize="sm" textSize="sm" />
+                </a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarHeader>
+        <SidebarContent>
+          <NavMain items={filteredSidebarItems} onCollectionCreated={refreshCollections} />
+          {/* <NavDocuments items={data.documents} /> */}
+          {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
+        </SidebarContent>
+        <SidebarFooter>
+          <div className="space-y-2">
+            <UsageTracker />
+            <NavUser />
+          </div>
+        </SidebarFooter>
+      </Sidebar>
+    </SidebarHoverWrapper>
   );
 }

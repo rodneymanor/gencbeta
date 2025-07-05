@@ -4,9 +4,7 @@ import { createContext, useContext } from "react";
 
 import { useSmartSidebar as useSmartSidebarInternal } from "@/hooks/use-smart-sidebar";
 
-type ManualState = "open" | "closed";
-type HoverState = "hovering" | "idle";
-type VisualState = "manual-open" | "hover-open" | "closed";
+type VisualState = "manual-open" | "hover-open" | "pinned-open" | "closed";
 
 interface SmartSidebarReturn {
   // State
@@ -14,10 +12,15 @@ interface SmartSidebarReturn {
   visualState: VisualState;
   isManuallyOpen: boolean;
   isHoverOpen: boolean;
+  isPinned: boolean;
 
   // Manual actions (persisted)
   toggleManual: () => void;
   setManualOpen: (open: boolean) => void;
+
+  // Pin actions (persisted)
+  togglePin: () => void;
+  setPinned: (pinned: boolean) => void;
 
   // Hover actions (temporary)
   handleMouseEnter: () => void;
