@@ -22,6 +22,18 @@ const config = {
       fontFamily: {
         sans: ["Poppins", "sans-serif"],
       },
+      fontSize: {
+        xs: ['0.75rem', { lineHeight: '1rem' }],     // 12px - Extra small text, e.g., source tags
+        sm: ['0.875rem', { lineHeight: '1.25rem' }], // 14px - Small text, e.g., secondary info
+        base: ['1rem', { lineHeight: '1.5rem' }],    // 16px - Base font size for body text
+        lg: ['1.125rem', { lineHeight: '1.75rem' }], // 18px - Large text, e.g., subheadings
+        xl: ['1.25rem', { lineHeight: '1.75rem' }],  // 20px - Extra large text, e.g., main headings
+      },
+      fontWeight: {
+        normal: '400',  // Standard font weight
+        medium: '500',  // Medium font weight for emphasis
+        bold: '700',    // Bold font weight for strong emphasis
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
