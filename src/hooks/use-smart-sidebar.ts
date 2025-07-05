@@ -65,22 +65,8 @@ export function useSmartSidebar(): SmartSidebarReturn {
 
   // Persistence functions
   const persistManualState = useCallback((state: ManualState) => {
-    try {
-      const open = state === "open";
-
-      // Set cookie for SSR
-      if (typeof document !== "undefined") {
-        const isSecure = location.protocol === "https:";
-        document.cookie = `${SIDEBAR_COOKIE_NAME}=${open}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}; SameSite=Lax; Secure=${isSecure}`;
-      }
-
-      // Set localStorage for client-side reliability
-      if (typeof window !== "undefined") {
-        localStorage.setItem(SIDEBAR_COOKIE_NAME, String(open));
-      }
-    } catch (error) {
-      console.warn("Failed to persist sidebar manual state:", error);
-    }
+    // Don't persist manual open state - sidebar should always start closed
+    // Only pin state should be persisted for permanent expansion
   }, []);
 
   const persistPinState = useCallback((state: PinState) => {
@@ -103,29 +89,8 @@ export function useSmartSidebar(): SmartSidebarReturn {
   }, []);
 
   const getPersistedManualState = useCallback((): ManualState => {
-    try {
-      // Try localStorage first
-      if (typeof window !== "undefined") {
-        const stored = localStorage.getItem(SIDEBAR_COOKIE_NAME);
-        if (stored !== null) {
-          return stored === "true" ? "open" : "closed";
-        }
-      }
-
-      // Fallback to cookie parsing
-      if (typeof document !== "undefined") {
-        const cookies = document.cookie.split(";");
-        const targetCookie = cookies.find((cookie) => cookie.trim().startsWith(`${SIDEBAR_COOKIE_NAME}=`));
-        if (targetCookie) {
-          const cookieValue = targetCookie.split("=")[1]?.trim();
-          return cookieValue === "true" ? "open" : "closed";
-        }
-      }
-    } catch (error) {
-      console.warn("Failed to read persisted sidebar state:", error);
-    }
-
-    // Default to closed if no preference exists
+    // Always start closed - don't persist manual open state
+    // Only pin state should be persisted for permanent expansion
     return "closed";
   }, []);
 
@@ -161,13 +126,6 @@ export function useSmartSidebar(): SmartSidebarReturn {
     if (typeof window !== "undefined") {
       const persistedManualState = getPersistedManualState();
       const persistedPinState = getPersistedPinState();
-
-      console.log("🔧 [SmartSidebar] Initializing from persistence:", {
-        persistedManualState,
-        persistedPinState,
-        localStorage: localStorage.getItem("sidebar_state"),
-        pinStorage: localStorage.getItem("sidebar_pinned"),
-      });
 
       setManualState(persistedManualState);
       setPinState(persistedPinState);

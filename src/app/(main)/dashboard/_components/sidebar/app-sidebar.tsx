@@ -33,13 +33,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   // Sync smart sidebar state with the main sidebar context
   useEffect(() => {
-    console.log("🔧 [Sidebar] State sync:", {
-      isLoading: smartSidebar.isLoading,
-      isOpen: smartSidebar.isOpen,
-      visualState: smartSidebar.visualState,
-      isPinned: smartSidebar.isPinned,
-    });
-
     // Only sync after smart sidebar has finished loading to prevent race conditions
     if (!smartSidebar.isLoading) {
       setOpen(smartSidebar.isOpen);
