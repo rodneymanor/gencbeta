@@ -18,21 +18,36 @@ const config = {
         "2xl": "1400px",
       },
     },
+    fontSize: {
+      xs: ['0.75rem', { lineHeight: '1rem' }],     // 12px - Extra small text, e.g., source tags
+      sm: ['0.875rem', { lineHeight: '1.25rem' }], // 14px - Small text, e.g., secondary info
+      base: ['1rem', { lineHeight: '1.5rem' }],    // 16px - Base font size for body text
+      lg: ['1.125rem', { lineHeight: '1.75rem' }], // 18px - Large text, e.g., subheadings
+      xl: ['1.25rem', { lineHeight: '1.75rem' }],  // 20px - Extra large text, e.g., main headings
+      // Keep other Tailwind defaults for larger sizes
+      '2xl': ['1.5rem', { lineHeight: '2rem' }],
+      '3xl': ['1.875rem', { lineHeight: '2.25rem' }],
+      '4xl': ['2.25rem', { lineHeight: '2.5rem' }],
+      '5xl': ['3rem', { lineHeight: '1' }],
+      '6xl': ['3.75rem', { lineHeight: '1' }],
+      '7xl': ['4.5rem', { lineHeight: '1' }],
+      '8xl': ['6rem', { lineHeight: '1' }],
+      '9xl': ['8rem', { lineHeight: '1' }],
+    },
+    fontWeight: {
+      thin: '100',
+      extralight: '200',
+      light: '300',
+      normal: '400',  // Standard font weight
+      medium: '500',  // Medium font weight for emphasis
+      semibold: '600',
+      bold: '700',    // Bold font weight for strong emphasis
+      extrabold: '800',
+      black: '900',
+    },
     extend: {
       fontFamily: {
         sans: ["Poppins", "sans-serif"],
-      },
-      fontSize: {
-        xs: ['0.75rem', { lineHeight: '1rem' }],     // 12px - Extra small text, e.g., source tags
-        sm: ['0.875rem', { lineHeight: '1.25rem' }], // 14px - Small text, e.g., secondary info
-        base: ['1rem', { lineHeight: '1.5rem' }],    // 16px - Base font size for body text
-        lg: ['1.125rem', { lineHeight: '1.75rem' }], // 18px - Large text, e.g., subheadings
-        xl: ['1.25rem', { lineHeight: '1.75rem' }],  // 20px - Extra large text, e.g., main headings
-      },
-      fontWeight: {
-        normal: '400',  // Standard font weight
-        medium: '500',  // Medium font weight for emphasis
-        bold: '700',    // Bold font weight for strong emphasis
       },
       colors: {
         border: "hsl(var(--border))",
