@@ -161,6 +161,14 @@ export function useSmartSidebar(): SmartSidebarReturn {
     if (typeof window !== "undefined") {
       const persistedManualState = getPersistedManualState();
       const persistedPinState = getPersistedPinState();
+
+      console.log("🔧 [SmartSidebar] Initializing from persistence:", {
+        persistedManualState,
+        persistedPinState,
+        localStorage: localStorage.getItem("sidebar_state"),
+        pinStorage: localStorage.getItem("sidebar_pinned"),
+      });
+
       setManualState(persistedManualState);
       setPinState(persistedPinState);
       setIsLoading(false);

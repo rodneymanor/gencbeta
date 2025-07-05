@@ -33,8 +33,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   // Sync smart sidebar state with the main sidebar context
   useEffect(() => {
-    setOpen(smartSidebar.isOpen);
-  }, [smartSidebar.isOpen, setOpen]);
+    console.log("🔧 [Sidebar] State sync:", {
+      isLoading: smartSidebar.isLoading,
+      isOpen: smartSidebar.isOpen,
+      visualState: smartSidebar.visualState,
+      isPinned: smartSidebar.isPinned,
+    });
+
+    // Only sync after smart sidebar has finished loading to prevent race conditions
+    if (!smartSidebar.isLoading) {
+      setOpen(smartSidebar.isOpen);
+    }
+  }, [smartSidebar.isOpen, smartSidebar.isLoading, setOpen]);
 
   // Filter sidebar items based on user role
   const filteredSidebarItems = dynamicSidebarItems
