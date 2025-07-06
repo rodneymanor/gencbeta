@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 
 import LinkNext from "next/link";
 
@@ -70,7 +70,8 @@ interface PageProps {
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export default function CollectionDetailPage({ params }: PageProps) {
+export default function CollectionDetailPage(props: PageProps) {
+  const params = use(props.params);
   const [collectionId, setCollectionId] = useState<string>("");
   const [items] = useState(mockItems);
   const setTopBarConfig = useTopBarConfig();

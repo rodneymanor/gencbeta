@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AIVoicesService } from "@/lib/ai-voices-service";
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { voiceId: string } }
-) {
+export async function DELETE(request: NextRequest, props: { params: Promise<{ voiceId: string }> }) {
+  const params = await props.params;
   try {
     // TODO: Get user ID from auth context
     const userId = "temp-user-id"; // Temporary until auth is implemented

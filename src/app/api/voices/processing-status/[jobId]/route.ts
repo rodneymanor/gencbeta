@@ -25,10 +25,8 @@ interface ProcessingStatusResponse {
   metadata?: any;
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { jobId: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ jobId: string }> }) {
+  const params = await props.params;
   try {
     // Authenticate the request
     const authResult = await authenticateApiKey(request);
@@ -130,10 +128,8 @@ export async function GET(
 }
 
 // Optional: Add a DELETE endpoint to cancel processing jobs
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { jobId: string } }
-) {
+export async function DELETE(request: NextRequest, props: { params: Promise<{ jobId: string }> }) {
+  const params = await props.params;
   try {
     // Authenticate the request
     const authResult = await authenticateApiKey(request);

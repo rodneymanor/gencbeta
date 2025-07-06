@@ -5,7 +5,7 @@ import { fetchVideos } from "@/lib/collections-data";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
+  const searchParams = new URL(request.url).searchParams;
   const collectionId = searchParams.get("collectionId");
 
   try {

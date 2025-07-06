@@ -19,10 +19,8 @@ function calculateDuration(content: string): string {
 }
 
 // GET: Fetch a specific script
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { scriptId: string } },
-): Promise<NextResponse<ScriptResponse>> {
+export async function GET(request: NextRequest, props: { params: Promise<{ scriptId: string }> }): Promise<NextResponse<ScriptResponse>> {
+  const params = await props.params;
   try {
     console.log("📖 [Script API] GET request for script:", params.scriptId);
 
@@ -111,10 +109,8 @@ function prepareUpdateData(body: UpdateScriptRequest): Partial<Script> {
 }
 
 // PUT: Update a script
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { scriptId: string } },
-): Promise<NextResponse<ScriptResponse>> {
+export async function PUT(request: NextRequest, props: { params: Promise<{ scriptId: string }> }): Promise<NextResponse<ScriptResponse>> {
+  const params = await props.params;
   try {
     console.log("✏️ [Script API] PUT request for script:", params.scriptId);
 
@@ -185,10 +181,8 @@ export async function PUT(
 }
 
 // DELETE: Delete a script
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { scriptId: string } },
-): Promise<NextResponse<{ success: boolean; error?: string }>> {
+export async function DELETE(request: NextRequest, props: { params: Promise<{ scriptId: string }> }): Promise<NextResponse<{ success: boolean; error?: string }>> {
+  const params = await props.params;
   try {
     console.log("🗑️ [Script API] DELETE request for script:", params.scriptId);
 
