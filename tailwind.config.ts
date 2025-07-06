@@ -118,6 +118,9 @@ const config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      ringWidth: {
+        12: '12px',
+      },
       boxShadow: {
         subtle: "0 3px 6px rgba(16,24,40,0.06)",
       },

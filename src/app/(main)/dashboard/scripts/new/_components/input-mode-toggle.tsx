@@ -193,7 +193,7 @@ export function InputModeToggle({
       {/* Input Content */}
       {inputMode === "text" ? (
         <div className="space-y-4">
-          <div className="border-border bg-card relative rounded-2xl border shadow-sm transition-all duration-75 focus-within:shadow-[0_0_0_1px_hsl(var(--primary))]">
+          <div className="border-border bg-card focus-within:ring-primary focus-within:border-primary relative rounded-2xl border shadow-sm transition-all duration-75 focus-within:ring-12 focus-within:ring-offset-0">
             <Textarea
               placeholder="My script idea is about productivity tips for remote workers..."
               value={textValue}
@@ -219,7 +219,7 @@ export function InputModeToggle({
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="border-border bg-card relative rounded-2xl border shadow-sm transition-all duration-75 focus-within:shadow-[0_0_0_1px_hsl(var(--primary))]">
+          <div className="border-border bg-card focus-within:ring-primary focus-within:border-primary relative rounded-2xl border shadow-sm transition-all duration-75 focus-within:ring-12 focus-within:ring-offset-0">
             <Input
               type="url"
               placeholder="https://www.tiktok.com/@user/video/123456789..."
