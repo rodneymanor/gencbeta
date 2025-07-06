@@ -16,6 +16,7 @@ export function TopBar() {
 
   const height = config.height || 48;
   const isCollectionsTopbar = config.className?.includes('collections-topbar');
+  const isTwoColumnLayout = config.className?.includes('collections-topbar-two-column');
 
   return (
     <header
@@ -27,7 +28,8 @@ export function TopBar() {
     >
       <div className={cn(
         "flex w-full items-center justify-between px-4 lg:px-6",
-        isCollectionsTopbar && "mx-auto max-w-4xl"
+        isCollectionsTopbar && !isTwoColumnLayout && "mx-auto max-w-4xl",
+        isTwoColumnLayout && "mx-auto max-w-6xl"
       )}>
         {/* Left Section */}
         <div className="flex items-center gap-2">

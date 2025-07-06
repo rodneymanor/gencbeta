@@ -25,6 +25,7 @@ import {
   createVideoSelectionHandlers,
 } from "./_components/collections-helpers";
 import { CollectionsTopbarActions } from "./_components/collections-topbar-actions";
+import CollectionSidebar from "./_components/collection-sidebar";
 import { ManageModeHeader } from "./_components/manage-mode-header";
 import { VideoGrid } from "./_components/video-grid";
 
@@ -432,7 +433,7 @@ function CollectionsPageContent() {
           title: collection.title,
           titleIcon: FolderOpen,
           height: 53,
-          className: "collections-topbar",
+          className: "collections-topbar-two-column",
           actions: topbarActions
         });
       }
@@ -441,7 +442,7 @@ function CollectionsPageContent() {
         title: "Collections",
         titleIcon: FolderOpen,
         height: 53,
-        className: "collections-topbar",
+        className: "collections-topbar-two-column",
         actions: topbarActions
       });
     }
@@ -451,9 +452,21 @@ function CollectionsPageContent() {
   if (isLoading) {
     return (
       <div className="@container/main">
-        <div className="mx-auto max-w-4xl space-y-8 p-4 md:space-y-10 md:p-6">
-          <PageHeaderLoading />
-          <VideoCollectionLoading count={12} />
+        <div className="flex gap-6 max-w-6xl mx-auto p-4 md:p-6">
+          <div className="flex-1 min-w-0 space-y-8 md:space-y-10">
+            <PageHeaderLoading />
+            <VideoCollectionLoading count={12} />
+          </div>
+          <div className="hidden md:block w-[313px] flex-shrink-0">
+            <div className="animate-pulse">
+              <div className="h-6 bg-muted rounded mb-4"></div>
+              <div className="space-y-3">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="h-8 bg-muted/50 rounded"></div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -461,40 +474,43 @@ function CollectionsPageContent() {
 
   return (
     <div className="@container/main">
-      {/* Single centered column layout */}
-      <div className="mx-auto max-w-4xl space-y-8 md:space-y-10">
-        {/* Header Section - Simplified animations */}
-        <section className="space-y-4">
-          <div className="space-y-2">
-            <h1 className="text-foreground text-3xl font-bold tracking-tight">{pageTitle}</h1>
-            <p className="text-muted-foreground text-lg">{pageDescription}</p>
-          </div>
-        </section>
+      {/* Two-column layout: main content + sidebar */}
+      <div className="flex gap-6 max-w-6xl mx-auto">
+        {/* Main content column */}
+        <div className="flex-1 min-w-0 space-y-8 md:space-y-10">
+          {/* Header Section */}
+          <section className="space-y-4">
+            <div className="space-y-2">
+              <h1 className="text-foreground text-3xl font-bold tracking-tight">{pageTitle}</h1>
+              <p className="text-muted-foreground text-lg">{pageDescription}</p>
+            </div>
+          </section>
 
-        {/* Collection Filter Section */}
-        <section className="space-y-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <CollectionBadge
-              isActive={!selectedCollectionId}
-              onClick={() => handleCollectionChange(null)}
-              videoCount={videos.length}
-              isTransitioning={isTransitioning && !selectedCollectionId}
-              onCollectionDeleted={handleCollectionDeleted}
-            />
-            <AnimatePresence mode="popLayout">
-              {collections.map((collection) => (
-                <CollectionBadge
-                  key={collection.id}
-                  collection={collection}
-                  isActive={selectedCollectionId === collection.id}
-                  onClick={() => handleCollectionChange(collection.id!)}
-                  videoCount={collection.videoCount || 0}
-                  isTransitioning={isTransitioning && selectedCollectionId === collection.id}
-                  onCollectionDeleted={handleCollectionDeleted}
-                />
-              ))}
-            </AnimatePresence>
-          </div>
+          {/* Mobile collection badges - visible only on mobile */}
+          <section className="md:hidden space-y-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <CollectionBadge
+                isActive={!selectedCollectionId}
+                onClick={() => handleCollectionChange(null)}
+                videoCount={videos.length}
+                isTransitioning={isTransitioning && !selectedCollectionId}
+                onCollectionDeleted={handleCollectionDeleted}
+              />
+              <AnimatePresence mode="popLayout">
+                {collections.map((collection) => (
+                  <CollectionBadge
+                    key={collection.id}
+                    collection={collection}
+                    isActive={selectedCollectionId === collection.id}
+                    onClick={() => handleCollectionChange(collection.id!)}
+                    videoCount={collection.videoCount || 0}
+                    isTransitioning={isTransitioning && selectedCollectionId === collection.id}
+                    onCollectionDeleted={handleCollectionDeleted}
+                  />
+                ))}
+              </AnimatePresence>
+            </div>
+          </section>
 
           {/* Transition indicator */}
           {isTransitioning && (
@@ -505,22 +521,34 @@ function CollectionsPageContent() {
               </div>
             </div>
           )}
-        </section>
 
-        {/* Videos Content Section */}
-        <VideoGrid
-          videos={videos}
-          collections={collections}
-          selectedCollectionId={selectedCollectionId}
-          loadingVideos={isTransitioning}
-          isPending={isPending}
-          manageMode={manageMode}
-          selectedVideos={selectedVideos}
-          deletingVideos={deletingVideos}
-          onToggleVideoSelection={toggleVideoSelection}
-          onDeleteVideo={handleDeleteVideo}
-          onVideoAdded={handleVideoAdded}
-        />
+          {/* Videos Content Section */}
+          <VideoGrid
+            videos={videos}
+            collections={collections}
+            selectedCollectionId={selectedCollectionId}
+            loadingVideos={isTransitioning}
+            isPending={isPending}
+            manageMode={manageMode}
+            selectedVideos={selectedVideos}
+            deletingVideos={deletingVideos}
+            onToggleVideoSelection={toggleVideoSelection}
+            onDeleteVideo={handleDeleteVideo}
+            onVideoAdded={handleVideoAdded}
+          />
+        </div>
+
+        {/* Right sidebar - hidden on mobile */}
+        <div className="hidden md:block w-[313px] flex-shrink-0">
+          <div className="sticky top-4">
+            <CollectionSidebar
+              collections={collections}
+              selectedCollectionId={selectedCollectionId}
+              onSelectionChange={handleCollectionChange}
+              videoCount={videos.length}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
