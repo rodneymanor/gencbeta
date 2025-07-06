@@ -282,6 +282,11 @@
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 4;
   }
+
+  /* Set all bold font-weight to 600 */
+  b, strong, .font-bold, .font-semibold {
+    font-weight: 600 !important;
+  }
 }
 
 /* Negative Keywords Highlighting */
