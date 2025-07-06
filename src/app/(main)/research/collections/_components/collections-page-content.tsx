@@ -119,13 +119,27 @@ export default function CollectionsPageContent({
     [selectedCollectionId, collections],
   );
 
-  // Video selection handlers
-  const selectionActions = useMemo(
-    () => createVideoSelectionHandlers(setSelectedVideos, { current: videosWithState }),
-    [videosWithState]
-  );
+  // Stable video selection handlers - don't depend on videosWithState
+  const toggleVideoSelection = useCallback((videoId: string) => {
+    setSelectedVideos((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(videoId)) {
+        newSet.delete(videoId);
+      } else {
+        newSet.add(videoId);
+      }
+      return newSet;
+    });
+  }, []);
 
-  const { toggleVideoSelection, selectAllVideos, clearSelection } = selectionActions;
+  const selectAllVideos = useCallback(() => {
+    const allVideoIds = videosWithState.map((v) => v.id!);
+    setSelectedVideos(new Set(allVideoIds));
+  }, [videosWithState]);
+
+  const clearSelection = useCallback(() => {
+    setSelectedVideos(new Set());
+  }, []);
 
   // Collection change handler with debounced navigation
   const handleCollectionChange = useCallback(
@@ -226,7 +240,10 @@ export default function CollectionsPageContent({
     setSelectedVideos(new Set());
   }, []);
 
-  // Update top bar configuration
+  // Track selected videos count for stable dependency
+  const selectedVideosCount = selectedVideos.size;
+
+  // Update top bar configuration - use stable dependencies
   useEffect(() => {
     const topbarActions = (
       <CollectionsTopbarActions
@@ -255,8 +272,8 @@ export default function CollectionsPageContent({
     collections,
     setTopBarConfig,
     manageMode,
-    selectedVideos,
-    userProfile,
+    selectedVideosCount, // Use count instead of the Set object
+    userProfile?.role, // Use specific property instead of entire object
     handleVideoAdded,
     handleExitManageMode,
     handleBulkDelete,
@@ -319,11 +336,7 @@ export default function CollectionsPageContent({
 
             <VirtualizedVideoGrid
               videos={videosWithState}
-              collections={collections}
               selectedCollectionId={selectedCollectionId}
-              manageMode={manageMode}
-              selectedVideos={selectedVideos}
-              deletingVideos={deletingVideos}
               onToggleVideoSelection={toggleVideoSelection}
               onDeleteVideo={handleDeleteVideo}
               onVideoAdded={handleVideoAdded}

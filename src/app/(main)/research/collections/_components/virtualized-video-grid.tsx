@@ -3,17 +3,11 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useRef, useMemo } from "react";
 
-import type { Collection } from "@/lib/collections";
-
 import type { VideoWithPlayer } from "./collections-helpers";
 
 interface VirtualizedVideoGridProps {
   videos: VideoWithPlayer[];
-  collections: Collection[];
   selectedCollectionId: string | null;
-  manageMode: boolean;
-  selectedVideos: Set<string>;
-  deletingVideos: Set<string>;
   onToggleVideoSelection: (videoId: string) => void;
   onDeleteVideo: (videoId: string) => void;
   onVideoAdded: () => void;
