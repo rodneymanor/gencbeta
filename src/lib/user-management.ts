@@ -128,26 +128,38 @@ export class UserManagementService {
    * Get user profile by UID
    */
   static async getUserProfile(uid: string): Promise<UserProfile | null> {
+    console.log("🔍 [USER_PROFILE] getUserProfile called with uid:", uid);
+    console.time("getUserProfile");
+    
     try {
+      console.log("🔍 [USER_PROFILE] Creating query for collection:", this.USERS_PATH);
       const q = query(collection(db, this.USERS_PATH), where("uid", "==", uid), where("isActive", "==", true));
 
+      console.log("🔍 [USER_PROFILE] Executing query...");
       const querySnapshot = await getDocs(q);
+      console.log("🔍 [USER_PROFILE] Query snapshot size:", querySnapshot.size);
 
       if (querySnapshot.empty) {
+        console.log("❌ [USER_PROFILE] No user profile found for uid:", uid);
         return null;
       }
 
       const doc = querySnapshot.docs[0];
-      return {
+      const profile = {
         id: doc.id,
         ...doc.data(),
         createdAt: formatTimestamp(doc.data().createdAt),
         updatedAt: formatTimestamp(doc.data().updatedAt),
         lastLoginAt: doc.data().lastLoginAt ? formatTimestamp(doc.data().lastLoginAt) : undefined,
       } as UserProfile;
+      
+      console.log("✅ [USER_PROFILE] Found user profile:", { id: profile.id, role: profile.role, email: profile.email });
+      return profile;
     } catch (error) {
-      console.error("Error fetching user profile:", error);
+      console.error("❌ [USER_PROFILE] Error fetching user profile:", error);
       throw new Error("Failed to fetch user profile");
+    } finally {
+      console.timeEnd("getUserProfile");
     }
   }
 

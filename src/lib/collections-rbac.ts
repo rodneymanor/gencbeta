@@ -13,16 +13,24 @@ export class CollectionsRBACService {
    * Get all collections for a user (role-based)
    */
   static async getUserCollections(userId: string): Promise<Collection[]> {
+    console.log("🔍 [RBAC] getUserCollections called with userId:", userId);
+    console.time("getUserCollections");
+    
     try {
       // Check if user is super admin first
       const userProfile = await UserManagementService.getUserProfile(userId);
+      console.log("🔍 [RBAC] User profile:", userProfile ? `role: ${userProfile.role}` : "null");
+      
       if (userProfile?.role === "super_admin") {
         console.log("🔍 [RBAC] Super admin loading all collections");
 
         // For super admin, get all collections
         const q = query(collection(db, this.COLLECTIONS_PATH), orderBy("updatedAt", "desc"));
+        console.log("🔍 [RBAC] Executing super admin query...");
 
         const querySnapshot = await getDocs(q);
+        console.log("🔍 [RBAC] Query snapshot size:", querySnapshot.size);
+        
         const collections = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
@@ -34,9 +42,12 @@ export class CollectionsRBACService {
         return collections;
       }
 
+      console.log("🔍 [RBAC] Regular user, getting accessible coaches...");
       const accessibleCoaches = await UserManagementService.getUserAccessibleCoaches(userId);
+      console.log("🔍 [RBAC] Accessible coaches:", accessibleCoaches);
 
       if (accessibleCoaches.length === 0) {
+        console.log("❌ [RBAC] No accessible coaches found");
         return [];
       }
 
@@ -45,17 +56,25 @@ export class CollectionsRBACService {
         where("userId", "in", accessibleCoaches),
         orderBy("updatedAt", "desc"),
       );
+      console.log("🔍 [RBAC] Executing regular user query...");
 
       const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map((doc) => ({
+      console.log("🔍 [RBAC] Query snapshot size:", querySnapshot.size);
+      
+      const collections = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
         createdAt: formatTimestamp(doc.data().createdAt),
         updatedAt: formatTimestamp(doc.data().updatedAt),
       })) as Collection[];
+
+      console.log("✅ [RBAC] Regular user loaded collections:", collections.length);
+      return collections;
     } catch (error) {
-      console.error("Error fetching collections:", error);
+      console.error("❌ [RBAC] Error fetching collections:", error);
       throw new Error("Failed to fetch collections");
+    } finally {
+      console.timeEnd("getUserCollections");
     }
   }
 
