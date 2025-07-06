@@ -10,7 +10,7 @@ import {
   writeBatch,
 } from "firebase/firestore";
 
-import { db } from "./firebase";
+import { adminDb } from "./firebase-admin";
 import { formatTimestamp, getAllCoaches, getCoachCreators, getAllUsers } from "./user-management-helpers";
 
 export type UserRole = "super_admin" | "coach" | "creator";
@@ -81,7 +81,7 @@ export class UserManagementService {
       console.log("🔍 [USER_PROFILE] Profile data prepared:", profileData);
       console.log("🔍 [USER_PROFILE] Using collection path:", this.USERS_PATH);
 
-      const docRef = await addDoc(collection(db, this.USERS_PATH), {
+      const docRef = await addDoc(collection(adminDb, this.USERS_PATH), {
         ...profileData,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
@@ -100,7 +100,7 @@ export class UserManagementService {
             isActive: true,
           };
 
-          await addDoc(collection(db, this.RELATIONSHIPS_PATH), {
+          await addDoc(collection(adminDb, this.RELATIONSHIPS_PATH), {
             ...relationshipData,
             assignedAt: serverTimestamp(),
           });
@@ -130,10 +130,10 @@ export class UserManagementService {
   static async getUserProfile(uid: string): Promise<UserProfile | null> {
     console.log("🔍 [USER_PROFILE] getUserProfile called with uid:", uid);
     console.time("getUserProfile");
-    
+
     try {
       console.log("🔍 [USER_PROFILE] Creating query for collection:", this.USERS_PATH);
-      const q = query(collection(db, this.USERS_PATH), where("uid", "==", uid), where("isActive", "==", true));
+      const q = query(collection(adminDb, this.USERS_PATH), where("uid", "==", uid), where("isActive", "==", true));
 
       console.log("🔍 [USER_PROFILE] Executing query...");
       const querySnapshot = await getDocs(q);
@@ -152,8 +152,12 @@ export class UserManagementService {
         updatedAt: formatTimestamp(doc.data().updatedAt),
         lastLoginAt: doc.data().lastLoginAt ? formatTimestamp(doc.data().lastLoginAt) : undefined,
       } as UserProfile;
-      
-      console.log("✅ [USER_PROFILE] Found user profile:", { id: profile.id, role: profile.role, email: profile.email });
+
+      console.log("✅ [USER_PROFILE] Found user profile:", {
+        id: profile.id,
+        role: profile.role,
+        email: profile.email,
+      });
       return profile;
     } catch (error) {
       console.error("❌ [USER_PROFILE] Error fetching user profile:", error);
@@ -173,7 +177,7 @@ export class UserManagementService {
         throw new Error("User profile not found");
       }
 
-      const docRef = doc(db, this.USERS_PATH, profile.id!);
+      const docRef = doc(adminDb, this.USERS_PATH, profile.id!);
       await updateDoc(docRef, {
         ...updates,
         updatedAt: serverTimestamp(),
@@ -248,7 +252,7 @@ export class UserManagementService {
         isActive: true,
       };
 
-      await addDoc(collection(db, this.RELATIONSHIPS_PATH), {
+      await addDoc(collection(adminDb, this.RELATIONSHIPS_PATH), {
         ...relationshipData,
         assignedAt: serverTimestamp(),
       });
@@ -273,13 +277,13 @@ export class UserManagementService {
 
       // Deactivate relationship records
       const q = query(
-        collection(db, this.RELATIONSHIPS_PATH),
+        collection(adminDb, this.RELATIONSHIPS_PATH),
         where("creatorId", "==", creatorUid),
         where("isActive", "==", true),
       );
 
       const querySnapshot = await getDocs(q);
-      const batch = writeBatch(db);
+      const batch = writeBatch(adminDb);
 
       querySnapshot.docs.forEach((doc) => {
         batch.update(doc.ref, { isActive: false });

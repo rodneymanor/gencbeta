@@ -2,7 +2,7 @@ import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
 
 import { type Collection, type Video } from "./collections";
 import { formatTimestamp } from "./collections-helpers";
-import { db } from "./firebase";
+import { adminDb } from "./firebase-admin";
 import { UserManagementService } from "./user-management";
 
 export class CollectionsRBACService {
@@ -15,22 +15,22 @@ export class CollectionsRBACService {
   static async getUserCollections(userId: string): Promise<Collection[]> {
     console.log("🔍 [RBAC] getUserCollections called with userId:", userId);
     console.time("getUserCollections");
-    
+
     try {
       // Check if user is super admin first
       const userProfile = await UserManagementService.getUserProfile(userId);
       console.log("🔍 [RBAC] User profile:", userProfile ? `role: ${userProfile.role}` : "null");
-      
+
       if (userProfile?.role === "super_admin") {
         console.log("🔍 [RBAC] Super admin loading all collections");
 
         // For super admin, get all collections
-        const q = query(collection(db, this.COLLECTIONS_PATH), orderBy("updatedAt", "desc"));
+        const q = query(collection(adminDb, this.COLLECTIONS_PATH), orderBy("updatedAt", "desc"));
         console.log("🔍 [RBAC] Executing super admin query...");
 
         const querySnapshot = await getDocs(q);
         console.log("🔍 [RBAC] Query snapshot size:", querySnapshot.size);
-        
+
         const collections = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
@@ -52,7 +52,7 @@ export class CollectionsRBACService {
       }
 
       const q = query(
-        collection(db, this.COLLECTIONS_PATH),
+        collection(adminDb, this.COLLECTIONS_PATH),
         where("userId", "in", accessibleCoaches),
         orderBy("updatedAt", "desc"),
       );
@@ -60,7 +60,7 @@ export class CollectionsRBACService {
 
       const querySnapshot = await getDocs(q);
       console.log("🔍 [RBAC] Query snapshot size:", querySnapshot.size);
-      
+
       const collections = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -106,7 +106,7 @@ export class CollectionsRBACService {
     let q;
     if (!collectionId || collectionId === "all-videos") {
       console.log("🔍 [RBAC] Super admin loading all videos");
-      q = query(collection(db, this.VIDEOS_PATH), orderBy("addedAt", "desc"));
+      q = query(collection(adminDb, this.VIDEOS_PATH), orderBy("addedAt", "desc"));
     } else {
       try {
         q = await this.getSuperAdminCollectionQuery(userId, collectionId);
@@ -142,7 +142,7 @@ export class CollectionsRBACService {
     }
 
     return query(
-      collection(db, this.VIDEOS_PATH),
+      collection(adminDb, this.VIDEOS_PATH),
       where("collectionId", "==", collectionId),
       where("userId", "==", targetCollection.userId),
       orderBy("addedAt", "desc"),
@@ -181,7 +181,7 @@ export class CollectionsRBACService {
   ) {
     if (!collectionId || collectionId === "all-videos") {
       return query(
-        collection(db, this.VIDEOS_PATH),
+        collection(adminDb, this.VIDEOS_PATH),
         where("userId", "in", accessibleCoaches),
         orderBy("addedAt", "desc"),
       );
@@ -195,7 +195,7 @@ export class CollectionsRBACService {
     }
 
     return query(
-      collection(db, this.VIDEOS_PATH),
+      collection(adminDb, this.VIDEOS_PATH),
       where("collectionId", "==", collectionId),
       where("userId", "in", accessibleCoaches),
       orderBy("addedAt", "desc"),
