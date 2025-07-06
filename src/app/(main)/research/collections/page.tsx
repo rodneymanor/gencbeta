@@ -426,26 +426,13 @@ function CollectionsPageContent() {
       />
     );
 
-    if (selectedCollectionId && collections.length > 0) {
-      const collection = collections.find((c) => c.id === selectedCollectionId);
-      if (collection) {
-        setTopBarConfig({ 
-          title: collection.title,
-          titleIcon: FolderOpen,
-          height: 53,
-          className: "collections-topbar-two-column",
-          actions: topbarActions
-        });
-      }
-    } else {
-      setTopBarConfig({ 
-        title: "Collections",
-        titleIcon: FolderOpen,
-        height: 53,
-        className: "collections-topbar-two-column",
-        actions: topbarActions
-      });
-    }
+    setTopBarConfig({ 
+      title: "Collections",
+      titleIcon: FolderOpen,
+      height: 53,
+      className: "collections-topbar-two-column",
+      actions: topbarActions
+    });
   }, [selectedCollectionId, collections, setTopBarConfig, manageMode, selectedVideos, userProfile, handleVideoAdded, handleExitManageMode, handleBulkDelete, clearSelection, selectAllVideos]);
 
   // Show loading only for initial load
