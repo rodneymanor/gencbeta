@@ -15,6 +15,7 @@ export function TopBar() {
   }
 
   const height = config.height || 48;
+  const isCollectionsTopbar = config.className?.includes('collections-topbar');
 
   return (
     <header
@@ -24,7 +25,10 @@ export function TopBar() {
       )}
       style={{ height: `${height}px` }}
     >
-      <div className="flex w-full items-center justify-between px-4 lg:px-6">
+      <div className={cn(
+        "flex w-full items-center justify-between px-4 lg:px-6",
+        isCollectionsTopbar && "mx-auto max-w-4xl"
+      )}>
         {/* Left Section */}
         <div className="flex items-center gap-2">
           {config.showBackButton && config.backHref && (

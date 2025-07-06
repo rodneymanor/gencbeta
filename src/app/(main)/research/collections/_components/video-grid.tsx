@@ -107,23 +107,25 @@ export const VideoGrid = memo<VideoGridProps>(
       );
     }
 
-    // Video grid with enhanced styling
+    // Video grid with 3 columns centered layout
     return (
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-        {videos.map((video) => (
-          <VideoCard
-            key={video.id}
-            video={video}
-            isManageMode={manageMode}
-            isSelected={selectedVideos.has(video.id!)}
-            isDeleting={deletingVideos.has(video.id!)}
-            isReprocessing={reprocessingVideos.has(video.id!)}
-            onToggleSelection={() => onToggleVideoSelection(video.id!)}
-            onDelete={() => onDeleteVideo(video.id!)}
-            onReprocess={handleReprocessVideo}
-            className="border-border/60 hover:border-border/80 shadow-sm transition-all duration-200 hover:shadow-md"
-          />
-        ))}
+      <div className="mx-auto max-w-4xl">
+        <div className="grid grid-cols-3 gap-6">
+          {videos.map((video) => (
+            <VideoCard
+              key={video.id}
+              video={video}
+              isManageMode={manageMode}
+              isSelected={selectedVideos.has(video.id!)}
+              isDeleting={deletingVideos.has(video.id!)}
+              isReprocessing={reprocessingVideos.has(video.id!)}
+              onToggleSelection={() => onToggleVideoSelection(video.id!)}
+              onDelete={() => onDeleteVideo(video.id!)}
+              onReprocess={handleReprocessVideo}
+              className="border-border/60 hover:border-border/80 shadow-sm transition-all duration-200 hover:shadow-md"
+            />
+          ))}
+        </div>
       </div>
     );
   },

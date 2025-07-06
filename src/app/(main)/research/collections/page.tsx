@@ -320,14 +320,16 @@ function CollectionsPageContent() {
         setTopBarConfig({ 
           title: collection.title,
           titleIcon: FolderOpen,
-          height: 53
+          height: 53,
+          className: "collections-topbar"
         });
       }
     } else {
       setTopBarConfig({ 
         title: "Collections",
         titleIcon: FolderOpen,
-        height: 53
+        height: 53,
+        className: "collections-topbar"
       });
     }
   }, [selectedCollectionId, collections, setTopBarConfig]);
@@ -431,7 +433,7 @@ function CollectionsPageContent() {
   if (isLoading) {
     return (
       <div className="@container/main">
-        <div className="mx-auto max-w-7xl space-y-8 p-4 md:space-y-10 md:p-6">
+        <div className="mx-auto max-w-4xl space-y-8 p-4 md:space-y-10 md:p-6">
           <PageHeaderLoading />
           <VideoCollectionLoading count={12} />
         </div>
@@ -441,7 +443,8 @@ function CollectionsPageContent() {
 
   return (
     <div className="@container/main">
-      <div className="mx-auto max-w-7xl space-y-8 md:space-y-10">
+      {/* Single centered column layout */}
+      <div className="mx-auto max-w-4xl space-y-8 md:space-y-10">
         {/* Header Section - Simplified animations */}
         <section className="space-y-4">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
