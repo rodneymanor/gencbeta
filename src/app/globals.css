@@ -60,7 +60,9 @@
   --sidebar-ring: oklch(0.58 0.08 220); /* #2d93ad - Teal blue */
 
   /* Custom background colors */
+  --background-color-100: 0.96 0.01 110; /* Light sage/cream for shadows */
   --background-color-300: 0.90 0.01 115; /* Light sage/cream for active states */
+  --text-color-100: 0.25 0.02 30; /* Dark brown for text shadows */
 
   --font-sans: Poppins, sans-serif;
   --font-serif: Georgia, serif;
@@ -147,7 +149,9 @@
   --sidebar-ring: oklch(0.58 0.08 220); /* #2d93ad - Teal blue */
 
   /* Custom background colors */
+  --background-color-100: 0.28 0.02 28; /* Slightly lighter brown for shadows in dark mode */
   --background-color-300: 0.32 0.02 28; /* Slightly lighter brown for active states in dark mode */
+  --text-color-100: 0.99 0.005 80; /* Light cream for text shadows in dark mode */
 
   --font-sans: Poppins, sans-serif;
   --font-serif: Georgia, serif;
