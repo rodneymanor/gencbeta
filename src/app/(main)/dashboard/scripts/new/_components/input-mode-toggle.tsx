@@ -193,13 +193,13 @@ export function InputModeToggle({
       {/* Input Content */}
       {inputMode === "text" ? (
         <div className="space-y-4">
-          <div className="border-border bg-card focus-within:ring-ring/50 focus-within:border-ring relative rounded-2xl border shadow-sm transition-all duration-75 focus-within:ring-[3px]">
+          <div className="relative">
             <Textarea
               placeholder="My script idea is about productivity tips for remote workers..."
               value={textValue}
               onChange={(e) => onTextChange(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="text-foreground placeholder-muted-foreground caret-primary selection:bg-primary/30 selection:text-foreground scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent max-h-[45vh] min-h-[160px] w-full resize-none border-0 bg-transparent px-4 py-3 pr-16 text-base leading-relaxed outline-none sm:max-h-[25vh] lg:max-h-[40vh]"
+              className="bg-background dark:bg-background text-foreground dark:text-foreground placeholder:text-muted-foreground dark:placeholder:text-muted-foreground border-border/50 dark:border-border/50 ring-border/50 dark:ring-border/50 focus:ring-primary/70 dark:focus:ring-primary/70 caret-primary selection:bg-primary/30 selection:text-foreground scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent block max-h-[45vh] min-h-[160px] w-full resize-none appearance-none rounded-2xl border px-4 py-3 pr-16 text-base leading-6 shadow-[0_1px_8px_2px_hsl(var(--foreground)/0.10),0_36px_16px_36px_hsl(var(--background))] transition-colors transition-shadow duration-150 hover:shadow-[0_2px_12px_3px_hsl(var(--foreground)/0.15),0_40px_20px_40px_hsl(var(--background))] focus:shadow-[0_0_0_4px_hsl(var(--primary)/0.18),0_36px_16px_36px_hsl(var(--background))] focus:ring-2 focus:ring-offset-0 focus-visible:outline-none sm:max-h-[25vh] lg:max-h-[40vh] dark:shadow-[0_4px_12px_rgba(0,0,0,0.12),0_32px_16px_36px_hsl(var(--background))] dark:hover:shadow-[0_6px_16px_rgba(0,0,0,0.16),0_40px_20px_40px_hsl(var(--background))] dark:focus:shadow-[0_0_0_4px_hsl(var(--primary)/0.10),0_32px_16px_36px_hsl(var(--background))]"
               disabled={disabled}
               style={{
                 fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
@@ -219,14 +219,14 @@ export function InputModeToggle({
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="border-border bg-card focus-within:ring-ring/50 focus-within:border-ring relative rounded-2xl border shadow-sm transition-all duration-75 focus-within:ring-[3px]">
+          <div className="relative">
             <Input
               type="url"
               placeholder="https://www.tiktok.com/@user/video/123456789..."
               value={videoUrl}
               onChange={(e) => onVideoUrlChange(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="text-foreground placeholder-muted-foreground caret-primary selection:bg-primary/30 selection:text-foreground h-14 w-full border-0 bg-transparent px-4 py-3 text-base outline-none"
+              className="bg-background dark:bg-background text-foreground dark:text-foreground placeholder:text-muted-foreground dark:placeholder:text-muted-foreground border-border/50 dark:border-border/50 ring-border/50 dark:ring-border/50 focus:ring-primary/70 dark:focus:ring-primary/70 caret-primary selection:bg-primary/30 selection:text-foreground block h-14 w-full appearance-none rounded-2xl border px-4 py-3 pr-12 text-base leading-6 shadow-[0_1px_8px_2px_hsl(var(--foreground)/0.10),0_36px_16px_36px_hsl(var(--background))] transition-colors transition-shadow duration-150 hover:shadow-[0_2px_12px_3px_hsl(var(--foreground)/0.15),0_40px_20px_40px_hsl(var(--background))] focus:shadow-[0_0_0_4px_hsl(var(--primary)/0.18),0_36px_16px_36px_hsl(var(--background))] focus:ring-2 focus:ring-offset-0 focus-visible:outline-none dark:shadow-[0_4px_12px_rgba(0,0,0,0.12),0_32px_16px_36px_hsl(var(--background))] dark:hover:shadow-[0_6px_16px_rgba(0,0,0,0.16),0_40px_20px_40px_hsl(var(--background))] dark:focus:shadow-[0_0_0_4px_hsl(var(--primary)/0.10),0_32px_16px_36px_hsl(var(--background))]"
               disabled={disabled}
               style={{
                 fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
