@@ -44,6 +44,11 @@ interface EnhancedEditorProps {
   onSave?: (text: string) => void;
 }
 
+// CustomTextarea component with unique data attribute
+function CustomTextarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return <textarea data-custom-textarea {...props} />;
+}
+
 export function EnhancedEditor({ initialText = "", onTextChange, onSave }: EnhancedEditorProps) {
   const [text, setText] = useState(initialText);
   const [selectedElement, setSelectedElement] = useState<{
@@ -209,7 +214,7 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
       <div className="main-content flex h-full flex-col">
         {/* Editor */}
         <div className="flex-1 p-6">
-          <Card className="h-full">
+          <Card className="h-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[12px] shadow-sm p-6">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
@@ -229,16 +234,15 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
                 )}
               </CardTitle>
             </CardHeader>
-            <CardContent className="h-full pb-6">
+            <CardContent className="h-full pb-6 bg-white p-6">
               <div className="relative h-full">
-                <Textarea
+                <CustomTextarea
                   value={text}
                   onChange={(e) => handleTextChange(e.target.value)}
                   placeholder="Start writing your script here..."
-                  className="h-full resize-none border-0 bg-transparent p-0 text-base leading-relaxed focus:ring-0 focus:outline-none"
+                  className="h-full resize-none text-base leading-relaxed focus:outline-none w-full border-0"
+                  style={{ border: 'none' }}
                 />
-
-
               </div>
             </CardContent>
           </Card>
@@ -248,15 +252,69 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
       {/* Right Sidebar - Statistics & Analysis */}
       <div className="right-sidebar bg-background/50 border-border/50 overflow-y-auto border-l backdrop-blur-sm">
         <div className="space-y-4 p-4">
+          {/* Readability Analysis (now on top) */}
+          <div
+            className="relative flex flex-col rounded-xl min-w-[225px] p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md"
+          >
+            <h3 className="line-clamp-2 text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-2">
+              <Target className="h-4 w-4" />
+              Readability
+            </h3>
+            {readabilityAnalysis ? (
+              <div className="space-y-3">
+                <div className="text-center">
+                  <div className="text-2xl font-bold">{readabilityAnalysis.overall.score.toFixed(1)}</div>
+                  <div className="text-muted-foreground text-sm">{readabilityAnalysis.overall.level.toUpperCase()}</div>
+                </div>
+                <Separator />
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground text-sm">Avg Words/Sentence</span>
+                    <span className="text-sm font-medium">
+                      {readabilityAnalysis.statistics.averageWordsPerSentence.toFixed(1)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground text-sm">Complex Words</span>
+                    <span className="text-sm font-medium">{readabilityAnalysis.statistics.complexWords}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground text-sm">Passive Voice</span>
+                    <span className="text-sm font-medium">{readabilityAnalysis.statistics.passiveVoiceCount}</span>
+                  </div>
+                </div>
+                {readabilityAnalysis.overall.suggestions.length > 0 && (
+                  <>
+                    <Separator />
+                    <div className="space-y-2">
+                      <h4 className="flex items-center gap-1 text-sm font-medium">
+                        <Lightbulb className="h-3 w-3" />
+                        Suggestions
+                      </h4>
+                      <div className="space-y-1">
+                        {readabilityAnalysis.overall.suggestions.slice(0, 3).map((suggestion, index) => (
+                          <div key={index} className="text-muted-foreground text-xs">
+                            • {suggestion}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="text-muted-foreground text-sm text-center py-8">No readability data available.</div>
+            )}
+          </div>
           {/* Statistics */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <BarChart3 className="h-4 w-4" />
-                Statistics
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
+          <div
+            className="relative flex flex-col rounded-xl min-w-[225px] p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md"
+          >
+            <h3 className="line-clamp-2 text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-2">
+              <BarChart3 className="h-4 w-4" />
+              Statistics
+            </h3>
+            <div className="space-y-3">
               <div className="flex justify-between">
                 <span className="text-muted-foreground text-sm">Words</span>
                 <span className="text-sm font-medium">
@@ -294,65 +352,8 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
                   <Badge variant="outline">{scriptStats.ctas}</Badge>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Readability Analysis */}
-          {readabilityAnalysis && (
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-sm">
-                  <Target className="h-4 w-4" />
-                  Readability
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="text-center">
-                  <div className="text-2xl font-bold">{readabilityAnalysis.overall.score.toFixed(1)}</div>
-                  <div className="text-muted-foreground text-sm">{readabilityAnalysis.overall.level.toUpperCase()}</div>
-                </div>
-
-                <Separator />
-
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground text-sm">Avg Words/Sentence</span>
-                    <span className="text-sm font-medium">
-                      {readabilityAnalysis.statistics.averageWordsPerSentence.toFixed(1)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground text-sm">Complex Words</span>
-                    <span className="text-sm font-medium">{readabilityAnalysis.statistics.complexWords}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground text-sm">Passive Voice</span>
-                    <span className="text-sm font-medium">{readabilityAnalysis.statistics.passiveVoiceCount}</span>
-                  </div>
-                </div>
-
-                {readabilityAnalysis.overall.suggestions.length > 0 && (
-                  <>
-                    <Separator />
-                    <div className="space-y-2">
-                      <h4 className="flex items-center gap-1 text-sm font-medium">
-                        <Lightbulb className="h-3 w-3" />
-                        Suggestions
-                      </h4>
-                      <div className="space-y-1">
-                        {readabilityAnalysis.overall.suggestions.slice(0, 3).map((suggestion, index) => (
-                          <div key={index} className="text-muted-foreground text-xs">
-                            • {suggestion}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
+            </div>
+          </div>
         </div>
       </div>
 

@@ -91,12 +91,11 @@ export function ContextualActionMenu({ element, position, onAction, onClose }: C
     <div className="pointer-events-none fixed inset-0 z-50" style={{ pointerEvents: "none" }}>
       <Card
         ref={menuRef}
-        className="pointer-events-auto absolute w-80 shadow-lg"
+        className="pointer-events-auto absolute w-80 border-2 shadow-lg"
         style={{
           left: adjustedPosition.x,
           top: adjustedPosition.y,
           zIndex: 1000,
-          border: "1px solid var(--border)",
         }}
       >
         <CardHeader className="pb-3">

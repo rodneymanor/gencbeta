@@ -14,12 +14,15 @@ export function TopBar() {
     return null;
   }
 
+  const height = config.height || 48;
+
   return (
     <header
       className={cn(
-        "flex h-12 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 border-b border-border/50 bg-background/95 backdrop-blur-sm rounded-t-xl",
+        "flex shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 border-b border-border/50 bg-background/95 backdrop-blur-sm rounded-t-xl",
         config.className
       )}
+      style={{ height: `${height}px` }}
     >
       <div className="flex w-full items-center justify-between px-4 lg:px-6">
         {/* Left Section */}
@@ -36,14 +39,24 @@ export function TopBar() {
           )}
           
           {config.titlePosition === 'left' && config.showTitle && config.title && (
-            <h1 className="text-lg font-semibold truncate">{config.title}</h1>
+            <div className="flex items-center gap-2">
+              {config.titleIcon && (
+                <config.titleIcon className="h-5 w-5" />
+              )}
+              <h1 className="text-lg font-semibold truncate">{config.title}</h1>
+            </div>
           )}
         </div>
 
         {/* Center Section */}
         <div className="flex items-center gap-2">
           {config.titlePosition === 'center' && config.showTitle && config.title && (
-            <h1 className="text-lg font-semibold truncate">{config.title}</h1>
+            <div className="flex items-center gap-2">
+              {config.titleIcon && (
+                <config.titleIcon className="h-5 w-5" />
+              )}
+              <h1 className="text-lg font-semibold truncate">{config.title}</h1>
+            </div>
           )}
           
           {config.customContent && (

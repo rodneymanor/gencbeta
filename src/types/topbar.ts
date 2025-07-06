@@ -4,11 +4,13 @@ export interface TopBarConfig {
   showTitle: boolean;
   titlePosition: TopBarTitlePosition;
   title?: string;
+  titleIcon?: React.ComponentType<{ className?: string }>;
   customContent?: React.ReactNode;
   showBackButton?: boolean;
   backHref?: string;
   actions?: React.ReactNode;
   className?: string;
+  height?: number; // Height in pixels
 }
 
 export interface TopBarContextValue {
@@ -22,4 +24,5 @@ export const defaultTopBarConfig: TopBarConfig = {
   titlePosition: "left",
   showBackButton: false,
   className: "",
+  height: 48, // Default height
 };

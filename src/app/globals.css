@@ -412,10 +412,19 @@
 }
 
 /* Hide Next.js Dev Tools badge */
+
+
+[data-next-badge] {
+  display: none !important;
+}
+
 [data-nextjs-dev-tools-button] {
   display: none !important;
 }
 
-[data-next-badge] {
-  display: none !important;
+/* Remove focus ring for custom script editor textarea */
+[data-custom-textarea]:focus-visible {
+  box-shadow: none !important;
+  outline: none !important;
+  border-color: inherit !important;
 }

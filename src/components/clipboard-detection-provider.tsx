@@ -3,11 +3,10 @@
 import { useState, useRef } from "react";
 
 import { ClipboardDetectionDialog } from "@/components/clipboard-detection-dialog";
-import { useAppState } from "@/contexts/app-state-context";
 import { useAuth } from "@/contexts/auth-context";
 import { useCollectionsSidebar } from "@/hooks/use-collections-sidebar";
 import { useClipboardDetection, isTikTokOrInstagramUrl, type ClipboardDetectionResult } from "@/lib/clipboard-detector";
-import { sidebarItems } from "@/navigation/sidebar/sidebar-items";
+import { sidebarGroups } from "@/navigation/sidebar/sidebar-items";
 
 interface ClipboardDetectionProviderProps {
   children: React.ReactNode;
@@ -20,8 +19,7 @@ export function ClipboardDetectionProvider({ children }: ClipboardDetectionProvi
   const hasInitializedRef = useRef(false);
 
   const { user } = useAuth();
-  const { busyState } = useAppState();
-  const { collections, refreshCollections } = useCollectionsSidebar(sidebarItems);
+  const { collections, refreshCollections } = useCollectionsSidebar(sidebarGroups);
 
   // Check clipboard once on page load when user is authenticated
   useClipboardDetection(

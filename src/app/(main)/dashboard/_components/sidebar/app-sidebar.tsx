@@ -17,7 +17,7 @@ import {
 import { UsageTracker } from "@/components/ui/usage-tracker";
 import { useAuth } from "@/contexts/auth-context";
 import { useCollectionsSidebar } from "@/hooks/use-collections-sidebar";
-import { sidebarItems } from "@/navigation/sidebar/sidebar-items";
+import { sidebarGroups } from "@/navigation/sidebar/sidebar-items";
 
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
@@ -25,7 +25,7 @@ import { SidebarPinControl } from "./sidebar-pin-control";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { userProfile } = useAuth();
-  const { sidebarItems: dynamicSidebarItems, refreshCollections } = useCollectionsSidebar(sidebarItems);
+  const { sidebarItems: dynamicSidebarItems, refreshCollections } = useCollectionsSidebar(sidebarGroups);
   const { setOpen } = useSidebar();
 
   // Use smart sidebar for proper manual/hover state management

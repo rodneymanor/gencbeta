@@ -152,7 +152,7 @@ export function NavUser() {
   };
 
   return (
-    <div className="w-full rounded-lg border bg-white p-3">
+    <div className="">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <div className="cursor-pointer">

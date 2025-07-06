@@ -7,6 +7,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 
 import { motion, AnimatePresence } from "framer-motion";
 
+import { FolderOpen } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
 import { VideoCollectionLoading, PageHeaderLoading } from "@/components/ui/loading-animations";
 import { useAuth } from "@/contexts/auth-context";
@@ -315,10 +317,18 @@ function CollectionsPageContent() {
     if (selectedCollectionId && collections.length > 0) {
       const collection = collections.find((c) => c.id === selectedCollectionId);
       if (collection) {
-        setTopBarConfig({ title: collection.title });
+        setTopBarConfig({ 
+          title: collection.title,
+          titleIcon: FolderOpen,
+          height: 53
+        });
       }
     } else {
-      setTopBarConfig({ title: "All Videos" });
+      setTopBarConfig({ 
+        title: "Collections",
+        titleIcon: FolderOpen,
+        height: 53
+      });
     }
   }, [selectedCollectionId, collections, setTopBarConfig]);
 
