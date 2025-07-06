@@ -393,3 +393,25 @@
 .hide-scrollbar::-webkit-scrollbar {   /* Chrome, Safari, Opera */
   display: none;
 }
+
+/* Hemingway Editor App Shell Layout */
+.app-shell {
+  display: grid;
+  grid-template-columns: 72px 1fr 320px;
+  gap: 24px;         /* matches their generous gutters */
+  height: 100vh;
+}
+
+.left-sidebar {
+  width: 72px;
+  min-width: 72px;
+}
+
+.right-sidebar {
+  width: 320px;
+  min-width: 320px;
+}
+
+.main-content {
+  min-width: 0; /* Allows flex item to shrink below content size */
+}

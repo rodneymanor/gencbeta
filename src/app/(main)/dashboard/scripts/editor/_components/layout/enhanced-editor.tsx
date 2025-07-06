@@ -1,35 +1,38 @@
 "use client";
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { 
-  FileText, 
-  BarChart3, 
-  Lightbulb, 
-  Target, 
+import React, { useState, useCallback, useMemo, useEffect } from "react";
+
+import {
+  FileText,
+  BarChart3,
+  Lightbulb,
+  Target,
   Settings,
   Sliders,
   Palette,
   Save,
   Download,
-  Upload
-} from 'lucide-react';
+  Upload,
+} from "lucide-react";
 
-import { ContextualMenu } from './contextual-menu';
-import { HighlightOverlay } from './highlight-overlay';
-import { SettingsPanel, EditorSettings, defaultSettings } from './settings-panel';
-import { AdvancedHighlightControls, AdvancedHighlightSettings, defaultAdvancedSettings } from './advanced-highlight-controls';
-import { UIPreferencesPanel, UIPreferences, defaultUIPreferences } from './ui-preferences-panel';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  EnhancedElementDetection,
+  ElementDetectionSettings,
+  defaultElementDetectionSettings,
+} from "@/lib/enhanced-element-detection";
+import {
+  EnhancedReadabilityService,
+  ReadabilitySettings,
+  defaultReadabilitySettings,
+} from "@/lib/enhanced-readability-service";
 
-import { analyzeReadability, ReadabilityAnalysis } from '@/lib/readability-highlighting';
-import { analyzeElement, enhanceElement, generateAlternatives } from '@/lib/script-element-actions';
-import { EnhancedReadabilityService, ReadabilitySettings, defaultReadabilitySettings } from '@/lib/enhanced-readability-service';
-import { EnhancedElementDetection, ElementDetectionSettings, defaultElementDetectionSettings } from '@/lib/enhanced-element-detection';
-import { 
+import { analyzeElement, enhanceElement, generateAlternatives } from "@/lib/script-element-actions";
+import {
   HemingwayEditorSettings,
   saveEditorSettings,
   loadEditorSettings,
@@ -37,8 +40,18 @@ import {
   importEditorSettings,
   resetEditorSettings,
   createSettingsBackup,
-  getSettingsStorageInfo
-} from '@/lib/settings-manager';
+  getSettingsStorageInfo,
+} from "@/lib/settings-manager";
+
+import {
+  AdvancedHighlightControls,
+  AdvancedHighlightSettings,
+  defaultAdvancedSettings,
+} from "./advanced-highlight-controls";
+import { ContextualMenu } from "./contextual-menu";
+import { HighlightOverlay } from "./highlight-overlay";
+import { SettingsPanel, EditorSettings, defaultSettings } from "./settings-panel";
+import { UIPreferencesPanel, UIPreferences, defaultUIPreferences } from "./ui-preferences-panel";
 
 interface EnhancedEditorProps {
   initialText?: string;
@@ -46,7 +59,7 @@ interface EnhancedEditorProps {
   onSave?: (text: string) => void;
 }
 
-export function EnhancedEditor({ initialText = '', onTextChange, onSave }: EnhancedEditorProps) {
+export function EnhancedEditor({ initialText = "", onTextChange, onSave }: EnhancedEditorProps) {
   const [text, setText] = useState(initialText);
   const [selectedElement, setSelectedElement] = useState<{
     type: string;
@@ -55,14 +68,16 @@ export function EnhancedEditor({ initialText = '', onTextChange, onSave }: Enhan
     endIndex: number;
   } | null>(null);
   const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number } | null>(null);
-  
+
   // Settings state
   const [editorSettings, setEditorSettings] = useState<EditorSettings>(defaultSettings);
   const [highlightSettings, setHighlightSettings] = useState<AdvancedHighlightSettings>(defaultAdvancedSettings);
   const [uiPreferences, setUIPreferences] = useState<UIPreferences>(defaultUIPreferences);
   const [readabilitySettings, setReadabilitySettings] = useState<ReadabilitySettings>(defaultReadabilitySettings);
-  const [elementDetectionSettings, setElementDetectionSettings] = useState<ElementDetectionSettings>(defaultElementDetectionSettings);
-  
+  const [elementDetectionSettings, setElementDetectionSettings] = useState<ElementDetectionSettings>(
+    defaultElementDetectionSettings,
+  );
+
   // Panel visibility state
   const [settingsPanelOpen, setSettingsPanelOpen] = useState(false);
   const [advancedControlsOpen, setAdvancedControlsOpen] = useState(false);
@@ -102,11 +117,11 @@ export function EnhancedEditor({ initialText = '', onTextChange, onSave }: Enhan
 
       return () => clearInterval(interval);
     }
-  }, [editorSettings.advanced.autoSave, editorSettings.advanced.saveInterval]);
+  }, [editorSettings.advanced.autoSave, editorSettings.advanced.saveInterval, saveCurrentSettings]);
 
   const saveCurrentSettings = useCallback(() => {
     const settings: HemingwayEditorSettings = {
-      version: '1.0.0',
+      version: "1.0.0",
       lastModified: new Date().toISOString(),
       editor: editorSettings,
       highlights: highlightSettings,
@@ -114,9 +129,9 @@ export function EnhancedEditor({ initialText = '', onTextChange, onSave }: Enhan
       readability: readabilitySettings,
       elementDetection: elementDetectionSettings,
       metadata: {
-        exportedBy: 'Hemingway Script Editor',
+        exportedBy: "Hemingway Script Editor",
         exportedAt: new Date().toISOString(),
-        deviceInfo: 'Browser',
+        deviceInfo: "Browser",
         browserInfo: navigator.userAgent.substring(0, 50),
       },
     };
@@ -126,7 +141,7 @@ export function EnhancedEditor({ initialText = '', onTextChange, onSave }: Enhan
 
   const handleExportSettings = useCallback(() => {
     const settings: HemingwayEditorSettings = {
-      version: '1.0.0',
+      version: "1.0.0",
       lastModified: new Date().toISOString(),
       editor: editorSettings,
       highlights: highlightSettings,
@@ -134,9 +149,9 @@ export function EnhancedEditor({ initialText = '', onTextChange, onSave }: Enhan
       readability: readabilitySettings,
       elementDetection: elementDetectionSettings,
       metadata: {
-        exportedBy: 'Hemingway Script Editor',
+        exportedBy: "Hemingway Script Editor",
         exportedAt: new Date().toISOString(),
-        deviceInfo: 'Browser',
+        deviceInfo: "Browser",
         browserInfo: navigator.userAgent.substring(0, 50),
       },
     };
@@ -156,7 +171,7 @@ export function EnhancedEditor({ initialText = '', onTextChange, onSave }: Enhan
       setReadabilitySettings(importedSettings.readability);
       setElementDetectionSettings(importedSettings.elementDetection);
     } catch (error) {
-      console.error('Failed to import settings:', error);
+      console.error("Failed to import settings:", error);
     }
   }, []);
 
@@ -188,18 +203,18 @@ export function EnhancedEditor({ initialText = '', onTextChange, onSave }: Enhan
       ctas: 0,
     };
 
-    detectedElements.forEach(element => {
+    detectedElements.forEach((element) => {
       switch (element.type) {
-        case 'hook':
+        case "hook":
           stats.hooks++;
           break;
-        case 'bridge':
+        case "bridge":
           stats.bridges++;
           break;
-        case 'goldenNugget':
+        case "goldenNugget":
           stats.goldenNuggets++;
           break;
-        case 'cta':
+        case "cta":
           stats.ctas++;
           break;
       }
@@ -208,10 +223,13 @@ export function EnhancedEditor({ initialText = '', onTextChange, onSave }: Enhan
     return stats;
   }, [detectedElements]);
 
-  const handleTextChange = useCallback((newText: string) => {
-    setText(newText);
-    onTextChange?.(newText);
-  }, [onTextChange]);
+  const handleTextChange = useCallback(
+    (newText: string) => {
+      setText(newText);
+      onTextChange?.(newText);
+    },
+    [onTextChange],
+  );
 
   const handleElementClick = useCallback((element: any, position: { x: number; y: number }) => {
     setSelectedElement(element);
@@ -223,41 +241,48 @@ export function EnhancedEditor({ initialText = '', onTextChange, onSave }: Enhan
     setContextMenuPosition(null);
   }, []);
 
-  const handleEnhanceElement = useCallback(async (element: any) => {
-    if (!element) return;
-    
-    try {
-      const enhanced = await enhanceElement(element.type, element.text);
-      if (enhanced) {
-        const newText = text.substring(0, element.startIndex) + 
-                       enhanced + 
-                       text.substring(element.endIndex);
-        handleTextChange(newText);
+  const handleEnhanceElement = useCallback(
+    async (element: any) => {
+      if (!element) return;
+
+      try {
+        const enhanced = await enhanceElement(element.type, element.text);
+        if (enhanced) {
+          const newText = text.substring(0, element.startIndex) + enhanced + text.substring(element.endIndex);
+          handleTextChange(newText);
+        }
+      } catch (error) {
+        console.error("Enhancement failed:", error);
       }
-    } catch (error) {
-      console.error('Enhancement failed:', error);
-    }
-    
-    handleContextMenuClose();
-  }, [text, handleTextChange, handleContextMenuClose]);
 
-  const handleAnalyzeElement = useCallback((element: any) => {
-    if (!element) return;
-    
-    const analysis = analyzeElement(element.type, element.text);
-    console.log('Element Analysis:', analysis);
-    
-    handleContextMenuClose();
-  }, [handleContextMenuClose]);
+      handleContextMenuClose();
+    },
+    [text, handleTextChange, handleContextMenuClose],
+  );
 
-  const handleGenerateAlternatives = useCallback((element: any) => {
-    if (!element) return;
-    
-    const alternatives = generateAlternatives(element.type, element.text);
-    console.log('Generated Alternatives:', alternatives);
-    
-    handleContextMenuClose();
-  }, [handleContextMenuClose]);
+  const handleAnalyzeElement = useCallback(
+    (element: any) => {
+      if (!element) return;
+
+      const analysis = analyzeElement(element.type, element.text);
+      console.log("Element Analysis:", analysis);
+
+      handleContextMenuClose();
+    },
+    [handleContextMenuClose],
+  );
+
+  const handleGenerateAlternatives = useCallback(
+    (element: any) => {
+      if (!element) return;
+
+      const alternatives = generateAlternatives(element.type, element.text);
+      console.log("Generated Alternatives:", alternatives);
+
+      handleContextMenuClose();
+    },
+    [handleContextMenuClose],
+  );
 
   const handleSave = useCallback(() => {
     onSave?.(text);
@@ -265,148 +290,164 @@ export function EnhancedEditor({ initialText = '', onTextChange, onSave }: Enhan
   }, [text, onSave, saveCurrentSettings]);
 
   // Apply UI preferences as CSS variables
-  const editorStyles = useMemo(() => ({
-    '--editor-font-family': uiPreferences.typography.fontFamily,
-    '--editor-font-size': `${uiPreferences.typography.fontSize}px`,
-    '--editor-line-height': uiPreferences.typography.lineHeight,
-    '--editor-letter-spacing': `${uiPreferences.typography.letterSpacing}px`,
-    '--editor-font-weight': uiPreferences.typography.fontWeight,
-    '--editor-text-align': uiPreferences.typography.textAlign,
-    '--editor-max-width': `${uiPreferences.layout.maxWidth}px`,
-    '--editor-padding': `${uiPreferences.layout.padding}px`,
-    '--editor-margin': `${uiPreferences.layout.margin}px`,
-    '--editor-border-radius': `${uiPreferences.theme.borderRadius}px`,
-    '--editor-border-width': `${uiPreferences.theme.borderWidth}px`,
-    '--editor-primary-color': uiPreferences.theme.primaryColor,
-    '--editor-accent-color': uiPreferences.theme.accentColor,
-  } as React.CSSProperties), [uiPreferences]);
+  const editorStyles = useMemo(
+    () =>
+      ({
+        "--editor-font-family": uiPreferences.typography.fontFamily,
+        "--editor-font-size": `${uiPreferences.typography.fontSize}px`,
+        "--editor-line-height": uiPreferences.typography.lineHeight,
+        "--editor-letter-spacing": `${uiPreferences.typography.letterSpacing}px`,
+        "--editor-font-weight": uiPreferences.typography.fontWeight,
+        "--editor-text-align": uiPreferences.typography.textAlign,
+        "--editor-max-width": `${uiPreferences.layout.maxWidth}px`,
+        "--editor-padding": `${uiPreferences.layout.padding}px`,
+        "--editor-margin": `${uiPreferences.layout.margin}px`,
+        "--editor-border-radius": `${uiPreferences.theme.borderRadius}px`,
+        "--editor-border-width": `${uiPreferences.theme.borderWidth}px`,
+        "--editor-primary-color": uiPreferences.theme.primaryColor,
+        "--editor-accent-color": uiPreferences.theme.accentColor,
+      }) as React.CSSProperties,
+    [uiPreferences],
+  );
 
   return (
-    <div className="space-y-6" style={editorStyles}>
-      {/* Header Controls */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <FileText className="h-5 w-5" />
-          <h2 className="text-xl font-semibold">Hemingway Script Editor</h2>
-          <Badge variant="secondary">Phase 4</Badge>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setAdvancedControlsOpen(!advancedControlsOpen)}
-          >
-            <Sliders className="h-4 w-4 mr-1" />
-            Controls
-          </Button>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setUIPreferencesOpen(!uiPreferencesOpen)}
-          >
-            <Palette className="h-4 w-4 mr-1" />
-            UI
-          </Button>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setSettingsPanelOpen(!settingsPanelOpen)}
-          >
-            <Settings className="h-4 w-4 mr-1" />
-            Settings
-          </Button>
-          
-          <Separator orientation="vertical" className="h-6" />
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExportSettings}
-          >
-            <Download className="h-4 w-4 mr-1" />
-            Export
-          </Button>
-          
-          <div className="relative">
-            <input
-              type="file"
-              accept=".json"
-              onChange={handleImportSettings}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-            />
-            <Button variant="outline" size="sm">
-              <Upload className="h-4 w-4 mr-1" />
-              Import
+    <div className="app-shell" style={editorStyles}>
+      {/* Left Sidebar - Tools & Navigation */}
+      <div className="left-sidebar bg-background/50 border-border/50 border-r backdrop-blur-sm">
+        <div className="flex flex-col items-center gap-4 p-4">
+          {/* Editor Title */}
+          <div className="flex flex-col items-center gap-2">
+            <FileText className="text-primary h-6 w-6" />
+            <h2 className="text-center text-xs font-medium">Hemingway Editor</h2>
+          </div>
+
+          <Separator orientation="horizontal" className="w-full" />
+
+          {/* Quick Actions */}
+          <div className="flex w-full flex-col gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setAdvancedControlsOpen(!advancedControlsOpen)}
+              className="h-10 w-10 p-0"
+              title="Highlight Controls"
+            >
+              <Sliders className="h-4 w-4" />
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setUIPreferencesOpen(!uiPreferencesOpen)}
+              className="h-10 w-10 p-0"
+              title="UI Preferences"
+            >
+              <Palette className="h-4 w-4" />
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSettingsPanelOpen(!settingsPanelOpen)}
+              className="h-10 w-10 p-0"
+              title="Settings"
+            >
+              <Settings className="h-4 w-4" />
             </Button>
           </div>
-          
-          <Button
-            variant="default"
-            size="sm"
-            onClick={handleSave}
-          >
-            <Save className="h-4 w-4 mr-1" />
-            Save
-          </Button>
+
+          <Separator orientation="horizontal" className="w-full" />
+
+          {/* Save Actions */}
+          <div className="flex w-full flex-col gap-2">
+            <Button variant="ghost" size="sm" onClick={handleSave} className="h-10 w-10 p-0" title="Save">
+              <Save className="h-4 w-4" />
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleExportSettings}
+              className="h-10 w-10 p-0"
+              title="Export Settings"
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+
+            <div className="relative">
+              <input
+                type="file"
+                accept=".json"
+                onChange={handleImportSettings}
+                className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+              />
+              <Button variant="ghost" size="sm" className="h-10 w-10 p-0" title="Import Settings">
+                <Upload className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Settings Panels */}
-      <div className="grid gap-4">
-        {settingsPanelOpen && (
-          <SettingsPanel
-            settings={editorSettings}
-            onSettingsChange={setEditorSettings}
-            isOpen={settingsPanelOpen}
-            onToggle={() => setSettingsPanelOpen(!settingsPanelOpen)}
-          />
-        )}
-        
-        {advancedControlsOpen && (
-          <AdvancedHighlightControls
-            settings={highlightSettings}
-            onSettingsChange={setHighlightSettings}
-            scriptStats={scriptStats}
-          />
-        )}
-        
-        {uiPreferencesOpen && (
-          <UIPreferencesPanel
-            preferences={uiPreferences}
-            onPreferencesChange={setUIPreferences}
-          />
-        )}
-      </div>
+      {/* Main Content Area */}
+      <div className="main-content flex h-full flex-col">
+        {/* Settings Panels */}
+        {(settingsPanelOpen || advancedControlsOpen || uiPreferencesOpen) && (
+          <div className="border-border/50 border-b p-6">
+            <div className="grid gap-4">
+              {settingsPanelOpen && (
+                <SettingsPanel
+                  settings={editorSettings}
+                  onSettingsChange={setEditorSettings}
+                  isOpen={settingsPanelOpen}
+                  onToggle={() => setSettingsPanelOpen(!settingsPanelOpen)}
+                />
+              )}
 
-      {/* Main Editor Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Editor Column */}
-        <div className="lg:col-span-3 space-y-4">
-          <Card>
-            <CardHeader>
+              {advancedControlsOpen && (
+                <AdvancedHighlightControls
+                  settings={highlightSettings}
+                  onSettingsChange={setHighlightSettings}
+                  scriptStats={scriptStats}
+                />
+              )}
+
+              {uiPreferencesOpen && (
+                <UIPreferencesPanel preferences={uiPreferences} onPreferencesChange={setUIPreferences} />
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Editor */}
+        <div className="flex-1 p-6">
+          <Card className="h-full">
+            <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
                 Script Editor
                 {readabilityAnalysis && (
-                  <Badge 
-                    variant={readabilityAnalysis.overall.level === 'easy' ? 'default' : 
-                            readabilityAnalysis.overall.level === 'medium' ? 'secondary' : 'destructive'}
+                  <Badge
+                    variant={
+                      readabilityAnalysis.overall.level === "easy"
+                        ? "default"
+                        : readabilityAnalysis.overall.level === "medium"
+                          ? "secondary"
+                          : "destructive"
+                    }
                   >
                     {readabilityAnalysis.overall.description}
                   </Badge>
                 )}
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="relative">
+            <CardContent className="h-full pb-6">
+              <div className="relative h-full">
                 <Textarea
                   value={text}
                   onChange={(e) => handleTextChange(e.target.value)}
                   placeholder="Start writing your script here..."
-                  className="min-h-[400px] resize-none"
+                  className="h-full resize-none border-0 bg-transparent p-0 text-base leading-relaxed focus:ring-0 focus:outline-none"
                   style={{
                     fontFamily: `var(--editor-font-family)`,
                     fontSize: `var(--editor-font-size)`,
@@ -414,14 +455,9 @@ export function EnhancedEditor({ initialText = '', onTextChange, onSave }: Enhan
                     letterSpacing: `var(--editor-letter-spacing)`,
                     fontWeight: `var(--editor-font-weight)`,
                     textAlign: `var(--editor-text-align)` as any,
-                    maxWidth: `var(--editor-max-width)`,
-                    padding: `var(--editor-padding)`,
-                    margin: `var(--editor-margin)`,
-                    borderRadius: `var(--editor-border-radius)`,
-                    borderWidth: `var(--editor-border-width)`,
                   }}
                 />
-                
+
                 {text && (
                   <HighlightOverlay
                     text={text}
@@ -435,52 +471,54 @@ export function EnhancedEditor({ initialText = '', onTextChange, onSave }: Enhan
             </CardContent>
           </Card>
         </div>
+      </div>
 
-        {/* Sidebar */}
-        <div className="space-y-4">
+      {/* Right Sidebar - Statistics & Analysis */}
+      <div className="right-sidebar bg-background/50 border-border/50 overflow-y-auto border-l backdrop-blur-sm">
+        <div className="space-y-4 p-4">
           {/* Statistics */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-sm">
                 <BarChart3 className="h-4 w-4" />
                 Statistics
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Words</span>
+                <span className="text-muted-foreground text-sm">Words</span>
                 <span className="text-sm font-medium">
-                  {text.split(/\s+/).filter(word => word.length > 0).length}
+                  {text.split(/\s+/).filter((word) => word.length > 0).length}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Sentences</span>
+                <span className="text-muted-foreground text-sm">Sentences</span>
                 <span className="text-sm font-medium">
-                  {text.split(/[.!?]+/).filter(s => s.trim().length > 0).length}
+                  {text.split(/[.!?]+/).filter((s) => s.trim().length > 0).length}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Characters</span>
+                <span className="text-muted-foreground text-sm">Characters</span>
                 <span className="text-sm font-medium">{text.length}</span>
               </div>
-              
+
               <Separator />
-              
+
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Hooks</span>
+                  <span className="text-muted-foreground text-sm">Hooks</span>
                   <Badge variant="outline">{scriptStats.hooks}</Badge>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Bridges</span>
+                  <span className="text-muted-foreground text-sm">Bridges</span>
                   <Badge variant="outline">{scriptStats.bridges}</Badge>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Golden Nuggets</span>
+                  <span className="text-muted-foreground text-sm">Golden Nuggets</span>
                   <Badge variant="outline">{scriptStats.goldenNuggets}</Badge>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">CTAs</span>
+                  <span className="text-muted-foreground text-sm">CTAs</span>
                   <Badge variant="outline">{scriptStats.ctas}</Badge>
                 </div>
               </div>
@@ -490,56 +528,48 @@ export function EnhancedEditor({ initialText = '', onTextChange, onSave }: Enhan
           {/* Readability Analysis */}
           {readabilityAnalysis && (
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-sm">
                   <Target className="h-4 w-4" />
                   Readability
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="text-center">
-                  <div className="text-2xl font-bold">
-                    {readabilityAnalysis.overall.score.toFixed(1)}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {readabilityAnalysis.overall.level.toUpperCase()}
-                  </div>
+                  <div className="text-2xl font-bold">{readabilityAnalysis.overall.score.toFixed(1)}</div>
+                  <div className="text-muted-foreground text-sm">{readabilityAnalysis.overall.level.toUpperCase()}</div>
                 </div>
-                
+
                 <Separator />
-                
+
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Avg Words/Sentence</span>
+                    <span className="text-muted-foreground text-sm">Avg Words/Sentence</span>
                     <span className="text-sm font-medium">
                       {readabilityAnalysis.statistics.averageWordsPerSentence.toFixed(1)}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Complex Words</span>
-                    <span className="text-sm font-medium">
-                      {readabilityAnalysis.statistics.complexWords}
-                    </span>
+                    <span className="text-muted-foreground text-sm">Complex Words</span>
+                    <span className="text-sm font-medium">{readabilityAnalysis.statistics.complexWords}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Passive Voice</span>
-                    <span className="text-sm font-medium">
-                      {readabilityAnalysis.statistics.passiveVoiceCount}
-                    </span>
+                    <span className="text-muted-foreground text-sm">Passive Voice</span>
+                    <span className="text-sm font-medium">{readabilityAnalysis.statistics.passiveVoiceCount}</span>
                   </div>
                 </div>
-                
+
                 {readabilityAnalysis.overall.suggestions.length > 0 && (
                   <>
                     <Separator />
                     <div className="space-y-2">
-                      <h4 className="text-sm font-medium flex items-center gap-1">
+                      <h4 className="flex items-center gap-1 text-sm font-medium">
                         <Lightbulb className="h-3 w-3" />
                         Suggestions
                       </h4>
                       <div className="space-y-1">
                         {readabilityAnalysis.overall.suggestions.slice(0, 3).map((suggestion, index) => (
-                          <div key={index} className="text-xs text-muted-foreground">
+                          <div key={index} className="text-muted-foreground text-xs">
                             • {suggestion}
                           </div>
                         ))}
@@ -553,7 +583,7 @@ export function EnhancedEditor({ initialText = '', onTextChange, onSave }: Enhan
 
           {/* Storage Info */}
           <Card>
-            <CardHeader>
+            <CardHeader className="pb-3">
               <CardTitle className="text-sm">Storage</CardTitle>
             </CardHeader>
             <CardContent>
@@ -562,18 +592,13 @@ export function EnhancedEditor({ initialText = '', onTextChange, onSave }: Enhan
                   <span>Settings Size</span>
                   <span>{(getSettingsStorageInfo().used / 1024).toFixed(1)} KB</span>
                 </div>
-                <div className="w-full bg-muted rounded-full h-2">
-                  <div 
+                <div className="bg-muted h-2 w-full rounded-full">
+                  <div
                     className="bg-primary h-2 rounded-full transition-all duration-300"
                     style={{ width: `${Math.min(getSettingsStorageInfo().percentage, 100)}%` }}
                   />
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleResetSettings}
-                  className="w-full text-xs"
-                >
+                <Button variant="outline" size="sm" onClick={handleResetSettings} className="w-full text-xs">
                   Reset All Settings
                 </Button>
               </div>

@@ -170,5 +170,5 @@ export default function ScriptEditorPage() {
     );
   }
 
-  return <EnhancedEditor initialScript={script} onScriptChange={handleScriptChange} onSave={handleScriptSave} />;
+  return <EnhancedEditor initialText={script} onTextChange={handleScriptChange} onSave={handleScriptSave} />;
 }
