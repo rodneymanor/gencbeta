@@ -1,7 +1,6 @@
-import { fetchCollections, fetchVideos } from "@/lib/collections-server";
-import { ReactQueryHydrate } from "@/providers/react-query-provider";
+import { fetchCollections, fetchVideos } from "@/lib/collections-data";
 
-import CollectionsPageClient from "./page-client";
+import PageClient from "./page-client";
 
 export const dynamic = "force-dynamic"; // always fresh
 
@@ -11,9 +10,5 @@ export default async function CollectionsPage({ searchParams }: { searchParams: 
   // 1. Fetch on the server – runs in parallel
   const [collections, videos] = await Promise.all([fetchCollections(), fetchVideos(selected)]);
 
-  return (
-    <ReactQueryHydrate>
-      <CollectionsPageClient initialCollections={collections} initialVideos={videos} initialCollectionId={selected} />
-    </ReactQueryHydrate>
-  );
+  return <PageClient initialCollections={collections} initialVideos={videos} initialCollectionId={selected} />;
 }

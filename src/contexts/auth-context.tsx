@@ -14,8 +14,8 @@ import {
   updateProfile,
 } from "firebase/auth";
 
-import { auth } from "@/lib/firebase";
 import { getAuthCache, setAuthCache, clearAuthCache, type AccountLevel } from "@/lib/auth-cache";
+import { auth } from "@/lib/firebase";
 import { UserManagementService, type UserProfile, type UserRole } from "@/lib/user-management";
 
 interface AuthContextType {
@@ -139,6 +139,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(firebaseUser);
 
       if (firebaseUser) {
+        const idToken = await firebaseUser.getIdToken();
+        await fetch("/api/auth/session", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ idToken }),
+        });
+
         await UserManagementService.updateLastLogin(firebaseUser.uid);
 
         try {
@@ -157,6 +166,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           updateAuthCache(firebaseUser, null, "free");
         }
       } else {
+        await fetch("/api/auth/session-logout", { method: "POST" });
         setUserProfile(null);
         setAccountLevel("free");
         clearAuthCache();

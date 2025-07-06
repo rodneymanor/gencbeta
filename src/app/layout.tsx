@@ -9,7 +9,7 @@ import { AppStateProvider } from "@/contexts/app-state-context";
 import { AuthProvider } from "@/contexts/auth-context";
 import { UsageProvider } from "@/contexts/usage-context";
 import { VideoPlaybackProvider } from "@/contexts/video-playback-context";
-import { QueryProvider } from "@/providers/react-query-provider";
+import { ReactQueryProvider } from "@/providers/react-query-provider";
 
 import "./globals.css";
 
@@ -28,7 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="light" suppressHydrationWarning>
       <body className={`${poppins.className} min-h-screen antialiased`}>
-        <QueryProvider>
+        <ReactQueryProvider>
           <AuthProvider>
             <UsageProvider>
               <AppStateProvider>
@@ -41,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </AppStateProvider>
             </UsageProvider>
           </AuthProvider>
-        </QueryProvider>
+        </ReactQueryProvider>
       </body>
     </html>
   );

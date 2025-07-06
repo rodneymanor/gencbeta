@@ -1,37 +1,35 @@
-"use client";
+import Image from "next/image";
 
 import type { Video } from "@/lib/collections";
 
-interface VideoGridProps {
-  videos: Video[];
-}
-
-export default function VideoGrid({ videos }: VideoGridProps) {
+export default function VideoGrid({ videos }: { videos: Video[] }) {
   if (videos.length === 0) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <div className="text-center">
-          <p className="text-muted-foreground text-lg">No videos found</p>
-          <p className="text-muted-foreground mt-2 text-sm">Upload some videos to get started</p>
-        </div>
+      <div className="flex h-full items-center justify-center py-16">
+        <p className="text-muted-foreground">No videos in this collection.</p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {videos.map((video) => (
-        <div key={video.id} className="bg-muted aspect-video overflow-hidden rounded-lg">
-          {/* Video poster keeps height -> no scroll jump */}
-          <div className="flex h-full w-full items-center justify-center">
-            <div className="p-4 text-center">
-              <p className="text-muted-foreground text-sm font-medium">{video.title}</p>
-              <p className="text-muted-foreground/60 mt-1 text-xs">
-                {video.duration
-                  ? `${Math.round(video.duration / 60)}:${(video.duration % 60).toString().padStart(2, "0")}`
-                  : "Unknown duration"}
-              </p>
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      {videos.map((v) => (
+        <div key={v.id} className="bg-muted group relative aspect-video overflow-hidden rounded-lg">
+          {v.thumbnailUrl ? (
+            <Image
+              src={v.thumbnailUrl}
+              alt={v.title}
+              width={320}
+              height={180}
+              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center">
+              <p className="text-muted-foreground text-sm">No thumbnail</p>
             </div>
+          )}
+          <div className="absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+            <h3 className="truncate text-sm font-semibold text-white">{v.title}</h3>
           </div>
         </div>
       ))}
