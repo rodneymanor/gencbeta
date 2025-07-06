@@ -410,3 +410,12 @@
 .main-content {
   min-width: 0; /* Allows flex item to shrink below content size */
 }
+
+/* Hide Next.js Dev Tools badge */
+[data-nextjs-dev-tools-button] {
+  display: none !important;
+}
+
+[data-next-badge] {
+  display: none !important;
+}

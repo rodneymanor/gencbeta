@@ -2,7 +2,8 @@
 const nextConfig = {
   // Completely disable all development indicators (Next.js logo, etc.)
   devIndicators: {
-    position: 'bottom-left',
+    buildActivity: false,
+    buildActivityPosition: 'bottom-left',
   },
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
@@ -63,6 +64,8 @@ const nextConfig = {
   // Force dynamic rendering and disable development features
   experimental: {
     forceSwcTransforms: true,
+    // Disable dev tools
+    devTools: false,
   },
   // Configure output for Vercel compatibility
   output: 'standalone',
