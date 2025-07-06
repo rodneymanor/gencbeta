@@ -7,11 +7,16 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 
 import { type Collection, type Video } from "@/lib/collections";
-import { fetchCollections, fetchVideos } from "@/lib/collections-data";
 
 import Sidebar from "./_components/sidebar";
 import SkeletonGrid from "./_components/skeleton-grid";
 import VideoGrid from "./_components/video-grid";
+
+const fetchCollectionsClient = () => fetch("/api/collections").then((res) => res.json());
+const fetchVideosClient = (collectionId: string | null) => {
+  const url = collectionId ? `/api/videos?collectionId=${collectionId}` : "/api/videos";
+  return fetch(url).then((res) => res.json());
+};
 
 type Props = {
   initialCollections: Collection[];
@@ -24,18 +29,18 @@ export default function PageClient({ initialCollections, initialVideos, initialC
   const router = useRouter();
 
   /* collections never change often, so cache for 5 min */
-  const { data: collections } = useQuery({
+  const { data: collections } = useQuery<Collection[]>({
     queryKey: ["collections"],
-    queryFn: fetchCollections,
+    queryFn: fetchCollectionsClient,
     initialData: initialCollections,
     staleTime: 5 * 60_000,
   });
 
-  const { data: videos, isLoading } = useQuery({
+  const { data: videos, isLoading } = useQuery<Video[]>({
     queryKey: ["videos", current ?? "all"], // STABLE key
-    queryFn: () => fetchVideos(current),
+    queryFn: () => fetchVideosClient(current),
     initialData: initialVideos,
-    placeholderData: (previousData) => previousData, // a.k.a. keepPreviousData
+    placeholderData: (previousData) => previousData,
     staleTime: 30_000,
   });
 

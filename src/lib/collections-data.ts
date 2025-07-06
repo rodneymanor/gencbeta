@@ -1,5 +1,3 @@
-import "server-only";
-
 import { Collection, Video } from "./collections";
 import { CollectionsRBACService } from "./collections-rbac";
 import { getCurrentUser } from "./server-auth";

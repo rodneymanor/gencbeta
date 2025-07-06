@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { ApiKeyAuthService } from "@/lib/api-key-auth";
 import { COLLECTION_LIMITS } from "@/lib/collections";
+import { fetchCollections } from "@/lib/collections-data";
 import { CollectionsRBACAdminService } from "@/lib/collections-rbac-admin";
 import { getAdminDb, isAdminInitialized } from "@/lib/firebase-admin";
 import { UserManagementAdminService } from "@/lib/user-management-admin";
@@ -100,65 +101,15 @@ async function createCollectionInFirestore(adminDb: any, collectionData: Record<
   return docRef;
 }
 
-export async function GET(request: NextRequest) {
+export const dynamic = "force-dynamic";
+
+export async function GET() {
   try {
-    // Authenticate API key first
-    const authResult = await authenticateApiKey(request);
-    if (authResult instanceof NextResponse) {
-      return authResult; // Return error response
-    }
-
-    const userId = authResult.user.uid;
-    console.log("📚 [Collections API] GET request received for user:", userId);
-
-    // Check if Admin SDK is initialized
-    if (!isAdminInitialized) {
-      return NextResponse.json({ error: "Firebase Admin SDK not configured" }, { status: 500 });
-    }
-
-    // Verify user exists
-    const userProfile = await UserManagementAdminService.getUserProfile(userId);
-    if (!userProfile) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    // Get collections using RBAC service
-    const collections = await CollectionsRBACAdminService.getUserCollections(userId);
-
-    // Format response
-    const formattedCollections = collections.map((collection) => ({
-      id: collection.id,
-      title: collection.title,
-      description: collection.description,
-      videoCount: collection.videoCount,
-      userId: collection.userId,
-      createdAt: collection.createdAt,
-      updatedAt: collection.updatedAt,
-    }));
-
-    console.log("✅ [Collections API] Successfully fetched", formattedCollections.length, "collections");
-
-    return NextResponse.json({
-      success: true,
-      user: {
-        id: userProfile.uid,
-        email: userProfile.email,
-        displayName: userProfile.displayName,
-        role: userProfile.role,
-      },
-      collections: formattedCollections,
-      total: formattedCollections.length,
-      timestamp: new Date().toISOString(),
-    });
+    const collections = await fetchCollections();
+    return NextResponse.json(collections);
   } catch (error) {
-    console.error("❌ [Collections API] Error fetching collections:", error);
-    return NextResponse.json(
-      {
-        error: "Internal server error",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 },
-    );
+    console.error("Error fetching collections:", error);
+    return NextResponse.json({ error: "Failed to fetch collections" }, { status: 500 });
   }
 }
 
