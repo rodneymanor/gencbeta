@@ -18,21 +18,23 @@ const VideoPlaybackAPIContext = createContext<VideoPlaybackAPI | null>(null);
 export const VideoPlaybackProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentlyPlayingId, setCurrentlyPlayingId] = useState<string | null>(null);
 
-  // Add logging to track state changes
+  // Add logging to track state changes (only in development)
   useEffect(() => {
-    console.log("🎬 [VideoPlayback] State changed:", {
-      currentlyPlayingId,
-      timestamp: new Date().toISOString(),
-      stack: new Error().stack?.split('\n').slice(1, 4).join('\n')
-    });
+    if (process.env.NODE_ENV === "development") {
+      console.log("🎬 [VideoPlayback] State changed:", {
+        currentlyPlayingId,
+        timestamp: new Date().toISOString(),
+      });
+    }
   }, [currentlyPlayingId]);
 
   // PRODUCTION SOLUTION: Enhanced pause all function
   const pauseAllVideos = useCallback(() => {
-    console.log("⏸️ [VideoPlayback] Pausing all videos", {
-      timestamp: new Date().toISOString(),
-      stack: new Error().stack?.split('\n').slice(1, 4).join('\n')
-    });
+    if (process.env.NODE_ENV === "development") {
+      console.log("⏸️ [VideoPlayback] Pausing all videos", {
+        timestamp: new Date().toISOString(),
+      });
+    }
 
     // Pause all HTML5 video elements
     document.querySelectorAll("video").forEach((video) => {
@@ -49,12 +51,13 @@ export const VideoPlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
   // OPTIMIZED: Simple setCurrentlyPlaying without complex async operations
   const setCurrentlyPlaying = useCallback(
     (videoId: string | null) => {
-      console.log("🎬 [VideoPlayback] setCurrentlyPlaying called:", {
-        previous: currentlyPlayingId ? currentlyPlayingId.substring(0, 50) + "..." : "null",
-        new: videoId ? videoId.substring(0, 50) + "..." : "null",
-        timestamp: new Date().toISOString(),
-        stack: new Error().stack?.split('\n').slice(1, 4).join('\n')
-      });
+      if (process.env.NODE_ENV === "development") {
+        console.log("🎬 [VideoPlayback] setCurrentlyPlaying called:", {
+          previous: currentlyPlayingId ? currentlyPlayingId.substring(0, 50) + "..." : "null",
+          new: videoId ? videoId.substring(0, 50) + "..." : "null",
+          timestamp: new Date().toISOString(),
+        });
+      }
 
       // Pause other videos when starting a new one
       if (videoId && videoId !== currentlyPlayingId) {
@@ -68,41 +71,40 @@ export const VideoPlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // SIMPLIFIED: Basic pause all function
   const pauseAll = useCallback(() => {
-    console.log("⏸️ [VideoPlayback] pauseAll called", {
-      timestamp: new Date().toISOString(),
-      stack: new Error().stack?.split('\n').slice(1, 4).join('\n')
-    });
+    if (process.env.NODE_ENV === "development") {
+      console.log("⏸️ [VideoPlayback] pauseAll called", {
+        timestamp: new Date().toISOString(),
+      });
+    }
 
     pauseAllVideos();
     setCurrentlyPlayingId(null);
   }, [pauseAllVideos]);
 
   // Memoize data and API separately to minimize re-renders
-  const data = useMemo(
-    () => {
+  const data = useMemo(() => {
+    if (process.env.NODE_ENV === "development") {
       console.log("🎬 [VideoPlayback] Data memoized", {
         currentlyPlayingId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
-      return {
-        currentlyPlayingId,
-      };
-    },
-    [currentlyPlayingId],
-  );
+    }
+    return {
+      currentlyPlayingId,
+    };
+  }, [currentlyPlayingId]);
 
-  const api = useMemo(
-    () => {
+  const api = useMemo(() => {
+    if (process.env.NODE_ENV === "development") {
       console.log("🎬 [VideoPlayback] API memoized", {
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
-      return {
-        setCurrentlyPlaying,
-        pauseAll,
-      };
-    },
-    [setCurrentlyPlaying, pauseAll],
-  );
+    }
+    return {
+      setCurrentlyPlaying,
+      pauseAll,
+    };
+  }, [setCurrentlyPlaying, pauseAll]);
 
   return (
     <VideoPlaybackDataContext.Provider value={data}>

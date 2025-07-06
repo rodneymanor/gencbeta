@@ -1,26 +1,20 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, useTransition } from "react";
+
 import { useSearchParams } from "next/navigation";
+
 import { FolderOpen } from "lucide-react";
 
 import { useAuth } from "@/contexts/auth-context";
-import { useTopBarConfig } from "@/hooks/use-route-topbar";
 import { useCollectionsQuery, useCollectionVideosQuery, useInvalidateCollections } from "@/hooks/use-collections-query";
 import { useDebouncedNavigation } from "@/hooks/use-debounced-navigation";
-import { MotionDiv } from "@/components/dynamic-motion";
+import { useTopBarConfig } from "@/hooks/use-route-topbar";
 import type { Collection } from "@/lib/collections";
 
-import { CollectionBadge } from "./collection-badge";
-import CollectionSidebar from "./collection-sidebar";
-import {
-  type VideoWithPlayer,
-  getPageTitle,
-  getPageDescription,
-  createVideoSelectionHandlers,
-} from "./collections-helpers";
+import { type VideoWithPlayer, getPageTitle, getPageDescription } from "./collections-helpers";
+import { CollectionsMainContent } from "./collections-main-content";
 import { CollectionsTopbarActions } from "./collections-topbar-actions";
-import { VirtualizedVideoGrid } from "./virtualized-video-grid";
 
 interface CollectionsPageContentProps {
   initialCollections: Collection[];
@@ -31,26 +25,26 @@ interface CollectionsPageContentProps {
 function LoadingState() {
   return (
     <div className="@container/main">
-      <div className="flex gap-6 max-w-6xl mx-auto relative">
-        <div className="flex-1 min-w-0 space-y-8 md:space-y-10">
+      <div className="relative mx-auto flex max-w-6xl gap-6">
+        <div className="min-w-0 flex-1 space-y-8 md:space-y-10">
           <div className="animate-pulse">
-            <div className="h-8 bg-muted rounded w-48 mb-2"></div>
-            <div className="h-6 bg-muted rounded w-96"></div>
+            <div className="bg-muted mb-2 h-8 w-48 rounded"></div>
+            <div className="bg-muted h-6 w-96 rounded"></div>
           </div>
           <div className="grid grid-cols-3 gap-4">
             {Array.from({ length: 12 }).map((_, i) => (
               <div key={i} className="animate-pulse">
-                <div className="aspect-video bg-muted rounded"></div>
+                <div className="bg-muted aspect-video rounded"></div>
               </div>
             ))}
           </div>
         </div>
         <div className="hidden w-[313px] flex-shrink-0 md:block">
           <div className="animate-pulse">
-            <div className="h-6 bg-muted rounded mb-4"></div>
+            <div className="bg-muted mb-4 h-6 rounded"></div>
             <div className="space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="h-10 bg-muted rounded"></div>
+                <div key={i} className="bg-muted h-10 rounded"></div>
               ))}
             </div>
           </div>
@@ -67,7 +61,7 @@ function ErrorState({ collectionsError, videosError }: { collectionsError?: Erro
       <div className="flex items-center justify-center py-16">
         <div className="text-center">
           <p className="text-destructive text-lg">Error loading collections</p>
-          <p className="text-muted-foreground text-sm mt-2">
+          <p className="text-muted-foreground mt-2 text-sm">
             {collectionsError?.message ?? videosError?.message ?? "Please try again"}
           </p>
         </div>
@@ -76,13 +70,9 @@ function ErrorState({ collectionsError, videosError }: { collectionsError?: Erro
   );
 }
 
-export default function CollectionsPageContent({ 
-  initialCollections, 
-  initialVideos 
-}: CollectionsPageContentProps) {
+export default function CollectionsPageContent({ initialCollections, initialVideos }: CollectionsPageContentProps) {
   const [manageMode, setManageMode] = useState(false);
   const [selectedVideos, setSelectedVideos] = useState<Set<string>>(new Set());
-  const [deletingVideos, setDeletingVideos] = useState<Set<string>>(new Set());
   const [, startTransition] = useTransition();
 
   const { user, userProfile } = useAuth();
@@ -93,24 +83,21 @@ export default function CollectionsPageContent({
   const { invalidateAll } = useInvalidateCollections();
 
   // React Query hooks for data fetching
-  const { 
-    data: collections = initialCollections, 
+  const {
+    data: collections = initialCollections,
     isLoading: collectionsLoading,
-    error: collectionsError 
+    error: collectionsError,
   } = useCollectionsQuery();
 
-  const { 
-    data: videos = initialVideos, 
+  const {
+    data: videos = initialVideos,
     isLoading: videosLoading,
     isFetching: videosFetching,
-    error: videosError 
+    error: videosError,
   } = useCollectionVideosQuery(selectedCollectionId);
 
   // Transform videos to include playing state
-  const videosWithState = useMemo(() => 
-    videos.map(video => ({ ...video, isPlaying: false })),
-    [videos]
-  );
+  const videosWithState = useMemo(() => videos.map((video) => ({ ...video, isPlaying: false })), [videos]);
 
   // Memoized computed values
   const pageTitle = useMemo(() => getPageTitle(selectedCollectionId, collections), [selectedCollectionId, collections]);
@@ -157,9 +144,9 @@ export default function CollectionsPageContent({
       user: !!user,
       userProfile: !!userProfile,
       userRole: userProfile?.role,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-    
+
     if (!user || !userProfile) return;
 
     const allowedRoles = ["creator", "coach", "super_admin"];
@@ -190,8 +177,6 @@ export default function CollectionsPageContent({
       console.log("🗑️ [Collections] handleDeleteVideo called:", { videoId });
       if (!user) return;
 
-      setDeletingVideos((prev) => new Set([...prev, videoId]));
-      
       try {
         // Optimistic update - remove from local state immediately
         startTransition(() => {
@@ -204,48 +189,36 @@ export default function CollectionsPageContent({
 
         // TODO: Implement actual deletion with React Query mutation
         setTimeout(() => {
-          setDeletingVideos((prev) => {
-            const newSet = new Set(prev);
-            newSet.delete(videoId);
-            return newSet;
-          });
           invalidateAll();
         }, 1000);
       } catch (error) {
         console.error("Error deleting video:", error);
-        setDeletingVideos((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(videoId);
-          return newSet;
-        });
       }
     },
     [user, invalidateAll],
   );
 
-  const handleBulkDelete = useCallback(async (videosToDelete: Set<string>) => {
-    console.log("🗑️ [Collections] handleBulkDelete called:", { count: videosToDelete.size });
-    if (!user || videosToDelete.size === 0) return;
+  const handleBulkDelete = useCallback(
+    async (videosToDelete: Set<string>) => {
+      console.log("🗑️ [Collections] handleBulkDelete called:", { count: videosToDelete.size });
+      if (!user || videosToDelete.size === 0) return;
 
-    const videoIds = Array.from(videosToDelete);
-    setDeletingVideos((prev) => new Set([...prev, ...videoIds]));
+      try {
+        // Optimistic update
+        startTransition(() => {
+          setSelectedVideos(new Set());
+        });
 
-    try {
-      // Optimistic update
-      startTransition(() => {
-        setSelectedVideos(new Set());
-      });
-
-      // TODO: Implement actual bulk deletion with React Query mutation
-      setTimeout(() => {
-        setDeletingVideos(new Set());
-        invalidateAll();
-      }, 1000);
-    } catch (error) {
-      console.error("Error deleting videos:", error);
-      setDeletingVideos(new Set());
-    }
-  }, [user, invalidateAll]);
+        // TODO: Implement actual bulk deletion with React Query mutation
+        setTimeout(() => {
+          invalidateAll();
+        }, 1000);
+      } catch (error) {
+        console.error("Error deleting videos:", error);
+      }
+    },
+    [user, invalidateAll],
+  );
 
   const handleExitManageMode = useCallback(() => {
     console.log("🚪 [Collections] handleExitManageMode called");
@@ -256,18 +229,20 @@ export default function CollectionsPageContent({
   // Track selected videos count for stable dependency
   const selectedVideosCount = selectedVideos.size;
 
-  // Update top bar configuration - use stable dependencies
-  useEffect(() => {
-    console.log("🎛️ [Collections] TopBar effect running:", {
-      selectedCollectionId,
-      collectionsCount: collections.length,
-      manageMode,
-      selectedVideosCount,
-      userRole: userProfile?.role,
-      timestamp: new Date().toISOString()
-    });
-    
-    const topbarActions = (
+  // Memoize topbar actions to prevent infinite re-renders
+  const topbarActions = useMemo(() => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("🎛️ [Collections] Creating topbar actions:", {
+        selectedCollectionId,
+        collectionsCount: collections.length,
+        manageMode,
+        selectedVideosCount,
+        userRole: userProfile?.role,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    return (
       <CollectionsTopbarActions
         collections={collections}
         selectedCollectionId={selectedCollectionId}
@@ -281,6 +256,33 @@ export default function CollectionsPageContent({
         onVideoAdded={handleVideoAdded}
       />
     );
+  }, [
+    collections,
+    selectedCollectionId,
+    manageMode,
+    selectedVideos,
+    selectedVideosCount,
+    userProfile?.role,
+    setManageMode,
+    handleExitManageMode,
+    handleBulkDelete,
+    clearSelection,
+    selectAllVideos,
+    handleVideoAdded,
+  ]);
+
+  // Update top bar configuration - use stable dependencies
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("🎛️ [Collections] TopBar effect running:", {
+        selectedCollectionId,
+        collectionsCount: collections.length,
+        manageMode,
+        selectedVideosCount,
+        userRole: userProfile?.role,
+        timestamp: new Date().toISOString(),
+      });
+    }
 
     setTopBarConfig({
       title: "Collections",
@@ -296,11 +298,7 @@ export default function CollectionsPageContent({
     manageMode,
     selectedVideosCount, // Use count instead of the Set object
     userProfile?.role, // Use specific property instead of entire object
-    handleVideoAdded,
-    handleExitManageMode,
-    handleBulkDelete,
-    clearSelection,
-    selectAllVideos,
+    topbarActions, // Now this is memoized and stable
   ]);
 
   // Show loading state
@@ -313,70 +311,19 @@ export default function CollectionsPageContent({
     return <ErrorState collectionsError={collectionsError} videosError={videosError} />;
   }
 
-  const contentKey = `content-${selectedCollectionId ?? "all"}-${videosWithState.length}`;
-
   return (
-    <div className="@container/main">
-      <MotionDiv
-        key={contentKey}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.3, ease: "easeInOut" }}
-      >
-        <div className="flex gap-6 max-w-6xl mx-auto relative">
-          <div className="flex-1 min-w-0 space-y-8 md:space-y-10">
-            <section className="space-y-4">
-              <div className="space-y-2">
-                <h1 className="text-foreground text-3xl font-bold tracking-tight">{pageTitle}</h1>
-                <p className="text-muted-foreground text-lg">{pageDescription}</p>
-              </div>
-            </section>
-
-            <section className="md:hidden space-y-4">
-              <div className="flex flex-wrap items-center gap-3">
-                <CollectionBadge
-                  isActive={!selectedCollectionId}
-                  onClick={() => handleCollectionChange(null)}
-                  videoCount={videosWithState.length}
-                  isTransitioning={videosFetching && !selectedCollectionId}
-                  onCollectionDeleted={handleCollectionDeleted}
-                />
-                {collections.map((collection) => (
-                  <CollectionBadge
-                    key={collection.id}
-                    collection={collection}
-                    isActive={selectedCollectionId === collection.id}
-                    onClick={() => handleCollectionChange(collection.id!)}
-                    videoCount={collection.videoCount}
-                    isTransitioning={videosFetching && selectedCollectionId === collection.id}
-                    onCollectionDeleted={handleCollectionDeleted}
-                  />
-                ))}
-              </div>
-            </section>
-
-            <VirtualizedVideoGrid
-              videos={videosWithState}
-              selectedCollectionId={selectedCollectionId}
-              onToggleVideoSelection={toggleVideoSelection}
-              onDeleteVideo={handleDeleteVideo}
-              onVideoAdded={handleVideoAdded}
-            />
-          </div>
-
-          <div className="hidden w-[313px] flex-shrink-0 md:block">
-            <div className="sticky top-4">
-              <CollectionSidebar
-                collections={collections}
-                selectedCollectionId={selectedCollectionId}
-                onSelectionChange={handleCollectionChange}
-                videoCount={videosWithState.length}
-              />
-            </div>
-          </div>
-        </div>
-      </MotionDiv>
-    </div>
+    <CollectionsMainContent
+      selectedCollectionId={selectedCollectionId}
+      collections={collections}
+      videosWithState={videosWithState}
+      videosFetching={videosFetching}
+      pageTitle={pageTitle}
+      pageDescription={pageDescription}
+      onCollectionChange={handleCollectionChange}
+      onCollectionDeleted={handleCollectionDeleted}
+      onToggleVideoSelection={toggleVideoSelection}
+      onDeleteVideo={handleDeleteVideo}
+      onVideoAdded={handleVideoAdded}
+    />
   );
 }
