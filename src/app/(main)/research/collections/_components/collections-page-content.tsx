@@ -153,20 +153,30 @@ export default function CollectionsPageContent({
 
   // Auth and role-based access control
   useEffect(() => {
+    console.log("🔐 [Collections] Auth effect running:", {
+      user: !!user,
+      userProfile: !!userProfile,
+      userRole: userProfile?.role,
+      timestamp: new Date().toISOString()
+    });
+    
     if (!user || !userProfile) return;
 
     const allowedRoles = ["creator", "coach", "super_admin"];
     if (!allowedRoles.includes(userProfile.role)) {
+      console.log("🔐 [Collections] Redirecting due to role:", userProfile.role);
       navigateToCollection(null);
     }
   }, [user, userProfile, navigateToCollection]);
 
   // Video management functions
   const handleVideoAdded = useCallback(() => {
+    console.log("➕ [Collections] handleVideoAdded called");
     invalidateAll();
   }, [invalidateAll]);
 
   const handleCollectionDeleted = useCallback(() => {
+    console.log("🗑️ [Collections] handleCollectionDeleted called:", { selectedCollectionId });
     if (selectedCollectionId) {
       startTransition(() => {
         navigateToCollection(null);
@@ -177,6 +187,7 @@ export default function CollectionsPageContent({
 
   const handleDeleteVideo = useCallback(
     async (videoId: string) => {
+      console.log("🗑️ [Collections] handleDeleteVideo called:", { videoId });
       if (!user) return;
 
       setDeletingVideos((prev) => new Set([...prev, videoId]));
@@ -213,6 +224,7 @@ export default function CollectionsPageContent({
   );
 
   const handleBulkDelete = useCallback(async (videosToDelete: Set<string>) => {
+    console.log("🗑️ [Collections] handleBulkDelete called:", { count: videosToDelete.size });
     if (!user || videosToDelete.size === 0) return;
 
     const videoIds = Array.from(videosToDelete);
@@ -236,6 +248,7 @@ export default function CollectionsPageContent({
   }, [user, invalidateAll]);
 
   const handleExitManageMode = useCallback(() => {
+    console.log("🚪 [Collections] handleExitManageMode called");
     setManageMode(false);
     setSelectedVideos(new Set());
   }, []);
@@ -245,6 +258,15 @@ export default function CollectionsPageContent({
 
   // Update top bar configuration - use stable dependencies
   useEffect(() => {
+    console.log("🎛️ [Collections] TopBar effect running:", {
+      selectedCollectionId,
+      collectionsCount: collections.length,
+      manageMode,
+      selectedVideosCount,
+      userRole: userProfile?.role,
+      timestamp: new Date().toISOString()
+    });
+    
     const topbarActions = (
       <CollectionsTopbarActions
         collections={collections}
