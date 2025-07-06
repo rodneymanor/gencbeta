@@ -7,12 +7,6 @@ import {
   BarChart3,
   Lightbulb,
   Target,
-  Settings,
-  Sliders,
-  Palette,
-  Save,
-  Download,
-  Upload,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -39,26 +33,10 @@ import {
   amplifyGoldenNugget,
   optimizeCTA
 } from "@/lib/script-element-actions";
-import {
-  HemingwayEditorSettings,
-  saveEditorSettings,
-  loadEditorSettings,
-  exportEditorSettings,
-  importEditorSettings,
-  resetEditorSettings,
-  createSettingsBackup,
-  getSettingsStorageInfo,
-} from "@/lib/settings-manager";
 
-import {
-  AdvancedHighlightControls,
-  AdvancedHighlightSettings,
-  defaultAdvancedSettings,
-} from "./advanced-highlight-controls";
+
 import { ContextualMenu } from "./contextual-menu";
 import { HighlightOverlay } from "./highlight-overlay";
-import { SettingsPanel, EditorSettings, defaultSettings } from "./settings-panel";
-import { UIPreferencesPanel, UIPreferences, defaultUIPreferences } from "./ui-preferences-panel";
 
 interface EnhancedEditorProps {
   initialText?: string;
@@ -77,54 +55,18 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
   const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number } | null>(null);
 
   // Settings state
-  const [editorSettings, setEditorSettings] = useState<EditorSettings>(defaultSettings);
-  const [highlightSettings, setHighlightSettings] = useState<AdvancedHighlightSettings>(defaultAdvancedSettings);
-  const [uiPreferences, setUIPreferences] = useState<UIPreferences>(defaultUIPreferences);
   const [readabilitySettings, setReadabilitySettings] = useState<ReadabilitySettings>(defaultReadabilitySettings);
   const [elementDetectionSettings, setElementDetectionSettings] = useState<ElementDetectionSettings>(
     defaultElementDetectionSettings,
   );
 
-  // Panel visibility state
-  const [settingsPanelOpen, setSettingsPanelOpen] = useState(false);
-  const [advancedControlsOpen, setAdvancedControlsOpen] = useState(false);
-  const [uiPreferencesOpen, setUIPreferencesOpen] = useState(false);
-
   // Services
   const [readabilityService] = useState(() => new EnhancedReadabilityService(readabilitySettings));
   const [elementDetectionService] = useState(() => new EnhancedElementDetection(elementDetectionSettings));
 
-  // Load settings on mount
-  useEffect(() => {
-    const savedSettings = loadEditorSettings();
-    if (savedSettings) {
-      setEditorSettings(savedSettings.editor);
-      setHighlightSettings(savedSettings.highlights);
-      setUIPreferences(savedSettings.ui);
-      setReadabilitySettings(savedSettings.readability);
-      setElementDetectionSettings(savedSettings.elementDetection);
-    }
-  }, []);
 
-  const saveCurrentSettings = useCallback(() => {
-    const settings: HemingwayEditorSettings = {
-      version: "1.0.0",
-      lastModified: new Date().toISOString(),
-      editor: editorSettings,
-      highlights: highlightSettings,
-      ui: uiPreferences,
-      readability: readabilitySettings,
-      elementDetection: elementDetectionSettings,
-      metadata: {
-        exportedBy: "Hemingway Script Editor",
-        exportedAt: new Date().toISOString(),
-        deviceInfo: "Browser",
-        browserInfo: navigator.userAgent.substring(0, 50),
-      },
-    };
 
-    saveEditorSettings(settings);
-  }, [editorSettings, highlightSettings, uiPreferences, readabilitySettings, elementDetectionSettings]);
+
 
   // Update services when settings change
   useEffect(() => {
@@ -135,62 +77,7 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
     elementDetectionService.updateSettings(elementDetectionSettings);
   }, [elementDetectionSettings, elementDetectionService]);
 
-  // Auto-save settings
-  useEffect(() => {
-    if (editorSettings.advanced.autoSave) {
-      const interval = setInterval(() => {
-        saveCurrentSettings();
-      }, editorSettings.advanced.saveInterval * 1000);
 
-      return () => clearInterval(interval);
-    }
-  }, [editorSettings.advanced.autoSave, editorSettings.advanced.saveInterval, saveCurrentSettings]);
-
-  const handleExportSettings = useCallback(() => {
-    const settings: HemingwayEditorSettings = {
-      version: "1.0.0",
-      lastModified: new Date().toISOString(),
-      editor: editorSettings,
-      highlights: highlightSettings,
-      ui: uiPreferences,
-      readability: readabilitySettings,
-      elementDetection: elementDetectionSettings,
-      metadata: {
-        exportedBy: "Hemingway Script Editor",
-        exportedAt: new Date().toISOString(),
-        deviceInfo: "Browser",
-        browserInfo: navigator.userAgent.substring(0, 50),
-      },
-    };
-
-    exportEditorSettings(settings);
-  }, [editorSettings, highlightSettings, uiPreferences, readabilitySettings, elementDetectionSettings]);
-
-  const handleImportSettings = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    try {
-      const importedSettings = await importEditorSettings(file);
-      setEditorSettings(importedSettings.editor);
-      setHighlightSettings(importedSettings.highlights);
-      setUIPreferences(importedSettings.ui);
-      setReadabilitySettings(importedSettings.readability);
-      setElementDetectionSettings(importedSettings.elementDetection);
-    } catch (error) {
-      console.error("Failed to import settings:", error);
-    }
-  }, []);
-
-  const handleResetSettings = useCallback(() => {
-    createSettingsBackup();
-    resetEditorSettings();
-    setEditorSettings(defaultSettings);
-    setHighlightSettings(defaultAdvancedSettings);
-    setUIPreferences(defaultUIPreferences);
-    setReadabilitySettings(defaultReadabilitySettings);
-    setElementDetectionSettings(defaultElementDetectionSettings);
-  }, []);
 
   const readabilityAnalysis = useMemo(() => {
     if (!text.trim() || !readabilitySettings.enabled) return null;
@@ -312,139 +199,14 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
 
   const handleSave = useCallback(() => {
     onSave?.(text);
-    saveCurrentSettings();
-  }, [text, onSave, saveCurrentSettings]);
+  }, [text, onSave]);
 
-  // Apply UI preferences as CSS variables
-  const editorStyles = useMemo(
-    () =>
-      ({
-        "--editor-font-family": uiPreferences.typography.fontFamily,
-        "--editor-font-size": `${uiPreferences.typography.fontSize}px`,
-        "--editor-line-height": uiPreferences.typography.lineHeight,
-        "--editor-letter-spacing": `${uiPreferences.typography.letterSpacing}px`,
-        "--editor-font-weight": uiPreferences.typography.fontWeight,
-        "--editor-text-align": uiPreferences.typography.textAlign,
-        "--editor-max-width": `${uiPreferences.layout.maxWidth}px`,
-        "--editor-padding": `${uiPreferences.layout.padding}px`,
-        "--editor-margin": `${uiPreferences.layout.margin}px`,
-        "--editor-border-radius": `${uiPreferences.theme.borderRadius}px`,
-        "--editor-border-width": `${uiPreferences.theme.borderWidth}px`,
-        "--editor-primary-color": uiPreferences.theme.primaryColor,
-        "--editor-accent-color": uiPreferences.theme.accentColor,
-      }) as React.CSSProperties,
-    [uiPreferences],
-  );
+
 
   return (
-    <div className="app-shell" style={editorStyles}>
-      {/* Left Sidebar - Tools & Navigation */}
-      <div className="left-sidebar bg-background/50 border-border/50 border-r backdrop-blur-sm">
-        <div className="flex flex-col items-center gap-4 p-4">
-          {/* Editor Title */}
-          <div className="flex flex-col items-center gap-2">
-            <FileText className="text-primary h-6 w-6" />
-            <h2 className="text-center text-xs font-medium">Hemingway Editor</h2>
-          </div>
-
-          <Separator orientation="horizontal" className="w-full" />
-
-          {/* Quick Actions */}
-          <div className="flex w-full flex-col gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setAdvancedControlsOpen(!advancedControlsOpen)}
-              className="h-10 w-10 p-0"
-              title="Highlight Controls"
-            >
-              <Sliders className="h-4 w-4" />
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setUIPreferencesOpen(!uiPreferencesOpen)}
-              className="h-10 w-10 p-0"
-              title="UI Preferences"
-            >
-              <Palette className="h-4 w-4" />
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSettingsPanelOpen(!settingsPanelOpen)}
-              className="h-10 w-10 p-0"
-              title="Settings"
-            >
-              <Settings className="h-4 w-4" />
-            </Button>
-          </div>
-
-          <Separator orientation="horizontal" className="w-full" />
-
-          {/* Save Actions */}
-          <div className="flex w-full flex-col gap-2">
-            <Button variant="ghost" size="sm" onClick={handleSave} className="h-10 w-10 p-0" title="Save">
-              <Save className="h-4 w-4" />
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleExportSettings}
-              className="h-10 w-10 p-0"
-              title="Export Settings"
-            >
-              <Download className="h-4 w-4" />
-            </Button>
-
-            <div className="relative">
-              <input
-                type="file"
-                accept=".json"
-                onChange={handleImportSettings}
-                className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-              />
-              <Button variant="ghost" size="sm" className="h-10 w-10 p-0" title="Import Settings">
-                <Upload className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <div className="app-shell">
       {/* Main Content Area */}
       <div className="main-content flex h-full flex-col">
-        {/* Settings Panels */}
-        {(settingsPanelOpen || advancedControlsOpen || uiPreferencesOpen) && (
-          <div className="border-border/50 border-b p-6">
-            <div className="grid gap-4">
-              {settingsPanelOpen && (
-                <SettingsPanel
-                  settings={editorSettings}
-                  onSettingsChange={setEditorSettings}
-                  isOpen={settingsPanelOpen}
-                  onToggle={() => setSettingsPanelOpen(!settingsPanelOpen)}
-                />
-              )}
-
-              {advancedControlsOpen && (
-                <AdvancedHighlightControls
-                  settings={highlightSettings}
-                  onSettingsChange={setHighlightSettings}
-                  scriptStats={scriptStats}
-                />
-              )}
-
-              {uiPreferencesOpen && (
-                <UIPreferencesPanel preferences={uiPreferences} onPreferencesChange={setUIPreferences} />
-              )}
-            </div>
-          </div>
-        )}
-
         {/* Editor */}
         <div className="flex-1 p-6">
           <Card className="h-full">
@@ -474,25 +236,9 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
                   onChange={(e) => handleTextChange(e.target.value)}
                   placeholder="Start writing your script here..."
                   className="h-full resize-none border-0 bg-transparent p-0 text-base leading-relaxed focus:ring-0 focus:outline-none"
-                  style={{
-                    fontFamily: `var(--editor-font-family)`,
-                    fontSize: `var(--editor-font-size)`,
-                    lineHeight: `var(--editor-line-height)`,
-                    letterSpacing: `var(--editor-letter-spacing)`,
-                    fontWeight: `var(--editor-font-weight)`,
-                    textAlign: `var(--editor-text-align)` as any,
-                  }}
                 />
 
-                {text && (
-                  <HighlightOverlay
-                    text={text}
-                    readabilityAnalysis={readabilityAnalysis}
-                    detectedElements={detectedElements}
-                    highlightSettings={highlightSettings}
-                    onElementClick={handleElementClick}
-                  />
-                )}
+
               </div>
             </CardContent>
           </Card>
@@ -607,29 +353,6 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
             </Card>
           )}
 
-          {/* Storage Info */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm">Storage</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs">
-                  <span>Settings Size</span>
-                  <span>{(getSettingsStorageInfo().used / 1024).toFixed(1)} KB</span>
-                </div>
-                <div className="bg-muted h-2 w-full rounded-full">
-                  <div
-                    className="bg-primary h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${Math.min(getSettingsStorageInfo().percentage, 100)}%` }}
-                  />
-                </div>
-                <Button variant="outline" size="sm" onClick={handleResetSettings} className="w-full text-xs">
-                  Reset All Settings
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
 
