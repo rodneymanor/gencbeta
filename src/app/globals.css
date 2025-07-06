@@ -433,3 +433,10 @@
   outline: none !important;
   border-color: inherit !important;
 }
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .video-item {
+    scale: 1 !important;
+  }
+}

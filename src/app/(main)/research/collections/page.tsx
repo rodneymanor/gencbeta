@@ -6,7 +6,6 @@ import { useState, useEffect, useCallback, useMemo, useTransition, useRef, memo 
 import { useSearchParams, useRouter } from "next/navigation";
 
 import { motion, AnimatePresence } from "framer-motion";
-
 import { FolderOpen } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +16,7 @@ import { CollectionsService, type Collection, type Video } from "@/lib/collectio
 import { CollectionsRBACService } from "@/lib/collections-rbac";
 
 import { CollectionBadgeMenu } from "./_components/collection-badge-menu";
+import CollectionSidebar from "./_components/collection-sidebar";
 import { badgeVariants } from "./_components/collections-animations";
 import {
   type VideoWithPlayer,
@@ -25,9 +25,21 @@ import {
   createVideoSelectionHandlers,
 } from "./_components/collections-helpers";
 import { CollectionsTopbarActions } from "./_components/collections-topbar-actions";
-import CollectionSidebar from "./_components/collection-sidebar";
 import { ManageModeHeader } from "./_components/manage-mode-header";
 import { VideoGrid } from "./_components/video-grid";
+
+// Smooth cross-fade component
+const Fade = ({ children, keyId }: { children: React.ReactNode; keyId: string }) => (
+  <motion.div
+    key={keyId}
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    transition={{ duration: 0.3, ease: "easeInOut" }}
+  >
+    {children}
+  </motion.div>
+);
 
 // Simplified cache for better performance
 interface SimpleCache {
@@ -65,7 +77,7 @@ const DelayedFallback = memo(
 
 DelayedFallback.displayName = "DelayedFallback";
 
-// Optimized collection badge with smooth transitions and management menu
+// Optimized collection badge with smooth transitions and stable layout
 const CollectionBadge = memo(
   ({
     collection,
@@ -89,12 +101,13 @@ const CollectionBadge = memo(
       whileHover="hover"
       whileTap={{ scale: 0.98 }}
       layout
+      layoutId={collection ? `badge-${collection.id}` : "badge-all"}
       transition={{ duration: 0.2, ease: "easeInOut" }}
       className="group relative"
     >
       <Badge
         variant="outline"
-        className={`focus-visible:ring-ring cursor-pointer font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 ${
+        className={`focus-visible:ring-ring min-w-[120px] cursor-pointer font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 ${
           isActive
             ? "bg-secondary text-foreground hover:bg-secondary/80 border-border/60 font-semibold shadow-sm"
             : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground hover:border-border/40 bg-transparent font-normal"
@@ -118,7 +131,27 @@ const CollectionBadge = memo(
 
 CollectionBadge.displayName = "CollectionBadge";
 
-// Main collections page component - simplified and optimized
+// Loading overlay component
+const LoadingOverlay = ({ show }: { show: boolean }) => (
+  <AnimatePresence>
+    {show && (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="bg-background/80 absolute inset-0 z-10 flex items-center justify-center backdrop-blur-sm"
+      >
+        <div className="text-muted-foreground flex items-center gap-2 text-sm">
+          <div className="border-primary h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
+          Loading collection...
+        </div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
+
+// Main collections page component - optimized for smooth transitions
 function CollectionsPageContent() {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [videos, setVideos] = useState<VideoWithPlayer[]>([]);
@@ -211,7 +244,7 @@ function CollectionsPageContent() {
     [setCachedVideos],
   );
 
-  // OPTIMIZED: Parallel data loading - this eliminates the 3-second delay
+  // OPTIMIZED: Parallel data loading with debounced transition end
   const loadData = useCallback(
     async (targetCollectionId?: string | null) => {
       if (!user) return;
@@ -223,7 +256,8 @@ function CollectionsPageContent() {
       if (cachedVideos) {
         console.log("📦 [Collections] Using cached data");
         setVideos(cachedVideos);
-        setIsTransitioning(false);
+        // Debounce transition end to avoid flash
+        setTimeout(() => setIsTransitioning(false), 50);
         return;
       }
 
@@ -256,13 +290,14 @@ function CollectionsPageContent() {
         console.error("❌ [Collections] Error loading data:", error);
       } finally {
         setIsLoading(false);
-        setIsTransitioning(false);
+        // Debounce transition end to avoid flash
+        setTimeout(() => setIsTransitioning(false), 50);
       }
     },
     [user, selectedCollectionId, getCachedVideos, validateCollectionExists, handleVideoResult],
   );
 
-  // Optimized collection navigation
+  // Optimized collection navigation - never clear videos, use overlay
   const handleCollectionChange = useCallback(
     (collectionId: string | null) => {
       if (collectionId === previousCollectionRef.current || isTransitioning) return;
@@ -274,6 +309,7 @@ function CollectionsPageContent() {
       if (cachedVideos) {
         setVideos(cachedVideos);
       } else {
+        // Show overlay instead of clearing videos
         setIsTransitioning(true);
       }
 
@@ -426,117 +462,123 @@ function CollectionsPageContent() {
       />
     );
 
-    setTopBarConfig({ 
+    setTopBarConfig({
       title: "Collections",
       titleIcon: FolderOpen,
       height: 53,
       className: "collections-topbar-two-column",
-      actions: topbarActions
+      actions: topbarActions,
     });
-  }, [selectedCollectionId, collections, setTopBarConfig, manageMode, selectedVideos, userProfile, handleVideoAdded, handleExitManageMode, handleBulkDelete, clearSelection, selectAllVideos]);
+  }, [
+    selectedCollectionId,
+    collections,
+    setTopBarConfig,
+    manageMode,
+    selectedVideos,
+    userProfile,
+    handleVideoAdded,
+    handleExitManageMode,
+    handleBulkDelete,
+    clearSelection,
+    selectAllVideos,
+  ]);
 
-  // Show loading only for initial load
-  if (isLoading) {
-    return (
-      <div className="@container/main">
-        <div className="flex gap-6 max-w-6xl mx-auto p-4 md:p-6">
-          <div className="flex-1 min-w-0 space-y-8 md:space-y-10">
-            <PageHeaderLoading />
-            <VideoCollectionLoading count={12} />
-          </div>
-          <div className="hidden md:block w-[313px] flex-shrink-0">
-            <div className="animate-pulse">
-              <div className="h-6 bg-muted rounded mb-4"></div>
-              <div className="space-y-3">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="h-8 bg-muted/50 rounded"></div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+  // Smooth cross-fade between loading and content
   return (
     <div className="@container/main">
-      {/* Two-column layout: main content + sidebar */}
-      <div className="flex gap-6 max-w-6xl mx-auto">
-        {/* Main content column */}
-        <div className="flex-1 min-w-0 space-y-8 md:space-y-10">
-          {/* Header Section */}
-          <section className="space-y-4">
-            <div className="space-y-2">
-              <h1 className="text-foreground text-3xl font-bold tracking-tight">{pageTitle}</h1>
-              <p className="text-muted-foreground text-lg">{pageDescription}</p>
-            </div>
-          </section>
-
-          {/* Mobile collection badges - visible only on mobile */}
-          <section className="md:hidden space-y-4">
-            <div className="flex flex-wrap items-center gap-3">
-              <CollectionBadge
-                isActive={!selectedCollectionId}
-                onClick={() => handleCollectionChange(null)}
-                videoCount={videos.length}
-                isTransitioning={isTransitioning && !selectedCollectionId}
-                onCollectionDeleted={handleCollectionDeleted}
-              />
-              <AnimatePresence mode="popLayout">
-                {collections.map((collection) => (
-                  <CollectionBadge
-                    key={collection.id}
-                    collection={collection}
-                    isActive={selectedCollectionId === collection.id}
-                    onClick={() => handleCollectionChange(collection.id!)}
-                    videoCount={collection.videoCount || 0}
-                    isTransitioning={isTransitioning && selectedCollectionId === collection.id}
-                    onCollectionDeleted={handleCollectionDeleted}
-                  />
-                ))}
-              </AnimatePresence>
-            </div>
-          </section>
-
-          {/* Transition indicator */}
-          {isTransitioning && (
-            <div className="flex items-center justify-center py-4">
-              <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                <div className="border-primary h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
-                Loading collection...
+      <AnimatePresence mode="wait">
+        {isLoading ? (
+          <Fade keyId="loading">
+            <div className="mx-auto flex max-w-6xl gap-6 p-4 md:p-6">
+              <div className="min-w-0 flex-1 space-y-8 md:space-y-10">
+                <PageHeaderLoading />
+                <VideoCollectionLoading count={12} />
+              </div>
+              <div className="hidden w-[313px] flex-shrink-0 md:block">
+                <div className="animate-pulse">
+                  <div className="bg-muted mb-4 h-6 rounded"></div>
+                  <div className="space-y-3">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="bg-muted/50 h-8 rounded"></div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
-          )}
+          </Fade>
+        ) : (
+          <Fade keyId="content">
+            <div className="relative mx-auto flex max-w-6xl gap-6">
+              {/* Loading overlay */}
+              <LoadingOverlay show={isTransitioning} />
 
-          {/* Videos Content Section */}
-          <VideoGrid
-            videos={videos}
-            collections={collections}
-            selectedCollectionId={selectedCollectionId}
-            loadingVideos={isTransitioning}
-            isPending={isPending}
-            manageMode={manageMode}
-            selectedVideos={selectedVideos}
-            deletingVideos={deletingVideos}
-            onToggleVideoSelection={toggleVideoSelection}
-            onDeleteVideo={handleDeleteVideo}
-            onVideoAdded={handleVideoAdded}
-          />
-        </div>
+              {/* Main content column */}
+              <div className="min-w-0 flex-1 space-y-8 md:space-y-10">
+                {/* Header Section */}
+                <section className="space-y-4">
+                  <div className="space-y-2">
+                    <h1 className="text-foreground text-3xl font-bold tracking-tight">{pageTitle}</h1>
+                    <p className="text-muted-foreground text-lg">{pageDescription}</p>
+                  </div>
+                </section>
 
-        {/* Right sidebar - hidden on mobile */}
-        <div className="hidden md:block w-[313px] flex-shrink-0">
-          <div className="sticky top-4">
-            <CollectionSidebar
-              collections={collections}
-              selectedCollectionId={selectedCollectionId}
-              onSelectionChange={handleCollectionChange}
-              videoCount={videos.length}
-            />
-          </div>
-        </div>
-      </div>
+                {/* Mobile collection badges - visible only on mobile */}
+                <section className="space-y-4 md:hidden">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <CollectionBadge
+                      isActive={!selectedCollectionId}
+                      onClick={() => handleCollectionChange(null)}
+                      videoCount={videos.length}
+                      isTransitioning={isTransitioning && !selectedCollectionId}
+                      onCollectionDeleted={handleCollectionDeleted}
+                    />
+                    <AnimatePresence mode="popLayout">
+                      {collections.map((collection) => (
+                        <CollectionBadge
+                          key={collection.id}
+                          collection={collection}
+                          isActive={selectedCollectionId === collection.id}
+                          onClick={() => handleCollectionChange(collection.id!)}
+                          videoCount={collection.videoCount || 0}
+                          isTransitioning={isTransitioning && selectedCollectionId === collection.id}
+                          onCollectionDeleted={handleCollectionDeleted}
+                        />
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                </section>
+
+                {/* Videos Content Section */}
+                <VideoGrid
+                  videos={videos}
+                  collections={collections}
+                  selectedCollectionId={selectedCollectionId}
+                  loadingVideos={isTransitioning}
+                  isPending={isPending}
+                  manageMode={manageMode}
+                  selectedVideos={selectedVideos}
+                  deletingVideos={deletingVideos}
+                  onToggleVideoSelection={toggleVideoSelection}
+                  onDeleteVideo={handleDeleteVideo}
+                  onVideoAdded={handleVideoAdded}
+                />
+              </div>
+
+              {/* Right sidebar - hidden on mobile */}
+              <div className="hidden w-[313px] flex-shrink-0 md:block">
+                <div className="sticky top-4">
+                  <CollectionSidebar
+                    collections={collections}
+                    selectedCollectionId={selectedCollectionId}
+                    onSelectionChange={handleCollectionChange}
+                    videoCount={videos.length}
+                  />
+                </div>
+              </div>
+            </div>
+          </Fade>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

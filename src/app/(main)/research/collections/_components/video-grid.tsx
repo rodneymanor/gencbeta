@@ -2,6 +2,7 @@
 
 import { memo, useState } from "react";
 
+import { motion, AnimatePresence } from "framer-motion";
 import { Plus } from "lucide-react";
 
 import type { Collection } from "@/lib/collections";
@@ -11,6 +12,21 @@ import type { VideoWithPlayer } from "./collections-helpers";
 import { VideosLoadingSkeleton } from "./loading-skeleton";
 import { processAndAddVideo } from "./simple-video-processing";
 import { VideoCard } from "./video-card";
+
+// Animation variants for staggered video loading
+const containerVariants = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.05,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, scale: 0.96 },
+  show: { opacity: 1, scale: 1 },
+};
 
 interface VideoGridProps {
   videos: VideoWithPlayer[];
@@ -83,7 +99,12 @@ export const VideoGrid = memo<VideoGridProps>(
     // Empty state with improved styling
     if (videos.length === 0) {
       return (
-        <div className="flex flex-col items-center justify-center px-6 py-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="flex flex-col items-center justify-center px-6 py-16"
+        >
           <div className="bg-secondary/60 mb-6 flex h-16 w-16 items-center justify-center rounded-full shadow-sm">
             <Plus className="text-muted-foreground h-8 w-8" />
           </div>
@@ -103,28 +124,44 @@ export const VideoGrid = memo<VideoGridProps>(
               Add Your First Video
             </button>
           </AddVideoDialog>
-        </div>
+        </motion.div>
       );
     }
 
-    // Video grid optimized for two-column layout
+    // Video grid optimized for two-column layout with staggered animations
     return (
-      <div className="grid grid-cols-3 gap-4">
-        {videos.map((video) => (
-          <VideoCard
-            key={video.id}
-            video={video}
-            isManageMode={manageMode}
-            isSelected={selectedVideos.has(video.id!)}
-            isDeleting={deletingVideos.has(video.id!)}
-            isReprocessing={reprocessingVideos.has(video.id!)}
-            onToggleSelection={() => onToggleVideoSelection(video.id!)}
-            onDelete={() => onDeleteVideo(video.id!)}
-            onReprocess={handleReprocessVideo}
-            className="border-border/60 hover:border-border/80 shadow-sm transition-all duration-200 hover:shadow-md"
-          />
-        ))}
-      </div>
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        className="grid grid-cols-3 gap-4"
+        style={{ contentVisibility: "auto" }}
+      >
+        <AnimatePresence mode="popLayout">
+          {videos.map((video) => (
+            <motion.div
+              key={video.id}
+              variants={itemVariants}
+              layout
+              layoutId={`video-${video.id}`}
+              className="video-item"
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <VideoCard
+                video={video}
+                isManageMode={manageMode}
+                isSelected={selectedVideos.has(video.id!)}
+                isDeleting={deletingVideos.has(video.id!)}
+                isReprocessing={reprocessingVideos.has(video.id!)}
+                onToggleSelection={() => onToggleVideoSelection(video.id!)}
+                onDelete={() => onDeleteVideo(video.id!)}
+                onReprocess={handleReprocessVideo}
+                className="border-border/60 hover:border-border/80 shadow-sm transition-all duration-200 hover:shadow-md"
+              />
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </motion.div>
     );
   },
   // Enhanced memo comparison
