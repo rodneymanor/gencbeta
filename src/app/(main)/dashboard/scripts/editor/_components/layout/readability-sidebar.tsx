@@ -109,7 +109,10 @@ export function ReadabilitySidebar({ script }: ReadabilitySidebarProps) {
         </div>
 
         {/* Overall Score */}
-        <Card className={`${getReadabilityBgColor(readabilityLevel.score)} border-2`}>
+        <Card
+          className={`${getReadabilityBgColor(readabilityLevel.score)}`}
+          style={{ border: "1px solid var(--border)" }}
+        >
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
               <TrendingUp className="h-4 w-4" />
