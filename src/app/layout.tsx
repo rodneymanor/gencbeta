@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
+
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 
@@ -8,7 +9,7 @@ import { AppStateProvider } from "@/contexts/app-state-context";
 import { AuthProvider } from "@/contexts/auth-context";
 import { UsageProvider } from "@/contexts/usage-context";
 import { VideoPlaybackProvider } from "@/contexts/video-playback-context";
-import { ReactQueryProvider } from "@/providers/react-query-provider";
+import { QueryProvider } from "@/providers/react-query-provider";
 
 import "./globals.css";
 
@@ -23,15 +24,11 @@ export const metadata: Metadata = {
   description: "Script writing application",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="light" suppressHydrationWarning>
       <body className={`${poppins.className} min-h-screen antialiased`}>
-        <ReactQueryProvider>
+        <QueryProvider>
           <AuthProvider>
             <UsageProvider>
               <AppStateProvider>
@@ -44,7 +41,7 @@ export default function RootLayout({
               </AppStateProvider>
             </UsageProvider>
           </AuthProvider>
-        </ReactQueryProvider>
+        </QueryProvider>
       </body>
     </html>
   );

@@ -1,28 +1,29 @@
 "use client";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState } from "react";
 
-export function ReactQueryProvider({ children }: { children: React.ReactNode }) {
+import { QueryClient, QueryClientProvider, HydrationBoundary } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+
+interface QueryProviderProps {
+  children: React.ReactNode;
+}
+
+export function QueryProvider({ children }: QueryProviderProps) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
         defaultOptions: {
           queries: {
             staleTime: 60 * 1000, // 1 minute
-            gcTime: 5 * 60 * 1000, // 5 minutes (formerly cacheTime)
-            retry: (failureCount, error) => {
-              // Don't retry on 4xx errors
-              if (error && typeof error === 'object' && 'status' in error) {
-                const status = error.status as number;
-                if (status >= 400 && status < 500) return false;
-              }
-              return failureCount < 3;
-            },
+            retry: 1,
+            refetchOnWindowFocus: false,
+          },
+          mutations: {
+            retry: 1,
           },
         },
-      })
+      }),
   );
 
   return (
@@ -31,4 +32,9 @@ export function ReactQueryProvider({ children }: { children: React.ReactNode }) 
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
-} 
+}
+
+// Component for hydrating React Query with server data
+export function ReactQueryHydrate({ children, state }: { children: React.ReactNode; state?: unknown }) {
+  return <HydrationBoundary state={state}>{children}</HydrationBoundary>;
+}
