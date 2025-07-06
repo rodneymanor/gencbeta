@@ -24,6 +24,7 @@ import {
   getPageDescription,
   createVideoSelectionHandlers,
 } from "./_components/collections-helpers";
+import { CollectionsTopbarActions } from "./_components/collections-topbar-actions";
 import { ManageModeHeader } from "./_components/manage-mode-header";
 import { VideoGrid } from "./_components/video-grid";
 
@@ -312,28 +313,6 @@ function CollectionsPageContent() {
     }
   }, [user, userProfile, isLoading, loadData]);
 
-  // Update top bar title when collections or selection changes
-  useEffect(() => {
-    if (selectedCollectionId && collections.length > 0) {
-      const collection = collections.find((c) => c.id === selectedCollectionId);
-      if (collection) {
-        setTopBarConfig({ 
-          title: collection.title,
-          titleIcon: FolderOpen,
-          height: 53,
-          className: "collections-topbar"
-        });
-      }
-    } else {
-      setTopBarConfig({ 
-        title: "Collections",
-        titleIcon: FolderOpen,
-        height: 53,
-        className: "collections-topbar"
-      });
-    }
-  }, [selectedCollectionId, collections, setTopBarConfig]);
-
   // Video management functions
   const handleVideoAdded = useCallback(async () => {
     // Clear cache and reload
@@ -429,6 +408,45 @@ function CollectionsPageContent() {
     setSelectedVideos(new Set());
   }, []);
 
+  // Update top bar title when collections or selection changes
+  useEffect(() => {
+    const topbarActions = (
+      <CollectionsTopbarActions
+        collections={collections}
+        selectedCollectionId={selectedCollectionId}
+        manageMode={manageMode}
+        selectedVideos={selectedVideos}
+        onManageModeToggle={() => userProfile?.role !== "creator" && setManageMode(true)}
+        onExitManageMode={handleExitManageMode}
+        onBulkDelete={handleBulkDelete}
+        onClearSelection={clearSelection}
+        onSelectAll={selectAllVideos}
+        onVideoAdded={handleVideoAdded}
+      />
+    );
+
+    if (selectedCollectionId && collections.length > 0) {
+      const collection = collections.find((c) => c.id === selectedCollectionId);
+      if (collection) {
+        setTopBarConfig({ 
+          title: collection.title,
+          titleIcon: FolderOpen,
+          height: 53,
+          className: "collections-topbar",
+          actions: topbarActions
+        });
+      }
+    } else {
+      setTopBarConfig({ 
+        title: "Collections",
+        titleIcon: FolderOpen,
+        height: 53,
+        className: "collections-topbar",
+        actions: topbarActions
+      });
+    }
+  }, [selectedCollectionId, collections, setTopBarConfig, manageMode, selectedVideos, userProfile, handleVideoAdded, handleExitManageMode, handleBulkDelete, clearSelection, selectAllVideos]);
+
   // Show loading only for initial load
   if (isLoading) {
     return (
@@ -447,25 +465,9 @@ function CollectionsPageContent() {
       <div className="mx-auto max-w-4xl space-y-8 md:space-y-10">
         {/* Header Section - Simplified animations */}
         <section className="space-y-4">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="space-y-2">
-              <h1 className="text-foreground text-3xl font-bold tracking-tight">{pageTitle}</h1>
-              <p className="text-muted-foreground text-lg">{pageDescription}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <ManageModeHeader
-                manageMode={manageMode}
-                selectedVideos={selectedVideos}
-                collections={collections}
-                selectedCollectionId={selectedCollectionId}
-                onManageModeToggle={() => userProfile?.role !== "creator" && setManageMode(true)}
-                onExitManageMode={handleExitManageMode}
-                onBulkDelete={handleBulkDelete}
-                onClearSelection={clearSelection}
-                onSelectAll={selectAllVideos}
-                onVideoAdded={handleVideoAdded}
-              />
-            </div>
+          <div className="space-y-2">
+            <h1 className="text-foreground text-3xl font-bold tracking-tight">{pageTitle}</h1>
+            <p className="text-muted-foreground text-lg">{pageDescription}</p>
           </div>
         </section>
 
