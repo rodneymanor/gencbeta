@@ -31,7 +31,7 @@ export const getPageDescription = (selectedCollectionId: string | null, collecti
 
 export const createVideoSelectionHandlers = (
   setSelectedVideos: React.Dispatch<React.SetStateAction<Set<string>>>,
-  videos: VideoWithPlayer[],
+  videosRef: React.MutableRefObject<VideoWithPlayer[]>,
 ) => {
   const toggleVideoSelection = (videoId: string) => {
     setSelectedVideos((prev) => {
@@ -46,7 +46,7 @@ export const createVideoSelectionHandlers = (
   };
 
   const selectAllVideos = () => {
-    const allVideoIds = videos.map((v) => v.id!);
+    const allVideoIds = videosRef.current.map((v) => v.id!);
     setSelectedVideos(new Set(allVideoIds));
   };
 
