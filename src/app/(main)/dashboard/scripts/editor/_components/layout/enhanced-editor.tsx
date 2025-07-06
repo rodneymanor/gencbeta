@@ -31,7 +31,14 @@ import {
   defaultReadabilitySettings,
 } from "@/lib/enhanced-readability-service";
 
-import { analyzeElement, enhanceElement, generateAlternatives } from "@/lib/script-element-actions";
+import { 
+  analyzeElement, 
+  generateAlternatives,
+  enhanceHook,
+  strengthenBridge,
+  amplifyGoldenNugget,
+  optimizeCTA
+} from "@/lib/script-element-actions";
 import {
   HemingwayEditorSettings,
   saveEditorSettings,
@@ -99,26 +106,6 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
     }
   }, []);
 
-  // Update services when settings change
-  useEffect(() => {
-    readabilityService.updateSettings(readabilitySettings);
-  }, [readabilitySettings, readabilityService]);
-
-  useEffect(() => {
-    elementDetectionService.updateSettings(elementDetectionSettings);
-  }, [elementDetectionSettings, elementDetectionService]);
-
-  // Auto-save settings
-  useEffect(() => {
-    if (editorSettings.advanced.autoSave) {
-      const interval = setInterval(() => {
-        saveCurrentSettings();
-      }, editorSettings.advanced.saveInterval * 1000);
-
-      return () => clearInterval(interval);
-    }
-  }, [editorSettings.advanced.autoSave, editorSettings.advanced.saveInterval, saveCurrentSettings]);
-
   const saveCurrentSettings = useCallback(() => {
     const settings: HemingwayEditorSettings = {
       version: "1.0.0",
@@ -138,6 +125,26 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
 
     saveEditorSettings(settings);
   }, [editorSettings, highlightSettings, uiPreferences, readabilitySettings, elementDetectionSettings]);
+
+  // Update services when settings change
+  useEffect(() => {
+    readabilityService.updateSettings(readabilitySettings);
+  }, [readabilitySettings, readabilityService]);
+
+  useEffect(() => {
+    elementDetectionService.updateSettings(elementDetectionSettings);
+  }, [elementDetectionSettings, elementDetectionService]);
+
+  // Auto-save settings
+  useEffect(() => {
+    if (editorSettings.advanced.autoSave) {
+      const interval = setInterval(() => {
+        saveCurrentSettings();
+      }, editorSettings.advanced.saveInterval * 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [editorSettings.advanced.autoSave, editorSettings.advanced.saveInterval, saveCurrentSettings]);
 
   const handleExportSettings = useCallback(() => {
     const settings: HemingwayEditorSettings = {
@@ -241,6 +248,25 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
     setContextMenuPosition(null);
   }, []);
 
+  const enhanceElement = useCallback(async (elementType: string, elementText: string) => {
+    switch (elementType) {
+      case 'hook':
+        const hookResult = await enhanceHook(elementText);
+        return hookResult.success ? hookResult.result : null;
+      case 'bridge':
+        const bridgeResult = await strengthenBridge(elementText);
+        return bridgeResult.success ? bridgeResult.result : null;
+      case 'golden-nugget':
+        const nuggetResult = await amplifyGoldenNugget(elementText);
+        return nuggetResult.success ? nuggetResult.result : null;
+      case 'cta':
+        const ctaResult = await optimizeCTA(elementText);
+        return ctaResult.success ? ctaResult.result : null;
+      default:
+        return null;
+    }
+  }, []);
+
   const handleEnhanceElement = useCallback(
     async (element: any) => {
       if (!element) return;
@@ -257,7 +283,7 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
 
       handleContextMenuClose();
     },
-    [text, handleTextChange, handleContextMenuClose],
+    [text, handleTextChange, handleContextMenuClose, enhanceElement],
   );
 
   const handleAnalyzeElement = useCallback(
