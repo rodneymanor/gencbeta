@@ -25,10 +25,9 @@ import {
   createVideoSelectionHandlers,
 } from "./_components/collections-helpers";
 import { CollectionsTopbarActions } from "./_components/collections-topbar-actions";
-import { ManageModeHeader } from "./_components/manage-mode-header";
 import { VideoGrid } from "./_components/video-grid";
 
-// Smooth cross-fade component
+// Smooth cross-fade component with proper keying
 const Fade = ({ children, keyId }: { children: React.ReactNode; keyId: string }) => (
   <motion.div
     key={keyId}
@@ -47,35 +46,6 @@ interface SimpleCache {
 }
 
 const CACHE_DURATION = 30000; // 30 seconds
-
-// Delayed fallback component to prevent flash
-const DelayedFallback = memo(
-  ({ delay = 200, show, children }: { delay?: number; show: boolean; children: React.ReactNode }) => {
-    const [shouldShow, setShouldShow] = useState(false);
-    const timeoutRef = useRef<NodeJS.Timeout>();
-
-    useEffect(() => {
-      if (show) {
-        timeoutRef.current = setTimeout(() => setShouldShow(true), delay);
-      } else {
-        setShouldShow(false);
-        if (timeoutRef.current) {
-          clearTimeout(timeoutRef.current);
-        }
-      }
-
-      return () => {
-        if (timeoutRef.current) {
-          clearTimeout(timeoutRef.current);
-        }
-      };
-    }, [show, delay]);
-
-    return shouldShow ? <>{children}</> : null;
-  },
-);
-
-DelayedFallback.displayName = "DelayedFallback";
 
 // Optimized collection badge with smooth transitions and stable layout
 const CollectionBadge = memo(
@@ -155,7 +125,8 @@ const LoadingOverlay = ({ show }: { show: boolean }) => (
 function CollectionsPageContent() {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [videos, setVideos] = useState<VideoWithPlayer[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [, setPreviousVideos] = useState<VideoWithPlayer[]>([]);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [manageMode, setManageMode] = useState(false);
   const [selectedVideos, setSelectedVideos] = useState<Set<string>>(new Set());
@@ -164,7 +135,6 @@ function CollectionsPageContent() {
 
   // Simplified cache
   const cacheRef = useRef<SimpleCache>({ data: new Map() });
-
   const previousCollectionRef = useRef<string | null>(null);
 
   const { user, userProfile } = useAuth();
@@ -222,7 +192,7 @@ function CollectionsPageContent() {
     [router],
   );
 
-  // Helper function to handle video loading result
+  // Helper function to handle video loading result - NEVER clears videos array
   const handleVideoResult = useCallback(
     (videosResult: PromiseSettledResult<Video[]>, collectionId: string | null) => {
       if (videosResult.status === "fulfilled") {
@@ -231,17 +201,20 @@ function CollectionsPageContent() {
           isPlaying: false,
         }));
 
+        // Store previous videos before updating
+        setPreviousVideos(videos);
         setVideos(optimizedVideos);
         setCachedVideos(collectionId, optimizedVideos);
       } else {
         console.error("Error loading videos:", videosResult.reason);
-        // If videos failed to load due to invalid collection, clear videos
-        if (videosResult.reason?.message?.includes("Collection not found")) {
+        // Only clear videos if it's a collection not found error AND we have no cached fallback
+        if (videosResult.reason?.message?.includes("Collection not found") && !getCachedVideos(null)) {
+          setPreviousVideos(videos);
           setVideos([]);
         }
       }
     },
-    [setCachedVideos],
+    [videos, setCachedVideos, getCachedVideos],
   );
 
   // OPTIMIZED: Parallel data loading with debounced transition end
@@ -255,6 +228,8 @@ function CollectionsPageContent() {
       const cachedVideos = getCachedVideos(collectionId);
       if (cachedVideos) {
         console.log("📦 [Collections] Using cached data");
+        // Store previous videos before updating
+        setPreviousVideos(videos);
         setVideos(cachedVideos);
         // Debounce transition end to avoid flash
         setTimeout(() => setIsTransitioning(false), 50);
@@ -282,22 +257,22 @@ function CollectionsPageContent() {
           console.error("Error loading collections:", collectionsResult.reason);
         }
 
-        // Handle videos result
+        // Handle videos result - NEVER clears existing videos
         handleVideoResult(videosResult, collectionId);
 
         console.log("✅ [Collections] Parallel loading completed");
       } catch (error) {
         console.error("❌ [Collections] Error loading data:", error);
       } finally {
-        setIsLoading(false);
+        setIsInitialLoading(false);
         // Debounce transition end to avoid flash
         setTimeout(() => setIsTransitioning(false), 50);
       }
     },
-    [user, selectedCollectionId, getCachedVideos, validateCollectionExists, handleVideoResult],
+    [user, selectedCollectionId, getCachedVideos, validateCollectionExists, handleVideoResult, videos],
   );
 
-  // Optimized collection navigation - never clear videos, use overlay
+  // Optimized collection navigation - NEVER clears videos, uses overlay
   const handleCollectionChange = useCallback(
     (collectionId: string | null) => {
       if (collectionId === previousCollectionRef.current || isTransitioning) return;
@@ -307,9 +282,11 @@ function CollectionsPageContent() {
       // Check cache first for instant switching
       const cachedVideos = getCachedVideos(collectionId);
       if (cachedVideos) {
+        // Store previous videos before updating
+        setPreviousVideos(videos);
         setVideos(cachedVideos);
       } else {
-        // Show overlay instead of clearing videos
+        // Show overlay but KEEP existing videos visible
         setIsTransitioning(true);
       }
 
@@ -324,7 +301,7 @@ function CollectionsPageContent() {
         loadData(collectionId);
       }
     },
-    [router, isTransitioning, getCachedVideos, loadData],
+    [router, isTransitioning, getCachedVideos, loadData, videos],
   );
 
   // Role-based access control
@@ -345,10 +322,10 @@ function CollectionsPageContent() {
 
   // OPTIMIZED: Single data loading effect
   useEffect(() => {
-    if (user && userProfile && isLoading) {
+    if (user && userProfile && isInitialLoading) {
       loadData();
     }
-  }, [user, userProfile, isLoading, loadData]);
+  }, [user, userProfile, isInitialLoading, loadData]);
 
   // Video management functions
   const handleVideoAdded = useCallback(async () => {
@@ -384,7 +361,8 @@ function CollectionsPageContent() {
       try {
         await CollectionsService.deleteVideo(user.uid, videoId);
 
-        // Optimistic update
+        // Optimistic update - store previous before updating
+        setPreviousVideos(videos);
         setVideos((prev) => {
           const newVideos = prev.filter((video) => video.id !== videoId);
           setCachedVideos(selectedCollectionId, newVideos);
@@ -407,7 +385,7 @@ function CollectionsPageContent() {
         });
       }
     },
-    [user, selectedCollectionId, setCachedVideos, loadData],
+    [user, selectedCollectionId, setCachedVideos, loadData, videos],
   );
 
   const handleBulkDelete = useCallback(async () => {
@@ -424,7 +402,8 @@ function CollectionsPageContent() {
         await Promise.all(batch.map((videoId) => CollectionsService.deleteVideo(user.uid, videoId)));
       }
 
-      // Optimistic update
+      // Optimistic update - store previous before updating
+      setPreviousVideos(videos);
       setVideos((prev) => {
         const newVideos = prev.filter((video) => !videoIds.includes(video.id!));
         setCachedVideos(selectedCollectionId, newVideos);
@@ -438,7 +417,7 @@ function CollectionsPageContent() {
       await loadData();
       setDeletingVideos(new Set());
     }
-  }, [user, selectedVideos, selectedCollectionId, setCachedVideos, loadData]);
+  }, [user, selectedVideos, selectedCollectionId, setCachedVideos, loadData, videos]);
 
   const handleExitManageMode = useCallback(() => {
     setManageMode(false);
@@ -483,12 +462,15 @@ function CollectionsPageContent() {
     selectAllVideos,
   ]);
 
+  // Create a unique key for content to enable proper cross-fade
+  const contentKey = `content-${selectedCollectionId ?? "all"}-${videos.length}`;
+
   // Smooth cross-fade between loading and content
   return (
     <div className="@container/main">
       <AnimatePresence mode="wait">
-        {isLoading ? (
-          <Fade keyId="loading">
+        {isInitialLoading ? (
+          <Fade keyId="initial-loading">
             <div className="mx-auto flex max-w-6xl gap-6 p-4 md:p-6">
               <div className="min-w-0 flex-1 space-y-8 md:space-y-10">
                 <PageHeaderLoading />
@@ -507,7 +489,7 @@ function CollectionsPageContent() {
             </div>
           </Fade>
         ) : (
-          <Fade keyId="content">
+          <Fade keyId={contentKey}>
             <div className="relative mx-auto flex max-w-6xl gap-6">
               {/* Loading overlay */}
               <LoadingOverlay show={isTransitioning} />

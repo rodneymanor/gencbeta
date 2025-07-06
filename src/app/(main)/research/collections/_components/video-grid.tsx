@@ -28,6 +28,21 @@ const itemVariants = {
   show: { opacity: 1, scale: 1 },
 };
 
+// VideoSkeleton with exact same dimensions as real video cards
+export const VideoSkeleton = () => (
+  <div className="border-border/60 bg-card space-y-3 rounded-lg border p-4 shadow-sm">
+    <div className="bg-muted aspect-[9/16] animate-pulse rounded-md" />
+    <div className="space-y-2">
+      <div className="bg-muted h-4 animate-pulse rounded" />
+      <div className="bg-muted/60 h-3 w-3/4 animate-pulse rounded" />
+    </div>
+    <div className="flex items-center gap-2">
+      <div className="bg-muted h-6 w-12 animate-pulse rounded" />
+      <div className="bg-muted h-6 w-16 animate-pulse rounded" />
+    </div>
+  </div>
+);
+
 interface VideoGridProps {
   videos: VideoWithPlayer[];
   collections: Collection[];
@@ -91,13 +106,13 @@ export const VideoGrid = memo<VideoGridProps>(
       }
     };
 
-    // Show loading state
-    if (loadingVideos || isPending) {
+    // Show loading state ONLY for initial page load
+    if (isPending && videos.length === 0) {
       return <VideosLoadingSkeleton />;
     }
 
     // Empty state with improved styling
-    if (videos.length === 0) {
+    if (videos.length === 0 && !loadingVideos) {
       return (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -128,7 +143,11 @@ export const VideoGrid = memo<VideoGridProps>(
       );
     }
 
-    // Video grid optimized for two-column layout with staggered animations
+    // Calculate skeleton count to maintain grid layout
+    const targetGridSize = 12; // Minimum grid size
+    const skeletonCount = Math.max(0, targetGridSize - videos.length);
+
+    // Video grid with maintained dimensions during transitions
     return (
       <motion.div
         variants={containerVariants}
@@ -138,6 +157,7 @@ export const VideoGrid = memo<VideoGridProps>(
         style={{ contentVisibility: "auto" }}
       >
         <AnimatePresence mode="popLayout">
+          {/* Render existing videos */}
           {videos.map((video) => (
             <motion.div
               key={video.id}
@@ -160,6 +180,20 @@ export const VideoGrid = memo<VideoGridProps>(
               />
             </motion.div>
           ))}
+
+          {/* Render skeleton cards when loading to maintain grid size */}
+          {loadingVideos &&
+            skeletonCount > 0 &&
+            [...Array(skeletonCount)].map((_, index) => (
+              <motion.div
+                key={`skeleton-${index}`}
+                variants={itemVariants}
+                className="video-item"
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              >
+                <VideoSkeleton />
+              </motion.div>
+            ))}
         </AnimatePresence>
       </motion.div>
     );
