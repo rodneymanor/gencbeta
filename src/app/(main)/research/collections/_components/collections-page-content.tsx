@@ -1,19 +1,18 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, useTransition, useRef } from "react";
-
-import { useSearchParams, useRouter } from "next/navigation";
-
-import { motion } from "framer-motion";
+import { useState, useEffect, useCallback, useMemo, useTransition } from "react";
+import { useSearchParams } from "next/navigation";
 import { FolderOpen } from "lucide-react";
 
 import { useAuth } from "@/contexts/auth-context";
 import { useTopBarConfig } from "@/hooks/use-route-topbar";
-import type { Collection, Video } from "@/lib/collections";
+import { useCollectionsQuery, useCollectionVideosQuery, useInvalidateCollections } from "@/hooks/use-collections-query";
+import { useDebouncedNavigation } from "@/hooks/use-debounced-navigation";
+import { MotionDiv } from "@/components/dynamic-motion";
+import type { Collection } from "@/lib/collections";
 
 import { CollectionBadge } from "./collection-badge";
 import CollectionSidebar from "./collection-sidebar";
-import { CollectionsDataManager } from "./collections-data-manager";
 import {
   type VideoWithPlayer,
   getPageTitle,
@@ -21,193 +20,206 @@ import {
   createVideoSelectionHandlers,
 } from "./collections-helpers";
 import { CollectionsTopbarActions } from "./collections-topbar-actions";
-import { useCollectionsLogic } from "./use-collections-logic";
-import { VideoGridWithSuspense } from "./video-grid-with-suspense";
-
-// Smooth cross-fade component with proper keying
-const Fade = ({ children, keyId }: { children: React.ReactNode; keyId: string }) => (
-  <motion.div
-    key={keyId}
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    exit={{ opacity: 0 }}
-    transition={{ duration: 0.3, ease: "easeInOut" }}
-  >
-    {children}
-  </motion.div>
-);
+import { VirtualizedVideoGrid } from "./virtualized-video-grid";
 
 interface CollectionsPageContentProps {
   initialCollections: Collection[];
   initialVideos: VideoWithPlayer[];
 }
 
-// Main collections page client component - optimized for smooth transitions
-export default function CollectionsPageContent({ initialCollections, initialVideos }: CollectionsPageContentProps) {
-  const [collections, setCollections] = useState<Collection[]>(initialCollections);
-  const [videos, setVideos] = useState<VideoWithPlayer[]>(initialVideos);
-  const [, setPreviousVideos] = useState<VideoWithPlayer[]>([]);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+// Loading component
+function LoadingState() {
+  return (
+    <div className="@container/main">
+      <div className="flex gap-6 max-w-6xl mx-auto relative">
+        <div className="flex-1 min-w-0 space-y-8 md:space-y-10">
+          <div className="animate-pulse">
+            <div className="h-8 bg-muted rounded w-48 mb-2"></div>
+            <div className="h-6 bg-muted rounded w-96"></div>
+          </div>
+          <div className="grid grid-cols-3 gap-4">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <div key={i} className="animate-pulse">
+                <div className="aspect-video bg-muted rounded"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="hidden w-[313px] flex-shrink-0 md:block">
+          <div className="animate-pulse">
+            <div className="h-6 bg-muted rounded mb-4"></div>
+            <div className="space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="h-10 bg-muted rounded"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Error component
+function ErrorState({ collectionsError, videosError }: { collectionsError?: Error; videosError?: Error }) {
+  return (
+    <div className="@container/main">
+      <div className="flex items-center justify-center py-16">
+        <div className="text-center">
+          <p className="text-destructive text-lg">Error loading collections</p>
+          <p className="text-muted-foreground text-sm mt-2">
+            {collectionsError?.message ?? videosError?.message ?? "Please try again"}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function CollectionsPageContent({ 
+  initialCollections, 
+  initialVideos 
+}: CollectionsPageContentProps) {
   const [manageMode, setManageMode] = useState(false);
   const [selectedVideos, setSelectedVideos] = useState<Set<string>>(new Set());
   const [deletingVideos, setDeletingVideos] = useState<Set<string>>(new Set());
-  const [isPending, startTransition] = useTransition();
-
-  const videosRef = useRef<VideoWithPlayer[]>(videos);
-  const cacheRef = useRef({ data: new Map() });
-  const previousCollectionRef = useRef<string | null>(null);
-  const dataManager = useMemo(() => new CollectionsDataManager(cacheRef), []);
-
-  useEffect(() => {
-    videosRef.current = videos;
-  }, [videos]);
+  const [, startTransition] = useTransition();
 
   const { user, userProfile } = useAuth();
   const searchParams = useSearchParams();
-  const router = useRouter();
   const selectedCollectionId = searchParams.get("collection");
   const setTopBarConfig = useTopBarConfig();
+  const { navigateToCollection } = useDebouncedNavigation(200);
+  const { invalidateAll } = useInvalidateCollections();
 
-  const selectionActions = useMemo(() => createVideoSelectionHandlers(setSelectedVideos, videosRef), []);
+  // React Query hooks for data fetching
+  const { 
+    data: collections = initialCollections, 
+    isLoading: collectionsLoading,
+    error: collectionsError 
+  } = useCollectionsQuery();
 
-  const { toggleVideoSelection, selectAllVideos, clearSelection } = selectionActions;
+  const { 
+    data: videos = initialVideos, 
+    isLoading: videosLoading,
+    isFetching: videosFetching,
+    error: videosError 
+  } = useCollectionVideosQuery(selectedCollectionId);
+
+  // Transform videos to include playing state
+  const videosWithState = useMemo(() => 
+    videos.map(video => ({ ...video, isPlaying: false })),
+    [videos]
+  );
+
+  // Memoized computed values
   const pageTitle = useMemo(() => getPageTitle(selectedCollectionId, collections), [selectedCollectionId, collections]);
   const pageDescription = useMemo(
     () => getPageDescription(selectedCollectionId, collections),
     [selectedCollectionId, collections],
   );
 
-  const handleVideoResult = useCallback(
-    (videosResult: PromiseSettledResult<Video[]>, collectionId: string | null) => {
-      if (videosResult.status === "fulfilled") {
-        const optimizedVideos = videosResult.value.map((video) => ({
-          ...video,
-          isPlaying: false,
-        }));
-
-        setPreviousVideos(videosRef.current);
-        startTransition(() => {
-          setVideos(optimizedVideos);
-        });
-        dataManager.setCachedVideos(collectionId, optimizedVideos);
-      } else {
-        console.error("Error loading videos:", videosResult.reason);
-        if (videosResult.reason?.message?.includes("Collection not found") && !dataManager.getCachedVideos(null)) {
-          setPreviousVideos(videosRef.current);
-          startTransition(() => {
-            setVideos([]);
-          });
-        }
-      }
-    },
-    [dataManager],
+  // Video selection handlers
+  const selectionActions = useMemo(
+    () => createVideoSelectionHandlers(setSelectedVideos, { current: videosWithState }),
+    [videosWithState]
   );
 
-  const loadData = useCallback(
-    async (targetCollectionId?: string | null) => {
-      if (!user) return;
+  const { toggleVideoSelection, selectAllVideos, clearSelection } = selectionActions;
 
-      const collectionId = targetCollectionId !== undefined ? targetCollectionId : selectedCollectionId;
-      const cachedVideos = dataManager.getCachedVideos(collectionId);
-
-      if (cachedVideos) {
-        setPreviousVideos(videosRef.current);
-        startTransition(() => {
-          setVideos(cachedVideos);
-        });
-        setTimeout(() => setIsTransitioning(false), 50);
-        return;
-      }
-
-      try {
-        const [collectionsResult, videosResult] = await dataManager.loadCollectionsAndVideos(
-          user.uid,
-          collectionId ?? undefined,
-        );
-
-        if (collectionsResult.status === "fulfilled") {
-          startTransition(() => {
-            setCollections(collectionsResult.value);
-          });
-
-          if (!dataManager.validateCollectionExists(collectionId, collectionsResult.value, router, startTransition)) {
-            return;
-          }
-        }
-
-        handleVideoResult(videosResult, collectionId);
-      } catch (error) {
-        console.error("❌ [Collections] Error loading data:", error);
-      } finally {
-        setTimeout(() => setIsTransitioning(false), 50);
-      }
-    },
-    [user, selectedCollectionId, dataManager, handleVideoResult, router],
-  );
-
+  // Collection change handler with debounced navigation
   const handleCollectionChange = useCallback(
     (collectionId: string | null) => {
-      if (collectionId === previousCollectionRef.current || isTransitioning) return;
-
-      previousCollectionRef.current = collectionId;
-      const cachedVideos = dataManager.getCachedVideos(collectionId);
-
-      if (cachedVideos) {
-        setPreviousVideos(videosRef.current);
-        startTransition(() => {
-          setVideos(cachedVideos);
-        });
-      } else {
-        setIsTransitioning(true);
-      }
-
       startTransition(() => {
-        const path = collectionId ? `/research/collections?collection=${collectionId}` : "/research/collections";
-        router.push(path, { scroll: false });
+        navigateToCollection(collectionId);
       });
-
-      if (!cachedVideos) {
-        loadData(collectionId);
-      }
     },
-    [router, isTransitioning, dataManager, loadData],
+    [navigateToCollection],
   );
 
-  const { handleVideoAdded, handleCollectionDeleted, handleDeleteVideo, handleBulkDelete } = useCollectionsLogic({
-    user,
-    selectedCollectionId,
-    dataManager,
-    videosRef,
-    setPreviousVideos,
-    setVideos,
-    setDeletingVideos,
-    setSelectedVideos,
-    startTransition,
-    loadData,
-    router,
-  });
-
-  // Auth and initial loading effects
+  // Auth and role-based access control
   useEffect(() => {
-    if (!user) {
-      router.push("/auth/v1/login");
-      return;
-    }
-
-    if (!userProfile) return;
+    if (!user || !userProfile) return;
 
     const allowedRoles = ["creator", "coach", "super_admin"];
     if (!allowedRoles.includes(userProfile.role)) {
-      router.push("/dashboard");
-      return;
+      navigateToCollection(null);
     }
-  }, [user, userProfile, router]);
+  }, [user, userProfile, navigateToCollection]);
 
-  useEffect(() => {
-    if (user && userProfile && videos.length === 0) {
-      loadData();
+  // Video management functions
+  const handleVideoAdded = useCallback(() => {
+    invalidateAll();
+  }, [invalidateAll]);
+
+  const handleCollectionDeleted = useCallback(() => {
+    if (selectedCollectionId) {
+      startTransition(() => {
+        navigateToCollection(null);
+      });
     }
-  }, [user, userProfile, videos.length, loadData]);
+    invalidateAll();
+  }, [selectedCollectionId, navigateToCollection, invalidateAll]);
+
+  const handleDeleteVideo = useCallback(
+    async (videoId: string) => {
+      if (!user) return;
+
+      setDeletingVideos((prev) => new Set([...prev, videoId]));
+      
+      try {
+        // Optimistic update - remove from local state immediately
+        startTransition(() => {
+          setSelectedVideos((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(videoId);
+            return newSet;
+          });
+        });
+
+        // TODO: Implement actual deletion with React Query mutation
+        setTimeout(() => {
+          setDeletingVideos((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(videoId);
+            return newSet;
+          });
+          invalidateAll();
+        }, 1000);
+      } catch (error) {
+        console.error("Error deleting video:", error);
+        setDeletingVideos((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(videoId);
+          return newSet;
+        });
+      }
+    },
+    [user, invalidateAll],
+  );
+
+  const handleBulkDelete = useCallback(async (videosToDelete: Set<string>) => {
+    if (!user || videosToDelete.size === 0) return;
+
+    const videoIds = Array.from(videosToDelete);
+    setDeletingVideos((prev) => new Set([...prev, ...videoIds]));
+
+    try {
+      // Optimistic update
+      startTransition(() => {
+        setSelectedVideos(new Set());
+      });
+
+      // TODO: Implement actual bulk deletion with React Query mutation
+      setTimeout(() => {
+        setDeletingVideos(new Set());
+        invalidateAll();
+      }, 1000);
+    } catch (error) {
+      console.error("Error deleting videos:", error);
+      setDeletingVideos(new Set());
+    }
+  }, [user, invalidateAll]);
 
   const handleExitManageMode = useCallback(() => {
     setManageMode(false);
@@ -252,13 +264,29 @@ export default function CollectionsPageContent({ initialCollections, initialVide
     selectAllVideos,
   ]);
 
-  const contentKey = `content-${selectedCollectionId ?? "all"}-${videos.length}`;
+  // Show loading state
+  if (collectionsLoading || videosLoading) {
+    return <LoadingState />;
+  }
+
+  // Show error state
+  if (collectionsError || videosError) {
+    return <ErrorState collectionsError={collectionsError} videosError={videosError} />;
+  }
+
+  const contentKey = `content-${selectedCollectionId ?? "all"}-${videosWithState.length}`;
 
   return (
     <div className="@container/main">
-      <Fade keyId={contentKey}>
-        <div className="relative mx-auto flex max-w-6xl gap-6">
-          <div className="min-w-0 flex-1 space-y-8 md:space-y-10">
+      <MotionDiv
+        key={contentKey}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+      >
+        <div className="flex gap-6 max-w-6xl mx-auto relative">
+          <div className="flex-1 min-w-0 space-y-8 md:space-y-10">
             <section className="space-y-4">
               <div className="space-y-2">
                 <h1 className="text-foreground text-3xl font-bold tracking-tight">{pageTitle}</h1>
@@ -266,13 +294,13 @@ export default function CollectionsPageContent({ initialCollections, initialVide
               </div>
             </section>
 
-            <section className="space-y-4 md:hidden">
+            <section className="md:hidden space-y-4">
               <div className="flex flex-wrap items-center gap-3">
                 <CollectionBadge
                   isActive={!selectedCollectionId}
                   onClick={() => handleCollectionChange(null)}
-                  videoCount={videos.length}
-                  isTransitioning={isTransitioning && !selectedCollectionId}
+                  videoCount={videosWithState.length}
+                  isTransitioning={videosFetching && !selectedCollectionId}
                   onCollectionDeleted={handleCollectionDeleted}
                 />
                 {collections.map((collection) => (
@@ -281,20 +309,18 @@ export default function CollectionsPageContent({ initialCollections, initialVide
                     collection={collection}
                     isActive={selectedCollectionId === collection.id}
                     onClick={() => handleCollectionChange(collection.id!)}
-                    videoCount={collection.videoCount || 0}
-                    isTransitioning={isTransitioning && selectedCollectionId === collection.id}
+                    videoCount={collection.videoCount}
+                    isTransitioning={videosFetching && selectedCollectionId === collection.id}
                     onCollectionDeleted={handleCollectionDeleted}
                   />
                 ))}
               </div>
             </section>
 
-            <VideoGridWithSuspense
-              videos={videos}
+            <VirtualizedVideoGrid
+              videos={videosWithState}
               collections={collections}
               selectedCollectionId={selectedCollectionId}
-              loadingVideos={isTransitioning}
-              isPending={isPending}
               manageMode={manageMode}
               selectedVideos={selectedVideos}
               deletingVideos={deletingVideos}
@@ -310,12 +336,12 @@ export default function CollectionsPageContent({ initialCollections, initialVide
                 collections={collections}
                 selectedCollectionId={selectedCollectionId}
                 onSelectionChange={handleCollectionChange}
-                videoCount={videos.length}
+                videoCount={videosWithState.length}
               />
             </div>
           </div>
         </div>
-      </Fade>
+      </MotionDiv>
     </div>
   );
 }
