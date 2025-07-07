@@ -44,7 +44,7 @@ export function GhostWriter() {
       if (apiKey) headers["x-api-key"] = apiKey;
       const response = await fetch("/api/ghost-writer/enhanced", { headers });
 
-      if (response.status === 401) {
+      if (!response.ok) {
         // fallback to legacy ideas endpoint without auth
         try {
           const legacyRes = await fetch("/api/ghost-writer/ideas");
