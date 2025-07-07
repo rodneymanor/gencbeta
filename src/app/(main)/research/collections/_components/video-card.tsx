@@ -115,6 +115,7 @@ export const VideoCard = memo<VideoCardProps>(
           {/* Action Buttons */}
           <div className="mt-3">
             <ActionButtons
+              video={video}
               onShowInsights={() => setShowInsightsModal(true)}
               onShowRepurpose={() => setShowRepurposeModal(true)}
             />

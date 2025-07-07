@@ -1,15 +1,25 @@
-import { ReactNode } from "react";
+export type TopBarTitlePosition = "left" | "center" | "hidden";
 
 export interface TopBarConfig {
-  title: ReactNode;
-  description?: string;
+  showTitle: boolean;
+  titlePosition: TopBarTitlePosition;
+  title?: string;
+  customContent?: React.ReactNode;
+  showBackButton?: boolean;
+  backHref?: string;
   actions?: React.ReactNode;
-  isLoading?: boolean;
+  className?: string;
+}
+
+export interface TopBarContextValue {
+  config: TopBarConfig;
+  setConfig: (config: Partial<TopBarConfig>) => void;
+  resetConfig: () => void;
 }
 
 export const defaultTopBarConfig: TopBarConfig = {
-  title: "",
-  description: "",
-  actions: null,
-  isLoading: false,
+  showTitle: true,
+  titlePosition: "left",
+  showBackButton: false,
+  className: "",
 };

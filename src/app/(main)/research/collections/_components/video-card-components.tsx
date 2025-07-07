@@ -1,11 +1,20 @@
 "use client";
 
+import { useState } from "react";
+
 import { MoreVertical, Trash2, ExternalLink, Clock, TrendingUp, Zap, RefreshCw } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -187,34 +196,76 @@ export const HoverActions = ({ showActions, onDelete }: { showActions: boolean; 
   );
 };
 
-export const ActionButtons = ({
-  onShowInsights,
-  onShowRepurpose,
-}: {
-  onShowInsights: () => void;
-  onShowRepurpose: () => void;
-}) => (
-  <div className="flex items-center justify-center gap-2">
-    <Button
-      size="sm"
-      variant="outline"
-      onClick={onShowInsights}
-      className="border-border/60 hover:bg-accent/50 h-8 rounded-md px-3 text-xs shadow-sm transition-all duration-200 hover:shadow-md"
-    >
-      <TrendingUp className="mr-1.5 h-3.5 w-3.5" />
-      Insights
-    </Button>
-    <Button
-      size="sm"
-      variant="outline"
-      onClick={onShowRepurpose}
-      className="border-border/60 hover:bg-accent/50 h-8 rounded-md px-3 text-xs shadow-sm transition-all duration-200 hover:shadow-md"
-    >
-      <Zap className="mr-1.5 h-3.5 w-3.5" />
-      Repurpose
-    </Button>
-  </div>
-);
+export const ActionButtons = ({ video, onShowInsights }: { video: VideoWithPlayer; onShowInsights: () => void }) => {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleRepurpose = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/script/speed-write", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idea: video.transcript }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error ?? "Failed to generate script");
+      }
+      setOpen(false);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Unknown error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="flex items-center justify-center gap-2">
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={onShowInsights}
+          className="border-border/60 hover:bg-accent/50 h-8 rounded-md px-3 text-xs shadow-sm transition-all duration-200 hover:shadow-md"
+        >
+          <TrendingUp className="mr-1.5 h-3.5 w-3.5" />
+          Insights
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => setOpen(true)}
+          className="border-border/60 hover:bg-accent/50 h-8 rounded-md px-3 text-xs shadow-sm transition-all duration-200 hover:shadow-md"
+        >
+          <Zap className="mr-1.5 h-3.5 w-3.5" />
+          Repurpose
+        </Button>
+      </div>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Repurpose Video</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to write a script based on this video&apos;s transcript?
+            </DialogDescription>
+          </DialogHeader>
+          {error && <div className="text-destructive mb-2 text-sm">{error}</div>}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)} disabled={loading}>
+              Cancel
+            </Button>
+            <Button onClick={handleRepurpose} disabled={loading}>
+              {loading ? "Generating..." : "Confirm"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+};
 
 export const VideoMetadata = ({ video }: { video: VideoWithPlayer }) => (
   <div className="space-y-3">
