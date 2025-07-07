@@ -2,6 +2,7 @@
 
 import { Type, Video, ExternalLink } from "lucide-react";
 
+import { ShineBorder } from "@/components/magicui/shine-border";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -194,30 +195,37 @@ export function InputModeToggle({
       {inputMode === "text" ? (
         <div className="space-y-4">
           <div className="relative">
-            <Textarea
-              placeholder="My script idea is about productivity tips for remote workers..."
-              value={textValue}
-              onChange={(e) => onTextChange(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className="bg-background dark:bg-background text-foreground dark:text-foreground placeholder:text-muted-foreground dark:placeholder:text-muted-foreground border-border/50 dark:border-border/50 ring-border/50 dark:ring-border/50 focus:ring-primary/70 dark:focus:ring-primary/70 caret-primary selection:bg-primary/30 selection:text-foreground scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent block h-14 max-h-[45vh] min-h-[56px] w-full resize-none appearance-none rounded-2xl border px-4 py-3 pr-16 text-base leading-6 shadow-sm transition-colors transition-shadow duration-150 hover:shadow focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:ring-2 focus:ring-offset-0 focus-visible:outline-none sm:max-h-[25vh] lg:max-h-[40vh]"
-              disabled={disabled}
-              style={{
-                fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-                height: "auto",
-                minHeight: "56px",
-                maxHeight: "45vh",
-              }}
-              onInput={(e) => {
-                const target = e.target as HTMLTextAreaElement;
-                target.style.height = "auto";
-                target.style.height = Math.min(target.scrollHeight, window.innerHeight * 0.45) + "px";
-              }}
-            />
+            <ShineBorder
+              shineColor={["#2d93ad", "#412722", "#87CEEB"]}
+              duration={4}
+              borderWidth={1}
+              className="rounded-2xl"
+            >
+              <Textarea
+                placeholder="My script idea is about productivity tips for remote workers..."
+                value={textValue}
+                onChange={(e) => onTextChange(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="bg-background dark:bg-background text-foreground dark:text-foreground placeholder:text-muted-foreground dark:placeholder:text-muted-foreground border-border/50 dark:border-border/50 ring-border/50 dark:ring-border/50 focus:ring-primary/70 dark:focus:ring-primary/70 caret-primary selection:bg-primary/30 selection:text-foreground scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent block h-14 max-h-[45vh] min-h-[56px] w-full resize-none appearance-none rounded-2xl border px-4 py-3 pr-16 text-base leading-6 shadow-sm transition-colors transition-shadow duration-150 hover:shadow focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:ring-2 focus:ring-offset-0 focus-visible:outline-none sm:max-h-[25vh] lg:max-h-[40vh]"
+                disabled={disabled}
+                style={{
+                  fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                  height: "auto",
+                  minHeight: "56px",
+                  maxHeight: "45vh",
+                }}
+                onInput={(e) => {
+                  const target = e.target as HTMLTextAreaElement;
+                  target.style.height = "auto";
+                  target.style.height = Math.min(target.scrollHeight, window.innerHeight * 0.45) + "px";
+                }}
+              />
+            </ShineBorder>
             <Button
               onClick={onSubmit}
               disabled={finalSubmitDisabled}
               size="sm"
-              className="absolute top-1/2 right-3 h-8 w-8 -translate-y-1/2 p-0 shadow-sm"
+              className="absolute top-1/2 right-3 z-10 h-8 w-8 -translate-y-1/2 p-0 shadow-sm"
             >
               <ExternalLink className="h-4 w-4" />
             </Button>
@@ -231,23 +239,30 @@ export function InputModeToggle({
       ) : (
         <div className="space-y-4">
           <div className="relative">
-            <Input
-              type="url"
-              placeholder="https://www.tiktok.com/@user/video/123456789..."
-              value={videoUrl}
-              onChange={(e) => onVideoUrlChange(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className="bg-background dark:bg-background text-foreground dark:text-foreground placeholder:text-muted-foreground dark:placeholder:text-muted-foreground border-border/50 dark:border-border/50 ring-border/50 dark:ring-border/50 focus:ring-primary/70 dark:focus:ring-primary/70 caret-primary selection:bg-primary/30 selection:text-foreground block h-14 w-full appearance-none rounded-2xl border px-4 py-3 pr-12 text-base leading-6 shadow-sm transition-colors transition-shadow duration-150 hover:shadow focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:ring-2 focus:ring-offset-0 focus-visible:outline-none"
-              disabled={disabled}
-              style={{
-                fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-              }}
-            />
+            <ShineBorder
+              shineColor={["#2d93ad", "#412722", "#87CEEB"]}
+              duration={4}
+              borderWidth={1}
+              className="rounded-2xl"
+            >
+              <Input
+                type="url"
+                placeholder="https://www.tiktok.com/@user/video/123456789..."
+                value={videoUrl}
+                onChange={(e) => onVideoUrlChange(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="bg-background dark:bg-background text-foreground dark:text-foreground placeholder:text-muted-foreground dark:placeholder:text-muted-foreground border-border/50 dark:border-border/50 ring-border/50 dark:ring-border/50 focus:ring-primary/70 dark:focus:ring-primary/70 caret-primary selection:bg-primary/30 selection:text-foreground block h-14 w-full appearance-none rounded-2xl border px-4 py-3 pr-12 text-base leading-6 shadow-sm transition-colors transition-shadow duration-150 hover:shadow focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:ring-2 focus:ring-offset-0 focus-visible:outline-none"
+                disabled={disabled}
+                style={{
+                  fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                }}
+              />
+            </ShineBorder>
             <Button
               onClick={onSubmit}
               disabled={finalSubmitDisabled}
               size="sm"
-              className="absolute top-1/2 right-3 h-8 w-8 -translate-y-1/2 p-0 shadow-sm"
+              className="absolute top-1/2 right-3 z-10 h-8 w-8 -translate-y-1/2 p-0 shadow-sm"
             >
               <ExternalLink className="h-4 w-4" />
             </Button>
