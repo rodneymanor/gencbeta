@@ -189,6 +189,14 @@ export async function GET(request: NextRequest): Promise<NextResponse<EnhancedGh
   } catch (error) {
     console.error("❌ [EnhancedGhostWriter] API error:", error);
 
+    // Attempt legacy fallback if enhanced pipeline fails
+    try {
+      console.log("🔄 [EnhancedGhostWriter] Falling back to legacy ideas after error");
+      return await createLegacyFallbackResponse(request);
+    } catch (fallbackError) {
+      console.error("❌ [EnhancedGhostWriter] Legacy fallback also failed:", fallbackError);
+    }
+
     return NextResponse.json(
       {
         success: false,
