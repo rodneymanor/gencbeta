@@ -17,7 +17,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     // Get user's account level from their profile
     const { getAdminDb } = await import("@/lib/firebase-admin");
-    const adminDb = getAdminDb();
+    
     
     if (!adminDb) {
       throw new Error("Database not available");

@@ -6,9 +6,6 @@ import { getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { GeminiService } from "@/lib/gemini";
 import type { BrandQuestionnaire, BrandProfileData, BrandProfile } from "@/types/brand-profile";
 
-const adminAuth = getAdminAuth();
-const adminDb = getAdminDb();
-
 const SYSTEM_PROMPT = `You are an expert brand and content strategist. Your task is to analyze a user's business profile and generate a foundational brand strategy profile in a valid JSON format. This profile will include core keywords and a set of personalized content pillar themes.
 
 Your expertise includes:
@@ -108,6 +105,7 @@ Based on this information, generate the required JSON object with personalized c
 }
 
 async function authenticateUser(request: NextRequest) {
+  
   const authHeader = request.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) {
     throw new Error("Missing authorization header");
@@ -121,6 +119,7 @@ async function authenticateUser(request: NextRequest) {
 // GET - Fetch user's brand profiles
 export async function GET(request: NextRequest) {
   try {
+    
     const userId = await authenticateUser(request);
     console.log("📋 [BRAND] Fetching profiles for user:", userId);
 
@@ -231,6 +230,7 @@ export async function POST(request: NextRequest) {
       version: 1,
     };
 
+    
     // Check for existing active profile and deactivate it
     const existingProfilesSnapshot = await adminDb
       .collection("brandProfiles")
@@ -284,6 +284,7 @@ export async function PUT(request: NextRequest) {
 
     console.log("📝 [BRAND] Updating profile:", profileId);
 
+    
     const profileRef = adminDb.collection("brandProfiles").doc(profileId);
     const profileDoc = await profileRef.get();
 
@@ -342,19 +343,11 @@ export async function DELETE(request: NextRequest) {
 
     console.log("🗑️ [BRAND] Deleting profile:", profileId);
 
+    
     const profileRef = adminDb.collection("brandProfiles").doc(profileId);
     const profileDoc = await profileRef.get();
 
-    if (!profileDoc.exists) {
-      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
-    }
-
-    const existingProfileData = profileDoc.data();
-    if (!existingProfileData) {
-      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
-    }
-    const existingProfile = existingProfileData as BrandProfile;
-    if (existingProfile.userId !== userId) {
+    if (!profileDoc.exists || profileDoc.data()?.userId !== userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 

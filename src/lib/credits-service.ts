@@ -18,8 +18,8 @@ export class CreditsService {
   } as const;
 
   static async initializeUserCredits(userId: string, accountLevel: AccountLevel): Promise<UserCredits> {
+    
     try {
-      const adminDb = getAdminDb();
       if (!adminDb) {
         throw new Error("Database not available");
       }
@@ -70,8 +70,8 @@ export class CreditsService {
   }
 
   static async getUserCredits(userId: string, accountLevel: AccountLevel): Promise<UserCredits> {
+    
     try {
-      const adminDb = getAdminDb();
       if (!adminDb) {
         throw new Error("Database not available");
       }
@@ -107,7 +107,12 @@ export class CreditsService {
     operation: CreditOperation,
     accountLevel: AccountLevel
   ): Promise<{ canPerform: boolean; reason?: string; creditsNeeded: number }> {
+    
     try {
+      if (!adminDb) {
+        throw new Error("Database not available");
+      }
+
       const userCredits = await this.getUserCredits(userId, accountLevel);
       const creditsNeeded = CREDIT_COSTS[operation];
       const creditsRemaining = userCredits.creditsLimit - userCredits.creditsUsed;
@@ -134,8 +139,8 @@ export class CreditsService {
     accountLevel: AccountLevel,
     metadata?: Record<string, unknown>
   ): Promise<{ success: boolean; newBalance: number; transaction?: CreditTransaction }> {
+    
     try {
-      const adminDb = getAdminDb();
       if (!adminDb) {
         throw new Error("Database not available");
       }
@@ -211,7 +216,12 @@ export class CreditsService {
   }
 
   static async getUsageStats(userId: string, accountLevel: AccountLevel): Promise<UsageStats> {
+    
     try {
+      if (!adminDb) {
+        throw new Error("Database not available");
+      }
+
       const userCredits = await this.getUserCredits(userId, accountLevel);
       const creditsRemaining = userCredits.creditsLimit - userCredits.creditsUsed;
       const percentageUsed = (userCredits.creditsUsed / userCredits.creditsLimit) * 100;
@@ -246,8 +256,8 @@ export class CreditsService {
     accountLevel: AccountLevel,
     usageData: Omit<UsageRecord, "userId" | "creditsUsed" | "operation">
   ): Promise<{ success: boolean; newBalance: number }> {
+    
     try {
-      const adminDb = getAdminDb();
       if (!adminDb) {
         throw new Error("Database not available");
       }
@@ -280,55 +290,60 @@ export class CreditsService {
     userCredits: UserCredits,
     accountLevel: AccountLevel
   ): Promise<boolean> {
-    const adminDb = getAdminDb();
-    if (!adminDb) {
-      throw new Error("Database not available");
-    }
-
-    const now = new Date();
-    const isProAccount = accountLevel === "pro";
-
-    let needsReset = false;
-    const updateData: Partial<UserCredits> = {};
-
-    if (isProAccount) {
-      const lastReset = new Date(userCredits.lastMonthlyReset ?? userCredits.createdAt);
-      const monthStart = this.getMonthStart();
-
-      if (now >= new Date(monthStart) && lastReset < new Date(monthStart)) {
-        needsReset = true;
-        updateData.monthlyCreditsUsed = 0;
-        updateData.creditsUsed = 0;
-        updateData.lastMonthlyReset = now.toISOString();
-        updateData.currentPeriodStart = monthStart;
-        updateData.currentPeriodEnd = this.getMonthEnd();
+    
+    try {
+      if (!adminDb) {
+        throw new Error("Database not available");
       }
-    } else {
-      const lastReset = new Date(userCredits.lastDailyReset ?? userCredits.createdAt);
-      const dayStart = this.getDayStart();
 
-      if (now >= new Date(dayStart) && lastReset < new Date(dayStart)) {
-        needsReset = true;
-        updateData.dailyCreditsUsed = 0;
-        updateData.creditsUsed = 0;
-        updateData.lastDailyReset = now.toISOString();
-        updateData.currentPeriodStart = dayStart;
-        updateData.currentPeriodEnd = this.getDayEnd();
+      const now = new Date();
+      const isProAccount = accountLevel === "pro";
+
+      let needsReset = false;
+      const updateData: Partial<UserCredits> = {};
+
+      if (isProAccount) {
+        const lastReset = new Date(userCredits.lastMonthlyReset ?? userCredits.createdAt);
+        const monthStart = this.getMonthStart();
+
+        if (now >= new Date(monthStart) && lastReset < new Date(monthStart)) {
+          needsReset = true;
+          updateData.monthlyCreditsUsed = 0;
+          updateData.creditsUsed = 0;
+          updateData.lastMonthlyReset = now.toISOString();
+          updateData.currentPeriodStart = monthStart;
+          updateData.currentPeriodEnd = this.getMonthEnd();
+        }
+      } else {
+        const lastReset = new Date(userCredits.lastDailyReset ?? userCredits.createdAt);
+        const dayStart = this.getDayStart();
+
+        if (now >= new Date(dayStart) && lastReset < new Date(dayStart)) {
+          needsReset = true;
+          updateData.dailyCreditsUsed = 0;
+          updateData.creditsUsed = 0;
+          updateData.lastDailyReset = now.toISOString();
+          updateData.currentPeriodStart = dayStart;
+          updateData.currentPeriodEnd = this.getDayEnd();
+        }
       }
+
+      if (needsReset) {
+        updateData.updatedAt = now.toISOString();
+
+        await adminDb
+          .collection(this.COLLECTIONS.USER_CREDITS)
+          .doc(userCredits.id!)
+          .update(updateData);
+
+        console.log(`🔄 [Credits] Reset ${isProAccount ? 'monthly' : 'daily'} credits for user ${userCredits.userId}`);
+      }
+
+      return needsReset;
+    } catch (error) {
+      console.error("❌ [Credits] Failed to check and reset period:", error);
+      throw error;
     }
-
-    if (needsReset) {
-      updateData.updatedAt = now.toISOString();
-
-      await adminDb
-        .collection(this.COLLECTIONS.USER_CREDITS)
-        .doc(userCredits.id!)
-        .update(updateData);
-
-      console.log(`🔄 [Credits] Reset ${isProAccount ? 'monthly' : 'daily'} credits for user ${userCredits.userId}`);
-    }
-
-    return needsReset;
   }
 
   private static getDayStart(): string {

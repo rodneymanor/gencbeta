@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
   try {
     // Check if Admin SDK is initialized
-    const adminDb = getAdminDb();
+    
     if (!isAdminInitialized || !adminDb) {
       console.error("❌ [UPDATE_TRANSCRIPTION] Firebase Admin SDK not initialized");
       return NextResponse.json({ error: "Firebase Admin SDK not configured" }, { status: 500 });

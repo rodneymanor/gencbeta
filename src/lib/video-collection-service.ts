@@ -96,9 +96,9 @@ export class VideoCollectionService {
     collectionId: string,
     videoData: VideoProcessingData,
   ): Promise<VideoCollectionResult> {
-    const adminDb = getAdminDb();
+    
 
-    if (!isAdminInitialized || !adminDb) {
+    if (!adminDb) {
       throw new Error("Firebase Admin SDK not configured");
     }
 
@@ -128,10 +128,9 @@ export class VideoCollectionService {
     collectionId: string,
     videoData: VideoProcessingData,
   ): Promise<VideoCollectionResult> {
+    
     try {
-      const adminDb = getAdminDb();
-
-      if (!isAdminInitialized || !adminDb) {
+      if (!adminDb) {
         throw new Error("Firebase Admin SDK not configured");
       }
 
@@ -254,17 +253,19 @@ export class VideoCollectionService {
     userId: string,
     increment: number,
   ): Promise<void> {
-    if (collectionId !== "all-videos") {
-      const collectionRef = adminDb.collection("collections").doc(collectionId);
-      const collectionDoc = await collectionRef.get();
+    if (!isAdminInitialized || !adminDb) {
+      throw new Error("Firebase Admin SDK not configured");
+    }
 
-      if (collectionDoc.exists && collectionDoc.data()?.userId === userId) {
-        const currentCount = collectionDoc.data()?.videoCount ?? 0;
-        await collectionRef.update({
-          videoCount: Math.max(0, currentCount + increment),
-          updatedAt: new Date().toISOString(),
-        });
-      }
+    const collectionRef = adminDb.collection("collections").doc(collectionId);
+    const collectionDoc = await collectionRef.get();
+
+    if (collectionDoc.exists && collectionDoc.data()?.userId === userId) {
+      const currentCount = collectionDoc.data()?.videoCount ?? 0;
+      await collectionRef.update({
+        videoCount: Math.max(0, currentCount + increment),
+        updatedAt: new Date().toISOString(),
+      });
     }
   }
 

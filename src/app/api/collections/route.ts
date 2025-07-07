@@ -96,7 +96,11 @@ async function validateCreateCollectionRequest(body: { title?: string; descripti
   };
 }
 
-async function createCollectionInFirestore(adminDb: any, collectionData: Record<string, unknown>) {
+async function createCollectionInFirestore(collectionData: Record<string, unknown>) {
+  const adminDb = getAdminDb();
+  if (!adminDb) {
+    throw new Error("Firebase Admin SDK not configured");
+  }
   const docRef = await adminDb.collection("collections").add(collectionData);
   return docRef;
 }
@@ -142,7 +146,7 @@ export async function POST(request: NextRequest) {
 
     // Check if Admin SDK is initialized
     const adminDb = getAdminDb();
-    if (!isAdminInitialized || !adminDb) {
+    if (!adminDb) {
       return NextResponse.json({ error: "Firebase Admin SDK not configured" }, { status: 500 });
     }
 
@@ -157,7 +161,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Add collection to Firestore using Admin SDK
-    const docRef = await createCollectionInFirestore(adminDb, collectionData);
+    const docRef = await createCollectionInFirestore(collectionData);
 
     console.log("✅ [Collections API] Collection created successfully:", docRef.id);
 

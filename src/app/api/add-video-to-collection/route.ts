@@ -165,14 +165,10 @@ async function streamToBunny(downloadData: any) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function addVideoToCollection(collectionId: string, videoData: any) {
+  const adminDb = getAdminDb();
   try {
     console.log("💾 [Add Video API] Adding video to Firestore collection...");
 
-    if (!isAdminInitialized) {
-      throw new Error("Firebase Admin SDK not initialized");
-    }
-
-    const adminDb = getAdminDb();
     if (!adminDb) {
       throw new Error("Admin database not available");
     }
@@ -283,7 +279,7 @@ export async function POST(request: NextRequest) {
 
     // Step 4: Firebase connection
     console.log(`🔥 [${requestId}] Step 4: Connecting to Firebase...`);
-    const adminDb = getAdminDb();
+    
     if (!isAdminInitialized || !adminDb) {
       console.log(`❌ [${requestId}] Firebase connection failed - SDK not configured`);
       return NextResponse.json({ error: "Firebase Admin SDK not configured" }, { status: 500 });
@@ -450,12 +446,15 @@ async function processVideoInBackground(
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function getCollectionVideos(adminDb: any, collectionId: string) {
-  // Use simpler query without orderBy to avoid index requirement
-  const videosSnapshot = await adminDb.collection("videos").where("collectionId", "==", collectionId).get();
+async function getCollectionVideos(collectionId: string) {
+  const adminDb = getAdminDb();
+  if (!adminDb) {
+    throw new Error("Admin database not available");
+  }
+  const snapshot = await adminDb.collection("videos").where("collectionId", "==", collectionId).get();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const videos = videosSnapshot.docs.map((doc: any) => {
+  const videos = snapshot.docs.map((doc: any) => {
     const data = doc.data();
     return {
       id: doc.id,
@@ -475,50 +474,21 @@ async function getCollectionVideos(adminDb: any, collectionId: string) {
 
 export async function GET(request: NextRequest) {
   try {
-    // Authenticate API key first
     const authResult = await authenticateApiKey(request);
     if (authResult instanceof NextResponse) {
       return authResult; // Return error response
     }
 
-    const userId = authResult.user.uid;
-    const { searchParams } = new URL(request.url);
-    const collectionId = searchParams.get("collectionId");
+    const { collectionId } = await request.json();
 
     if (!collectionId) {
       return NextResponse.json({ error: "Collection ID is required" }, { status: 400 });
     }
 
-    const adminDb = getAdminDb();
-    if (!isAdminInitialized || !adminDb) {
-      return NextResponse.json({ error: "Firebase Admin SDK not configured" }, { status: 500 });
-    }
-
-    const collectionDoc = await adminDb.collection("collections").doc(collectionId).get();
-    if (!collectionDoc.exists) {
-      return NextResponse.json({ error: "Collection not found" }, { status: 404 });
-    }
-
-    const collectionData = collectionDoc.data();
-
-    // Verify user owns the collection
-    if (collectionData?.userId !== userId) {
-      return NextResponse.json({ error: "Access denied: You do not own this collection" }, { status: 403 });
-    }
-
-    const videos = await getCollectionVideos(adminDb, collectionId);
-
-    return NextResponse.json({
-      collection: {
-        id: collectionId,
-        title: collectionData?.title,
-        description: collectionData?.description,
-        videoCount: videos.length,
-      },
-      videos,
-    });
+    const videos = await getCollectionVideos(collectionId);
+    return NextResponse.json(videos);
   } catch (error) {
-    console.error("Error retrieving collection:", error);
+    console.error("Error fetching videos:", error);
     return NextResponse.json(
       { error: "Internal server error", details: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 },

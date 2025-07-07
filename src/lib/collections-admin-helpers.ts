@@ -12,8 +12,7 @@ export async function verifyCollectionOwnershipAdmin(
   collectionId: string,
 ): Promise<{ exists: boolean; data?: Record<string, unknown> }> {
   const adminDb = getAdminDb();
-
-  if (!isAdminInitialized || !adminDb) {
+  if (!adminDb) {
     throw new Error("Firebase Admin SDK not initialized");
   }
 

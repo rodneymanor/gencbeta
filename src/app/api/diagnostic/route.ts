@@ -12,8 +12,8 @@ interface DiagnosticResult {
 
 async function checkFirebaseAdminSDK(): Promise<DiagnosticResult> {
   try {
-    const adminDb = getAdminDb();
-    const adminAuth = getAdminAuth();
+    
+    
 
     if (isAdminInitialized && adminDb && adminAuth) {
       return {
@@ -84,7 +84,7 @@ async function checkFirestoreConnection(): Promise<DiagnosticResult | null> {
   }
 
   try {
-    const adminDb = getAdminDb();
+    
 
     // Try to read from collections to test connectivity
     const testQuery = await adminDb.collection("collections").limit(1).get();
@@ -115,7 +115,7 @@ async function checkFirebaseAuth(): Promise<DiagnosticResult | null> {
   }
 
   try {
-    const adminAuth = getAdminAuth();
+    
 
     // Test by trying to get user count (this requires admin privileges)
     const userList = await adminAuth.listUsers(1);

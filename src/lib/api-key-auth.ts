@@ -43,6 +43,12 @@ export class ApiKeyAuthService {
   static async validateApiKey(
     apiKey: string,
   ): Promise<{ user: AuthenticatedUser; rateLimitResult: RateLimitResult } | null> {
+    
+    if (!adminDb) {
+      console.error("❌ [API Auth] Admin database not available");
+      return null;
+    }
+
     if (!apiKey || !apiKey.startsWith("gencbeta_")) {
       console.log("❌ [API Auth] Invalid API key format");
       return null;
@@ -50,12 +56,6 @@ export class ApiKeyAuthService {
 
     if (!isAdminInitialized) {
       console.error("❌ [API Auth] Firebase Admin SDK not initialized");
-      return null;
-    }
-
-    const adminDb = getAdminDb();
-    if (!adminDb) {
-      console.error("❌ [API Auth] Admin database not available");
       return null;
     }
 

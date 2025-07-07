@@ -39,7 +39,7 @@ export class RateLimitService {
     limitType: LimitType = "api-general",
   ): Promise<RateLimitResult> {
     const adminDb = getAdminDb();
-    if (!isAdminInitialized || !adminDb) {
+    if (!adminDb) {
       // If rate limiting is unavailable, allow the request
       return {
         allowed: true,
@@ -157,7 +157,7 @@ export class RateLimitService {
     limitType: LimitType = "api-general",
   ): Promise<RateLimitResult> {
     const adminDb = getAdminDb();
-    if (!isAdminInitialized || !adminDb) {
+    if (!adminDb) {
       return {
         allowed: true,
         remaining: 999,
@@ -219,7 +219,7 @@ export class RateLimitService {
    */
   static async resetUserRateLimits(userId: string): Promise<void> {
     const adminDb = getAdminDb();
-    if (!isAdminInitialized || !adminDb) {
+    if (!adminDb) {
       throw new Error("Firebase Admin SDK not configured");
     }
 
@@ -250,7 +250,7 @@ export class RateLimitService {
     rateLimitedRequests: number;
   }> {
     const adminDb = getAdminDb();
-    if (!isAdminInitialized || !adminDb) {
+    if (!adminDb) {
       return {
         totalActiveUsers: 0,
         heaviestUsers: [],
@@ -305,7 +305,7 @@ export class RateLimitService {
    */
   static async cleanupExpiredEntries(): Promise<number> {
     const adminDb = getAdminDb();
-    if (!isAdminInitialized || !adminDb) {
+    if (!adminDb) {
       return 0;
     }
 

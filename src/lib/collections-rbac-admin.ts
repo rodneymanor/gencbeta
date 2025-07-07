@@ -50,7 +50,7 @@ export class CollectionsRBACAdminService {
    */
   static async getUserCollections(userId: string): Promise<Collection[]> {
     const adminDb = getAdminDb();
-    if (!isAdminInitialized || !adminDb) {
+    if (!adminDb) {
       throw new Error("Firebase Admin SDK not initialized");
     }
 
@@ -107,7 +107,7 @@ export class CollectionsRBACAdminService {
    */
   static async getCollectionVideos(userId: string, collectionId?: string): Promise<Video[]> {
     const adminDb = getAdminDb();
-    if (!isAdminInitialized || !adminDb) {
+    if (!adminDb) {
       throw new Error("Firebase Admin SDK not initialized");
     }
 
@@ -203,7 +203,7 @@ export class CollectionsRBACAdminService {
    */
   static async getCollection(collectionId: string): Promise<Collection | null> {
     const adminDb = getAdminDb();
-    if (!isAdminInitialized || !adminDb) {
+    if (!adminDb) {
       throw new Error("Firebase Admin SDK not initialized");
     }
 
@@ -237,7 +237,7 @@ export class CollectionsRBACAdminService {
    */
   static async deleteCollection(collectionId: string): Promise<void> {
     const adminDb = getAdminDb();
-    if (!isAdminInitialized || !adminDb) {
+    if (!adminDb) {
       throw new Error("Firebase Admin SDK not initialized");
     }
 

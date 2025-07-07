@@ -21,11 +21,11 @@ interface RateLimitResult {
 export async function verifyFirebaseToken(token: string) {
   const { getAuth } = await import("firebase-admin/auth");
   const { getAdminDb } = await import("./firebase-admin");
+  const adminDb = getAdminDb();
 
   const decodedToken = await getAuth().verifyIdToken(token);
   console.log("✅ [Auth] Firebase token verified for user:", decodedToken.uid);
 
-  const adminDb = getAdminDb();
   if (!adminDb) {
     throw new Error("Admin database not available");
   }

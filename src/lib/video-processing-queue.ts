@@ -24,8 +24,8 @@ export class VideoProcessingQueue {
     title?: string,
     priority: JobPriority = "normal",
   ): Promise<VideoProcessingJob> {
-    const adminDb = getAdminDb();
-    if (!isAdminInitialized || !adminDb) {
+    
+    if (!adminDb) {
       throw new Error("Firebase Admin SDK not configured");
     }
 
@@ -63,8 +63,8 @@ export class VideoProcessingQueue {
    * Get job status
    */
   static async getJobStatus(jobId: string, userId: string): Promise<VideoProcessingJob | null> {
-    const adminDb = getAdminDb();
-    if (!isAdminInitialized || !adminDb) {
+    
+    if (!adminDb) {
       throw new Error("Firebase Admin SDK not configured");
     }
 
@@ -88,8 +88,8 @@ export class VideoProcessingQueue {
    * Get user's recent jobs
    */
   static async getUserJobs(userId: string, limit: number = 20): Promise<VideoProcessingJob[]> {
-    const adminDb = getAdminDb();
-    if (!isAdminInitialized || !adminDb) {
+    
+    if (!adminDb) {
       throw new Error("Firebase Admin SDK not configured");
     }
 
@@ -107,8 +107,8 @@ export class VideoProcessingQueue {
    * Retry a failed job
    */
   static async retryJob(jobId: string, userId: string): Promise<boolean> {
-    const adminDb = getAdminDb();
-    if (!isAdminInitialized || !adminDb) {
+    
+    if (!adminDb) {
       throw new Error("Firebase Admin SDK not configured");
     }
 
@@ -148,8 +148,8 @@ export class VideoProcessingQueue {
    * Cancel a job
    */
   static async cancelJob(jobId: string, userId: string): Promise<boolean> {
-    const adminDb = getAdminDb();
-    if (!isAdminInitialized || !adminDb) {
+    
+    if (!adminDb) {
       throw new Error("Firebase Admin SDK not configured");
     }
 
@@ -180,9 +180,9 @@ export class VideoProcessingQueue {
    * Process a job (this would be handled by background workers in production)
    */
   private static async processJob(jobId: string): Promise<void> {
+    
     try {
-      const adminDb = getAdminDb();
-      if (!isAdminInitialized || !adminDb) {
+      if (!adminDb) {
         throw new Error("Firebase Admin SDK not configured");
       }
 
@@ -288,7 +288,7 @@ export class VideoProcessingQueue {
    * Complete a job successfully
    */
   private static async completeJob(jobId: string): Promise<void> {
-    const adminDb = getAdminDb();
+    
     if (!adminDb) return;
 
     const result: ProcessedVideoResult = this.createMockResult();
@@ -312,7 +312,7 @@ export class VideoProcessingQueue {
    * Fail a job with error details
    */
   private static async failJob(jobId: string, error: unknown): Promise<void> {
-    const adminDb = getAdminDb();
+    
     if (!adminDb) return;
 
     const processingError: VideoProcessingError = {
@@ -371,8 +371,10 @@ export class VideoProcessingQueue {
     status: VideoProcessingStatus,
     progress: ProcessingProgress,
   ): Promise<void> {
-    const adminDb = getAdminDb();
-    if (!adminDb) return;
+    
+    if (!adminDb) {
+      throw new Error("Firebase Admin SDK not configured");
+    }
 
     const updates = {
       status,
@@ -388,8 +390,10 @@ export class VideoProcessingQueue {
   }
 
   private static async incrementAttempts(jobId: string): Promise<void> {
-    const adminDb = getAdminDb();
-    if (!adminDb) return;
+    
+    if (!adminDb) {
+      throw new Error("Firebase Admin SDK not configured");
+    }
 
     const jobDoc = await adminDb.collection(this.JOBS_COLLECTION).doc(jobId).get();
     if (jobDoc.exists) {

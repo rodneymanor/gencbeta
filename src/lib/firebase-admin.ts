@@ -2,16 +2,28 @@ import { initializeApp, getApps, cert, App, ServiceAccount } from "firebase-admi
 import { getAuth, Auth } from "firebase-admin/auth";
 import { getFirestore, Firestore } from "firebase-admin/firestore";
 
-let app: App;
-let auth: Auth;
-let db: Firestore;
+interface AdminInstances {
+  app: App;
+  auth: Auth;
+  db: Firestore;
+}
 
-const initializeAdminApp = () => {
-  if (getApps().length > 0) {
-    app = getApps()[0];
-    auth = getAuth(app);
-    db = getFirestore(app);
-    return;
+let instances: AdminInstances | null = null;
+
+function initializeAdminApp(): AdminInstances {
+  if (instances) {
+    return instances;
+  }
+
+  const apps = getApps();
+  if (apps.length > 0) {
+    const app = apps[0];
+    instances = {
+      app,
+      auth: getAuth(app),
+      db: getFirestore(app),
+    };
+    return instances;
   }
 
   try {
@@ -29,25 +41,35 @@ const initializeAdminApp = () => {
       clientEmail,
     };
 
-    app = initializeApp({
+    const app = initializeApp({
       credential: cert(serviceAccount),
       projectId,
     });
-
-    auth = getAuth(app);
-    db = getFirestore(app);
-
+    
     console.log("✅ Firebase Admin SDK initialized successfully");
+
+    instances = {
+      app,
+      auth: getAuth(app),
+      db: getFirestore(app),
+    };
+    
+    return instances;
+
   } catch (error) {
     console.error("❌ Failed to initialize Firebase Admin SDK:", error);
-    // We are not throwing the error here to allow the app to run even if Firebase Admin is not configured.
-    // The parts of the app that depend on it will fail gracefully.
+    throw new Error("Could not initialize Firebase Admin SDK. Check server logs for details.");
   }
-};
+}
 
-initializeAdminApp();
+export function getAdminAuth(): Auth {
+  return initializeAdminApp().auth;
+}
 
-// These are now guaranteed to be initialized (or throw an error)
-export const adminApp = app;
-export const adminAuth = auth;
-export const adminDb = db;
+export function getAdminDb(): Firestore {
+  return initializeAdminApp().db;
+}
+
+export function getAdminApp(): App {
+    return initializeAdminApp().app;
+}
