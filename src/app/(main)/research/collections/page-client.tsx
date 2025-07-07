@@ -97,7 +97,7 @@ export default function PageClient({ initialCollections, initialVideos, initialC
           <VideoGrid videos={videos} activeVideoId={activeVideoId} setActiveVideoId={setActiveVideoId} />
         )}
       </div>
-      <div className="hidden w-[280px] flex-shrink-0 lg:block">
+      <div className="hidden w-[313px] flex-shrink-0 lg:block">
         <div className="sticky top-4">
           <CategoryChooser
             items={categoryItems}
