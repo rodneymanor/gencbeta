@@ -238,7 +238,9 @@ export default function NewScriptPage() {
 
         {/* Ghost Writer Section */}
         <div className="mt-12 w-full max-w-7xl">
-          <GhostWriter />
+          <div className="bg-sidebar rounded-lg p-4 md:p-8">
+            <GhostWriter />
+          </div>
         </div>
       </div>
     </div>

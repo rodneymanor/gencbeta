@@ -236,68 +236,41 @@ export function GhostWriter() {
   }
 
   return (
-    <Card className="border-0 shadow-none">
-      <CardHeader>
-        <div className="relative">
-          <div className="absolute top-0 left-0">
-            <div className="border-primary/20 bg-primary/20 hover:bg-primary/30 hover:border-primary/40 text-primary relative items-center rounded-full border px-3 py-1.5 font-sans text-sm outline-transparent transition duration-300 ease-out outline-none select-none focus:outline-none">
-              New posts coming in:{" "}
-              <span className="text-primary font-mono">{formatTimeUntilRefresh(data.cycle.expiresAt)}</span>
-            </div>
-          </div>
-          <div className="pt-12 text-center">
-            <CardTitle className="bg-gradient-to-r from-[#2d93ad] to-[#412722] bg-clip-text text-4xl font-bold text-transparent">
-              Ghost Writer
-            </CardTitle>
-            <CardDescription className="mt-2 text-base">
-              AI-powered content ideas based on your brand profile
-            </CardDescription>
-          </div>
+    <div>
+      <div className="mb-8 text-center">
+        <h2 className="bg-gradient-to-r from-[#2d93ad] to-[#412722] bg-clip-text text-4xl font-bold text-transparent">
+          Ghost Writer
+        </h2>
+        <p className="text-muted-foreground mt-2 text-base">AI-powered content ideas based on your brand profile</p>
+        <div className="border-muted/20 bg-muted/10 text-muted-foreground mt-4 inline-flex items-center rounded-full border px-2 py-0.5 font-sans text-xs transition duration-300 ease-out">
+          New posts coming in: <span className="font-mono">{formatTimeUntilRefresh(data.cycle.expiresAt)}</span>
         </div>
-      </CardHeader>
-
-      <CardContent>
+      </div>
+      <div>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {data.ideas.map((idea) => (
             <GhostWriterCard
               key={idea.id}
               idea={idea}
-              isSaved={data.userData?.savedIdeas?.includes(idea.id) ?? false}
-              onSave={(ideaId) => handleIdeaAction(ideaId, "save")}
-              onDismiss={(ideaId) => handleIdeaAction(ideaId, "dismiss")}
+              onSave={handleIdeaAction}
+              onDismiss={handleIdeaAction}
               onUse={handleUseIdea}
+              isSaved={data.userData?.savedIdeas.includes(idea.id)}
             />
           ))}
         </div>
 
-        <div className="mt-8 text-center">
-          <div className="flex items-center justify-center gap-4">
-            <Button onClick={handleRefresh} variant="outline" size="lg" disabled={loading} className="px-8">
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Refreshing...
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Refresh All
-                </>
-              )}
-            </Button>
-            <Button onClick={handleWriteMore} variant="outline" size="lg" disabled={generatingMore} className="px-8">
-              {generatingMore ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                "Write More"
-              )}
-            </Button>
-          </div>
+        <div className="mt-8 flex justify-center">
+          <Button onClick={handleWriteMore} disabled={generatingMore}>
+            {generatingMore ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="mr-2 h-4 w-4" />
+            )}
+            Write More
+          </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
