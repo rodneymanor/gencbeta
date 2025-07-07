@@ -24,15 +24,13 @@ type Props = {
   initialCollectionId: string | null;
 };
 
-const CollectionHeader = ({ collection }: { collection: Collection | null | undefined }) => {
-  if (!collection) {
-    return null;
-  }
+const CollectionHeader = ({ title, description }: { title: string; description?: string | null }) => {
+  const defaultDescription = "Review these videos for script writing inspiration.";
 
   return (
     <div className="space-y-1.5">
-      <h1 className="text-3xl font-bold tracking-tight">{collection.title}</h1>
-      {collection.description && <p className="text-muted-foreground max-w-2xl">{collection.description}</p>}
+      <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
+      <p className="text-muted-foreground max-w-2xl">{description || defaultDescription}</p>
     </div>
   );
 };
@@ -71,6 +69,9 @@ export default function PageClient({ initialCollections, initialVideos, initialC
 
   const selectedCollection = current ? collections.find((c) => c.id === current) : null;
 
+  const displayTitle = selectedCollection?.title ?? "All Videos";
+  const displayDescription = selectedCollection?.description;
+
   // Transform collections data for CategoryChooser
   const categoryItems = [
     { id: "all", name: "All Videos", description: "View all videos" },
@@ -89,7 +90,7 @@ export default function PageClient({ initialCollections, initialVideos, initialC
   return (
     <div className="relative mx-auto flex max-w-6xl justify-center gap-12 px-4">
       <div className="max-w-3xl min-w-0 flex-1 space-y-8 md:space-y-10">
-        <CollectionHeader collection={selectedCollection} />
+        <CollectionHeader title={displayTitle} description={displayDescription} />
         {isLoading ? (
           <SkeletonGrid />
         ) : (
