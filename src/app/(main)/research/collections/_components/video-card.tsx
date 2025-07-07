@@ -68,7 +68,7 @@ export const VideoCard = memo<VideoCardProps>(
     const [showInsightsModal, setShowInsightsModal] = useState(false);
     const [showRepurposeModal, setShowRepurposeModal] = useState(false);
 
-    const cardClassName = `group relative overflow-hidden transition-all duration-200 hover:shadow-lg border-border/50 hover:border-border ${className} ${
+    const cardClassName = `w-[240px] p-3 rounded-xl group relative transition-all duration-200 hover:shadow-lg border-border/50 hover:border-border ${className} ${
       isSelected ? "ring-2 ring-primary shadow-md" : ""
     } ${isDeleting ? "opacity-50 pointer-events-none" : ""}`;
 
@@ -90,7 +90,7 @@ export const VideoCard = memo<VideoCardProps>(
           />
 
           {/* Video Content */}
-          <div className="bg-muted/30 relative aspect-[9/16] overflow-hidden">
+          <div className="bg-muted/30 relative aspect-[9/16] overflow-hidden rounded-lg">
             <VideoEmbed url={getVideoUrl(video as LegacyVideo)} className="absolute inset-0 h-full w-full" />
 
             {/* Reprocess Video Overlay for Legacy Videos */}
@@ -112,8 +112,8 @@ export const VideoCard = memo<VideoCardProps>(
             {/* Hover Actions */}
           </div>
 
-          {/* Action Buttons with Padding */}
-          <div className="p-4">
+          {/* Action Buttons */}
+          <div className="mt-3">
             <ActionButtons
               onShowInsights={() => setShowInsightsModal(true)}
               onShowRepurpose={() => setShowRepurposeModal(true)}
