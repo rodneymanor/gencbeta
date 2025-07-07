@@ -22,7 +22,7 @@ export class PEQExtractionService {
       console.log("🔍 [PEQ] Extracting Problems, Excuses, Questions from brand profile");
 
       const prompt = this.buildPEQExtractionPrompt(questionnaire);
-      
+
       const result = await GeminiService.generateContent({
         prompt,
         maxTokens: 1000,
@@ -45,7 +45,7 @@ export class PEQExtractionService {
           console.error("❌ [PEQ] No JSON found in AI response");
           throw new Error("No JSON found in response");
         }
-        
+
         console.log("🔍 [PEQ] Extracted JSON:", jsonMatch[0]);
         parsedPEQ = JSON.parse(jsonMatch[0]);
         console.log("✅ [PEQ] Parsed PEQ data:", JSON.stringify(parsedPEQ, null, 2));
@@ -60,7 +60,9 @@ export class PEQExtractionService {
         throw new Error("Invalid PEQ structure - missing required fields");
       }
 
-      console.log(`✅ [PEQ] Successfully extracted ${parsedPEQ.problems.length} problems, ${parsedPEQ.excuses.length} excuses, ${parsedPEQ.questions.length} questions`);
+      console.log(
+        `✅ [PEQ] Successfully extracted ${parsedPEQ.problems.length} problems, ${parsedPEQ.excuses.length} excuses, ${parsedPEQ.questions.length} questions`,
+      );
 
       return {
         success: true,
@@ -131,4 +133,4 @@ GUIDELINES:
 
 FINAL REMINDER: Your response must be PURE JSON starting with { and ending with }. No other text whatsoever.`;
   }
-} 
+}

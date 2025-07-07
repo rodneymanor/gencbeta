@@ -1,15 +1,16 @@
 "use client";
 
 import { useState, useMemo } from "react";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Wand, Bot, X, CheckCircle2 } from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
 // --- Data Mocks ---
@@ -105,7 +106,7 @@ export default function HeroSection() {
   const templateVariables = useMemo(() => {
     if (!selectedTemplate) return [];
     const regex = /{(\w+)}/g;
-    // eslint-disable-next-line security/detect-object-injection
+
     const matches = selectedTemplate.template.match(regex);
     return matches ? matches.map((v: string) => v.slice(1, -1)) : [];
   }, [selectedTemplate]);
@@ -130,7 +131,6 @@ export default function HeroSection() {
   };
 
   const handleTemplateInputChange = (variable: string, value: string) => {
-    // eslint-disable-next-line security/detect-object-injection
     setTemplateInputs((prev) => ({ ...prev, [variable]: value }));
   };
 
@@ -221,7 +221,6 @@ export default function HeroSection() {
                       {tones.map((tone) => (
                         <Card
                           key={tone.id}
-                          // eslint-disable-next-line security/detect-object-injection
                           onClick={() => setSelectedTone(tone.id)}
                           className={cn(
                             "cursor-pointer transition-all",

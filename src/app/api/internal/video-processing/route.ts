@@ -22,7 +22,6 @@ async function validateUserToken(request: NextRequest): Promise<string | null> {
     }
 
     const idToken = authHeader.substring(7);
-    
 
     if (!adminAuth) {
       console.error("Firebase Admin Auth not initialized");

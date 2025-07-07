@@ -232,24 +232,24 @@ export default function ScriptIdeaTestPage() {
 
               <div className="bg-muted/20 border-t px-6 py-4">
                 <div className="flex items-center justify-between">
-                                      <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2">
-                        <div className="h-3 w-3 rounded-full bg-[#2d93ad]"></div>
-                        <span className="text-sm">1 Hook</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="h-3 w-3 rounded-full bg-[#412722]"></div>
-                        <span className="text-sm">1 Bridge</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="h-3 w-3 rounded-full bg-[#d9dcd6]"></div>
-                        <span className="text-sm">1 Nugget</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="h-3 w-3 rounded-full bg-[#2d93ad]"></div>
-                        <span className="text-sm">1 CTA</span>
-                      </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <div className="h-3 w-3 rounded-full bg-[#2d93ad]"></div>
+                      <span className="text-sm">1 Hook</span>
                     </div>
+                    <div className="flex items-center gap-2">
+                      <div className="h-3 w-3 rounded-full bg-[#412722]"></div>
+                      <span className="text-sm">1 Bridge</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="h-3 w-3 rounded-full bg-[#d9dcd6]"></div>
+                      <span className="text-sm">1 Nugget</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="h-3 w-3 rounded-full bg-[#2d93ad]"></div>
+                      <span className="text-sm">1 CTA</span>
+                    </div>
+                  </div>
                   <Button variant="outline" size="sm">
                     <Code2 className="mr-2 h-4 w-4" />
                     Export Script

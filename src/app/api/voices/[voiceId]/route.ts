@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { AIVoicesService } from "@/lib/ai-voices-service";
 
 export async function DELETE(request: NextRequest, props: { params: Promise<{ voiceId: string }> }) {
@@ -10,10 +11,7 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ vo
     const { voiceId } = params;
 
     if (!voiceId) {
-      return NextResponse.json(
-        { error: "Voice ID is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Voice ID is required" }, { status: 400 });
     }
 
     await AIVoicesService.deleteCustomVoice(userId, voiceId);
@@ -21,17 +19,11 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ vo
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("🔥 [API] Failed to delete custom voice:", error);
-    
+
     if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: "Failed to delete custom voice" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to delete custom voice" }, { status: 500 });
   }
-} 
+}

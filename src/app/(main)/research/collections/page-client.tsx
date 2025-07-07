@@ -24,6 +24,19 @@ type Props = {
   initialCollectionId: string | null;
 };
 
+const CollectionHeader = ({ collection }: { collection: Collection | null | undefined }) => {
+  if (!collection) {
+    return null;
+  }
+
+  return (
+    <div className="space-y-1.5">
+      <h1 className="text-3xl font-bold tracking-tight">{collection.title}</h1>
+      {collection.description && <p className="text-muted-foreground max-w-2xl">{collection.description}</p>}
+    </div>
+  );
+};
+
 export default function PageClient({ initialCollections, initialVideos, initialCollectionId }: Props) {
   const [current, setCurrent] = useState(initialCollectionId);
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
@@ -56,14 +69,16 @@ export default function PageClient({ initialCollections, initialVideos, initialC
     router.replace(`${window.location.pathname}?${params.toString()}`);
   };
 
+  const selectedCollection = current ? collections.find((c) => c.id === current) : null;
+
   // Transform collections data for CategoryChooser
   const categoryItems = [
     { id: "all", name: "All Videos", description: "View all videos" },
-    ...(collections?.map((collection) => ({
+    ...collections.map((collection) => ({
       id: collection.id ?? "",
       name: collection.title,
       description: collection.description,
-    })) ?? []),
+    })),
   ];
 
   const handleCategorySelection = (item: { id: string; name: string; description?: string }) => {
@@ -74,10 +89,11 @@ export default function PageClient({ initialCollections, initialVideos, initialC
   return (
     <div className="relative mx-auto flex max-w-6xl justify-center gap-12 px-4">
       <div className="max-w-3xl min-w-0 flex-1 space-y-8 md:space-y-10">
+        <CollectionHeader collection={selectedCollection} />
         {isLoading ? (
           <SkeletonGrid />
         ) : (
-          <VideoGrid videos={videos ?? []} activeVideoId={activeVideoId} setActiveVideoId={setActiveVideoId} />
+          <VideoGrid videos={videos} activeVideoId={activeVideoId} setActiveVideoId={setActiveVideoId} />
         )}
       </div>
       <div className="hidden w-[280px] flex-shrink-0 lg:block">

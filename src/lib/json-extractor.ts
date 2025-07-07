@@ -14,8 +14,8 @@ export interface JsonExtractionResult {
  */
 function extractJson(text: string): string | null {
   // Grab everything between the first "{" and the last "}"
-  const first = text.indexOf('{');
-  const last = text.lastIndexOf('}');
+  const first = text.indexOf("{");
+  const last = text.lastIndexOf("}");
   return first !== -1 && last !== -1 ? text.slice(first, last + 1) : null;
 }
 
@@ -25,7 +25,7 @@ function extractJson(text: string): string | null {
 export function parseStructuredResponse(rawContent: string, context: string = "unknown"): JsonExtractionResult {
   try {
     console.log(`[JsonExtractor] Parsing ${context} response:`, rawContent.substring(0, 200) + "...");
-    
+
     // First try direct JSON parsing (for clean responses)
     try {
       const parsed = JSON.parse(rawContent.trim());
@@ -33,7 +33,7 @@ export function parseStructuredResponse(rawContent: string, context: string = "u
       return {
         success: true,
         data: parsed,
-        rawContent
+        rawContent,
       };
     } catch (directParseError) {
       // Direct parsing failed, try extraction
@@ -46,29 +46,28 @@ export function parseStructuredResponse(rawContent: string, context: string = "u
       return {
         success: false,
         error: "No JSON object found in response",
-        rawContent
+        rawContent,
       };
     }
 
     console.log(`[JsonExtractor] Extracted JSON for ${context}:`, extractedJson.substring(0, 200) + "...");
-    
+
     const parsed = JSON.parse(extractedJson);
     console.log(`✅ [JsonExtractor] JSON extraction and parse successful for ${context}`);
-    
+
     return {
       success: true,
       data: parsed,
-      rawContent
+      rawContent,
     };
-
   } catch (error) {
     console.error(`❌ [JsonExtractor] Failed to parse ${context} response:`, error);
     console.error(`[JsonExtractor] Raw content that failed:`, rawContent);
-    
+
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown parsing error",
-      rawContent
+      rawContent,
     };
   }
 }
@@ -86,7 +85,7 @@ export function createScriptElements(data: any): {
     hook: data.hook ?? "",
     bridge: data.bridge ?? "",
     goldenNugget: data.goldenNugget ?? "",
-    wta: data.wta ?? ""
+    wta: data.wta ?? "",
   };
 }
 
@@ -99,7 +98,5 @@ export function combineScriptElements(elements: {
   goldenNugget: string;
   wta: string;
 }): string {
-  return [elements.hook, elements.bridge, elements.goldenNugget, elements.wta]
-    .filter(Boolean)
-    .join('\n\n');
-} 
+  return [elements.hook, elements.bridge, elements.goldenNugget, elements.wta].filter(Boolean).join("\n\n");
+}

@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-
-
 import { getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 
 async function authenticateUser(request: NextRequest) {

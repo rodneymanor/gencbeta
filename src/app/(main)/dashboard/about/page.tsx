@@ -1,10 +1,11 @@
 import React from "react";
-import { Button } from '@/components/ui/button';
+
+import { Button } from "@/components/ui/button";
 
 export default function AboutPage() {
   return (
-    <div className="max-w-md mx-auto py-12">
-      <h1 className="text-2xl font-bold mb-6">Button Styles Demo</h1>
+    <div className="mx-auto max-w-md py-12">
+      <h1 className="mb-6 text-2xl font-bold">Button Styles Demo</h1>
       <div className="flex flex-col gap-4">
         <Button>Default</Button>
         <Button variant="secondary">Secondary</Button>

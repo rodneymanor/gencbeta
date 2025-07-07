@@ -53,7 +53,7 @@ function EditorFooter({
   setHighlightConfig: (config: HighlightConfig) => void;
 }) {
   return (
-    <div className="bg-background/50 text-muted-foreground border-t border-border/30 text-sm">
+    <div className="bg-background/50 text-muted-foreground border-border/30 border-t text-sm">
       {/* Word count and stats */}
       <div className="flex items-center justify-between px-6 py-3">
         <div className="flex items-center gap-4">
@@ -67,16 +67,16 @@ function EditorFooter({
 
         {showAnalysis && stats.total > 0 && (
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-xs border-border/50">
+            <Badge variant="outline" className="border-border/50 text-xs">
               {stats.hooks} hooks
             </Badge>
-            <Badge variant="outline" className="text-xs border-border/50">
+            <Badge variant="outline" className="border-border/50 text-xs">
               {stats.bridges} bridges
             </Badge>
-            <Badge variant="outline" className="text-xs border-border/50">
+            <Badge variant="outline" className="border-border/50 text-xs">
               {stats.goldenNuggets} nuggets
             </Badge>
-            <Badge variant="outline" className="text-xs border-border/50">
+            <Badge variant="outline" className="border-border/50 text-xs">
               {stats.wtas} CTAs
             </Badge>
           </div>
@@ -102,7 +102,7 @@ function AnalysisControls({
   stats: AnalysisStats;
 }) {
   return (
-    <div className="bg-background/30 border-t border-border/20 px-6 py-4">
+    <div className="bg-background/30 border-border/20 border-t px-6 py-4">
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Settings className="text-muted-foreground h-4 w-4" />
@@ -199,7 +199,7 @@ export function HemingwayEditor({
     const bridges = currentAnalysis.bridges.length;
     const goldenNuggets = currentAnalysis.goldenNuggets.length;
     const wtas = currentAnalysis.wtas.length;
-    
+
     return {
       total: hooks + bridges + goldenNuggets + wtas,
       hooks,

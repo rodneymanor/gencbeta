@@ -19,7 +19,6 @@ export class UserManagementAdminService {
    * Get user profile using Admin SDK
    */
   static async getUserProfile(uid: string): Promise<UserProfile | null> {
-    
     if (!adminDb) {
       throw new Error("Firebase Admin SDK not initialized");
     }
@@ -57,7 +56,6 @@ export class UserManagementAdminService {
    * Get all coaches using Admin SDK
    */
   static async getAllCoaches(): Promise<string[]> {
-    
     if (!adminDb) {
       throw new Error("Firebase Admin SDK not initialized");
     }
@@ -81,7 +79,6 @@ export class UserManagementAdminService {
    * Get accessible coaches for a user using Admin SDK
    */
   static async getUserAccessibleCoaches(userId: string): Promise<string[]> {
-    
     if (!adminDb) {
       throw new Error("Firebase Admin SDK not initialized");
     }
@@ -122,7 +119,6 @@ export class UserManagementAdminService {
    * Update user profile using Admin SDK
    */
   static async updateUserProfile(uid: string, updates: Partial<UserProfile>): Promise<void> {
-    
     if (!adminDb) {
       throw new Error("Firebase Admin SDK not initialized");
     }
@@ -174,7 +170,6 @@ export class UserManagementAdminService {
     role: UserRole = "creator",
     coachId?: string,
   ): Promise<{ uid: string; profileId: string }> {
-    
     if (!adminDb) {
       throw new Error("Firebase Admin SDK not initialized");
     }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+
 import { type ScriptAnalysis, type ScriptElement } from "@/lib/script-analysis";
 
 interface TextHighlightOverlayProps {
@@ -39,12 +40,12 @@ export function TextHighlightOverlay({
   // Get all elements that should be highlighted
   const getVisibleElements = (): ScriptElement[] => {
     const elements: ScriptElement[] = [];
-    
+
     if (highlightConfig.hooks) elements.push(...analysis.hooks);
     if (highlightConfig.bridges) elements.push(...analysis.bridges);
     if (highlightConfig.goldenNuggets) elements.push(...analysis.goldenNuggets);
     if (highlightConfig.wtas) elements.push(...analysis.wtas);
-    
+
     return elements.sort((a, b) => a.startIndex - b.startIndex);
   };
 
@@ -56,7 +57,7 @@ export function TextHighlightOverlay({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     // Set canvas font to match textarea
@@ -77,10 +78,10 @@ export function TextHighlightOverlay({
       const elementText = text.substring(element.startIndex, element.endIndex);
 
       // Calculate position based on text metrics
-      const lines = beforeText.split('\n');
+      const lines = beforeText.split("\n");
       const lineIndex = lines.length - 1;
-      const lastLineText = lines[lineIndex] || '';
-      
+      const lastLineText = lines[lineIndex] || "";
+
       const textWidth = ctx.measureText(lastLineText).width;
       const elementWidth = ctx.measureText(elementText).width;
 
@@ -88,7 +89,7 @@ export function TextHighlightOverlay({
         id: `${element.type}-${index}`,
         type: element.type,
         left: paddingLeft + textWidth,
-        top: paddingTop + (lineIndex * lineHeight),
+        top: paddingTop + lineIndex * lineHeight,
         width: elementWidth,
         height: lineHeight,
         element,
@@ -107,8 +108,8 @@ export function TextHighlightOverlay({
   // Recalculate on window resize
   useEffect(() => {
     const handleResize = () => calculateHighlightPositions();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // Get color for element type
@@ -147,13 +148,8 @@ export function TextHighlightOverlay({
   return (
     <>
       {/* Hidden canvas for text measurements */}
-      <canvas
-        ref={canvasRef}
-        style={{ display: 'none' }}
-        width={100}
-        height={100}
-      />
-      
+      <canvas ref={canvasRef} style={{ display: "none" }} width={100} height={100} />
+
       {/* Highlight overlay */}
       <div
         className="pointer-events-none absolute inset-0 z-10"
@@ -166,7 +162,7 @@ export function TextHighlightOverlay({
         {highlightBoxes.map((box) => (
           <div
             key={box.id}
-            className="absolute rounded-sm transition-all duration-200 pointer-events-auto cursor-pointer hover:opacity-80"
+            className="pointer-events-auto absolute cursor-pointer rounded-sm transition-all duration-200 hover:opacity-80"
             style={{
               left: box.left,
               top: box.top,
@@ -182,4 +178,4 @@ export function TextHighlightOverlay({
       </div>
     </>
   );
-} 
+}

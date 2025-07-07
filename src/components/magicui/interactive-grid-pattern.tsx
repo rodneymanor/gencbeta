@@ -1,7 +1,8 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import React, { useState } from "react";
+
+import { cn } from "@/lib/utils";
 
 /**
  * InteractiveGridPattern is a component that renders a grid pattern with interactive squares.
@@ -41,10 +42,7 @@ export function InteractiveGridPattern({
     <svg
       width={width * horizontal}
       height={height * vertical}
-      className={cn(
-        "absolute inset-0 h-full w-full border border-gray-400/30",
-        className,
-      )}
+      className={cn("absolute inset-0 h-full w-full border border-gray-400/30", className)}
       {...props}
     >
       {Array.from({ length: horizontal * vertical }).map((_, index) => {

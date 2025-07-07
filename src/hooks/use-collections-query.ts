@@ -1,25 +1,26 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { useAuth } from "@/contexts/auth-context";
 import { CollectionsRBACService } from "@/lib/collections-rbac";
 
 // Query keys for React Query
 export const collectionsKeys = {
-  all: ['collections'] as const,
-  lists: () => [...collectionsKeys.all, 'list'] as const,
+  all: ["collections"] as const,
+  lists: () => [...collectionsKeys.all, "list"] as const,
   list: (userId: string) => [...collectionsKeys.lists(), userId] as const,
-  videos: () => [...collectionsKeys.all, 'videos'] as const,
-  videosByCollection: (userId: string, collectionId?: string) => 
+  videos: () => [...collectionsKeys.all, "videos"] as const,
+  videosByCollection: (userId: string, collectionId?: string) =>
     [...collectionsKeys.videos(), userId, collectionId] as const,
 };
 
 // Hook to fetch user collections
 export function useCollectionsQuery() {
   const { user } = useAuth();
-  
+
   return useQuery({
-    queryKey: collectionsKeys.list(user?.uid ?? ''),
+    queryKey: collectionsKeys.list(user?.uid ?? ""),
     queryFn: async () => {
-      if (!user?.uid) throw new Error('User not authenticated');
+      if (!user?.uid) throw new Error("User not authenticated");
       return await CollectionsRBACService.getUserCollections(user.uid);
     },
     enabled: !!user?.uid,
@@ -31,11 +32,11 @@ export function useCollectionsQuery() {
 // Hook to fetch videos for a collection
 export function useCollectionVideosQuery(collectionId?: string | null) {
   const { user } = useAuth();
-  
+
   return useQuery({
-    queryKey: collectionsKeys.videosByCollection(user?.uid ?? '', collectionId ?? undefined),
+    queryKey: collectionsKeys.videosByCollection(user?.uid ?? "", collectionId ?? undefined),
     queryFn: async () => {
-      if (!user?.uid) throw new Error('User not authenticated');
+      if (!user?.uid) throw new Error("User not authenticated");
       return await CollectionsRBACService.getCollectionVideos(user.uid, collectionId ?? undefined);
     },
     enabled: !!user?.uid,
@@ -51,7 +52,7 @@ export function usePrefetchCollections() {
 
   const prefetchCollections = async () => {
     if (!user?.uid) return;
-    
+
     await queryClient.prefetchQuery({
       queryKey: collectionsKeys.list(user.uid),
       queryFn: () => CollectionsRBACService.getUserCollections(user.uid),
@@ -61,7 +62,7 @@ export function usePrefetchCollections() {
 
   const prefetchVideos = async (collectionId?: string | null) => {
     if (!user?.uid) return;
-    
+
     await queryClient.prefetchQuery({
       queryKey: collectionsKeys.videosByCollection(user.uid, collectionId ?? undefined),
       queryFn: () => CollectionsRBACService.getCollectionVideos(user.uid, collectionId ?? undefined),
@@ -75,14 +76,14 @@ export function usePrefetchCollections() {
 // Hook to invalidate collections cache
 export function useInvalidateCollections() {
   const queryClient = useQueryClient();
-  
+
   const invalidateCollections = () => {
     queryClient.invalidateQueries({ queryKey: collectionsKeys.lists() });
   };
 
   const invalidateVideos = (userId: string, collectionId?: string) => {
-    queryClient.invalidateQueries({ 
-      queryKey: collectionsKeys.videosByCollection(userId, collectionId) 
+    queryClient.invalidateQueries({
+      queryKey: collectionsKeys.videosByCollection(userId, collectionId),
     });
   };
 
@@ -91,4 +92,4 @@ export function useInvalidateCollections() {
   };
 
   return { invalidateCollections, invalidateVideos, invalidateAll };
-} 
+}

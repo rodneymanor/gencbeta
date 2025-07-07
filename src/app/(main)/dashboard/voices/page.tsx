@@ -1,19 +1,23 @@
 "use client";
 
 import { useState } from "react";
+
 import { useSearchParams } from "next/navigation";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { VoiceLibraryTab } from "./_components/voice-library-tab";
-import { CustomVoicesTab } from "./_components/custom-voices-tab";
-import { NegativeKeywordsTab } from "./_components/negative-keywords-tab";
-import { CreateVoiceFromProfile } from "./_components/create-voice-from-profile";
-import { VoiceActivatedModal } from "./_components/voice-activated-modal";
-import { ExampleScriptsModal } from "./_components/example-scripts-modal";
-import { CreateVoiceModal } from "./_components/create-voice-modal";
+
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AIVoicesClient } from "@/lib/ai-voices-client";
 import { AIVoice, VoiceActivationResponse, OriginalScript } from "@/types/ai-voices";
-import { toast } from "sonner";
+
+import { CreateVoiceFromProfile } from "./_components/create-voice-from-profile";
+import { CreateVoiceModal } from "./_components/create-voice-modal";
+import { CustomVoicesTab } from "./_components/custom-voices-tab";
+import { ExampleScriptsModal } from "./_components/example-scripts-modal";
+import { NegativeKeywordsTab } from "./_components/negative-keywords-tab";
+import { VoiceActivatedModal } from "./_components/voice-activated-modal";
+import { VoiceLibraryTab } from "./_components/voice-library-tab";
 
 function VoicesPage() {
   const searchParams = useSearchParams();
@@ -144,7 +148,7 @@ function VoicesPage() {
         </TabsContent>
 
         <TabsContent value="create" className="mt-6">
-          <CreateVoiceFromProfile 
+          <CreateVoiceFromProfile
             onVoiceCreated={handleVoiceCreated}
             onCollectionCreated={(collectionId) => {
               toast.success("Collection created! Videos are being processed.");

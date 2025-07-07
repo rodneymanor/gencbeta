@@ -1,11 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { authenticateApiKey } from "@/lib/api-key-auth";
 import { adminDb } from "@/lib/firebase-admin";
 
 interface ProcessingStatusResponse {
   success: boolean;
   jobId: string;
-  status: "discovering_videos" | "processing_videos" | "waiting_transcriptions" | "generating_templates" | "creating_voice" | "completed" | "failed";
+  status:
+    | "discovering_videos"
+    | "processing_videos"
+    | "waiting_transcriptions"
+    | "generating_templates"
+    | "creating_voice"
+    | "completed"
+    | "failed";
   progress: number;
   currentStep: number;
   totalSteps: number;
@@ -31,20 +39,14 @@ export async function GET(request: NextRequest, props: { params: Promise<{ jobId
     // Authenticate the request
     const authResult = await authenticateApiKey(request);
     if (!authResult.success) {
-      return NextResponse.json(
-        { error: "Authentication failed" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Authentication failed" }, { status: 401 });
     }
 
     const userId = authResult.user.uid;
     const { jobId } = params;
 
     if (!jobId) {
-      return NextResponse.json(
-        { error: "Job ID is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Job ID is required" }, { status: 400 });
     }
 
     console.log(`📊 [STATUS] Checking status for job: ${jobId}`);
@@ -53,20 +55,14 @@ export async function GET(request: NextRequest, props: { params: Promise<{ jobId
     const jobDoc = await adminDb.collection("voice_creation_jobs").doc(jobId).get();
 
     if (!jobDoc.exists) {
-      return NextResponse.json(
-        { error: "Job not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
 
     const jobData = jobDoc.data();
 
     // Verify user owns this job
     if (jobData?.userId !== userId) {
-      return NextResponse.json(
-        { error: "Access denied" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
     // Calculate estimated completion time if still processing
@@ -76,7 +72,7 @@ export async function GET(request: NextRequest, props: { params: Promise<{ jobId
       const currentTime = Date.now();
       const elapsed = currentTime - startTime;
       const progressPercent = jobData?.progress || 0;
-      
+
       if (progressPercent > 0) {
         const estimatedTotal = (elapsed / progressPercent) * 100;
         const remaining = estimatedTotal - elapsed;
@@ -108,21 +104,20 @@ export async function GET(request: NextRequest, props: { params: Promise<{ jobId
         platform: jobData?.platform,
         username: jobData?.username,
         voiceName: jobData?.voiceName,
-        videoCount: jobData?.videoCount
-      }
+        videoCount: jobData?.videoCount,
+      },
     };
 
     return NextResponse.json(response);
-
   } catch (error) {
     console.error("🔥 [STATUS] Failed to get processing status:", error);
-    
+
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : "Failed to get processing status"
+        error: error instanceof Error ? error.message : "Failed to get processing status",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -134,10 +129,7 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ jo
     // Authenticate the request
     const authResult = await authenticateApiKey(request);
     if (!authResult.success) {
-      return NextResponse.json(
-        { error: "Authentication failed" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Authentication failed" }, { status: 401 });
     }
 
     const userId = authResult.user.uid;
@@ -149,28 +141,19 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ jo
     const jobDoc = await adminDb.collection("voice_creation_jobs").doc(jobId).get();
 
     if (!jobDoc.exists) {
-      return NextResponse.json(
-        { error: "Job not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
 
     const jobData = jobDoc.data();
 
     // Verify user owns this job
     if (jobData?.userId !== userId) {
-      return NextResponse.json(
-        { error: "Access denied" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
     // Only allow cancellation of active jobs
     if (jobData?.status === "completed" || jobData?.status === "failed") {
-      return NextResponse.json(
-        { error: "Cannot cancel completed or failed jobs" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Cannot cancel completed or failed jobs" }, { status: 400 });
     }
 
     // Update job status to cancelled
@@ -178,7 +161,7 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ jo
       status: "cancelled",
       completedAt: new Date().toISOString(),
       progress: 100,
-      error: "Job cancelled by user"
+      error: "Job cancelled by user",
     });
 
     console.log(`✅ [CANCEL] Successfully cancelled job: ${jobId}`);
@@ -186,18 +169,17 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ jo
     return NextResponse.json({
       success: true,
       message: "Job cancelled successfully",
-      jobId
+      jobId,
     });
-
   } catch (error) {
     console.error("🔥 [CANCEL] Failed to cancel job:", error);
-    
+
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : "Failed to cancel job"
+        error: error instanceof Error ? error.message : "Failed to cancel job",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
-} 
+}

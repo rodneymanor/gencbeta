@@ -279,7 +279,7 @@ export async function POST(request: NextRequest) {
 
     // Step 4: Firebase connection
     console.log(`🔥 [${requestId}] Step 4: Connecting to Firebase...`);
-    
+
     if (!isAdminInitialized || !adminDb) {
       console.log(`❌ [${requestId}] Firebase connection failed - SDK not configured`);
       return NextResponse.json({ error: "Firebase Admin SDK not configured" }, { status: 500 });
@@ -445,7 +445,6 @@ async function processVideoInBackground(
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function getCollectionVideos(collectionId: string) {
   const adminDb = getAdminDb();
   if (!adminDb) {

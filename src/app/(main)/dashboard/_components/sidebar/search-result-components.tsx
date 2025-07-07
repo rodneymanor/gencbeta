@@ -23,7 +23,11 @@ export function SearchResultGroup({ title, items, onSelect, formatDate }: Search
       <CommandSeparator />
       <CommandGroup heading={title}>
         {items.map((item) => (
-          <CommandItem key={`${title.toLowerCase()}-${item.id}`} className="cursor-pointer !py-2" onSelect={() => onSelect(item)}>
+          <CommandItem
+            key={`${title.toLowerCase()}-${item.id}`}
+            className="cursor-pointer !py-2"
+            onSelect={() => onSelect(item)}
+          >
             <item.icon className="mr-2 h-4 w-4" />
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
@@ -37,7 +41,9 @@ export function SearchResultGroup({ title, items, onSelect, formatDate }: Search
                   <span className="text-muted-foreground text-xs">{formatDate(item.metadata.createdAt)}</span>
                 )}
               </div>
-              {item.description && <div className="text-muted-foreground mt-1 text-xs line-clamp-1">{item.description}</div>}
+              {item.description && (
+                <div className="text-muted-foreground mt-1 line-clamp-1 text-xs">{item.description}</div>
+              )}
             </div>
             <ArrowRight className="ml-2 h-3 w-3 opacity-50" />
           </CommandItem>
@@ -87,4 +93,4 @@ export function QuickActionItem({ action, onSelect }: QuickActionProps) {
       <ArrowRight className="ml-2 h-3 w-3 opacity-50" />
     </CommandItem>
   );
-} 
+}

@@ -1,21 +1,21 @@
 import { NextResponse } from "next/server";
 
-import { getCurrentUser } from "@/lib/server-auth";
 import { CreditsService } from "@/lib/credits-service";
 import { getAdminDb } from "@/lib/firebase-admin";
+import { getCurrentUser } from "@/lib/server-auth";
 
 async function getUserAccountLevel(userId: string): Promise<string> {
   const adminDb = getAdminDb();
   const userDoc = await adminDb.collection("users").doc(userId).get();
-  
+
   if (!userDoc.exists) {
     console.log(`❌ [Usage Stats] User document not found for ${userId}`);
     throw new Error("User profile not found");
   }
-  
+
   const userData = userDoc.data();
   const accountLevel = userData?.accountLevel ?? "free";
-  
+
   console.log(`📊 [Usage Stats] User account level: ${accountLevel}`);
   return accountLevel;
 }
@@ -49,10 +49,13 @@ export async function GET(): Promise<NextResponse> {
       return NextResponse.json(usageStats);
     } catch (firestoreError) {
       console.error("❌ [Usage Stats] Firestore error:", firestoreError);
-      return NextResponse.json({ 
-        error: "Database error", 
-        details: firestoreError instanceof Error ? firestoreError.message : "Unknown database error"
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          error: "Database error",
+          details: firestoreError instanceof Error ? firestoreError.message : "Unknown database error",
+        },
+        { status: 500 },
+      );
     }
   } catch (error) {
     console.error("❌ [Usage Stats] Error fetching usage statistics:", error);
@@ -61,9 +64,12 @@ export async function GET(): Promise<NextResponse> {
       message: error instanceof Error ? error.message : "Unknown error",
       stack: error instanceof Error ? error.stack : "No stack trace",
     });
-    return NextResponse.json({ 
-      error: "Failed to fetch usage statistics",
-      details: error instanceof Error ? error.message : "Unknown error"
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: "Failed to fetch usage statistics",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
+    );
   }
 }

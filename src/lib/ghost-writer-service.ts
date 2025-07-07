@@ -1,14 +1,14 @@
 import { adminDb } from "@/lib/firebase-admin";
 import { GeminiService } from "@/lib/gemini";
 import { AIVoice } from "@/types/ai-voices";
-import { 
-  ContentIdea, 
-  ContentPillar, 
-  GhostWriterCycle, 
+import {
+  ContentIdea,
+  ContentPillar,
+  GhostWriterCycle,
   UserGhostWriterData,
   BrandProfileForIdeas,
   IdeaGenerationRequest,
-  CONTENT_PILLARS
+  CONTENT_PILLARS,
 } from "@/types/ghost-writer";
 
 export class GhostWriterService {
@@ -79,9 +79,7 @@ export class GhostWriterService {
       .limit(1)
       .get();
 
-    const cycleNumber = latestCycleSnapshot.empty
-      ? 1
-      : (latestCycleSnapshot.docs[0].data().cycleNumber + 1);
+    const cycleNumber = latestCycleSnapshot.empty ? 1 : latestCycleSnapshot.docs[0].data().cycleNumber + 1;
 
     const newCycle: Omit<GhostWriterCycle, "id"> = {
       cycleNumber,
@@ -235,7 +233,7 @@ export class GhostWriterService {
     }
   }
 
-    /**
+  /**
    * Build the AI prompt for idea generation
    */
   private static buildIdeaGenerationPrompt(brandProfile: BrandProfileForIdeas, activeVoice?: AIVoice | null): string {
@@ -250,13 +248,18 @@ ACTIVE VOICE PROFILE:
 - Available Templates: ${activeVoice.templates.length} voice templates
 
 VOICE TEMPLATE EXAMPLES:
-${activeVoice.templates.slice(0, 2).map((template, index) => `
+${activeVoice.templates
+  .slice(0, 2)
+  .map(
+    (template, index) => `
 Template ${index + 1}:
 - Hook: ${template.hook}
 - Bridge: ${template.bridge}
 - Golden Nugget: ${template.nugget}
 - WTA: ${template.wta}
-`).join('')}
+`,
+  )
+  .join("")}
 
 CRITICAL: Generate ideas that can be executed using these specific voice templates. Each idea should map to the Hook→Bridge→Golden Nugget→WTA structure. The hooks should be designed to work with the template patterns above.`
       : `
@@ -308,10 +311,10 @@ REQUIRED JSON FORMAT:
 }
 
 ${
-      activeVoice
-        ? `IMPORTANT: Each hook must be designed to work with the ${activeVoice.name} voice templates. The script_outline should follow the Hook→Bridge→Golden Nugget→WTA structure that matches the voice template patterns.`
-        : `Make each idea specific to the brand voice (${brandProfile.brandVoice}) and directly address the problems/excuses/questions from the brand profile.`
-    }
+  activeVoice
+    ? `IMPORTANT: Each hook must be designed to work with the ${activeVoice.name} voice templates. The script_outline should follow the Hook→Bridge→Golden Nugget→WTA structure that matches the voice template patterns.`
+    : `Make each idea specific to the brand voice (${brandProfile.brandVoice}) and directly address the problems/excuses/questions from the brand profile.`
+}
 
 Ensure variety in difficulty and duration.`;
   }

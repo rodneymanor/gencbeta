@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { authenticateApiKey } from "@/lib/api-key-auth";
 import { GhostWriterService } from "@/lib/ghost-writer-service";
 
@@ -14,27 +15,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Authenticate user
     const authResult = await authenticateApiKey(request);
     if (!authResult.success) {
-      return NextResponse.json(
-        { error: authResult.error },
-        { status: authResult.status }
-      );
+      return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
 
     const { userId } = authResult;
     const body: ManageIdeaRequest = await request.json();
 
     if (!body.ideaId || !body.action) {
-      return NextResponse.json(
-        { error: "Missing ideaId or action" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Missing ideaId or action" }, { status: 400 });
     }
 
     if (!["save", "dismiss"].includes(body.action)) {
-      return NextResponse.json(
-        { error: "Invalid action. Must be 'save' or 'dismiss'" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid action. Must be 'save' or 'dismiss'" }, { status: 400 });
     }
 
     // Perform the action
@@ -48,14 +40,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({
       success: true,
-      message: `Idea ${body.action}d successfully`
+      message: `Idea ${body.action}d successfully`,
     });
-
   } catch (error) {
     console.error("❌ [GhostWriter] Error managing idea:", error);
-    return NextResponse.json(
-      { error: "Failed to manage idea" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to manage idea" }, { status: 500 });
   }
-} 
+}

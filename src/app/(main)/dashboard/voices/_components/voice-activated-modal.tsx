@@ -1,9 +1,10 @@
 "use client";
 
-import { VoiceActivationResponse } from "@/types/ai-voices";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { VoiceActivationResponse } from "@/types/ai-voices";
 
 interface VoiceActivatedModalProps {
   open: boolean;

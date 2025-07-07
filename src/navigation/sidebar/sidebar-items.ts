@@ -68,9 +68,7 @@ export const sidebarGroups: NavGroup[] = [
         title: "Research",
         url: "/research/collections",
         icon: FolderOpen,
-        subItems: [
-          { title: "Collections", url: "/research/collections", icon: FolderOpen },
-        ],
+        subItems: [{ title: "Collections", url: "/research/collections", icon: FolderOpen }],
       },
     ],
   },
@@ -107,4 +105,4 @@ export const sidebarGroups: NavGroup[] = [
 ];
 
 // Keep the old export for backward compatibility if needed
-export const sidebarItems: NavMainItem[] = sidebarGroups.flatMap(group => group.items);
+export const sidebarItems: NavMainItem[] = sidebarGroups.flatMap((group) => group.items);

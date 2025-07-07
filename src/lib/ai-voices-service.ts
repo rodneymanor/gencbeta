@@ -1,4 +1,3 @@
-import { adminDb } from "./firebase-admin";
 import {
   AIVoice,
   VoiceCreationRequest,
@@ -6,13 +5,13 @@ import {
   CustomVoiceLimit,
   VoiceTemplate,
 } from "@/types/ai-voices";
+
+import { adminDb } from "./firebase-admin";
 import { TemplateGenerator } from "./template-generator-service";
 
 export class AIVoicesService {
   private static readonly CUSTOM_VOICE_LIMIT = 3;
   private static readonly COLLECTION_NAME = "aiVoices";
-
-
 
   /**
    * Get all available voices (shared + user's custom voices)
@@ -20,10 +19,7 @@ export class AIVoicesService {
   static async getAvailableVoices(userId: string): Promise<{ sharedVoices: AIVoice[]; customVoices: AIVoice[] }> {
     try {
       // Get shared voices (isShared = true, userId = null)
-      const sharedSnapshot = await adminDb
-        .collection(this.COLLECTION_NAME)
-        .where("isShared", "==", true)
-        .get();
+      const sharedSnapshot = await adminDb.collection(this.COLLECTION_NAME).where("isShared", "==", true).get();
 
       const sharedVoices = sharedSnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -305,15 +301,17 @@ export class AIVoicesService {
       {
         id: "script_1",
         title: "Business Growth Script",
-        content: "If you want to scale your business but keep hitting the same revenue ceiling, here's what you're missing. Most entrepreneurs think they need more customers, but that's not the real problem. The real issue is you're not maximizing the value of your existing customers. Here's what successful businesses do differently: they focus on increasing customer lifetime value through strategic upsells and retention programs. Start implementing a customer success program today and watch your revenue grow without spending more on acquisition.",
+        content:
+          "If you want to scale your business but keep hitting the same revenue ceiling, here's what you're missing. Most entrepreneurs think they need more customers, but that's not the real problem. The real issue is you're not maximizing the value of your existing customers. Here's what successful businesses do differently: they focus on increasing customer lifetime value through strategic upsells and retention programs. Start implementing a customer success program today and watch your revenue grow without spending more on acquisition.",
         source: profileUrl,
         platform,
         metrics: { views: 125000, likes: 8500 },
       },
       {
-        id: "script_2", 
+        id: "script_2",
         title: "Productivity Hack",
-        content: "If you're working 12-hour days but still falling behind, you're doing it wrong. I used to be the same way until I discovered this simple system. The problem isn't that you don't have enough time, it's that you're not protecting your energy. Here's the game-changer: batch similar tasks together and eliminate decision fatigue. Block out 2-hour focused work sessions and turn off all notifications. Try this for one week and you'll accomplish more in 6 hours than you used to in 12.",
+        content:
+          "If you're working 12-hour days but still falling behind, you're doing it wrong. I used to be the same way until I discovered this simple system. The problem isn't that you don't have enough time, it's that you're not protecting your energy. Here's the game-changer: batch similar tasks together and eliminate decision fatigue. Block out 2-hour focused work sessions and turn off all notifications. Try this for one week and you'll accomplish more in 6 hours than you used to in 12.",
         source: profileUrl,
         platform,
         metrics: { views: 89000, likes: 6200 },
@@ -321,11 +319,12 @@ export class AIVoicesService {
       {
         id: "script_3",
         title: "Marketing Strategy",
-        content: "If your marketing feels like you're shouting into the void, here's why. Everyone's trying to be everywhere at once, but that's a recipe for mediocrity. The secret successful brands know is this: dominate one platform before expanding. Pick the platform where your ideal customers spend the most time and become the go-to expert there. Focus all your energy on creating incredible content for that one platform for 90 days and watch your audience explode.",
+        content:
+          "If your marketing feels like you're shouting into the void, here's why. Everyone's trying to be everywhere at once, but that's a recipe for mediocrity. The secret successful brands know is this: dominate one platform before expanding. Pick the platform where your ideal customers spend the most time and become the go-to expert there. Focus all your energy on creating incredible content for that one platform for 90 days and watch your audience explode.",
         source: profileUrl,
         platform,
         metrics: { views: 156000, likes: 11300 },
-      }
+      },
     ];
 
     return {

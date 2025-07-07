@@ -2,12 +2,7 @@
 
 import React, { useState, useCallback, useMemo, useEffect } from "react";
 
-import {
-  FileText,
-  BarChart3,
-  Lightbulb,
-  Target,
-} from "lucide-react";
+import { FileText, BarChart3, Lightbulb, Target } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,16 +19,14 @@ import {
   ReadabilitySettings,
   defaultReadabilitySettings,
 } from "@/lib/enhanced-readability-service";
-
-import { 
-  analyzeElement, 
+import {
+  analyzeElement,
   generateAlternatives,
   enhanceHook,
   strengthenBridge,
   amplifyGoldenNugget,
-  optimizeCTA
+  optimizeCTA,
 } from "@/lib/script-element-actions";
-
 
 import { ContextualMenu } from "./contextual-menu";
 import { HighlightOverlay } from "./highlight-overlay";
@@ -69,10 +62,6 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
   const [readabilityService] = useState(() => new EnhancedReadabilityService(readabilitySettings));
   const [elementDetectionService] = useState(() => new EnhancedElementDetection(elementDetectionSettings));
 
-
-
-
-
   // Update services when settings change
   useEffect(() => {
     readabilityService.updateSettings(readabilitySettings);
@@ -81,8 +70,6 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
   useEffect(() => {
     elementDetectionService.updateSettings(elementDetectionSettings);
   }, [elementDetectionSettings, elementDetectionService]);
-
-
 
   const readabilityAnalysis = useMemo(() => {
     if (!text.trim() || !readabilitySettings.enabled) return null;
@@ -142,16 +129,16 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
 
   const enhanceElement = useCallback(async (elementType: string, elementText: string) => {
     switch (elementType) {
-      case 'hook':
+      case "hook":
         const hookResult = await enhanceHook(elementText);
         return hookResult.success ? hookResult.result : null;
-      case 'bridge':
+      case "bridge":
         const bridgeResult = await strengthenBridge(elementText);
         return bridgeResult.success ? bridgeResult.result : null;
-      case 'golden-nugget':
+      case "golden-nugget":
         const nuggetResult = await amplifyGoldenNugget(elementText);
         return nuggetResult.success ? nuggetResult.result : null;
-      case 'cta':
+      case "cta":
         const ctaResult = await optimizeCTA(elementText);
         return ctaResult.success ? ctaResult.result : null;
       default:
@@ -206,15 +193,13 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
     onSave?.(text);
   }, [text, onSave]);
 
-
-
   return (
     <div className="app-shell">
       {/* Main Content Area */}
       <div className="main-content flex h-full flex-col">
         {/* Editor */}
         <div className="flex-1 p-6">
-          <Card className="h-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[12px] shadow-sm p-6">
+          <Card className="h-full rounded-[12px] border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
@@ -234,14 +219,14 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
                 )}
               </CardTitle>
             </CardHeader>
-            <CardContent className="h-full pb-6 bg-white p-6">
+            <CardContent className="h-full bg-white p-6 pb-6">
               <div className="relative h-full">
                 <CustomTextarea
                   value={text}
                   onChange={(e) => handleTextChange(e.target.value)}
                   placeholder="Start writing your script here..."
-                  className="h-full resize-none text-base leading-relaxed focus:outline-none w-full border-0"
-                  style={{ border: 'none' }}
+                  className="h-full w-full resize-none border-0 text-base leading-relaxed focus:outline-none"
+                  style={{ border: "none" }}
                 />
               </div>
             </CardContent>
@@ -253,10 +238,8 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
       <div className="right-sidebar bg-background/50 border-border/50 overflow-y-auto border-l backdrop-blur-sm">
         <div className="space-y-4 p-4">
           {/* Readability Analysis (now on top) */}
-          <div
-            className="relative flex flex-col rounded-xl min-w-[225px] p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md"
-          >
-            <h3 className="line-clamp-2 text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-2">
+          <div className="relative flex min-w-[225px] flex-col rounded-xl border border-gray-200 bg-white p-4 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
+            <h3 className="mb-2 line-clamp-2 flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
               <Target className="h-4 w-4" />
               Readability
             </h3>
@@ -303,14 +286,12 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
                 )}
               </div>
             ) : (
-              <div className="text-muted-foreground text-sm text-center py-8">No readability data available.</div>
+              <div className="text-muted-foreground py-8 text-center text-sm">No readability data available.</div>
             )}
           </div>
           {/* Statistics */}
-          <div
-            className="relative flex flex-col rounded-xl min-w-[225px] p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md"
-          >
-            <h3 className="line-clamp-2 text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-2">
+          <div className="relative flex min-w-[225px] flex-col rounded-xl border border-gray-200 bg-white p-4 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
+            <h3 className="mb-2 line-clamp-2 flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
               <BarChart3 className="h-4 w-4" />
               Statistics
             </h3>

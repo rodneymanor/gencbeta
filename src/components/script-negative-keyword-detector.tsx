@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import { AlertTriangle, RefreshCw, Eye } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { detectNegativeKeywords } from "@/data/negative-keywords";
 
@@ -49,10 +50,11 @@ export function ScriptNegativeKeywordDetector({
         <AlertTriangle className="h-4 w-4" />
         <AlertDescription className="flex items-center justify-between">
           <div className="flex-1">
-            <div className="font-medium mb-2">
-              Detected {detection.detectedKeywords.length} AI-overused word{detection.detectedKeywords.length !== 1 ? 's' : ''}
+            <div className="mb-2 font-medium">
+              Detected {detection.detectedKeywords.length} AI-overused word
+              {detection.detectedKeywords.length !== 1 ? "s" : ""}
             </div>
-            <div className="flex flex-wrap gap-1 mb-3">
+            <div className="mb-3 flex flex-wrap gap-1">
               {detection.detectedKeywords.map((keyword) => (
                 <Badge key={keyword} variant="destructive" className="text-xs">
                   {keyword}
@@ -63,50 +65,47 @@ export function ScriptNegativeKeywordDetector({
               These words make content sound robotic and AI-generated. Consider regenerating for more natural language.
             </p>
           </div>
-          <div className="flex gap-2 ml-4">
+          <div className="ml-4 flex gap-2">
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm">
-                  <Eye className="h-4 w-4 mr-1" />
+                  <Eye className="mr-1 h-4 w-4" />
                   Preview
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+              <DialogContent className="max-h-[80vh] max-w-2xl overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Script with Highlighted Keywords</DialogTitle>
                 </DialogHeader>
                 <div className="mt-4">
-                  <div 
+                  <div
                     className="prose prose-sm max-w-none"
-                    dangerouslySetInnerHTML={{ 
+                    dangerouslySetInnerHTML={{
                       __html: detection.highlightedText.replace(
-                        /class="negative-keyword"/g, 
-                        'class="bg-red-200 dark:bg-red-900 px-1 py-0.5 rounded font-semibold"'
-                      )
+                        /class="negative-keyword"/g,
+                        'class="bg-red-200 dark:bg-red-900 px-1 py-0.5 rounded font-semibold"',
+                      ),
                     }}
                   />
-                  <div className="mt-4 p-3 bg-muted rounded-lg">
-                    <p className="text-sm text-muted-foreground">
-                      <strong>Legend:</strong> Highlighted words are flagged as AI-overused terms that should be avoided for more natural, human-like content.
+                  <div className="bg-muted mt-4 rounded-lg p-3">
+                    <p className="text-muted-foreground text-sm">
+                      <strong>Legend:</strong> Highlighted words are flagged as AI-overused terms that should be avoided
+                      for more natural, human-like content.
                     </p>
                   </div>
                 </div>
               </DialogContent>
             </Dialog>
             {onRegenerateRequest && (
-              <Button 
-                onClick={onRegenerateRequest} 
-                disabled={isRegenerating}
-                size="sm"
-              >
+              <Button onClick={onRegenerateRequest} disabled={isRegenerating} size="sm">
                 {isRegenerating ? (
                   <>
-                    <RefreshCw className="h-4 w-4 mr-1 animate-spin" />
+                    <RefreshCw className="mr-1 h-4 w-4 animate-spin" />
                     Regenerating...
                   </>
                 ) : (
                   <>
-                    <RefreshCw className="h-4 w-4 mr-1" />
+                    <RefreshCw className="mr-1 h-4 w-4" />
                     Regenerate
                   </>
                 )}
@@ -117,4 +116,4 @@ export function ScriptNegativeKeywordDetector({
       </Alert>
     </div>
   );
-} 
+}

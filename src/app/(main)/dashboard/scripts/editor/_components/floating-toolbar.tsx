@@ -1,19 +1,20 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+
 import { Download, Save, Mic, RefreshCw, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator 
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { toast } from "sonner";
+import { Separator } from "@/components/ui/separator";
 import { useVoice, type VoiceType } from "@/contexts/voice-context";
 
 interface FloatingToolbarProps {
@@ -28,11 +29,11 @@ export function FloatingToolbar({ script }: FloatingToolbarProps) {
 
   const handleSave = useCallback(async () => {
     if (!script.trim()) return;
-    
+
     setIsSaving(true);
     try {
       // TODO: Implement actual save functionality
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
       toast.success("Script saved successfully!");
     } catch {
       toast.error("Failed to save script");
@@ -44,29 +45,29 @@ export function FloatingToolbar({ script }: FloatingToolbarProps) {
   // Add keyboard shortcut support
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+      if ((e.metaKey || e.ctrlKey) && e.key === "s") {
         e.preventDefault();
         handleSave();
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [handleSave]);
 
   const handleDownload = () => {
     if (!script.trim()) return;
-    
-    const blob = new Blob([script], { type: 'text/plain' });
+
+    const blob = new Blob([script], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `script-${new Date().toISOString().split('T')[0]}.txt`;
+    a.download = `script-${new Date().toISOString().split("T")[0]}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
+
     toast.success("Script downloaded!");
   };
 
@@ -77,13 +78,13 @@ export function FloatingToolbar({ script }: FloatingToolbarProps) {
 
   const handleRewriteWithVoice = async (voiceType: VoiceType) => {
     if (!script.trim()) return;
-    
+
     setIsRewriting(true);
     try {
       // Change the voice first
       setCurrentVoice(voiceType);
       // TODO: Implement actual AI rewrite functionality
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate API call
       toast.success(`Script rewritten with ${voiceType} voice!`);
     } catch {
       toast.error("Failed to rewrite script");
@@ -94,11 +95,11 @@ export function FloatingToolbar({ script }: FloatingToolbarProps) {
 
   const handleRewriteScript = async () => {
     if (!script.trim()) return;
-    
+
     setIsRewriting(true);
     try {
       // TODO: Implement actual AI rewrite functionality
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate API call
       toast.success("Script rewritten!");
     } catch {
       toast.error("Failed to rewrite script");
@@ -120,19 +121,13 @@ export function FloatingToolbar({ script }: FloatingToolbarProps) {
               disabled={isSaving || !script.trim()}
               className="h-8 px-3"
             >
-              <Save className="h-4 w-4 mr-1" />
+              <Save className="mr-1 h-4 w-4" />
               {isSaving ? "Saving..." : "Save"}
             </Button>
 
             {/* Download Button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleDownload}
-              disabled={!script.trim()}
-              className="h-8 px-3"
-            >
-              <Download className="h-4 w-4 mr-1" />
+            <Button variant="ghost" size="sm" onClick={handleDownload} disabled={!script.trim()} className="h-8 px-3">
+              <Download className="mr-1 h-4 w-4" />
               Export
             </Button>
 
@@ -141,40 +136,35 @@ export function FloatingToolbar({ script }: FloatingToolbarProps) {
             {/* Voice Selection & Rewrite Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  disabled={isRewriting}
-                  className="h-8 px-3"
-                >
-                  <Mic className="h-4 w-4 mr-1" />
+                <Button variant="ghost" size="sm" disabled={isRewriting} className="h-8 px-3">
+                  <Mic className="mr-1 h-4 w-4" />
                   {currentVoice}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 {/* Voice Selection */}
                 {availableVoices.map((voice) => (
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     key={voice}
                     onClick={() => handleChangeVoice(voice)}
                     className={voice === currentVoice ? "bg-accent" : ""}
                   >
-                    <Mic className="h-4 w-4 mr-2" />
+                    <Mic className="mr-2 h-4 w-4" />
                     {voice} Voice
                     {voice === currentVoice && <span className="ml-auto">✓</span>}
                   </DropdownMenuItem>
                 ))}
-                
+
                 <DropdownMenuSeparator />
-                
+
                 {/* Rewrite with Voice Options */}
                 {availableVoices.map((voice) => (
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     key={`rewrite-${voice}`}
                     onClick={() => handleRewriteWithVoice(voice)}
                     disabled={!script.trim()}
                   >
-                    <RefreshCw className="h-4 w-4 mr-2" />
+                    <RefreshCw className="mr-2 h-4 w-4" />
                     Rewrite as {voice}
                   </DropdownMenuItem>
                 ))}
@@ -184,39 +174,34 @@ export function FloatingToolbar({ script }: FloatingToolbarProps) {
             {/* AI Tools Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  disabled={isRewriting || !script.trim()}
-                  className="h-8 px-3"
-                >
-                  <Sparkles className="h-4 w-4 mr-1" />
+                <Button variant="ghost" size="sm" disabled={isRewriting || !script.trim()} className="h-8 px-3">
+                  <Sparkles className="mr-1 h-4 w-4" />
                   AI Tools
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={handleRewriteScript}>
-                  <RefreshCw className="h-4 w-4 mr-2" />
+                  <RefreshCw className="mr-2 h-4 w-4" />
                   Rewrite Script
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => handleRewriteWithVoice("Hook")}>
-                  <Sparkles className="h-4 w-4 mr-2" />
+                  <Sparkles className="mr-2 h-4 w-4" />
                   Improve Hook
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleRewriteWithVoice("CTA")}>
-                  <Sparkles className="h-4 w-4 mr-2" />
+                  <Sparkles className="mr-2 h-4 w-4" />
                   Strengthen CTA
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleRewriteWithVoice("Flow")}>
-                  <Sparkles className="h-4 w-4 mr-2" />
+                  <Sparkles className="mr-2 h-4 w-4" />
                   Improve Flow
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
             {/* Keyboard Shortcuts Indicator */}
-            <div className="flex items-center gap-1 ml-2 text-xs text-muted-foreground">
+            <div className="text-muted-foreground ml-2 flex items-center gap-1 text-xs">
               <kbd className="bg-muted rounded px-1.5 py-0.5">⌘S</kbd>
             </div>
           </div>
@@ -224,4 +209,4 @@ export function FloatingToolbar({ script }: FloatingToolbarProps) {
       </Card>
     </div>
   );
-} 
+}

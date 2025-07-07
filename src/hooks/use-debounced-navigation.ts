@@ -1,8 +1,9 @@
 import { useCallback, useRef } from "react";
+
 import { useRouter } from "next/navigation";
 
 // Simple debounce function
-function debounce<T extends (...args: unknown[]) => void>(func: T, delay: number): (...args: Parameters<T>) => void {
+function debounce<T extends(...args: unknown[]) => void>(func: T, delay: number): (...args: Parameters<T>) => void {
   let timeoutId: NodeJS.Timeout;
 
   return (...args: Parameters<T>) => {

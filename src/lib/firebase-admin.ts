@@ -45,7 +45,7 @@ function initializeAdminApp(): AdminInstances {
       credential: cert(serviceAccount),
       projectId,
     });
-    
+
     console.log("✅ Firebase Admin SDK initialized successfully");
 
     instances = {
@@ -53,9 +53,8 @@ function initializeAdminApp(): AdminInstances {
       auth: getAuth(app),
       db: getFirestore(app),
     };
-    
-    return instances;
 
+    return instances;
   } catch (error) {
     console.error("❌ Failed to initialize Firebase Admin SDK:", error);
     throw new Error("Could not initialize Firebase Admin SDK. Check server logs for details.");
@@ -71,5 +70,5 @@ export function getAdminDb(): Firestore {
 }
 
 export function getAdminApp(): App {
-    return initializeAdminApp().app;
+  return initializeAdminApp().app;
 }

@@ -1,9 +1,7 @@
-
-
 export interface SentenceHighlight {
   text: string;
   score: number;
-  level: 'easy' | 'medium' | 'hard';
+  level: "easy" | "medium" | "hard";
   color: string;
   bgColor: string;
   start: number;
@@ -21,7 +19,7 @@ export interface ReadabilityHighlightResult {
  */
 function splitIntoSentences(text: string): Array<{ text: string; start: number; end: number }> {
   const sentences: Array<{ text: string; start: number; end: number }> = [];
-  
+
   // Enhanced regex to handle various sentence endings
   const sentenceRegex = /[.!?]+(?:\s+|$)/g;
   let lastIndex = 0;
@@ -29,15 +27,15 @@ function splitIntoSentences(text: string): Array<{ text: string; start: number; 
 
   while ((match = sentenceRegex.exec(text)) !== null) {
     const sentenceText = text.slice(lastIndex, match.index + match[0].length).trim();
-    
+
     if (sentenceText.length > 0) {
       sentences.push({
         text: sentenceText,
         start: lastIndex,
-        end: match.index + match[0].length
+        end: match.index + match[0].length,
       });
     }
-    
+
     lastIndex = match.index + match[0].length;
   }
 
@@ -48,7 +46,7 @@ function splitIntoSentences(text: string): Array<{ text: string; start: number; 
       sentences.push({
         text: remainingText,
         start: lastIndex,
-        end: text.length
+        end: text.length,
       });
     }
   }
@@ -61,9 +59,9 @@ function splitIntoSentences(text: string): Array<{ text: string; start: number; 
  */
 function calculateSentenceScore(sentence: string): number {
   // Use simplified metrics for individual sentences
-  const words = sentence.split(/\s+/).filter(word => word.length > 0);
+  const words = sentence.split(/\s+/).filter((word) => word.length > 0);
   const wordCount = words.length;
-  
+
   if (wordCount === 0) return 100;
 
   // Count syllables (simplified)
@@ -73,7 +71,7 @@ function calculateSentenceScore(sentence: string): number {
   }, 0);
 
   // Count complex words (3+ syllables)
-  const complexWords = words.filter(word => {
+  const complexWords = words.filter((word) => {
     const syllables = word.toLowerCase().match(/[aeiouy]+/g);
     return syllables && syllables.length >= 3;
   }).length;
@@ -85,10 +83,10 @@ function calculateSentenceScore(sentence: string): number {
   const complexWordRatio = complexWords / wordCount;
 
   // Flesch-like formula adapted for single sentences
-  let score = 206.835 - (1.015 * avgWordsPerSentence) - (84.6 * avgSyllablesPerWord);
-  
+  let score = 206.835 - 1.015 * avgWordsPerSentence - 84.6 * avgSyllablesPerWord;
+
   // Adjust for complex words
-  score -= (complexWordRatio * 50);
+  score -= complexWordRatio * 50;
 
   // Ensure score is between 0 and 100
   return Math.max(0, Math.min(100, score));
@@ -97,24 +95,24 @@ function calculateSentenceScore(sentence: string): number {
 /**
  * Get readability level and colors based on score
  */
-function getReadabilityLevel(score: number): { level: 'easy' | 'medium' | 'hard'; color: string; bgColor: string } {
+function getReadabilityLevel(score: number): { level: "easy" | "medium" | "hard"; color: string; bgColor: string } {
   if (score >= 70) {
     return {
-      level: 'easy',
-      color: 'text-green-700',
-      bgColor: 'bg-green-100/50'
+      level: "easy",
+      color: "text-green-700",
+      bgColor: "bg-green-100/50",
     };
   } else if (score >= 40) {
     return {
-      level: 'medium',
-      color: 'text-yellow-700',
-      bgColor: 'bg-yellow-100/50'
+      level: "medium",
+      color: "text-yellow-700",
+      bgColor: "bg-yellow-100/50",
     };
   } else {
     return {
-      level: 'hard',
-      color: 'text-red-700',
-      bgColor: 'bg-red-100/50'
+      level: "hard",
+      color: "text-red-700",
+      bgColor: "bg-red-100/50",
     };
   }
 }
@@ -127,7 +125,7 @@ export function analyzeReadabilityHighlighting(text: string): ReadabilityHighlig
     return {
       sentences: [],
       overallScore: 0,
-      wordCount: 0
+      wordCount: 0,
     };
   }
 
@@ -140,7 +138,7 @@ export function analyzeReadabilityHighlighting(text: string): ReadabilityHighlig
   for (const sentence of sentences) {
     const score = calculateSentenceScore(sentence.text);
     const { level, color, bgColor } = getReadabilityLevel(score);
-    const wordCount = sentence.text.split(/\s+/).filter(word => word.length > 0).length;
+    const wordCount = sentence.text.split(/\s+/).filter((word) => word.length > 0).length;
 
     highlights.push({
       text: sentence.text,
@@ -149,7 +147,7 @@ export function analyzeReadabilityHighlighting(text: string): ReadabilityHighlig
       color,
       bgColor,
       start: sentence.start,
-      end: sentence.end
+      end: sentence.end,
     });
 
     totalScore += score * wordCount; // Weight by word count
@@ -161,7 +159,7 @@ export function analyzeReadabilityHighlighting(text: string): ReadabilityHighlig
   return {
     sentences: highlights,
     overallScore,
-    wordCount: totalWords
+    wordCount: totalWords,
   };
 }
 
@@ -171,7 +169,7 @@ export function analyzeReadabilityHighlighting(text: string): ReadabilityHighlig
 export function generateReadabilityHTML(text: string, highlights: SentenceHighlight[]): string {
   if (!text || highlights.length === 0) return text;
 
-  let html = '';
+  let html = "";
   let lastIndex = 0;
 
   for (const highlight of highlights) {
@@ -207,7 +205,7 @@ export function getReadabilityStats(highlights: SentenceHighlight[]): {
     easy: 0,
     medium: 0,
     hard: 0,
-    total: highlights.length
+    total: highlights.length,
   };
 
   for (const highlight of highlights) {
@@ -215,4 +213,4 @@ export function getReadabilityStats(highlights: SentenceHighlight[]): {
   }
 
   return stats;
-} 
+}

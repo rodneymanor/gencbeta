@@ -66,8 +66,6 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`🔍 [API Keys] Generating key for ${userProfile.role}: ${userEmail}`);
-
-    
     if (!adminDb) {
       return NextResponse.json({ error: "Database connection failed" }, { status: 500 });
     }
@@ -178,8 +176,6 @@ export async function DELETE(request: NextRequest) {
     const userEmail = decodedToken.email;
 
     console.log(`🔍 [API Keys] Revoking key for user: ${userEmail}`);
-
-    
     if (!adminDb) {
       return NextResponse.json({ error: "Database connection failed" }, { status: 500 });
     }
@@ -273,7 +269,6 @@ export async function GET(request: NextRequest) {
     const userId = decodedToken.uid;
     const userEmail = decodedToken.email;
 
-    
     if (!adminDb) {
       return NextResponse.json({ error: "Database connection failed" }, { status: 500 });
     }

@@ -1,6 +1,7 @@
+import { FirebaseFirestore } from "firebase-admin";
+
 import { getAdminDb, isAdminInitialized } from "./firebase-admin";
 import { UserManagementAdminService } from "./user-management-admin";
-import { FirebaseFirestore } from "firebase-admin";
 
 export interface Collection {
   id: string;

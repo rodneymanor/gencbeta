@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
     console.log("📚 [List Collections API] GET request received for user:", userId);
 
     // Check if Admin SDK is initialized
-    
+
     if (!isAdminInitialized || !adminDb) {
       return NextResponse.json({ error: "Firebase Admin SDK not configured" }, { status: 500 });
     }

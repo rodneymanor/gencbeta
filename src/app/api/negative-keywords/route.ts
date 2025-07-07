@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { NegativeKeywordSettings } from "@/data/negative-keywords";
 import { authenticateApiKey } from "@/lib/api-key-auth";
 import { NegativeKeywordsService } from "@/lib/negative-keywords-service";
-import { NegativeKeywordSettings } from "@/data/negative-keywords";
 
 interface NegativeKeywordsResponse {
   success: boolean;
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<NegativeKe
         success: false,
         error: "Failed to fetch negative keyword settings",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -65,7 +65,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse<NegativeKe
           success: false,
           error: "Settings are required",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -73,7 +73,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse<NegativeKe
 
     const updatedSettings = await NegativeKeywordsService.updateUserNegativeKeywords(
       userId,
-      body.settings as NegativeKeywordSettings
+      body.settings as NegativeKeywordSettings,
     );
 
     console.log("✅ [NegativeKeywords API] Settings updated successfully");
@@ -89,7 +89,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse<NegativeKe
         success: false,
         error: "Failed to update negative keyword settings",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<NegativeK
           success: false,
           error: "Action and keyword are required",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -149,7 +149,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<NegativeK
             success: false,
             error: "Invalid action",
           },
-          { status: 400 }
+          { status: 400 },
         );
     }
 
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<NegativeK
         success: false,
         error: error instanceof Error ? error.message : "Failed to process request",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
-} 
+}

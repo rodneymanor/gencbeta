@@ -88,7 +88,12 @@ async function getActiveVoice(userId: string): Promise<AIVoice | null> {
   }
 }
 
-function createVoicePrompt(activeVoice: AIVoice, idea: string, length: string, negativeKeywordInstruction: string): string {
+function createVoicePrompt(
+  activeVoice: AIVoice,
+  idea: string,
+  length: string,
+  negativeKeywordInstruction: string,
+): string {
   const randomTemplate = activeVoice.templates[Math.floor(Math.random() * activeVoice.templates.length)];
   const targetWordCount = VoiceTemplateProcessor.calculateTargetWordCount(randomTemplate, parseInt(length));
 
@@ -145,7 +150,7 @@ async function generateAIVoiceScript(idea: string, length: string, activeVoice: 
     randomTemplate.bridge,
     randomTemplate.nugget,
     randomTemplate.wta,
-    negativeKeywordInstruction
+    negativeKeywordInstruction,
   );
 
   try {
@@ -155,13 +160,13 @@ async function generateAIVoiceScript(idea: string, length: string, activeVoice: 
 
     // Use bulletproof JSON extraction
     const parseResult = parseStructuredResponse(rawContent, "AI Voice");
-    
+
     if (!parseResult.success) {
       console.warn("[SpeedWrite] AI Voice JSON parsing failed, falling back to plain text");
       const cleanedContent = cleanScriptContent(rawContent);
       const elements = { hook: "", bridge: "", goldenNugget: "", wta: cleanedContent };
       const fullContent = combineScriptElements(elements);
-      
+
       return {
         ...result,
         content: fullContent,
@@ -169,7 +174,7 @@ async function generateAIVoiceScript(idea: string, length: string, activeVoice: 
         approach: "ai-voice" as const,
         voice: { id: activeVoice.id, name: activeVoice.name, badges: activeVoice.badges },
         success: false,
-        error: parseResult.error
+        error: parseResult.error,
       };
     }
 
@@ -209,26 +214,26 @@ async function generateSpeedWriteScript(idea: string, length: string, userId: st
     const result = await generateScriptWithValidation(
       () => generateScript(prompt, { responseType: "json" }),
       (result) => result.content ?? "",
-      { maxRetries: 2, retryDelay: 500 }
+      { maxRetries: 2, retryDelay: 500 },
     );
 
     const rawContent = result.content ?? "";
 
     // Use bulletproof JSON extraction
     const parseResult = parseStructuredResponse(rawContent, "Speed Write");
-    
+
     if (!parseResult.success) {
       console.warn("[SpeedWrite] Speed Write JSON parsing failed, falling back to plain text");
       const cleanedContent = cleanScriptContent(rawContent);
       const elements = { hook: "", bridge: "", goldenNugget: "", wta: cleanedContent };
       const fullContent = combineScriptElements(elements);
-      
+
       return {
         ...result,
         content: fullContent,
         elements,
         success: false,
-        error: parseResult.error
+        error: parseResult.error,
       };
     }
 
@@ -244,7 +249,7 @@ async function generateSpeedWriteScript(idea: string, length: string, userId: st
     return {
       ...result,
       content: fullContent,
-      elements
+      elements,
     };
   } catch (error) {
     console.error("[SpeedWrite] Speed Write script generation failed:", error);
@@ -281,13 +286,13 @@ Write the complete script now:`;
     const result = await generateScriptWithValidation(
       () => generateScript(prompt),
       (result) => result.content ?? "",
-      { maxRetries: 2, retryDelay: 500 }
+      { maxRetries: 2, retryDelay: 500 },
     );
 
     const cleanedContent = cleanScriptContent(result.content ?? "");
     return {
       ...result,
-      content: cleanedContent
+      content: cleanedContent,
     };
   } catch (error) {
     console.error("[SpeedWrite] Educational script generation failed:", error);
@@ -330,7 +335,10 @@ async function processSpeedWriteRequest(
   // Check for active AI voice
   const activeVoice = await getActiveVoice(userId);
 
-  const promises: Promise<any>[] = [generateSpeedWriteScript(idea, length, userId), generateEducationalScript(idea, length, userId)];
+  const promises: Promise<any>[] = [
+    generateSpeedWriteScript(idea, length, userId),
+    generateEducationalScript(idea, length, userId),
+  ];
 
   // Add AI voice generation if available
   if (activeVoice && activeVoice.templates && activeVoice.templates.length > 0) {
@@ -376,12 +384,7 @@ async function createScriptOptions(
             speedWriteResult.value.elements,
           )
         : educationalResult.status === "fulfilled" && educationalResult.value.success
-          ? createScriptOption(
-              "option-b",
-              "Educational Approach",
-              educationalResult.value.content,
-              "educational",
-            )
+          ? createScriptOption("option-b", "Educational Approach", educationalResult.value.content, "educational")
           : null;
 
     return { optionA, optionB };
@@ -402,12 +405,7 @@ async function createScriptOptions(
 
   const optionB =
     educationalResult.status === "fulfilled" && educationalResult.value.success
-      ? createScriptOption(
-          "option-b",
-          "Educational Approach",
-          educationalResult.value.content,
-          "educational",
-        )
+      ? createScriptOption("option-b", "Educational Approach", educationalResult.value.content, "educational")
       : null;
 
   return { optionA, optionB };
@@ -519,20 +517,16 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
     }
 
     // Deduct credits for successful generation
-    await CreditsService.trackUsageAndDeductCredits(
-      userId,
-      "script_generation",
-      accountLevel,
-      {
-        service: "gemini",
-        tokensUsed: (speedWriteResult.status === "fulfilled" ? speedWriteResult.value.tokensUsed : 0) +
-                   (educationalResult.status === "fulfilled" ? educationalResult.value.tokensUsed : 0),
-        responseTime: processingTime,
-        success: true,
-        timestamp: new Date().toISOString(),
-        metadata: { scriptLength: body.length, inputLength: body.idea.length },
-      }
-    );
+    await CreditsService.trackUsageAndDeductCredits(userId, "script_generation", accountLevel, {
+      service: "gemini",
+      tokensUsed:
+        (speedWriteResult.status === "fulfilled" ? speedWriteResult.value.tokensUsed : 0) +
+        (educationalResult.status === "fulfilled" ? educationalResult.value.tokensUsed : 0),
+      responseTime: processingTime,
+      success: true,
+      timestamp: new Date().toISOString(),
+      metadata: { scriptLength: body.length, inputLength: body.idea.length },
+    });
 
     // Track usage
     await trackUsageResults(userId, body, speedWriteResult, educationalResult, processingTime);

@@ -7,7 +7,7 @@ import {
   UsageRecord,
   CREDIT_COSTS,
   ACCOUNT_LIMITS,
-  CreditOperation
+  CreditOperation,
 } from "@/types/usage-tracking";
 
 export class CreditsService {
@@ -18,7 +18,6 @@ export class CreditsService {
   } as const;
 
   static async initializeUserCredits(userId: string, accountLevel: AccountLevel): Promise<UserCredits> {
-    
     try {
       const adminDb = getAdminDb();
 
@@ -68,7 +67,6 @@ export class CreditsService {
   }
 
   static async getUserCredits(userId: string, accountLevel: AccountLevel): Promise<UserCredits> {
-    
     try {
       const adminDb = getAdminDb();
 
@@ -101,9 +99,8 @@ export class CreditsService {
   static async canPerformAction(
     userId: string,
     operation: CreditOperation,
-    accountLevel: AccountLevel
+    accountLevel: AccountLevel,
   ): Promise<{ canPerform: boolean; reason?: string; creditsNeeded: number }> {
-    
     try {
       const userCredits = await this.getUserCredits(userId, accountLevel);
       const creditsNeeded = CREDIT_COSTS[operation];
@@ -117,7 +114,7 @@ export class CreditsService {
       return {
         canPerform: false,
         reason: `Insufficient credits. Need ${creditsNeeded}, have ${creditsRemaining}. Resets ${periodType}.`,
-        creditsNeeded
+        creditsNeeded,
       };
     } catch (error) {
       console.error("❌ [Credits] Failed to check action permission:", error);
@@ -129,9 +126,8 @@ export class CreditsService {
     userId: string,
     operation: CreditOperation,
     accountLevel: AccountLevel,
-    metadata?: Record<string, unknown>
+    metadata?: Record<string, unknown>,
   ): Promise<{ success: boolean; newBalance: number; transaction?: CreditTransaction }> {
-    
     try {
       const adminDb = getAdminDb();
 
@@ -197,9 +193,9 @@ export class CreditsService {
   }
 
   private static updateOperationCounters(
-    updateData: Partial<UserCredits>, 
-    operation: CreditOperation, 
-    userCredits: UserCredits
+    updateData: Partial<UserCredits>,
+    operation: CreditOperation,
+    userCredits: UserCredits,
   ): void {
     switch (operation) {
       case "script_generation":
@@ -216,7 +212,6 @@ export class CreditsService {
   }
 
   static async getUsageStats(userId: string, accountLevel: AccountLevel): Promise<UsageStats> {
-    
     try {
       const userCredits = await this.getUserCredits(userId, accountLevel);
       const creditsRemaining = userCredits.creditsLimit - userCredits.creditsUsed;
@@ -250,9 +245,8 @@ export class CreditsService {
     userId: string,
     operation: CreditOperation,
     accountLevel: AccountLevel,
-    usageData: Omit<UsageRecord, "userId" | "creditsUsed" | "operation">
+    usageData: Omit<UsageRecord, "userId" | "creditsUsed" | "operation">,
   ): Promise<{ success: boolean; newBalance: number }> {
-    
     try {
       const adminDb = getAdminDb();
 
@@ -280,11 +274,7 @@ export class CreditsService {
     }
   }
 
-  private static async checkAndResetPeriod(
-    userCredits: UserCredits,
-    accountLevel: AccountLevel
-  ): Promise<boolean> {
-    
+  private static async checkAndResetPeriod(userCredits: UserCredits, accountLevel: AccountLevel): Promise<boolean> {
     try {
       const adminDb = getAdminDb();
 
@@ -292,16 +282,13 @@ export class CreditsService {
       const isProAccount = accountLevel === "pro";
 
       const resetData = this.calculateResetData(userCredits, accountLevel, now);
-      
+
       if (resetData.needsReset) {
         resetData.updateData.updatedAt = now.toISOString();
 
-        await adminDb
-          .collection(this.COLLECTIONS.USER_CREDITS)
-          .doc(userCredits.id!)
-          .update(resetData.updateData);
+        await adminDb.collection(this.COLLECTIONS.USER_CREDITS).doc(userCredits.id!).update(resetData.updateData);
 
-        console.log(`🔄 [Credits] Reset ${isProAccount ? 'monthly' : 'daily'} credits for user ${userCredits.userId}`);
+        console.log(`🔄 [Credits] Reset ${isProAccount ? "monthly" : "daily"} credits for user ${userCredits.userId}`);
       }
 
       return resetData.needsReset;
@@ -312,9 +299,9 @@ export class CreditsService {
   }
 
   private static calculateResetData(
-    userCredits: UserCredits, 
-    accountLevel: AccountLevel, 
-    now: Date
+    userCredits: UserCredits,
+    accountLevel: AccountLevel,
+    now: Date,
   ): { needsReset: boolean; updateData: Partial<UserCredits> } {
     const isProAccount = accountLevel === "pro";
     let needsReset = false;
@@ -383,11 +370,11 @@ export class CreditsService {
 
     if (hours > 24) {
       const days = Math.floor(hours / 24);
-      return `${days} day${days !== 1 ? 's' : ''}`;
+      return `${days} day${days !== 1 ? "s" : ""}`;
     } else if (hours > 0) {
       return `${hours}h ${minutes}m`;
     } else {
       return `${minutes}m`;
     }
   }
-} 
+}

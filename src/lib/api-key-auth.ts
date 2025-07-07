@@ -43,7 +43,6 @@ export class ApiKeyAuthService {
   static async validateApiKey(
     apiKey: string,
   ): Promise<{ user: AuthenticatedUser; rateLimitResult: RateLimitResult } | null> {
-    
     if (!adminDb) {
       console.error("❌ [API Auth] Admin database not available");
       return null;

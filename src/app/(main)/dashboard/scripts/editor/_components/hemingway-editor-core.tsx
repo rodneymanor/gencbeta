@@ -62,52 +62,47 @@ export function HemingwayEditorCore({
   const analysisTimeoutRef = useRef<NodeJS.Timeout>();
 
   // Create analysis from structured elements
-  const createAnalysisFromElements = useCallback(
-    (text: string, structuredElements: ScriptElements): ScriptAnalysis => {
-      const analysisResult: ScriptAnalysis = {
-        hooks: [],
-        bridges: [],
-        goldenNuggets: [],
-        wtas: [],
+  const createAnalysisFromElements = useCallback((text: string, structuredElements: ScriptElements): ScriptAnalysis => {
+    const analysisResult: ScriptAnalysis = {
+      hooks: [],
+      bridges: [],
+      goldenNuggets: [],
+      wtas: [],
+    };
+
+    let currentIndex = 0;
+
+    // Process each element type in order
+    const elementTypes = ["hook", "bridge", "goldenNugget", "wta"] as const;
+
+    elementTypes.forEach((elementType) => {
+      const elementText = structuredElements[elementType];
+      if (!elementText.trim()) return;
+
+      const startIndex = text.indexOf(elementText, currentIndex);
+      if (startIndex === -1) return;
+
+      const endIndex = startIndex + elementText.length;
+      const element: ScriptElement = {
+        type: elementType === "goldenNugget" ? "golden-nugget" : elementType === "wta" ? "wta" : elementType,
+        startIndex,
+        endIndex,
+        text: elementText,
+        confidence: 1.0, // High confidence for structured elements
+        suggestions: [],
       };
 
-      let currentIndex = 0;
+      // Add to appropriate array
+      if (elementType === "hook") analysisResult.hooks.push(element);
+      else if (elementType === "bridge") analysisResult.bridges.push(element);
+      else if (elementType === "goldenNugget") analysisResult.goldenNuggets.push(element);
+      else if (elementType === "wta") analysisResult.wtas.push(element);
 
-      // Process each element type in order
-      const elementTypes = ['hook', 'bridge', 'goldenNugget', 'wta'] as const;
-      
-      elementTypes.forEach((elementType) => {
-        const elementText = structuredElements[elementType];
-        if (!elementText.trim()) return;
+      currentIndex = endIndex;
+    });
 
-        const startIndex = text.indexOf(elementText, currentIndex);
-        if (startIndex === -1) return;
-
-        const endIndex = startIndex + elementText.length;
-        const element: ScriptElement = {
-          type: elementType === 'goldenNugget' ? 'golden-nugget' : 
-                elementType === 'wta' ? 'wta' : 
-                elementType as 'hook' | 'bridge',
-          startIndex,
-          endIndex,
-          text: elementText,
-          confidence: 1.0, // High confidence for structured elements
-          suggestions: [],
-        };
-
-        // Add to appropriate array
-        if (elementType === 'hook') analysisResult.hooks.push(element);
-        else if (elementType === 'bridge') analysisResult.bridges.push(element);
-        else if (elementType === 'goldenNugget') analysisResult.goldenNuggets.push(element);
-        else if (elementType === 'wta') analysisResult.wtas.push(element);
-
-        currentIndex = endIndex;
-      });
-
-      return analysisResult;
-    },
-    [],
-  );
+    return analysisResult;
+  }, []);
 
   // Debounced analysis
   const analyzeText = useCallback(
@@ -121,14 +116,14 @@ export function HemingwayEditorCore({
 
       try {
         let result: ScriptAnalysis;
-        
+
         // Use structured elements if available, otherwise fall back to pattern-based analysis
         if (elements && (elements.hook || elements.bridge || elements.goldenNugget || elements.wta)) {
           result = createAnalysisFromElements(text, elements);
         } else {
           result = await analyzeScriptElements(text, highlightConfig);
         }
-        
+
         setAnalysis(result);
         onAnalysisChange?.(result);
       } catch (error) {

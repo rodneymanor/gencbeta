@@ -28,7 +28,6 @@ export async function POST(request: NextRequest) {
     let userId: string;
 
     try {
-      
       if (!adminAuth) {
         throw new Error("Admin auth not available");
       }
@@ -229,8 +228,6 @@ async function addVideoToCollection(collectionId: string, videoData: any) {
     if (!isAdminInitialized) {
       throw new Error("Firebase Admin SDK not initialized");
     }
-
-    
     if (!adminDb) {
       throw new Error("Admin database not available");
     }
@@ -313,7 +310,6 @@ function startBackgroundTranscription(
 
 async function updateVideoTranscription(videoId: string, transcriptionData: any) {
   try {
-    
     if (!adminDb) return;
 
     // Filter out undefined values to prevent Firestore errors
@@ -347,7 +343,6 @@ async function updateVideoTranscription(videoId: string, transcriptionData: any)
 
 async function updateVideoTranscriptionStatus(videoId: string, status: string) {
   try {
-    
     if (!adminDb) return;
 
     await adminDb.collection("videos").doc(videoId).update({

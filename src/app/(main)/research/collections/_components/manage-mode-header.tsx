@@ -2,10 +2,10 @@
 
 import { Settings, Trash2, Plus, CheckSquare, X } from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth-context";
 import { type Collection } from "@/lib/collections";
-import { Badge } from "@/components/ui/badge";
 
 import { AddVideoDialog } from "./add-video-dialog";
 import { CreateCollectionDialog } from "./create-collection-dialog";

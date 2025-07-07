@@ -1,7 +1,7 @@
 // Production-ready video collection service
 
-import { getAdminDb, isAdminInitialized } from "./firebase-admin";
 import type { Video } from "./collections";
+import { getAdminDb, isAdminInitialized } from "./firebase-admin";
 
 export interface VideoCollectionResult {
   success: boolean;
@@ -96,8 +96,6 @@ export class VideoCollectionService {
     collectionId: string,
     videoData: VideoProcessingData,
   ): Promise<VideoCollectionResult> {
-    
-
     if (!adminDb) {
       throw new Error("Firebase Admin SDK not configured");
     }
@@ -128,7 +126,6 @@ export class VideoCollectionService {
     collectionId: string,
     videoData: VideoProcessingData,
   ): Promise<VideoCollectionResult> {
-    
     try {
       if (!adminDb) {
         throw new Error("Firebase Admin SDK not configured");

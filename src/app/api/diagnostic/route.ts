@@ -1,6 +1,7 @@
 // Diagnostic endpoint for troubleshooting configuration issues
 
 import { NextResponse } from "next/server";
+
 import { getAdminDb, getAdminAuth, isAdminInitialized } from "@/lib/firebase-admin";
 
 interface DiagnosticResult {
@@ -12,9 +13,6 @@ interface DiagnosticResult {
 
 async function checkFirebaseAdminSDK(): Promise<DiagnosticResult> {
   try {
-    
-    
-
     if (isAdminInitialized && adminDb && adminAuth) {
       return {
         component: "Firebase Admin SDK",
@@ -84,8 +82,6 @@ async function checkFirestoreConnection(): Promise<DiagnosticResult | null> {
   }
 
   try {
-    
-
     // Try to read from collections to test connectivity
     const testQuery = await adminDb.collection("collections").limit(1).get();
 
@@ -115,8 +111,6 @@ async function checkFirebaseAuth(): Promise<DiagnosticResult | null> {
   }
 
   try {
-    
-
     // Test by trying to get user count (this requires admin privileges)
     const userList = await adminAuth.listUsers(1);
 

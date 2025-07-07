@@ -57,7 +57,7 @@ export class EnhancedGhostWriterService {
     userId: string,
     brandProfile: BrandProfile,
     cycleId: string,
-    activeVoice?: AIVoice | null
+    activeVoice?: AIVoice | null,
   ): Promise<IdeaGenerationResult> {
     const startTime = Date.now();
 
@@ -69,7 +69,7 @@ export class EnhancedGhostWriterService {
       // Step 1: Extract PEQ data from brand profile
       console.log("📊 [EnhancedGhostWriter] Step 1: Extracting PEQ data");
       const peqResult = await PEQExtractionService.extractPEQ(brandProfile.questionnaire);
-      
+
       if (!peqResult.success || !peqResult.data) {
         throw new Error(`Failed to extract PEQ data: ${peqResult.error}`);
       }
@@ -80,7 +80,7 @@ export class EnhancedGhostWriterService {
       // Step 2: Generate content concepts based on PEQ
       console.log("💡 [EnhancedGhostWriter] Step 2: Generating content concepts");
       const conceptsResult = await this.generateContentConcepts(peqData, brandProfile);
-      
+
       if (!conceptsResult.success || !conceptsResult.concepts) {
         throw new Error(`Failed to generate concepts: ${conceptsResult.error}`);
       }
@@ -100,10 +100,10 @@ export class EnhancedGhostWriterService {
           // If voice is available, process through voice template
           if (activeVoice && activeVoice.templates && activeVoice.templates.length > 0) {
             const selectedTemplate = VoiceTemplateProcessor.selectRandomTemplate(activeVoice);
-            
+
             if (selectedTemplate) {
               const targetWordCount = VoiceTemplateProcessor.calculateTargetWordCount(selectedTemplate, 60);
-              
+
               const processingResult = await VoiceTemplateProcessor.processContent({
                 sourceContent: concept.concept,
                 voiceTemplate: selectedTemplate,
@@ -116,7 +116,9 @@ export class EnhancedGhostWriterService {
                 wordCount = processingResult.metadata?.wordCount || wordCount;
                 console.log(`✅ [EnhancedGhostWriter] Processed concept through voice template: ${voiceTemplateId}`);
               } else {
-                console.warn(`⚠️ [EnhancedGhostWriter] Voice processing failed, using concept as-is: ${processingResult.error}`);
+                console.warn(
+                  `⚠️ [EnhancedGhostWriter] Voice processing failed, using concept as-is: ${processingResult.error}`,
+                );
               }
             }
           }
@@ -147,12 +149,12 @@ export class EnhancedGhostWriterService {
       if (ideas.length > 0) {
         console.log("💾 [EnhancedGhostWriter] Saving ideas to database");
         const batch = adminDb.batch();
-        
+
         for (const idea of ideas) {
           const docRef = adminDb.collection(this.COLLECTIONS.ENHANCED_CONTENT_IDEAS).doc();
           batch.set(docRef, { ...idea, id: docRef.id });
         }
-        
+
         await batch.commit();
         console.log(`✅ [EnhancedGhostWriter] Saved ${ideas.length} ideas to database`);
       }
@@ -173,7 +175,7 @@ export class EnhancedGhostWriterService {
     } catch (error) {
       const processingTime = Date.now() - startTime;
       console.error("❌ [EnhancedGhostWriter] Failed to generate enhanced ideas:", error);
-      
+
       return {
         success: false,
         error: error instanceof Error ? error.message : "Unknown error",
@@ -192,11 +194,11 @@ export class EnhancedGhostWriterService {
    */
   private static async generateContentConcepts(
     peqData: PEQData,
-    brandProfile: BrandProfile
+    brandProfile: BrandProfile,
   ): Promise<ConceptGenerationResult> {
     try {
       const prompt = this.buildConceptGenerationPrompt(peqData, brandProfile);
-      
+
       const result = await GeminiService.generateContent({
         prompt,
         maxTokens: 1200,
@@ -217,7 +219,7 @@ export class EnhancedGhostWriterService {
         if (!jsonMatch) {
           throw new Error("No JSON found in response");
         }
-        
+
         parsedConcepts = JSON.parse(jsonMatch[0]);
       } catch (parseError) {
         console.error("❌ [EnhancedGhostWriter] Failed to parse concepts:", parseError);
@@ -294,13 +296,13 @@ BRAND CONTEXT:
 PEQ DATA EXTRACTED FROM BRAND PROFILE:
 
 PROBLEMS:
-${peqData.problems.map((p, i) => `${i + 1}. ${p}`).join('\n')}
+${peqData.problems.map((p, i) => `${i + 1}. ${p}`).join("\n")}
 
 EXCUSES:
-${peqData.excuses.map((e, i) => `${i + 1}. ${e}`).join('\n')}
+${peqData.excuses.map((e, i) => `${i + 1}. ${e}`).join("\n")}
 
 QUESTIONS:
-${peqData.questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
+${peqData.questions.map((q, i) => `${i + 1}. ${q}`).join("\n")}
 
 TASK:
 Generate 2 content concepts for each PEQ category (6 total). Each concept should be a complete content idea that addresses the specific PEQ item and provides value to the audience.
@@ -361,7 +363,7 @@ FINAL REMINDER: Your response must be PURE JSON starting with { and ending with 
       peqCategory: "problem" | "excuse" | "question";
       sourceText: string;
     }>,
-    targetCount: number
+    targetCount: number,
   ): Array<{
     concept: string;
     peqCategory: "problem" | "excuse" | "question";
@@ -398,7 +400,7 @@ FINAL REMINDER: Your response must be PURE JSON starting with { and ending with 
     // Extract target audience from brand profile or use a default
     const profession = brandProfile.questionnaire.profession;
     const problem = brandProfile.questionnaire.universalProblem;
-    
+
     return `People in ${profession} struggling with ${problem}`;
   }
 
@@ -422,8 +424,8 @@ FINAL REMINDER: Your response must be PURE JSON starting with { and ending with 
 
     // Sort by createdAt descending
     return ideas.sort(
-      (a: EnhancedContentIdea, b: EnhancedContentIdea) => 
+      (a: EnhancedContentIdea, b: EnhancedContentIdea) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
   }
-} 
+}

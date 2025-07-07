@@ -113,7 +113,7 @@ export const useCollectionsLogic = ({
         setPreviousVideos(videosRef.current);
         startTransition(() => {
           setVideos((prev) => {
-            const newVideos = prev.filter((video) => !videoIds.includes(video.id!));
+            const newVideos = prev.filter((video) => !videoIds.includes(video.id));
             dataManager.setCachedVideos(selectedCollectionId, newVideos);
             return newVideos;
           });
