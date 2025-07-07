@@ -123,6 +123,8 @@ export async function POST(request: NextRequest) {
       addResult.videoId,
       collectionId,
       downloadResult.data.platform,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      downloadResult.data.metadata || {},
     );
 
     console.log("✅ [VIDEO_PROCESS] Complete workflow successful!");
@@ -274,6 +276,8 @@ function startBackgroundTranscription(
   videoId: string,
   collectionId: string,
   platform: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  additionalMetadata: any = {},
 ) {
   // Use setTimeout to ensure response is sent before starting background work
   setTimeout(async () => {
@@ -291,19 +295,56 @@ function startBackgroundTranscription(
         body: formData,
       });
 
-      if (response.ok) {
-        const transcriptionResult = await response.json();
-        console.log("✅ [BACKGROUND] Transcription completed");
-
-        // Update video with transcription results
-        await updateVideoTranscription(videoId, transcriptionResult);
-
-        // Real-time update could be sent via WebSocket here if implemented
-        console.log("📡 [BACKGROUND] Transcription ready for video:", videoId);
-      } else {
+      if (!response.ok) {
         console.error("❌ [BACKGROUND] Transcription failed:", response.status);
         await updateVideoTranscriptionStatus(videoId, "failed");
+        return;
       }
+
+      const { transcript } = await response.json();
+      console.log("✅ [BACKGROUND] Transcription completed");
+
+      if (!transcript) {
+        console.error("❌ [BACKGROUND] No transcript returned – aborting analysis");
+        await updateVideoTranscriptionStatus(videoId, "failed");
+        return;
+      }
+
+      // 🔍 Analyze script to extract Hook / Bridge / Nugget / WTA components
+      const analysisRes = await fetch(`${baseUrl}/api/video/analyze-script`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transcript }),
+      });
+
+      let components = { hook: "", bridge: "", nugget: "", wta: "" } as any;
+      if (analysisRes.ok) {
+        const analysisJson = await analysisRes.json();
+        components = analysisJson.components ?? components;
+        console.log("✅ [BACKGROUND] Script analysis succeeded – components extracted");
+      } else {
+        console.error("⚠️ [BACKGROUND] Script analysis failed – using empty components");
+      }
+
+      // 📝 Prepare extra content metadata (caption & hashtags already in additionalMetadata)
+      const contentMetadata = {
+        platform,
+        author: additionalMetadata?.author ?? "Unknown",
+        description: additionalMetadata?.description ?? "",
+        source: "other",
+        hashtags: additionalMetadata?.hashtags ?? [],
+      } as any;
+
+      // Merge all transcription-related data and save to Firestore
+      await updateVideoTranscription(videoId, {
+        transcript,
+        components,
+        contentMetadata,
+        visualContext: "", // reserved for future computer-vision analysis
+      });
+
+      // Real-time update hook (WebSocket, etc.) could be invoked here
+      console.log("📡 [BACKGROUND] Transcription + analysis ready for video:", videoId);
     } catch (error) {
       console.error("❌ [BACKGROUND] Transcription error:", error);
       await updateVideoTranscriptionStatus(videoId, "failed");

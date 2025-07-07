@@ -203,6 +203,11 @@ export const ActionButtons = ({ video }: { video: VideoWithPlayer }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Debug: Log when ActionButtons component renders
+  console.log("🔍 [ActionButtons] Component rendered with video:", video);
+  console.log("🔍 [ActionButtons] Video ID:", video.id);
+  console.log("🔍 [ActionButtons] Video title:", video.title);
+
   const handleRepurpose = async () => {
     setLoading(true);
     setError(null);
@@ -238,6 +243,12 @@ export const ActionButtons = ({ video }: { video: VideoWithPlayer }) => {
           <Button
             size="sm"
             variant="outline"
+            onClick={() => {
+              console.log("🔍 [ActionButtons] Insights button clicked!");
+              console.log("🔍 [ActionButtons] Video data being passed to insights:", video);
+              console.log("🔍 [ActionButtons] Video metrics:", video.metrics);
+              console.log("🔍 [ActionButtons] Video metadata:", video.metadata);
+            }}
             className="border-border/60 hover:bg-accent/50 h-8 rounded-md px-3 text-xs shadow-sm transition-all duration-200 hover:shadow-md"
           >
             <TrendingUp className="mr-1.5 h-3.5 w-3.5" />

@@ -99,14 +99,11 @@ export class CollectionsRBACService {
     }
 
     const querySnapshot = await getDocs(q);
-    const videos = querySnapshot.docs.map((doc) => {
-      const data = doc.data() as Video;
-      return {
-        ...data,
-        id: doc.id,
-        addedAt: formatTimestamp(data.addedAt),
-      };
-    });
+    const videos = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+      addedAt: formatTimestamp(doc.data().addedAt),
+    })) as Video[];
 
     console.log("✅ [RBAC] Super admin loaded videos:", videos.length);
     return videos;
@@ -148,14 +145,11 @@ export class CollectionsRBACService {
     const q = await this.getRegularUserQuery(userId, collectionId, accessibleCoaches);
     const querySnapshot = await getDocs(q);
 
-    return querySnapshot.docs.map((doc) => {
-      const data = doc.data() as Video;
-      return {
-        ...data,
-        id: doc.id,
-        addedAt: formatTimestamp(data.addedAt),
-      };
-    });
+    return querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+      addedAt: formatTimestamp(doc.data().addedAt),
+    })) as Video[];
   }
 
   /**

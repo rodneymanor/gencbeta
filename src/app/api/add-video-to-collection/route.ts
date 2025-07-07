@@ -1,22 +1,56 @@
 import { NextRequest, NextResponse } from "next/server";
-import { query, where, orderBy, getDocs } from "firebase/firestore";
 
 import { ApiKeyAuthService } from "@/lib/api-key-auth";
 import { uploadToBunnyStream } from "@/lib/bunny-stream";
 import { getAdminDb, isAdminInitialized } from "@/lib/firebase-admin";
 
 async function authenticateApiKey(request: NextRequest) {
+  console.log("🔐 [Add Video API] Checking API key authentication");
+
   const apiKey = ApiKeyAuthService.extractApiKey(request);
+
   if (!apiKey) {
-    return NextResponse.json({ error: "Unauthorized", message: "API key required." }, { status: 401 });
+    console.log("❌ [Add Video API] No API key provided");
+    return NextResponse.json(
+      {
+        error: "Unauthorized",
+        message: "API key required. Provide via x-api-key header or Authorization: Bearer header.",
+      },
+      { status: 401 },
+    );
   }
+
   const authResult = await ApiKeyAuthService.validateApiKey(apiKey);
+
   if (!authResult) {
-    return NextResponse.json({ error: "Unauthorized", message: "Invalid API key" }, { status: 401 });
+    console.log("❌ [Add Video API] Invalid API key");
+    return NextResponse.json(
+      {
+        error: "Unauthorized",
+        message: "Invalid API key",
+      },
+      { status: 401 },
+    );
   }
+
   if (!authResult.rateLimitResult.allowed) {
-    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+    console.log("🚫 [Add Video API] Request blocked by rate limiting");
+    return NextResponse.json(
+      {
+        error: "Rate limit exceeded",
+        message: authResult.rateLimitResult.reason,
+        rateLimitInfo: {
+          resetTime: authResult.rateLimitResult.resetTime,
+          violationsCount: authResult.rateLimitResult.violationsCount,
+          requestsPerMinute: 50,
+          maxViolations: 2,
+        },
+      },
+      { status: 429 },
+    );
   }
+
+  console.log("✅ [Add Video API] API key authenticated for user:", authResult.user.email);
   return authResult;
 }
 
@@ -32,7 +66,7 @@ function getBaseUrl(request: NextRequest): string {
   }
 
   // Fallback to default
-  return "http://localhost:3000";
+  return process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${process.env.PORT ?? 3001}`;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -206,52 +240,129 @@ function startBackgroundTranscription(
   }, 1000); // Start after 1 second delay
 }
 
+async function verifyCollectionOwnership(adminDb: any, collectionId: string, userId: string) {
+  const collectionDoc = await adminDb.collection("collections").doc(collectionId).get();
+  if (!collectionDoc.exists) {
+    return { success: false, error: "Collection not found", status: 404 };
+  }
+
+  const collectionData = collectionDoc.data();
+  if (collectionData?.userId !== userId) {
+    return { success: false, error: "Access denied: You do not own this collection", status: 403 };
+  }
+
+  return { success: true, data: collectionData };
+}
+
+async function downloadAndStream(baseUrl: string, decodedUrl: string, requestId: string) {
+  console.log(`📥 [${requestId}] Step 1: Downloading video...`);
+  const downloadResult = await downloadVideo(baseUrl, decodedUrl);
+  if (!downloadResult.success) {
+    console.error(`❌ [${requestId}] Download failed:`, downloadResult.error);
+    return { success: false, error: downloadResult.error };
+  }
+  console.log(`✅ [${requestId}] Download successful`);
+
+  console.log(`🎬 [${requestId}] Step 2: Streaming to Bunny CDN...`);
+  const streamResult = await streamToBunny(downloadResult.data);
+  if (!streamResult.success) {
+    console.error(`❌ [${requestId}] Streaming failed:`, streamResult.error);
+    return { success: false, error: streamResult.error };
+  }
+  console.log(`✅ [${requestId}] Streaming successful`);
+
+  return { success: true, downloadResult, streamResult };
+}
+
+async function storeVideoInDatabase(collectionId: string, videoPayload: any, requestId: string) {
+  console.log(`💾 [${requestId}] Step 3: Adding to collection...`);
+  const addResult = await addVideoToCollection(collectionId, videoPayload);
+  if (!addResult.success || !addResult.videoId) {
+    console.error(`❌ [${requestId}] Failed to add to collection:`, addResult.error);
+    return { success: false, error: addResult.error };
+  }
+  return { success: true, videoId: addResult.videoId };
+}
+
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  const requestId = Math.random().toString(36).substring(7);
+
+  console.log(`🚀 [${requestId}] Starting video processing workflow at ${new Date().toISOString()}`);
+
   try {
+    // Step 1: Authentication
     const authResult = await authenticateApiKey(request);
     if (authResult instanceof NextResponse) return authResult;
-    const userId = authResult.user.uid;
+    const { user: { uid: userId, email } } = authResult;
+    console.log(`✅ [${requestId}] Authentication successful for user: ${email}`);
+
+    // Step 2: Request validation
     const body = await request.json();
     const validation = validateAddVideoRequest(body);
     if (!validation.isValid) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
     const { videoUrl, collectionId, title } = validation.data!;
+    
+    // Step 3: URL validation
     if (!validateUrl(videoUrl)) {
-      return NextResponse.json({ error: "Unsupported video platform" }, { status: 400 });
+      return NextResponse.json({ error: "Only TikTok and Instagram videos are supported" }, { status: 400 });
     }
+    
+    // Step 4: Firebase connection
     const adminDb = getAdminDb();
     if (!isAdminInitialized || !adminDb) {
-      return NextResponse.json({ error: "Firebase not configured" }, { status: 500 });
+      return NextResponse.json({ error: "Firebase Admin SDK not configured" }, { status: 500 });
     }
-    const collectionDoc = await adminDb.collection("collections").doc(collectionId).get();
-    if (!collectionDoc.exists || collectionDoc.data()?.userId !== userId) {
-      return NextResponse.json({ error: "Access denied" }, { status: 403 });
+
+    // Step 5: Collection verification
+    const ownershipResult = await verifyCollectionOwnership(adminDb, collectionId, userId);
+    if (!ownershipResult.success) {
+      return NextResponse.json({ error: ownershipResult.error }, { status: ownershipResult.status });
     }
+    console.log(`✅ [${requestId}] Collection verified - Title: ${ownershipResult.data?.title}`);
+
+    // Start backend processing (non-blocking)
     setTimeout(() => {
-      processVideoInBackground(videoUrl, collectionId, title, userId, request);
+      processVideoInBackground(requestId, videoUrl, collectionId, title, userId, request);
     }, 0);
-    return NextResponse.json({ success: true, message: "Video processing started" });
+
+    // Return immediate success response
+    return NextResponse.json({
+      success: true,
+      message: "Video processing has started successfully",
+      requestId,
+      status: "processing",
+    });
   } catch (error) {
     return NextResponse.json({ error: "Failed to process video request" }, { status: 500 });
   }
 }
 
+// Background processing function using the same backend method as the add video button
 async function processVideoInBackground(
+  requestId: string,
   videoUrl: string,
   collectionId: string,
   title: string | undefined,
   userId: string,
   request: NextRequest,
 ) {
+  const backgroundStartTime = Date.now();
   try {
     const baseUrl = getBaseUrl(request);
     const decodedUrl = decodeURIComponent(videoUrl);
-    const downloadResult = await downloadVideo(baseUrl, decodedUrl);
-    if (!downloadResult.success) return;
-    const streamResult = await streamToBunny(downloadResult.data);
-    if (!streamResult.success) return;
-    const videoData = {
+
+    const processingResult = await downloadAndStream(baseUrl, decodedUrl, requestId);
+    if (!processingResult.success || !processingResult.downloadResult || !processingResult.streamResult) {
+      console.error(`❌ [${requestId}] Download or stream failed, aborting processing.`);
+      return;
+    }
+
+    const { downloadResult, streamResult } = processingResult;
+
+    const videoPayload = {
       originalUrl: decodedUrl,
       title: title ?? `Video from ${downloadResult.data.platform}`,
       platform: downloadResult.data.platform,
@@ -260,43 +371,43 @@ async function processVideoInBackground(
       guid: streamResult.guid,
       thumbnailUrl: downloadResult.data.thumbnailUrl ?? streamResult.thumbnailUrl,
       metrics: downloadResult.data.metrics ?? {},
-      metadata: downloadResult.data.metadata ?? {},
-      transcriptionStatus: "pending" as const,
+      metadata: {
+        ...downloadResult.data.metadata,
+        author: downloadResult.data.additionalMetadata?.author ?? "Unknown",
+        duration: downloadResult.data.additionalMetadata?.duration ?? 0,
+      },
+      transcriptionStatus: "pending",
       userId: userId,
       collectionId: collectionId,
     };
-    const addResult = await addVideoToCollection(collectionId, videoData);
-    if (!addResult.success || !addResult.videoId) return;
+
+    const dbResult = await storeVideoInDatabase(collectionId, videoPayload, requestId);
+    if (!dbResult.success || !dbResult.videoId) return;
+
     startBackgroundTranscription(
       baseUrl,
       downloadResult.data.videoData,
-      addResult.videoId,
+      dbResult.videoId,
       collectionId,
       downloadResult.data.platform,
     );
+
+    console.log(`🎉 [${requestId}] PROCESSING COMPLETED SUCCESSFULLY in ${Date.now() - backgroundStartTime}ms`);
   } catch (error) {
-    console.error(`Background processing failed:`, error);
+    console.error(`❌ [${requestId}] BACKGROUND PROCESSING FAILED:`, error);
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function getCollectionVideos(adminDb: any, collectionId: string) {
-  const videosQuery = query(
-    adminDb.collection("videos"),
-    where("collectionId", "==", collectionId),
-    orderBy("addedAt", "desc"),
-  );
-
-  const videosSnapshot = await getDocs(videosQuery);
-
-  if (videosSnapshot.empty) {
-    return [];
-  }
+  // Use simpler query without orderBy to avoid index requirement
+  const videosSnapshot = await adminDb.collection("videos").where("collectionId", "==", collectionId).get();
 
   const videos = videosSnapshot.docs.map((doc: any) => {
     const data = doc.data();
     return {
-      ...data,
       id: doc.id,
+      ...data,
       addedAt: data.addedAt?.toDate?.().toISOString() ?? new Date().toISOString(),
     };
   });
@@ -306,37 +417,44 @@ async function getCollectionVideos(adminDb: any, collectionId: string) {
 }
 
 export async function GET(request: NextRequest) {
-  const authResult = await authenticateApiKey(request);
-  if (authResult instanceof NextResponse) {
-    return authResult; // Return error response
+  try {
+    // Authenticate API key first
+    const authResult = await authenticateApiKey(request);
+    if (authResult instanceof NextResponse) return authResult;
+    const { user: { uid: userId } } = authResult;
+
+    const { searchParams } = new URL(request.url);
+    const collectionId = searchParams.get("collectionId");
+    if (!collectionId) {
+      return NextResponse.json({ error: "Collection ID is required" }, { status: 400 });
+    }
+
+    const adminDb = getAdminDb();
+    if (!isAdminInitialized || !adminDb) {
+      return NextResponse.json({ error: "Firebase Admin SDK not configured" }, { status: 500 });
+    }
+
+    const ownershipResult = await verifyCollectionOwnership(adminDb, collectionId, userId);
+    if (!ownershipResult.success) {
+      return NextResponse.json({ error: ownershipResult.error }, { status: ownershipResult.status });
+    }
+
+    const videos = await getCollectionVideos(adminDb, collectionId);
+
+    return NextResponse.json({
+      collection: {
+        id: collectionId,
+        title: ownershipResult.data?.title,
+        description: ownershipResult.data?.description,
+        videoCount: videos.length,
+      },
+      videos,
+    });
+  } catch (error) {
+    console.error("Error retrieving collection:", error);
+    return NextResponse.json(
+      { error: "Internal server error", details: error instanceof Error ? error.message : "Unknown error" },
+      { status: 500 },
+    );
   }
-
-  const userId = authResult.user.uid;
-  const { searchParams } = new URL(request.url);
-  const collectionId = searchParams.get("collectionId");
-
-  if (!collectionId) {
-    return NextResponse.json({ error: "Collection ID is required" }, { status: 400 });
-  }
-
-  const adminDb = getAdminDb();
-  if (!isAdminInitialized || !adminDb) {
-    return NextResponse.json({ error: "Firebase Admin SDK not configured" }, { status: 500 });
-  }
-
-  const collectionDoc = await adminDb.collection("collections").doc(collectionId).get();
-  if (!collectionDoc.exists || collectionDoc.data()?.userId !== userId) {
-    return NextResponse.json({ error: "Collection not found or access denied" }, { status: 404 });
-  }
-
-  const videos = await getCollectionVideos(adminDb, collectionId);
-
-  return NextResponse.json({
-    collection: {
-      id: collectionId,
-      ...collectionDoc.data(),
-      videoCount: videos.length,
-    },
-    videos,
-  });
 }
