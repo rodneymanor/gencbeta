@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { type Collection, type Video } from "@/lib/collections";
 
-import Sidebar from "./_components/sidebar";
+import CategoryChooser from "./_components/category-chooser";
 import SkeletonGrid from "./_components/skeleton-grid";
 import VideoGrid from "./_components/video-grid";
 
@@ -55,6 +55,21 @@ export default function PageClient({ initialCollections, initialVideos, initialC
     router.replace(`${window.location.pathname}?${params.toString()}`);
   };
 
+  // Transform collections data for CategoryChooser
+  const categoryItems = [
+    { id: "all", name: "All Videos", description: "View all videos" },
+    ...(collections?.map((collection) => ({
+      id: collection.id ?? "",
+      name: collection.title,
+      description: collection.description,
+    })) ?? []),
+  ];
+
+  const handleCategorySelection = (item: { id: string; name: string; description?: string }) => {
+    const collectionId = item.id === "all" ? null : item.id;
+    handleCollectionChange(collectionId);
+  };
+
   return (
     <div className="relative mx-auto flex max-w-6xl gap-6">
       <div className="min-w-0 flex-1 space-y-8 md:space-y-10">
@@ -62,7 +77,12 @@ export default function PageClient({ initialCollections, initialVideos, initialC
       </div>
       <div className="hidden w-[313px] flex-shrink-0 md:block">
         <div className="sticky top-4">
-          <Sidebar collections={collections} selected={current} onChange={handleCollectionChange} />
+          <CategoryChooser
+            items={categoryItems}
+            selectedId={current ?? "all"}
+            onSelectionChange={handleCategorySelection}
+            label="Collections"
+          />
         </div>
       </div>
     </div>
