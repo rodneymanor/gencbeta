@@ -38,22 +38,24 @@ export function GhostWriter() {
     try {
       setError(null);
       const token = await user.getIdToken();
-      const response = await fetch("/api/ghost-writer/enhanced", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const apiKey = process.env.NEXT_PUBLIC_GHOST_API_KEY;
+      const headers: Record<string, string> = {};
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+      if (apiKey) headers["x-api-key"] = apiKey;
+      const response = await fetch("/api/ghost-writer/enhanced", { headers });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        if (errorData.needsBrandProfile) {
+        const errorData = await safeJson(response);
+        if (errorData?.needsBrandProfile) {
           setNeedsBrandProfile(true);
           setError("Please complete your brand profile to get personalized content ideas.");
         } else {
-          throw new Error(errorData.error ?? "Failed to fetch ideas");
+          throw new Error(errorData?.error ?? "Failed to fetch ideas");
         }
         return;
       }
 
-      const result = await response.json();
+      const result = await safeJson(response);
       setData(result);
       setNeedsBrandProfile(false);
     } catch (err) {
@@ -62,6 +64,14 @@ export function GhostWriter() {
       setLoading(false);
     }
   }, [user]);
+
+  const safeJson = async (res: Response) => {
+    try {
+      return await res.json();
+    } catch {
+      return null;
+    }
+  };
 
   const handleIdeaAction = async (ideaId: string, action: "save" | "dismiss") => {
     if (!user || !data) return;
@@ -114,7 +124,7 @@ export function GhostWriter() {
 
       if (!response.ok) throw new Error("Failed to generate more ideas");
 
-      const result = await response.json();
+      const result = await safeJson(response);
       setData(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to generate more ideas");
@@ -134,7 +144,7 @@ export function GhostWriter() {
 
       if (!response.ok) throw new Error("Failed to refresh ideas");
 
-      const result = await response.json();
+      const result = await safeJson(response);
       setData(result);
       setError(null);
     } catch (err) {
