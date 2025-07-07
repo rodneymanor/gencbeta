@@ -107,14 +107,14 @@ const AdminControls = ({
   onManageModeToggle: () => void;
   onVideoAdded: () => void;
 }) => (
-  <div className="flex items-center gap-3">
+  <div className="flex items-center gap-2">
     <CreateCollectionDialog onCollectionCreated={onVideoAdded}>
       <Button
         variant="outline"
         size="sm"
-        className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 shadow-xs transition-all duration-200 hover:shadow-sm"
+        className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 h-8 px-3 text-xs shadow-xs transition-all duration-200 hover:shadow-sm"
       >
-        <Plus className="mr-2 h-4 w-4" />
+        <Plus className="mr-1.5 h-3.5 w-3.5" />
         Create Collection
       </Button>
     </CreateCollectionDialog>
@@ -126,9 +126,9 @@ const AdminControls = ({
       <Button
         variant="outline"
         size="sm"
-        className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 shadow-xs transition-all duration-200 hover:shadow-sm"
+        className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 h-8 px-3 text-xs shadow-xs transition-all duration-200 hover:shadow-sm"
       >
-        <Plus className="mr-2 h-4 w-4" />
+        <Plus className="mr-1.5 h-3.5 w-3.5" />
         Add Video
       </Button>
     </AddVideoDialog>
