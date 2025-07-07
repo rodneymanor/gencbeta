@@ -139,9 +139,9 @@ export const titleResolvers = {
     const collectionParam = searchParams?.get("collection");
     if (collectionParam) {
       // This would ideally fetch from collections context/store
-      return "Collection"; // Will be overridden by page component
+      return "Collections"; // Will be overridden by page component
     }
-    return "All Videos";
+    return "Collections";
   },
 
   collectionDetail: (pathname: string) => {
