@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BrandProfileService } from "@/lib/brand-profile";
+import { useAuth } from "@/contexts/auth-context";
 
 import { ContentPillarsTab } from "./content-pillars-tab";
 import { KeywordsTab } from "./keywords-tab";
@@ -21,10 +22,13 @@ export function BrandProfileTabs() {
   const [activeTab, setActiveTab] = useState<TabValue>("questions");
   const [hasAutoSwitched, setHasAutoSwitched] = useState(false);
 
+  const { user } = useAuth();
+
   // Fetch brand profiles
   const { data: profilesData, isLoading } = useQuery({
-    queryKey: ["brand-profiles"],
+    queryKey: ["brand-profiles", user?.uid],
     queryFn: () => BrandProfileService.getBrandProfiles(),
+    enabled: !!user,
   });
 
   const activeProfile = profilesData?.activeProfile;
