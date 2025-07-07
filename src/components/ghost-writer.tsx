@@ -44,6 +44,22 @@ export function GhostWriter() {
       if (apiKey) headers["x-api-key"] = apiKey;
       const response = await fetch("/api/ghost-writer/enhanced", { headers });
 
+      if (response.status === 401) {
+        // fallback to legacy ideas endpoint without auth
+        try {
+          const legacyRes = await fetch("/api/ghost-writer/ideas");
+          if (legacyRes.ok) {
+            const legacyData = await safeJson(legacyRes);
+            setData(legacyData);
+            setNeedsBrandProfile(false);
+            return;
+          }
+        } catch (_) {
+          /* empty */
+        }
+        // if fallback fails, continue to parse error
+      }
+
       if (!response.ok) {
         const errorData = await safeJson(response);
         if (errorData?.needsBrandProfile) {
