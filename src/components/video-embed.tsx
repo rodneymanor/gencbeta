@@ -4,11 +4,11 @@ import React, { useState, useCallback, useEffect, memo, useTransition } from "re
 
 import { Play } from "lucide-react";
 
-import { useVideoPlaybackData, useVideoPlaybackAPI } from "@/contexts/video-playback-context";
-
 interface VideoEmbedProps {
   url: string;
   className?: string;
+  onPlay?: () => void;
+  playing?: boolean;
 }
 
 // Helper function to check if URL is a Bunny.net URL
@@ -33,41 +33,37 @@ const NonBunnyFallback = ({ className }: { className: string }) => (
 
 // BUNNY.NET ONLY VIDEO EMBED - Rejects all non-Bunny URLs
 export const VideoEmbed = memo<VideoEmbedProps>(
-  ({ url, className = "" }) => {
-    const [isPlaying, setIsPlaying] = useState(false);
+  ({ url, className = "", onPlay, playing = false }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [iframeKey, setIframeKey] = useState(0);
     const [isPending, startTransition] = useTransition();
 
-    const { currentlyPlayingId } = useVideoPlaybackData();
-    const { setCurrentlyPlaying } = useVideoPlaybackAPI();
-
     const videoId = url;
 
-    // Handle video play with startTransition
-    const handlePlay = useCallback(() => {
-      if (!isPlaying && videoId) {
-        console.log("🎬 [VideoEmbed] Starting Bunny video:", videoId.substring(0, 50) + "...");
+    // Handle local play button click
+    const handleLocalPlay = useCallback(() => {
+      if (!playing && videoId) {
+        console.log("🎬 [VideoEmbed] Starting Bunny video (via local click):", videoId.substring(0, 50) + "...");
         startTransition(() => {
           setIsLoading(true);
-          setIsPlaying(true);
         });
-        void setCurrentlyPlaying(videoId);
+        onPlay?.();
         setTimeout(() => setIsLoading(false), 500);
       }
-    }, [isPlaying, videoId, setCurrentlyPlaying]);
+    }, [playing, videoId, onPlay]);
 
-    // Force iframe recreation when pausing
+    // Effect to handle when the 'playing' prop changes
     useEffect(() => {
-      if (currentlyPlayingId !== videoId && isPlaying) {
-        console.log("⏸️ [VideoEmbed] Force stopping Bunny video by recreating iframe");
-        startTransition(() => {
-          setIsPlaying(false);
-          setIsLoading(false);
-        });
+      if (playing) {
+        console.log("🎬 [VideoEmbed] Starting Bunny video (via prop change):", videoId.substring(0, 50) + "...");
+        setIsLoading(true);
+        setTimeout(() => setIsLoading(false), 500);
+      } else {
+        console.log("⏸️ [VideoEmbed] Pausing Bunny video (via prop change) by recreating iframe");
         setIframeKey((prev) => prev + 1);
+        setIsLoading(false);
       }
-    }, [currentlyPlayingId, videoId, isPlaying]);
+    }, [playing, videoId]);
 
     // Check if URL is valid Bunny.net URL
     if (!isBunnyUrl(url)) {
@@ -79,8 +75,8 @@ export const VideoEmbed = memo<VideoEmbedProps>(
       <div className={`group relative w-full overflow-hidden rounded-lg bg-black ${className}`}>
         <div className="relative aspect-[9/16] w-full">
           <iframe
-            key={isPlaying ? `playing-${iframeKey}` : `thumbnail-${iframeKey}`}
-            src={createIframeSrc(url, isPlaying)}
+            key={playing ? `playing-${iframeKey}` : `thumbnail-${iframeKey}`}
+            src={createIframeSrc(url, playing)}
             className="absolute inset-0 h-full w-full"
             width="100%"
             height="100%"
@@ -90,10 +86,10 @@ export const VideoEmbed = memo<VideoEmbedProps>(
             onLoad={() => setIsLoading(false)}
           />
 
-          {!isPlaying && (
+          {!playing && (
             <div
               className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center bg-black/20 transition-colors hover:bg-black/30"
-              onClick={handlePlay}
+              onClick={handleLocalPlay}
             >
               <div className="rounded-full bg-black/60 p-6 backdrop-blur-sm transition-all hover:scale-110 hover:bg-black/80">
                 <Play className="h-8 w-8 text-white" fill="white" />
@@ -110,7 +106,7 @@ export const VideoEmbed = memo<VideoEmbedProps>(
       </div>
     );
   },
-  (prevProps, nextProps) => prevProps.url === nextProps.url,
+  (prevProps, nextProps) => prevProps.url === nextProps.url && prevProps.playing === nextProps.playing,
 );
 
 VideoEmbed.displayName = "VideoEmbed";

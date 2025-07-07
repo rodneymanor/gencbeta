@@ -26,6 +26,7 @@ type Props = {
 
 export default function PageClient({ initialCollections, initialVideos, initialCollectionId }: Props) {
   const [current, setCurrent] = useState(initialCollectionId);
+  const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
   const router = useRouter();
 
   /* collections never change often, so cache for 5 min */
@@ -73,7 +74,11 @@ export default function PageClient({ initialCollections, initialVideos, initialC
   return (
     <div className="relative mx-auto flex max-w-6xl justify-center gap-12 px-4">
       <div className="max-w-3xl min-w-0 flex-1 space-y-8 md:space-y-10">
-        {isLoading ? <SkeletonGrid /> : <VideoGrid videos={videos ?? []} />}
+        {isLoading ? (
+          <SkeletonGrid />
+        ) : (
+          <VideoGrid videos={videos ?? []} activeVideoId={activeVideoId} setActiveVideoId={setActiveVideoId} />
+        )}
       </div>
       <div className="hidden w-[280px] flex-shrink-0 lg:block">
         <div className="sticky top-4">
