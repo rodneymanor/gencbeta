@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
+import Script from "next/script";
 
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 
@@ -42,6 +44,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </UsageProvider>
           </AuthProvider>
         </ReactQueryProvider>
+        <SpeedInsights />
+        <Script src="//assets.mediadelivery.net/playerjs/player-0.1.0.min.js" strategy="beforeInteractive" />
       </body>
     </html>
   );

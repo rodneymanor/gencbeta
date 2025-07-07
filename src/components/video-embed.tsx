@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState, useCallback, useEffect, memo, useTransition, useRef } from "react";
+import React, { useEffect, useRef, memo } from "react";
 
-import { Play } from "lucide-react";
+// Note: The Player.js script is loaded in the root layout (src/app/layout.tsx)
+// This makes the `playerjs` object available globally in the browser.
+declare const playerjs: any;
 
 interface VideoEmbedProps {
   url: string;
@@ -11,27 +13,13 @@ interface VideoEmbedProps {
   playing?: boolean;
 }
 
-// Custom hook to get the previous value of a prop or state
-function usePrevious<T>(value: T): T | undefined {
-  const ref = useRef<T>();
-  useEffect(() => {
-    ref.current = value;
-  });
-  return ref.current;
-}
-
 // Helper function to check if URL is a Bunny.net URL
 const isBunnyUrl = (url: string): boolean => {
   return url && (url.includes("iframe.mediadelivery.net") || url.includes("bunnycdn.com") || url.includes("b-cdn.net"));
 };
 
-// Helper function to create iframe src with autoplay
-const createIframeSrc = (url: string, autoplay: boolean): string => {
-  return autoplay ? `${url}${url.includes("?") ? "&" : "?"}autoplay=true` : url;
-};
-
 // Fallback component for non-Bunny URLs
-const NonBunnyFallback = ({ className }: { className: string }) => (
+const NonBunnyFallback = ({ className }: { className?: string }) => (
   <div className={`flex aspect-[9/16] items-center justify-center bg-gray-900 text-white ${className}`}>
     <div className="p-4 text-center">
       <div className="text-sm font-medium">Video Processing Required</div>
@@ -43,34 +31,53 @@ const NonBunnyFallback = ({ className }: { className: string }) => (
 // BUNNY.NET ONLY VIDEO EMBED - Rejects all non-Bunny URLs
 export const VideoEmbed = memo<VideoEmbedProps>(
   ({ url, className = "", onPlay, playing = false }) => {
-    const [isLoading, setIsLoading] = useState(false);
-    const [iframeKey, setIframeKey] = useState(0);
-    const [isPending, startTransition] = useTransition();
-    const prevPlaying = usePrevious(playing);
+    const iframeRef = useRef<HTMLIFrameElement>(null);
+    const playerRef = useRef<any>(null);
 
-    const videoId = url;
-
-    // Handle local play button click
-    const handleLocalPlay = useCallback(() => {
-      if (!playing && videoId) {
-        console.log("🎬 [VideoEmbed] Starting Bunny video (via local click):", videoId.substring(0, 50) + "...");
-        startTransition(() => {
-          setIsLoading(true);
-        });
-        onPlay?.();
-      }
-    }, [playing, videoId, onPlay]);
-
-    // Effect to handle pausing the video
+    // Initialize the player and set up event listeners
     useEffect(() => {
-      // When the `playing` prop changes from true to false, it means we need to stop the video.
-      // We do this by changing the iframeKey, which forces the iframe to be completely re-rendered.
-      if (prevPlaying === true && playing === false) {
-        console.log("⏸️ [VideoEmbed] Pausing Bunny video (via prop change) by recreating iframe");
-        setIframeKey((prev) => prev + 1);
-        setIsLoading(false); // Ensure loading state is reset
+      if (iframeRef.current) {
+        const player = new playerjs.Player(iframeRef.current);
+        playerRef.current = player;
+
+        player.on("ready", () => {
+          console.log(`🎬 [Player.js] Player ready for: ${url.substring(0, 50)}...`);
+        });
+
+        player.on("play", () => {
+          console.log(`▶️ [Player.js] Play event for: ${url.substring(0, 50)}...`);
+          onPlay?.();
+        });
+
+        player.on("error", (error: any) => {
+          console.error(`❌ [Player.js] Error for: ${url.substring(0, 50)}...`, error);
+        });
+
+        // Cleanup on component unmount
+        return () => {
+          try {
+            player.off("ready");
+            player.off("play");
+            player.off("error");
+          } catch (e) {
+            console.warn(`[Player.js] Cleanup failed for ${url.substring(0, 50)}...`, e);
+          }
+        };
       }
-    }, [playing, prevPlaying]);
+    }, [url, onPlay]);
+
+    // Control playback based on the `playing` prop
+    useEffect(() => {
+      const player = playerRef.current;
+      if (player) {
+        if (playing) {
+          player.play();
+        } else {
+          player.pause();
+          player.setCurrentTime(0); // Optional: rewind to start
+        }
+      }
+    }, [playing]);
 
     // Check if URL is valid Bunny.net URL
     if (!isBunnyUrl(url)) {
@@ -82,33 +89,15 @@ export const VideoEmbed = memo<VideoEmbedProps>(
       <div className={`group relative w-full overflow-hidden rounded-lg bg-black ${className}`}>
         <div className="relative aspect-[9/16] w-full">
           <iframe
-            key={playing ? `playing-${iframeKey}` : `thumbnail-${iframeKey}`}
-            src={createIframeSrc(url, playing)}
+            ref={iframeRef}
+            src={`${url}?autoplay=false`} // Autoplay is now controlled via JS
             className="absolute inset-0 h-full w-full"
             width="100%"
             height="100%"
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
-            onLoad={() => setIsLoading(false)}
           />
-
-          {!playing && (
-            <div
-              className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center bg-black/20 transition-colors hover:bg-black/30"
-              onClick={handleLocalPlay}
-            >
-              <div className="rounded-full bg-black/60 p-6 backdrop-blur-sm transition-all hover:scale-110 hover:bg-black/80">
-                <Play className="h-8 w-8 text-white" fill="white" />
-              </div>
-            </div>
-          )}
-
-          {(isLoading || isPending) && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/40">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent" />
-            </div>
-          )}
         </div>
       </div>
     );
