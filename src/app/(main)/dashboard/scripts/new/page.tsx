@@ -186,7 +186,7 @@ export default function NewScriptPage() {
   return (
     <div className="hide-scrollbar flex min-h-[calc(100vh-6rem)] flex-col overflow-y-auto">
       {/* Hero Section - Vertically Centered */}
-      <div className="flex flex-1 items-center justify-center py-8">
+      <div className="flex flex-1 items-center justify-center py-8 pt-20">
         <div className="flex w-full flex-col items-center justify-center">
           {/* Header */}
           <div className="mb-8 text-center">
