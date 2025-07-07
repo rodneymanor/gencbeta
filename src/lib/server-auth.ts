@@ -1,13 +1,13 @@
 import "server-only";
 
 import { cookies } from "next/headers";
-
-import { adminAuth } from "./firebase-admin";
+import { getAdminAuth } from "./firebase-admin";
 
 export async function getCurrentUser() {
   console.log("🔍 [getCurrentUser] Function called");
   
   try {
+    const adminAuth = getAdminAuth();
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("session")?.value;
     

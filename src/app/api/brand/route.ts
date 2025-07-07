@@ -105,7 +105,7 @@ Based on this information, generate the required JSON object with personalized c
 }
 
 async function authenticateUser(request: NextRequest) {
-  
+  const adminAuth = getAdminAuth();
   const authHeader = request.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) {
     throw new Error("Missing authorization header");
