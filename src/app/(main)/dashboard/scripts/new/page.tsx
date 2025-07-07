@@ -184,63 +184,65 @@ export default function NewScriptPage() {
   };
 
   return (
-    <div className="hide-scrollbar flex min-h-[calc(100vh-6rem)] items-center justify-center overflow-y-auto">
-      {/* Vertically Centered Content Container */}
-      <div className="flex w-full flex-col items-center justify-center py-8">
-        {/* Header */}
-        <div className="mb-8 text-center">
-          <h1 className="text-foreground font-inter mb-2 text-5xl font-bold">What&apos;s your script idea?</h1>
-          <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
-            Transform your ideas into engaging scripts with AI assistance
-          </p>
-        </div>
+    <div className="hide-scrollbar flex min-h-[calc(100vh-6rem)] flex-col overflow-y-auto">
+      {/* Hero Section - Vertically Centered */}
+      <div className="flex flex-1 items-center justify-center py-8">
+        <div className="flex w-full flex-col items-center justify-center">
+          {/* Header */}
+          <div className="mb-8 text-center">
+            <h1 className="text-foreground font-inter mb-2 text-5xl font-bold">What&apos;s your script idea?</h1>
+            <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
+              Transform your ideas into engaging scripts with AI assistance
+            </p>
+          </div>
 
-        {/* Error Display */}
-        {speedWriteResponse && !speedWriteResponse.success && (
-          <Card className="border-destructive bg-destructive/5 mb-6 w-full max-w-2xl p-4">
-            <div className="text-destructive flex items-center gap-2">
-              <span className="font-medium">Generation Failed:</span>
-              <span>{speedWriteResponse.error}</span>
-              <Button variant="outline" size="sm" onClick={() => setSpeedWriteResponse(null)} className="ml-auto">
-                Dismiss
-              </Button>
+          {/* Error Display */}
+          {speedWriteResponse && !speedWriteResponse.success && (
+            <Card className="border-destructive bg-destructive/5 mb-6 w-full max-w-2xl p-4">
+              <div className="text-destructive flex items-center gap-2">
+                <span className="font-medium">Generation Failed:</span>
+                <span>{speedWriteResponse.error}</span>
+                <Button variant="outline" size="sm" onClick={() => setSpeedWriteResponse(null)} className="ml-auto">
+                  Dismiss
+                </Button>
+              </div>
+            </Card>
+          )}
+
+          {/* Main Input Section - 700px width */}
+          <div className="w-full max-w-2xl">
+            {/* Voice Badge */}
+            <div className="mb-4 flex justify-center">
+              <Badge variant="outline" className="border-primary/30 text-primary bg-primary/10 px-3 py-1 text-sm">
+                <Mic className="mr-1 h-3 w-3" />
+                {currentVoice} Voice
+              </Badge>
             </div>
-          </Card>
-        )}
 
-        {/* Main Input Section - 700px width */}
-        <div className="w-full max-w-2xl">
-          {/* Voice Badge */}
-          <div className="mb-4 flex justify-center">
-            <Badge variant="outline" className="border-primary/30 text-primary bg-primary/10 px-3 py-1 text-sm">
-              <Mic className="mr-1 h-3 w-3" />
-              {currentVoice} Voice
-            </Badge>
-          </div>
+            <InputModeToggle
+              inputMode={inputMode}
+              onInputModeChange={setInputMode}
+              textValue={scriptIdea}
+              onTextChange={setScriptIdea}
+              videoUrl={videoUrl}
+              onVideoUrlChange={setVideoUrl}
+              onSubmit={handleSubmit}
+              disabled={isGenerating}
+              showIdeaInbox={true}
+            />
 
-          <InputModeToggle
-            inputMode={inputMode}
-            onInputModeChange={setInputMode}
-            textValue={scriptIdea}
-            onTextChange={setScriptIdea}
-            videoUrl={videoUrl}
-            onVideoUrlChange={setVideoUrl}
-            onSubmit={handleSubmit}
-            disabled={isGenerating}
-            showIdeaInbox={true}
-          />
-
-          {/* Controls Row - Simplified */}
-          <div className="mt-4 flex items-center justify-center gap-4">
-            <div className="text-muted-foreground text-sm">Press ⌘+Enter to generate scripts</div>
+            {/* Controls Row - Simplified */}
+            <div className="mt-4 flex items-center justify-center gap-4">
+              <div className="text-muted-foreground text-sm">Press ⌘+Enter to generate scripts</div>
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* Ghost Writer Section */}
-        <div className="mt-12 w-full max-w-7xl">
-          <div className="bg-sidebar rounded-lg p-4 md:p-8">
-            <GhostWriter />
-          </div>
+      {/* Ghost Writer Section - Below Hero */}
+      <div className="mx-auto w-full max-w-7xl px-4 pb-8">
+        <div className="bg-sidebar rounded-lg p-4 md:p-8">
+          <GhostWriter />
         </div>
       </div>
     </div>
