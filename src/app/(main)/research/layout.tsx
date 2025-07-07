@@ -24,7 +24,7 @@ export default function ResearchLayout({ children }: Readonly<{ children: ReactN
               <SidebarInset className="flex w-screen flex-1">
                 <RouteAwareTopBar />
                 <DashboardClientLayout>
-                  <div className="hide-scrollbar flex-1 overflow-auto p-4 md:p-6">{children}</div>
+                  <div className="hide-scrollbar flex-1 overflow-auto">{children}</div>
                 </DashboardClientLayout>
               </SidebarInset>
             </div>

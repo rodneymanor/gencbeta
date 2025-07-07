@@ -80,7 +80,7 @@ export const VideoGrid = memo<VideoGridProps>(
 
     // Video grid with enhanced styling
     return (
-      <div className="flex flex-wrap justify-start gap-6">
+      <div className="flex flex-wrap justify-start gap-4">
         {videos.map((video) => (
           <VideoCard
             key={video.id}

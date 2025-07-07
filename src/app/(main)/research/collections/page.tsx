@@ -419,48 +419,37 @@ function CollectionsPageContent() {
     setSelectedVideos(new Set());
   }, []);
 
-  // Show loading only for initial load
-  if (isLoading) {
-    return (
-      <div className="@container/main">
-        <div className="mx-auto max-w-7xl space-y-8 p-4 md:space-y-10 md:p-6">
-          <PageHeaderLoading />
-          <VideoCollectionLoading count={12} />
-        </div>
-      </div>
-    );
+  // Don't show anything until collections are loaded and validated
+  if (isLoading || (selectedCollectionId && !validateCollectionExists(selectedCollectionId, collections))) {
+    return <VideoCollectionLoading />;
   }
 
   return (
-    <div className="@container/main">
-      <div className="mx-auto flex max-w-5xl gap-8">
-        {/* Main Content */}
-        <div className="flex-1 space-y-8 md:space-y-10">
-          {/* Header Section - Simplified animations */}
-          <section className="space-y-4">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="space-y-2">
-                <h1 className="text-foreground text-3xl font-bold tracking-tight">{pageTitle}</h1>
-                <p className="text-muted-foreground text-lg">{pageDescription}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <ManageModeHeader
-                  manageMode={manageMode}
-                  selectedVideos={selectedVideos}
-                  collections={collections}
-                  selectedCollectionId={selectedCollectionId}
-                  onManageModeToggle={() => userProfile?.role !== "creator" && setManageMode(true)}
-                  onExitManageMode={handleExitManageMode}
-                  onBulkDelete={handleBulkDelete}
-                  onClearSelection={clearSelection}
-                  onSelectAll={selectAllVideos}
-                  onVideoAdded={handleVideoAdded}
-                />
-              </div>
-            </div>
-          </section>
+    <div className="flex h-full p-4 md:p-6">
+      {/* Left side: Main content (Video Grid) */}
+      <div className="flex-1">
+        <header className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">{pageTitle}</h1>
+            <p className="text-muted-foreground">{pageDescription}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <ManageModeHeader
+              manageMode={manageMode}
+              selectedVideos={selectedVideos}
+              collections={collections}
+              selectedCollectionId={selectedCollectionId}
+              onManageModeToggle={() => setManageMode(!manageMode)}
+              onExitManageMode={handleExitManageMode}
+              onBulkDelete={handleBulkDelete}
+              onClearSelection={clearSelection}
+              onSelectAll={selectAllVideos}
+              onVideoAdded={handleVideoAdded}
+            />
+          </div>
+        </header>
 
-          {/* Videos Content Section */}
+        <main>
           <VideoGrid
             videos={videos}
             collections={collections}
@@ -474,19 +463,16 @@ function CollectionsPageContent() {
             onDeleteVideo={handleDeleteVideo}
             onVideoAdded={handleVideoAdded}
           />
-        </div>
+        </main>
+      </div>
 
-        {/* Right Sidebar */}
-        <aside className="hidden w-[313px] flex-shrink-0 md:block">
-          <div className="sticky top-4">
-            <CategoryChooser
-              items={categoryItems}
-              selectedId={selectedCollectionId ?? "all-videos"}
-              onSelectionChange={(item) => handleCollectionChange(item.id === "all-videos" ? null : item.id)}
-              label="Collections"
-            />
-          </div>
-        </aside>
+      {/* Right side: Category Chooser */}
+      <div className="ml-8 w-64">
+        <CategoryChooser
+          items={categoryItems}
+          selectedId={selectedCollectionId ?? "all-videos"}
+          onSelectionChange={(item) => handleCollectionChange(item.id === "all-videos" ? null : item.id)}
+        />
       </div>
     </div>
   );
