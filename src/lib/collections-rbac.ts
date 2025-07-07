@@ -12,7 +12,8 @@ export class CollectionsRBACService {
    */
   static async getUserCollections(userId: string): Promise<Collection[]> {
     console.log("🔍 [RBAC] getUserCollections called with userId:", userId);
-    console.time("getUserCollections");
+    const timerLabel = `getUserCollections-${Date.now()}`;
+    console.time(timerLabel);
 
     try {
       const db = getAdminDb();
@@ -57,7 +58,7 @@ export class CollectionsRBACService {
       console.error("❌ [RBAC] Error fetching collections:", error);
       throw new Error("Failed to fetch collections");
     } finally {
-      console.timeEnd("getUserCollections");
+      console.timeEnd(timerLabel);
     }
   }
 
