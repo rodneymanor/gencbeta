@@ -22,6 +22,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { auth } from "@/lib/firebase";
 
 import type { VideoWithPlayer } from "./collections-helpers";
 
@@ -205,9 +206,16 @@ export const ActionButtons = ({ video, onShowInsights }: { video: VideoWithPlaye
     setLoading(true);
     setError(null);
     try {
+      if (!auth?.currentUser) {
+        throw new Error("User not authenticated");
+      }
+      const token = await auth.currentUser.getIdToken();
       const res = await fetch("/api/script/speed-write", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ idea: video.transcript }),
       });
       if (!res.ok) {
