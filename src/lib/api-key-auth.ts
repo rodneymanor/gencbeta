@@ -316,6 +316,17 @@ export async function authenticateApiKey(
   try {
     console.log("🔐 [Auth] Authenticating API request");
 
+    // Log relevant auth headers (redacting sensitive values)
+    const incomingApiKey = request.headers.get("x-api-key");
+    const incomingAuth = request.headers.get("authorization");
+
+    console.log(
+      "🧾 [Auth] Headers summary | x-api-key:",
+      incomingApiKey ? "<provided>" : "<none>",
+      "| authorization:",
+      incomingAuth ? `${incomingAuth.substring(0, 20)}...` : "<none>",
+    );
+
     // First, try API key authentication
     const apiKey = ApiKeyAuthService.extractApiKey(request);
     if (apiKey) {
@@ -326,7 +337,7 @@ export async function authenticateApiKey(
     const authHeader = request.headers.get("authorization");
 
     if (!authHeader?.startsWith("Bearer ")) {
-      console.log("❌ [Auth] No valid authentication provided");
+      console.log("❌ [Auth] Missing or malformed Authorization header. authHeader:", authHeader);
       return NextResponse.json(
         {
           success: false,

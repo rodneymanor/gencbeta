@@ -45,28 +45,29 @@ export function GhostWriter() {
       const response = await fetch("/api/ghost-writer/enhanced", { headers });
 
       if (!response.ok) {
+        // Log server error details
+        const errorPayload = await safeJson(response);
+        console.error("❌ [GhostWriter] Enhanced endpoint error:", errorPayload);
+
         // fallback to legacy ideas endpoint without auth
         try {
           const legacyRes = await fetch("/api/ghost-writer/ideas");
           if (legacyRes.ok) {
             const legacyData = await safeJson(legacyRes);
+            console.log("🔄 [GhostWriter] Using legacy ideas after enhanced failure");
             setData(legacyData);
             setNeedsBrandProfile(false);
             return;
           }
-        } catch (_) {
-          /* empty */
+        } catch (fallbackErr) {
+          console.error("❌ [GhostWriter] Legacy fallback fetch error:", fallbackErr);
         }
-        // if fallback fails, continue to parse error
-      }
 
-      if (!response.ok) {
-        const errorData = await safeJson(response);
-        if (errorData?.needsBrandProfile) {
+        if (errorPayload?.needsBrandProfile) {
           setNeedsBrandProfile(true);
           setError("Please complete your brand profile to get personalized content ideas.");
         } else {
-          throw new Error(errorData?.error ?? "Failed to fetch ideas");
+          setError(errorPayload?.error ?? "Failed to fetch ideas");
         }
         return;
       }
