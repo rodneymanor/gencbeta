@@ -14,7 +14,7 @@ export function TopBar() {
     return null;
   }
 
-  const height = config.height || 48;
+  const height = config.height || 64;
   const isCollectionsTopbar = config.className?.includes('collections-topbar');
   const isTwoColumnLayout = config.className?.includes('collections-topbar-two-column');
 
@@ -29,7 +29,7 @@ export function TopBar() {
       <div className={cn(
         "flex w-full items-center justify-between px-4 lg:px-6",
         isCollectionsTopbar && !isTwoColumnLayout && "mx-auto max-w-4xl",
-        isTwoColumnLayout && "mx-auto max-w-6xl"
+        isTwoColumnLayout ? "mx-auto max-w-6xl justify-start gap-12" : "justify-between"
       )}>
         {/* Left Section */}
         <div className="flex items-center gap-2">
@@ -49,7 +49,7 @@ export function TopBar() {
               {config.titleIcon && (
                 <config.titleIcon className="h-5 w-5" />
               )}
-              <h1 className="text-lg font-semibold truncate">{config.title}</h1>
+              <h1 className={cn("text-lg font-semibold truncate", config.titleClassName)}>{config.title}</h1>
             </div>
           )}
         </div>

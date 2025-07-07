@@ -5,6 +5,7 @@ export interface TopBarConfig {
   titlePosition: TopBarTitlePosition;
   title?: string;
   titleIcon?: React.ComponentType<{ className?: string }>;
+  titleClassName?: string;
   customContent?: React.ReactNode;
   showBackButton?: boolean;
   backHref?: string;

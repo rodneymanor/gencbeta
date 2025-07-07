@@ -31,6 +31,8 @@ export const routeConfigs: RouteConfig[] = [
     priority: 80,
     showTitle: true,
     titlePosition: "left",
+    className: "collections-topbar-two-column",
+    titleClassName: "text-2xl font-bold",
     // title will be dynamically set by the page
   },
 
