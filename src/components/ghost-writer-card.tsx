@@ -84,26 +84,6 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
           {(idea as ContentIdea & { script?: string }).script ?? idea.hook}
         </div>
       </div>
-
-      {/* Engagement metrics */}
-      <div className="flex items-center justify-between pt-1">
-        <div className="flex items-center space-x-6">
-          <button className="text-muted-foreground hover:text-destructive flex items-center space-x-2 transition-colors">
-            <Heart className="h-4 w-4" />
-            <span className="text-sm font-medium">{engagement.likes.toLocaleString()}</span>
-          </button>
-
-          <button className="text-muted-foreground hover:text-primary flex items-center space-x-2 transition-colors">
-            <MessageCircle className="h-4 w-4" />
-            <span className="text-sm font-medium">{engagement.comments}</span>
-          </button>
-
-          <button className="text-muted-foreground hover:text-primary flex items-center space-x-2 transition-colors">
-            <Share className="h-4 w-4" />
-            <span className="text-sm font-medium">{engagement.shares}</span>
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
