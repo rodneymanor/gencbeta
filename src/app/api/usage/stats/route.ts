@@ -1,8 +1,24 @@
 import { NextResponse } from "next/server";
 
+import { getCurrentUser } from "@/lib/server-auth";
 import { CreditsService } from "@/lib/credits-service";
 import { getAdminDb } from "@/lib/firebase-admin";
-import { getCurrentUser } from "@/lib/server-auth";
+
+async function getUserAccountLevel(userId: string): Promise<string> {
+  const adminDb = getAdminDb();
+  const userDoc = await adminDb.collection("users").doc(userId).get();
+  
+  if (!userDoc.exists) {
+    console.log(`❌ [Usage Stats] User document not found for ${userId}`);
+    throw new Error("User profile not found");
+  }
+  
+  const userData = userDoc.data();
+  const accountLevel = userData?.accountLevel ?? "free";
+  
+  console.log(`📊 [Usage Stats] User account level: ${accountLevel}`);
+  return accountLevel;
+}
 
 export async function GET(): Promise<NextResponse> {
   try {
@@ -16,29 +32,38 @@ export async function GET(): Promise<NextResponse> {
     }
 
     const userId = user.uid;
+    console.log(`📊 [Usage Stats] Authenticated user: ${userId}`);
 
-    // Get user's account level from their profile
-    const adminDb = getAdminDb();
+    // Get user's account level and usage statistics
+    try {
+      const accountLevel = await getUserAccountLevel(userId);
+      const usageStats = await CreditsService.getUsageStats(userId, accountLevel);
 
-    const userDoc = await adminDb.collection("users").doc(userId).get();
-    const userData = userDoc.data();
-    const accountLevel = userData?.accountLevel ?? "free";
+      console.log(`✅ [Usage Stats] Retrieved stats for user ${userId}:`, {
+        creditsUsed: usageStats.creditsUsed,
+        creditsRemaining: usageStats.creditsRemaining,
+        percentageUsed: usageStats.percentageUsed,
+        periodType: usageStats.periodType,
+      });
 
-    console.log(`📊 [Usage Stats] Getting stats for user ${userId} (${accountLevel})`);
-
-    // Get usage statistics
-    const usageStats = await CreditsService.getUsageStats(userId, accountLevel);
-
-    console.log(`✅ [Usage Stats] Retrieved stats for user ${userId}:`, {
-      creditsUsed: usageStats.creditsUsed,
-      creditsRemaining: usageStats.creditsRemaining,
-      percentageUsed: usageStats.percentageUsed,
-      periodType: usageStats.periodType,
-    });
-
-    return NextResponse.json(usageStats);
+      return NextResponse.json(usageStats);
+    } catch (firestoreError) {
+      console.error("❌ [Usage Stats] Firestore error:", firestoreError);
+      return NextResponse.json({ 
+        error: "Database error", 
+        details: firestoreError instanceof Error ? firestoreError.message : "Unknown database error"
+      }, { status: 500 });
+    }
   } catch (error) {
     console.error("❌ [Usage Stats] Error fetching usage statistics:", error);
-    return NextResponse.json({ error: "Failed to fetch usage statistics" }, { status: 500 });
+    console.error("❌ [Usage Stats] Error details:", {
+      name: error instanceof Error ? error.name : "Unknown",
+      message: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : "No stack trace",
+    });
+    return NextResponse.json({ 
+      error: "Failed to fetch usage statistics",
+      details: error instanceof Error ? error.message : "Unknown error"
+    }, { status: 500 });
   }
 }

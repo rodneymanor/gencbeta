@@ -84,7 +84,8 @@ export class UserManagementService {
   }
 
   static async getUserProfile(uid: string): Promise<UserProfile | null> {
-    console.time("getUserProfile");
+    const timerLabel = `getUserProfile-${uid}-${Date.now()}`;
+    console.time(timerLabel);
     console.log(`🔍 [USER_PROFILE] getUserProfile called with uid: ${uid}`);
     try {
       const db = getAdminDb();
@@ -115,7 +116,7 @@ export class UserManagementService {
       console.error(`❌ [USER_PROFILE] Error fetching user profile:`, error);
       throw new Error("Failed to fetch user profile");
     } finally {
-      console.timeEnd("getUserProfile");
+      console.timeEnd(timerLabel);
     }
   }
 
