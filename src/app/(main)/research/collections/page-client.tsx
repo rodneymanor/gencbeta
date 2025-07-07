@@ -88,8 +88,8 @@ export default function PageClient({ initialCollections, initialVideos, initialC
   };
 
   return (
-    <div className="relative mx-auto flex max-w-6xl gap-12 px-4">
-      <div className="max-w-3xl min-w-0 space-y-8 md:space-y-10">
+    <div className="relative mx-auto flex max-w-full gap-12 px-4 lg:max-w-6xl">
+      <div className="mx-auto min-w-0 flex-1 space-y-8 md:space-y-10">
         <CollectionHeader title={displayTitle} description={displayDescription} />
         {isLoading ? (
           <SkeletonGrid />
