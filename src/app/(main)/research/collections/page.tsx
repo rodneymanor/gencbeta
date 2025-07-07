@@ -1,7 +1,6 @@
-/* eslint-disable max-lines */
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, useTransition, useRef, memo } from "react";
+import { useState, useEffect, useCallback, useMemo, useTransition, useRef, memo, Suspense } from "react";
 
 import { useSearchParams, useRouter } from "next/navigation";
 
@@ -480,5 +479,9 @@ function CollectionsPageContent() {
 
 // Main export
 export default function CollectionsPage() {
-  return <CollectionsPageContent />;
+  return (
+    <Suspense fallback={<VideoCollectionLoading />}>
+      <CollectionsPageContent />
+    </Suspense>
+  );
 }
