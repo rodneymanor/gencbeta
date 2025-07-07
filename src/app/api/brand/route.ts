@@ -119,11 +119,10 @@ async function authenticateUser(request: NextRequest) {
 // GET - Fetch user's brand profiles
 export async function GET(request: NextRequest) {
   try {
-    
     const userId = await authenticateUser(request);
     console.log("📋 [BRAND] Fetching profiles for user:", userId);
 
-    const profilesSnapshot = await adminDb
+    const profilesSnapshot = await getAdminDb()
       .collection("brandProfiles")
       .where("userId", "==", userId)
       .orderBy("createdAt", "desc")
@@ -229,16 +228,14 @@ export async function POST(request: NextRequest) {
       isActive: true,
       version: 1,
     };
-
-    
     // Check for existing active profile and deactivate it
-    const existingProfilesSnapshot = await adminDb
+    const existingProfilesSnapshot = await getAdminDb()
       .collection("brandProfiles")
       .where("userId", "==", userId)
       .where("isActive", "==", true)
       .get();
 
-    const batch = adminDb.batch();
+    const batch = getAdminDb().batch();
 
     // Deactivate existing profiles
     existingProfilesSnapshot.docs.forEach((doc) => {
@@ -246,7 +243,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Create new profile
-    const newProfileRef = adminDb.collection("brandProfiles").doc();
+    const newProfileRef = getAdminDb().collection("brandProfiles").doc();
     batch.set(newProfileRef, brandProfile);
 
     await batch.commit();
@@ -284,8 +281,7 @@ export async function PUT(request: NextRequest) {
 
     console.log("📝 [BRAND] Updating profile:", profileId);
 
-    
-    const profileRef = adminDb.collection("brandProfiles").doc(profileId);
+    const profileRef = getAdminDb().collection("brandProfiles").doc(profileId);
     const profileDoc = await profileRef.get();
 
     if (!profileDoc.exists) {
@@ -343,8 +339,7 @@ export async function DELETE(request: NextRequest) {
 
     console.log("🗑️ [BRAND] Deleting profile:", profileId);
 
-    
-    const profileRef = adminDb.collection("brandProfiles").doc(profileId);
+    const profileRef = getAdminDb().collection("brandProfiles").doc(profileId);
     const profileDoc = await profileRef.get();
 
     if (!profileDoc.exists || profileDoc.data()?.userId !== userId) {

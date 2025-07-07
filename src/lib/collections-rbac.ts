@@ -1,8 +1,6 @@
-import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
-
 import { type Collection, type Video } from "./collections";
 import { formatTimestamp } from "./collections-helpers";
-import { adminDb } from "./firebase-admin";
+import { getAdminDb } from "./firebase-admin";
 import { UserManagementService } from "./user-management";
 
 export class CollectionsRBACService {
@@ -17,48 +15,33 @@ export class CollectionsRBACService {
     console.time("getUserCollections");
 
     try {
-      // Check if user is super admin first
+      const db = getAdminDb();
       const userProfile = await UserManagementService.getUserProfile(userId);
       console.log("🔍 [RBAC] User profile:", userProfile ? `role: ${userProfile.role}` : "null");
 
+      let query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData>;
+
       if (userProfile?.role === "super_admin") {
         console.log("🔍 [RBAC] Super admin loading all collections");
+        query = db.collection(this.COLLECTIONS_PATH).orderBy("updatedAt", "desc");
+      } else {
+        console.log("🔍 [RBAC] Regular user, getting accessible coaches...");
+        const accessibleCoaches = await UserManagementService.getUserAccessibleCoaches(userId);
+        console.log("🔍 [RBAC] Accessible coaches:", accessibleCoaches);
 
-        // For super admin, get all collections
-        const q = query(collection(adminDb, this.COLLECTIONS_PATH), orderBy("updatedAt", "desc"));
-        console.log("🔍 [RBAC] Executing super admin query...");
+        if (accessibleCoaches.length === 0) {
+          console.log("❌ [RBAC] No accessible coaches found");
+          return [];
+        }
 
-        const querySnapshot = await getDocs(q);
-        console.log("🔍 [RBAC] Query snapshot size:", querySnapshot.size);
-
-        const collections = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: formatTimestamp(doc.data().createdAt),
-          updatedAt: formatTimestamp(doc.data().updatedAt),
-        })) as Collection[];
-
-        console.log("✅ [RBAC] Super admin loaded collections:", collections.length);
-        return collections;
+        query = db
+          .collection(this.COLLECTIONS_PATH)
+          .where("userId", "in", accessibleCoaches)
+          .orderBy("updatedAt", "desc");
       }
 
-      console.log("🔍 [RBAC] Regular user, getting accessible coaches...");
-      const accessibleCoaches = await UserManagementService.getUserAccessibleCoaches(userId);
-      console.log("🔍 [RBAC] Accessible coaches:", accessibleCoaches);
-
-      if (accessibleCoaches.length === 0) {
-        console.log("❌ [RBAC] No accessible coaches found");
-        return [];
-      }
-
-      const q = query(
-        collection(adminDb, this.COLLECTIONS_PATH),
-        where("userId", "in", accessibleCoaches),
-        orderBy("updatedAt", "desc"),
-      );
-      console.log("🔍 [RBAC] Executing regular user query...");
-
-      const querySnapshot = await getDocs(q);
+      console.log("🔍 [RBAC] Executing query...");
+      const querySnapshot = await query.get();
       console.log("🔍 [RBAC] Query snapshot size:", querySnapshot.size);
 
       const collections = querySnapshot.docs.map((doc) => ({
@@ -68,7 +51,7 @@ export class CollectionsRBACService {
         updatedAt: formatTimestamp(doc.data().updatedAt),
       })) as Collection[];
 
-      console.log("✅ [RBAC] Regular user loaded collections:", collections.length);
+      console.log("✅ [RBAC] Loaded collections:", collections.length);
       return collections;
     } catch (error) {
       console.error("❌ [RBAC] Error fetching collections:", error);
@@ -102,14 +85,24 @@ export class CollectionsRBACService {
    */
   private static async getSuperAdminVideos(userId: string, collectionId?: string): Promise<Video[]> {
     console.log("🔍 [RBAC] Super admin detected - bypassing coach restrictions");
+    const db = getAdminDb();
+    let query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData>;
 
-    let q;
     if (!collectionId || collectionId === "all-videos") {
       console.log("🔍 [RBAC] Super admin loading all videos");
-      q = query(collection(adminDb, this.VIDEOS_PATH), orderBy("addedAt", "desc"));
+      query = db.collection(this.VIDEOS_PATH).orderBy("addedAt", "desc");
     } else {
       try {
-        q = await this.getSuperAdminCollectionQuery(userId, collectionId);
+        const targetCollection = await this.getSuperAdminCollection(userId, collectionId);
+        if (!targetCollection) {
+          console.log("❌ [RBAC] Collection not found:", collectionId);
+          return [];
+        }
+        query = db
+          .collection(this.VIDEOS_PATH)
+          .where("collectionId", "==", collectionId)
+          .where("userId", "==", targetCollection.userId)
+          .orderBy("addedAt", "desc");
       } catch (error) {
         // Collection not found, return empty array
         console.log("❌ [RBAC] Collection query failed:", error instanceof Error ? error.message : String(error));
@@ -117,7 +110,7 @@ export class CollectionsRBACService {
       }
     }
 
-    const querySnapshot = await getDocs(q);
+    const querySnapshot = await query.get();
     const videos = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
@@ -129,24 +122,13 @@ export class CollectionsRBACService {
   }
 
   /**
-   * Get collection query for super admin
+   * Get collection for super admin
    */
-  private static async getSuperAdminCollectionQuery(userId: string, collectionId: string) {
+  private static async getSuperAdminCollection(userId: string, collectionId: string) {
     console.log("🔍 [RBAC] Super admin loading videos from collection:", collectionId);
     const collections = await this.getUserCollections(userId);
     const targetCollection = collections.find((c) => c.id === collectionId);
-
-    if (!targetCollection) {
-      console.log("❌ [RBAC] Collection not found:", collectionId);
-      throw new Error(`Collection not found: ${collectionId}`);
-    }
-
-    return query(
-      collection(adminDb, this.VIDEOS_PATH),
-      where("collectionId", "==", collectionId),
-      where("userId", "==", targetCollection.userId),
-      orderBy("addedAt", "desc"),
-    );
+    return targetCollection;
   }
 
   /**
@@ -160,45 +142,32 @@ export class CollectionsRBACService {
       console.log("❌ [RBAC] No accessible coaches found - returning empty array");
       return [];
     }
+    const db = getAdminDb();
+    let query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData>;
 
-    const q = await this.getRegularUserQuery(userId, collectionId, accessibleCoaches);
-    const querySnapshot = await getDocs(q);
+    if (!collectionId || collectionId === "all-videos") {
+      query = db.collection(this.VIDEOS_PATH).where("userId", "in", accessibleCoaches).orderBy("addedAt", "desc");
+    } else {
+      const collections = await this.getUserCollections(userId);
+      const hasAccess = collections.some((c) => c.id === collectionId);
+
+      if (!hasAccess) {
+        throw new Error("Access denied to collection");
+      }
+
+      query = db
+        .collection(this.VIDEOS_PATH)
+        .where("collectionId", "==", collectionId)
+        .where("userId", "in", accessibleCoaches)
+        .orderBy("addedAt", "desc");
+    }
+
+    const querySnapshot = await query.get();
 
     return querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
       addedAt: formatTimestamp(doc.data().addedAt),
     })) as Video[];
-  }
-
-  /**
-   * Get query for regular users
-   */
-  private static async getRegularUserQuery(
-    userId: string,
-    collectionId: string | undefined,
-    accessibleCoaches: string[],
-  ) {
-    if (!collectionId || collectionId === "all-videos") {
-      return query(
-        collection(adminDb, this.VIDEOS_PATH),
-        where("userId", "in", accessibleCoaches),
-        orderBy("addedAt", "desc"),
-      );
-    }
-
-    const collections = await this.getUserCollections(userId);
-    const hasAccess = collections.some((c) => c.id === collectionId);
-
-    if (!hasAccess) {
-      throw new Error("Access denied to collection");
-    }
-
-    return query(
-      collection(adminDb, this.VIDEOS_PATH),
-      where("collectionId", "==", collectionId),
-      where("userId", "in", accessibleCoaches),
-      orderBy("addedAt", "desc"),
-    );
   }
 }
