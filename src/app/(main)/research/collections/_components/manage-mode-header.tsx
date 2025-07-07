@@ -1,11 +1,17 @@
 "use client";
 
-import { Settings, Trash2, Plus, CheckSquare, X } from "lucide-react";
+import { Settings, Trash2, Plus, CheckSquare, X, MoreVertical } from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/auth-context";
 import { type Collection } from "@/lib/collections";
-import { Badge } from "@/components/ui/badge";
 
 import { AddVideoDialog } from "./add-video-dialog";
 import { CreateCollectionDialog } from "./create-collection-dialog";
@@ -102,15 +108,6 @@ const AdminControls = ({
   onVideoAdded: () => void;
 }) => (
   <div className="flex items-center gap-3">
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={onManageModeToggle}
-      className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 shadow-xs transition-all duration-200 hover:shadow-sm"
-    >
-      <Settings className="mr-2 h-4 w-4" />
-      Manage
-    </Button>
     <CreateCollectionDialog onCollectionCreated={onVideoAdded}>
       <Button
         variant="outline"
@@ -125,7 +122,29 @@ const AdminControls = ({
       collections={collections.filter((c) => c.id).map((c) => ({ id: c.id!, title: c.title }))}
       selectedCollectionId={selectedCollectionId ?? undefined}
       onVideoAdded={onVideoAdded}
-    />
+    >
+      <Button
+        variant="outline"
+        size="sm"
+        className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 shadow-xs transition-all duration-200 hover:shadow-sm"
+      >
+        <Plus className="mr-2 h-4 w-4" />
+        Add Video
+      </Button>
+    </AddVideoDialog>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground h-8 w-8">
+          <MoreVertical className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={onManageModeToggle}>
+          <Settings className="mr-2 h-4 w-4" />
+          <span>Manage Videos</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   </div>
 );
 

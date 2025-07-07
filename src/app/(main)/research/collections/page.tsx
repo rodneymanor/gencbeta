@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { VideoCollectionLoading, PageHeaderLoading } from "@/components/ui/loading-animations";
 import { useAuth } from "@/contexts/auth-context";
+import { useTopBarConfig } from "@/hooks/use-route-topbar";
 import { CollectionsService, type Collection, type Video } from "@/lib/collections";
 import { CollectionsRBACService } from "@/lib/collections-rbac";
 
@@ -132,17 +133,26 @@ function CollectionsPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const selectedCollectionId = searchParams.get("collection");
+  const setTopBarConfig = useTopBarConfig();
 
   const { toggleVideoSelection, selectAllVideos, clearSelection } = useMemo(
     () => createVideoSelectionHandlers(setSelectedVideos, videos),
     [videos],
   );
 
-  const pageTitle = useMemo(() => getPageTitle(selectedCollectionId, collections), [selectedCollectionId, collections]);
-  const pageDescription = useMemo(
-    () => getPageDescription(selectedCollectionId, collections),
-    [selectedCollectionId, collections],
-  );
+  const pageTitle = useMemo(() => {
+    if (!selectedCollectionId) return "All Videos";
+    const collection = collections.find((c) => c.id === selectedCollectionId);
+    return collection?.title ?? "All Videos";
+  }, [selectedCollectionId, collections]);
+
+  const pageDescription = useMemo(() => {
+    if (selectedCollectionId) {
+      const collection = collections.find((c) => c.id === selectedCollectionId);
+      if (collection?.description) return collection.description;
+    }
+    return "Browse and manage your video collections";
+  }, [selectedCollectionId, collections]);
 
   const categoryItems = useMemo(() => {
     const items = collections.map((c) => ({ id: c.id!, name: c.title }));
@@ -310,6 +320,10 @@ function CollectionsPageContent() {
     }
   }, [user, userProfile, isLoading, loadData]);
 
+  useEffect(() => {
+    setTopBarConfig({ title: "Collections" });
+  }, [setTopBarConfig]);
+
   // Video management functions
   const handleVideoAdded = useCallback(async () => {
     // Clear cache and reload
@@ -419,7 +433,7 @@ function CollectionsPageContent() {
 
   return (
     <div className="@container/main">
-      <div className="mx-auto flex max-w-7xl gap-8">
+      <div className="mx-auto flex max-w-5xl gap-8">
         {/* Main Content */}
         <div className="flex-1 space-y-8 md:space-y-10">
           {/* Header Section - Simplified animations */}

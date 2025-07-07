@@ -110,7 +110,6 @@ export const VideoCard = memo<VideoCardProps>(
             <DurationBadge duration={video.duration} />
 
             {/* Hover Actions */}
-            <HoverActions showActions={showActions} onDelete={onDelete} />
           </div>
 
           {/* Action Buttons */}
