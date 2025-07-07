@@ -11,10 +11,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth-context";
-import { UserManagementService, type UserProfile, type UserRole } from "@/lib/user-management";
+import { type UserProfile, type UserRole } from "@/lib/user-management";
 
 import { AssignCreatorDialog } from "./_components/assign-creator-dialog";
 import { CreateUserDialog } from "./_components/create-user-dialog";
+
+const fetchAdminData = () => fetch("/api/admin/users").then((res) => res.json());
+const deactivateUser = (uid: string) =>
+  fetch("/api/admin/users", {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ uid }),
+  }).then((res) => res.json());
 
 export default function AdminPage() {
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -42,10 +50,7 @@ export default function AdminPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [allUsers, allCoaches] = await Promise.all([
-        UserManagementService.getAllUsers(),
-        UserManagementService.getAllCoaches(),
-      ]);
+      const { users: allUsers, coaches: allCoaches } = await fetchAdminData();
       setUsers(allUsers);
       setCoaches(allCoaches);
     } catch (error) {
@@ -67,7 +72,7 @@ export default function AdminPage() {
     if (!confirm("Are you sure you want to deactivate this user?")) return;
 
     try {
-      await UserManagementService.deactivateUser(uid);
+      await deactivateUser(uid);
       loadData();
     } catch (error) {
       console.error("Error deactivating user:", error);
@@ -218,9 +223,7 @@ export default function AdminPage() {
                       <p className="text-muted-foreground text-sm">{user.email}</p>
                     </div>
                   </div>
-                  <Badge variant={getRoleBadgeVariant(user.role)}>{user.role.replace("_", " ").toUpperCase()}</Badge>
-                  {user.role === "creator" && user.coachId && <Badge variant="outline">Assigned to Coach</Badge>}
-                  {user.role === "creator" && !user.coachId && <Badge variant="destructive">Unassigned</Badge>}
+                  <Badge variant={getRoleBadgeVariant(user.role)}>{user.role}</Badge>
                 </div>
                 <div className="flex items-center space-x-2">
                   <div className="text-muted-foreground text-sm">
@@ -229,7 +232,12 @@ export default function AdminPage() {
                       : "Never logged in"}
                   </div>
                   {user.role !== "super_admin" && (
-                    <Button variant="outline" size="sm" onClick={() => handleDeactivateUser(user.uid)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeactivateUser(user.uid)}
+                      className="text-red-600 hover:text-red-700"
+                    >
                       Deactivate
                     </Button>
                   )}

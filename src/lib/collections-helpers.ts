@@ -1,6 +1,4 @@
-import { collection, doc, getDoc, getDocs, query, where, serverTimestamp, WriteBatch } from "firebase/firestore";
-
-import { db } from "./firebase";
+import { getAdminDb } from "./firebase-admin";
 
 /**
  * Helper to verify collection ownership
@@ -14,15 +12,16 @@ export async function verifyCollectionOwnership(
     return { exists: false };
   }
 
-  const docRef = doc(db, "collections", collectionId);
-  const docSnap = await getDoc(docRef);
+  const db = getAdminDb();
+  const docRef = db.collection("collections").doc(collectionId);
+  const docSnap = await docRef.get();
 
-  if (!docSnap.exists()) {
+  if (!docSnap.exists) {
     return { exists: false };
   }
 
   const data = docSnap.data();
-  if (data.userId !== userId) {
+  if (data?.userId !== userId) {
     throw new Error("Access denied");
   }
 
@@ -36,15 +35,16 @@ export async function verifyVideoOwnership(
   userId: string,
   videoId: string,
 ): Promise<{ exists: boolean; data?: Record<string, unknown> }> {
-  const docRef = doc(db, "videos", videoId);
-  const docSnap = await getDoc(docRef);
+  const db = getAdminDb();
+  const docRef = db.collection("videos").doc(videoId);
+  const docSnap = await docRef.get();
 
-  if (!docSnap.exists()) {
+  if (!docSnap.exists) {
     return { exists: false };
   }
 
   const data = docSnap.data();
-  if (data.userId !== userId) {
+  if (data?.userId !== userId) {
     throw new Error("Access denied");
   }
 
@@ -55,7 +55,7 @@ export async function verifyVideoOwnership(
  * Helper to update collection video count
  */
 export async function updateCollectionVideoCount(
-  batch: WriteBatch,
+  batch: FirebaseFirestore.WriteBatch,
   collectionId: string,
   userId: string,
   increment: number,
@@ -64,14 +64,15 @@ export async function updateCollectionVideoCount(
     return; // Don't update count for all-videos
   }
 
-  const collectionRef = doc(db, "collections", collectionId);
-  const collectionSnap = await getDoc(collectionRef);
+  const db = getAdminDb();
+  const collectionRef = db.collection("collections").doc(collectionId);
+  const collectionSnap = await collectionRef.get();
 
-  if (collectionSnap.exists() && collectionSnap.data().userId === userId) {
-    const currentCount = collectionSnap.data().videoCount ?? 0;
+  if (collectionSnap.exists && collectionSnap.data()?.userId === userId) {
+    const currentCount = collectionSnap.data()?.videoCount ?? 0;
     batch.update(collectionRef, {
       videoCount: Math.max(0, currentCount + increment),
-      updatedAt: serverTimestamp(),
+      updatedAt: new Date(),
     });
   }
 }
@@ -79,14 +80,15 @@ export async function updateCollectionVideoCount(
 /**
  * Helper to delete videos in a collection
  */
-export async function deleteCollectionVideos(batch: WriteBatch, userId: string, collectionId: string): Promise<void> {
-  const videosQuery = query(
-    collection(db, "videos"),
-    where("userId", "==", userId),
-    where("collectionId", "==", collectionId),
-  );
+export async function deleteCollectionVideos(
+  batch: FirebaseFirestore.WriteBatch,
+  userId: string,
+  collectionId: string,
+): Promise<void> {
+  const db = getAdminDb();
+  const videosQuery = db.collection("videos").where("userId", "==", userId).where("collectionId", "==", collectionId);
 
-  const videosSnapshot = await getDocs(videosQuery);
+  const videosSnapshot = await videosQuery.get();
   videosSnapshot.docs.forEach((videoDoc) => {
     batch.delete(videoDoc.ref);
   });

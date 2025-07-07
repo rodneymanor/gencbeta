@@ -14,7 +14,14 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { UserManagementService, type UserProfile } from "@/lib/user-management";
+import { type UserProfile } from "@/lib/user-management";
+
+const assignCreatorToCoach = (creatorUid: string, coachUid: string) =>
+  fetch("/api/admin/assign-creator", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ creatorUid, coachUid }),
+  }).then((res) => res.json());
 
 interface AssignCreatorDialogProps {
   children: React.ReactNode;
@@ -39,7 +46,7 @@ export function AssignCreatorDialog({ children, coaches, unassignedCreators, onA
 
     setLoading(true);
     try {
-      await UserManagementService.assignCreatorToCoach(selectedCreator, selectedCoach);
+      await assignCreatorToCoach(selectedCreator, selectedCoach);
 
       // Reset form
       setSelectedCoach("");
