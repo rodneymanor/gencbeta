@@ -213,11 +213,14 @@ export function InputModeToggle({
                 target.style.height = Math.min(target.scrollHeight, window.innerHeight * 0.45) + "px";
               }}
             />
-            <div className="absolute right-4 bottom-4 flex items-center gap-2">
-              <Button onClick={onSubmit} disabled={finalSubmitDisabled} size="sm" className="h-10 w-10 p-0 shadow-sm">
-                <ExternalLink className="h-5 w-5" />
-              </Button>
-            </div>
+            <Button
+              onClick={onSubmit}
+              disabled={finalSubmitDisabled}
+              size="sm"
+              className="absolute top-1/2 right-3 h-8 w-8 -translate-y-1/2 p-0 shadow-sm"
+            >
+              <ExternalLink className="h-4 w-4" />
+            </Button>
           </div>
           {showIdeaInbox && (
             <div className="flex justify-center">
