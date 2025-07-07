@@ -1,4 +1,6 @@
-import { getAdminDb } from "./firebase-admin";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+
+import { db } from "@/lib/firebase";
 
 export interface UsageRecord {
   userId: string;
@@ -9,7 +11,7 @@ export interface UsageRecord {
   responseTime: number;
   success: boolean;
   error?: string;
-  timestamp: Date | Record<string, unknown>; // Firestore timestamp
+  timestamp: any; // Firestore timestamp
   metadata?: {
     scriptLength?: string;
     inputLength?: number;
@@ -40,7 +42,6 @@ export class UsageTracker {
     metadata?: UsageRecord["metadata"];
   }): Promise<void> {
     try {
-      const db = getAdminDb();
       const usageRecord: Omit<UsageRecord, "timestamp"> = {
         userId: data.userId,
         service: "gemini",
@@ -49,7 +50,7 @@ export class UsageTracker {
         tokensUsed: data.tokensUsed,
         responseTime: data.responseTime,
         success: data.success,
-        timestamp: new Date(),
+        timestamp: serverTimestamp(),
       };
 
       // Only include error field if it's not undefined
@@ -62,7 +63,7 @@ export class UsageTracker {
         usageRecord.metadata = data.metadata;
       }
 
-      await db.collection("usage_tracking").add(usageRecord);
+      await addDoc(collection(db, "usage_tracking"), usageRecord);
 
       console.log(`📊 [Usage] Tracked Gemini usage for user ${data.userId}: ${data.tokensUsed} tokens`);
     } catch (error) {

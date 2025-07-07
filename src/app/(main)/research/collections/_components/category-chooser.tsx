@@ -31,7 +31,12 @@ export default function CategoryChooser({
   };
 
   return (
-    <div className={`flex flex-col p-4 ${className}`} role="navigation" aria-label={label}>
+    <div
+      className={`absolute top-0 right-0 left-0 isolate hidden flex-col items-end p-4 md:flex ${className}`}
+      style={{ opacity: 1, transform: "none", transformOrigin: "50% 50% 0px" }}
+      role="navigation"
+      aria-label={label}
+    >
       <ul className="-mb-1 flex w-full flex-col items-start">
         {items.map((item) => {
           const isActive = item.id === activeId;
@@ -75,6 +80,8 @@ export default function CategoryChooser({
                   {item.name}
                 </div>
               </div>
+
+              {/* Connector line */}
 
               {/* Active/Inactive indicator with smooth transitions */}
               <div

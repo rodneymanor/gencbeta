@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 
 import { useRouter } from "next/navigation";
 
@@ -11,17 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth-context";
-import { type UserProfile } from "@/lib/user-management";
+import { UserManagementService, type UserProfile } from "@/lib/user-management";
 
 import { CreateCreatorDialog } from "../../research/collections/_components/create-creator-dialog";
-
-const fetchCreators = () => fetch("/api/creators").then((res) => res.json());
-const removeCreator = (creatorUid: string) =>
-  fetch("/api/creators", {
-    method: "DELETE",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ creatorUid }),
-  }).then((res) => res.json());
 
 export default function CreatorsPage() {
   const [creators, setCreators] = useState<UserProfile[]>([]);
@@ -29,19 +21,19 @@ export default function CreatorsPage() {
   const { user, userProfile } = useAuth();
   const router = useRouter();
 
-  const loadCreators = useCallback(async () => {
+  const loadCreators = async () => {
     if (!user) return;
 
     try {
       setLoading(true);
-      const coachCreators = await fetchCreators();
+      const coachCreators = await UserManagementService.getCoachCreators(user.uid);
       setCreators(coachCreators);
     } catch (error) {
       console.error("Error loading creators:", error);
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  };
 
   useEffect(() => {
     if (!user) {
@@ -67,7 +59,7 @@ export default function CreatorsPage() {
     if (!confirm("Are you sure you want to remove this creator from your team?")) return;
 
     try {
-      await removeCreator(creatorUid);
+      await UserManagementService.removeCreatorFromCoach(creatorUid);
       loadCreators();
     } catch (error) {
       console.error("Error removing creator:", error);

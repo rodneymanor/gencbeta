@@ -1,4 +1,6 @@
-import { getAdminDb } from "./firebase-admin";
+import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
+
+import { adminDb } from "./firebase-admin";
 import { type UserProfile } from "./user-management";
 
 /**
@@ -7,11 +9,11 @@ import { type UserProfile } from "./user-management";
 export function formatTimestamp(timestamp: unknown): string {
   if (!timestamp) return new Date().toISOString();
 
-  if (typeof timestamp === "object" && "toDate" in timestamp) {
+  if (timestamp && typeof timestamp === "object" && "toDate" in timestamp) {
     return (timestamp as { toDate: () => Date }).toDate().toISOString();
   }
 
-  if (typeof timestamp === "object" && "seconds" in timestamp) {
+  if (timestamp && typeof timestamp === "object" && "seconds" in timestamp) {
     return new Date((timestamp as { seconds: number }).seconds * 1000).toISOString();
   }
 
@@ -24,9 +26,8 @@ export function formatTimestamp(timestamp: unknown): string {
 export async function getAllCoaches(): Promise<UserProfile[]> {
   try {
     console.log("🔍 [USER_HELPERS] Getting all coaches");
-    const db = getAdminDb();
-    const q = db.collection("user_profiles").where("role", "==", "coach").orderBy("displayName", "asc");
-    const querySnapshot = await q.get();
+    const q = query(collection(adminDb, "user_profiles"), where("role", "==", "coach"), orderBy("displayName", "asc"));
+    const querySnapshot = await getDocs(q);
     const coaches = querySnapshot.docs.map(
       (doc) =>
         ({
@@ -48,13 +49,13 @@ export async function getAllCoaches(): Promise<UserProfile[]> {
 export async function getCoachCreators(coachId: string): Promise<UserProfile[]> {
   try {
     console.log("🔍 [USER_HELPERS] Getting creators for coach:", coachId);
-    const db = getAdminDb();
-    const q = db
-      .collection("user_profiles")
-      .where("role", "==", "creator")
-      .where("coachId", "==", coachId)
-      .orderBy("displayName", "asc");
-    const querySnapshot = await q.get();
+    const q = query(
+      collection(adminDb, "user_profiles"),
+      where("role", "==", "creator"),
+      where("coachId", "==", coachId),
+      orderBy("displayName", "asc"),
+    );
+    const querySnapshot = await getDocs(q);
     const creators = querySnapshot.docs.map(
       (doc) =>
         ({
@@ -76,9 +77,8 @@ export async function getCoachCreators(coachId: string): Promise<UserProfile[]> 
 export async function getAllUsers(): Promise<UserProfile[]> {
   try {
     console.log("🔍 [USER_HELPERS] Getting all users");
-    const db = getAdminDb();
-    const q = db.collection("user_profiles").orderBy("displayName", "asc");
-    const querySnapshot = await q.get();
+    const q = query(collection(adminDb, "user_profiles"), orderBy("displayName", "asc"));
+    const querySnapshot = await getDocs(q);
     const users = querySnapshot.docs.map(
       (doc) =>
         ({
