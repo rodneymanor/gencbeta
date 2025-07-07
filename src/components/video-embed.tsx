@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect, memo, useTransition } from "react";
+import React, { useState, useCallback, useEffect, memo, useTransition, useRef } from "react";
 
 import { Play } from "lucide-react";
 
@@ -9,6 +9,15 @@ interface VideoEmbedProps {
   className?: string;
   onPlay?: () => void;
   playing?: boolean;
+}
+
+// Custom hook to get the previous value of a prop or state
+function usePrevious<T>(value: T): T | undefined {
+  const ref = useRef<T>();
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
 }
 
 // Helper function to check if URL is a Bunny.net URL
@@ -37,6 +46,7 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     const [isLoading, setIsLoading] = useState(false);
     const [iframeKey, setIframeKey] = useState(0);
     const [isPending, startTransition] = useTransition();
+    const prevPlaying = usePrevious(playing);
 
     const videoId = url;
 
@@ -50,6 +60,17 @@ export const VideoEmbed = memo<VideoEmbedProps>(
         onPlay?.();
       }
     }, [playing, videoId, onPlay]);
+
+    // Effect to handle pausing the video
+    useEffect(() => {
+      // When the `playing` prop changes from true to false, it means we need to stop the video.
+      // We do this by changing the iframeKey, which forces the iframe to be completely re-rendered.
+      if (prevPlaying === true && playing === false) {
+        console.log("⏸️ [VideoEmbed] Pausing Bunny video (via prop change) by recreating iframe");
+        setIframeKey((prev) => prev + 1);
+        setIsLoading(false); // Ensure loading state is reset
+      }
+    }, [playing, prevPlaying]);
 
     // Check if URL is valid Bunny.net URL
     if (!isBunnyUrl(url)) {
