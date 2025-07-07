@@ -48,22 +48,8 @@ export const VideoEmbed = memo<VideoEmbedProps>(
           setIsLoading(true);
         });
         onPlay?.();
-        setTimeout(() => setIsLoading(false), 500);
       }
     }, [playing, videoId, onPlay]);
-
-    // Effect to handle when the 'playing' prop changes
-    useEffect(() => {
-      if (playing) {
-        console.log("🎬 [VideoEmbed] Starting Bunny video (via prop change):", videoId.substring(0, 50) + "...");
-        setIsLoading(true);
-        setTimeout(() => setIsLoading(false), 500);
-      } else {
-        console.log("⏸️ [VideoEmbed] Pausing Bunny video (via prop change) by recreating iframe");
-        setIframeKey((prev) => prev + 1);
-        setIsLoading(false);
-      }
-    }, [playing, videoId]);
 
     // Check if URL is valid Bunny.net URL
     if (!isBunnyUrl(url)) {
