@@ -30,7 +30,7 @@ const CollectionHeader = ({ title, description }: { title: string; description?:
   return (
     <div className="space-y-1.5">
       <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
-      <p className="text-muted-foreground max-w-2xl">{description || defaultDescription}</p>
+      <p className="text-muted-foreground max-w-2xl">{description ?? defaultDescription}</p>
     </div>
   );
 };
@@ -88,8 +88,8 @@ export default function PageClient({ initialCollections, initialVideos, initialC
   };
 
   return (
-    <div className="relative mx-auto flex max-w-6xl justify-center gap-12 px-4">
-      <div className="max-w-3xl min-w-0 flex-1 space-y-8 md:space-y-10">
+    <div className="mx-auto flex max-w-6xl gap-12 px-4 lg:justify-between">
+      <div className="w-full lg:flex-1 max-w-3xl min-w-0 space-y-8 md:space-y-10">
         <CollectionHeader title={displayTitle} description={displayDescription} />
         {isLoading ? (
           <SkeletonGrid />
