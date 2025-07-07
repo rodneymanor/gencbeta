@@ -240,7 +240,7 @@ export default function NewScriptPage() {
       </div>
 
       {/* Ghost Writer Section - Below Hero */}
-      <div className="mx-auto w-full max-w-7xl px-4 pb-8">
+      <div className="mx-auto w-full max-w-7xl px-4 pt-12 pb-8">
         <div className="bg-sidebar rounded-lg p-4 md:p-8">
           <GhostWriter />
         </div>
