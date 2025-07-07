@@ -16,12 +16,14 @@ import DashboardClientLayout from "../dashboard/dashboard-client-layout";
 export default function ResearchLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <TopBarProvider>
-      <div className="flex h-full">
-        <main className="flex-1 overflow-y-auto">
-          <TopBar />
-          <div className="p-4 sm:p-6">{children}</div>
-        </main>
-      </div>
+      <VideoPlaybackProvider>
+        <div className="flex h-full">
+          <main className="flex-1 overflow-y-auto">
+            <TopBar />
+            <div className="p-4 sm:p-6">{children}</div>
+          </main>
+        </div>
+      </VideoPlaybackProvider>
     </TopBarProvider>
   );
 }
