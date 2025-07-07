@@ -9,7 +9,6 @@ import type { Collection } from "@/lib/collections";
 import { AddVideoDialog } from "./add-video-dialog";
 import type { VideoWithPlayer } from "./collections-helpers";
 import { VideosLoadingSkeleton } from "./loading-skeleton";
-import { processAndAddVideo } from "./simple-video-processing";
 import { VideoCard } from "./video-card";
 
 interface VideoGridProps {
@@ -42,37 +41,9 @@ export const VideoGrid = memo<VideoGridProps>(
   }) => {
     const [reprocessingVideos, setReprocessingVideos] = useState<Set<string>>(new Set());
 
-    const handleReprocessVideo = async (video: VideoWithPlayer) => {
-      if (!video.url || !video.collectionId) {
-        console.error("❌ [REPROCESS] Missing required fields:", { url: video.url, collectionId: video.collectionId });
-        return;
-      }
-
-      setReprocessingVideos((prev) => new Set(prev).add(video.id!));
-
-      try {
-        console.log("🔄 [REPROCESS] Starting reprocess for video:", video.id);
-
-        const result = await processAndAddVideo(video.url, video.collectionId, video.title);
-
-        if (result.success) {
-          console.log("✅ [REPROCESS] Video reprocessed successfully:", result);
-          // Refresh the video list to show updated data
-          onVideoAdded();
-        } else {
-          console.error("❌ [REPROCESS] Failed:", result.error);
-          // TODO: Show error toast to user
-        }
-      } catch (error) {
-        console.error("❌ [REPROCESS] Error:", error);
-        // TODO: Show error toast to user
-      } finally {
-        setReprocessingVideos((prev) => {
-          const next = new Set(prev);
-          next.delete(video.id!);
-          return next;
-        });
-      }
+    const handleReprocessVideo = async () => {
+      // TODO: Re-implement video reprocessing. The required properties `url` and `collectionId` are missing from the `VideoWithPlayer` type in this version of the code.
+      console.log("Reprocessing is currently disabled.");
     };
 
     // Show loading state
@@ -109,7 +80,7 @@ export const VideoGrid = memo<VideoGridProps>(
 
     // Video grid with enhanced styling
     return (
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
         {videos.map((video) => (
           <VideoCard
             key={video.id}

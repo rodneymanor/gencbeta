@@ -5,15 +5,15 @@ import { useState, useEffect, useCallback, useMemo, useTransition, useRef, memo 
 
 import { useSearchParams, useRouter } from "next/navigation";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 import { Badge } from "@/components/ui/badge";
 import { VideoCollectionLoading, PageHeaderLoading } from "@/components/ui/loading-animations";
 import { useAuth } from "@/contexts/auth-context";
-import { useTopBarConfig } from "@/hooks/use-route-topbar";
 import { CollectionsService, type Collection, type Video } from "@/lib/collections";
 import { CollectionsRBACService } from "@/lib/collections-rbac";
 
+import CategoryChooser from "./_components/category-chooser";
 import { CollectionBadgeMenu } from "./_components/collection-badge-menu";
 import { badgeVariants } from "./_components/collections-animations";
 import {
@@ -125,31 +125,31 @@ function CollectionsPageContent() {
   const [deletingVideos, setDeletingVideos] = useState<Set<string>>(new Set());
   const [isPending, startTransition] = useTransition();
 
-  // Simplified cache
   const cacheRef = useRef<SimpleCache>({ data: new Map() });
-
   const previousCollectionRef = useRef<string | null>(null);
 
   const { user, userProfile } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
   const selectedCollectionId = searchParams.get("collection");
-  const setTopBarConfig = useTopBarConfig();
 
-  // Stable references with useCallback to prevent unnecessary re-renders
   const { toggleVideoSelection, selectAllVideos, clearSelection } = useMemo(
     () => createVideoSelectionHandlers(setSelectedVideos, videos),
     [videos],
   );
 
-  // Memoized computed values
   const pageTitle = useMemo(() => getPageTitle(selectedCollectionId, collections), [selectedCollectionId, collections]);
   const pageDescription = useMemo(
     () => getPageDescription(selectedCollectionId, collections),
     [selectedCollectionId, collections],
   );
 
-  // Cache utilities
+  const categoryItems = useMemo(() => {
+    const items = collections.map((c) => ({ id: c.id!, name: c.title }));
+    items.unshift({ id: "all-videos", name: "All Videos" });
+    return items;
+  }, [collections]);
+
   const getCachedVideos = useCallback((collectionId: string | null): VideoWithPlayer[] | null => {
     const key = collectionId ?? "all";
     const cached = cacheRef.current.data.get(key);
@@ -310,18 +310,6 @@ function CollectionsPageContent() {
     }
   }, [user, userProfile, isLoading, loadData]);
 
-  // Update top bar title when collections or selection changes
-  useEffect(() => {
-    if (selectedCollectionId && collections.length > 0) {
-      const collection = collections.find((c) => c.id === selectedCollectionId);
-      if (collection) {
-        setTopBarConfig({ title: collection.title });
-      }
-    } else {
-      setTopBarConfig({ title: "All Videos" });
-    }
-  }, [selectedCollectionId, collections, setTopBarConfig]);
-
   // Video management functions
   const handleVideoAdded = useCallback(async () => {
     // Clear cache and reload
@@ -431,81 +419,60 @@ function CollectionsPageContent() {
 
   return (
     <div className="@container/main">
-      <div className="mx-auto max-w-7xl space-y-8 md:space-y-10">
-        {/* Header Section - Simplified animations */}
-        <section className="space-y-4">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="space-y-2">
-              <h1 className="text-foreground text-3xl font-bold tracking-tight">{pageTitle}</h1>
-              <p className="text-muted-foreground text-lg">{pageDescription}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <ManageModeHeader
-                manageMode={manageMode}
-                selectedVideos={selectedVideos}
-                collections={collections}
-                selectedCollectionId={selectedCollectionId}
-                onManageModeToggle={() => userProfile?.role !== "creator" && setManageMode(true)}
-                onExitManageMode={handleExitManageMode}
-                onBulkDelete={handleBulkDelete}
-                onClearSelection={clearSelection}
-                onSelectAll={selectAllVideos}
-                onVideoAdded={handleVideoAdded}
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* Collection Filter Section */}
-        <section className="space-y-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <CollectionBadge
-              isActive={!selectedCollectionId}
-              onClick={() => handleCollectionChange(null)}
-              videoCount={videos.length}
-              isTransitioning={isTransitioning && !selectedCollectionId}
-              onCollectionDeleted={handleCollectionDeleted}
-            />
-            <AnimatePresence mode="popLayout">
-              {collections.map((collection) => (
-                <CollectionBadge
-                  key={collection.id}
-                  collection={collection}
-                  isActive={selectedCollectionId === collection.id}
-                  onClick={() => handleCollectionChange(collection.id!)}
-                  videoCount={collection.videoCount || 0}
-                  isTransitioning={isTransitioning && selectedCollectionId === collection.id}
-                  onCollectionDeleted={handleCollectionDeleted}
+      <div className="mx-auto flex max-w-7xl gap-8">
+        {/* Main Content */}
+        <div className="flex-1 space-y-8 md:space-y-10">
+          {/* Header Section - Simplified animations */}
+          <section className="space-y-4">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="space-y-2">
+                <h1 className="text-foreground text-3xl font-bold tracking-tight">{pageTitle}</h1>
+                <p className="text-muted-foreground text-lg">{pageDescription}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <ManageModeHeader
+                  manageMode={manageMode}
+                  selectedVideos={selectedVideos}
+                  collections={collections}
+                  selectedCollectionId={selectedCollectionId}
+                  onManageModeToggle={() => userProfile?.role !== "creator" && setManageMode(true)}
+                  onExitManageMode={handleExitManageMode}
+                  onBulkDelete={handleBulkDelete}
+                  onClearSelection={clearSelection}
+                  onSelectAll={selectAllVideos}
+                  onVideoAdded={handleVideoAdded}
                 />
-              ))}
-            </AnimatePresence>
-          </div>
-
-          {/* Transition indicator */}
-          {isTransitioning && (
-            <div className="flex items-center justify-center py-4">
-              <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                <div className="border-primary h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
-                Loading collection...
               </div>
             </div>
-          )}
-        </section>
+          </section>
 
-        {/* Videos Content Section */}
-        <VideoGrid
-          videos={videos}
-          collections={collections}
-          selectedCollectionId={selectedCollectionId}
-          loadingVideos={isTransitioning}
-          isPending={isPending}
-          manageMode={manageMode}
-          selectedVideos={selectedVideos}
-          deletingVideos={deletingVideos}
-          onToggleVideoSelection={toggleVideoSelection}
-          onDeleteVideo={handleDeleteVideo}
-          onVideoAdded={handleVideoAdded}
-        />
+          {/* Videos Content Section */}
+          <VideoGrid
+            videos={videos}
+            collections={collections}
+            selectedCollectionId={selectedCollectionId}
+            loadingVideos={isTransitioning}
+            isPending={isPending}
+            manageMode={manageMode}
+            selectedVideos={selectedVideos}
+            deletingVideos={deletingVideos}
+            onToggleVideoSelection={toggleVideoSelection}
+            onDeleteVideo={handleDeleteVideo}
+            onVideoAdded={handleVideoAdded}
+          />
+        </div>
+
+        {/* Right Sidebar */}
+        <aside className="hidden w-[313px] flex-shrink-0 md:block">
+          <div className="sticky top-4">
+            <CategoryChooser
+              items={categoryItems}
+              selectedId={selectedCollectionId ?? "all-videos"}
+              onSelectionChange={(item) => handleCollectionChange(item.id === "all-videos" ? null : item.id)}
+              label="Collections"
+            />
+          </div>
+        </aside>
       </div>
     </div>
   );
