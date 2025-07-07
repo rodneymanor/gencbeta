@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Bookmark, BookmarkCheck, X, Heart, MessageCircle, Share } from "lucide-react";
+import { Bookmark, BookmarkCheck, X, Heart, MessageCircle, Share, Star } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -10,7 +10,7 @@ import { ContentIdea } from "@/types/ghost-writer";
 
 interface GhostWriterCardProps {
   idea: ContentIdea;
-  onSave?: (ideaId: string) => void;
+  onSave?: (ideaId: string, action: "save" | "dismiss") => void;
   onDismiss?: (ideaId: string) => void;
   onUse?: (idea: ContentIdea) => void;
   isSaved?: boolean;
@@ -20,21 +20,11 @@ interface GhostWriterCardProps {
 export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = false, className }: GhostWriterCardProps) {
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSave = async () => {
+  const handleSaveToggle = async () => {
     if (isLoading || !onSave) return;
     setIsLoading(true);
     try {
-      await onSave(idea.id);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleDismiss = async () => {
-    if (isLoading || !onDismiss) return;
-    setIsLoading(true);
-    try {
-      await onDismiss(idea.id);
+      await onSave(idea.id, isSaved ? "dismiss" : "save");
     } finally {
       setIsLoading(false);
     }
@@ -76,26 +66,14 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
           <Button
             variant="ghost"
             size="sm"
-            className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
+            className={cn("text-muted-foreground hover:text-primary h-8 w-8 p-0", isSaved && "text-primary")}
             onClick={(e) => {
               e.stopPropagation();
-              handleSave();
-            }}
-            disabled={isLoading || isSaved}
-          >
-            {isSaved ? <BookmarkCheck className="text-primary h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-muted-foreground hover:text-destructive h-8 w-8 p-0"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDismiss();
+              handleSaveToggle();
             }}
             disabled={isLoading}
           >
-            <X className="h-4 w-4" />
+            {isSaved ? <Star fill="currentColor" className="h-4 w-4" /> : <Star className="h-4 w-4" />}
           </Button>
         </div>
       </div>

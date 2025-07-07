@@ -253,7 +253,6 @@ export function GhostWriter() {
               key={idea.id}
               idea={idea}
               onSave={handleIdeaAction}
-              onDismiss={handleIdeaAction}
               onUse={handleUseIdea}
               isSaved={data.userData?.savedIdeas.includes(idea.id)}
             />
