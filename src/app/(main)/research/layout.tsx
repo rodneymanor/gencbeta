@@ -15,15 +15,22 @@ import DashboardClientLayout from "../dashboard/dashboard-client-layout";
 
 export default function ResearchLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <TopBarProvider>
-      <VideoPlaybackProvider>
-        <div className="flex h-full">
-          <main className="flex-1 overflow-y-auto">
-            <TopBar />
-            <div className="p-4 sm:p-6">{children}</div>
-          </main>
-        </div>
-      </VideoPlaybackProvider>
-    </TopBarProvider>
+    <SidebarProvider defaultOpen={false}>
+      <SmartSidebarProvider>
+        <TopBarProvider>
+          <VideoPlaybackProvider>
+            <div className="flex h-screen w-full">
+              <AppSidebar variant="inset" collapsible="icon" />
+              <SidebarInset className="flex w-screen flex-1">
+                <RouteAwareTopBar />
+                <DashboardClientLayout>
+                  <div className="hide-scrollbar flex-1 overflow-auto p-4 md:p-6">{children}</div>
+                </DashboardClientLayout>
+              </SidebarInset>
+            </div>
+          </VideoPlaybackProvider>
+        </TopBarProvider>
+      </SmartSidebarProvider>
+    </SidebarProvider>
   );
 }
