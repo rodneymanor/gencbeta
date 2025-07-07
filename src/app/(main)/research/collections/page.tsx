@@ -431,7 +431,7 @@ function CollectionsPageContent() {
         <header className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">{pageTitle}</h1>
-            <p className="text-muted-foreground">{pageDescription}</p>
+            <p className="text-muted-foreground max-w-prose">{pageDescription}</p>
           </div>
           <div className="flex items-center gap-2">
             <ManageModeHeader
