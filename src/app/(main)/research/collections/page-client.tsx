@@ -57,13 +57,13 @@ export default function PageClient({ initialCollections, initialVideos, initialC
 
   return (
     <div className="relative mx-auto flex max-w-6xl gap-6">
+      <div className="min-w-0 flex-1 space-y-8 md:space-y-10">
+        {isLoading ? <SkeletonGrid /> : <VideoGrid videos={videos ?? []} />}
+      </div>
       <div className="hidden w-[313px] flex-shrink-0 md:block">
         <div className="sticky top-4">
           <Sidebar collections={collections} selected={current} onChange={handleCollectionChange} />
         </div>
-      </div>
-      <div className="min-w-0 flex-1 space-y-8 md:space-y-10">
-        {isLoading ? <SkeletonGrid /> : <VideoGrid videos={videos ?? []} />}
       </div>
     </div>
   );
