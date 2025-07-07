@@ -1,5 +1,4 @@
-import Image from "next/image";
-
+import { VideoEmbed } from "@/components/video-embed";
 import type { Video } from "@/lib/collections";
 
 export default function VideoGrid({ videos }: { videos: Video[] }) {
@@ -14,18 +13,12 @@ export default function VideoGrid({ videos }: { videos: Video[] }) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       {videos.map((v) => (
-        <div key={v.id} className="bg-muted group relative aspect-video overflow-hidden rounded-lg">
-          {v.thumbnailUrl ? (
-            <Image
-              src={v.thumbnailUrl}
-              alt={v.title}
-              width={320}
-              height={180}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-            />
+        <div key={v.id} className="bg-muted group relative overflow-hidden rounded-lg">
+          {v.iframeUrl ? (
+            <VideoEmbed url={v.iframeUrl} className="h-full w-full" />
           ) : (
-            <div className="flex h-full w-full items-center justify-center">
-              <p className="text-muted-foreground text-sm">No thumbnail</p>
+            <div className="flex aspect-video w-full items-center justify-center">
+              <p className="text-muted-foreground text-sm">No video available</p>
             </div>
           )}
           <div className="absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/60 to-transparent p-4">

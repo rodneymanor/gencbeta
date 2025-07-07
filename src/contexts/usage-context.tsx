@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, ReactNode, useRef } from "react";
+import { createContext, useContext, useState, useCallback, ReactNode, useRef, useMemo } from "react";
+
 import { useAuth } from "@/contexts/auth-context";
 import { UsageStats } from "@/types/usage-tracking";
 
@@ -36,11 +37,8 @@ export function UsageProvider({ children }: UsageProviderProps) {
     setError(null);
 
     try {
-      const response = await fetch("/api/usage/stats", {
-        headers: {
-          "Authorization": `Bearer ${await user.getIdToken()}`,
-        },
-      });
+      // Use session-based authentication instead of Firebase Client SDK
+      const response = await fetch("/api/usage/stats");
 
       if (!response.ok) {
         throw new Error("Failed to fetch usage stats");
@@ -48,9 +46,9 @@ export function UsageProvider({ children }: UsageProviderProps) {
 
       const data = await response.json();
       console.log("📊 [UsageContext] Updated usage stats:", data);
-      
+
       // Validate that we have the required fields
-      if (data && typeof data.creditsUsed === 'number' && typeof data.creditsLimit === 'number') {
+      if (data && typeof data.creditsUsed === "number" && typeof data.creditsLimit === "number") {
         setUsageStats(data);
         setError(null);
       } else {
@@ -77,19 +75,18 @@ export function UsageProvider({ children }: UsageProviderProps) {
     }, 1000); // 1 second delay to allow backend to process
   }, [refreshUsageStats]);
 
-  const value: UsageContextType = {
-    usageStats,
-    loading,
-    error,
-    refreshUsageStats,
-    triggerUsageUpdate,
-  };
-
-  return (
-    <UsageContext.Provider value={value}>
-      {children}
-    </UsageContext.Provider>
+  const value = useMemo<UsageContextType>(
+    () => ({
+      usageStats,
+      loading,
+      error,
+      refreshUsageStats,
+      triggerUsageUpdate,
+    }),
+    [usageStats, loading, error, refreshUsageStats, triggerUsageUpdate],
   );
+
+  return <UsageContext.Provider value={value}>{children}</UsageContext.Provider>;
 }
 
 export function useUsage() {
@@ -98,4 +95,4 @@ export function useUsage() {
     throw new Error("useUsage must be used within a UsageProvider");
   }
   return context;
-} 
+}

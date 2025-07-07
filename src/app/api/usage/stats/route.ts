@@ -1,20 +1,20 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-import { authenticateApiKey } from "@/lib/api-key-auth";
 import { CreditsService } from "@/lib/credits-service";
 import { getAdminDb } from "@/lib/firebase-admin";
+import { getCurrentUser } from "@/lib/server-auth";
 
-export async function GET(request: NextRequest): Promise<NextResponse> {
+export async function GET(): Promise<NextResponse> {
   try {
     console.log("📊 [Usage Stats] Fetching user usage statistics...");
 
-    // Authenticate user
-    const authResult = await authenticateApiKey(request);
-    if (authResult instanceof NextResponse) {
-      return authResult;
+    // Authenticate user using session
+    const user = await getCurrentUser();
+    if (!user) {
+      console.log("❌ [Usage Stats] No authenticated user found");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { user } = authResult;
     const userId = user.uid;
 
     // Get user's account level from their profile
