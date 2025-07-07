@@ -71,8 +71,8 @@ export default function PageClient({ initialCollections, initialVideos, initialC
   };
 
   return (
-    <div className="relative mx-auto flex max-w-7xl gap-8 justify-center px-4">
-      <div className="min-w-0 flex-1 max-w-4xl space-y-8 md:space-y-10">
+    <div className="relative mx-auto flex max-w-6xl justify-center gap-12 px-4">
+      <div className="max-w-3xl min-w-0 flex-1 space-y-8 md:space-y-10">
         {isLoading ? <SkeletonGrid /> : <VideoGrid videos={videos ?? []} />}
       </div>
       <div className="hidden w-[280px] flex-shrink-0 lg:block">
