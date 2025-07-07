@@ -196,8 +196,8 @@ export function InputModeToggle({
         <div className="space-y-4">
           <div className="relative">
             <ShineBorder
-              shineColor={["#2d93ad", "#412722", "#87CEEB"]}
-              duration={4}
+              shineColor={["hsl(var(--primary)/0.3)", "hsl(var(--muted-foreground)/0.2)", "hsl(var(--accent)/0.25)"]}
+              duration={6}
               borderWidth={1}
               className="rounded-2xl"
             >
@@ -240,8 +240,8 @@ export function InputModeToggle({
         <div className="space-y-4">
           <div className="relative">
             <ShineBorder
-              shineColor={["#2d93ad", "#412722", "#87CEEB"]}
-              duration={4}
+              shineColor={["hsl(var(--primary)/0.3)", "hsl(var(--muted-foreground)/0.2)", "hsl(var(--accent)/0.25)"]}
+              duration={6}
               borderWidth={1}
               className="rounded-2xl"
             >
