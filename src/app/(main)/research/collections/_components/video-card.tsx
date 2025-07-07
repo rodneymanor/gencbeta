@@ -112,11 +112,13 @@ export const VideoCard = memo<VideoCardProps>(
             {/* Hover Actions */}
           </div>
 
-          {/* Action Buttons */}
-          <ActionButtons
-            onShowInsights={() => setShowInsightsModal(true)}
-            onShowRepurpose={() => setShowRepurposeModal(true)}
-          />
+          {/* Action Buttons with Padding */}
+          <div className="p-4">
+            <ActionButtons
+              onShowInsights={() => setShowInsightsModal(true)}
+              onShowRepurpose={() => setShowRepurposeModal(true)}
+            />
+          </div>
         </Card>
 
         {/* Coming Soon Modals */}
