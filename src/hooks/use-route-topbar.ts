@@ -8,9 +8,9 @@ import { useTopBar } from "@/contexts/topbar-context";
 import { getRouteConfig, resolveTitle } from "@/lib/topbar-config";
 
 export function useRouteTopBar() {
+  const { setConfig } = useTopBar();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { setConfig, resetConfig } = useTopBar();
 
   useEffect(() => {
     // Get route configuration
@@ -27,9 +27,11 @@ export function useRouteTopBar() {
 
     // Cleanup function to reset on unmount
     return () => {
-      resetConfig();
+      setConfig({
+        title: routeConfig.title,
+      });
     };
-  }, [pathname, searchParams, setConfig, resetConfig]);
+  }, [pathname, searchParams, setConfig]);
 }
 
 // Alternative hook for manual configuration

@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback, useMemo, useTransition, useRef, memo 
 import { useSearchParams, useRouter } from "next/navigation";
 
 import { motion } from "framer-motion";
+import { Folder } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { VideoCollectionLoading, PageHeaderLoading } from "@/components/ui/loading-animations";
@@ -320,11 +321,26 @@ function CollectionsPageContent() {
     }
   }, [user, userProfile, isLoading, loadData]);
 
+  // Set top bar config on mount
   useEffect(() => {
-    setTopBarConfig({ title: "Collections" });
+    setTopBarConfig({
+      title: (
+        <div className="flex items-center gap-2">
+          <Folder className="h-5 w-5" />
+          <span>Collections</span>
+        </div>
+      ),
+    });
   }, [setTopBarConfig]);
 
   // Video management functions
+  const handleDataRefresh = useCallback(() => {
+    console.log("🔄 [Collections] Refreshing data...");
+    // Clear cache and reload
+    cacheRef.current.data.clear();
+    loadData();
+  }, [loadData]);
+
   const handleVideoAdded = useCallback(async () => {
     // Clear cache and reload
     cacheRef.current.data.clear();
