@@ -233,7 +233,7 @@ async function discoverAndProcessVideos(jobData: any) {
   });
 
   // Call the existing process-creator API to discover videos
-  const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
+  const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${process.env.PORT || 3001}`;
   
   const discoverResponse = await fetch(`${baseUrl}/api/process-creator`, {
     method: "POST",
@@ -301,7 +301,7 @@ async function processVideoToCollection(collectionId: string, video: any, index:
     console.log(`🎬 [BACKGROUND] Processing video ${index + 1}: ${video.id}`);
 
     // Use the existing video processing pipeline
-    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
+    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${process.env.PORT || 3001}`;
     
     const response = await fetch(`${baseUrl}/api/add-video-to-collection`, {
       method: "POST",

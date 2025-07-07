@@ -44,22 +44,36 @@ export interface ContentMetadata {
   hashtags: string[];
 }
 
+export interface VideoMetrics {
+  views: number;
+  likes: number;
+  comments: number;
+  shares: number;
+  saves: number;
+}
+
 export interface Video {
-  id?: string;
-  originalUrl: string; // The original TikTok/Instagram URL
-  iframeUrl?: string; // The Bunny.net iframe URL for playback
-  platform: string;
-  thumbnailUrl: string;
+  id: string;
+  originalUrl: string;
   title: string;
-  author: string;
-  transcript: string;
-  components: VideoComponents;
-  contentMetadata: ContentMetadata;
-  visualContext: string;
-  insights: VideoInsights;
-  addedAt: string;
-  fileSize: number;
-  duration: number;
+  platform: string;
+  iframeUrl?: string;
+  directUrl?: string;
+  guid?: string;
+  thumbnailUrl?: string;
+  metrics?: VideoMetrics;
+  metadata?: any;
+  transcriptionStatus: "pending" | "completed" | "failed";
+  transcription?: string;
+  userId: string;
+  collectionId: string;
+  addedAt: any;
+  insights?: VideoInsights;
+  components?: VideoComponents;
+  contentMetadata?: ContentMetadata;
+  visualContext?: string;
+  author?: any;
+  duration?: number;
 }
 
 export interface Collection {

@@ -64,7 +64,7 @@ function getBaseUrl(request: NextRequest): string {
   }
 
   // Fallback to default
-  return "http://localhost:3000";
+  return process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${process.env.PORT || 3001}`;
 }
 
 async function callDownloaderService(baseUrl: string, url: string) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 
 import { ClipboardDetectionDialog } from "@/components/clipboard-detection-dialog";
 import { useAppState } from "@/contexts/app-state-context";
@@ -54,10 +54,12 @@ export function ClipboardDetectionProvider({ children }: ClipboardDetectionProvi
     },
   );
 
-  // Mark as initialized after first mount
-  if (!!user && !hasInitializedRef.current) {
-    hasInitializedRef.current = true;
-  }
+  // Mark as initialized after first mount - use useEffect to ensure this happens after render
+  React.useEffect(() => {
+    if (!!user && !hasInitializedRef.current) {
+      hasInitializedRef.current = true;
+    }
+  }, [user]);
 
   const handleCloseDialog = () => {
     setShowDialog(false);

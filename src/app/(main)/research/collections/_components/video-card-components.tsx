@@ -25,6 +25,7 @@ import {
 import { auth } from "@/lib/firebase";
 
 import type { VideoWithPlayer } from "./collections-helpers";
+import { VideoInsightsDashboard } from "./video-insights-dashboard";
 
 // Legacy video type for backward compatibility
 type LegacyVideo = VideoWithPlayer & {
@@ -197,7 +198,7 @@ export const HoverActions = ({ showActions, onDelete }: { showActions: boolean; 
   );
 };
 
-export const ActionButtons = ({ video, onShowInsights }: { video: VideoWithPlayer; onShowInsights: () => void }) => {
+export const ActionButtons = ({ video }: { video: VideoWithPlayer }) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -233,15 +234,16 @@ export const ActionButtons = ({ video, onShowInsights }: { video: VideoWithPlaye
   return (
     <>
       <div className="flex items-center justify-center gap-2">
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={onShowInsights}
-          className="border-border/60 hover:bg-accent/50 h-8 rounded-md px-3 text-xs shadow-sm transition-all duration-200 hover:shadow-md"
-        >
-          <TrendingUp className="mr-1.5 h-3.5 w-3.5" />
-          Insights
-        </Button>
+        <VideoInsightsDashboard video={video}>
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-border/60 hover:bg-accent/50 h-8 rounded-md px-3 text-xs shadow-sm transition-all duration-200 hover:shadow-md"
+          >
+            <TrendingUp className="mr-1.5 h-3.5 w-3.5" />
+            Insights
+          </Button>
+        </VideoInsightsDashboard>
         <Button
           size="sm"
           variant="outline"

@@ -153,7 +153,7 @@ function getBaseUrl(request: NextRequest): string {
     return `https://${process.env.VERCEL_URL}`;
   }
   const host = request.headers.get("host");
-  return host ? `http://${host}` : "http://localhost:3000";
+  return host ? `http://${host}` : `http://localhost:${process.env.PORT || 3001}`;
 }
 
 async function downloadVideo(baseUrl: string, url: string) {

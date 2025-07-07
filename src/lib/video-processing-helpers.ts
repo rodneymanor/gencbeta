@@ -89,7 +89,7 @@ export async function transcribeVideoData(
 
     console.log("🎬 [DOWNLOAD] Transcribing video file...");
     // Use localhost for server-side transcription calls
-    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
+    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${process.env.PORT || 3001}`;
     const transcriptionResult = await transcribeVideoFile(file, baseUrl);
 
     return transcriptionResult;

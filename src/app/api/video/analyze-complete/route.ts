@@ -294,7 +294,7 @@ async function callMetadataAnalysisService(
 
 async function callVisualAnalysisService(videoData: ArrayBuffer): Promise<string | null> {
   try {
-    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
+    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${process.env.PORT || 3001}`;
 
     const formData = new FormData();
     const blob = new Blob([videoData], { type: "video/mp4" });

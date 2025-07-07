@@ -9,7 +9,7 @@ const https = require('https');
 const http = require('http');
 
 // Configuration
-const BASE_URL = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
+const BASE_URL = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${process.env.PORT || 3001}`;
 const FIREBASE_ID_TOKEN = process.env.FIREBASE_ID_TOKEN; // You'll need to set this
 
 console.log('🧪 Testing API Key Authentication System');
