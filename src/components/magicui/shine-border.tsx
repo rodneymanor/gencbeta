@@ -61,12 +61,6 @@ export function ShineBorder({
           transition: `opacity ${duration * 0.1}s ease-in-out, --shine-deg ${duration}s linear`,
         }}
       />
-      <div
-        className="bg-background absolute inset-[var(--border-width)] rounded-[inherit]"
-        style={{
-          borderRadius: "inherit",
-        }}
-      />
       {children}
     </div>
   );
