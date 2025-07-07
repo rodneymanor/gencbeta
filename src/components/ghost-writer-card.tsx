@@ -36,6 +36,21 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
     }
   };
 
+  // Helper to remove descriptive labels from AI output
+  const cleanContent = (raw: string): string => {
+    if (!raw) return "";
+
+    // Define regex to remove leading labels like "Hook:", "Bridge:", "Golden Nugget:", "WTA:", "Idea 1:" etc.
+    const labelPattern = /^\s*(hook|bridge|golden[\s-]?nugget|wta|idea)\s*\d*\s*[:\-–]?\s*/i;
+
+    // Split into lines and clean each line
+    return raw
+      .split(/\n+/)
+      .map((line) => line.replace(labelPattern, "").trim())
+      .filter((line) => line.length > 0)
+      .join("\n");
+  };
+
   // Generate mock engagement metrics for visual appeal
   const engagement = {
     likes: Math.floor(Math.random() * 2000) + 500,
@@ -81,7 +96,7 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
       {/* Script content */}
       <div className="py-3">
         <div className="text-foreground line-clamp-6 text-sm leading-relaxed whitespace-pre-wrap">
-          {(idea as ContentIdea & { script?: string }).script ?? idea.hook}
+          {cleanContent((idea as ContentIdea & { script?: string }).script ?? idea.hook)}
         </div>
       </div>
     </div>
