@@ -29,9 +29,15 @@ interface EnhancedGhostWriterResponse {
 }
 
 const createLegacyFallbackResponse = async (request: NextRequest): Promise<NextResponse<EnhancedGhostWriterResponse>> => {
+  // Clone headers to plain object to avoid issues with reusing the same Headers instance
+  const forwardHeaders: Record<string, string> = {};
+  request.headers.forEach((value, key) => {
+    forwardHeaders[key] = value;
+  });
+
   const legacyResponse = await fetch(new URL("/api/ghost-writer/ideas", request.url), {
     method: "GET",
-    headers: request.headers,
+    headers: forwardHeaders,
   });
 
   if (legacyResponse.ok) {

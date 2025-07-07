@@ -48,19 +48,29 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       // Get user's brand profile
       const brandProfile = await getBrandProfileForUser(userId);
       
-      if (!brandProfile) {
-        return NextResponse.json(
-          { 
-            error: "Brand profile not found. Please complete your brand profile first.",
-            needsBrandProfile: true 
-          },
-          { status: 400 }
-        );
+      let effectiveBrandProfile = brandProfile;
+
+      if (!effectiveBrandProfile) {
+        console.log("⚠️ [GhostWriter] Brand profile missing – using default template");
+
+        effectiveBrandProfile = {
+          businessProfession: "Content Creator",
+          brandPersonality: "Helpful and engaging",
+          universalProblem: "Struggling to come up with engaging content ideas",
+          initialHurdle: "Generating the first batch of ideas",
+          persistentStruggle: "Maintaining consistency in posting",
+          visibleTriumph: "Audience growth and engagement",
+          ultimateTransformation: "Becoming a recognised authority in their niche",
+          contentPillars: [],
+          targetAudience: "General social media audience",
+          brandVoice: "Friendly",
+          industry: "Content Creation",
+        };
       }
 
       // Generate new ideas
-      console.log(`🎨 [GhostWriter] Generating ${generateMore ? "additional" : "new"} ideas with brand profile:`, JSON.stringify(brandProfile, null, 2));
-      const newIdeas = await GhostWriterService.generateIdeasForUser(userId, brandProfile, currentCycle.id);
+      console.log(`🎨 [GhostWriter] Generating ${generateMore ? "additional" : "new"} ideas with brand profile:`, JSON.stringify(effectiveBrandProfile, null, 2));
+      const newIdeas = await GhostWriterService.generateIdeasForUser(userId, effectiveBrandProfile, currentCycle.id);
       
       // If generating more, combine with existing ideas
       if (generateMore) {
