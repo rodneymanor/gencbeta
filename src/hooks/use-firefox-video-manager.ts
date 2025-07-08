@@ -16,7 +16,7 @@ export const useFirefoxVideoManager = ({ videoId, isPlaying, onVideoStop }: Fire
     isFirefox.current = navigator.userAgent.includes('Firefox');
   }, []);
 
-  // Function to pause all other videos on the page
+  // Function to pause all other videos on the page - SIMPLIFIED VERSION
   const pauseAllOtherVideos = useCallback((currentVideoId: string) => {
     if (!isFirefox.current) return;
 
@@ -31,7 +31,7 @@ export const useFirefoxVideoManager = ({ videoId, isPlaying, onVideoStop }: Fire
       }
     });
 
-    // Method 2: Send pause messages to all iframes
+    // Method 2: Send pause messages to all iframes - ONLY THIS METHOD
     const allIframes = document.querySelectorAll('iframe[data-video-id]');
     allIframes.forEach((iframe) => {
       const iframeVideoId = iframe.getAttribute('data-video-id');
@@ -45,19 +45,8 @@ export const useFirefoxVideoManager = ({ videoId, isPlaying, onVideoStop }: Fire
       }
     });
 
-    // Method 3: Force pause via iframe src manipulation (nuclear option)
-    allIframes.forEach((iframe) => {
-      const iframeVideoId = iframe.getAttribute('data-video-id');
-      if (iframeVideoId && iframeVideoId !== currentVideoId) {
-        const currentSrc = iframe.src;
-        if (currentSrc && !currentSrc.includes('autoplay=false')) {
-          console.log("🦊 [Firefox Video Manager] Force reloading iframe without autoplay:", iframeVideoId);
-          // Temporarily change src to force reload without autoplay
-          const newSrc = currentSrc.replace(/autoplay=true/g, 'autoplay=false');
-          iframe.src = newSrc;
-        }
-      }
-    });
+    // REMOVED: Method 3 - Force pause via iframe src manipulation (this was causing the problem)
+    // The iframe reloading was actually causing videos to start playing instead of stopping them
   }, []);
 
   // Function to handle video play events
@@ -124,7 +113,7 @@ export const useFirefoxVideoManager = ({ videoId, isPlaying, onVideoStop }: Fire
     }
   }, [isPlaying, videoId, pauseAllOtherVideos]);
 
-  // Function to force stop all videos (for manual control)
+  // Function to force stop all videos (for manual control) - SIMPLIFIED
   const forceStopAllVideos = useCallback(() => {
     if (!isFirefox.current) return;
 
@@ -138,7 +127,7 @@ export const useFirefoxVideoManager = ({ videoId, isPlaying, onVideoStop }: Fire
       }
     });
 
-    // Send stop messages to all iframes
+    // Send stop messages to all iframes - ONLY postMessage, no reloading
     const allIframes = document.querySelectorAll('iframe[data-video-id]');
     allIframes.forEach((iframe) => {
       try {

@@ -59,21 +59,33 @@ export const VideoGrid = ({ collectionId, collection, videos }: VideoGridProps) 
 
     console.log("🎬 [VideoGrid] Playing video:", videoId);
 
+    // CRITICAL: Stop all other videos before starting new one
+    if (currentlyPlayingId && currentlyPlayingId !== videoId) {
+      console.log("🛑 [VideoGrid] Stopping currently playing video:", currentlyPlayingId);
+      // Force stop the current video first
+      setCurrentlyPlayingId(null);
+      
+      // Add a small delay to ensure the current video stops
+      setTimeout(() => {
+        setCurrentlyPlayingId(videoId);
+        lastPlayTime.current = Date.now();
+      }, 100);
+    } else {
+      setCurrentlyPlayingId(videoId);
+      lastPlayTime.current = now;
+    }
+
     // For Firefox, force stop all other videos first
     if (isFirefox) {
       console.log("🦊 [VideoGrid] Firefox detected - forcing stop of all other videos");
       forceStopAllVideos();
     }
 
-    // Set currently playing video
-    setCurrentlyPlayingId(videoId);
-    lastPlayTime.current = now;
-
     // Set cooldown
     cooldownRef.current = setTimeout(() => {
       console.log("✅ [VideoGrid] Cooldown expired");
     }, 3500);
-  }, [isFirefox, forceStopAllVideos]);
+  }, [isFirefox, forceStopAllVideos, currentlyPlayingId]);
 
   // Cleanup cooldown on unmount
   useEffect(() => {

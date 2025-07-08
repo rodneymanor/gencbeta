@@ -193,14 +193,13 @@ export const VideoEmbed = memo<VideoEmbedProps>(
 
     // Firefox-aware iframe parameters
     const getIframeParams = useCallback((playing: boolean) => {
-      const baseParams = { metrics: 'false' };
-
       if (playing) {
-        return { ...baseParams, autoplay: 'true', muted: 'true' };
+        return { metrics: 'false', autoplay: 'true', muted: 'true' };
       }
-
-      // For Firefox, don't add preload parameter at all
-      return isFirefox ? baseParams : { ...baseParams, preload: 'true' };
+      // For non-playing videos, explicitly set autoplay=false and preload=none for Firefox
+      return isFirefox 
+        ? { metrics: 'false', autoplay: 'false', preload: 'none' }
+        : { metrics: 'false', autoplay: 'false', preload: 'true' };
     }, [isFirefox]);
 
     // Dynamic iframe src based on playing state
