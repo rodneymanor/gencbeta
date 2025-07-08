@@ -1,13 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 
-function getBaseUrl(): string {
+// Cache so helpers can reuse base URL without passing it around
+let cachedBaseUrl: string | undefined;
+
+function getBaseUrl(request?: NextRequest): string {
+  // Prefer explicit base URL derived from the current request
+  if (request) {
+    const host = request.headers.get("host") ?? "localhost:3000";
+    const protocol = host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : "https";
+    cachedBaseUrl = `${protocol}://${host}`;
+    return cachedBaseUrl;
+  }
+
+  // Use cached value if POST handler already initialised it
+  if (cachedBaseUrl) return cachedBaseUrl;
+
+  // Fallbacks for edge/runtime environments
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}`;
   }
 
-  // In development, check for common development ports
-  // This is a fallback since we don't have the request object here
-  return "http://localhost:3002"; // Use the port your dev server is running on
+  return "http://localhost:3000";
 }
 
 interface AnalysisResult {
@@ -30,6 +43,9 @@ interface AnalysisResult {
 
 export async function POST(request: NextRequest) {
   console.log("🎯 [COMPLETE_ANALYSIS] Starting comprehensive video analysis...");
+
+  // Prime and cache base URL so helper calls use the correct host
+  void getBaseUrl(request);
 
   try {
     const { videoData, videoUrl, fileName, fileSize } = await processRequestInput(request);
@@ -294,7 +310,7 @@ async function callMetadataAnalysisService(
 
 async function callVisualAnalysisService(videoData: ArrayBuffer): Promise<string | null> {
   try {
-    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${process.env.PORT || 3001}`;
+    const baseUrl = getBaseUrl();
 
     const formData = new FormData();
     const blob = new Blob([videoData], { type: "video/mp4" });
