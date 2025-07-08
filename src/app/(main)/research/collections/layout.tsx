@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 
-import { CollectionsSidebar } from "./_components/collections-sidebar";
 import { FirefoxVideoManager } from "@/components/firefox-video-manager";
 
 export default function CollectionsLayout({
@@ -10,7 +9,6 @@ export default function CollectionsLayout({
 }) {
   return (
     <div className="flex h-full">
-      <CollectionsSidebar />
       <div className="flex-1 overflow-hidden">
         <Suspense fallback={<div>Loading...</div>}>
           {children}
