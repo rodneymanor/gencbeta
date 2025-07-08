@@ -99,6 +99,22 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
           {cleanContent((idea as ContentIdea & { script?: string }).script ?? idea.hook)}
         </div>
       </div>
+
+      {/* Placeholder engagement metrics */}
+      <div className="flex items-center justify-between pt-2 text-xs text-muted-foreground">
+        <div className="flex items-center gap-1">
+          <Heart className="h-3 w-3" />
+          <span>{engagement.likes.toLocaleString()}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <MessageCircle className="h-3 w-3" />
+          <span>{engagement.comments.toLocaleString()}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <Share className="h-3 w-3" />
+          <span>{engagement.shares.toLocaleString()}</span>
+        </div>
+      </div>
     </div>
   );
 }
