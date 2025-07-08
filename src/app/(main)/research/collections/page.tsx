@@ -424,7 +424,7 @@ function CollectionsPageContent() {
   }
 
   return (
-    <div className="flex h-full p-4 md:p-6">
+    <div className="flex h-full max-w-7xl mx-auto p-4 md:p-6 justify-center gap-8">
       {/* Left side: Main content (Video Grid) */}
       <div className="flex-1">
         <header className="mb-6 flex items-center justify-between">
@@ -466,7 +466,7 @@ function CollectionsPageContent() {
       </div>
 
       {/* Right side: Category Chooser */}
-      <div className="ml-8 w-64">
+      <div className="w-64">
         <CategoryChooser
           items={categoryItems}
           selectedId={selectedCollectionId ?? "all-videos"}

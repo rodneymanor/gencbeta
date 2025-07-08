@@ -42,6 +42,7 @@
     "firebase": "^11.9.1",
     "firebase-admin": "^13.4.0",
     "framer-motion": "^12.19.2",
+    "hls.js": "^1.6.7",
     "initials": "^3.1.2",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.453.0",

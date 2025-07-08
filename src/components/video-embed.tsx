@@ -3,6 +3,7 @@
 import React, { useState, useCallback, useEffect, memo } from "react";
 
 import { Play } from "lucide-react";
+import { HlsPlayer } from "./hls-player";
 
 import { useVideoPlaybackData, useVideoPlaybackAPI } from "@/contexts/video-playback-context";
 
@@ -66,15 +67,11 @@ export const VideoEmbed = memo<VideoEmbedProps>(
         <div className="relative h-0 w-full pb-[177.78%]">
           {/* PRODUCTION SOLUTION: Conditional iframe rendering */}
           {isPlaying ? (
-            // Playing iframe with autoplay
-            <iframe
-              key={`playing-${iframeKey}`}
-              src={`${url}${url.includes("?") ? "&" : "?"}autoplay=true&metrics=false`}
+            <HlsPlayer
+              key={`hls-${iframeKey}`}
+              src={deriveHlsUrl(url)}
+              autoPlay
               className="absolute inset-0 h-full w-full"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              onLoad={() => setIsLoading(false)}
             />
           ) : (
             // Thumbnail iframe without autoplay
@@ -114,3 +111,21 @@ export const VideoEmbed = memo<VideoEmbedProps>(
 );
 
 VideoEmbed.displayName = "VideoEmbed";
+
+function deriveHlsUrl(embedUrl: string): string {
+  // Convert Bunny iframe embed URL to direct .m3u8 playlist
+  if (embedUrl.endsWith(".m3u8")) return embedUrl;
+
+  try {
+    const u = new URL(embedUrl);
+    const segments = u.pathname.split("/");
+    const embedIdx = segments.findIndex((s) => s === "embed");
+    if (embedIdx !== -1 && segments.length > embedIdx + 2) {
+      const videoId = segments[embedIdx + 2];
+      return `https://vz-${videoId}.b-cdn.net/manifest.m3u8`;
+    }
+  } catch {
+    /* invalid URL */
+  }
+  return embedUrl;
+}
