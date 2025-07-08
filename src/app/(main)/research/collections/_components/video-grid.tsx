@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 
 import { useFirefoxVideoManager } from "@/hooks/use-firefox-video-manager";
 
@@ -21,8 +21,10 @@ export const VideoGrid = ({ collectionId, collection, videos }: VideoGridProps) 
   const [isManageMode, setIsManageMode] = useState(false);
   const [selectedVideos, setSelectedVideos] = useState<Set<string>>(new Set());
   const [deletingVideos, setDeletingVideos] = useState<Set<string>>(new Set());
+  const [visibleVideos, setVisibleVideos] = useState<Set<string>>(new Set());
   const lastPlayTime = useRef<number>(0);
   const cooldownRef = useRef<NodeJS.Timeout | null>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   // Firefox video manager for handling Firefox-specific issues
   const { forceStopAllVideos } = useFirefoxVideoManager({
@@ -83,16 +85,63 @@ export const VideoGrid = ({ collectionId, collection, videos }: VideoGridProps) 
   }, []);
 
   // Convert videos to VideoWithPlayer format
-  const videosWithPlayer: VideoWithPlayer[] = (videos ?? []).map((video: Video) => ({
-    ...video,
-    id: video.id ?? "",
-    title: video.title ?? "Untitled Video",
-    platform: video.platform ?? "Unknown",
-    thumbnailUrl: video.thumbnailUrl ?? "",
-    metrics: video.metrics ?? { likes: 0, comments: 0, shares: 0, views: 0, saves: 0 },
-    metadata: video.metadata ?? { originalUrl: "", platform: "", downloadedAt: "" },
-    addedAt: video.addedAt ?? new Date().toISOString(),
-  }));
+  const videosWithPlayer: VideoWithPlayer[] = useMemo(() => {
+    return (videos ?? []).map((video: Video) => ({
+      ...video,
+      id: video.id ?? "",
+      title: video.title ?? "Untitled Video",
+      platform: video.platform ?? "Unknown",
+      thumbnailUrl: video.thumbnailUrl ?? "",
+      metrics: video.metrics ?? { likes: 0, comments: 0, shares: 0, views: 0, saves: 0 },
+      metadata: video.metadata ?? { originalUrl: "", platform: "", downloadedAt: "" },
+      addedAt: video.addedAt ?? new Date().toISOString(),
+    }));
+  }, [videos]);
+
+  // Lazy loading setup
+  useEffect(() => {
+    if (!observerRef.current) {
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            const videoId = entry.target.getAttribute('data-video-id');
+            if (videoId) {
+              if (entry.isIntersecting) {
+                setVisibleVideos(prev => new Set([...prev, videoId]));
+              } else {
+                // Keep video visible once it's been loaded to prevent flickering
+                // setVisibleVideos(prev => {
+                //   const newSet = new Set(prev);
+                //   newSet.delete(videoId);
+                //   return newSet;
+                // });
+              }
+            }
+          });
+        },
+        {
+          rootMargin: '100px', // Start loading when 100px away
+          threshold: 0.1,
+        }
+      );
+    }
+
+    // Observe all video cards
+    const videoCards = document.querySelectorAll('[data-video-id]');
+    videoCards.forEach((card) => {
+      observerRef.current?.observe(card);
+    });
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [videosWithPlayer]);
+
+  // Show first 6 videos immediately, then lazy load the rest
+  const initialVisibleCount = isFirefox ? 3 : 6; // Show fewer videos initially for Firefox
+  const visibleVideosList = videosWithPlayer.slice(0, initialVisibleCount);
 
   if (!videosWithPlayer || videosWithPlayer.length === 0) {
     return (
@@ -107,29 +156,30 @@ export const VideoGrid = ({ collectionId, collection, videos }: VideoGridProps) 
 
   return (
     <div className="grid grid-cols-1 gap-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
-      {videosWithPlayer.map((video) => (
-        <VideoCard
-          key={video.id}
-          video={video}
-          isManageMode={isManageMode}
-          isSelected={selectedVideos.has(video.id)}
-          isDeleting={deletingVideos.has(video.id)}
-          onToggleSelection={() => {
-            const newSelected = new Set(selectedVideos);
-            if (newSelected.has(video.id)) {
-              newSelected.delete(video.id);
-            } else {
-              newSelected.add(video.id);
-            }
-            setSelectedVideos(newSelected);
-          }}
-          onDelete={() => {
-            console.log("🗑️ [VideoGrid] Delete video:", video.id);
-            // TODO: Implement actual deletion
-          }}
-          isPlaying={currentlyPlayingId === video.id}
-          onPlay={handleVideoPlay}
-        />
+      {videosWithPlayer.map((video, index) => (
+        <div key={video.id} data-video-id={video.id}>
+          <VideoCard
+            video={video}
+            isManageMode={isManageMode}
+            isSelected={selectedVideos.has(video.id)}
+            isDeleting={deletingVideos.has(video.id)}
+            onToggleSelection={() => {
+              const newSelected = new Set(selectedVideos);
+              if (newSelected.has(video.id)) {
+                newSelected.delete(video.id);
+              } else {
+                newSelected.add(video.id);
+              }
+              setSelectedVideos(newSelected);
+            }}
+            onDelete={() => {
+              console.log("🗑️ [VideoGrid] Delete video:", video.id);
+              // TODO: Implement actual deletion
+            }}
+            isPlaying={currentlyPlayingId === video.id}
+            onPlay={handleVideoPlay}
+          />
+        </div>
       ))}
     </div>
   );

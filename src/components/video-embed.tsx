@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect, memo, useRef } from "react";
+import React, { useState, useCallback, useEffect, memo, useRef, useMemo } from "react";
 
 import { Play, AlertTriangle, RefreshCw } from "lucide-react";
 
@@ -35,8 +35,13 @@ const isBunnyUrl = (url: string) => {
   return url && (url.includes("iframe.mediadelivery.net") || url.includes("bunnycdn.com") || url.includes("b-cdn.net"));
 };
 
-// Helper function to create preload iframe
-const createPreloadIframe = (url: string, videoId: string) => {
+// Helper function to create preload iframe (disabled for Firefox)
+const createPreloadIframe = (url: string, videoId: string, isFirefox: boolean) => {
+  if (isFirefox) {
+    console.log("🦊 [VideoEmbed] Skipping preload for Firefox");
+    return null;
+  }
+
   const preloadFrame = document.createElement("iframe");
   preloadFrame.src = buildIframeSrc(url, { metrics: 'false', preload: 'true', autoplay: 'false' });
   preloadFrame.style.display = "none";
@@ -126,6 +131,10 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     // Use external isPlaying state if provided, otherwise use internal state
     const isCurrentlyPlaying = externalIsPlaying ?? isPlaying;
 
+    // Firefox detection - disable preloading for Firefox
+    const isFirefox = useMemo(() => navigator.userAgent.includes('Firefox'), []);
+    const effectivePreload = isFirefox ? false : preload;
+
     // Enhanced HLS monitoring and recovery
     const { attemptRecovery, recoveryAttempts, maxAttempts } = useHLSRecovery({
       videoRef: iframeRef,
@@ -139,7 +148,7 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     });
 
     // Firefox video manager for handling Firefox-specific issues
-    const { forceStopAllVideos, isFirefox } = useFirefoxVideoManager({
+    const { forceStopAllVideos } = useFirefoxVideoManager({
       videoId,
       isPlaying: isCurrentlyPlaying,
       onVideoStop: () => {
@@ -182,34 +191,61 @@ export const VideoEmbed = memo<VideoEmbedProps>(
       onBufferIssue: handleBufferIssue
     });
 
-    // Preload iframe for better performance
-    useEffect(() => {
-      if (preload && !isPreloaded && videoId) {
-        console.log("🔄 [VideoEmbed] Preloading iframe for:", videoId.substring(0, 50) + "...");
+    // Firefox-aware iframe parameters
+    const getIframeParams = useCallback((playing: boolean) => {
+      const baseParams = { metrics: 'false' };
 
-        // Create a hidden iframe for preloading
-        const preloadFrame = createPreloadIframe(url, videoId);
-        document.body.appendChild(preloadFrame);
-
-        // Set a timeout to remove the preload iframe after a delay
-        preloadTimeoutRef.current = setTimeout(() => {
-          if (preloadFrame.parentElement) {
-            preloadFrame.parentElement.removeChild(preloadFrame);
-          }
-          setIsPreloaded(true);
-          console.log("✅ [VideoEmbed] Preload completed for:", videoId.substring(0, 50) + "...");
-        }, 10000); // Remove after 10 seconds
-
-        return () => {
-          if (preloadTimeoutRef.current) {
-            clearTimeout(preloadTimeoutRef.current);
-          }
-          if (preloadFrame.parentElement) {
-            preloadFrame.parentElement.removeChild(preloadFrame);
-          }
-        };
+      if (playing) {
+        return { ...baseParams, autoplay: 'true', muted: 'true' };
       }
-    }, [preload, isPreloaded, videoId, url]);
+
+      // For Firefox, don't add preload parameter at all
+      return isFirefox ? baseParams : { ...baseParams, preload: 'true' };
+    }, [isFirefox]);
+
+    // Dynamic iframe src based on playing state
+    const iframeSrc = useMemo(() => {
+      return buildIframeSrc(url, getIframeParams(isCurrentlyPlaying));
+    }, [url, isCurrentlyPlaying, getIframeParams]);
+
+    // Helper function to handle preload logic
+    const handlePreloadLogic = useCallback(() => {
+      if (!effectivePreload || isPreloaded || !videoId) return;
+
+      console.log("🔄 [VideoEmbed] Preloading iframe for:", videoId.substring(0, 50) + "...");
+
+      // Create a hidden iframe for preloading (skip for Firefox)
+      const preloadFrame = createPreloadIframe(url, videoId, isFirefox);
+      if (!preloadFrame) {
+        setIsPreloaded(true);
+        return;
+      }
+
+      document.body.appendChild(preloadFrame);
+
+      // Set a timeout to remove the preload iframe after a delay
+      preloadTimeoutRef.current = setTimeout(() => {
+        if (preloadFrame.parentElement) {
+          preloadFrame.parentElement.removeChild(preloadFrame);
+        }
+        setIsPreloaded(true);
+        console.log("✅ [VideoEmbed] Preload completed for:", videoId.substring(0, 50) + "...");
+      }, 10000); // Remove after 10 seconds
+
+      return () => {
+        if (preloadTimeoutRef.current) {
+          clearTimeout(preloadTimeoutRef.current);
+        }
+        if (preloadFrame.parentElement) {
+          preloadFrame.parentElement.removeChild(preloadFrame);
+        }
+      };
+    }, [effectivePreload, isPreloaded, videoId, url, isFirefox]);
+
+    // Preload iframe for better performance (disabled for Firefox)
+    useEffect(() => {
+      return handlePreloadLogic();
+    }, [handlePreloadLogic]);
 
     // Handle video play
     const handlePlay = useCallback(async () => {
@@ -257,29 +293,18 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     return (
       <div className={`group relative w-full overflow-hidden rounded-lg bg-black ${className}`}>
         <div className="relative h-0 w-full pb-[177.78%]">
-          {/* PRODUCTION SOLUTION: Conditional iframe rendering */}
-          {isCurrentlyPlaying ? (
-            // Playing iframe with autoplay
-            <BunnyIframe
-              iframeKey={`playing-${iframeKey}`}
-              videoId={videoId}
-              src={buildIframeSrc(url, { autoplay: 'true', preload: 'true', muted: 'true', metrics: 'false' })}
-              className="absolute inset-0 h-full w-full"
-            />
-          ) : (
-            // Thumbnail iframe without autoplay
-            <iframe
-              key={`thumbnail-${iframeKey}`}
-              ref={iframeRef}
-              src={buildIframeSrc(url, { metrics: 'false', preload: 'true' })}
-              data-video-id={videoId}
-              className="absolute inset-0 h-full w-full"
-              frameBorder="0"
-              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              loading="lazy"
-            />
-          )}
+          {/* Single iframe with dynamic src instead of conditional rendering */}
+          <iframe
+            key={`video-${iframeKey}`}
+            ref={iframeRef}
+            src={iframeSrc}
+            data-video-id={videoId}
+            className="absolute inset-0 h-full w-full"
+            frameBorder="0"
+            allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            loading="lazy"
+          />
 
           {/* Click overlay for play button */}
           {!isCurrentlyPlaying && !hasError && (
@@ -303,8 +328,8 @@ export const VideoEmbed = memo<VideoEmbedProps>(
           {/* Error overlay with recovery option */}
           {hasError && renderErrorOverlay(isRecovering, handleHLSRecovery)}
 
-          {/* Preload indicator */}
-          {preload && isPreloaded && !isCurrentlyPlaying && !hasError && (
+          {/* Preload indicator (only show for non-Firefox) */}
+          {effectivePreload && isPreloaded && !isCurrentlyPlaying && !hasError && (
             <div className="absolute top-2 right-2 z-10">
               <div className="rounded-full bg-green-500/80 px-2 py-1 text-xs text-white">
                 Ready

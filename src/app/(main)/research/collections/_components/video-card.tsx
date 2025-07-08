@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, memo, useCallback } from "react";
+import { useState, memo, useCallback, useMemo } from "react";
 
 import { Clock, TrendingUp, Zap } from "lucide-react";
 
@@ -92,12 +92,17 @@ export const VideoCard = memo<VideoCardProps>(
     const [isHovered, setIsHovered] = useState(false);
     const [showRepurposeModal, setShowRepurposeModal] = useState(false);
 
+    // Firefox detection - disable preloading for Firefox
+    const isFirefox = useMemo(() => navigator.userAgent.includes('Firefox'), []);
+    const effectivePreload = isFirefox ? false : true;
+
     // Debug: Log when VideoCard component renders
     console.log("🔍 [VideoCard] Component rendered with video:", video);
     console.log("🔍 [VideoCard] Video ID:", video.id);
     console.log("🔍 [VideoCard] Video title:", video.title);
     console.log("🔍 [VideoCard] Video metrics:", video.metrics);
     console.log("🔍 [VideoCard] Video metadata:", video.metadata);
+    console.log("🦊 [VideoCard] Firefox detected:", isFirefox, "Preload enabled:", effectivePreload);
 
     const baseClassName = `w-[240px] p-3 rounded-xl group relative transition-all duration-200 hover:shadow-lg border-border/50 hover:border-border ${className}`;
     const cardClassName = buildCardClassName(baseClassName, isSelected, isDeleting, hasHLSIssue);
@@ -132,7 +137,7 @@ export const VideoCard = memo<VideoCardProps>(
               videoId={video.id}
               isPlaying={isPlaying}
               onPlay={handlePlay}
-              preload={true}
+              preload={effectivePreload}
               className="absolute inset-0 h-full w-full"
             />
 
@@ -203,11 +208,11 @@ export const VideoCard = memo<VideoCardProps>(
           </div>
         </Card>
 
-        {/* Coming Soon Modal for Repurpose */}
+        {/* Repurpose Modal */}
         <ComingSoonModal
           isOpen={showRepurposeModal}
           onClose={() => setShowRepurposeModal(false)}
-          title="Content Repurposing"
+          title="Video Repurposing"
         />
       </>
     );
@@ -215,14 +220,12 @@ export const VideoCard = memo<VideoCardProps>(
   (prevProps, nextProps) => {
     return (
       prevProps.video.id === nextProps.video.id &&
-      prevProps.isManageMode === nextProps.isManageMode &&
+      prevProps.isPlaying === nextProps.isPlaying &&
       prevProps.isSelected === nextProps.isSelected &&
       prevProps.isDeleting === nextProps.isDeleting &&
-      prevProps.isReprocessing === nextProps.isReprocessing &&
-      prevProps.isPlaying === nextProps.isPlaying &&
       prevProps.hasHLSIssue === nextProps.hasHLSIssue
     );
-  },
+  }
 );
 
 VideoCard.displayName = "VideoCard";
