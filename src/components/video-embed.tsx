@@ -17,7 +17,7 @@ export const VideoEmbed = memo<VideoEmbedProps>(
   ({ url, className = "" }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [iframeKey, setIframeKey] = useState(0); // Force iframe recreation
+    const [iframeKey] = useState(0); // stable key, no recreation
 
     const { currentlyPlayingId } = useVideoPlaybackData();
     const { setCurrentlyPlaying } = useVideoPlaybackAPI();
@@ -41,8 +41,7 @@ export const VideoEmbed = memo<VideoEmbedProps>(
         console.log("⏸️ [VideoEmbed] Force stopping Bunny video by recreating iframe");
         setIsPlaying(false);
         setIsLoading(false);
-        // Force iframe to be completely destroyed and recreated
-        setIframeKey((prev) => prev + 1);
+        // Graceful pause without destroying iframe – let PlayerJS handle pause internally
       }
     }, [currentlyPlayingId, videoId, isPlaying]);
 
