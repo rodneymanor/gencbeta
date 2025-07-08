@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
 
 import { AppSidebar } from "@/app/(main)/dashboard/_components/sidebar/app-sidebar";
 import { SmartSidebarProvider } from "@/components/providers/smart-sidebar-provider";
@@ -22,7 +22,9 @@ export default function ResearchLayout({ children }: Readonly<{ children: ReactN
             <div className="flex h-screen w-full">
               <AppSidebar variant="inset" collapsible="icon" />
               <SidebarInset className="flex w-screen flex-1">
-                <RouteAwareTopBar />
+                <Suspense fallback={<TopBar />}>
+                  <RouteAwareTopBar />
+                </Suspense>
                 <DashboardClientLayout>
                   <div className="hide-scrollbar flex-1 overflow-auto">{children}</div>
                 </DashboardClientLayout>

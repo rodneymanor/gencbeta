@@ -270,7 +270,7 @@ export function GhostWriter() {
         </h2>
         <p className="text-muted-foreground mt-2 text-base">AI-powered content ideas based on your brand profile</p>
         <div className="border-muted/20 bg-muted/10 text-muted-foreground mt-4 inline-flex items-center rounded-full border px-2 py-0.5 font-sans text-xs transition duration-300 ease-out">
-          New posts coming in: <span className="font-mono">{formatTimeUntilRefresh(data.cycle.expiresAt)}</span>
+          New posts coming in: <span className="font-mono"> {formatTimeUntilRefresh(data.cycle.expiresAt)}</span>
         </div>
       </div>
       <div>

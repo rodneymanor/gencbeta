@@ -37,20 +37,57 @@ export default function BunnyIframe({ src, className = "", iframeKey, videoId }:
         }
       });
 
-      // Handle buffer stalls by nudging 0.25s forward
+      // Enhanced buffer stall recovery
       playerInstance.on("bufferstalled", () => {
-        console.warn("🐇 [BunnyIframe] stall detected – skipping 0.25 s");
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        playerInstance.getCurrentTime((t: number) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-          playerInstance.setCurrentTime(t + 0.25);
-          // ensure still playing
-          try {
-            playerInstance.play();
-          } catch {
-            /* ignored */
-          }
+        console.warn("🐇 [BunnyIframe] Enhanced stall recovery initiated");
+
+        playerInstance.getCurrentTime((currentTime: number) => {
+          const strategies = [
+            () => playerInstance.setCurrentTime(currentTime + 0.1),
+            () => playerInstance.setCurrentTime(currentTime + 0.5),
+            () => playerInstance.setCurrentTime(Math.max(0, currentTime - 0.2)),
+            () => {
+              const iframe = iframeRef.current;
+              if (iframe?.src) {
+                iframe.src = iframe.src + (iframe.src.includes("?") ? "&" : "?") + "_refresh=" + Date.now();
+              }
+            },
+          ];
+
+          strategies.forEach((fn, idx) => {
+            setTimeout(() => {
+              try {
+                fn();
+                void playerInstance.play().catch(() => {});
+              } catch {/* ignore */}
+            }, idx * 500);
+          });
         });
+      });
+
+      // Robust error listener
+      playerInstance.on("error", (error: any) => {
+        console.error("🚨 [BunnyIframe] Player error:", error);
+
+        if (error?.name === "MediaError" || error?.message?.includes("buffer")) {
+          setTimeout(() => {
+            try {
+              playerInstance.getCurrentTime((currentTime: number) => {
+                if (error?.message?.includes("hole")) {
+                  playerInstance.setCurrentTime(currentTime + 1.0);
+                } else {
+                  playerInstance.setCurrentTime(Math.max(0, currentTime - 0.5));
+                }
+                void playerInstance.play();
+              });
+            } catch {
+              const iframe = iframeRef.current;
+              if (iframe?.src) {
+                iframe.src = iframe.src.replace(/[?&]_retry=\d+/, "") + (iframe.src.includes("?") ? "&" : "?") + "_retry=" + Date.now();
+              }
+            }
+          }, 500);
+        }
       });
     }
 
