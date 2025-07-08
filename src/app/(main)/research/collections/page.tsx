@@ -1,5 +1,8 @@
 "use client";
 
+// Prevent Next.js from attempting to statically prerender a client-side page
+export const dynamic = "force-dynamic";
+
 import { useState, useEffect, useCallback, useMemo, useTransition, useRef, memo, Suspense } from "react";
 
 import { useSearchParams, useRouter } from "next/navigation";
