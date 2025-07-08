@@ -25,13 +25,19 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     const videoId = url;
 
     // Handle video play
-    const handlePlay = useCallback(() => {
+    const handlePlay = useCallback(async () => {
       if (!isPlaying && videoId) {
-        console.log("🎬 [VideoEmbed] Starting Bunny video:", videoId.substring(0, 50) + "...");
+        console.log("🎬 [VideoEmbed] Starting smooth transition:", videoId.substring(0, 50) + "...");
         setIsLoading(true);
-        setIsPlaying(true);
-        void setCurrentlyPlaying(videoId);
-        setTimeout(() => setIsLoading(false), 500);
+
+        // Pause others but keep their iframes intact via context
+        await setCurrentlyPlaying(videoId);
+
+        // Small delay to allow buffer to build before showing controls
+        setTimeout(() => {
+          setIsPlaying(true);
+          setIsLoading(false);
+        }, 800);
       }
     }, [isPlaying, videoId, setCurrentlyPlaying]);
 
