@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 
 import { TrendingUp, Sparkles, FolderPlus, Zap } from "lucide-react";
 
@@ -59,7 +59,7 @@ const mockInspirations = [
 // a page that relies on client-side hooks like useSearchParams.
 export const dynamic = "force-dynamic";
 
-export default function AIIdeasPage() {
+function IdeasContent() {
   const [categoryFilter, setCategoryFilter] = useState("all");
 
   const filteredInspirations = mockInspirations.filter((inspiration) => {
@@ -127,5 +127,13 @@ export default function AIIdeasPage() {
         ))}
       </div>
     </div>
+  );
+}
+
+export default function AIIdeasPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-center text-muted-foreground">Loading...</div>}>
+      <IdeasContent />
+    </Suspense>
   );
 }
