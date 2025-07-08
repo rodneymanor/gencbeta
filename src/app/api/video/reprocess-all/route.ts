@@ -90,7 +90,10 @@ export async function POST(request: NextRequest) {
     // Process videos sequentially to avoid overwhelming services
     for (const video of videos) {
       const videoId = video.id;
-      const videoUrl = video.cdnUrl ?? video.url;
+      const videoUrl =
+        // Prefer the original source URL for best analysis fidelity
+        // Fallback to current canonical fields we store
+        video.originalUrl ?? video.url ?? video.directUrl ?? video.cdnUrl ?? undefined;
 
       if (!videoUrl) {
         console.warn(`⚠️ [REPROCESS_ALL] Skipping video ${videoId}: No URL found.`);
