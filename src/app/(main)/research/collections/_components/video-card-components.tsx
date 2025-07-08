@@ -249,7 +249,7 @@ export const ActionButtons = ({ video }: { video: VideoWithPlayer }) => {
   useEffect(() => {
     if (video.iframeUrl && !video.isPlaying) {
       const preloadFrame = document.createElement("iframe");
-      preloadFrame.src = buildOptimizedIframeUrl(video.iframeUrl);
+      preloadFrame.src = getValidIframeUrl(video.iframeUrl);
       preloadFrame.style.display = "none";
       document.body.appendChild(preloadFrame);
       const timer = window.setTimeout(() => {
@@ -377,12 +377,17 @@ export const getVideoUrl = (video: LegacyVideo): string => {
   return "";
 };
 
-// Build optimized iframe url with extra params
-const buildOptimizedIframeUrl = (base: string): string => {
+// Build iframe URL with only Bunny-supported query parameters
+const getValidIframeUrl = (base: string): string => {
   const url = new URL(base);
-  url.searchParams.set("preload", "auto");
-  url.searchParams.set("buffering", "aggressive");
-  url.searchParams.set("retry", "3");
-  url.searchParams.set("timeout", "10000");
+  // Supported parameters per Bunny Stream docs
+  url.searchParams.set("autoplay", "false");
+  url.searchParams.set("preload", "true");
+  url.searchParams.set("muted", "false");
+  url.searchParams.set("responsive", "true");
+  // Keep metrics off to disable RUM probes if not already present
+  if (!url.searchParams.has("metrics")) {
+    url.searchParams.set("metrics", "false");
+  }
   return url.toString();
 };

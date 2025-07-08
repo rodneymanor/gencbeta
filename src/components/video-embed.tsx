@@ -76,14 +76,14 @@ export const VideoEmbed = memo<VideoEmbedProps>(
             <BunnyIframe
               iframeKey={`playing-${iframeKey}`}
               videoId={videoId}
-              src={`${url}${url.includes("?") ? "&" : "?"}autoplay=true&metrics=false`}
+              src={`${url}${url.includes("?") ? "&" : "?"}autoplay=true&preload=true&muted=true&metrics=false`}
               className="absolute inset-0 h-full w-full"
             />
           ) : (
             // Thumbnail iframe without autoplay
             <iframe
               key={`thumbnail-${iframeKey}`}
-              src={`${url}${url.includes("?") ? "&" : "?"}metrics=false`}
+              src={`${url}${url.includes("?") ? "&" : "?"}metrics=false&preload=true`}
               data-video-id={videoId}
               className="absolute inset-0 h-full w-full"
               frameBorder="0"
