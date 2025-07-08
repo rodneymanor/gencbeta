@@ -37,6 +37,8 @@ interface VideoCardProps {
   className?: string;
   isPlaying?: boolean;
   onPlay?: (videoId: string) => void;
+  hasHLSIssue?: boolean;
+  onHLSIssue?: (issueType: string) => void;
 }
 
 const DurationBadge = ({ duration }: { duration?: number }) => {
@@ -55,6 +57,22 @@ const DurationBadge = ({ duration }: { duration?: number }) => {
   );
 };
 
+// Helper function to build card className
+const buildCardClassName = (
+  baseClassName: string,
+  isSelected: boolean,
+  isDeleting: boolean,
+  hasHLSIssue: boolean
+) => {
+  const classes = [
+    baseClassName,
+    isSelected ? "ring-2 ring-primary shadow-md" : "",
+    isDeleting ? "opacity-50 pointer-events-none" : "",
+    hasHLSIssue ? "ring-2 ring-yellow-400" : "",
+  ];
+  return classes.filter(Boolean).join(" ");
+};
+
 export const VideoCard = memo<VideoCardProps>(
   ({
     video,
@@ -68,6 +86,8 @@ export const VideoCard = memo<VideoCardProps>(
     className = "",
     isPlaying = false,
     onPlay,
+    hasHLSIssue = false,
+    onHLSIssue,
   }) => {
     const [isHovered, setIsHovered] = useState(false);
     const [showRepurposeModal, setShowRepurposeModal] = useState(false);
@@ -79,9 +99,8 @@ export const VideoCard = memo<VideoCardProps>(
     console.log("🔍 [VideoCard] Video metrics:", video.metrics);
     console.log("🔍 [VideoCard] Video metadata:", video.metadata);
 
-    const cardClassName = `w-[240px] p-3 rounded-xl group relative transition-all duration-200 hover:shadow-lg border-border/50 hover:border-border ${className} ${
-      isSelected ? "ring-2 ring-primary shadow-md" : ""
-    } ${isDeleting ? "opacity-50 pointer-events-none" : ""}`;
+    const baseClassName = `w-[240px] p-3 rounded-xl group relative transition-all duration-200 hover:shadow-lg border-border/50 hover:border-border ${className}`;
+    const cardClassName = buildCardClassName(baseClassName, isSelected, isDeleting, hasHLSIssue);
 
     const showActions = (isHovered || isManageMode) && !isDeleting;
 
@@ -90,6 +109,10 @@ export const VideoCard = memo<VideoCardProps>(
         onPlay(video.id);
       }
     }, [onPlay, video.id]);
+
+    const handleHLSIssue = useCallback((issueType: string) => {
+      onHLSIssue?.(issueType);
+    }, [onHLSIssue]);
 
     return (
       <>
@@ -108,12 +131,13 @@ export const VideoCard = memo<VideoCardProps>(
 
           {/* Video Content */}
           <div className="bg-muted/30 relative aspect-[9/16] overflow-hidden rounded-lg">
-            <VideoEmbed 
-              url={getVideoUrl(video as LegacyVideo)} 
+            <VideoEmbed
+              url={getVideoUrl(video as LegacyVideo)}
               videoId={video.id}
               isPlaying={isPlaying}
               onPlay={handlePlay}
-              className="absolute inset-0 h-full w-full" 
+              preload={true}
+              className="absolute inset-0 h-full w-full"
             />
 
             {/* Reprocess Video Overlay for Legacy Videos */}
@@ -137,6 +161,15 @@ export const VideoCard = memo<VideoCardProps>(
               <div className="absolute top-2 left-2 z-10">
                 <Badge className="bg-primary text-primary-foreground text-xs">
                   Playing
+                </Badge>
+              </div>
+            )}
+
+            {/* HLS Issue Indicator */}
+            {hasHLSIssue && (
+              <div className="absolute top-2 right-2 z-10">
+                <Badge className="bg-yellow-500 text-white text-xs">
+                  HLS Issue
                 </Badge>
               </div>
             )}
@@ -190,7 +223,8 @@ export const VideoCard = memo<VideoCardProps>(
       prevProps.isSelected === nextProps.isSelected &&
       prevProps.isDeleting === nextProps.isDeleting &&
       prevProps.isReprocessing === nextProps.isReprocessing &&
-      prevProps.isPlaying === nextProps.isPlaying
+      prevProps.isPlaying === nextProps.isPlaying &&
+      prevProps.hasHLSIssue === nextProps.hasHLSIssue
     );
   },
 );

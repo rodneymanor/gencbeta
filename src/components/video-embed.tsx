@@ -1,11 +1,15 @@
 "use client";
 
-import React, { useState, useCallback, useEffect, memo } from "react";
+import React, { useState, useCallback, useEffect, memo, useRef } from "react";
 
-import { Play } from "lucide-react";
-import BunnyIframe from "./bunny-iframe";
+import { Play, AlertTriangle, RefreshCw } from "lucide-react";
 
 import { useVideoPlaybackData, useVideoPlaybackAPI } from "@/contexts/video-playback-context";
+import { useHLSBufferMonitor } from "@/hooks/use-hls-buffer-monitor";
+import { useHLSRecovery } from "@/hooks/use-hls-recovery";
+import { usePreemptiveBufferManagement } from "@/hooks/use-preemptive-buffer-management";
+
+import BunnyIframe from "./bunny-iframe";
 
 interface VideoEmbedProps {
   url: string;
@@ -13,29 +17,157 @@ interface VideoEmbedProps {
   videoId?: string; // Add videoId prop for better control
   isPlaying?: boolean; // Add isPlaying prop for external control
   onPlay?: () => void; // Add onPlay callback for external control
+  preload?: boolean; // Add preload prop for better performance
 }
+
+// Helper function to build iframe src URL
+const buildIframeSrc = (baseUrl: string, params: Record<string, string>) => {
+  const separator = baseUrl.includes("?") ? "&" : "?";
+  const paramString = Object.entries(params)
+    .map(([key, value]) => `${key}=${value}`)
+    .join("&");
+  return `${baseUrl}${separator}${paramString}`;
+};
+
+// Helper function to check if URL is from Bunny
+const isBunnyUrl = (url: string) => {
+  return url && (url.includes("iframe.mediadelivery.net") || url.includes("bunnycdn.com") || url.includes("b-cdn.net"));
+};
+
+// Helper function to create preload iframe
+const createPreloadIframe = (url: string, videoId: string) => {
+  const preloadFrame = document.createElement("iframe");
+  preloadFrame.src = buildIframeSrc(url, { metrics: 'false', preload: 'true', autoplay: 'false' });
+  preloadFrame.style.display = "none";
+  preloadFrame.setAttribute("data-preload", "true");
+  preloadFrame.setAttribute("data-video-id", videoId);
+  return preloadFrame;
+};
+
+// Helper function to render error overlay
+const renderErrorOverlay = (isRecovering: boolean, onRetry: () => void) => (
+  <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/60">
+    <div className="text-center text-white">
+      <AlertTriangle className="mx-auto h-8 w-8 mb-2" />
+      <div className="text-sm mb-3">Video playback error</div>
+      <button
+        onClick={onRetry}
+        disabled={isRecovering}
+        className="flex items-center gap-2 mx-auto px-4 py-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors"
+      >
+        {isRecovering ? (
+          <RefreshCw className="h-4 w-4 animate-spin" />
+        ) : (
+          <RefreshCw className="h-4 w-4" />
+        )}
+        {isRecovering ? "Recovering..." : "Retry"}
+      </button>
+    </div>
+  </div>
+);
 
 // BUNNY.NET ONLY VIDEO EMBED - Rejects all non-Bunny URLs
 export const VideoEmbed = memo<VideoEmbedProps>(
-  ({ url, className = "", videoId: externalVideoId, isPlaying: externalIsPlaying, onPlay }) => {
+  ({ url, className = "", videoId: externalVideoId, isPlaying: externalIsPlaying, onPlay, preload = false }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [iframeKey] = useState(0); // stable key, no recreation
+    const [iframeKey, setIframeKey] = useState(0); // Make key mutable for recovery
+    const [isPreloaded, setIsPreloaded] = useState(false);
+    const [hasError, setHasError] = useState(false);
+    const [isRecovering, setIsRecovering] = useState(false);
+    const preloadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const iframeRef = useRef<HTMLIFrameElement>(null);
 
     const { currentlyPlayingId } = useVideoPlaybackData();
     const { setCurrentlyPlaying } = useVideoPlaybackAPI();
 
     // Use external videoId if provided, otherwise use URL
-    const videoId = externalVideoId || url;
-    
+    const videoId = externalVideoId ?? url;
+
     // Use external isPlaying state if provided, otherwise use internal state
-    const isCurrentlyPlaying = externalIsPlaying !== undefined ? externalIsPlaying : isPlaying;
+    const isCurrentlyPlaying = externalIsPlaying ?? isPlaying;
+
+    // Enhanced HLS monitoring and recovery
+    const { attemptRecovery, recoveryAttempts, maxAttempts } = useHLSRecovery({
+      videoRef: iframeRef,
+      videoId,
+      url
+    });
+
+    const { bufferHealth } = usePreemptiveBufferManagement({
+      videoRef: iframeRef,
+      isPlaying: isCurrentlyPlaying
+    });
+
+    // Handle HLS recovery by recreating iframe
+    const handleHLSRecovery = useCallback(() => {
+      console.log("🔄 [VideoEmbed] Force recreating iframe for HLS recovery");
+      setIframeKey(prev => prev + 1);
+      setHasError(false);
+      setIsRecovering(false);
+    }, []);
+
+    // Enhanced buffer issue handler
+    const handleBufferIssue = useCallback((issueType: string) => {
+      console.warn(`🚨 [VideoEmbed] Buffer issue detected: ${issueType}`);
+      setHasError(true);
+
+      if (recoveryAttempts >= maxAttempts) {
+        console.error("❌ [VideoEmbed] Max recovery attempts reached");
+        return;
+      }
+
+      setIsRecovering(true);
+      attemptRecovery(issueType).then(result => {
+        if (result === 'recreate_iframe') {
+          handleHLSRecovery();
+        }
+        setIsRecovering(false);
+      });
+    }, [recoveryAttempts, maxAttempts, attemptRecovery, handleHLSRecovery]);
+
+    // Use the enhanced monitoring hook
+    useHLSBufferMonitor({
+      videoRef: iframeRef,
+      isPlaying: isCurrentlyPlaying,
+      onBufferIssue: handleBufferIssue
+    });
+
+    // Preload iframe for better performance
+    useEffect(() => {
+      if (preload && !isPreloaded && videoId) {
+        console.log("🔄 [VideoEmbed] Preloading iframe for:", videoId.substring(0, 50) + "...");
+
+        // Create a hidden iframe for preloading
+        const preloadFrame = createPreloadIframe(url, videoId);
+        document.body.appendChild(preloadFrame);
+
+        // Set a timeout to remove the preload iframe after a delay
+        preloadTimeoutRef.current = setTimeout(() => {
+          if (preloadFrame.parentElement) {
+            preloadFrame.parentElement.removeChild(preloadFrame);
+          }
+          setIsPreloaded(true);
+          console.log("✅ [VideoEmbed] Preload completed for:", videoId.substring(0, 50) + "...");
+        }, 10000); // Remove after 10 seconds
+
+        return () => {
+          if (preloadTimeoutRef.current) {
+            clearTimeout(preloadTimeoutRef.current);
+          }
+          if (preloadFrame.parentElement) {
+            preloadFrame.parentElement.removeChild(preloadFrame);
+          }
+        };
+      }
+    }, [preload, isPreloaded, videoId, url]);
 
     // Handle video play
     const handlePlay = useCallback(async () => {
       if (!isCurrentlyPlaying && videoId) {
         console.log("🎬 [VideoEmbed] Starting smooth transition:", videoId.substring(0, 50) + "...");
         setIsLoading(true);
+        setHasError(false);
 
         // Call external onPlay callback if provided
         if (onPlay) {
@@ -68,10 +200,7 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     }, [currentlyPlayingId, videoId, isPlaying, externalIsPlaying]);
 
     // CRITICAL: Only allow Bunny.net iframe URLs - REJECT EVERYTHING ELSE
-    const isBunnyUrl =
-      url && (url.includes("iframe.mediadelivery.net") || url.includes("bunnycdn.com") || url.includes("b-cdn.net"));
-
-    if (!isBunnyUrl) {
+    if (!isBunnyUrl(url)) {
       console.warn("🚫 [VideoEmbed] Rejected non-Bunny URL:", url);
       return (
         <div className={`flex items-center justify-center bg-gray-900 text-white ${className}`}>
@@ -92,24 +221,26 @@ export const VideoEmbed = memo<VideoEmbedProps>(
             <BunnyIframe
               iframeKey={`playing-${iframeKey}`}
               videoId={videoId}
-              src={`${url}${url.includes("?") ? "&" : "?"}autoplay=true&preload=true&muted=true&metrics=false`}
+              src={buildIframeSrc(url, { autoplay: 'true', preload: 'true', muted: 'true', metrics: 'false' })}
               className="absolute inset-0 h-full w-full"
             />
           ) : (
             // Thumbnail iframe without autoplay
             <iframe
               key={`thumbnail-${iframeKey}`}
-              src={`${url}${url.includes("?") ? "&" : "?"}metrics=false&preload=true`}
+              ref={iframeRef}
+              src={buildIframeSrc(url, { metrics: 'false', preload: 'true' })}
               data-video-id={videoId}
               className="absolute inset-0 h-full w-full"
               frameBorder="0"
               allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
+              loading="lazy"
             />
           )}
 
           {/* Click overlay for play button */}
-          {!isCurrentlyPlaying && (
+          {!isCurrentlyPlaying && !hasError && (
             <div
               className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center bg-black/20 transition-colors hover:bg-black/30"
               onClick={handlePlay}
@@ -126,14 +257,38 @@ export const VideoEmbed = memo<VideoEmbedProps>(
               <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent" />
             </div>
           )}
+
+          {/* Error overlay with recovery option */}
+          {hasError && renderErrorOverlay(isRecovering, handleHLSRecovery)}
+
+          {/* Preload indicator */}
+          {preload && isPreloaded && !isCurrentlyPlaying && !hasError && (
+            <div className="absolute top-2 right-2 z-10">
+              <div className="rounded-full bg-green-500/80 px-2 py-1 text-xs text-white">
+                Ready
+              </div>
+            </div>
+          )}
+
+          {/* Buffer health indicator */}
+          {isCurrentlyPlaying && bufferHealth !== 'healthy' && (
+            <div className="absolute top-2 left-2 z-10">
+              <div className={`rounded-full px-2 py-1 text-xs text-white ${
+                bufferHealth === 'critical' ? 'bg-red-500/80' : 'bg-yellow-500/80'
+              }`}>
+                {bufferHealth === 'critical' ? 'Low Buffer' : 'Buffer Low'}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
   },
-  (prevProps, nextProps) => 
-    prevProps.url === nextProps.url && 
-    prevProps.videoId === nextProps.videoId && 
-    prevProps.isPlaying === nextProps.isPlaying,
+  (prevProps, nextProps) =>
+    prevProps.url === nextProps.url &&
+    prevProps.videoId === nextProps.videoId &&
+    prevProps.isPlaying === nextProps.isPlaying &&
+    prevProps.preload === nextProps.preload,
 );
 
 VideoEmbed.displayName = "VideoEmbed";
