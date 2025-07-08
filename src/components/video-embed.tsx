@@ -69,7 +69,7 @@ export const VideoEmbed = memo<VideoEmbedProps>(
             // Playing iframe with autoplay
             <iframe
               key={`playing-${iframeKey}`}
-              src={`${url}${url.includes("?") ? "&" : "?"}autoplay=true`}
+              src={`${url}${url.includes("?") ? "&" : "?"}autoplay=true&metrics=false`}
               className="absolute inset-0 h-full w-full"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -80,7 +80,7 @@ export const VideoEmbed = memo<VideoEmbedProps>(
             // Thumbnail iframe without autoplay
             <iframe
               key={`thumbnail-${iframeKey}`}
-              src={url}
+              src={`${url}${url.includes("?") ? "&" : "?"}metrics=false`}
               className="absolute inset-0 h-full w-full"
               frameBorder="0"
               allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
