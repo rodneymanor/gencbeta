@@ -19,7 +19,6 @@ import {
   getVideoUrl,
 } from "./video-card-components";
 
-
 // Legacy video type for backward compatibility
 type LegacyVideo = VideoWithPlayer & {
   url?: string; // Legacy field that might contain Bunny.net URLs
@@ -65,8 +64,8 @@ export const VideoCard = memo<VideoCardProps>(
     onReprocess,
     className = "",
   }) => {
-      const [isHovered, setIsHovered] = useState(false);
-  const [showRepurposeModal, setShowRepurposeModal] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
+    const [showRepurposeModal, setShowRepurposeModal] = useState(false);
 
     // Debug: Log when VideoCard component renders
     console.log("🔍 [VideoCard] Component rendered with video:", video);
@@ -75,7 +74,7 @@ export const VideoCard = memo<VideoCardProps>(
     console.log("🔍 [VideoCard] Video metrics:", video.metrics);
     console.log("🔍 [VideoCard] Video metadata:", video.metadata);
 
-    const cardClassName = `w-full p-3 rounded-xl group relative transition-all duration-200 hover:shadow-lg border-border/50 hover:border-border ${className} ${
+    const cardClassName = `w-[240px] p-3 rounded-xl group relative transition-all duration-200 hover:shadow-lg border-border/50 hover:border-border ${className} ${
       isSelected ? "ring-2 ring-primary shadow-md" : ""
     } ${isDeleting ? "opacity-50 pointer-events-none" : ""}`;
 
@@ -121,9 +120,7 @@ export const VideoCard = memo<VideoCardProps>(
 
           {/* Action Buttons */}
           <div className="mt-3">
-            <ActionButtons
-              video={video}
-            />
+            <ActionButtons video={video} />
           </div>
         </Card>
 
