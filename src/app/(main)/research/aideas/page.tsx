@@ -55,6 +55,10 @@ const mockInspirations = [
   },
 ];
 
+// Force dynamic rendering so Next.js doesn't try to statically pre-render
+// a page that relies on client-side hooks like useSearchParams.
+export const dynamic = "force-dynamic";
+
 export default function AIIdeasPage() {
   const [categoryFilter, setCategoryFilter] = useState("all");
 
