@@ -15,6 +15,7 @@ import { UserManagementService, type UserProfile, type UserRole } from "@/lib/us
 
 import { AssignCreatorDialog } from "./_components/assign-creator-dialog";
 import { CreateUserDialog } from "./_components/create-user-dialog";
+import { ReprocessVideosCard } from "./_components/reprocess-videos-card";
 
 export default function AdminPage() {
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -237,6 +238,13 @@ export default function AdminPage() {
               </CardContent>
             </Card>
           ))}
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        <h2 className="text-xl font-bold tracking-tight">System Operations</h2>
+        <div className="grid grid-cols-1 gap-6">
+          <ReprocessVideosCard />
         </div>
       </div>
     </div>
