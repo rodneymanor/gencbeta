@@ -1,26 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Cache so helpers can reuse base URL without passing it around
-let cachedBaseUrl: string | undefined;
-
-function getBaseUrl(request?: NextRequest): string {
-  // Prefer explicit base URL derived from the current request
-  if (request) {
-    const host = request.headers.get("host") ?? "localhost:3000";
-    const protocol = host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : "https";
-    cachedBaseUrl = `${protocol}://${host}`;
-    return cachedBaseUrl;
-  }
-
-  // Use cached value if POST handler already initialised it
-  if (cachedBaseUrl) return cachedBaseUrl;
-
-  // Fallbacks for edge/runtime environments
+function getBaseUrl(): string {
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}`;
   }
 
-  return "http://localhost:3000";
+  // In development, check for common development ports
+  // This is a fallback since we don't have the request object here
+  return "http://localhost:3002"; // Use the port your dev server is running on
 }
 
 interface AnalysisResult {
@@ -43,9 +30,6 @@ interface AnalysisResult {
 
 export async function POST(request: NextRequest) {
   console.log("🎯 [COMPLETE_ANALYSIS] Starting comprehensive video analysis...");
-
-  // Prime and cache base URL so helper calls use the correct host
-  void getBaseUrl(request);
 
   try {
     const { videoData, videoUrl, fileName, fileSize } = await processRequestInput(request);
@@ -121,10 +105,13 @@ async function processFileInput(request: NextRequest) {
 async function performCompleteAnalysis(videoData: ArrayBuffer, videoUrl?: string): Promise<AnalysisResult> {
   console.log("🚀 [COMPLETE_ANALYSIS] Starting parallel analysis tasks...");
 
-  const [transcriptResult] = await Promise.allSettled([callTranscribeService(videoData, videoUrl)]);
+  const [transcriptResult, visualResult] = await Promise.allSettled([
+    callTranscribeService(videoData, videoUrl),
+    callVisualAnalysisService(videoData),
+  ]);
 
   const transcript = getTranscriptResult(transcriptResult);
-  const visualContext = "Visual analysis has been disabled."; // Provide a static fallback
+  const visualContext = getVisualResult(visualResult);
 
   console.log("🔄 [COMPLETE_ANALYSIS] Starting text-based analysis tasks...");
 
@@ -166,6 +153,16 @@ function getTranscriptResult(transcriptResult: PromiseSettledResult<string | nul
   } else {
     console.log("⚠️ [COMPLETE_ANALYSIS] Transcription failed, using fallback");
     return "Transcription failed - unable to extract spoken content from video";
+  }
+}
+
+function getVisualResult(visualResult: PromiseSettledResult<string | null>): string {
+  if (visualResult.status === "fulfilled" && visualResult.value) {
+    console.log("✅ [COMPLETE_ANALYSIS] Visual analysis completed");
+    return visualResult.value;
+  } else {
+    console.log("⚠️ [COMPLETE_ANALYSIS] Visual analysis failed, using fallback");
+    return "Visual analysis failed - unable to extract visual context from video";
   }
 }
 
@@ -291,6 +288,28 @@ async function callMetadataAnalysisService(
     return data.metadata;
   } catch (error) {
     console.error("❌ [ORCHESTRATOR] Metadata analysis service error:", error);
+    return null;
+  }
+}
+
+async function callVisualAnalysisService(videoData: ArrayBuffer): Promise<string | null> {
+  try {
+    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${process.env.PORT || 3001}`;
+
+    const formData = new FormData();
+    const blob = new Blob([videoData], { type: "video/mp4" });
+    formData.append("video", blob, "video.mp4");
+
+    const response = await fetch(`${baseUrl}/api/video/analyze-visuals`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.visualContext;
+  } catch (error) {
+    console.error("❌ [ORCHESTRATOR] Visual analysis service error:", error);
     return null;
   }
 }

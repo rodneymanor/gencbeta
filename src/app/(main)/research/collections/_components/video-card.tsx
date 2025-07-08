@@ -75,7 +75,7 @@ export const VideoCard = memo<VideoCardProps>(
     console.log("🔍 [VideoCard] Video metrics:", video.metrics);
     console.log("🔍 [VideoCard] Video metadata:", video.metadata);
 
-    const cardClassName = `w-[240px] p-3 rounded-xl group relative transition-all duration-200 hover:shadow-lg border-border/50 hover:border-border ${className} ${
+    const cardClassName = `w-full p-3 rounded-xl group relative transition-all duration-200 hover:shadow-lg border-border/50 hover:border-border ${className} ${
       isSelected ? "ring-2 ring-primary shadow-md" : ""
     } ${isDeleting ? "opacity-50 pointer-events-none" : ""}`;
 

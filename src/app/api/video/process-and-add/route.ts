@@ -3,175 +3,228 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { uploadToBunnyStream } from "@/lib/bunny-stream";
 import { getAdminAuth, getAdminDb, isAdminInitialized } from "@/lib/firebase-admin";
-import { updateVideoTranscription, updateVideoTranscriptionStatus } from "@/lib/video-utils";
 
-interface VideoData {
-  buffer: number[];
-  filename: string;
-  mimeType: string;
-  description?: string;
-  cover?: string;
-  author?: string;
-  hashtags?: string[];
-}
+export async function POST(request: NextRequest) {
+  try {
+    console.log("🚀 [VIDEO_PROCESS] Starting complete video processing workflow...");
 
-interface VideoDetails {
-  title: string;
-  url: string;
-  cdnUrl: string;
-  thumbnailUrl?: string;
-  author?: string;
-  description?: string;
-  hashtags?: string[];
-  platform: string;
-  transcriptionStatus: string;
-  userId: string;
-  videoGuid: string;
-}
+    // Check if Firebase Admin is initialized (it auto-initializes on import)
+    if (!isAdminInitialized) {
+      throw new Error("Firebase Admin SDK not initialized - check environment variables");
+    }
 
-interface BunnyResult {
-  success: boolean;
-  iframeUrl?: string;
-  directUrl?: string;
-  guid?: string;
-  thumbnailUrl?: string;
-  error?: string;
+    // Extract and verify user authentication
+    const authHeader = request.headers.get("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return NextResponse.json(
+        {
+          error: "Unauthorized - Missing or invalid authorization header",
+        },
+        { status: 401 },
+      );
+    }
+
+    const idToken = authHeader.split("Bearer ")[1];
+    let userId: string;
+
+    try {
+      const adminAuth = getAdminAuth();
+      if (!adminAuth) {
+        throw new Error("Admin auth not available");
+      }
+
+      const decodedToken = await adminAuth.verifyIdToken(idToken);
+      userId = decodedToken.uid;
+      console.log("✅ [VIDEO_PROCESS] User authenticated:", userId);
+    } catch (authError) {
+      console.error("❌ [VIDEO_PROCESS] Authentication failed:", authError);
+      return NextResponse.json(
+        {
+          error: "Unauthorized - Invalid token",
+        },
+        { status: 401 },
+      );
+    }
+
+    const { videoUrl, collectionId, title } = await request.json();
+    const baseUrl = getBaseUrl(request);
+
+    console.log("🔍 [VIDEO_PROCESS] Original URL:", videoUrl);
+
+    // Decode URL to handle URL encoding issues (like Instagram)
+    const decodedUrl = decodeURIComponent(videoUrl);
+    console.log("🔍 [VIDEO_PROCESS] Decoded URL:", decodedUrl);
+
+    // Step 1: Download video
+    console.log("📥 [VIDEO_PROCESS] Step 1: Downloading video...");
+    const downloadResult = await downloadVideo(baseUrl, decodedUrl);
+
+    if (!downloadResult.success) {
+      return NextResponse.json(
+        {
+          error: "Failed to download video",
+          details: downloadResult.error,
+        },
+        { status: 500 },
+      );
+    }
+
+    console.log("✅ [VIDEO_PROCESS] Download successful");
+
+    // Step 2: Stream to Bunny CDN
+    console.log("🎬 [VIDEO_PROCESS] Step 2: Streaming to Bunny CDN...");
+    const streamResult = await streamToBunny(downloadResult.data);
+
+    if (!streamResult.success) {
+      return NextResponse.json(
+        {
+          error: "Failed to stream video to CDN",
+          details: streamResult.error || "Failed to upload to Bunny CDN",
+        },
+        { status: 500 },
+      );
+    }
+
+    console.log("✅ [VIDEO_PROCESS] Streaming successful");
+
+    // Step 3: Add to collection with userId
+    console.log("💾 [VIDEO_PROCESS] Step 3: Adding to collection...");
+    const videoData = {
+      originalUrl: decodedUrl,
+      title: title || `Video from ${downloadResult.data.platform}`,
+      platform: downloadResult.data.platform,
+      iframeUrl: streamResult.iframeUrl,
+      directUrl: streamResult.directUrl,
+      guid: streamResult.guid,
+      thumbnailUrl: downloadResult.data.thumbnailUrl || streamResult.thumbnailUrl,
+      metrics: downloadResult.data.metrics || {},
+      metadata: downloadResult.data.metadata || {},
+      transcriptionStatus: "pending",
+      userId: userId,
+    };
+
+    const addResult = await addVideoToCollection(collectionId, videoData);
+
+    if (!addResult.success) {
+      return NextResponse.json(
+        {
+          error: "Failed to add video to collection",
+          details: addResult.error,
+        },
+        { status: 500 },
+      );
+    }
+
+    // Step 4: Start background transcription (real-time updates)
+    console.log("🎙️ [VIDEO_PROCESS] Step 4: Starting background transcription...");
+    startBackgroundTranscription(
+      baseUrl,
+      downloadResult.data.videoData,
+      addResult.videoId,
+      collectionId,
+      downloadResult.data.platform,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      downloadResult.data.metadata || {},
+    );
+
+    console.log("✅ [VIDEO_PROCESS] Complete workflow successful!");
+
+    return NextResponse.json({
+      success: true,
+      videoId: addResult.videoId,
+      iframe: streamResult.iframeUrl,
+      directUrl: streamResult.directUrl,
+      platform: downloadResult.data.platform,
+      transcriptionStatus: "processing",
+      message: "Video added successfully. Transcription in progress.",
+    });
+  } catch (error) {
+    console.error("❌ [VIDEO_PROCESS] Workflow error:", error);
+    return NextResponse.json(
+      {
+        error: "Video processing failed",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
+    );
+  }
 }
 
 function getBaseUrl(request: NextRequest): string {
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
   const host = request.headers.get("host");
-  const protocol = host?.startsWith("localhost") ? "http" : "https";
-  return `${protocol}://${host}`;
+  return host ? `http://${host}` : `http://localhost:${process.env.PORT || 3001}`;
 }
 
-async function downloadVideo(): Promise<{ status: string; result?: VideoData; message?: string }> {
-  // Mock implementation - replace with actual download logic
-  return {
-    status: "success",
-    result: {
-      buffer: [],
-      filename: "video.mp4",
-      mimeType: "video/mp4",
-      description: "Video description",
-      author: "Unknown",
-      hashtags: [],
-    },
-  };
-}
-
-async function streamToBunny(downloadData: VideoData): Promise<BunnyResult> {
+async function downloadVideo(baseUrl: string, url: string) {
   try {
-    const result = await uploadToBunnyStream(downloadData.buffer, downloadData.filename);
+    console.log("🔄 [VIDEO_PROCESS] Calling downloader service...");
+
+    const response = await fetch(`${baseUrl}/api/video/downloader`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("❌ [VIDEO_PROCESS] Download failed:", response.status, errorText);
+      return { success: false, error: `Download failed: ${errorText}` };
+    }
+
+    const data = await response.json();
+    console.log("✅ [VIDEO_PROCESS] Download successful");
+    return { success: true, data };
+  } catch (error) {
+    console.error("❌ [VIDEO_PROCESS] Download error:", error);
+    return { success: false, error: error instanceof Error ? error.message : "Download failed" };
+  }
+}
+
+async function streamToBunny(downloadData: any) {
+  try {
+    console.log("🐰 [VIDEO_PROCESS] Streaming to Bunny CDN...");
+
+    const buffer = Buffer.from(downloadData.videoData.buffer);
+    const filename = downloadData.videoData.filename || `${downloadData.platform}-video.mp4`;
+    const mimeType = downloadData.videoData.mimeType || "video/mp4";
+
+    console.log("🔍 [VIDEO_PROCESS] Buffer info:", {
+      bufferSize: buffer.length,
+      filename,
+      mimeType,
+    });
+
+    const result = await uploadToBunnyStream(buffer, filename, mimeType);
+
+    console.log("🔍 [VIDEO_PROCESS] Upload result:", result);
+
     if (!result) {
+      console.error("❌ [VIDEO_PROCESS] Bunny stream failed - null result");
       return { success: false, error: "Failed to upload to Bunny CDN" };
     }
-    return {
+
+    console.log("✅ [VIDEO_PROCESS] Bunny stream successful:", result.cdnUrl);
+
+    const returnValue = {
       success: true,
       iframeUrl: result.cdnUrl,
       directUrl: result.cdnUrl,
-      guid: result.filename,
+      guid: result.filename, // This is actually the GUID
       thumbnailUrl: null,
     };
+
+    console.log("🔍 [VIDEO_PROCESS] Returning:", returnValue);
+    return returnValue;
   } catch (error) {
+    console.error("❌ [VIDEO_PROCESS] Bunny stream error:", error);
     return { success: false, error: error instanceof Error ? error.message : "Bunny stream failed" };
   }
 }
 
-async function authenticateUser(request: NextRequest): Promise<string> {
-  const authHeader = request.headers.get("authorization");
-  const idToken = authHeader?.substring(7);
-
-  if (!isAdminInitialized || !idToken) {
-    throw new Error("Configuration or authentication error");
-  }
-
-  const auth = getAdminAuth();
-  const decodedToken = await auth.verifyIdToken(idToken);
-  if (!decodedToken.uid) {
-    throw new Error("Invalid user token");
-  }
-
-  return decodedToken.uid;
-}
-
-async function processVideoDownload(_videoUrl: string): Promise<VideoData> {
-  const downloadResult = await downloadVideo();
-  if (downloadResult.status !== "success" || !downloadResult.result) {
-    throw new Error(downloadResult.message ?? "Failed to download video");
-  }
-  return downloadResult.result;
-}
-
-async function processVideoUpload(videoData: VideoData): Promise<BunnyResult> {
-  const bunnyResult = await streamToBunny(videoData);
-  if (!bunnyResult.success) {
-    throw new Error(bunnyResult.error ?? "Failed to upload to CDN");
-  }
-  return bunnyResult;
-}
-
-export async function POST(request: NextRequest) {
-  console.log("🎬 [VIDEO_PROCESS] Starting video processing workflow...");
-
-  try {
-    // 1. Authenticate user
-    const userId = await authenticateUser(request);
-
-    // 2. Parse request body
-    const { videoUrl, collectionId, title } = await request.json();
-    if (!videoUrl || !collectionId) {
-      return NextResponse.json({ error: "videoUrl and collectionId are required" }, { status: 400 });
-    }
-
-    // 3. Download and prepare video
-    const videoData = await processVideoDownload(videoUrl);
-    const platform = "TikTok";
-
-    // 4. Upload to CDN
-    const bunnyResult = await processVideoUpload(videoData);
-
-    // 5. Add video to collection in Firestore
-    const videoDetails: VideoDetails = {
-      title: title ?? videoData.description ?? "Untitled Video",
-      url: videoUrl,
-      cdnUrl: bunnyResult.directUrl!,
-      thumbnailUrl: bunnyResult.thumbnailUrl ?? videoData.cover,
-      author: videoData.author,
-      description: videoData.description,
-      hashtags: videoData.hashtags,
-      platform,
-      transcriptionStatus: "pending",
-      userId,
-      videoGuid: bunnyResult.guid!,
-    };
-
-    const addResult = await addVideoToCollection(collectionId, videoDetails);
-    if (!addResult.success) {
-      return NextResponse.json({ error: addResult.error }, { status: 500 });
-    }
-
-    // 6. Start background transcription
-    const baseUrl = getBaseUrl(request);
-    startBackgroundTranscription(baseUrl, videoData, addResult.videoId, collectionId, platform, videoData);
-
-    // 7. Return success response
-    return NextResponse.json({
-      success: true,
-      message: "Video processing started.",
-      videoId: addResult.videoId,
-      iframe: bunnyResult.iframeUrl,
-      directUrl: bunnyResult.directUrl,
-      platform,
-      transcriptionStatus: "pending",
-    });
-  } catch (error) {
-    console.error("❌ [VIDEO_PROCESS] Workflow error:", error);
-    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-    return NextResponse.json({ error: "Video processing workflow failed", details: errorMessage }, { status: 500 });
-  }
-}
-
-async function addVideoToCollection(collectionId: string, videoData: VideoDetails) {
+async function addVideoToCollection(collectionId: string, videoData: any) {
   try {
     console.log("💾 [VIDEO_PROCESS] Adding video to Firestore collection...");
 
@@ -184,25 +237,29 @@ async function addVideoToCollection(collectionId: string, videoData: VideoDetail
       throw new Error("Admin database not available");
     }
 
+    // Add video to collection
     const videoRef = adminDb.collection("videos").doc();
     const timestamp = new Date().toISOString();
     await videoRef.set({
       ...videoData,
       collectionId,
       id: videoRef.id,
-      addedAt: timestamp,
+      addedAt: timestamp, // ✅ Required by RBAC queries
       createdAt: timestamp,
       updatedAt: timestamp,
     });
 
+    // Update collection video count
     const collectionRef = adminDb.collection("collections").doc(collectionId);
     await adminDb.runTransaction(async (transaction) => {
       const collectionDoc = await transaction.get(collectionRef);
-      const currentCount = collectionDoc.data()?.videoCount ?? 0;
-      transaction.update(collectionRef, {
-        videoCount: currentCount + 1,
-        updatedAt: new Date().toISOString(),
-      });
+      if (collectionDoc.exists) {
+        const currentCount = collectionDoc.data()?.videoCount || 0;
+        transaction.update(collectionRef, {
+          videoCount: currentCount + 1,
+          updatedAt: new Date().toISOString(),
+        });
+      }
     });
 
     console.log("✅ [VIDEO_PROCESS] Video added to collection:", videoRef.id);
@@ -215,16 +272,19 @@ async function addVideoToCollection(collectionId: string, videoData: VideoDetail
 
 function startBackgroundTranscription(
   baseUrl: string,
-  videoData: VideoData,
+  videoData: any,
   videoId: string,
   collectionId: string,
   platform: string,
-  additionalMetadata: VideoData,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  additionalMetadata: any = {},
 ) {
+  // Use setTimeout to ensure response is sent before starting background work
   setTimeout(async () => {
     try {
       console.log("🎙️ [BACKGROUND] Starting transcription for video:", videoId);
 
+      // Convert buffer array back to proper format for transcription
       const buffer = Buffer.from(videoData.buffer);
       const blob = new Blob([buffer], { type: videoData.mimeType });
       const formData = new FormData();
@@ -250,13 +310,14 @@ function startBackgroundTranscription(
         return;
       }
 
+      // 🔍 Analyze script to extract Hook / Bridge / Nugget / WTA components
       const analysisRes = await fetch(`${baseUrl}/api/video/analyze-script`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ transcript }),
       });
 
-      let components = { hook: "", bridge: "", nugget: "", wta: "" };
+      let components = { hook: "", bridge: "", nugget: "", wta: "" } as any;
       if (analysisRes.ok) {
         const analysisJson = await analysisRes.json();
         components = analysisJson.components ?? components;
@@ -265,25 +326,76 @@ function startBackgroundTranscription(
         console.error("⚠️ [BACKGROUND] Script analysis failed – using empty components");
       }
 
+      // 📝 Prepare extra content metadata (caption & hashtags already in additionalMetadata)
       const contentMetadata = {
         platform,
-        author: additionalMetadata.author ?? "Unknown",
-        description: additionalMetadata.description ?? "",
-        source: "other" as const,
-        hashtags: additionalMetadata.hashtags ?? [],
-      };
+        author: additionalMetadata?.author ?? "Unknown",
+        description: additionalMetadata?.description ?? "",
+        source: "other",
+        hashtags: additionalMetadata?.hashtags ?? [],
+      } as any;
 
+      // Merge all transcription-related data and save to Firestore
       await updateVideoTranscription(videoId, {
         transcript,
         components,
         contentMetadata,
-        visualContext: "",
+        visualContext: "", // reserved for future computer-vision analysis
       });
 
+      // Real-time update hook (WebSocket, etc.) could be invoked here
       console.log("📡 [BACKGROUND] Transcription + analysis ready for video:", videoId);
     } catch (error) {
       console.error("❌ [BACKGROUND] Transcription error:", error);
       await updateVideoTranscriptionStatus(videoId, "failed");
     }
   }, 100);
+}
+
+async function updateVideoTranscription(videoId: string, transcriptionData: any) {
+  try {
+    const adminDb = getAdminDb();
+    if (!adminDb) return;
+
+    // Filter out undefined values to prevent Firestore errors
+    const updateData: any = {
+      transcriptionStatus: "completed",
+      transcriptionCompletedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Only add fields that are not undefined
+    if (transcriptionData.transcript !== undefined) {
+      updateData.transcript = transcriptionData.transcript;
+    }
+    if (transcriptionData.components !== undefined) {
+      updateData.components = transcriptionData.components;
+    }
+    if (transcriptionData.contentMetadata !== undefined) {
+      updateData.contentMetadata = transcriptionData.contentMetadata;
+    }
+    if (transcriptionData.visualContext !== undefined) {
+      updateData.visualContext = transcriptionData.visualContext;
+    }
+
+    await adminDb.collection("videos").doc(videoId).update(updateData);
+
+    console.log("✅ [BACKGROUND] Video transcription updated:", videoId);
+  } catch (error) {
+    console.error("❌ [BACKGROUND] Failed to update transcription:", error);
+  }
+}
+
+async function updateVideoTranscriptionStatus(videoId: string, status: string) {
+  try {
+    const adminDb = getAdminDb();
+    if (!adminDb) return;
+
+    await adminDb.collection("videos").doc(videoId).update({
+      transcriptionStatus: status,
+      updatedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("❌ [BACKGROUND] Failed to update transcription status:", error);
+  }
 }

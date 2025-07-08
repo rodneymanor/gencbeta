@@ -3,20 +3,66 @@
 // Prevent Next.js from attempting to statically prerender a client-side page
 export const dynamic = "force-dynamic";
 
-import { memo, Suspense } from "react";
+import { useState, useEffect, useCallback, useMemo, useTransition, useRef, memo, Suspense } from "react";
+
+import { useSearchParams, useRouter } from "next/navigation";
 
 import { motion } from "framer-motion";
 
 import { Badge } from "@/components/ui/badge";
-import { VideoCollectionLoading } from "@/components/ui/loading-animations";
-import { Collection } from "@/lib/collections";
+import { VideoCollectionLoading, PageHeaderLoading } from "@/components/ui/loading-animations";
+import { useAuth } from "@/contexts/auth-context";
+import { useTopBarConfig } from "@/hooks/use-route-topbar";
+import { CollectionsService, type Collection, type Video } from "@/lib/collections";
+import { CollectionsRBACService } from "@/lib/collections-rbac";
 
 import CategoryChooser from "./_components/category-chooser";
 import { CollectionBadgeMenu } from "./_components/collection-badge-menu";
 import { badgeVariants } from "./_components/collections-animations";
+import {
+  type VideoWithPlayer,
+  getPageTitle,
+  getPageDescription,
+  createVideoSelectionHandlers,
+} from "./_components/collections-helpers";
 import { ManageModeHeader } from "./_components/manage-mode-header";
 import { VideoGrid } from "./_components/video-grid";
-import { useCollectionsPage } from "./_hooks/use-collections-page";
+
+// Simplified cache for better performance
+interface SimpleCache {
+  data: Map<string, { videos: VideoWithPlayer[]; timestamp: number }>;
+}
+
+const CACHE_DURATION = 30000; // 30 seconds
+
+// Delayed fallback component to prevent flash
+const DelayedFallback = memo(
+  ({ delay = 200, show, children }: { delay?: number; show: boolean; children: React.ReactNode }) => {
+    const [shouldShow, setShouldShow] = useState(false);
+    const timeoutRef = useRef<NodeJS.Timeout>();
+
+    useEffect(() => {
+      if (show) {
+        timeoutRef.current = setTimeout(() => setShouldShow(true), delay);
+      } else {
+        setShouldShow(false);
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
+      }
+
+      return () => {
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
+      };
+    }, [show, delay]);
+
+    return shouldShow ? <>{children}</> : null;
+  },
+);
+
+DelayedFallback.displayName = "DelayedFallback";
 
 // Optimized collection badge with smooth transitions and management menu
 const CollectionBadge = memo(
@@ -73,37 +119,315 @@ CollectionBadge.displayName = "CollectionBadge";
 
 // Main collections page component - simplified and optimized
 function CollectionsPageContent() {
-  const {
-    collections,
-    videos,
-    isTransitioning,
-    manageMode,
-    selectedVideos,
-    deletingVideos,
-    isPending,
-    selectedCollectionId,
-    pageTitle,
-    pageDescription,
-    categoryItems,
-    setManageMode,
-    handleCollectionChange,
-    toggleVideoSelection,
-    selectAllVideos,
-    clearSelection,
-    handleVideoAdded,
-    handleDeleteVideo,
-    handleBulkDelete,
-    handleExitManageMode,
-    shouldShowLoading,
-  } = useCollectionsPage();
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [videos, setVideos] = useState<VideoWithPlayer[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [manageMode, setManageMode] = useState(false);
+  const [selectedVideos, setSelectedVideos] = useState<Set<string>>(new Set());
+  const [deletingVideos, setDeletingVideos] = useState<Set<string>>(new Set());
+  const [isPending, startTransition] = useTransition();
+
+  const cacheRef = useRef<SimpleCache>({ data: new Map() });
+  const previousCollectionRef = useRef<string | null>(null);
+
+  const { user, userProfile } = useAuth();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const selectedCollectionId = searchParams.get("collection");
+  const setTopBarConfig = useTopBarConfig();
+
+  const { toggleVideoSelection, selectAllVideos, clearSelection } = useMemo(
+    () => createVideoSelectionHandlers(setSelectedVideos, videos),
+    [videos],
+  );
+
+  const pageTitle = useMemo(() => {
+    if (!selectedCollectionId) return "All Videos";
+    const collection = collections.find((c) => c.id === selectedCollectionId);
+    return collection?.title ?? "All Videos";
+  }, [selectedCollectionId, collections]);
+
+  const pageDescription = useMemo(() => {
+    if (selectedCollectionId) {
+      const collection = collections.find((c) => c.id === selectedCollectionId);
+      if (collection?.description) return collection.description;
+    }
+    return "Browse and manage your video collections";
+  }, [selectedCollectionId, collections]);
+
+  const categoryItems = useMemo(() => {
+    const items = collections.map((c) => ({ id: c.id!, name: c.title }));
+    items.unshift({ id: "all-videos", name: "All Videos" });
+    return items;
+  }, [collections]);
+
+  const getCachedVideos = useCallback((collectionId: string | null): VideoWithPlayer[] | null => {
+    const key = collectionId ?? "all";
+    const cached = cacheRef.current.data.get(key);
+    if (!cached) return null;
+
+    const isValid = Date.now() - cached.timestamp < CACHE_DURATION;
+    return isValid ? cached.videos : null;
+  }, []);
+
+  const setCachedVideos = useCallback((collectionId: string | null, videos: VideoWithPlayer[]) => {
+    const key = collectionId ?? "all";
+    cacheRef.current.data.set(key, { videos, timestamp: Date.now() });
+  }, []);
+
+  // Helper function to validate collection exists
+  const validateCollectionExists = useCallback(
+    (collectionId: string | null, collections: Collection[]) => {
+      if (!collectionId || collectionId === "all-videos") return true;
+
+      const collectionExists = collections.some((c) => c.id === collectionId);
+      if (!collectionExists) {
+        console.warn("⚠️ [Collections] Collection not found, redirecting to all videos:", collectionId);
+        // Clear cache for clean refresh
+        cacheRef.current.data.clear();
+        // Redirect to all videos without the invalid collection parameter
+        startTransition(() => {
+          router.push("/research/collections", { scroll: false });
+        });
+        return false;
+      }
+      return true;
+    },
+    [router],
+  );
+
+  // Helper function to handle video loading result
+  const handleVideoResult = useCallback(
+    (videosResult: PromiseSettledResult<Video[]>, collectionId: string | null) => {
+      if (videosResult.status === "fulfilled") {
+        const optimizedVideos = videosResult.value.map((video) => ({
+          ...video,
+          isPlaying: false,
+        }));
+
+        setVideos(optimizedVideos);
+        setCachedVideos(collectionId, optimizedVideos);
+      } else {
+        console.error("Error loading videos:", videosResult.reason);
+        // If videos failed to load due to invalid collection, clear videos
+        if (videosResult.reason?.message?.includes("Collection not found")) {
+          setVideos([]);
+        }
+      }
+    },
+    [setCachedVideos],
+  );
+
+  // OPTIMIZED: Parallel data loading - this eliminates the 3-second delay
+  const loadData = useCallback(
+    async (targetCollectionId?: string | null) => {
+      if (!user) return;
+
+      const collectionId = targetCollectionId !== undefined ? targetCollectionId : selectedCollectionId;
+
+      // Check cache first
+      const cachedVideos = getCachedVideos(collectionId);
+      if (cachedVideos) {
+        console.log("📦 [Collections] Using cached data");
+        setVideos(cachedVideos);
+        setIsTransitioning(false);
+        return;
+      }
+
+      console.log("🚀 [Collections] Loading data in parallel...");
+
+      try {
+        // CRITICAL OPTIMIZATION: Load collections and videos in parallel
+        const [collectionsResult, videosResult] = await Promise.allSettled([
+          CollectionsRBACService.getUserCollections(user.uid),
+          CollectionsRBACService.getCollectionVideos(user.uid, collectionId ?? undefined),
+        ]);
+
+        // Handle collections result
+        if (collectionsResult.status === "fulfilled") {
+          setCollections(collectionsResult.value);
+
+          // Validate collection exists and redirect if not
+          if (!validateCollectionExists(collectionId, collectionsResult.value)) {
+            return;
+          }
+        } else {
+          console.error("Error loading collections:", collectionsResult.reason);
+        }
+
+        // Handle videos result
+        handleVideoResult(videosResult, collectionId);
+
+        console.log("✅ [Collections] Parallel loading completed");
+      } catch (error) {
+        console.error("❌ [Collections] Error loading data:", error);
+      } finally {
+        setIsLoading(false);
+        setIsTransitioning(false);
+      }
+    },
+    [user, selectedCollectionId, getCachedVideos, validateCollectionExists, handleVideoResult],
+  );
+
+  // Optimized collection navigation
+  const handleCollectionChange = useCallback(
+    (collectionId: string | null) => {
+      if (collectionId === previousCollectionRef.current || isTransitioning) return;
+
+      previousCollectionRef.current = collectionId;
+
+      // Check cache first for instant switching
+      const cachedVideos = getCachedVideos(collectionId);
+      if (cachedVideos) {
+        setVideos(cachedVideos);
+      } else {
+        setIsTransitioning(true);
+      }
+
+      // Navigate
+      startTransition(() => {
+        const path = collectionId ? `/research/collections?collection=${collectionId}` : "/research/collections";
+        router.push(path, { scroll: false });
+      });
+
+      // Load fresh data if not cached
+      if (!cachedVideos) {
+        loadData(collectionId);
+      }
+    },
+    [router, isTransitioning, getCachedVideos, loadData],
+  );
+
+  // Role-based access control
+  useEffect(() => {
+    if (!user) {
+      router.push("/auth/v1/login");
+      return;
+    }
+
+    if (!userProfile) return;
+
+    const allowedRoles = ["creator", "coach", "super_admin"];
+    if (!allowedRoles.includes(userProfile.role)) {
+      router.push("/dashboard");
+      return;
+    }
+  }, [user, userProfile, router]);
+
+  // OPTIMIZED: Single data loading effect
+  useEffect(() => {
+    if (user && userProfile && isLoading) {
+      loadData();
+    }
+  }, [user, userProfile, isLoading, loadData]);
+
+  useEffect(() => {
+    setTopBarConfig({ title: "Collections" });
+  }, [setTopBarConfig]);
+
+  // Video management functions
+  const handleVideoAdded = useCallback(async () => {
+    // Clear cache and reload
+    cacheRef.current.data.clear();
+    await loadData();
+  }, [loadData]);
+
+  const handleCollectionDeleted = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      if (selectedCollectionId) {
+        startTransition(() => {
+          router.push("/research/collections");
+        });
+      }
+
+      // Clear cache and reload
+      cacheRef.current.data.clear();
+      await loadData();
+    } catch (error) {
+      console.error("Error refreshing after collection deleted:", error);
+    }
+  }, [user, selectedCollectionId, router, loadData]);
+
+  const handleDeleteVideo = useCallback(
+    async (videoId: string) => {
+      if (!user) return;
+
+      setDeletingVideos((prev) => new Set([...prev, videoId]));
+
+      try {
+        await CollectionsService.deleteVideo(user.uid, videoId);
+
+        // Optimistic update
+        setVideos((prev) => {
+          const newVideos = prev.filter((video) => video.id !== videoId);
+          setCachedVideos(selectedCollectionId, newVideos);
+          return newVideos;
+        });
+
+        setDeletingVideos((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(videoId);
+          return newSet;
+        });
+      } catch (error) {
+        console.error("Error deleting video:", error);
+        // Reload on error
+        await loadData();
+        setDeletingVideos((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(videoId);
+          return newSet;
+        });
+      }
+    },
+    [user, selectedCollectionId, setCachedVideos, loadData],
+  );
+
+  const handleBulkDelete = useCallback(async () => {
+    if (!user || selectedVideos.size === 0) return;
+
+    const videoIds = Array.from(selectedVideos);
+    setDeletingVideos((prev) => new Set([...prev, ...videoIds]));
+
+    try {
+      // Process deletions in batches
+      const batchSize = 5;
+      for (let i = 0; i < videoIds.length; i += batchSize) {
+        const batch = videoIds.slice(i, i + batchSize);
+        await Promise.all(batch.map((videoId) => CollectionsService.deleteVideo(user.uid, videoId)));
+      }
+
+      // Optimistic update
+      setVideos((prev) => {
+        const newVideos = prev.filter((video) => !videoIds.includes(video.id!));
+        setCachedVideos(selectedCollectionId, newVideos);
+        return newVideos;
+      });
+
+      setSelectedVideos(new Set());
+      setDeletingVideos(new Set());
+    } catch (error) {
+      console.error("Error deleting videos:", error);
+      await loadData();
+      setDeletingVideos(new Set());
+    }
+  }, [user, selectedVideos, selectedCollectionId, setCachedVideos, loadData]);
+
+  const handleExitManageMode = useCallback(() => {
+    setManageMode(false);
+    setSelectedVideos(new Set());
+  }, []);
 
   // Don't show anything until collections are loaded and validated
-  if (shouldShowLoading) {
+  if (isLoading || (selectedCollectionId && !validateCollectionExists(selectedCollectionId, collections))) {
     return <VideoCollectionLoading />;
   }
 
   return (
-    <div className="mx-auto flex h-full max-w-7xl justify-center gap-8 p-4 md:p-6">
+    <div className="flex h-full max-w-7xl mx-auto p-4 md:p-6 justify-center gap-8">
       {/* Left side: Main content (Video Grid) */}
       <div className="flex-1">
         <header className="mb-6 flex items-center justify-between">
