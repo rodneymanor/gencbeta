@@ -66,9 +66,7 @@ const nextConfig = {
   },
   // Configure output for Vercel compatibility
   output: 'standalone',
-  transpilePackages: [
-    'react-product-video-showcase',
-  ],
+  transpilePackages: [],
   // No custom webpack alias needed
   async redirects() {
     return [

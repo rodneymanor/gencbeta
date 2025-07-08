@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, memo } from "react";
+import { useState, memo, useCallback } from "react";
 
-import { Clock } from "lucide-react";
+import { Clock, TrendingUp, Zap } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { VideoEmbed } from "@/components/video-embed";
 
@@ -15,9 +16,9 @@ import {
   ReprocessVideoOverlay,
   PlatformBadge,
   HoverActions,
-  ActionButtons,
   getVideoUrl,
 } from "./video-card-components";
+import { VideoInsightsDashboard } from "./video-insights-dashboard";
 
 // Legacy video type for backward compatibility
 type LegacyVideo = VideoWithPlayer & {
@@ -34,6 +35,8 @@ interface VideoCardProps {
   onDelete: () => void;
   onReprocess?: (video: VideoWithPlayer) => void;
   className?: string;
+  isPlaying?: boolean;
+  onPlay?: (videoId: string) => void;
 }
 
 const DurationBadge = ({ duration }: { duration?: number }) => {
@@ -63,6 +66,8 @@ export const VideoCard = memo<VideoCardProps>(
     onDelete,
     onReprocess,
     className = "",
+    isPlaying = false,
+    onPlay,
   }) => {
     const [isHovered, setIsHovered] = useState(false);
     const [showRepurposeModal, setShowRepurposeModal] = useState(false);
@@ -79,6 +84,12 @@ export const VideoCard = memo<VideoCardProps>(
     } ${isDeleting ? "opacity-50 pointer-events-none" : ""}`;
 
     const showActions = (isHovered || isManageMode) && !isDeleting;
+
+    const handlePlay = useCallback(() => {
+      if (onPlay && video.id) {
+        onPlay(video.id);
+      }
+    }, [onPlay, video.id]);
 
     return (
       <>
@@ -97,7 +108,13 @@ export const VideoCard = memo<VideoCardProps>(
 
           {/* Video Content */}
           <div className="bg-muted/30 relative aspect-[9/16] overflow-hidden rounded-lg">
-            <VideoEmbed url={getVideoUrl(video as LegacyVideo)} className="absolute inset-0 h-full w-full" />
+            <VideoEmbed 
+              url={getVideoUrl(video as LegacyVideo)} 
+              videoId={video.id}
+              isPlaying={isPlaying}
+              onPlay={handlePlay}
+              className="absolute inset-0 h-full w-full" 
+            />
 
             {/* Reprocess Video Overlay for Legacy Videos */}
             {onReprocess && (
@@ -115,12 +132,45 @@ export const VideoCard = memo<VideoCardProps>(
             {/* Duration Badge */}
             <DurationBadge duration={video.duration} />
 
+            {/* Playing Indicator */}
+            {isPlaying && (
+              <div className="absolute top-2 left-2 z-10">
+                <Badge className="bg-primary text-primary-foreground text-xs">
+                  Playing
+                </Badge>
+              </div>
+            )}
+
             {/* Hover Actions */}
+            <HoverActions showActions={showActions} onDelete={onDelete} />
           </div>
 
           {/* Action Buttons */}
           <div className="mt-3">
-            <ActionButtons video={video} />
+            <div className="flex gap-2">
+              {/* Insights Button */}
+              <VideoInsightsDashboard video={video}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 border-border/60 hover:bg-accent/50 h-8 rounded-md px-3 text-xs shadow-sm transition-all duration-200 hover:shadow-md"
+                >
+                  <TrendingUp className="mr-1.5 h-3.5 w-3.5" />
+                  Insights
+                </Button>
+              </VideoInsightsDashboard>
+
+              {/* Repurpose Button */}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setShowRepurposeModal(true)}
+                className="flex-1 border-border/60 hover:bg-accent/50 h-8 rounded-md px-3 text-xs shadow-sm transition-all duration-200 hover:shadow-md"
+              >
+                <Zap className="mr-1.5 h-3.5 w-3.5" />
+                Repurpose
+              </Button>
+            </div>
           </div>
         </Card>
 
@@ -139,7 +189,8 @@ export const VideoCard = memo<VideoCardProps>(
       prevProps.isManageMode === nextProps.isManageMode &&
       prevProps.isSelected === nextProps.isSelected &&
       prevProps.isDeleting === nextProps.isDeleting &&
-      prevProps.isReprocessing === nextProps.isReprocessing
+      prevProps.isReprocessing === nextProps.isReprocessing &&
+      prevProps.isPlaying === nextProps.isPlaying
     );
   },
 );

@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useState } from "react";
+import { memo, useState, useCallback } from "react";
 
 import { Plus } from "lucide-react";
 
@@ -40,11 +40,28 @@ export const VideoGrid = memo<VideoGridProps>(
     onVideoAdded,
   }) => {
     const [reprocessingVideos, setReprocessingVideos] = useState<Set<string>>(new Set());
+    const [currentPlayingVideo, setCurrentPlayingVideo] = useState<string | null>(null);
 
     const handleReprocessVideo = async () => {
       // TODO: Re-implement video reprocessing. The required properties `url` and `collectionId` are missing from the `VideoWithPlayer` type in this version of the code.
       console.log("Reprocessing is currently disabled.");
     };
+
+    // Handle video play - ensures only one video plays at a time
+    const handleVideoPlay = useCallback((videoId: string) => {
+      console.log("🎬 [VideoGrid] Playing video:", videoId);
+      setCurrentPlayingVideo(videoId);
+
+      // Stop all other videos by sending pause messages to their iframes
+      videos.forEach((video) => {
+        if (video.id !== videoId) {
+          const iframe = document.querySelector(`iframe[data-video-id="${video.id}"]`) as HTMLIFrameElement;
+          if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage({ command: 'pause' }, '*');
+          }
+        }
+      });
+    }, [videos]);
 
     // Show loading state
     if (loadingVideos || isPending) {
@@ -78,23 +95,37 @@ export const VideoGrid = memo<VideoGridProps>(
       );
     }
 
-    // Video grid with enhanced styling
+    // Video grid with enhanced styling and single video playback control
     return (
-      <div className="flex flex-wrap justify-start gap-4">
-        {videos.map((video) => (
-          <VideoCard
-            key={video.id}
-            video={video}
-            isManageMode={manageMode}
-            isSelected={selectedVideos.has(video.id!)}
-            isDeleting={deletingVideos.has(video.id!)}
-            isReprocessing={reprocessingVideos.has(video.id!)}
-            onToggleSelection={() => onToggleVideoSelection(video.id!)}
-            onDelete={() => onDeleteVideo(video.id!)}
-            onReprocess={handleReprocessVideo}
-            className="border-border/60 hover:border-border/80 shadow-sm transition-all duration-200 hover:shadow-md"
-          />
-        ))}
+      <div className="space-y-6">
+        {/* Playback Status */}
+        {currentPlayingVideo && (
+          <div className="flex items-center justify-center">
+            <div className="bg-primary/10 border-primary/20 text-primary rounded-lg px-4 py-2 text-sm font-medium">
+              🎬 Playing: {videos.find(v => v.id === currentPlayingVideo)?.title ?? 'Video'}
+            </div>
+          </div>
+        )}
+
+        {/* Video Grid */}
+        <div className="flex flex-wrap justify-start gap-4">
+          {videos.map((video) => (
+            <VideoCard
+              key={video.id}
+              video={video}
+              isManageMode={manageMode}
+              isSelected={selectedVideos.has(video.id!)}
+              isDeleting={deletingVideos.has(video.id!)}
+              isReprocessing={reprocessingVideos.has(video.id!)}
+              isPlaying={currentPlayingVideo === video.id}
+              onToggleSelection={() => onToggleVideoSelection(video.id!)}
+              onDelete={() => onDeleteVideo(video.id!)}
+              onReprocess={handleReprocessVideo}
+              onPlay={handleVideoPlay}
+              className="border-border/60 hover:border-border/80 shadow-sm transition-all duration-200 hover:shadow-md"
+            />
+          ))}
+        </div>
       </div>
     );
   },

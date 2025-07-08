@@ -10,11 +10,14 @@ import { useVideoPlaybackData, useVideoPlaybackAPI } from "@/contexts/video-play
 interface VideoEmbedProps {
   url: string;
   className?: string;
+  videoId?: string; // Add videoId prop for better control
+  isPlaying?: boolean; // Add isPlaying prop for external control
+  onPlay?: () => void; // Add onPlay callback for external control
 }
 
 // BUNNY.NET ONLY VIDEO EMBED - Rejects all non-Bunny URLs
 export const VideoEmbed = memo<VideoEmbedProps>(
-  ({ url, className = "" }) => {
+  ({ url, className = "", videoId: externalVideoId, isPlaying: externalIsPlaying, onPlay }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [iframeKey] = useState(0); // stable key, no recreation
@@ -22,16 +25,25 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     const { currentlyPlayingId } = useVideoPlaybackData();
     const { setCurrentlyPlaying } = useVideoPlaybackAPI();
 
-    const videoId = url;
+    // Use external videoId if provided, otherwise use URL
+    const videoId = externalVideoId || url;
+    
+    // Use external isPlaying state if provided, otherwise use internal state
+    const isCurrentlyPlaying = externalIsPlaying !== undefined ? externalIsPlaying : isPlaying;
 
     // Handle video play
     const handlePlay = useCallback(async () => {
-      if (!isPlaying && videoId) {
+      if (!isCurrentlyPlaying && videoId) {
         console.log("🎬 [VideoEmbed] Starting smooth transition:", videoId.substring(0, 50) + "...");
         setIsLoading(true);
 
-        // Pause others but keep their iframes intact via context
-        await setCurrentlyPlaying(videoId);
+        // Call external onPlay callback if provided
+        if (onPlay) {
+          onPlay();
+        } else {
+          // Fallback to context-based playback
+          await setCurrentlyPlaying(videoId);
+        }
 
         // Small delay to allow buffer to build before showing controls
         setTimeout(() => {
@@ -39,17 +51,21 @@ export const VideoEmbed = memo<VideoEmbedProps>(
           setIsLoading(false);
         }, 800);
       }
-    }, [isPlaying, videoId, setCurrentlyPlaying]);
+    }, [isCurrentlyPlaying, videoId, setCurrentlyPlaying, onPlay]);
 
     // PRODUCTION SOLUTION: Force iframe recreation when pausing
     useEffect(() => {
-      if (currentlyPlayingId !== videoId && isPlaying) {
+      if (externalIsPlaying !== undefined) {
+        // External control mode
+        setIsPlaying(externalIsPlaying);
+        setIsLoading(false);
+      } else if (currentlyPlayingId !== videoId && isPlaying) {
+        // Context control mode
         console.log("⏸️ [VideoEmbed] Force stopping Bunny video by recreating iframe");
         setIsPlaying(false);
         setIsLoading(false);
-        // Graceful pause without destroying iframe – let PlayerJS handle pause internally
       }
-    }, [currentlyPlayingId, videoId, isPlaying]);
+    }, [currentlyPlayingId, videoId, isPlaying, externalIsPlaying]);
 
     // CRITICAL: Only allow Bunny.net iframe URLs - REJECT EVERYTHING ELSE
     const isBunnyUrl =
@@ -71,7 +87,7 @@ export const VideoEmbed = memo<VideoEmbedProps>(
       <div className={`group relative w-full overflow-hidden rounded-lg bg-black ${className}`}>
         <div className="relative h-0 w-full pb-[177.78%]">
           {/* PRODUCTION SOLUTION: Conditional iframe rendering */}
-          {isPlaying ? (
+          {isCurrentlyPlaying ? (
             // Playing iframe with autoplay
             <BunnyIframe
               iframeKey={`playing-${iframeKey}`}
@@ -93,7 +109,7 @@ export const VideoEmbed = memo<VideoEmbedProps>(
           )}
 
           {/* Click overlay for play button */}
-          {!isPlaying && (
+          {!isCurrentlyPlaying && (
             <div
               className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center bg-black/20 transition-colors hover:bg-black/30"
               onClick={handlePlay}
@@ -114,7 +130,10 @@ export const VideoEmbed = memo<VideoEmbedProps>(
       </div>
     );
   },
-  (prevProps, nextProps) => prevProps.url === nextProps.url,
+  (prevProps, nextProps) => 
+    prevProps.url === nextProps.url && 
+    prevProps.videoId === nextProps.videoId && 
+    prevProps.isPlaying === nextProps.isPlaying,
 );
 
 VideoEmbed.displayName = "VideoEmbed";
