@@ -7,56 +7,66 @@ interface BunnyIframeProps {
   src: string;
   className?: string;
   iframeKey?: string | number;
+  videoId?: string;
 }
 
 // Lightweight wrapper around Bunny Stream iframe that listens for buffer stalls and nudges playback forward.
-export default function BunnyIframe({ src, className = "", iframeKey }: BunnyIframeProps) {
+export default function BunnyIframe({ src, className = "", iframeKey, videoId }: BunnyIframeProps) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
   useEffect(() => {
-    // Guard: wait until PlayerJS is loaded
     if (!iframeRef.current) return;
 
-    function handleScriptLoad() {
+    let playerInstance: any;
+    const handleScriptLoad = () => {
       // PlayerJS is a UMD lib that attaches to window.Player
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const Player = (window as any).Player;
       if (!Player || !iframeRef.current) return;
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
-      const p = new Player.Player(iframeRef.current);
+      playerInstance = new Player.Player(iframeRef.current);
 
       // Autoplay flows better on desktop; mute first to satisfy mobile policies
-      p.on("ready", () => {
+      playerInstance.on("ready", () => {
         try {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-          p.mute();
+          playerInstance.mute();
         } catch {
           /* ignored */
         }
       });
 
       // Handle buffer stalls by nudging 0.25s forward
-      p.on("bufferstalled", () => {
+      playerInstance.on("bufferstalled", () => {
         console.warn("🐇 [BunnyIframe] stall detected – skipping 0.25 s");
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        p.getCurrentTime((t: number) => {
+        playerInstance.getCurrentTime((t: number) => {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-          p.setCurrentTime(t + 0.25);
+          playerInstance.setCurrentTime(t + 0.25);
+          // ensure still playing
+          try {
+            playerInstance.play();
+          } catch {
+            /* ignored */
+          }
         });
       });
     }
 
-    if (typeof window !== "undefined" && !(window as any).Player) {
-      // Load PlayerJS once
-      const script = document.createElement("script");
-      script.src = "//assets.mediadelivery.net/playerjs/player-0.1.0.min.js";
-      script.async = true;
-      script.onload = handleScriptLoad;
-      document.body.appendChild(script);
-    } else {
+    if ((window as any).Player) {
       handleScriptLoad();
     }
+
+    return () => {
+      try {
+        if (playerInstance) {
+          playerInstance.destroy && playerInstance.destroy();
+        }
+      } catch {
+        /* ignored */
+      }
+    };
   }, [src]);
 
   return (
@@ -68,6 +78,7 @@ export default function BunnyIframe({ src, className = "", iframeKey }: BunnyIfr
         ref={iframeRef}
         src={src}
         className={className}
+        data-video-id={videoId}
         frameBorder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowFullScreen

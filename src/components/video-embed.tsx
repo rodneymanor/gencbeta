@@ -70,6 +70,7 @@ export const VideoEmbed = memo<VideoEmbedProps>(
             // Playing iframe with autoplay
             <BunnyIframe
               iframeKey={`playing-${iframeKey}`}
+              videoId={videoId}
               src={`${url}${url.includes("?") ? "&" : "?"}autoplay=true&metrics=false`}
               className="absolute inset-0 h-full w-full"
             />
@@ -78,6 +79,7 @@ export const VideoEmbed = memo<VideoEmbedProps>(
             <iframe
               key={`thumbnail-${iframeKey}`}
               src={`${url}${url.includes("?") ? "&" : "?"}metrics=false`}
+              data-video-id={videoId}
               className="absolute inset-0 h-full w-full"
               frameBorder="0"
               allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
