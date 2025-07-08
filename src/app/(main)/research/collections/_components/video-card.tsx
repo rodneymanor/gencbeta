@@ -110,10 +110,6 @@ export const VideoCard = memo<VideoCardProps>(
       }
     }, [onPlay, video.id]);
 
-    const handleHLSIssue = useCallback((issueType: string) => {
-      onHLSIssue?.(issueType);
-    }, [onHLSIssue]);
-
     return (
       <>
         <Card

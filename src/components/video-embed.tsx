@@ -5,6 +5,7 @@ import React, { useState, useCallback, useEffect, memo, useRef } from "react";
 import { Play, AlertTriangle, RefreshCw } from "lucide-react";
 
 import { useVideoPlaybackData, useVideoPlaybackAPI } from "@/contexts/video-playback-context";
+import { useFirefoxVideoManager } from "@/hooks/use-firefox-video-manager";
 import { useHLSBufferMonitor } from "@/hooks/use-hls-buffer-monitor";
 import { useHLSRecovery } from "@/hooks/use-hls-recovery";
 import { usePreemptiveBufferManagement } from "@/hooks/use-preemptive-buffer-management";
@@ -66,6 +67,44 @@ const renderErrorOverlay = (isRecovering: boolean, onRetry: () => void) => (
   </div>
 );
 
+// Helper function to render Firefox indicator
+const renderFirefoxIndicator = (isFirefox: boolean) => {
+  if (!isFirefox) return null;
+
+  return (
+    <div className="absolute bottom-2 right-2 z-10">
+      <div className="rounded-full bg-blue-500/80 px-2 py-1 text-xs text-white">
+        Firefox Mode
+      </div>
+    </div>
+  );
+};
+
+// Helper function to handle video play logic
+const handleVideoPlayLogic = async (
+  videoId: string,
+  setCurrentlyPlaying: (id: string) => void,
+  onPlay?: () => void,
+  isFirefox?: boolean,
+  forceStopAllVideos?: () => void
+) => {
+  console.log("🎬 [VideoEmbed] Starting smooth transition:", videoId.substring(0, 50) + "...");
+
+  // For Firefox, force stop all other videos first
+  if (isFirefox && forceStopAllVideos) {
+    console.log("🦊 [VideoEmbed] Firefox detected - forcing stop of all other videos");
+    forceStopAllVideos();
+  }
+
+  // Call external onPlay callback if provided
+  if (onPlay) {
+    onPlay();
+  } else {
+    // Fallback to context-based playback
+    setCurrentlyPlaying(videoId);
+  }
+};
+
 // BUNNY.NET ONLY VIDEO EMBED - Rejects all non-Bunny URLs
 export const VideoEmbed = memo<VideoEmbedProps>(
   ({ url, className = "", videoId: externalVideoId, isPlaying: externalIsPlaying, onPlay, preload = false }) => {
@@ -97,6 +136,16 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     const { bufferHealth } = usePreemptiveBufferManagement({
       videoRef: iframeRef,
       isPlaying: isCurrentlyPlaying
+    });
+
+    // Firefox video manager for handling Firefox-specific issues
+    const { forceStopAllVideos, isFirefox } = useFirefoxVideoManager({
+      videoId,
+      isPlaying: isCurrentlyPlaying,
+      onVideoStop: () => {
+        console.log("🦊 [VideoEmbed] Firefox video stop callback triggered");
+        setIsPlaying(false);
+      }
     });
 
     // Handle HLS recovery by recreating iframe
@@ -165,17 +214,10 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     // Handle video play
     const handlePlay = useCallback(async () => {
       if (!isCurrentlyPlaying && videoId) {
-        console.log("🎬 [VideoEmbed] Starting smooth transition:", videoId.substring(0, 50) + "...");
         setIsLoading(true);
         setHasError(false);
 
-        // Call external onPlay callback if provided
-        if (onPlay) {
-          onPlay();
-        } else {
-          // Fallback to context-based playback
-          await setCurrentlyPlaying(videoId);
-        }
+        await handleVideoPlayLogic(videoId, setCurrentlyPlaying, onPlay, isFirefox, forceStopAllVideos);
 
         // Small delay to allow buffer to build before showing controls
         setTimeout(() => {
@@ -183,7 +225,7 @@ export const VideoEmbed = memo<VideoEmbedProps>(
           setIsLoading(false);
         }, 800);
       }
-    }, [isCurrentlyPlaying, videoId, setCurrentlyPlaying, onPlay]);
+    }, [isCurrentlyPlaying, videoId, setCurrentlyPlaying, onPlay, isFirefox, forceStopAllVideos]);
 
     // PRODUCTION SOLUTION: Force iframe recreation when pausing
     useEffect(() => {
@@ -280,6 +322,9 @@ export const VideoEmbed = memo<VideoEmbedProps>(
               </div>
             </div>
           )}
+
+          {/* Firefox indicator (for debugging) */}
+          {renderFirefoxIndicator(isFirefox)}
         </div>
       </div>
     );

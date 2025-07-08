@@ -1,0 +1,23 @@
+import { Suspense } from "react";
+
+import { CollectionsSidebar } from "./_components/collections-sidebar";
+import { FirefoxVideoManager } from "@/components/firefox-video-manager";
+
+export default function CollectionsLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex h-full">
+      <CollectionsSidebar />
+      <div className="flex-1 overflow-hidden">
+        <Suspense fallback={<div>Loading...</div>}>
+          {children}
+        </Suspense>
+      </div>
+      {/* Global Firefox video manager for handling Firefox-specific issues */}
+      <FirefoxVideoManager />
+    </div>
+  );
+} 
