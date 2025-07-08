@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 
 import { MoreVertical, Trash2, ExternalLink, Clock, TrendingUp, Zap, RefreshCw } from "lucide-react";
 
@@ -25,7 +26,15 @@ import {
 import { auth } from "@/lib/firebase";
 
 import type { VideoWithPlayer } from "./collections-helpers";
-import { VideoInsightsDashboard } from "./video-insights-dashboard";
+
+// Lazy load the heavy Insights dashboard component on demand (CSR only)
+const VideoInsightsDashboard = dynamic(
+  () => import("./video-insights-dashboard").then((m) => m.VideoInsightsDashboard),
+  {
+    ssr: false,
+    loading: () => null, // render nothing while chunk is loading
+  }
+);
 
 // Legacy video type for backward compatibility
 type LegacyVideo = VideoWithPlayer & {
@@ -202,6 +211,7 @@ export const ActionButtons = ({ video }: { video: VideoWithPlayer }) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [insightsLoaded, setInsightsLoaded] = useState(false);
 
   // Debug: Log when ActionButtons component renders
   console.log("🔍 [ActionButtons] Component rendered with video:", video);
@@ -254,25 +264,31 @@ export const ActionButtons = ({ video }: { video: VideoWithPlayer }) => {
     }
   }, [video.iframeUrl, video.isPlaying]);
 
+  // Predefine the Insights button so we can reuse it
+  const insightsButton = (
+    <Button
+      size="sm"
+      variant="outline"
+      onClick={() => {
+        console.log("🔍 [ActionButtons] Insights button clicked!");
+        console.log("🔍 [ActionButtons] Video data being passed to insights:", video);
+        setInsightsLoaded(true);
+      }}
+      className="border-border/60 hover:bg-accent/50 h-8 rounded-md px-3 text-xs shadow-sm transition-all duration-200 hover:shadow-md"
+    >
+      <TrendingUp className="mr-1.5 h-3.5 w-3.5" />
+      Insights
+    </Button>
+  );
+
   return (
     <>
       <div className="flex items-center justify-center gap-2">
-        <VideoInsightsDashboard video={video}>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              console.log("🔍 [ActionButtons] Insights button clicked!");
-              console.log("🔍 [ActionButtons] Video data being passed to insights:", video);
-              console.log("🔍 [ActionButtons] Video metrics:", video.metrics);
-              console.log("🔍 [ActionButtons] Video metadata:", video.metadata);
-            }}
-            className="border-border/60 hover:bg-accent/50 h-8 rounded-md px-3 text-xs shadow-sm transition-all duration-200 hover:shadow-md"
-          >
-            <TrendingUp className="mr-1.5 h-3.5 w-3.5" />
-            Insights
-          </Button>
-        </VideoInsightsDashboard>
+        {insightsLoaded ? (
+          <VideoInsightsDashboard video={video}>{insightsButton}</VideoInsightsDashboard>
+        ) : (
+          insightsButton
+        )}
         <Button
           size="sm"
           variant="outline"
