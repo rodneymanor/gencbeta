@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { MoreVertical, Trash2, ExternalLink, Clock, TrendingUp, Zap, RefreshCw } from "lucide-react";
 
@@ -236,6 +236,24 @@ export const ActionButtons = ({ video }: { video: VideoWithPlayer }) => {
     }
   };
 
+  useEffect(() => {
+    if (video.iframeUrl && !video.isPlaying) {
+      const preloadFrame = document.createElement("iframe");
+      preloadFrame.src = buildOptimizedIframeUrl(video.iframeUrl);
+      preloadFrame.style.display = "none";
+      document.body.appendChild(preloadFrame);
+      const timer = window.setTimeout(() => {
+        document.body.removeChild(preloadFrame);
+      }, 30000);
+      return () => {
+        window.clearTimeout(timer);
+        if (preloadFrame.parentElement) {
+          preloadFrame.parentElement.removeChild(preloadFrame);
+        }
+      };
+    }
+  }, [video.iframeUrl, video.isPlaying]);
+
   return (
     <>
       <div className="flex items-center justify-center gap-2">
@@ -341,4 +359,14 @@ export const getVideoUrl = (video: LegacyVideo): string => {
 
   console.log("❌ [VideoCard] No valid URL found - returning empty string");
   return "";
+};
+
+// Build optimized iframe url with extra params
+const buildOptimizedIframeUrl = (base: string): string => {
+  const url = new URL(base);
+  url.searchParams.set("preload", "auto");
+  url.searchParams.set("buffering", "aggressive");
+  url.searchParams.set("retry", "3");
+  url.searchParams.set("timeout", "10000");
+  return url.toString();
 };
