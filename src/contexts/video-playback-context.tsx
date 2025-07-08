@@ -19,19 +19,18 @@ export const VideoPlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
   const [currentlyPlayingId, setCurrentlyPlayingId] = useState<string | null>(null);
 
   // PRODUCTION SOLUTION: Enhanced pause all function
-  const pauseAllVideos = useCallback(() => {
-    console.log("⏸️ [VideoPlayback] Pausing all videos");
+  const pauseAllVideos = useCallback((excludeId?: string) => {
+    console.log("⏸️ [VideoPlayback] Pausing all videos", excludeId ? `(excluding ${excludeId})` : "");
 
-    // Pause all HTML5 video elements
-    document.querySelectorAll("video").forEach((video) => {
-      if (!video.paused) {
+    // Pause all HTML5 video elements except the one we are about to play
+    document.querySelectorAll<HTMLVideoElement>("video").forEach((video) => {
+      const vidId = video.dataset.videoId;
+      if (!video.paused && (!excludeId || vidId !== excludeId)) {
         video.pause();
       }
     });
 
-    // For Bunny.net iframes: The VideoEmbed components will handle iframe recreation
-    // via their useEffect when currentlyPlayingId changes
-    // This is more reliable than postMessage to iframes with different origins
+    // Bunny.net iframes are handled by VideoEmbed recreating the iframe when currentlyPlayingId changes
   }, []);
 
   // OPTIMIZED: Simple setCurrentlyPlaying without complex async operations
@@ -44,7 +43,7 @@ export const VideoPlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
 
       // Pause other videos when starting a new one
       if (videoId && videoId !== currentlyPlayingId) {
-        pauseAllVideos();
+        pauseAllVideos(videoId);
       }
 
       setCurrentlyPlayingId(videoId);
