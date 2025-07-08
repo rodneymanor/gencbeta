@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
         processedCount++;
 
         // Add a small delay between requests to be kind to our services
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 5000));
       } catch (error) {
         console.error(`❌ [REPROCESS_ALL] Failed to reprocess video ${videoId}:`, error);
         failedCount++;
