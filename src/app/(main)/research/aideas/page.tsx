@@ -1,5 +1,8 @@
 "use client";
 
+// Force dynamic rendering so Next.js doesn't try to statically pre-render a page that relies on client-side hooks.
+export const dynamic = "force-dynamic";
+
 import { useState, Suspense } from "react";
 
 import { TrendingUp, Sparkles, FolderPlus, Zap } from "lucide-react";
@@ -54,10 +57,6 @@ const mockInspirations = [
     trending: true,
   },
 ];
-
-// Force dynamic rendering so Next.js doesn't try to statically pre-render
-// a page that relies on client-side hooks like useSearchParams.
-export const dynamic = "force-dynamic";
 
 function IdeasContent() {
   const [categoryFilter, setCategoryFilter] = useState("all");
