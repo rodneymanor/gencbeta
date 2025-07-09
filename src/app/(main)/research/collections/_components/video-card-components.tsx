@@ -74,11 +74,11 @@ export const VideoActionsDropdown = ({ onDelete }: { onDelete: () => void }) => 
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
       <Button
-        variant="secondary"
+        variant="ghost"
         size="sm"
-        className="bg-background/90 border-border/60 hover:bg-background h-8 w-8 p-0 shadow-sm backdrop-blur-sm"
+        className="bg-transparent hover:bg-white/10 h-8 w-8 p-0 border-0 shadow-none"
       >
-        <MoreVertical className="h-4 w-4" />
+        <MoreVertical className="h-4 w-4 text-white" />
         <span className="sr-only">Video options</span>
       </Button>
     </DropdownMenuTrigger>
