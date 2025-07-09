@@ -9,7 +9,6 @@ import { useFirefoxVideoManager } from "@/hooks/use-firefox-video-manager";
 import { useHLSBufferMonitor } from "@/hooks/use-hls-buffer-monitor";
 import { useHLSRecovery } from "@/hooks/use-hls-recovery";
 import { usePreemptiveBufferManagement } from "@/hooks/use-preemptive-buffer-management";
-import { generateBunnyThumbnailUrl, isBunnyUrl, buildIframeSrc } from "@/lib/video-utils";
 
 import BunnyIframe from "./bunny-iframe";
 
@@ -20,8 +19,22 @@ interface VideoEmbedProps {
   isPlaying?: boolean; // Add isPlaying prop for external control
   onPlay?: () => void; // Add onPlay callback for external control
   preload?: boolean; // Add preload prop for better performance
-  thumbnailUrl?: string; // Add thumbnailUrl prop for thumbnail support
+  thumbnailUrl?: string; // Bunny thumbnail URL
 }
+
+// Helper function to build iframe src URL
+const buildIframeSrc = (baseUrl: string, params: Record<string, string>) => {
+  const separator = baseUrl.includes("?") ? "&" : "?";
+  const paramString = Object.entries(params)
+    .map(([key, value]) => `${key}=${value}`)
+    .join("&");
+  return `${baseUrl}${separator}${paramString}`;
+};
+
+// Helper function to check if URL is from Bunny
+const isBunnyUrl = (url: string) => {
+  return url && (url.includes("iframe.mediadelivery.net") || url.includes("bunnycdn.com") || url.includes("b-cdn.net"));
+};
 
 // Helper function to create preload iframe (disabled for Firefox)
 const createPreloadIframe = (url: string, videoId: string, isFirefox: boolean) => {
@@ -81,20 +94,19 @@ const handleVideoPlayLogic = async (
   isFirefox?: boolean,
   forceStopAllVideos?: () => void
 ) => {
-  console.log("🎬 [VideoEmbed] Starting smooth transition:", videoId.substring(0, 50) + "...");
-
-  // For Firefox, force stop all other videos first
-  if (isFirefox && forceStopAllVideos) {
-    console.log("🦊 [VideoEmbed] Firefox detected - forcing stop of all other videos");
-    forceStopAllVideos();
-  }
-
-  // Call external onPlay callback if provided
+  console.log("🎬 [VideoEmbed] Starting video:", videoId.substring(0, 50) + "...");
+  
+  // Direct callback execution
   if (onPlay) {
     onPlay();
   } else {
-    // Fallback to context-based playback
     setCurrentlyPlaying(videoId);
+  }
+  
+  // Firefox handling - run after play, not during
+  if (isFirefox && forceStopAllVideos) {
+    console.log("🦊 [VideoEmbed] Firefox - cleaning up other videos");
+    setTimeout(() => forceStopAllVideos(), 200);
   }
 };
 
@@ -122,26 +134,6 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     // Firefox detection - disable preloading for Firefox
     const isFirefox = useMemo(() => navigator.userAgent.includes('Firefox'), []);
     const effectivePreload = isFirefox ? false : preload;
-
-    // Generate thumbnail URL if not provided
-    const effectiveThumbnailUrl = useMemo(() => {
-      if (thumbnailUrl) {
-        return thumbnailUrl;
-      }
-      
-      // Try to generate a Bunny.net thumbnail URL from the video URL
-      if (url && url.includes('iframe.mediadelivery.net')) {
-        // Extract the video ID from the Bunny.net URL
-        const match = url.match(/\/embed\/([^\/\?]+)/);
-        if (match) {
-          const videoId = match[1];
-          // Generate thumbnail URL using Bunny.net's thumbnail service
-          return `https://iframe.mediadelivery.net/embed/thumbnails/${videoId}.jpg`;
-        }
-      }
-      
-      return null;
-    }, [thumbnailUrl, url]);
 
     // Enhanced HLS monitoring and recovery
     const { attemptRecovery, recoveryAttempts, maxAttempts } = useHLSRecovery({
@@ -200,9 +192,9 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     });
 
     // Firefox-aware iframe parameters
-    const getIframeParams = useCallback((playing: boolean) => {
+    const getIframeParams = useCallback((playing: boolean): Record<string, string> => {
       if (playing) {
-        return { metrics: 'false', autoplay: 'true', muted: 'true' };
+        return { metrics: 'false', autoplay: 'true', muted: 'true', preload: 'true' };
       }
       // For non-playing videos, explicitly set autoplay=false and preload=none for Firefox
       return isFirefox 
@@ -254,33 +246,54 @@ export const VideoEmbed = memo<VideoEmbedProps>(
       return handlePreloadLogic();
     }, [handlePreloadLogic]);
 
-    // Handle video play
+    // Simplified video play handler - no delays, immediate response
     const handlePlay = useCallback(async () => {
       if (!isCurrentlyPlaying && videoId) {
+        console.log("🎬 [VideoEmbed] Starting video play:", videoId);
+        
+        // Set loading state immediately
         setIsLoading(true);
         setHasError(false);
-
-        await handleVideoPlayLogic(videoId, setCurrentlyPlaying, onPlay, isFirefox, forceStopAllVideos);
-
-        // Small delay to allow buffer to build before showing controls
-        setTimeout(() => {
+        
+        try {
+          // Direct state update - no complex logic
+          if (onPlay) {
+            onPlay();
+          } else {
+            setCurrentlyPlaying(videoId);
+          }
+          
+          // Firefox handling - but don't let it block play
+          if (isFirefox && forceStopAllVideos) {
+            console.log("🦊 [VideoEmbed] Firefox - stopping other videos");
+            // Run this after our video starts, not before
+            setTimeout(() => forceStopAllVideos(), 100);
+          }
+          
+          // Immediate state update - no 800ms delay
           setIsPlaying(true);
           setIsLoading(false);
-        }, 800);
+          
+        } catch (error) {
+          console.error("❌ [VideoEmbed] Play failed:", error);
+          setHasError(true);
+          setIsLoading(false);
+        }
       }
     }, [isCurrentlyPlaying, videoId, setCurrentlyPlaying, onPlay, isFirefox, forceStopAllVideos]);
 
-    // PRODUCTION SOLUTION: Force iframe recreation when pausing
+    // Improved state management - immediate updates
     useEffect(() => {
       if (externalIsPlaying !== undefined) {
-        // External control mode
+        // External control mode - immediate update
         setIsPlaying(externalIsPlaying);
         setIsLoading(false);
       } else if (currentlyPlayingId !== videoId && isPlaying) {
-        // Context control mode
-        console.log("⏸️ [VideoEmbed] Force stopping Bunny video by recreating iframe");
+        // Context control mode - immediate stop
+        console.log("⏸️ [VideoEmbed] Stopping video immediately");
         setIsPlaying(false);
         setIsLoading(false);
+        // No iframe recreation needed - just stop
       }
     }, [currentlyPlayingId, videoId, isPlaying, externalIsPlaying]);
 
@@ -300,34 +313,26 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     return (
       <div className={`group relative w-full overflow-hidden rounded-lg bg-black ${className}`}>
         <div className="relative h-0 w-full pb-[177.78%]">
-          {/* Show thumbnail when not playing */}
-          {!isCurrentlyPlaying && effectiveThumbnailUrl && (
-            <div className="absolute inset-0 z-5">
-              <img
-                src={effectiveThumbnailUrl}
-                alt="Video thumbnail"
-                className="h-full w-full object-cover"
-                onError={(e) => {
-                  console.warn("🖼️ [VideoEmbed] Thumbnail failed to load:", effectiveThumbnailUrl);
-                  // Hide the thumbnail if it fails to load
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
-            </div>
+          {/* Render thumbnail image when not playing, iframe when playing */}
+          {isCurrentlyPlaying ? (
+            <iframe
+              key={`video-${iframeKey}`}
+              ref={iframeRef}
+              src={iframeSrc}
+              data-video-id={videoId}
+              className="absolute inset-0 h-full w-full"
+              frameBorder="0"
+              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              loading="lazy"
+            />
+          ) : (
+            <img
+              src={thumbnailUrl ?? ''}
+              alt="Video thumbnail"
+              className="absolute inset-0 h-full w-full object-cover"
+            />
           )}
-
-          {/* Single iframe with dynamic src instead of conditional rendering */}
-          <iframe
-            key={`video-${iframeKey}`}
-            ref={iframeRef}
-            src={iframeSrc}
-            data-video-id={videoId}
-            className="absolute inset-0 h-full w-full"
-            frameBorder="0"
-            allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            loading="lazy"
-          />
 
           {/* Click overlay for play button */}
           {!isCurrentlyPlaying && !hasError && (
@@ -370,9 +375,6 @@ export const VideoEmbed = memo<VideoEmbedProps>(
               </div>
             </div>
           )}
-
-          {/* Firefox indicator (for debugging) */}
-          {renderFirefoxIndicator(isFirefox)}
         </div>
       </div>
     );
@@ -381,8 +383,7 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     prevProps.url === nextProps.url &&
     prevProps.videoId === nextProps.videoId &&
     prevProps.isPlaying === nextProps.isPlaying &&
-    prevProps.preload === nextProps.preload &&
-    prevProps.thumbnailUrl === nextProps.thumbnailUrl,
+    prevProps.preload === nextProps.preload,
 );
 
 VideoEmbed.displayName = "VideoEmbed";

@@ -22,8 +22,6 @@ export const VideoGrid = ({ collectionId, collection, videos }: VideoGridProps) 
   const [selectedVideos, setSelectedVideos] = useState<Set<string>>(new Set());
   const [deletingVideos, setDeletingVideos] = useState<Set<string>>(new Set());
   const [visibleVideos, setVisibleVideos] = useState<Set<string>>(new Set());
-  const lastPlayTime = useRef<number>(0);
-  const cooldownRef = useRef<NodeJS.Timeout | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   // Firefox video manager for handling Firefox-specific issues
@@ -41,60 +39,20 @@ export const VideoGrid = ({ collectionId, collection, videos }: VideoGridProps) 
     setIsFirefox(navigator.userAgent.includes('Firefox'));
   }, []);
 
-  // Enhanced video play handler with cooldown and Firefox support
+  // Simplified video play handler - no cooldown, immediate response
   const handleVideoPlay = useCallback((videoId: string) => {
-    const now = Date.now();
-    const timeSinceLastPlay = now - lastPlayTime.current;
-
-    // Cooldown check (3.5 seconds)
-    if (timeSinceLastPlay < 3500) {
-      console.log("⏳ [VideoGrid] Cooldown active, ignoring video play request");
-      return;
-    }
-
-    // Clear any existing cooldown
-    if (cooldownRef.current) {
-      clearTimeout(cooldownRef.current);
-    }
-
     console.log("🎬 [VideoGrid] Playing video:", videoId);
-
-    // CRITICAL: Stop all other videos before starting new one
-    if (currentlyPlayingId && currentlyPlayingId !== videoId) {
-      console.log("🛑 [VideoGrid] Stopping currently playing video:", currentlyPlayingId);
-      // Force stop the current video first
-      setCurrentlyPlayingId(null);
-      
-      // Add a small delay to ensure the current video stops
-      setTimeout(() => {
-        setCurrentlyPlayingId(videoId);
-        lastPlayTime.current = Date.now();
-      }, 100);
-    } else {
+    
+    // Simple, immediate state update - no cooldown, no delays
+    if (currentlyPlayingId !== videoId) {
       setCurrentlyPlayingId(videoId);
-      lastPlayTime.current = now;
     }
-
-    // For Firefox, force stop all other videos first
+    
+    // Firefox-specific handling (if needed) - but don't interfere with the play
     if (isFirefox) {
-      console.log("🦊 [VideoGrid] Firefox detected - forcing stop of all other videos");
-      forceStopAllVideos();
+      console.log("🦊 [VideoGrid] Firefox detected - will handle in video component");
     }
-
-    // Set cooldown
-    cooldownRef.current = setTimeout(() => {
-      console.log("✅ [VideoGrid] Cooldown expired");
-    }, 3500);
-  }, [isFirefox, forceStopAllVideos, currentlyPlayingId]);
-
-  // Cleanup cooldown on unmount
-  useEffect(() => {
-    return () => {
-      if (cooldownRef.current) {
-        clearTimeout(cooldownRef.current);
-      }
-    };
-  }, []);
+  }, [currentlyPlayingId, isFirefox]);
 
   // Convert videos to VideoWithPlayer format
   const videosWithPlayer: VideoWithPlayer[] = useMemo(() => {
@@ -168,31 +126,34 @@ export const VideoGrid = ({ collectionId, collection, videos }: VideoGridProps) 
 
   return (
     <div className="grid grid-cols-1 gap-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
-      {videosWithPlayer.map((video, index) => (
-        <div key={video.id} data-video-id={video.id}>
-          <VideoCard
-            video={video}
-            isManageMode={isManageMode}
-            isSelected={selectedVideos.has(video.id)}
-            isDeleting={deletingVideos.has(video.id)}
-            onToggleSelection={() => {
-              const newSelected = new Set(selectedVideos);
-              if (newSelected.has(video.id)) {
-                newSelected.delete(video.id);
-              } else {
-                newSelected.add(video.id);
-              }
-              setSelectedVideos(newSelected);
-            }}
-            onDelete={() => {
-              console.log("🗑️ [VideoGrid] Delete video:", video.id);
-              // TODO: Implement actual deletion
-            }}
-            isPlaying={currentlyPlayingId === video.id}
-            onPlay={handleVideoPlay}
-          />
-        </div>
-      ))}
+      {videosWithPlayer.map((video, index) => {
+        const videoId = video.id ?? "";
+        return (
+          <div key={videoId} data-video-id={videoId}>
+            <VideoCard
+              video={video}
+              isManageMode={isManageMode}
+              isSelected={selectedVideos.has(videoId)}
+              isDeleting={deletingVideos.has(videoId)}
+              onToggleSelection={() => {
+                const newSelected = new Set(selectedVideos);
+                if (newSelected.has(videoId)) {
+                  newSelected.delete(videoId);
+                } else {
+                  newSelected.add(videoId);
+                }
+                setSelectedVideos(newSelected);
+              }}
+              onDelete={() => {
+                console.log("🗑️ [VideoGrid] Delete video:", videoId);
+                // TODO: Implement actual deletion
+              }}
+              isPlaying={currentlyPlayingId === videoId}
+              onPlay={handleVideoPlay}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 };

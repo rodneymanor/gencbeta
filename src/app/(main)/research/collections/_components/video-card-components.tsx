@@ -377,6 +377,47 @@ export const getVideoUrl = (video: LegacyVideo): string => {
   return "";
 };
 
+// Helper function to build Bunny Stream thumbnail URL
+export const getThumbnailUrl = (video: VideoWithPlayer): string | null => {
+  // If we already have a thumbnailUrl field, use it
+  if (video.thumbnailUrl) {
+    return video.thumbnailUrl;
+  }
+
+  // Try to derive from directUrl (preferred)
+  if (video.directUrl && video.directUrl.includes(".b-cdn.net")) {
+    try {
+      const url = new URL(video.directUrl);
+      const host = url.host; // e.g. vz-8416c36e-556.b-cdn.net
+      const parts = url.pathname.split("/").filter(Boolean); // [guid, ...]
+      if (parts.length > 0) {
+        const guid = parts[0];
+        return `https://${host}/${guid}/thumbnail.jpg`;
+      }
+    } catch (error) {
+      console.log("❌ [Thumbnail] Failed to parse directUrl:", video.directUrl);
+    }
+  }
+
+  // Fallback: Try to derive from iframeUrl if it contains mediadelivery.net pattern
+  if (video.iframeUrl && video.iframeUrl.includes("iframe.mediadelivery.net")) {
+    try {
+      const url = new URL(video.iframeUrl);
+      const parts = url.pathname.split("/").filter(Boolean); // [embed, libraryId, guid]
+      if (parts.length === 3) {
+        const libraryId = parts[1];
+        const guid = parts[2];
+        // Bunny's default CDN domain pattern for libraries
+        return `https://vz-${libraryId}.b-cdn.net/${guid}/thumbnail.jpg`;
+      }
+    } catch (error) {
+      console.log("❌ [Thumbnail] Failed to parse iframeUrl:", video.iframeUrl);
+    }
+  }
+
+  return null; // No thumbnail found
+};
+
 // Build iframe URL with only Bunny-supported query parameters
 const getValidIframeUrl = (base: string): string => {
   const url = new URL(base);

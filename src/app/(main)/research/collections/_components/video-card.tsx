@@ -17,6 +17,7 @@ import {
   PlatformBadge,
   HoverActions,
   getVideoUrl,
+  getThumbnailUrl,
 } from "./video-card-components";
 import { VideoInsightsDashboard } from "./video-insights-dashboard";
 
@@ -96,24 +97,21 @@ export const VideoCard = memo<VideoCardProps>(
     const isFirefox = useMemo(() => navigator.userAgent.includes('Firefox'), []);
     const effectivePreload = isFirefox ? false : true;
 
-    // Debug: Log when VideoCard component renders
-    console.log("🔍 [VideoCard] Component rendered with video:", video);
-    console.log("🔍 [VideoCard] Video ID:", video.id);
-    console.log("🔍 [VideoCard] Video title:", video.title);
-    console.log("🔍 [VideoCard] Video metrics:", video.metrics);
-    console.log("🔍 [VideoCard] Video metadata:", video.metadata);
-    console.log("🦊 [VideoCard] Firefox detected:", isFirefox, "Preload enabled:", effectivePreload);
-
     const baseClassName = `w-[240px] p-3 rounded-xl group relative transition-all duration-200 hover:shadow-lg border-border/50 hover:border-border ${className}`;
     const cardClassName = buildCardClassName(baseClassName, isSelected, isDeleting, hasHLSIssue);
 
     const showActions = (isHovered || isManageMode) && !isDeleting;
 
     const handlePlay = useCallback(() => {
-      if (onPlay && video.id) {
-        onPlay(video.id);
+      if (!isPlaying && video.id) {
+        console.log("🎬 [VideoCard] Direct play request");
+        onPlay?.(video.id);
+      } else if (isPlaying) {
+        console.log("⏸️ [VideoCard] Video already playing");
       }
-    }, [onPlay, video.id]);
+    }, [isPlaying, onPlay, video.id]);
+
+    const thumbnailUrl = getThumbnailUrl(video);
 
     return (
       <>
@@ -138,7 +136,7 @@ export const VideoCard = memo<VideoCardProps>(
               isPlaying={isPlaying}
               onPlay={handlePlay}
               preload={effectivePreload}
-              thumbnailUrl={video.thumbnailUrl}
+              thumbnailUrl={thumbnailUrl ?? undefined}
               className="absolute inset-0 h-full w-full"
             />
 
