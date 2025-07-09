@@ -1,6 +1,6 @@
 "use client";
 
-import { Settings, Trash2, Plus, CheckSquare, X, MoreVertical } from "lucide-react";
+import { Settings, Trash2, Plus, CheckSquare, X, MoreVertical, MoveRight } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { type Collection } from "@/lib/collections";
 
 import { AddVideoDialog } from "./add-video-dialog";
 import { CreateCollectionDialog } from "./create-collection-dialog";
+import { MoveCopyVideosDialog } from "./move-copy-videos-dialog";
 
 interface ManageModeHeaderProps {
   manageMode: boolean;
@@ -31,16 +32,22 @@ interface ManageModeHeaderProps {
 
 const ManageModeControls = ({
   selectedVideos,
+  collections,
+  currentCollectionId,
   onClearSelection,
   onSelectAll,
   onBulkDelete,
   onExitManageMode,
+  onActionCompleted,
 }: {
   selectedVideos: Set<string>;
+  collections: Collection[];
+  currentCollectionId: string | null;
   onClearSelection: () => void;
   onSelectAll: () => void;
   onBulkDelete: () => void;
   onExitManageMode: () => void;
+  onActionCompleted: () => void;
 }) => (
   <div className="flex items-center gap-3">
     <div className="bg-secondary/40 border-border/60 flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium shadow-xs">
@@ -70,15 +77,33 @@ const ManageModeControls = ({
         Clear
       </Button>
       {selectedVideos.size > 0 && (
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={onBulkDelete}
-          className="shadow-xs transition-all duration-200 hover:shadow-sm"
-        >
-          <Trash2 className="mr-2 h-4 w-4" />
-          Delete ({selectedVideos.size})
-        </Button>
+        <>
+          <MoveCopyVideosDialog
+            collections={collections}
+            selectedVideos={Array.from(selectedVideos)}
+            currentCollectionId={currentCollectionId}
+            onCompleted={onActionCompleted}
+          >
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 shadow-xs transition-all duration-200 hover:shadow-sm"
+            >
+              <MoveRight className="mr-1.5 h-3.5 w-3.5" />
+              Move/Copy
+            </Button>
+          </MoveCopyVideosDialog>
+
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={onBulkDelete}
+            className="shadow-xs transition-all duration-200 hover:shadow-sm"
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete ({selectedVideos.size})
+          </Button>
+        </>
       )}
     </div>
 
@@ -168,10 +193,13 @@ export const ManageModeHeader = ({
     return (
       <ManageModeControls
         selectedVideos={selectedVideos}
+        collections={collections}
+        currentCollectionId={selectedCollectionId}
         onClearSelection={onClearSelection}
         onSelectAll={onSelectAll}
         onBulkDelete={onBulkDelete}
         onExitManageMode={onExitManageMode}
+        onActionCompleted={onVideoAdded}
       />
     );
   }

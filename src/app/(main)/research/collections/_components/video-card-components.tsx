@@ -1,9 +1,11 @@
+/* eslint-disable max-lines */
 "use client";
 
 import { useState, useEffect } from "react";
+
 import dynamic from "next/dynamic";
 
-import { MoreVertical, Trash2, ExternalLink, Clock, TrendingUp, Zap, RefreshCw } from "lucide-react";
+import { MoreVertical, Trash2, ExternalLink, Clock, TrendingUp, Zap, RefreshCw, MoveRight, Copy } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -33,7 +35,7 @@ const VideoInsightsDashboard = dynamic(
   {
     ssr: false,
     loading: () => null, // render nothing while chunk is loading
-  }
+  },
 );
 
 // Legacy video type for backward compatibility
@@ -70,19 +72,27 @@ export const ComingSoonModal = ({
 );
 
 // Video actions dropdown component to reduce complexity
-export const VideoActionsDropdown = ({ onDelete }: { onDelete: () => void }) => (
+export const VideoActionsDropdown = ({
+  onDelete,
+  onMoveVideo,
+  onCopyVideo,
+}: {
+  onDelete: () => void;
+  onMoveVideo?: () => void;
+  onCopyVideo?: () => void;
+}) => (
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
       <Button
         variant="ghost"
         size="sm"
-        className="bg-transparent hover:bg-white/10 h-8 w-8 p-0 border-0 shadow-none pointer-events-auto"
+        className="pointer-events-auto h-8 w-8 border-0 bg-transparent p-0 shadow-none hover:bg-white/10"
         onClick={(e) => {
           e.stopPropagation();
           e.preventDefault();
         }}
       >
-        <MoreVertical className="h-4 w-4 text-white pointer-events-none" />
+        <MoreVertical className="pointer-events-none h-4 w-4 text-white" />
         <span className="sr-only">Video options</span>
       </Button>
     </DropdownMenuTrigger>
@@ -91,6 +101,18 @@ export const VideoActionsDropdown = ({ onDelete }: { onDelete: () => void }) => 
         <ExternalLink className="h-4 w-4" />
         View Original
       </DropdownMenuItem>
+      {onMoveVideo && (
+        <DropdownMenuItem className="cursor-pointer gap-2" onClick={onMoveVideo}>
+          <MoveRight className="h-4 w-4" />
+          Move to Collection
+        </DropdownMenuItem>
+      )}
+      {onCopyVideo && (
+        <DropdownMenuItem className="cursor-pointer gap-2" onClick={onCopyVideo}>
+          <Copy className="h-4 w-4" />
+          Copy to Collection
+        </DropdownMenuItem>
+      )}
       <DropdownMenuSeparator />
       <DropdownMenuItem className="text-destructive focus:text-destructive cursor-pointer gap-2" onClick={onDelete}>
         <Trash2 className="h-4 w-4" />
@@ -201,12 +223,22 @@ export const DurationBadge = ({ duration }: { duration?: number }) => {
   );
 };
 
-export const HoverActions = ({ showActions, onDelete }: { showActions: boolean; onDelete: () => void }) => {
+export const HoverActions = ({
+  showActions,
+  onDelete,
+  onMoveVideo,
+  onCopyVideo,
+}: {
+  showActions: boolean;
+  onDelete: () => void;
+  onMoveVideo?: () => void;
+  onCopyVideo?: () => void;
+}) => {
   if (!showActions) return null;
 
   return (
-    <div className="absolute top-3 left-3 z-30 pointer-events-auto opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-      <VideoActionsDropdown onDelete={onDelete} />
+    <div className="pointer-events-auto absolute top-3 left-3 z-30 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+      <VideoActionsDropdown onDelete={onDelete} onMoveVideo={onMoveVideo} onCopyVideo={onCopyVideo} />
     </div>
   );
 };
@@ -330,8 +362,8 @@ export const VideoMetadata = ({ video }: { video: VideoWithPlayer }) => (
   <div className="space-y-3">
     <div className="space-y-1">
       <h3 className="text-sm leading-tight font-semibold">{video.title}</h3>
-      {video.description && (
-        <p className="text-muted-foreground line-clamp-2 text-xs leading-relaxed">{video.description}</p>
+      {video.metadata?.description && (
+        <p className="text-muted-foreground line-clamp-2 text-xs leading-relaxed">{video.metadata.description}</p>
       )}
     </div>
 
@@ -343,9 +375,9 @@ export const VideoMetadata = ({ video }: { video: VideoWithPlayer }) => (
           <span>{video.duration}</span>
         </div>
       )}
-      {video.views && (
+      {video.metrics?.views && (
         <div className="text-muted-foreground">
-          <span>{video.views.toLocaleString()} views</span>
+          <span>{video.metrics.views.toLocaleString()} views</span>
         </div>
       )}
     </div>

@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import {
   collection,
   doc,
@@ -9,6 +10,8 @@ import {
   orderBy,
   serverTimestamp,
   writeBatch,
+  limit,
+  Timestamp,
 } from "firebase/firestore";
 
 import {
@@ -388,6 +391,45 @@ export class CollectionsService {
     } catch (error) {
       console.error("Error moving video:", error);
       throw new Error("Failed to move video");
+    }
+  }
+
+  /**
+   * Copy a video to another collection (duplicates the video document)
+   */
+  static async copyVideo(userId: string, videoId: string, targetCollectionId: string): Promise<string> {
+    try {
+      const ownership = await verifyVideoOwnership(userId, videoId);
+      if (!ownership.exists || !ownership.data) {
+        throw new Error("Video not found");
+      }
+
+      const videoData = ownership.data as Video;
+
+      // Verify access to target collection
+      if (targetCollectionId !== "all-videos") {
+        await verifyCollectionOwnership(userId, targetCollectionId);
+      }
+
+      // Prepare new video doc
+      const batch = writeBatch(db);
+      const newVideoRef = doc(collection(db, this.VIDEOS_PATH));
+
+      batch.set(newVideoRef, {
+        ...videoData,
+        collectionId: targetCollectionId === "all-videos" ? "all-videos" : targetCollectionId,
+        addedAt: serverTimestamp(),
+      });
+
+      // Update target collection count (not for all-videos)
+      await updateCollectionVideoCount(batch, targetCollectionId, userId, 1);
+
+      await batch.commit();
+
+      return newVideoRef.id;
+    } catch (error) {
+      console.error("Error copying video:", error);
+      throw new Error("Failed to copy video");
     }
   }
 

@@ -2,6 +2,7 @@
 
 import { MoreHorizontal, Trash2, Edit3, FolderOpen } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,19 +10,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth-context";
 import { type Collection } from "@/lib/collections";
 
 import { DeleteCollectionDialog } from "./delete-collection-dialog";
+import { EditCollectionDialog } from "./edit-collection-dialog";
 
 interface CollectionBadgeMenuProps {
   collection: Collection;
   onCollectionDeleted: () => void;
+  onCollectionUpdated?: () => void;
   className?: string;
 }
 
-export function CollectionBadgeMenu({ collection, onCollectionDeleted, className = "" }: CollectionBadgeMenuProps) {
+export function CollectionBadgeMenu({
+  collection,
+  onCollectionDeleted,
+  onCollectionUpdated,
+  className = "",
+}: CollectionBadgeMenuProps) {
   const { userProfile } = useAuth();
   const isAdmin = userProfile?.role === "coach" || userProfile?.role === "super_admin";
 
@@ -47,10 +54,12 @@ export function CollectionBadgeMenu({ collection, onCollectionDeleted, className
           <FolderOpen className="h-4 w-4" />
           View Details
         </DropdownMenuItem>
-        <DropdownMenuItem className="gap-2">
-          <Edit3 className="h-4 w-4" />
-          Edit Collection
-        </DropdownMenuItem>
+        <EditCollectionDialog collection={collection} onCollectionUpdated={onCollectionUpdated ?? (() => {})}>
+          <DropdownMenuItem className="gap-2" onSelect={(e) => e.preventDefault()}>
+            <Edit3 className="h-4 w-4" />
+            Edit Collection
+          </DropdownMenuItem>
+        </EditCollectionDialog>
         <DropdownMenuSeparator />
         <DeleteCollectionDialog collection={collection} onCollectionDeleted={onCollectionDeleted}>
           <DropdownMenuItem

@@ -1,6 +1,275 @@
 # System Patterns
 
-## 🎉 **NEW: Production-Ready Usage Tracking System** (January 2, 2025)
+## 🎉 **NEW: Video Collection System Architecture** (January 2025)
+
+### Video Playback Management Pattern
+
+#### **Single Video Enforcement System**
+**Problem**: Multiple videos playing simultaneously when switching between videos.
+**Solution**: Comprehensive video management with cross-browser compatibility.
+
+```typescript
+// Video management hook with single video enforcement
+export function useVideoManager() {
+  const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
+  const [iframeKey, setIframeKey] = useState(0);
+
+  const playVideo = useCallback((videoId: string) => {
+    // Stop any currently playing video
+    if (playingVideoId && playingVideoId !== videoId) {
+      // Force iframe recreation for reliable stopping
+      setIframeKey(prev => prev + 1);
+    }
+    
+    setPlayingVideoId(videoId);
+  }, [playingVideoId]);
+
+  const stopVideo = useCallback(() => {
+    setPlayingVideoId(null);
+    setIframeKey(prev => prev + 1);
+  }, []);
+
+  return { playingVideoId, iframeKey, playVideo, stopVideo };
+}
+```
+
+#### **Benefits of Single Video Enforcement**
+- **Reliable Control**: Only one video plays at a time across all pages
+- **Cross-Browser Support**: Works consistently in Chrome, Safari, Firefox
+- **Performance Optimized**: Prevents resource conflicts and memory issues
+- **User Experience**: Clear, predictable video behavior
+
+### HLS Buffer Monitoring Pattern
+
+#### **Multi-Layered Buffer Health System**
+**Problem**: HLS videos can stall or buffer unexpectedly, causing poor user experience.
+**Solution**: Real-time buffer monitoring with automatic recovery.
+
+```typescript
+// Comprehensive buffer monitoring with recovery
+export function useHLSBufferMonitor(videoRef: RefObject<HTMLVideoElement>) {
+  const [bufferHealth, setBufferHealth] = useState<BufferHealth>('healthy');
+  const [recoveryAttempts, setRecoveryAttempts] = useState(0);
+  const maxRecoveryAttempts = 3;
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const checkBufferHealth = () => {
+      const buffered = video.buffered;
+      const currentTime = video.currentTime;
+      
+      // Check if current time is buffered
+      let isBuffered = false;
+      for (let i = 0; i < buffered.length; i++) {
+        if (currentTime >= buffered.start(i) && currentTime <= buffered.end(i)) {
+          isBuffered = true;
+          break;
+        }
+      }
+      
+      if (!isBuffered && bufferHealth === 'healthy') {
+        setBufferHealth('stalled');
+        setRecoveryAttempts(prev => prev + 1);
+      } else if (isBuffered && bufferHealth === 'stalled') {
+        setBufferHealth('healthy');
+      }
+    };
+
+    const interval = setInterval(checkBufferHealth, 1000);
+    return () => clearInterval(interval);
+  }, [videoRef, bufferHealth]);
+
+  const attemptRecovery = useCallback(() => {
+    if (recoveryAttempts < maxRecoveryAttempts) {
+      const video = videoRef.current;
+      if (video) {
+        video.currentTime = video.currentTime + 0.1;
+        setRecoveryAttempts(prev => prev + 1);
+      }
+    }
+  }, [recoveryAttempts, videoRef]);
+
+  return { bufferHealth, recoveryAttempts, attemptRecovery };
+}
+```
+
+#### **Benefits of Buffer Monitoring**
+- **Real-Time Detection**: Immediate identification of buffer issues
+- **Automatic Recovery**: Self-healing system for stalled videos
+- **Performance Tracking**: Monitor video performance over time
+- **User Feedback**: Clear indicators of video health status
+
+### Browser-Specific Video Handling Pattern
+
+#### **Firefox Video Management**
+**Problem**: Firefox has different video behavior that can cause multiple videos to play.
+**Solution**: Browser-specific handling with specialized strategies.
+
+```typescript
+// Browser detection and specialized handling
+export function useBrowserSpecificVideo() {
+  const [isFirefox, setIsFirefox] = useState(false);
+
+  useEffect(() => {
+    const userAgent = navigator.userAgent;
+    setIsFirefox(userAgent.includes('Firefox'));
+  }, []);
+
+  const getVideoStrategy = useCallback(() => {
+    if (isFirefox) {
+      return {
+        preload: 'none', // Disable preloading in Firefox
+        useSingleIframe: true, // Use single iframe with dynamic source
+        postMessageControl: true, // Rely on postMessage for control
+      };
+    }
+    
+    return {
+      preload: 'metadata', // Enable preloading in other browsers
+      useSingleIframe: false, // Allow iframe recreation
+      postMessageControl: true, // Use postMessage for control
+    };
+  }, [isFirefox]);
+
+  return { isFirefox, getVideoStrategy };
+}
+```
+
+#### **Benefits of Browser-Specific Handling**
+- **Cross-Browser Compatibility**: Consistent behavior across all browsers
+- **Performance Optimization**: Browser-specific optimizations
+- **Reliability**: Reduced video playback issues
+- **Maintainability**: Clear separation of browser-specific logic
+
+### Thumbnail System Pattern
+
+#### **CDN Integration with Fallback**
+**Problem**: Thumbnails not displaying due to incorrect CDN URL format.
+**Solution**: Proper URL generation with fallback handling.
+
+```typescript
+// Proper Bunny.net thumbnail URL generation
+export function generateThumbnailUrl(videoId: string, width: number = 320): string {
+  // Ensure videoId is properly formatted
+  const cleanVideoId = videoId.replace(/[^a-zA-Z0-9-]/g, '');
+  return `https://iframe.mediadelivery.net/${cleanVideoId}/${width}`;
+}
+
+// VideoEmbed component with thumbnail support
+export function VideoEmbed({ videoId, isPlaying, onPlay }: VideoEmbedProps) {
+  const thumbnailUrl = generateThumbnailUrl(videoId);
+  const [thumbnailError, setThumbnailError] = useState(false);
+  
+  return (
+    <div className="relative aspect-video">
+      {isPlaying ? (
+        <iframe
+          src={`https://iframe.mediadelivery.net/embed/${videoId}`}
+          className="w-full h-full"
+          allowFullScreen
+        />
+      ) : (
+        <div 
+          className="w-full h-full bg-cover bg-center cursor-pointer"
+          style={{ 
+            backgroundImage: thumbnailError 
+              ? 'none' 
+              : `url(${thumbnailUrl})` 
+          }}
+          onClick={onPlay}
+          onError={() => setThumbnailError(true)}
+        >
+          {thumbnailError && (
+            <div className="flex items-center justify-center h-full bg-muted">
+              <Play className="h-8 w-8 text-muted-foreground" />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+#### **Benefits of Thumbnail System**
+- **Reliable Display**: Proper CDN integration with error handling
+- **Performance**: Fast thumbnail loading with fallbacks
+- **User Experience**: Clear visual indicators for video content
+- **Accessibility**: Proper alt text and click targets
+
+### UI Component Z-Index Management Pattern
+
+#### **Conflict Resolution for Overlapping Elements**
+**Problem**: Z-index conflicts between management mode checkbox and three dots menu.
+**Solution**: Proper layering and conditional rendering.
+
+```typescript
+// Fixed z-index management for video actions
+export function VideoCard({ video, isManagementMode, onSelect }: VideoCardProps) {
+  return (
+    <div className="relative group">
+      {/* Video content */}
+      <VideoEmbed videoId={video.id} />
+      
+      {/* Management mode checkbox - only when in management mode */}
+      {isManagementMode && (
+        <div className="absolute top-2 left-2 z-10">
+          <Checkbox
+            checked={selectedVideos.includes(video.id)}
+            onCheckedChange={(checked) => onSelect(video.id, checked)}
+          />
+        </div>
+      )}
+      
+      {/* Three dots menu - only when NOT in management mode */}
+      {!isManagementMode && (
+        <VideoActionsDropdown 
+          video={video} 
+          onDelete={handleDelete}
+          onEdit={handleEdit}
+        />
+      )}
+    </div>
+  );
+}
+
+// VideoActionsDropdown with proper z-index
+export function VideoActionsDropdown({ video, onDelete, onEdit }: VideoActionsDropdownProps) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="absolute top-2 left-2 z-50 bg-black/20 hover:bg-black/30 text-white border-0 p-1 h-8 w-8"
+        >
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="z-50">
+        <DropdownMenuItem onClick={() => onEdit(video)}>
+          <Edit className="mr-2 h-4 w-4" />
+          Edit
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onDelete(video.id)}>
+          <Trash className="mr-2 h-4 w-4" />
+          Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+```
+
+#### **Benefits of Z-Index Management**
+- **Conflict Resolution**: Eliminates overlapping element issues
+- **User Experience**: Reliable button interaction
+- **Visual Clarity**: Clear hierarchy of interactive elements
+- **Maintainability**: Organized component structure
+
+## 🎉 **PREVIOUSLY DOCUMENTED: Production-Ready Usage Tracking System** (January 2, 2025)
 
 ### Credit-Based Usage Management Architecture
 

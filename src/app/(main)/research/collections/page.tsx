@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable max-lines */
 // Prevent Next.js from attempting to statically prerender a client-side page
 export const dynamic = "force-dynamic";
 
@@ -73,6 +74,7 @@ const CollectionBadge = memo(
     videoCount,
     isTransitioning,
     onCollectionDeleted,
+    onCollectionUpdated,
   }: {
     collection?: Collection;
     isActive: boolean;
@@ -80,6 +82,7 @@ const CollectionBadge = memo(
     videoCount: number;
     isTransitioning: boolean;
     onCollectionDeleted: () => void;
+    onCollectionUpdated: () => void;
   }) => (
     <motion.div
       variants={badgeVariants}
@@ -107,6 +110,7 @@ const CollectionBadge = memo(
           <CollectionBadgeMenu
             collection={collection}
             onCollectionDeleted={onCollectionDeleted}
+            onCollectionUpdated={onCollectionUpdated}
             className="bg-background border-border rounded-md border shadow-md transition-shadow duration-200 hover:shadow-lg"
           />
         </div>
@@ -333,6 +337,12 @@ function CollectionsPageContent() {
     await loadData();
   }, [loadData]);
 
+  const handleCollectionUpdated = useCallback(async () => {
+    // Clear cache and reload collections and videos
+    cacheRef.current.data.clear();
+    await loadData();
+  }, [loadData]);
+
   const handleCollectionDeleted = useCallback(async () => {
     if (!user) return;
 
@@ -427,7 +437,7 @@ function CollectionsPageContent() {
   }
 
   return (
-    <div className="flex h-full max-w-7xl mx-auto p-4 md:p-6 justify-center gap-8">
+    <div className="mx-auto flex h-full max-w-7xl justify-center gap-8 p-4 md:p-6">
       {/* Left side: Main content (Video Grid) */}
       <div className="flex-1">
         <header className="mb-6 flex items-center justify-between">
@@ -454,7 +464,6 @@ function CollectionsPageContent() {
         <main>
           <VideoGrid
             videos={videos}
-            collections={collections}
             selectedCollectionId={selectedCollectionId}
             loadingVideos={isTransitioning}
             isPending={isPending}
@@ -464,6 +473,7 @@ function CollectionsPageContent() {
             onToggleVideoSelection={toggleVideoSelection}
             onDeleteVideo={handleDeleteVideo}
             onVideoAdded={handleVideoAdded}
+            collections={collections}
           />
         </main>
       </div>

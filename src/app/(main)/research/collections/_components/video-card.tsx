@@ -8,8 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { VideoEmbed } from "@/components/video-embed";
+import type { Collection } from "@/lib/collections";
 
 import type { VideoWithPlayer } from "./collections-helpers";
+import { SingleVideoMoveCopyDialog } from "./single-video-move-copy-dialog";
 import {
   ComingSoonModal,
   ManagementModeSelection,
@@ -28,6 +30,8 @@ type LegacyVideo = VideoWithPlayer & {
 
 interface VideoCardProps {
   video: VideoWithPlayer;
+  collections?: Collection[];
+  currentCollectionId?: string | null;
   isManageMode: boolean;
   isSelected: boolean;
   isDeleting: boolean;
@@ -35,6 +39,7 @@ interface VideoCardProps {
   onToggleSelection: () => void;
   onDelete: () => void;
   onReprocess?: (video: VideoWithPlayer) => void;
+  onVideoUpdated?: () => void;
   className?: string;
   isPlaying?: boolean;
   onPlay?: (videoId: string) => void;
@@ -58,12 +63,7 @@ const DurationBadge = ({ duration }: { duration?: number }) => {
 };
 
 // Helper function to build card className
-const buildCardClassName = (
-  baseClassName: string,
-  isSelected: boolean,
-  isDeleting: boolean,
-  hasHLSIssue: boolean
-) => {
+const buildCardClassName = (baseClassName: string, isSelected: boolean, isDeleting: boolean, hasHLSIssue: boolean) => {
   const classes = [
     baseClassName,
     isSelected ? "ring-2 ring-primary shadow-md" : "",
@@ -73,9 +73,12 @@ const buildCardClassName = (
   return classes.filter(Boolean).join(" ");
 };
 
+/* eslint-disable complexity */
 export const VideoCard = memo<VideoCardProps>(
   ({
     video,
+    collections = [],
+    currentCollectionId,
     isManageMode,
     isSelected,
     isDeleting,
@@ -83,6 +86,7 @@ export const VideoCard = memo<VideoCardProps>(
     onToggleSelection,
     onDelete,
     onReprocess,
+    onVideoUpdated,
     className = "",
     isPlaying = false,
     onPlay,
@@ -90,9 +94,11 @@ export const VideoCard = memo<VideoCardProps>(
   }) => {
     const [isHovered, setIsHovered] = useState(false);
     const [showRepurposeModal, setShowRepurposeModal] = useState(false);
+    const [showMoveDialog, setShowMoveDialog] = useState(false);
+    const [showCopyDialog, setShowCopyDialog] = useState(false);
 
     // Firefox detection - disable preloading for Firefox
-    const isFirefox = useMemo(() => navigator.userAgent.includes('Firefox'), []);
+    const isFirefox = useMemo(() => navigator.userAgent.includes("Firefox"), []);
     const effectivePreload = isFirefox ? false : true;
 
     const baseClassName = `w-[240px] p-3 rounded-xl group relative transition-all duration-200 hover:shadow-lg border-border/50 hover:border-border ${className}`;
@@ -149,9 +155,7 @@ export const VideoCard = memo<VideoCardProps>(
             {/* HLS Issue Indicator */}
             {hasHLSIssue && (
               <div className="absolute top-2 right-2 z-10">
-                <Badge className="bg-yellow-500 text-white text-xs">
-                  HLS Issue
-                </Badge>
+                <Badge className="bg-yellow-500 text-xs text-white">HLS Issue</Badge>
               </div>
             )}
 
@@ -167,7 +171,12 @@ export const VideoCard = memo<VideoCardProps>(
 
             {/* Hover Actions - Only show when NOT in manage mode */}
             {!isManageMode && (
-              <HoverActions showActions={showActions} onDelete={onDelete} />
+              <HoverActions
+                showActions={showActions}
+                onDelete={onDelete}
+                onMoveVideo={collections.length > 0 ? () => setShowMoveDialog(true) : undefined}
+                onCopyVideo={collections.length > 0 ? () => setShowCopyDialog(true) : undefined}
+              />
             )}
           </div>
 
@@ -179,7 +188,7 @@ export const VideoCard = memo<VideoCardProps>(
                 <Button
                   size="sm"
                   variant="outline"
-                  className="flex-1 border-border/60 hover:bg-accent/50 h-8 rounded-md px-3 text-xs shadow-sm transition-all duration-200 hover:shadow-md"
+                  className="border-border/60 hover:bg-accent/50 h-8 flex-1 rounded-md px-3 text-xs shadow-sm transition-all duration-200 hover:shadow-md"
                 >
                   <TrendingUp className="mr-1.5 h-3.5 w-3.5" />
                   Insights
@@ -191,7 +200,7 @@ export const VideoCard = memo<VideoCardProps>(
                 size="sm"
                 variant="outline"
                 onClick={() => setShowRepurposeModal(true)}
-                className="flex-1 border-border/60 hover:bg-accent/50 h-8 rounded-md px-3 text-xs shadow-sm transition-all duration-200 hover:shadow-md"
+                className="border-border/60 hover:bg-accent/50 h-8 flex-1 rounded-md px-3 text-xs shadow-sm transition-all duration-200 hover:shadow-md"
               >
                 <Zap className="mr-1.5 h-3.5 w-3.5" />
                 Repurpose
@@ -206,6 +215,38 @@ export const VideoCard = memo<VideoCardProps>(
           onClose={() => setShowRepurposeModal(false)}
           title="Video Repurposing"
         />
+
+        {/* Move Video Dialog */}
+        {showMoveDialog && video.id && (
+          <SingleVideoMoveCopyDialog
+            collections={collections}
+            videoId={video.id}
+            videoTitle={video.title}
+            currentCollectionId={currentCollectionId ?? null}
+            onCompleted={() => {
+              setShowMoveDialog(false);
+              onVideoUpdated?.();
+            }}
+          >
+            <div style={{ display: "none" }} />
+          </SingleVideoMoveCopyDialog>
+        )}
+
+        {/* Copy Video Dialog */}
+        {showCopyDialog && video.id && (
+          <SingleVideoMoveCopyDialog
+            collections={collections}
+            videoId={video.id}
+            videoTitle={video.title}
+            currentCollectionId={currentCollectionId ?? null}
+            onCompleted={() => {
+              setShowCopyDialog(false);
+              onVideoUpdated?.();
+            }}
+          >
+            <div style={{ display: "none" }} />
+          </SingleVideoMoveCopyDialog>
+        )}
       </>
     );
   },
@@ -217,7 +258,7 @@ export const VideoCard = memo<VideoCardProps>(
       prevProps.isDeleting === nextProps.isDeleting &&
       prevProps.hasHLSIssue === nextProps.hasHLSIssue
     );
-  }
+  },
 );
 
 VideoCard.displayName = "VideoCard";
