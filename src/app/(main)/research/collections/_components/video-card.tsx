@@ -11,7 +11,7 @@ import { VideoEmbed } from "@/components/video-embed";
 import type { Collection } from "@/lib/collections";
 
 import type { VideoWithPlayer } from "./collections-helpers";
-import { SingleVideoMoveCopyDialog } from "./single-video-move-copy-dialog";
+import { MoveCopyVideosDialog } from "./move-copy-videos-dialog";
 import {
   ComingSoonModal,
   ManagementModeSelection,
@@ -218,10 +218,11 @@ export const VideoCard = memo<VideoCardProps>(
 
         {/* Move Video Dialog */}
         {showMoveDialog && video.id && (
-          <SingleVideoMoveCopyDialog
+          <MoveCopyVideosDialog
             collections={collections}
-            videoId={video.id}
-            videoTitle={video.title}
+            selectedVideos={[video.id]}
+            singleVideoTitle={video.title}
+            defaultAction="move"
             currentCollectionId={currentCollectionId ?? null}
             onCompleted={() => {
               setShowMoveDialog(false);
@@ -229,15 +230,16 @@ export const VideoCard = memo<VideoCardProps>(
             }}
           >
             <div style={{ display: "none" }} />
-          </SingleVideoMoveCopyDialog>
+          </MoveCopyVideosDialog>
         )}
 
         {/* Copy Video Dialog */}
         {showCopyDialog && video.id && (
-          <SingleVideoMoveCopyDialog
+          <MoveCopyVideosDialog
             collections={collections}
-            videoId={video.id}
-            videoTitle={video.title}
+            selectedVideos={[video.id]}
+            singleVideoTitle={video.title}
+            defaultAction="copy"
             currentCollectionId={currentCollectionId ?? null}
             onCompleted={() => {
               setShowCopyDialog(false);
@@ -245,7 +247,7 @@ export const VideoCard = memo<VideoCardProps>(
             }}
           >
             <div style={{ display: "none" }} />
-          </SingleVideoMoveCopyDialog>
+          </MoveCopyVideosDialog>
         )}
       </>
     );

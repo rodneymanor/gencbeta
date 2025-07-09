@@ -27,23 +27,32 @@ interface MoveCopyVideosDialogProps {
   currentCollectionId: string | null;
   onCompleted: () => void;
   children: React.ReactNode;
+  // Optional props for single video mode
+  singleVideoTitle?: string;
+  defaultAction?: "move" | "copy";
 }
 
+/* eslint-disable complexity */
 export function MoveCopyVideosDialog({
   collections,
   selectedVideos,
   currentCollectionId,
   onCompleted,
   children,
+  singleVideoTitle,
+  defaultAction = "move",
 }: MoveCopyVideosDialogProps) {
   const [open, setOpen] = useState(false);
   const [targetCollectionId, setTargetCollectionId] = useState<string>("");
-  const [action, setAction] = useState<"move" | "copy">("move");
+  const [action, setAction] = useState<"move" | "copy">(defaultAction);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   const { user } = useAuth();
+
+  const isSingleVideo = selectedVideos.length === 1 && singleVideoTitle;
+  const videoCount = selectedVideos.length;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,7 +84,11 @@ export function MoveCopyVideosDialog({
         );
       }
 
-      toast.success(action === "move" ? "Videos moved successfully" : "Videos copied successfully to collection");
+      if (isSingleVideo) {
+        toast.success(action === "move" ? "Video moved successfully" : "Video copied successfully");
+      } else {
+        toast.success(action === "move" ? "Videos moved successfully" : "Videos copied successfully to collection");
+      }
       setSuccess("Operation completed successfully");
       onCompleted();
       setOpen(false);
@@ -91,13 +104,35 @@ export function MoveCopyVideosDialog({
 
   const availableCollections = collections.filter((c) => c.id && c.id !== currentCollectionId);
 
+  const resetForm = () => {
+    setTargetCollectionId("");
+    setAction(defaultAction);
+    setError(null);
+    setSuccess(null);
+  };
+
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) {
+      resetForm();
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{action === "move" ? "Move Videos" : "Copy Videos"}</DialogTitle>
-          <DialogDescription>Select the target collection and action for the selected videos.</DialogDescription>
+          <DialogTitle>
+            {isSingleVideo
+              ? `${action === "move" ? "Move" : "Copy"} Video`
+              : `${action === "move" ? "Move" : "Copy"} Videos`}
+          </DialogTitle>
+          <DialogDescription>
+            {isSingleVideo
+              ? `${action === "move" ? "Move" : "Copy"} "${singleVideoTitle}" to another collection.`
+              : `Select the target collection and action for the ${videoCount} selected video${videoCount > 1 ? "s" : ""}.`}
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -158,7 +193,9 @@ export function MoveCopyVideosDialog({
           {isLoading && (
             <div className="flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 p-3">
               <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
-              <span className="text-sm text-blue-800">Processing videos...</span>
+              <span className="text-sm text-blue-800">
+                {isSingleVideo ? "Processing video..." : "Processing videos..."}
+              </span>
             </div>
           )}
 
