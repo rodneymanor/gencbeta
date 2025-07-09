@@ -118,14 +118,6 @@ export const VideoCard = memo<VideoCardProps>(
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
-          {/* Management Mode Selection */}
-          <ManagementModeSelection
-            isManageMode={isManageMode}
-            isSelected={isSelected}
-            onToggleSelection={onToggleSelection}
-            videoTitle={video.title}
-          />
-
           {/* Video Content */}
           <div className="bg-muted/30 relative aspect-[9/16] overflow-hidden rounded-lg">
             <VideoEmbed
@@ -163,8 +155,20 @@ export const VideoCard = memo<VideoCardProps>(
               </div>
             )}
 
-            {/* Hover Actions */}
-            <HoverActions showActions={showActions} onDelete={onDelete} />
+            {/* Management Mode Selection - Only show when in manage mode */}
+            {isManageMode && (
+              <ManagementModeSelection
+                isManageMode={isManageMode}
+                isSelected={isSelected}
+                onToggleSelection={onToggleSelection}
+                videoTitle={video.title}
+              />
+            )}
+
+            {/* Hover Actions - Only show when NOT in manage mode */}
+            {!isManageMode && (
+              <HoverActions showActions={showActions} onDelete={onDelete} />
+            )}
           </div>
 
           {/* Action Buttons */}

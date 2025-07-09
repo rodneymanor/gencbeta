@@ -76,9 +76,13 @@ export const VideoActionsDropdown = ({ onDelete }: { onDelete: () => void }) => 
       <Button
         variant="ghost"
         size="sm"
-        className="bg-transparent hover:bg-white/10 h-8 w-8 p-0 border-0 shadow-none"
+        className="bg-transparent hover:bg-white/10 h-8 w-8 p-0 border-0 shadow-none pointer-events-auto"
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+        }}
       >
-        <MoreVertical className="h-4 w-4 text-white" />
+        <MoreVertical className="h-4 w-4 text-white pointer-events-none" />
         <span className="sr-only">Video options</span>
       </Button>
     </DropdownMenuTrigger>
@@ -201,7 +205,7 @@ export const HoverActions = ({ showActions, onDelete }: { showActions: boolean; 
   if (!showActions) return null;
 
   return (
-    <div className="absolute top-3 left-3 z-20 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+    <div className="absolute top-3 left-3 z-30 pointer-events-auto opacity-0 transition-opacity duration-200 group-hover:opacity-100">
       <VideoActionsDropdown onDelete={onDelete} />
     </div>
   );
