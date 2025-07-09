@@ -1,4 +1,4 @@
-import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
+import { collection, query, where, orderBy, getDocs, limit } from "firebase/firestore";
 
 import { type Collection, type Video } from "./collections";
 import { formatTimestamp } from "./collections-helpers";
@@ -62,16 +62,16 @@ export class CollectionsRBACService {
   /**
    * Get videos from a collection or all videos (role-based)
    */
-  static async getCollectionVideos(userId: string, collectionId?: string): Promise<Video[]> {
+  static async getCollectionVideos(userId: string, collectionId?: string, videoLimit?: number): Promise<Video[]> {
     try {
-      console.log("🔍 [RBAC] User ID:", userId);
+      console.log("🔍 [RBAC] User ID:", userId, "Limit:", videoLimit);
 
       const userProfile = await UserManagementService.getUserProfile(userId);
       if (userProfile?.role === "super_admin") {
-        return this.getSuperAdminVideos(userId, collectionId);
+        return this.getSuperAdminVideos(userId, collectionId, videoLimit);
       }
 
-      return this.getRegularUserVideos(userId, collectionId);
+      return this.getRegularUserVideos(userId, collectionId, videoLimit);
     } catch (error) {
       console.error("Error fetching videos:", error);
       throw new Error("Failed to fetch videos");
@@ -81,7 +81,11 @@ export class CollectionsRBACService {
   /**
    * Get videos for super admin users
    */
-  private static async getSuperAdminVideos(userId: string, collectionId?: string): Promise<Video[]> {
+  private static async getSuperAdminVideos(
+    userId: string,
+    collectionId?: string,
+    videoLimit?: number,
+  ): Promise<Video[]> {
     console.log("🔍 [RBAC] Super admin detected - bypassing coach restrictions");
 
     let q;
@@ -96,6 +100,11 @@ export class CollectionsRBACService {
         console.log("❌ [RBAC] Collection query failed:", error instanceof Error ? error.message : String(error));
         return [];
       }
+    }
+
+    // Apply limit if specified
+    if (videoLimit) {
+      q = query(q, limit(videoLimit));
     }
 
     const querySnapshot = await getDocs(q);
@@ -133,7 +142,11 @@ export class CollectionsRBACService {
   /**
    * Get videos for regular users (coach/creator)
    */
-  private static async getRegularUserVideos(userId: string, collectionId?: string): Promise<Video[]> {
+  private static async getRegularUserVideos(
+    userId: string,
+    collectionId?: string,
+    videoLimit?: number,
+  ): Promise<Video[]> {
     const accessibleCoaches = await UserManagementService.getUserAccessibleCoaches(userId);
     console.log("🔍 [RBAC] Accessible coaches:", accessibleCoaches);
 
@@ -143,7 +156,10 @@ export class CollectionsRBACService {
     }
 
     const q = await this.getRegularUserQuery(userId, collectionId, accessibleCoaches);
-    const querySnapshot = await getDocs(q);
+
+    // Apply limit if specified
+    const finalQuery = videoLimit ? query(q, limit(videoLimit)) : q;
+    const querySnapshot = await getDocs(finalQuery);
 
     return querySnapshot.docs.map((doc) => ({
       id: doc.id,

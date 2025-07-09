@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 
+import { Loader2 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import type { Collection, Video } from "@/lib/collections";
 
 import { VideoCard } from "./video-card";
@@ -20,6 +23,9 @@ interface VideoGridProps {
   onToggleVideoSelection?: (videoId: string) => void;
   onDeleteVideo?: (videoId: string) => void;
   onVideoAdded?: () => void;
+  onLoadMore?: () => Promise<void>;
+  hasMoreVideos?: boolean;
+  isLoadingMore?: boolean;
 }
 
 export const VideoGrid = ({
@@ -32,6 +38,9 @@ export const VideoGrid = ({
   onToggleVideoSelection,
   onDeleteVideo,
   onVideoAdded,
+  onLoadMore,
+  hasMoreVideos = false,
+  isLoadingMore = false,
 }: VideoGridProps) => {
   const [currentlyPlayingId, setCurrentlyPlayingId] = useState<string | null>(null);
 
@@ -54,33 +63,51 @@ export const VideoGrid = ({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {safeVideos.map((video) => {
-        const videoId = video.id;
-        if (!videoId) return null;
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {safeVideos.map((video) => {
+          const videoId = video.id;
+          if (!videoId) return null;
 
-        return (
-          <div key={videoId} data-video-id={videoId}>
-            <VideoCard
-              video={video}
-              collections={collections}
-              currentCollectionId={selectedCollectionId}
-              isManageMode={manageMode ?? false}
-              isSelected={selectedVideos?.has(videoId) ?? false}
-              isDeleting={deletingVideos?.has(videoId) ?? false}
-              onToggleSelection={() => {
-                onToggleVideoSelection?.(videoId);
-              }}
-              onDelete={() => {
-                onDeleteVideo?.(videoId);
-              }}
-              onVideoUpdated={onVideoAdded}
-              isPlaying={currentlyPlayingId === videoId}
-              onPlay={handleVideoPlay}
-            />
-          </div>
-        );
-      })}
+          return (
+            <div key={videoId} data-video-id={videoId}>
+              <VideoCard
+                video={video}
+                collections={collections}
+                currentCollectionId={selectedCollectionId}
+                isManageMode={manageMode ?? false}
+                isSelected={selectedVideos?.has(videoId) ?? false}
+                isDeleting={deletingVideos?.has(videoId) ?? false}
+                onToggleSelection={() => {
+                  onToggleVideoSelection?.(videoId);
+                }}
+                onDelete={() => {
+                  onDeleteVideo?.(videoId);
+                }}
+                onVideoUpdated={onVideoAdded}
+                isPlaying={currentlyPlayingId === videoId}
+                onPlay={handleVideoPlay}
+              />
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Load More Button */}
+      {hasMoreVideos && onLoadMore && (
+        <div className="flex justify-center pt-6">
+          <Button onClick={onLoadMore} disabled={isLoadingMore} variant="outline" className="min-w-[120px]">
+            {isLoadingMore ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Loading...
+              </>
+            ) : (
+              "Load More"
+            )}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

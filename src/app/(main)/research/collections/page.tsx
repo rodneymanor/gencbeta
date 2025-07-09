@@ -131,6 +131,9 @@ function CollectionsPageContent() {
   const [selectedVideos, setSelectedVideos] = useState<Set<string>>(new Set());
   const [deletingVideos, setDeletingVideos] = useState<Set<string>>(new Set());
   const [isPending, startTransition] = useTransition();
+  const [hasMoreVideos, setHasMoreVideos] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const cacheRef = useRef<SimpleCache>({ data: new Map() });
   const previousCollectionRef = useRef<string | null>(null);
@@ -203,15 +206,22 @@ function CollectionsPageContent() {
 
   // Helper function to handle video loading result
   const handleVideoResult = useCallback(
-    (videosResult: PromiseSettledResult<Video[]>, collectionId: string | null) => {
+    (videosResult: PromiseSettledResult<Video[]>, collectionId: string | null, isLoadMore = false) => {
       if (videosResult.status === "fulfilled") {
         const optimizedVideos = videosResult.value.map((video) => ({
           ...video,
           isPlaying: false,
         }));
 
-        setVideos(optimizedVideos);
-        setCachedVideos(collectionId, optimizedVideos);
+        if (isLoadMore) {
+          setVideos((prev) => [...prev, ...optimizedVideos]);
+          // Check if we got fewer videos than requested (indicating no more videos)
+          setHasMoreVideos(optimizedVideos.length === 50);
+        } else {
+          setVideos(optimizedVideos);
+          setCachedVideos(collectionId, optimizedVideos);
+          setHasMoreVideos(optimizedVideos.length === 50);
+        }
       } else {
         console.error("Error loading videos:", videosResult.reason);
         // If videos failed to load due to invalid collection, clear videos
@@ -245,7 +255,7 @@ function CollectionsPageContent() {
         // CRITICAL OPTIMIZATION: Load collections and videos in parallel
         const [collectionsResult, videosResult] = await Promise.allSettled([
           CollectionsRBACService.getUserCollections(user.uid),
-          CollectionsRBACService.getCollectionVideos(user.uid, collectionId ?? undefined),
+          CollectionsRBACService.getCollectionVideos(user.uid, collectionId ?? undefined, 50), // Load first 50 videos initially
         ]);
 
         // Handle collections result
@@ -262,6 +272,9 @@ function CollectionsPageContent() {
 
         // Handle videos result
         handleVideoResult(videosResult, collectionId);
+
+        // Reset pagination state for initial load
+        setCurrentPage(1);
 
         console.log("✅ [Collections] Parallel loading completed");
       } catch (error) {
@@ -280,6 +293,10 @@ function CollectionsPageContent() {
       if (collectionId === previousCollectionRef.current || isTransitioning) return;
 
       previousCollectionRef.current = collectionId;
+
+      // Reset pagination state
+      setCurrentPage(1);
+      setHasMoreVideos(true);
 
       // Check cache first for instant switching
       const cachedVideos = getCachedVideos(collectionId);
@@ -431,6 +448,31 @@ function CollectionsPageContent() {
     setSelectedVideos(new Set());
   }, []);
 
+  const handleLoadMore = useCallback(async () => {
+    if (!user || isLoadingMore || !hasMoreVideos) return;
+
+    setIsLoadingMore(true);
+    const nextPage = currentPage + 1;
+    const offset = (nextPage - 1) * 50;
+
+    try {
+      console.log("🔄 [Collections] Loading more videos, page:", nextPage);
+
+      const videosResult = await CollectionsRBACService.getCollectionVideos(
+        user.uid,
+        selectedCollectionId ?? undefined,
+        50,
+      );
+
+      handleVideoResult({ status: "fulfilled", value: videosResult }, selectedCollectionId, true);
+      setCurrentPage(nextPage);
+    } catch (error) {
+      console.error("❌ [Collections] Error loading more videos:", error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [user, isLoadingMore, hasMoreVideos, currentPage, selectedCollectionId, handleVideoResult]);
+
   // Don't show anything until collections are loaded and validated
   if (isLoading || (selectedCollectionId && !validateCollectionExists(selectedCollectionId, collections))) {
     return <VideoCollectionLoading />;
@@ -474,6 +516,9 @@ function CollectionsPageContent() {
             onDeleteVideo={handleDeleteVideo}
             onVideoAdded={handleVideoAdded}
             collections={collections}
+            onLoadMore={handleLoadMore}
+            hasMoreVideos={hasMoreVideos}
+            isLoadingMore={isLoadingMore}
           />
         </main>
       </div>
