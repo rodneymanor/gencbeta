@@ -217,36 +217,40 @@ export const VideoCard = memo<VideoCardProps>(
         />
 
         {/* Move Video Dialog */}
-        {showMoveDialog && video.id && (
+        {video.id && (
           <MoveCopyVideosDialog
             collections={collections}
             selectedVideos={[video.id]}
             singleVideoTitle={video.title}
             defaultAction="move"
             currentCollectionId={currentCollectionId ?? null}
+            open={showMoveDialog}
+            onOpenChange={setShowMoveDialog}
             onCompleted={() => {
               setShowMoveDialog(false);
               onVideoUpdated?.();
             }}
           >
-            <div style={{ display: "none" }} />
+            <div />
           </MoveCopyVideosDialog>
         )}
 
         {/* Copy Video Dialog */}
-        {showCopyDialog && video.id && (
+        {video.id && (
           <MoveCopyVideosDialog
             collections={collections}
             selectedVideos={[video.id]}
             singleVideoTitle={video.title}
             defaultAction="copy"
             currentCollectionId={currentCollectionId ?? null}
+            open={showCopyDialog}
+            onOpenChange={setShowCopyDialog}
             onCompleted={() => {
               setShowCopyDialog(false);
               onVideoUpdated?.();
             }}
           >
-            <div style={{ display: "none" }} />
+            <div />
           </MoveCopyVideosDialog>
         )}
       </>

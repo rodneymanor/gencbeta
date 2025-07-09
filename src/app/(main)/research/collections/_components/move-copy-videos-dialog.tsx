@@ -30,6 +30,9 @@ interface MoveCopyVideosDialogProps {
   // Optional props for single video mode
   singleVideoTitle?: string;
   defaultAction?: "move" | "copy";
+  // External control props
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 /* eslint-disable complexity */
@@ -41,8 +44,10 @@ export function MoveCopyVideosDialog({
   children,
   singleVideoTitle,
   defaultAction = "move",
+  open: externalOpen,
+  onOpenChange: externalOnOpenChange,
 }: MoveCopyVideosDialogProps) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [targetCollectionId, setTargetCollectionId] = useState<string>("");
   const [action, setAction] = useState<"move" | "copy">(defaultAction);
   const [isLoading, setIsLoading] = useState(false);
@@ -50,6 +55,10 @@ export function MoveCopyVideosDialog({
   const [success, setSuccess] = useState<string | null>(null);
 
   const { user } = useAuth();
+
+  // Use external open state if provided, otherwise use internal state
+  const open = externalOpen ?? internalOpen;
+  const setOpen = externalOnOpenChange ?? setInternalOpen;
 
   const isSingleVideo = selectedVideos.length === 1 && singleVideoTitle;
   const videoCount = selectedVideos.length;
@@ -120,7 +129,7 @@ export function MoveCopyVideosDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      {externalOpen === undefined && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
