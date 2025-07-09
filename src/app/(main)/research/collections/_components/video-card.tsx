@@ -39,7 +39,6 @@ interface VideoCardProps {
   isPlaying?: boolean;
   onPlay?: (videoId: string) => void;
   hasHLSIssue?: boolean;
-  onHLSIssue?: (issueType: string) => void;
 }
 
 const DurationBadge = ({ duration }: { duration?: number }) => {
@@ -88,7 +87,6 @@ export const VideoCard = memo<VideoCardProps>(
     isPlaying = false,
     onPlay,
     hasHLSIssue = false,
-    onHLSIssue,
   }) => {
     const [isHovered, setIsHovered] = useState(false);
     const [showRepurposeModal, setShowRepurposeModal] = useState(false);
@@ -155,15 +153,6 @@ export const VideoCard = memo<VideoCardProps>(
 
             {/* Duration Badge */}
             <DurationBadge duration={video.duration} />
-
-            {/* Playing Indicator */}
-            {isPlaying && (
-              <div className="absolute top-2 left-2 z-10">
-                <Badge className="bg-primary text-primary-foreground text-xs">
-                  Playing
-                </Badge>
-              </div>
-            )}
 
             {/* HLS Issue Indicator */}
             {hasHLSIssue && (

@@ -23,7 +23,7 @@ const getVideoId = (videoData, log) => {
         log(`  [Debug]  - Extracted Video ID: ${potentialId} from ${urlString}`);
         return potentialId;
       }
-    } catch (e) {
+    } catch {
       log(`  [Debug]  - Warning: Could not parse URL to get ID: ${urlString}`);
     }
   }
