@@ -138,6 +138,7 @@ export const VideoCard = memo<VideoCardProps>(
               isPlaying={isPlaying}
               onPlay={handlePlay}
               preload={effectivePreload}
+              thumbnailUrl={video.thumbnailUrl}
               className="absolute inset-0 h-full w-full"
             />
 

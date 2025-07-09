@@ -9,6 +9,7 @@ import { useFirefoxVideoManager } from "@/hooks/use-firefox-video-manager";
 import { useHLSBufferMonitor } from "@/hooks/use-hls-buffer-monitor";
 import { useHLSRecovery } from "@/hooks/use-hls-recovery";
 import { usePreemptiveBufferManagement } from "@/hooks/use-preemptive-buffer-management";
+import { generateBunnyThumbnailUrl, isBunnyUrl, buildIframeSrc } from "@/lib/video-utils";
 
 import BunnyIframe from "./bunny-iframe";
 
@@ -19,21 +20,8 @@ interface VideoEmbedProps {
   isPlaying?: boolean; // Add isPlaying prop for external control
   onPlay?: () => void; // Add onPlay callback for external control
   preload?: boolean; // Add preload prop for better performance
+  thumbnailUrl?: string; // Add thumbnailUrl prop for thumbnail support
 }
-
-// Helper function to build iframe src URL
-const buildIframeSrc = (baseUrl: string, params: Record<string, string>) => {
-  const separator = baseUrl.includes("?") ? "&" : "?";
-  const paramString = Object.entries(params)
-    .map(([key, value]) => `${key}=${value}`)
-    .join("&");
-  return `${baseUrl}${separator}${paramString}`;
-};
-
-// Helper function to check if URL is from Bunny
-const isBunnyUrl = (url: string) => {
-  return url && (url.includes("iframe.mediadelivery.net") || url.includes("bunnycdn.com") || url.includes("b-cdn.net"));
-};
 
 // Helper function to create preload iframe (disabled for Firefox)
 const createPreloadIframe = (url: string, videoId: string, isFirefox: boolean) => {
@@ -112,7 +100,7 @@ const handleVideoPlayLogic = async (
 
 // BUNNY.NET ONLY VIDEO EMBED - Rejects all non-Bunny URLs
 export const VideoEmbed = memo<VideoEmbedProps>(
-  ({ url, className = "", videoId: externalVideoId, isPlaying: externalIsPlaying, onPlay, preload = false }) => {
+  ({ url, className = "", videoId: externalVideoId, isPlaying: externalIsPlaying, onPlay, preload = false, thumbnailUrl }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [iframeKey, setIframeKey] = useState(0); // Make key mutable for recovery
@@ -134,6 +122,26 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     // Firefox detection - disable preloading for Firefox
     const isFirefox = useMemo(() => navigator.userAgent.includes('Firefox'), []);
     const effectivePreload = isFirefox ? false : preload;
+
+    // Generate thumbnail URL if not provided
+    const effectiveThumbnailUrl = useMemo(() => {
+      if (thumbnailUrl) {
+        return thumbnailUrl;
+      }
+      
+      // Try to generate a Bunny.net thumbnail URL from the video URL
+      if (url && url.includes('iframe.mediadelivery.net')) {
+        // Extract the video ID from the Bunny.net URL
+        const match = url.match(/\/embed\/([^\/\?]+)/);
+        if (match) {
+          const videoId = match[1];
+          // Generate thumbnail URL using Bunny.net's thumbnail service
+          return `https://iframe.mediadelivery.net/embed/thumbnails/${videoId}.jpg`;
+        }
+      }
+      
+      return null;
+    }, [thumbnailUrl, url]);
 
     // Enhanced HLS monitoring and recovery
     const { attemptRecovery, recoveryAttempts, maxAttempts } = useHLSRecovery({
@@ -292,6 +300,22 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     return (
       <div className={`group relative w-full overflow-hidden rounded-lg bg-black ${className}`}>
         <div className="relative h-0 w-full pb-[177.78%]">
+          {/* Show thumbnail when not playing */}
+          {!isCurrentlyPlaying && effectiveThumbnailUrl && (
+            <div className="absolute inset-0 z-5">
+              <img
+                src={effectiveThumbnailUrl}
+                alt="Video thumbnail"
+                className="h-full w-full object-cover"
+                onError={(e) => {
+                  console.warn("🖼️ [VideoEmbed] Thumbnail failed to load:", effectiveThumbnailUrl);
+                  // Hide the thumbnail if it fails to load
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            </div>
+          )}
+
           {/* Single iframe with dynamic src instead of conditional rendering */}
           <iframe
             key={`video-${iframeKey}`}
@@ -357,7 +381,8 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     prevProps.url === nextProps.url &&
     prevProps.videoId === nextProps.videoId &&
     prevProps.isPlaying === nextProps.isPlaying &&
-    prevProps.preload === nextProps.preload,
+    prevProps.preload === nextProps.preload &&
+    prevProps.thumbnailUrl === nextProps.thumbnailUrl,
 );
 
 VideoEmbed.displayName = "VideoEmbed";
