@@ -81,40 +81,67 @@ export const VideoActionsDropdown = ({
   onMoveVideo?: () => void;
   onCopyVideo?: () => void;
 }) => (
-  <DropdownMenu>
+  <DropdownMenu modal={false}>
     <DropdownMenuTrigger asChild>
       <Button
         variant="ghost"
         size="sm"
-        className="pointer-events-auto h-8 w-8 border-0 bg-transparent p-0 shadow-none hover:bg-white/10"
+        className="pointer-events-auto h-8 w-8 border-0 bg-transparent p-0 shadow-none hover:bg-white/10 focus:ring-2 focus:ring-white/20"
         onClick={(e) => {
           e.stopPropagation();
           e.preventDefault();
+        }}
+        onMouseDown={(e) => {
+          e.stopPropagation();
         }}
       >
         <MoreVertical className="pointer-events-none h-4 w-4 text-white" />
         <span className="sr-only">Video options</span>
       </Button>
     </DropdownMenuTrigger>
-    <DropdownMenuContent align="end" className="border-border/60 w-48 shadow-lg">
+    <DropdownMenuContent
+      align="end"
+      className="border-border/60 z-50 w-48 shadow-lg"
+      sideOffset={5}
+      collisionPadding={10}
+      onCloseAutoFocus={(e) => e.preventDefault()}
+    >
       <DropdownMenuItem className="cursor-pointer gap-2">
         <ExternalLink className="h-4 w-4" />
         View Original
       </DropdownMenuItem>
       {onMoveVideo && (
-        <DropdownMenuItem className="cursor-pointer gap-2" onClick={onMoveVideo}>
+        <DropdownMenuItem
+          className="cursor-pointer gap-2"
+          onClick={(e) => {
+            e.preventDefault();
+            onMoveVideo();
+          }}
+        >
           <MoveRight className="h-4 w-4" />
           Move to Collection
         </DropdownMenuItem>
       )}
       {onCopyVideo && (
-        <DropdownMenuItem className="cursor-pointer gap-2" onClick={onCopyVideo}>
+        <DropdownMenuItem
+          className="cursor-pointer gap-2"
+          onClick={(e) => {
+            e.preventDefault();
+            onCopyVideo();
+          }}
+        >
           <Copy className="h-4 w-4" />
           Copy to Collection
         </DropdownMenuItem>
       )}
       <DropdownMenuSeparator />
-      <DropdownMenuItem className="text-destructive focus:text-destructive cursor-pointer gap-2" onClick={onDelete}>
+      <DropdownMenuItem
+        className="text-destructive focus:text-destructive cursor-pointer gap-2"
+        onClick={(e) => {
+          e.preventDefault();
+          onDelete();
+        }}
+      >
         <Trash2 className="h-4 w-4" />
         Remove from Collection
       </DropdownMenuItem>
@@ -237,7 +264,7 @@ export const HoverActions = ({
   if (!showActions) return null;
 
   return (
-    <div className="pointer-events-auto absolute top-3 left-3 z-30 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+    <div className="pointer-events-auto absolute top-3 left-3 z-30">
       <VideoActionsDropdown onDelete={onDelete} onMoveVideo={onMoveVideo} onCopyVideo={onCopyVideo} />
     </div>
   );

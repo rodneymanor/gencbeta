@@ -16,10 +16,10 @@ import {
   ComingSoonModal,
   ManagementModeSelection,
   ReprocessVideoOverlay,
-  PlatformBadge,
-  HoverActions,
   getVideoUrl,
   getThumbnailUrl,
+  VideoActionsDropdown,
+  PlatformBadge,
 } from "./video-card-components";
 import { VideoInsightsDashboard } from "./video-insights-dashboard";
 
@@ -93,6 +93,7 @@ export const VideoCard = memo<VideoCardProps>(
     hasHLSIssue = false,
   }) => {
     const [isHovered, setIsHovered] = useState(false);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [showRepurposeModal, setShowRepurposeModal] = useState(false);
     const [showMoveDialog, setShowMoveDialog] = useState(false);
     const [showCopyDialog, setShowCopyDialog] = useState(false);
@@ -104,7 +105,7 @@ export const VideoCard = memo<VideoCardProps>(
     const baseClassName = `w-[240px] p-3 rounded-xl group relative transition-all duration-200 hover:shadow-lg border-border/50 hover:border-border ${className}`;
     const cardClassName = buildCardClassName(baseClassName, isSelected, isDeleting, hasHLSIssue);
 
-    const showActions = (isHovered || isManageMode) && !isDeleting;
+    const showActions = (isHovered || isDropdownOpen || isManageMode) && !isDeleting;
 
     const handlePlay = useCallback(() => {
       if (!isPlaying && video.id) {
@@ -115,17 +116,27 @@ export const VideoCard = memo<VideoCardProps>(
       }
     }, [isPlaying, onPlay, video.id]);
 
+    const handleMouseEnter = useCallback(() => {
+      setIsHovered(true);
+    }, []);
+
+    const handleMouseLeave = useCallback(() => {
+      // Only hide if dropdown is not open
+      if (!isDropdownOpen) {
+        setIsHovered(false);
+      }
+    }, [isDropdownOpen]);
+
     const thumbnailUrl = getThumbnailUrl(video);
 
     return (
       <>
-        <Card
-          className={cardClassName}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-        >
+        <Card className={cardClassName} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
           {/* Video Content */}
-          <div className="bg-muted/30 relative aspect-[9/16] overflow-hidden rounded-lg">
+          <div
+            className="bg-muted/30 relative aspect-[9/16] overflow-hidden rounded-lg"
+            onMouseEnter={handleMouseEnter}
+          >
             <VideoEmbed
               url={getVideoUrl(video as LegacyVideo)}
               videoId={video.id}
@@ -171,12 +182,17 @@ export const VideoCard = memo<VideoCardProps>(
 
             {/* Hover Actions - Only show when NOT in manage mode */}
             {!isManageMode && (
-              <HoverActions
-                showActions={showActions}
-                onDelete={onDelete}
-                onMoveVideo={collections.length > 0 ? () => setShowMoveDialog(true) : undefined}
-                onCopyVideo={collections.length > 0 ? () => setShowCopyDialog(true) : undefined}
-              />
+              <div
+                className={`pointer-events-auto absolute top-3 left-3 z-30 transition-opacity duration-200 ${
+                  showActions ? "opacity-100" : "pointer-events-none opacity-0"
+                }`}
+              >
+                <VideoActionsDropdown
+                  onDelete={onDelete}
+                  onMoveVideo={collections.length > 0 ? () => setShowMoveDialog(true) : undefined}
+                  onCopyVideo={collections.length > 0 ? () => setShowCopyDialog(true) : undefined}
+                />
+              </div>
             )}
           </div>
 
