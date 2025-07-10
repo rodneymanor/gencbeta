@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { getTikTokAdditionalMetadata, getTikTokMetrics } from "@/lib/tiktok-downloader";
 import {
   downloadTikTokVideo,
   downloadInstagramVideoWithMetrics,
   detectPlatform,
   type DownloadResult,
 } from "@/lib/video-processing-helpers";
-import { getTikTokAdditionalMetadata, getTikTokMetrics } from "@/lib/tiktok-downloader";
 
 export async function POST(request: NextRequest) {
   console.log("📥 [DOWNLOADER] Starting video download service...");
@@ -107,7 +107,7 @@ async function downloadVideo(url: string, platform: string): Promise<DownloadRes
       metrics,
     };
   } else if (platform === "instagram") {
-    return downloadInstagramVideoWithMetrics(url);
+    return await downloadInstagramVideoWithMetrics(url);
   }
   return null;
 }

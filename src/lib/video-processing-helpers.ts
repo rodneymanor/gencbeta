@@ -4,7 +4,6 @@ import {
   extractMetricsFromMetadata,
   extractAdditionalMetadata,
   downloadVideoFromVersions,
-  extractVideoVersions,
 } from "@/lib/instagram-downloader";
 import { downloadTikTokVideo as downloadTikTokVideoFromAPI, extractTikTokVideoId } from "@/lib/tiktok-downloader";
 import { transcribeVideoFile } from "@/lib/transcription";
@@ -48,8 +47,6 @@ export interface TranscriptionResult {
     processedAt: string;
   };
 }
-
-// Removed unused tiktokCache variable
 
 export function detectPlatform(url: string): string {
   const urlLower = url.toLowerCase();
@@ -198,25 +195,12 @@ export async function downloadInstagramVideoWithMetrics(url: string): Promise<Do
     console.log("📱 [DOWNLOAD] Fetching Instagram metadata...");
     const metadata = await fetchInstagramMetadata(shortcode);
 
-    if (!metadata) {
-      console.log("❌ [DOWNLOAD] No metadata returned, falling back to basic download");
-      return await fallbackToBasicDownload();
-    }
-
     console.log("📊 [DOWNLOAD] Extracting metrics from metadata...");
     const metrics = extractMetricsFromMetadata(metadata);
     const additionalMetadata = extractAdditionalMetadata(metadata);
 
-    console.log("🎥 [DOWNLOAD] Extracting video versions...");
-    const videoVersions = extractVideoVersions(metadata);
-
-    if (!videoVersions.length) {
-      console.error("❌ [DOWNLOAD] No video versions found in metadata");
-      return null;
-    }
-
     console.log("🎥 [DOWNLOAD] Downloading video from versions...");
-    const videoData = await downloadVideoFromVersions(videoVersions, shortcode);
+    const videoData = await downloadVideoFromVersions(metadata.video_versions, shortcode);
 
     if (!videoData) {
       console.log("❌ [DOWNLOAD] Failed to download video data");
@@ -227,14 +211,8 @@ export async function downloadInstagramVideoWithMetrics(url: string): Promise<Do
     console.log("📋 [DOWNLOAD] Additional metadata:", additionalMetadata);
     return { videoData, metrics, additionalMetadata };
   } catch (error) {
-    console.error("❌ [DOWNLOAD] Instagram download error:", error);
-    console.log("🔄 [DOWNLOAD] Falling back to basic download...");
-    return await fallbackToBasicDownload();
+    console.error("❌ [DOWNLOAD] Instagram download failed:", error);
+    // Re-throw the error to provide clear feedback to the user
+    throw error;
   }
-}
-
-async function fallbackToBasicDownload(): Promise<DownloadResult | null> {
-  // Simplified fallback - just return null for now
-  console.log("🔄 [DOWNLOAD] Basic download fallback not implemented");
-  return null;
 }
