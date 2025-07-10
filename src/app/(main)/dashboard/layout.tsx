@@ -1,18 +1,17 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
 
 import { AppSidebar } from "@/app/(main)/dashboard/_components/sidebar/app-sidebar";
 import { SmartSidebarProvider } from "@/components/providers/smart-sidebar-provider";
 import { RouteAwareTopBar } from "@/components/ui/route-aware-topbar";
-import { Suspense } from "react"; // React suspense
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { TopBarProvider } from "@/contexts/topbar-context";
 import { VoiceProvider } from "@/contexts/voice-context";
 
 import DashboardClientLayout from "./dashboard-client-layout";
 
-export default async function Layout({ children }: Readonly<{ children: ReactNode }>) {
+export default function Layout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <SidebarProvider defaultOpen={false}>
       <SmartSidebarProvider>
