@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 
 import dynamic from "next/dynamic";
 
-import { MoreVertical, Trash2, ExternalLink, Clock, TrendingUp, Zap, RefreshCw, MoveRight, Copy } from "lucide-react";
+import { MoreVertical, Trash2, ExternalLink, TrendingUp, Zap, RefreshCw, MoveRight, Copy } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -143,9 +143,9 @@ export const VideoActionsDropdown = ({
             onDelete();
           }}
         >
-        <Trash2 className="h-4 w-4" />
-        Remove from Collection
-      </DropdownMenuItem>
+          <Trash2 className="h-4 w-4" />
+          Remove from Collection
+        </DropdownMenuItem>
       )}
     </DropdownMenuContent>
   </DropdownMenu>
@@ -235,22 +235,6 @@ export const PlatformBadge = ({ platform }: { platform: string }) => (
     </Badge>
   </div>
 );
-
-export const DurationBadge = ({ duration }: { duration?: number }) => {
-  if (!duration) return null;
-
-  return (
-    <div className="absolute right-3 bottom-3 z-10">
-      <Badge
-        variant="secondary"
-        className="bg-background/90 text-foreground border-border/60 flex items-center gap-1 text-xs font-medium shadow-sm backdrop-blur-sm"
-      >
-        <Clock className="h-3 w-3" />
-        {Math.round(duration)}s
-      </Badge>
-    </div>
-  );
-};
 
 export const HoverActions = ({
   showActions,
@@ -386,32 +370,6 @@ export const ActionButtons = ({ video }: { video: VideoWithPlayer }) => {
     </>
   );
 };
-
-export const VideoMetadata = ({ video }: { video: VideoWithPlayer }) => (
-  <div className="space-y-3">
-    <div className="space-y-1">
-      <h3 className="text-sm leading-tight font-semibold">{video.title}</h3>
-      {video.metadata?.description && (
-        <p className="text-muted-foreground line-clamp-2 text-xs leading-relaxed">{video.metadata.description}</p>
-      )}
-    </div>
-
-    {/* Video metadata */}
-    <div className="flex items-center gap-3 text-xs">
-      {video.duration && (
-        <div className="text-muted-foreground flex items-center gap-1">
-          <Clock className="h-3 w-3" />
-          <span>{video.duration}</span>
-        </div>
-      )}
-      {video.metrics?.views && (
-        <div className="text-muted-foreground">
-          <span>{video.metrics.views.toLocaleString()} views</span>
-        </div>
-      )}
-    </div>
-  </div>
-);
 
 // Helper function to get the correct video URL
 export const getVideoUrl = (video: LegacyVideo): string => {

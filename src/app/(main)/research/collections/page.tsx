@@ -9,7 +9,7 @@ import { useState, useEffect, useCallback, useMemo, useTransition, useRef, memo,
 import { useSearchParams, useRouter } from "next/navigation";
 
 import { motion } from "framer-motion";
-import { Edit3, Loader2, Check, Star } from "lucide-react";
+import { Edit3, Loader2, Check, Bookmark } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +22,6 @@ import { useTopBarConfig } from "@/hooks/use-route-topbar";
 import { CollectionsService, type Collection, type Video } from "@/lib/collections";
 import { CollectionsRBACService } from "@/lib/collections-rbac";
 
-import CategoryChooser from "./_components/category-chooser";
 import { CollectionBadgeMenu } from "./_components/collection-badge-menu";
 import { badgeVariants } from "./_components/collections-animations";
 import { type VideoWithPlayer, createVideoSelectionHandlers } from "./_components/collections-helpers";
@@ -65,7 +64,7 @@ const DelayedFallback = memo(
 
 DelayedFallback.displayName = "DelayedFallback";
 
-// Optimized collection badge with smooth transitions and management menu
+// Optimized collection badge with smooth transitions
 const CollectionBadge = memo(
   ({
     collection,
@@ -73,16 +72,12 @@ const CollectionBadge = memo(
     onClick,
     videoCount,
     isTransitioning,
-    onCollectionDeleted,
-    onCollectionUpdated,
   }: {
     collection?: Collection;
     isActive: boolean;
     onClick: () => void;
     videoCount: number;
     isTransitioning: boolean;
-    onCollectionDeleted: () => void;
-    onCollectionUpdated: () => void;
   }) => {
     const { user } = useAuth();
 
@@ -109,29 +104,7 @@ const CollectionBadge = memo(
           {collection
             ? `${collection.title.length > 30 ? collection.title.slice(0, 27) + "…" : collection.title} (${collection.videoCount})`
             : `All Videos (${videoCount})`}
-          {collection && (
-            <Star
-              onClick={(e) => {
-                e.stopPropagation();
-                if (!user || !collection.id) return;
-                CollectionsService.setFavorite(user.uid, collection.id, !collection.favorite)
-                  .then(onCollectionUpdated)
-                  .catch(console.error);
-              }}
-              className={`h-4 w-4 ${collection.favorite ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"}`}
-            />
-          )}
         </Badge>
-        {collection && (
-          <div className="absolute -top-1 -right-1">
-            <CollectionBadgeMenu
-              collection={collection}
-              onCollectionDeleted={onCollectionDeleted}
-              onCollectionUpdated={onCollectionUpdated}
-              className="bg-background border-border rounded-md border shadow-md transition-shadow duration-200 hover:shadow-lg"
-            />
-          </div>
-        )}
       </motion.div>
     );
   },
@@ -299,14 +272,6 @@ function CollectionsPageContent() {
     }
     return "Browse and manage your video collections";
   }, [selectedCollectionId, collections]);
-
-  const categoryItems = useMemo(() => {
-    const favs = collections.filter((c) => c.favorite).sort((a, b) => a.title.localeCompare(b.title));
-    const others = collections.filter((c) => !c.favorite).sort((a, b) => a.title.localeCompare(b.title));
-    const items = [...favs, ...others].map((c) => ({ id: c.id!, name: c.title }));
-    items.unshift({ id: "all-videos", name: "All Videos" });
-    return items;
-  }, [collections]);
 
   const getCachedVideos = useCallback((collectionId: string | null): VideoWithPlayer[] | null => {
     const key = collectionId ?? "all";
@@ -683,27 +648,39 @@ function CollectionsPageContent() {
       {/* Left side: Main content (Video Grid) */}
       <div className="flex-1">
         <header className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              {selectedCollection ? (
-                <InlineEditableField
-                  value={selectedCollection.title}
-                  onSave={async (newTitle) => {
-                    if (!user) return;
-                    await CollectionsService.updateCollection(user.uid, selectedCollection.id!, { title: newTitle });
-                    toast.success("Collection name updated");
-                    handleCollectionUpdated();
-                  }}
-                  isOwner={isOwner}
-                  type="input"
-                  label="Collection Name"
-                  maxLength={80}
-                  className="inline-block"
-                />
-              ) : (
-                pageTitle
+          <div className="flex-1">
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold tracking-tight">
+                {selectedCollection ? (
+                  <InlineEditableField
+                    value={selectedCollection.title}
+                    onSave={async (newTitle) => {
+                      if (!user) return;
+                      await CollectionsService.updateCollection(user.uid, selectedCollection.id!, { title: newTitle });
+                      toast.success("Collection name updated");
+                      handleCollectionUpdated();
+                    }}
+                    isOwner={isOwner}
+                    type="input"
+                    label="Collection Name"
+                    maxLength={80}
+                    className="inline-block"
+                  />
+                ) : (
+                  pageTitle
+                )}
+              </h1>
+              {selectedCollection && (
+                <div className="flex items-center gap-2">
+                  <CollectionBadgeMenu
+                    collection={selectedCollection}
+                    onCollectionDeleted={handleCollectionDeleted}
+                    onCollectionUpdated={handleCollectionUpdated}
+                    className="transition-opacity duration-200"
+                  />
+                </div>
               )}
-            </h1>
+            </div>
             <p className="text-muted-foreground max-w-prose">
               {selectedCollection ? (
                 <InlineEditableField
@@ -728,7 +705,21 @@ function CollectionsPageContent() {
               )}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            {selectedCollection && (
+              <Bookmark
+                onClick={async () => {
+                  if (!user || !selectedCollection.id) return;
+                  await CollectionsService.setFavorite(user.uid, selectedCollection.id, !selectedCollection.favorite);
+                  handleCollectionUpdated();
+                }}
+                className={`h-5 w-5 cursor-pointer transition-colors ${
+                  selectedCollection.favorite
+                    ? "fill-yellow-400 text-yellow-400"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              />
+            )}
             <ManageModeHeader
               manageMode={manageMode}
               selectedVideos={selectedVideos}
@@ -764,13 +755,74 @@ function CollectionsPageContent() {
         </main>
       </div>
 
-      {/* Right side: Category Chooser */}
+      {/* Right side: Collection Badges */}
       <div className="w-64">
-        <CategoryChooser
-          items={categoryItems}
-          selectedId={selectedCollectionId ?? "all-videos"}
-          onSelectionChange={(item) => handleCollectionChange(item.id === "all-videos" ? null : item.id)}
-        />
+        <div className="space-y-4">
+          {/* All Videos Badge */}
+          <CollectionBadge
+            collection={undefined}
+            isActive={!selectedCollectionId}
+            onClick={() => handleCollectionChange(null)}
+            videoCount={videos.length}
+            isTransitioning={isTransitioning}
+          />
+
+          {/* Starred Collections Section */}
+          {collections.filter((c) => c.favorite).length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 px-2">
+                <span className="text-foreground text-sm font-semibold">Favorited</span>
+              </div>
+              <div className="space-y-2">
+                {collections
+                  .filter((c) => c.favorite)
+                  .sort((a, b) => a.title.localeCompare(b.title))
+                  .map((collection) => (
+                    <CollectionBadge
+                      key={collection.id}
+                      collection={collection}
+                      isActive={selectedCollectionId === collection.id}
+                      onClick={() => handleCollectionChange(collection.id!)}
+                      videoCount={collection.videoCount}
+                      isTransitioning={isTransitioning}
+                    />
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {/* Other Collections Section */}
+          {collections.filter((c) => !c.favorite).length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 px-2">
+                <span className="text-foreground text-sm font-semibold">Collections</span>
+              </div>
+              <div className="space-y-2">
+                {collections
+                  .filter((c) => !c.favorite)
+                  .sort((a, b) => a.title.localeCompare(b.title))
+                  .map((collection) => (
+                    <CollectionBadge
+                      key={collection.id}
+                      collection={collection}
+                      isActive={selectedCollectionId === collection.id}
+                      onClick={() => handleCollectionChange(collection.id!)}
+                      videoCount={collection.videoCount}
+                      isTransitioning={isTransitioning}
+                    />
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {collections.length === 0 && (
+            <div className="py-8 text-center">
+              <div className="text-muted-foreground text-sm">No collections yet</div>
+              <div className="text-muted-foreground mt-1 text-xs">Create your first collection to get started</div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

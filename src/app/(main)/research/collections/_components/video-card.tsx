@@ -2,7 +2,7 @@
 
 import { useState, memo, useCallback, useMemo } from "react";
 
-import { Clock, TrendingUp, Zap } from "lucide-react";
+import { TrendingUp, Zap } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -45,22 +45,6 @@ interface VideoCardProps {
   onPlay?: (videoId: string) => void;
   hasHLSIssue?: boolean;
 }
-
-const DurationBadge = ({ duration }: { duration?: number }) => {
-  if (!duration) return null;
-
-  return (
-    <div className="absolute right-3 bottom-3 z-10">
-      <Badge
-        variant="secondary"
-        className="bg-background/90 text-foreground border-border/60 flex items-center gap-1 text-xs font-medium shadow-sm backdrop-blur-sm"
-      >
-        <Clock className="h-3 w-3" />
-        {Math.round(duration)}s
-      </Badge>
-    </div>
-  );
-};
 
 // Helper function to build card className
 const buildCardClassName = (baseClassName: string, isSelected: boolean, isDeleting: boolean, hasHLSIssue: boolean) => {
@@ -158,9 +142,6 @@ export const VideoCard = memo<VideoCardProps>(
 
             {/* Platform Badge */}
             <PlatformBadge platform={video.platform} />
-
-            {/* Duration Badge */}
-            <DurationBadge duration={video.duration} />
 
             {/* HLS Issue Indicator */}
             {hasHLSIssue && (

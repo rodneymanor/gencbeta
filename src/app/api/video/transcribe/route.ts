@@ -134,7 +134,7 @@ async function transcribeVideoData(arrayBuffer: ArrayBuffer, mimeType: string): 
     console.log("🤖 [TRANSCRIBE] Converting video to transcript...");
 
     const base64Data = Buffer.from(arrayBuffer).toString("base64");
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     // Simple, focused prompt for transcription only
     const prompt = `Provide a full, accurate transcription of all spoken content in this video. 
