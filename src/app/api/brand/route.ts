@@ -174,11 +174,10 @@ async function generateProfileWithGemini(questionnaire: BrandQuestionnaire): Pro
   const geminiService = new GeminiService();
   const userPrompt = createUserPrompt(questionnaire);
 
-  const modelName = process.env.GEMINI_MODEL || "gemini-1.5-flash-preview-0514";
   const geminiResponse = await geminiService.generateContent({
     prompt: userPrompt,
     systemPrompt: SYSTEM_PROMPT,
-    model: modelName,
+    model: "gemini-2.0-flash-exp",
   });
 
   try {

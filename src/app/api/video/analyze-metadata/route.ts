@@ -69,8 +69,7 @@ async function analyzeContentMetadata(
   try {
     console.log("🤖 [METADATA_ANALYSIS] Analyzing content metadata with AI...");
 
-    const modelName = process.env.GEMINI_MODEL || "gemini-1.5-flash-preview-0514";
-    const model = genAI.getGenerativeModel({ model: modelName });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     const analysisContext = buildAnalysisContext(transcript, videoUrl, additionalContext, platform);
     const prompt = createMetadataPrompt(analysisContext, platform);
 

@@ -15,12 +15,12 @@ export async function POST(request: NextRequest) {
     } else {
       return await handleFileTranscription(request);
     }
-  } catch (e: unknown) {
-    console.error("❌ [TRANSCRIBE] Transcription error:", e);
+  } catch (error) {
+    console.error("❌ [TRANSCRIBE] Transcription error:", error);
     return NextResponse.json(
       {
         error: "Failed to transcribe video",
-        details: e instanceof Error ? e.message : "Unknown error",
+        details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 },
     );
@@ -44,7 +44,7 @@ async function handleUrlTranscription(request: NextRequest) {
       decodedUrl = decodeURIComponent(videoUrl);
       console.log("🔍 [TRANSCRIBE] Original URL:", videoUrl);
       console.log("🔍 [TRANSCRIBE] Decoded URL:", decodedUrl);
-    } catch (error) {
+    } catch {
       console.log("⚠️ [TRANSCRIBE] URL decode failed, using original:", videoUrl);
       decodedUrl = videoUrl;
     }
@@ -74,8 +74,7 @@ async function handleUrlTranscription(request: NextRequest) {
         processedAt: new Date().toISOString(),
       },
     });
-  } catch (e: unknown) {
-    const error = e as Error;
+  } catch (error) {
     console.error("❌ [TRANSCRIBE] URL transcription error:", error);
     return NextResponse.json({ error: "Failed to transcribe video from URL" }, { status: 500 });
   }
@@ -124,8 +123,7 @@ async function handleFileTranscription(request: NextRequest) {
         processedAt: new Date().toISOString(),
       },
     });
-  } catch (e: unknown) {
-    const error = e as Error;
+  } catch (error) {
     console.error("❌ [TRANSCRIBE] File transcription error:", error);
     return NextResponse.json({ error: "Failed to transcribe video file" }, { status: 500 });
   }
@@ -136,8 +134,7 @@ async function transcribeVideoData(arrayBuffer: ArrayBuffer, mimeType: string): 
     console.log("🤖 [TRANSCRIBE] Converting video to transcript...");
 
     const base64Data = Buffer.from(arrayBuffer).toString("base64");
-    const modelName = process.env.GEMINI_MODEL || "gemini-1.5-flash-preview-0514";
-    const model = genAI.getGenerativeModel({ model: modelName });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     // Simple, focused prompt for transcription only
     const prompt = `Provide a full, accurate transcription of all spoken content in this video. 
@@ -160,8 +157,7 @@ Respond with only the transcript text, no additional formatting or commentary.`;
     console.log("✅ [TRANSCRIBE] Transcription generated successfully");
 
     return transcript;
-  } catch (e: unknown) {
-    const error = e as Error;
+  } catch (error) {
     console.error("❌ [TRANSCRIBE] Video transcription error:", error);
     return null;
   }

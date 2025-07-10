@@ -244,8 +244,7 @@ async function transcribeDirectly(file: File): Promise<{
 
     console.log("🤖 [TRANSCRIBE-DIRECT] Generating transcription with direct upload...");
 
-    const modelName = process.env.GEMINI_MODEL || "gemini-1.5-flash-preview-0514";
-    const model = genAI.getGenerativeModel({ model: modelName });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     const prompt = createTranscriptionPrompt();
 
     const result = await model.generateContent([
@@ -309,8 +308,7 @@ async function transcribeFromUrl(
       "MB",
     );
 
-    const modelName = process.env.GEMINI_MODEL || "gemini-1.5-flash-preview-0514";
-    const model = genAI.getGenerativeModel({ model: modelName });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     const prompt = createTranscriptionPrompt();
 
     const result = await model.generateContent([

@@ -2,7 +2,7 @@ import { GeminiResponse } from "./types";
 
 export class GeminiClient {
   private static readonly API_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models";
-  private static readonly DEFAULT_MODEL = "gemini-1.5-flash-preview-0514";
+  private static readonly DEFAULT_MODEL = "gemini-2.0-flash";
   private static readonly REQUEST_TIMEOUT = 30000; // 30 seconds
   private static readonly RATE_LIMIT_DELAY = 500; // 500ms between requests
 
@@ -53,7 +53,7 @@ export class GeminiClient {
         },
       };
 
-      const response = await this.makeRequest("POST", `${GeminiClient.DEFAULT_MODEL}:generateContent`, requestBody);
+      const response = await this.makeRequest(url, requestBody);
       const processingTime = Date.now() - startTime;
 
       console.log(`[GeminiClient] Successfully received response in ${processingTime}ms`);
@@ -73,81 +73,68 @@ export class GeminiClient {
   /**
    * Make HTTP request to Gemini API with timeout and error handling
    */
-  private async makeRequest<T>(
-    method: "GET" | "POST",
-    endpoint: string,
-    body: Record<string, unknown> | null = null,
-    isStream = false,
-  ): Promise<T> {
-    for (let retries = 3; retries > 0; retries--) {
-      try {
-        return await this.performRequest<T>(method, endpoint, body, isStream);
-      } catch (error) {
-        if (!this.isRetryable(error) || retries === 1) {
-          throw error;
-        }
-        await this.exponentialBackoff(retries);
-      }
-    }
-    throw new Error("Request failed after multiple retries");
-  }
-
-  private async performRequest<T>(
-    method: "GET" | "POST",
-    endpoint: string,
-    body: Record<string, unknown> | null,
-    isStream: boolean,
-  ): Promise<T> {
-    const url = `${GeminiClient.API_BASE_URL}/${endpoint}`;
-    const apiKey = process.env.GEMINI_API_KEY;
-
-    if (!apiKey) {
-      throw new Error("GEMINI_API_KEY environment variable not set");
-    }
-
-    const headers = {
-      "Content-Type": "application/json",
-      "x-goog-api-key": apiKey,
-    };
-
+  // eslint-disable-next-line complexity
+  private async makeRequest(url: string, body: any): Promise<any> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), GeminiClient.REQUEST_TIMEOUT);
 
     try {
       const response = await fetch(url, {
-        method,
-        headers,
-        body: body ? JSON.stringify(body) : null,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
         signal: controller.signal,
       });
 
-      if (isStream && response.body) {
-        return response.body as T;
-      }
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorBody = await response.text();
-        console.error(`Gemini API Error: ${response.status} ${response.statusText}`, errorBody);
-        throw new Error(`Gemini API request failed: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+
+        try {
+          const errorData = JSON.parse(errorText);
+          if (errorData.error?.message) {
+            errorMessage = errorData.error.message;
+          }
+        } catch {
+          // If we can't parse the error, use the raw text
+          if (errorText) {
+            errorMessage += ` - ${errorText}`;
+          }
+        }
+
+        throw new Error(errorMessage);
       }
 
-      return (await response.json()) as T;
-    } finally {
+      const data = await response.json();
+
+      if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+        throw new Error("Invalid response format from Gemini API");
+      }
+
+      const text = data.candidates[0].content.parts?.map((part: any) => part.text).join("") ?? "";
+
+      if (!text.trim()) {
+        throw new Error("Empty response from Gemini API");
+      }
+
+      return {
+        text: text.trim(),
+        usage: data.usageMetadata
+          ? {
+              promptTokens: data.usageMetadata.promptTokenCount ?? 0,
+              completionTokens: data.usageMetadata.candidatesTokenCount ?? 0,
+              totalTokens: data.usageMetadata.totalTokenCount ?? 0,
+            }
+          : undefined,
+      };
+    } catch (error) {
       clearTimeout(timeoutId);
+      throw error;
     }
-  }
-
-  private isRetryable(error: unknown): boolean {
-    if (error instanceof Error) {
-      const message = error.message.toLowerCase();
-      return message.includes("timeout") || message.includes("503");
-    }
-    return false;
-  }
-
-  private async exponentialBackoff(retries: number): Promise<void> {
-    const delay = Math.pow(2, 4 - retries) * 1000 + Math.random() * 1000;
-    await new Promise((resolve) => setTimeout(resolve, delay));
   }
 
   /**
