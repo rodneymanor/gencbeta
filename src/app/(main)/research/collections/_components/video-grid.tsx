@@ -80,7 +80,7 @@ export const VideoGrid = ({
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
         {safeVideos.map((video) => {
           const videoId = video.id;
           if (!videoId) return null;
