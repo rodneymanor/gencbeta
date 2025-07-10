@@ -33,18 +33,9 @@ function ProfileWithBadgeInline({
 
   if (initializing) {
     return (
-      <div className="flex items-center gap-3">
-        <div className="relative">
-          <div className="bg-primary/10 flex h-10 w-10 animate-pulse items-center justify-center rounded-lg">
-            <CircleUser className="text-primary h-5 w-5" />
-          </div>
-          <div className="absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-[9px] shadow-sm">
-            <div className="h-1 w-1 animate-pulse rounded-full bg-gray-400" />
-          </div>
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="animate-pulse text-sm font-medium">Loading...</div>
-          <div className="text-muted-foreground animate-pulse text-xs">Authenticating...</div>
+      <div className="flex items-center justify-center">
+        <div className="bg-primary/10 flex h-9 w-9 animate-pulse items-center justify-center rounded-lg">
+          <CircleUser className="text-primary h-4 w-4" />
         </div>
       </div>
     );
