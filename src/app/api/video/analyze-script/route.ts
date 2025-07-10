@@ -56,7 +56,8 @@ async function analyzeScriptComponents(transcript: string): Promise<ScriptCompon
   try {
     console.log("🤖 [SCRIPT_ANALYSIS] Analyzing script components with AI...");
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    const modelName = process.env.GEMINI_MODEL || "gemini-1.5-flash-preview-0514";
+    const model = genAI.getGenerativeModel({ model: modelName });
 
     const prompt = `Analyze this video transcript and break it down into these four essential script components:
 

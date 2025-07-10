@@ -100,24 +100,20 @@ async function performCompleteAnalysis(videoData: ArrayBuffer, videoUrl?: string
   const transcriptRaw = await callTranscribeService(videoData, videoUrl);
   const transcript = transcriptRaw ?? "Transcription failed - unable to extract spoken content from video";
 
-  // Visual and Script analysis are disabled to avoid rate-limiting issues.
+  // Visual analysis disabled
   const visualContext = "";
-  const components = {
-    hook: "Script analysis disabled",
-    bridge: "Script analysis disabled",
-    nugget: "Script analysis disabled",
-    wta: "Script analysis disabled",
-  };
 
   console.log("🔄 [COMPLETE_ANALYSIS] Starting text-based analysis tasks...");
 
   // Detect platform from URL if available
   const platformFromUrl = detectPlatformFromUrl(videoUrl);
 
-  const [metadataResult] = await Promise.allSettled([
+  const [scriptResult, metadataResult] = await Promise.allSettled([
+    callScriptAnalysisService(transcript),
     callMetadataAnalysisService(transcript, videoUrl, platformFromUrl),
   ]);
 
+  const components = getScriptResult(scriptResult);
   const contentMetadata = getMetadataResult(metadataResult);
 
   console.log("🎉 [COMPLETE_ANALYSIS] All analyses completed successfully");
@@ -140,23 +136,20 @@ function detectPlatformFromUrl(videoUrl?: string): string | undefined {
   return undefined;
 }
 
-function getTranscriptResult(transcriptResult: PromiseSettledResult<string | null>): string {
-  if (transcriptResult.status === "fulfilled" && transcriptResult.value) {
-    console.log("✅ [COMPLETE_ANALYSIS] Transcription completed");
-    return transcriptResult.value;
+function getScriptResult(
+  scriptResult: PromiseSettledResult<AnalysisResult["components"] | null>,
+): AnalysisResult["components"] {
+  if (scriptResult.status === "fulfilled" && scriptResult.value) {
+    console.log("✅ [COMPLETE_ANALYSIS] Script analysis completed");
+    return scriptResult.value;
   } else {
-    console.log("⚠️ [COMPLETE_ANALYSIS] Transcription failed, using fallback");
-    return "Transcription failed - unable to extract spoken content from video";
-  }
-}
-
-function getVisualResult(visualResult: PromiseSettledResult<string | null>): string {
-  if (visualResult.status === "fulfilled" && visualResult.value) {
-    console.log("✅ [COMPLETE_ANALYSIS] Visual analysis completed");
-    return visualResult.value;
-  } else {
-    console.log("⚠️ [COMPLETE_ANALYSIS] Visual analysis failed, using fallback");
-    return "Visual analysis failed - unable to extract visual context from video";
+    console.log("⚠️ [COMPLETE_ANALYSIS] Script analysis failed, using fallback");
+    return {
+      hook: "Unable to extract hook from content",
+      bridge: "Unable to extract bridge from content",
+      nugget: "Unable to extract golden nugget from content",
+      wta: "Unable to extract WTA from content",
+    };
   }
 }
 
@@ -210,6 +203,23 @@ async function callTranscribeService(videoData: ArrayBuffer, videoUrl?: string):
   }
 }
 
+async function callScriptAnalysisService(transcript: string): Promise<AnalysisResult["components"] | null> {
+  try {
+    const response = await fetch(buildInternalUrl(`/api/video/analyze-script`), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ transcript }),
+    });
+
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.components;
+  } catch (error) {
+    console.error("❌ [ORCHESTRATOR] Script analysis service error:", error);
+    return null;
+  }
+}
+
 async function callMetadataAnalysisService(
   transcript: string,
   videoUrl?: string,
@@ -227,26 +237,6 @@ async function callMetadataAnalysisService(
     return data.metadata;
   } catch (error) {
     console.error("❌ [ORCHESTRATOR] Metadata analysis service error:", error);
-    return null;
-  }
-}
-
-async function callVisualAnalysisService(videoData: ArrayBuffer): Promise<string | null> {
-  try {
-    const formData = new FormData();
-    const blob = new Blob([videoData], { type: "video/mp4" });
-    formData.append("video", blob, "video.mp4");
-
-    const response = await fetch(buildInternalUrl("/api/video/analyze-visuals"), {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!response.ok) return null;
-    const data = await response.json();
-    return data.visualContext;
-  } catch (error) {
-    console.error("❌ [ORCHESTRATOR] Visual analysis service error:", error);
     return null;
   }
 }

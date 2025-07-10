@@ -121,7 +121,8 @@ async function analyzeVideoVisuals(arrayBuffer: ArrayBuffer, mimeType: string): 
     console.log("🤖 [VISUAL_ANALYSIS] Analyzing visual elements with AI...");
 
     const base64Data = Buffer.from(arrayBuffer).toString("base64");
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    const modelName = process.env.GEMINI_MODEL || "gemini-1.5-flash-preview-0514";
+    const model = genAI.getGenerativeModel({ model: modelName });
 
     const prompt = `Analyze the visual elements in this video and provide a comprehensive description including:
 

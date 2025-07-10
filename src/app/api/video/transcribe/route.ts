@@ -15,12 +15,12 @@ export async function POST(request: NextRequest) {
     } else {
       return await handleFileTranscription(request);
     }
-  } catch (error) {
-    console.error("❌ [TRANSCRIBE] Transcription error:", error);
+  } catch (e: unknown) {
+    console.error("❌ [TRANSCRIBE] Transcription error:", e);
     return NextResponse.json(
       {
         error: "Failed to transcribe video",
-        details: error instanceof Error ? error.message : "Unknown error",
+        details: e instanceof Error ? e.message : "Unknown error",
       },
       { status: 500 },
     );
@@ -74,7 +74,8 @@ async function handleUrlTranscription(request: NextRequest) {
         processedAt: new Date().toISOString(),
       },
     });
-  } catch (error) {
+  } catch (e: unknown) {
+    const error = e as Error;
     console.error("❌ [TRANSCRIBE] URL transcription error:", error);
     return NextResponse.json({ error: "Failed to transcribe video from URL" }, { status: 500 });
   }
@@ -123,7 +124,8 @@ async function handleFileTranscription(request: NextRequest) {
         processedAt: new Date().toISOString(),
       },
     });
-  } catch (error) {
+  } catch (e: unknown) {
+    const error = e as Error;
     console.error("❌ [TRANSCRIBE] File transcription error:", error);
     return NextResponse.json({ error: "Failed to transcribe video file" }, { status: 500 });
   }
@@ -134,7 +136,8 @@ async function transcribeVideoData(arrayBuffer: ArrayBuffer, mimeType: string): 
     console.log("🤖 [TRANSCRIBE] Converting video to transcript...");
 
     const base64Data = Buffer.from(arrayBuffer).toString("base64");
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    const modelName = process.env.GEMINI_MODEL || "gemini-1.5-flash-preview-0514";
+    const model = genAI.getGenerativeModel({ model: modelName });
 
     // Simple, focused prompt for transcription only
     const prompt = `Provide a full, accurate transcription of all spoken content in this video. 
@@ -157,7 +160,8 @@ Respond with only the transcript text, no additional formatting or commentary.`;
     console.log("✅ [TRANSCRIBE] Transcription generated successfully");
 
     return transcript;
-  } catch (error) {
+  } catch (e: unknown) {
+    const error = e as Error;
     console.error("❌ [TRANSCRIBE] Video transcription error:", error);
     return null;
   }

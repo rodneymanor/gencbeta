@@ -27,7 +27,7 @@ export interface AudioData {
 
 // Gemini service with production error handling
 export class GeminiService {
-  private static readonly DEFAULT_MODEL = "gemini-1.5-flash";
+  private static readonly DEFAULT_MODEL = "gemini-1.5-flash-preview-0514";
   private static readonly TIMEOUT_MS = 30000; // 30 seconds
   private static readonly MAX_RETRIES = 2;
 
@@ -39,14 +39,14 @@ export class GeminiService {
       console.log("🤖 [Gemini] Starting content generation...");
 
       const modelName = request.model ?? GeminiService.DEFAULT_MODEL;
-      const generationConfig: any = {
+      const generationConfig: unknown = {
         maxOutputTokens: request.maxTokens ?? 1000,
         temperature: request.temperature ?? 0.7,
       };
 
       // Add JSON response type if requested
       if (request.responseType === "json") {
-        generationConfig.responseMimeType = "application/json";
+        (generationConfig as { responseMimeType: string }).responseMimeType = "application/json";
       }
 
       const model = genAI.getGenerativeModel({
@@ -89,7 +89,7 @@ export class GeminiService {
       console.log("🎤 [Gemini] Starting audio transcription...");
 
       const model = genAI.getGenerativeModel({
-        model: "gemini-1.5-flash",
+        model: "gemini-1.5-flash-preview-0514",
       });
 
       const result = await GeminiService.withTimeout(

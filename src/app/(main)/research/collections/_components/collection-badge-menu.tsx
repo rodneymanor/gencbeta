@@ -11,8 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/auth-context";
-import { type Collection } from "@/lib/collections";
-import { CollectionsService } from "@/lib/collections";
+import { type Collection, CollectionsService } from "@/lib/collections";
 
 import { DeleteCollectionDialog } from "./delete-collection-dialog";
 import { EditCollectionDialog } from "./edit-collection-dialog";
