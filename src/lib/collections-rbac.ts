@@ -1,4 +1,4 @@
-import { collection, query, where, orderBy, getDocs, limit } from "firebase/firestore";
+import { collection, query, where, orderBy, getDocs, limit, startAfter, DocumentSnapshot } from "firebase/firestore";
 
 import { type Collection, type Video } from "./collections";
 import { formatTimestamp } from "./collections-helpers";
@@ -62,16 +62,21 @@ export class CollectionsRBACService {
   /**
    * Get videos from a collection or all videos (role-based)
    */
-  static async getCollectionVideos(userId: string, collectionId?: string, videoLimit?: number): Promise<Video[]> {
+  static async getCollectionVideos(
+    userId: string,
+    collectionId?: string,
+    videoLimit?: number,
+    lastDoc?: DocumentSnapshot,
+  ): Promise<{ videos: Video[]; lastDoc?: DocumentSnapshot }> {
     try {
-      console.log("🔍 [RBAC] User ID:", userId, "Limit:", videoLimit);
+      console.log("🔍 [RBAC] User ID:", userId, "Limit:", videoLimit, "HasCursor:", !!lastDoc);
 
       const userProfile = await UserManagementService.getUserProfile(userId);
       if (userProfile?.role === "super_admin") {
-        return this.getSuperAdminVideos(userId, collectionId, videoLimit);
+        return this.getSuperAdminVideos(userId, collectionId, videoLimit, lastDoc);
       }
 
-      return this.getRegularUserVideos(userId, collectionId, videoLimit);
+      return this.getRegularUserVideos(userId, collectionId, videoLimit, lastDoc);
     } catch (error) {
       console.error("Error fetching videos:", error);
       throw new Error("Failed to fetch videos");
@@ -85,7 +90,8 @@ export class CollectionsRBACService {
     userId: string,
     collectionId?: string,
     videoLimit?: number,
-  ): Promise<Video[]> {
+    lastDoc?: DocumentSnapshot,
+  ): Promise<{ videos: Video[]; lastDoc?: DocumentSnapshot }> {
     console.log("🔍 [RBAC] Super admin detected - bypassing coach restrictions");
 
     let q;
@@ -98,8 +104,13 @@ export class CollectionsRBACService {
       } catch (error) {
         // Collection not found, return empty array
         console.log("❌ [RBAC] Collection query failed:", error instanceof Error ? error.message : String(error));
-        return [];
+        return { videos: [] };
       }
+    }
+
+    // Apply pagination cursor if provided
+    if (lastDoc) {
+      q = query(q, startAfter(lastDoc));
     }
 
     // Apply limit if specified
@@ -114,8 +125,10 @@ export class CollectionsRBACService {
       addedAt: formatTimestamp(doc.data().addedAt),
     })) as Video[];
 
+    const newLastDoc = querySnapshot.docs.length > 0 ? querySnapshot.docs[querySnapshot.docs.length - 1] : undefined;
+
     console.log("✅ [RBAC] Super admin loaded videos:", videos.length);
-    return videos;
+    return { videos, lastDoc: newLastDoc };
   }
 
   /**
@@ -146,26 +159,38 @@ export class CollectionsRBACService {
     userId: string,
     collectionId?: string,
     videoLimit?: number,
-  ): Promise<Video[]> {
+    lastDoc?: DocumentSnapshot,
+  ): Promise<{ videos: Video[]; lastDoc?: DocumentSnapshot }> {
     const accessibleCoaches = await UserManagementService.getUserAccessibleCoaches(userId);
     console.log("🔍 [RBAC] Accessible coaches:", accessibleCoaches);
 
     if (accessibleCoaches.length === 0) {
       console.log("❌ [RBAC] No accessible coaches found - returning empty array");
-      return [];
+      return { videos: [] };
     }
 
-    const q = await this.getRegularUserQuery(userId, collectionId, accessibleCoaches);
+    let q = await this.getRegularUserQuery(userId, collectionId, accessibleCoaches);
+
+    // Apply pagination cursor if provided
+    if (lastDoc) {
+      q = query(q, startAfter(lastDoc));
+    }
 
     // Apply limit if specified
-    const finalQuery = videoLimit ? query(q, limit(videoLimit)) : q;
-    const querySnapshot = await getDocs(finalQuery);
+    if (videoLimit) {
+      q = query(q, limit(videoLimit));
+    }
 
-    return querySnapshot.docs.map((doc) => ({
+    const querySnapshot = await getDocs(q);
+    const videos = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
       addedAt: formatTimestamp(doc.data().addedAt),
     })) as Video[];
+
+    const newLastDoc = querySnapshot.docs.length > 0 ? querySnapshot.docs[querySnapshot.docs.length - 1] : undefined;
+
+    return { videos, lastDoc: newLastDoc };
   }
 
   /**
