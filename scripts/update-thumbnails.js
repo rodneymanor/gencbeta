@@ -44,7 +44,9 @@ function generateBunnyThumbnailUrl(videoId) {
     return null;
   }
 
-  const thumbnailUrl = `https://vz-${hostname}.b-cdn.net/${videoId}/thumbnail.jpg`;
+  // The hostname should already be in format like "8416c36e-556.b-cdn.net"
+  // We just need to add the "vz-" prefix for thumbnails
+  const thumbnailUrl = `https://vz-${hostname}/${videoId}/thumbnail.jpg`;
   console.log("🖼️ [UPDATE] Generated thumbnail URL:", thumbnailUrl);
   
   return thumbnailUrl;
