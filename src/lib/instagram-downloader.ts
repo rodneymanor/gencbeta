@@ -63,9 +63,17 @@ export function extractAdditionalMetadata(metadata: any) {
   const author = getAuthorFromMetadata(metadata);
   const duration = getDurationFromMetadata(metadata);
 
+  const captionText = metadata.caption?.text || metadata.caption_text || metadata.edge_media_to_caption?.edges?.[0]?.node?.text || "";
+
+  // Extract hashtags from caption text
+  const hashtags = Array.from(new Set((captionText.match(/#[A-Za-z0-9_]+/g) || []).map((h: string) => h.substring(1))))
+    .slice(0, 30); // limit
+
   const additionalData = {
     author,
     duration,
+    description: captionText,
+    hashtags,
   };
 
   console.log("📋 [DOWNLOAD] Extracted additional metadata:", additionalData);
