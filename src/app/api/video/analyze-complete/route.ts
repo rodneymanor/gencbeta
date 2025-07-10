@@ -103,15 +103,13 @@ async function processFileInput(request: NextRequest) {
 }
 
 async function performCompleteAnalysis(videoData: ArrayBuffer, videoUrl?: string): Promise<AnalysisResult> {
-  console.log("🚀 [COMPLETE_ANALYSIS] Starting parallel analysis tasks...");
+  console.log("🚀 [COMPLETE_ANALYSIS] Starting transcription task...");
 
-  const [transcriptResult, visualResult] = await Promise.allSettled([
-    callTranscribeService(videoData, videoUrl),
-    callVisualAnalysisService(videoData),
-  ]);
+  const transcriptRaw = await callTranscribeService(videoData, videoUrl);
+  const transcript = transcriptRaw ?? "Transcription failed - unable to extract spoken content from video";
 
-  const transcript = getTranscriptResult(transcriptResult);
-  const visualContext = getVisualResult(visualResult);
+  // Visual analysis disabled
+  const visualContext = "";
 
   console.log("🔄 [COMPLETE_ANALYSIS] Starting text-based analysis tasks...");
 
@@ -130,7 +128,7 @@ async function performCompleteAnalysis(videoData: ArrayBuffer, videoUrl?: string
   console.log("📊 [COMPLETE_ANALYSIS] Results summary:");
   console.log("  - Transcript length:", transcript.length, "characters");
   console.log("  - Platform detected:", contentMetadata.platform);
-  console.log("  - Visual context length:", visualContext.length, "characters");
+  // Visual context disabled
 
   return { transcript, components, contentMetadata, visualContext };
 }
@@ -294,7 +292,9 @@ async function callMetadataAnalysisService(
 
 async function callVisualAnalysisService(videoData: ArrayBuffer): Promise<string | null> {
   try {
-    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${process.env.PORT || 3001}`;
+    const baseUrl = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : `http://localhost:${process.env.PORT || 3001}`;
 
     const formData = new FormData();
     const blob = new Blob([videoData], { type: "video/mp4" });
