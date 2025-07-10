@@ -284,8 +284,9 @@ function CollectionsPageContent() {
   }, [selectedCollectionId, collections]);
 
   const categoryItems = useMemo(() => {
-    const sorted = [...collections].sort((a, b) => a.title.localeCompare(b.title));
-    const items = sorted.map((c) => ({ id: c.id!, name: c.title }));
+    const favs = collections.filter((c) => c.favorite).sort((a, b) => a.title.localeCompare(b.title));
+    const others = collections.filter((c) => !c.favorite).sort((a, b) => a.title.localeCompare(b.title));
+    const items = [...favs, ...others].map((c) => ({ id: c.id!, name: c.title }));
     items.unshift({ id: "all-videos", name: "All Videos" });
     return items;
   }, [collections]);

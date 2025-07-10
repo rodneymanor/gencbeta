@@ -6,6 +6,7 @@ import {
   detectPlatform,
   type DownloadResult,
 } from "@/lib/video-processing-helpers";
+import { getTikTokAdditionalMetadata, extractTikTokThumbnailUrl } from "@/lib/tiktok-downloader";
 
 export async function POST(request: NextRequest) {
   console.log("📥 [DOWNLOADER] Starting video download service...");
@@ -95,13 +96,17 @@ export async function POST(request: NextRequest) {
 
 async function downloadVideo(url: string, platform: string): Promise<DownloadResult | null> {
   if (platform === "tiktok") {
-    const result = await downloadTikTokVideo(url);
-    return result
-      ? {
-          videoData: result,
-          additionalMetadata: { author: "Unknown", duration: 0 },
-        }
-      : null;
+    const videoResult = await downloadTikTokVideo(url);
+    if (!videoResult) return null;
+
+    const additionalMetadata = await getTikTokAdditionalMetadata(url);
+    const thumbnailUrl = await extractTikTokThumbnailUrl(url);
+
+    return {
+      videoData: videoResult,
+      additionalMetadata: additionalMetadata as any, // include description & hashtags
+      thumbnailUrl,
+    };
   } else if (platform === "instagram") {
     return downloadInstagramVideoWithMetrics(url);
   }

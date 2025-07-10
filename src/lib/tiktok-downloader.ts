@@ -5,6 +5,12 @@ interface TikTokMetadata {
         play_addr?: {
           url_list?: string[];
         };
+        cover?: {
+          url_list?: string[];
+        };
+        dynamic_cover?: {
+          url_list?: string[];
+        };
       };
     };
   };
@@ -278,5 +284,97 @@ export async function downloadTikTokVideo(url: string): Promise<TikTokVideoResul
     return await tryDownloadFromUrls(videoUrls, videoId);
   } catch (error) {
     handleError(error);
+  }
+}
+
+export function extractAdditionalMetadataFromTikTok(metadata: any) {
+  // Extract author (nickname) if available
+  const author = metadata?.data?.aweme_detail?.author?.nickname ?? "Unknown";
+
+  // Extract duration (in seconds) if available
+  const duration = metadata?.data?.aweme_detail?.video?.duration ?? 0;
+
+  // Caption text lives in `desc`
+  const description: string = metadata?.data?.aweme_detail?.desc ?? "";
+
+  // Parse hashtags from caption text (max 30, unique)
+  const hashtags = Array.from(new Set((description.match(/#[A-Za-z0-9_]+/g) || []).map((h: string) => h.substring(1))))
+    .slice(0, 30);
+
+  return {
+    author,
+    duration,
+    description,
+    hashtags,
+  };
+}
+
+export function extractTikTokThumbnailUrl(metadata: any): string | undefined {
+  try {
+    const videoData = metadata?.data?.aweme_detail?.video;
+    
+    // Try dynamic_cover first (animated thumbnail)
+    if (videoData?.dynamic_cover?.url_list?.length > 0) {
+      const thumbnail = videoData.dynamic_cover.url_list[0];
+      console.log("🖼️ [DOWNLOAD] Extracted TikTok thumbnail from dynamic_cover:", thumbnail);
+      return thumbnail;
+    }
+
+    // Fallback to static cover
+    if (videoData?.cover?.url_list?.length > 0) {
+      const thumbnail = videoData.cover.url_list[0];
+      console.log("🖼️ [DOWNLOAD] Extracted TikTok thumbnail from cover:", thumbnail);
+      return thumbnail;
+    }
+
+    console.log("⚠️ [DOWNLOAD] No thumbnail found in TikTok metadata");
+    return undefined;
+  } catch (error) {
+    console.error("❌ [DOWNLOAD] Error extracting TikTok thumbnail URL:", error);
+    return undefined;
+  }
+}
+
+/**
+ * Convenience helper: given a TikTok URL, fetches RapidAPI metadata and returns a simplified
+ * object containing author, duration, caption (description) and parsed hashtags.
+ */
+export async function getTikTokAdditionalMetadata(url: string): Promise<{
+  author: string;
+  duration: number;
+  description: string;
+  hashtags: string[];
+}> {
+  try {
+    const videoId = await extractTikTokVideoId(url);
+    if (!videoId) {
+      console.log("⚠️ [METADATA] Unable to extract video ID for additional metadata");
+      return { author: "Unknown", duration: 0, description: "", hashtags: [] };
+    }
+
+    const metadata = await getMetadata(videoId);
+    return extractAdditionalMetadataFromTikTok(metadata);
+  } catch (error) {
+    console.error("❌ [METADATA] Failed to fetch TikTok additional metadata:", error);
+    return { author: "Unknown", duration: 0, description: "", hashtags: [] };
+  }
+}
+
+/**
+ * Convenience helper: given a TikTok URL, fetches RapidAPI metadata and returns the thumbnail URL.
+ */
+export async function getTikTokThumbnailUrl(url: string): Promise<string | undefined> {
+  try {
+    const videoId = await extractTikTokVideoId(url);
+    if (!videoId) {
+      console.log("⚠️ [THUMBNAIL] Unable to extract video ID for thumbnail");
+      return undefined;
+    }
+
+    const metadata = await getMetadata(videoId);
+    return extractTikTokThumbnailUrl(metadata);
+  } catch (error) {
+    console.error("❌ [THUMBNAIL] Failed to fetch TikTok thumbnail:", error);
+    return undefined;
   }
 }

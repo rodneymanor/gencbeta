@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
       collectionId,
       downloadResult.data.platform,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      downloadResult.data.metadata || {},
+      downloadResult.data.additionalMetadata || {},
     );
 
     console.log("✅ [VIDEO_PROCESS] Complete workflow successful!");
