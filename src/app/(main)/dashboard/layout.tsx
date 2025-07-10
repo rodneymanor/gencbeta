@@ -1,3 +1,5 @@
+"use client";
+
 import { ReactNode } from "react";
 
 import { AppSidebar } from "@/app/(main)/dashboard/_components/sidebar/app-sidebar";
