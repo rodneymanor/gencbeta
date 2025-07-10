@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { Users, UserPlus, Shield, User, Crown, ImageUp } from "lucide-react";
+import { Users, UserPlus, Shield, User, Crown, ImageUp, Terminal } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,7 +16,6 @@ import { UserManagementService, type UserProfile, type UserRole } from "@/lib/us
 
 import { AssignCreatorDialog } from "./_components/assign-creator-dialog";
 import { CreateUserDialog } from "./_components/create-user-dialog";
-import Link from "next/link";
 
 export default function AdminPage() {
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -244,9 +244,7 @@ export default function AdminPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Create New User
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Create New User</CardTitle>
           </CardHeader>
           <CardContent>
             <CreateUserDialog onUserCreated={handleUserCreated} />
@@ -254,15 +252,26 @@ export default function AdminPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Update Thumbnails
-            </CardTitle>
-            <ImageUp className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Update Thumbnails</CardTitle>
+            <ImageUp className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <Link href="/dashboard/admin/thumbnail-updater" passHref>
               <Button variant="outline" className="w-full">
                 Go to Thumbnail Tool
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Fill Video Insights</CardTitle>
+            <Terminal className="text-muted-foreground h-4 w-4" />
+          </CardHeader>
+          <CardContent>
+            <Link href="/dashboard/admin/fill-video-insights" passHref>
+              <Button variant="outline" className="w-full">
+                Go to Insights Tool
               </Button>
             </Link>
           </CardContent>
