@@ -93,7 +93,6 @@ export const VideoCard = memo<VideoCardProps>(
     hasHLSIssue = false,
   }) => {
     const [isHovered, setIsHovered] = useState(false);
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [showRepurposeModal, setShowRepurposeModal] = useState(false);
     const [showMoveDialog, setShowMoveDialog] = useState(false);
     const [showCopyDialog, setShowCopyDialog] = useState(false);
@@ -105,7 +104,7 @@ export const VideoCard = memo<VideoCardProps>(
     const baseClassName = `w-[240px] p-3 rounded-xl group relative transition-all duration-200 hover:shadow-lg border-border/50 hover:border-border ${className}`;
     const cardClassName = buildCardClassName(baseClassName, isSelected, isDeleting, hasHLSIssue);
 
-    const showActions = (isHovered || isDropdownOpen || isManageMode) && !isDeleting;
+    const showActions = (isHovered || isManageMode) && !isDeleting;
 
     const handlePlay = useCallback(() => {
       if (!isPlaying && video.id) {
@@ -122,10 +121,10 @@ export const VideoCard = memo<VideoCardProps>(
 
     const handleMouseLeave = useCallback(() => {
       // Only hide if dropdown is not open
-      if (!isDropdownOpen) {
+      if (!isManageMode) {
         setIsHovered(false);
       }
-    }, [isDropdownOpen]);
+    }, [isManageMode]);
 
     const thumbnailUrl = getThumbnailUrl(video);
 
@@ -278,7 +277,9 @@ export const VideoCard = memo<VideoCardProps>(
       prevProps.isPlaying === nextProps.isPlaying &&
       prevProps.isSelected === nextProps.isSelected &&
       prevProps.isDeleting === nextProps.isDeleting &&
-      prevProps.hasHLSIssue === nextProps.hasHLSIssue
+      prevProps.hasHLSIssue === nextProps.hasHLSIssue &&
+      prevProps.collections?.length === nextProps.collections?.length &&
+      prevProps.currentCollectionId === nextProps.currentCollectionId
     );
   },
 );

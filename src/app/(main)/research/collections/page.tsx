@@ -9,9 +9,14 @@ import { useState, useEffect, useCallback, useMemo, useTransition, useRef, memo,
 import { useSearchParams, useRouter } from "next/navigation";
 
 import { motion } from "framer-motion";
+import { Edit3, Loader2, Check } from "lucide-react";
+import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
-import { VideoCollectionLoading, PageHeaderLoading } from "@/components/ui/loading-animations";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { VideoCollectionLoading } from "@/components/ui/loading-animations";
+import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/contexts/auth-context";
 import { useTopBarConfig } from "@/hooks/use-route-topbar";
 import { CollectionsService, type Collection, type Video } from "@/lib/collections";
@@ -22,8 +27,6 @@ import { CollectionBadgeMenu } from "./_components/collection-badge-menu";
 import { badgeVariants } from "./_components/collections-animations";
 import {
   type VideoWithPlayer,
-  getPageTitle,
-  getPageDescription,
   createVideoSelectionHandlers,
 } from "./_components/collections-helpers";
 import { ManageModeHeader } from "./_components/manage-mode-header";
@@ -120,6 +123,120 @@ const CollectionBadge = memo(
 );
 
 CollectionBadge.displayName = "CollectionBadge";
+
+function InlineEditableField({
+  value,
+  onSave,
+  isOwner,
+  type = "input",
+  label,
+  maxLength,
+  className = "",
+  placeholder,
+}: {
+  value: string;
+  onSave: (newValue: string) => Promise<void>;
+  isOwner: boolean;
+  type?: "input" | "textarea";
+  label: string;
+  maxLength: number;
+  className?: string;
+  placeholder?: string;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [inputValue, setInputValue] = useState(value);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    setInputValue(value);
+  }, [value]);
+
+  const handleSave = async () => {
+    if (inputValue.trim() === value.trim()) {
+      setEditing(false);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      await onSave(inputValue.trim());
+      setSaved(true);
+      setTimeout(() => setSaved(false), 1200);
+      setEditing(false);
+    } catch (err: any) {
+      setError(err.message ?? "Failed to save");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBlur = () => {
+    if (editing) handleSave();
+  };
+
+  const isEmpty = !value || value.trim() === "";
+
+  if (!isOwner) {
+    return (
+      <span className={className}>{isEmpty ? (placeholder ?? "This is the place to add your videos.") : value}</span>
+    );
+  }
+
+  return (
+    <span className={`relative group ${className}`}>
+      {editing ? (
+        <>
+          {type === "input" ? (
+            <Input
+              value={inputValue}
+              onChange={e => setInputValue(e.target.value)}
+              onBlur={handleBlur}
+              maxLength={maxLength}
+              autoFocus
+              disabled={loading}
+              className="pr-10"
+            />
+          ) : (
+            <Textarea
+              value={inputValue}
+              onChange={e => setInputValue(e.target.value)}
+              onBlur={handleBlur}
+              maxLength={maxLength}
+              autoFocus
+              disabled={loading}
+              className="pr-10 min-h-[80px]"
+              rows={3}
+            />
+          )}
+          <Button
+            size="icon"
+            variant="ghost"
+            className="absolute right-1 top-1 z-10"
+            onClick={handleSave}
+            disabled={loading}
+            tabIndex={-1}
+          >
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4 text-green-600" />}
+          </Button>
+        </>
+      ) : (
+        <span
+          className={`inline-flex items-center gap-1 rounded px-1 cursor-pointer transition group-hover:bg-accent/30`}
+          onClick={() => setEditing(true)}
+        >
+          <span className={isEmpty ? "text-muted-foreground italic" : undefined}>
+            {isEmpty ? (placeholder ?? "This is the place to add your videos.") : value}
+          </span>
+          <Edit3 className={"ml-1 h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"} />
+          {saved && <Check className="ml-1 h-4 w-4 text-green-600" />}
+        </span>
+      )}
+      {error && <span className="block text-xs text-destructive mt-1">{error}</span>}
+    </span>
+  );
+}
 
 // Main collections page component - simplified and optimized
 function CollectionsPageContent() {
@@ -344,6 +461,22 @@ function CollectionsPageContent() {
     }
   }, [user, userProfile, router]);
 
+  // Collection validation effect - moved out of render to prevent infinite loops
+  useEffect(() => {
+    if (selectedCollectionId && collections.length > 0) {
+      const collectionExists = collections.some((c) => c.id === selectedCollectionId);
+      if (!collectionExists && selectedCollectionId !== "all-videos") {
+        console.warn("⚠️ [Collections] Collection not found, redirecting to all videos:", selectedCollectionId);
+        // Clear cache for clean refresh
+        cacheRef.current.data.clear();
+        // Redirect to all videos without the invalid collection parameter
+        startTransition(() => {
+          router.push("/research/collections", { scroll: false });
+        });
+      }
+    }
+  }, [selectedCollectionId, collections, router]);
+
   // OPTIMIZED: Single data loading effect
   useEffect(() => {
     if (user && userProfile && isLoading) {
@@ -357,10 +490,45 @@ function CollectionsPageContent() {
 
   // Video management functions
   const handleVideoAdded = useCallback(async () => {
-    // Clear cache and reload
+    if (!user) return;
+
+    // Clear cache and force fresh data fetch
     cacheRef.current.data.clear();
-    await loadData();
-  }, [loadData]);
+
+    console.log("🔄 [Collections] Refreshing collections after video/collection added");
+
+    try {
+      // Force fresh fetch of both collections and videos
+      const [collectionsResult, videosResult] = await Promise.allSettled([
+        CollectionsRBACService.getUserCollections(user.uid),
+        CollectionsRBACService.getCollectionVideos(user.uid, selectedCollectionId ?? undefined, 24),
+      ]);
+
+      if (collectionsResult.status === "fulfilled") {
+        setCollections(collectionsResult.value);
+        console.log("✅ [Collections] Collections refreshed:", collectionsResult.value.length);
+      } else {
+        console.error("Error refreshing collections:", collectionsResult.reason);
+      }
+
+      if (videosResult.status === "fulfilled") {
+        const { videos, lastDoc } = videosResult.value;
+        const optimizedVideos = videos.map((video) => ({
+          ...video,
+          isPlaying: false,
+        }));
+        setVideos(optimizedVideos);
+        setCachedVideos(selectedCollectionId, optimizedVideos);
+        setHasMoreVideos(optimizedVideos.length === 24);
+        setLastDocRef(lastDoc);
+        console.log("✅ [Collections] Videos refreshed:", optimizedVideos.length);
+      } else {
+        console.error("Error refreshing videos:", videosResult.reason);
+      }
+    } catch (error) {
+      console.error("❌ [Collections] Error refreshing data:", error);
+    }
+  }, [user, selectedCollectionId, setCachedVideos]);
 
   const handleCollectionUpdated = useCallback(async () => {
     // Clear cache and reload collections and videos
@@ -372,19 +540,20 @@ function CollectionsPageContent() {
     if (!user) return;
 
     try {
+      // If we're viewing the deleted collection, redirect to all videos
       if (selectedCollectionId) {
         startTransition(() => {
-          router.push("/research/collections");
+          router.push("/research/collections", { scroll: false });
         });
       }
 
-      // Clear cache and reload
+      // Clear cache and reload data
       cacheRef.current.data.clear();
-      await loadData();
+      setIsLoading(true);
     } catch (error) {
-      console.error("Error refreshing after collection deleted:", error);
+      console.error("Error handling collection deletion:", error);
     }
-  }, [user, selectedCollectionId, router, loadData]);
+  }, [user, selectedCollectionId, router]);
 
   const handleDeleteVideo = useCallback(
     async (videoId: string) => {
@@ -479,8 +648,14 @@ function CollectionsPageContent() {
     }
   }, [user, isLoadingMore, hasMoreVideos, lastDocRef, selectedCollectionId, handleVideoResult]);
 
-  // Don't show anything until collections are loaded and validated
-  if (isLoading || (selectedCollectionId && !validateCollectionExists(selectedCollectionId, collections))) {
+  const selectedCollection = useMemo(() => {
+    if (!selectedCollectionId) return null;
+    return collections.find((c) => c.id === selectedCollectionId) ?? null;
+  }, [selectedCollectionId, collections]);
+  const isOwner = Boolean(user && selectedCollection && selectedCollection.userId === user?.uid);
+
+  // Don't show anything until collections are loaded
+  if (isLoading) {
     return <VideoCollectionLoading />;
   }
 
@@ -490,8 +665,47 @@ function CollectionsPageContent() {
       <div className="flex-1">
         <header className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">{pageTitle}</h1>
-            <p className="text-muted-foreground max-w-prose">{pageDescription}</p>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {selectedCollection ? (
+                <InlineEditableField
+                  value={selectedCollection.title}
+                  onSave={async (newTitle) => {
+                    if (!user) return;
+                    await CollectionsService.updateCollection(user.uid, selectedCollection.id!, { title: newTitle });
+                    toast.success("Collection name updated");
+                    handleCollectionUpdated();
+                  }}
+                  isOwner={isOwner}
+                  type="input"
+                  label="Collection Name"
+                  maxLength={80}
+                  className="inline-block"
+                />
+              ) : (
+                pageTitle
+              )}
+            </h1>
+            <p className="text-muted-foreground max-w-prose">
+              {selectedCollection ? (
+                <InlineEditableField
+                  value={selectedCollection.description}
+                  onSave={async (newDesc) => {
+                    if (!user) return;
+                    await CollectionsService.updateCollection(user.uid, selectedCollection.id!, { description: newDesc });
+                    toast.success("Collection description updated");
+                    handleCollectionUpdated();
+                  }}
+                  isOwner={isOwner}
+                  type="textarea"
+                  label="Collection Description"
+                  maxLength={500}
+                  className="inline-block"
+                  placeholder="This is the place to add your videos."
+                />
+              ) : (
+                pageDescription
+              )}
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <ManageModeHeader

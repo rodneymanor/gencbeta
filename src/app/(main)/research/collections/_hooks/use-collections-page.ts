@@ -200,9 +200,42 @@ export function useCollectionsPage() {
   }, [setTopBarConfig]);
 
   const handleVideoAdded = useCallback(async () => {
+    if (!user) return;
+    
+    // Clear cache and force fresh data fetch
     cacheRef.current.data.clear();
-    await loadData();
-  }, [loadData]);
+    
+    console.log("🔄 [Collections] Refreshing collections after video/collection added");
+    
+    try {
+      // Force fresh fetch of both collections and videos
+      const [collectionsResult, videosResult] = await Promise.allSettled([
+        CollectionsRBACService.getUserCollections(user.uid),
+        CollectionsRBACService.getCollectionVideos(user.uid, selectedCollectionId ?? undefined),
+      ]);
+
+      if (collectionsResult.status === "fulfilled") {
+        setCollections(collectionsResult.value);
+        console.log("✅ [Collections] Collections refreshed:", collectionsResult.value.length);
+      } else {
+        console.error("Error refreshing collections:", collectionsResult.reason);
+      }
+
+      if (videosResult.status === "fulfilled") {
+        const optimizedVideos = videosResult.value.map((video) => ({
+          ...video,
+          isPlaying: false,
+        }));
+        setVideos(optimizedVideos);
+        setCachedVideos(selectedCollectionId, optimizedVideos);
+        console.log("✅ [Collections] Videos refreshed:", optimizedVideos.length);
+      } else {
+        console.error("Error refreshing videos:", videosResult.reason);
+      }
+    } catch (error) {
+      console.error("❌ [Collections] Error refreshing data:", error);
+    }
+  }, [user, selectedCollectionId, setCachedVideos]);
 
   const handleCollectionDeleted = useCallback(async () => {
     if (!user) return;

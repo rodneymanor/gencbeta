@@ -1,6 +1,6 @@
 "use client";
 
-import { Settings, Trash2, Plus, CheckSquare, X, MoreVertical, MoveRight } from "lucide-react";
+import { Settings, Trash2, Plus, CheckSquare, X, MoreVertical, MoveRight, FolderOpen } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/auth-context";
 import { type Collection } from "@/lib/collections";
+import { useState } from "react";
+import { ManageCollectionsModal } from "./manage-collections-modal";
 
 import { AddVideoDialog } from "./add-video-dialog";
 import { CreateCollectionDialog } from "./create-collection-dialog";
@@ -131,47 +133,62 @@ const AdminControls = ({
   selectedCollectionId: string | null;
   onManageModeToggle: () => void;
   onVideoAdded: () => void;
-}) => (
-  <div className="flex items-center gap-2">
-    <CreateCollectionDialog onCollectionCreated={onVideoAdded}>
-      <Button
-        variant="outline"
-        size="sm"
-        className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 h-8 px-3 text-xs shadow-xs transition-all duration-200 hover:shadow-sm"
-      >
-        <Plus className="mr-1.5 h-3.5 w-3.5" />
-        Create Collection
-      </Button>
-    </CreateCollectionDialog>
-    <AddVideoDialog
-      collections={collections.filter((c) => c.id).map((c) => ({ id: c.id!, title: c.title }))}
-      selectedCollectionId={selectedCollectionId ?? undefined}
-      onVideoAdded={onVideoAdded}
-    >
-      <Button
-        variant="outline"
-        size="sm"
-        className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 h-8 px-3 text-xs shadow-xs transition-all duration-200 hover:shadow-sm"
-      >
-        <Plus className="mr-1.5 h-3.5 w-3.5" />
-        Add Video
-      </Button>
-    </AddVideoDialog>
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground h-8 w-8">
-          <MoreVertical className="h-4 w-4" />
+}) => {
+  const [manageCollectionsOpen, setManageCollectionsOpen] = useState(false);
+  const { user } = useAuth();
+  const ownedCollections = user ? collections.filter((c) => c.userId === user.uid) : [];
+  return (
+    <div className="flex items-center gap-2">
+      <CreateCollectionDialog onCollectionCreated={onVideoAdded}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 h-8 px-3 text-xs shadow-xs transition-all duration-200 hover:shadow-sm"
+        >
+          <Plus className="mr-1.5 h-3.5 w-3.5" />
+          Create Collection
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={onManageModeToggle}>
-          <Settings className="mr-2 h-4 w-4" />
-          <span>Manage Videos</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  </div>
-);
+      </CreateCollectionDialog>
+      <AddVideoDialog
+        collections={collections.filter((c) => c.id).map((c) => ({ id: c.id!, title: c.title }))}
+        selectedCollectionId={selectedCollectionId ?? undefined}
+        onVideoAdded={onVideoAdded}
+      >
+        <Button
+          variant="outline"
+          size="sm"
+          className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 h-8 px-3 text-xs shadow-xs transition-all duration-200 hover:shadow-sm"
+        >
+          <Plus className="mr-1.5 h-3.5 w-3.5" />
+          Add Video
+        </Button>
+      </AddVideoDialog>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground h-8 w-8">
+            <MoreVertical className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={onManageModeToggle}>
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Manage Videos</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setManageCollectionsOpen(true)}>
+            <FolderOpen className="mr-2 h-4 w-4" />
+            <span>Manage Collections</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <ManageCollectionsModal
+        open={manageCollectionsOpen}
+        onOpenChange={setManageCollectionsOpen}
+        collections={ownedCollections}
+        onCollectionDeleted={onVideoAdded}
+      />
+    </div>
+  );
+};
 
 export const ManageModeHeader = ({
   manageMode,

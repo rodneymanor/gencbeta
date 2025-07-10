@@ -356,14 +356,7 @@ export const VideoEmbed = memo<VideoEmbedProps>(
           {/* Error overlay with recovery option */}
           {hasError && renderErrorOverlay(isRecovering, handleHLSRecovery)}
 
-          {/* Preload indicator (only show for non-Firefox) */}
-          {effectivePreload && isPreloaded && !isCurrentlyPlaying && !hasError && (
-            <div className="absolute top-2 right-2 z-10">
-              <div className="rounded-full bg-green-500/80 px-2 py-1 text-xs text-white">
-                Ready
-              </div>
-            </div>
-          )}
+          {/* Preload indicator removed per user request */}
 
           {/* Buffer health indicator */}
           {isCurrentlyPlaying && bufferHealth !== 'healthy' && (
