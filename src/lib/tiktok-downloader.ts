@@ -335,6 +335,32 @@ export function extractTikTokThumbnailUrl(metadata: any): string | undefined {
   }
 }
 
+export function extractTikTokMetrics(metadata: any) {
+  const statistics = metadata?.data?.aweme_detail?.statistics;
+  
+  if (!statistics) {
+    console.log("⚠️ [METRICS] No statistics found in TikTok metadata");
+    return {
+      likes: 0,
+      views: 0,
+      shares: 0,
+      comments: 0,
+      saves: 0,
+    };
+  }
+
+  const metrics = {
+    likes: statistics.digg_count ?? 0,
+    views: statistics.play_count ?? 0,
+    shares: statistics.share_count ?? 0,
+    comments: statistics.comment_count ?? 0,
+    saves: statistics.collect_count ?? 0,
+  };
+
+  console.log("📊 [METRICS] Extracted TikTok metrics:", metrics);
+  return metrics;
+}
+
 /**
  * Convenience helper: given a TikTok URL, fetches RapidAPI metadata and returns a simplified
  * object containing author, duration, caption (description) and parsed hashtags.
@@ -376,5 +402,30 @@ export async function getTikTokThumbnailUrl(url: string): Promise<string | undef
   } catch (error) {
     console.error("❌ [THUMBNAIL] Failed to fetch TikTok thumbnail:", error);
     return undefined;
+  }
+}
+
+/**
+ * Convenience helper: given a TikTok URL, fetches RapidAPI metadata and returns the video metrics.
+ */
+export async function getTikTokMetrics(url: string): Promise<{
+  likes: number;
+  views: number;
+  shares: number;
+  comments: number;
+  saves: number;
+}> {
+  try {
+    const videoId = await extractTikTokVideoId(url);
+    if (!videoId) {
+      console.log("⚠️ [METRICS] Unable to extract video ID for metrics");
+      return { likes: 0, views: 0, shares: 0, comments: 0, saves: 0 };
+    }
+
+    const metadata = await getMetadata(videoId);
+    return extractTikTokMetrics(metadata);
+  } catch (error) {
+    console.error("❌ [METRICS] Failed to fetch TikTok metrics:", error);
+    return { likes: 0, views: 0, shares: 0, comments: 0, saves: 0 };
   }
 }
