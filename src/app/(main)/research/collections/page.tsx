@@ -284,7 +284,8 @@ function CollectionsPageContent() {
   }, [selectedCollectionId, collections]);
 
   const categoryItems = useMemo(() => {
-    const items = collections.map((c) => ({ id: c.id!, name: c.title }));
+    const sorted = [...collections].sort((a, b) => a.title.localeCompare(b.title));
+    const items = sorted.map((c) => ({ id: c.id!, name: c.title }));
     items.unshift({ id: "all-videos", name: "All Videos" });
     return items;
   }, [collections]);
