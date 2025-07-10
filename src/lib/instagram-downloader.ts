@@ -28,7 +28,16 @@ export async function fetchInstagramMetadata(shortcode: string) {
   clearTimeout(timeoutId);
 
   if (!response.ok) {
-    const errorMessage = `Instagram RapidAPI failed with status ${response.status}. This usually means the video is private, deleted, or the API key is invalid.`;
+    let errorMessage: string;
+
+    if (response.status === 429) {
+      errorMessage = "Instagram RapidAPI rate limit exceeded. Please try again later or upgrade your RapidAPI plan.";
+    } else if (response.status === 403) {
+      errorMessage = "Instagram RapidAPI access denied. Please check your RapidAPI key or upgrade your plan.";
+    } else {
+      errorMessage = `Instagram RapidAPI failed with status ${response.status}. This usually means the video is private, deleted, or the API key is invalid.`;
+    }
+
     console.error("❌ [DOWNLOAD]", errorMessage);
     throw new Error(errorMessage);
   }

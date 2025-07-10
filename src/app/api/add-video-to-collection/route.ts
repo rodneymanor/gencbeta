@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { ApiKeyAuthService } from "@/lib/api-key-auth";
 import { uploadToBunnyStream } from "@/lib/bunny-stream";
 import { getAdminDb, isAdminInitialized } from "@/lib/firebase-admin";
+import { buildInternalUrl } from "@/lib/utils/url";
 
 async function authenticateApiKey(request: NextRequest) {
   console.log("🔐 [Add Video API] Checking API key authentication");
@@ -54,22 +55,6 @@ async function authenticateApiKey(request: NextRequest) {
   return authResult;
 }
 
-function getBaseUrl(request: NextRequest): string {
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-
-  // In development, use the request's host to get the correct port
-  const host = request.headers.get("host");
-  if (host) {
-    return `http://${host}`;
-  }
-
-  // Fallback to default
-  return process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${process.env.PORT ?? 3001}`;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function validateAddVideoRequest(body: any) {
   const { videoUrl, collectionId, title } = body;
 
@@ -99,11 +84,11 @@ function validateUrl(url: string): boolean {
 }
 
 // Use the same backend processing functions as the add video button
-async function downloadVideo(baseUrl: string, url: string) {
+async function downloadVideo(url: string) {
   try {
     console.log("🔄 [Add Video API] Calling downloader service...");
 
-    const response = await fetch(`${baseUrl}/api/video/downloader`, {
+    const response = await fetch(buildInternalUrl("/api/video/downloader"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url }),
@@ -124,7 +109,6 @@ async function downloadVideo(baseUrl: string, url: string) {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function streamToBunny(downloadData: any) {
   try {
     console.log("🐰 [Add Video API] Streaming to Bunny CDN...");
@@ -163,7 +147,6 @@ async function streamToBunny(downloadData: any) {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function addVideoToCollection(collectionId: string, videoData: any) {
   try {
     console.log("💾 [Add Video API] Adding video to Firestore collection...");
@@ -205,20 +188,13 @@ async function addVideoToCollection(collectionId: string, videoData: any) {
   }
 }
 
-function startBackgroundTranscription(
-  baseUrl: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  videoData: any,
-  videoId: string,
-  collectionId: string,
-  platform: string,
-) {
+function startBackgroundTranscription(videoData: any, videoId: string, collectionId: string, platform: string) {
   // Start background transcription process (non-blocking)
   setTimeout(async () => {
     try {
       console.log("🎙️ [Add Video API] Starting background transcription for video:", videoId);
 
-      const response = await fetch(`${baseUrl}/api/video/transcribe`, {
+      const response = await fetch(buildInternalUrl("/api/video/transcribe"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -254,9 +230,9 @@ async function verifyCollectionOwnership(adminDb: any, collectionId: string, use
   return { success: true, data: collectionData };
 }
 
-async function downloadAndStream(baseUrl: string, decodedUrl: string, requestId: string) {
+async function downloadAndStream(decodedUrl: string, requestId: string) {
   console.log(`📥 [${requestId}] Step 1: Downloading video...`);
-  const downloadResult = await downloadVideo(baseUrl, decodedUrl);
+  const downloadResult = await downloadVideo(decodedUrl);
   if (!downloadResult.success) {
     console.error(`❌ [${requestId}] Download failed:`, downloadResult.error);
     return { success: false, error: downloadResult.error };
@@ -294,7 +270,9 @@ export async function POST(request: NextRequest) {
     // Step 1: Authentication
     const authResult = await authenticateApiKey(request);
     if (authResult instanceof NextResponse) return authResult;
-    const { user: { uid: userId, email } } = authResult;
+    const {
+      user: { uid: userId, email },
+    } = authResult;
     console.log(`✅ [${requestId}] Authentication successful for user: ${email}`);
 
     // Step 2: Request validation
@@ -304,12 +282,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
     const { videoUrl, collectionId, title } = validation.data!;
-    
+
     // Step 3: URL validation
     if (!validateUrl(videoUrl)) {
       return NextResponse.json({ error: "Only TikTok and Instagram videos are supported" }, { status: 400 });
     }
-    
+
     // Step 4: Firebase connection
     const adminDb = getAdminDb();
     if (!isAdminInitialized || !adminDb) {
@@ -351,10 +329,9 @@ async function processVideoInBackground(
 ) {
   const backgroundStartTime = Date.now();
   try {
-    const baseUrl = getBaseUrl(request);
     const decodedUrl = decodeURIComponent(videoUrl);
 
-    const processingResult = await downloadAndStream(baseUrl, decodedUrl, requestId);
+    const processingResult = await downloadAndStream(decodedUrl, requestId);
     if (!processingResult.success || !processingResult.downloadResult || !processingResult.streamResult) {
       console.error(`❌ [${requestId}] Download or stream failed, aborting processing.`);
       return;
@@ -385,7 +362,6 @@ async function processVideoInBackground(
     if (!dbResult.success || !dbResult.videoId) return;
 
     startBackgroundTranscription(
-      baseUrl,
       downloadResult.data.videoData,
       dbResult.videoId,
       collectionId,
@@ -398,7 +374,6 @@ async function processVideoInBackground(
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function getCollectionVideos(adminDb: any, collectionId: string) {
   // Use simpler query without orderBy to avoid index requirement
   const videosSnapshot = await adminDb.collection("videos").where("collectionId", "==", collectionId).get();
@@ -421,7 +396,9 @@ export async function GET(request: NextRequest) {
     // Authenticate API key first
     const authResult = await authenticateApiKey(request);
     if (authResult instanceof NextResponse) return authResult;
-    const { user: { uid: userId } } = authResult;
+    const {
+      user: { uid: userId },
+    } = authResult;
 
     const { searchParams } = new URL(request.url);
     const collectionId = searchParams.get("collectionId");

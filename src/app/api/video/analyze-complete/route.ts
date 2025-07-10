@@ -1,14 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Build URL for internal API calls that works locally & in serverless
-function buildInternalUrl(path: string): string {
-  // When deployed on Vercel, include absolute origin so fetch leaves the sandbox correctly
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}${path}`;
-  }
-  // During local dev Next.js already proxies /api routes inside the same process
-  return path; // e.g. "/api/video/transcribe"
-}
+import { buildInternalUrl } from "@/lib/utils/url";
 
 interface AnalysisResult {
   transcript: string;
@@ -271,15 +263,11 @@ async function callMetadataAnalysisService(
 
 async function callVisualAnalysisService(videoData: ArrayBuffer): Promise<string | null> {
   try {
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : `http://localhost:${process.env.PORT || 3001}`;
-
     const formData = new FormData();
     const blob = new Blob([videoData], { type: "video/mp4" });
     formData.append("video", blob, "video.mp4");
 
-    const response = await fetch(`${baseUrl}/api/video/analyze-visuals`, {
+    const response = await fetch(buildInternalUrl("/api/video/analyze-visuals"), {
       method: "POST",
       body: formData,
     });
