@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { uploadToBunnyStream } from "@/lib/bunny-stream";
 import { getAdminAuth, getAdminDb, isAdminInitialized } from "@/lib/firebase-admin";
+import { generateBunnyThumbnailUrl } from "@/lib/bunny-stream";
 
 export async function POST(request: NextRequest) {
   try {
@@ -96,7 +97,7 @@ export async function POST(request: NextRequest) {
       iframeUrl: streamResult.iframeUrl,
       directUrl: streamResult.directUrl,
       guid: streamResult.guid,
-      thumbnailUrl: downloadResult.data.thumbnailUrl || streamResult.thumbnailUrl,
+      thumbnailUrl: streamResult.thumbnailUrl || downloadResult.data.thumbnailUrl,
       metrics: downloadResult.data.metrics || {},
       metadata: downloadResult.data.metadata || {},
       transcriptionStatus: "pending",
@@ -208,12 +209,15 @@ async function streamToBunny(downloadData: any) {
 
     console.log("✅ [VIDEO_PROCESS] Bunny stream successful:", result.cdnUrl);
 
+    // Generate Bunny CDN thumbnail URL using the video ID
+    const thumbnailUrl = generateBunnyThumbnailUrl(result.filename);
+
     const returnValue = {
       success: true,
       iframeUrl: result.cdnUrl,
       directUrl: result.cdnUrl,
       guid: result.filename, // This is actually the GUID
-      thumbnailUrl: null,
+      thumbnailUrl,
     };
 
     console.log("🔍 [VIDEO_PROCESS] Returning:", returnValue);

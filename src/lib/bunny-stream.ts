@@ -374,3 +374,44 @@ async function streamVideoToBunny(sourceUrl: string, videoGuid: string): Promise
     return false;
   }
 }
+
+/**
+ * Generate a Bunny CDN thumbnail URL for a video
+ * Format: https://vz-{hostname}.b-cdn.net/{videoId}/thumbnail.jpg
+ */
+export function generateBunnyThumbnailUrl(videoId: string): string | null {
+  const hostname = process.env.BUNNY_CDN_HOSTNAME;
+  
+  if (!hostname) {
+    console.error("❌ [BUNNY] BUNNY_CDN_HOSTNAME not configured");
+    return null;
+  }
+
+  const thumbnailUrl = `https://vz-${hostname}.b-cdn.net/${videoId}/thumbnail.jpg`;
+  console.log("🖼️ [BUNNY] Generated thumbnail URL:", thumbnailUrl);
+  
+  return thumbnailUrl;
+}
+
+/**
+ * Extract video ID from Bunny iframe URL
+ * Format: https://iframe.mediadelivery.net/embed/{libraryId}/{videoId}
+ */
+export function extractVideoIdFromIframeUrl(iframeUrl: string): string | null {
+  try {
+    const url = new URL(iframeUrl);
+    const pathParts = url.pathname.split('/');
+    const videoId = pathParts[pathParts.length - 1];
+    
+    if (videoId && videoId.length > 0) {
+      console.log("🆔 [BUNNY] Extracted video ID from iframe:", videoId);
+      return videoId;
+    }
+    
+    console.error("❌ [BUNNY] Could not extract video ID from iframe URL");
+    return null;
+  } catch (error) {
+    console.error("❌ [BUNNY] Error parsing iframe URL:", error);
+    return null;
+  }
+}
