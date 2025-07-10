@@ -10,8 +10,6 @@ import {
   orderBy,
   serverTimestamp,
   writeBatch,
-  limit,
-  Timestamp,
 } from "firebase/firestore";
 
 import {
@@ -102,6 +100,26 @@ export const COLLECTION_LIMITS = {
 export class CollectionsService {
   private static readonly COLLECTIONS_PATH = "collections";
   private static readonly VIDEOS_PATH = "videos";
+
+  /**
+   * Deduplicate videos by originalUrl, keeping the most recent one
+   */
+  private static deduplicateVideosByOriginalUrl(videos: Video[]): Video[] {
+    const urlToVideoMap = new Map<string, Video>();
+
+    // Process videos in order (already sorted by addedAt desc)
+    videos.forEach((video) => {
+      const originalUrl = video.originalUrl;
+      if (!originalUrl) return;
+
+      // Keep the first occurrence (most recent due to sorting)
+      if (!urlToVideoMap.has(originalUrl)) {
+        urlToVideoMap.set(originalUrl, video);
+      }
+    });
+
+    return Array.from(urlToVideoMap.values());
+  }
 
   /**
    * Validate video URL format
@@ -288,11 +306,19 @@ export class CollectionsService {
       }
 
       const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map((doc) => ({
+      let videos = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
         addedAt: formatTimestamp(doc.data().addedAt),
       })) as Video[];
+
+      // Deduplicate videos for "all-videos" view based on originalUrl
+      if (!collectionId || collectionId === "all-videos") {
+        videos = this.deduplicateVideosByOriginalUrl(videos);
+        console.log("🔄 [Collections] Deduplicated videos from", querySnapshot.docs.length, "to", videos.length);
+      }
+
+      return videos;
     } catch (error) {
       console.error("Error fetching videos:", error);
       throw new Error("Failed to fetch videos");

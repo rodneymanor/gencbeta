@@ -10,6 +10,26 @@ export class CollectionsRBACService {
   private static readonly VIDEOS_PATH = "videos";
 
   /**
+   * Deduplicate videos by originalUrl, keeping the most recent one
+   */
+  private static deduplicateVideosByOriginalUrl(videos: Video[]): Video[] {
+    const urlToVideoMap = new Map<string, Video>();
+
+    // Process videos in order (already sorted by addedAt desc)
+    videos.forEach((video) => {
+      const originalUrl = video.originalUrl;
+      if (!originalUrl) return;
+
+      // Keep the first occurrence (most recent due to sorting)
+      if (!urlToVideoMap.has(originalUrl)) {
+        urlToVideoMap.set(originalUrl, video);
+      }
+    });
+
+    return Array.from(urlToVideoMap.values());
+  }
+
+  /**
    * Get all collections for a user (role-based)
    */
   static async getUserCollections(userId: string): Promise<Collection[]> {
@@ -119,11 +139,17 @@ export class CollectionsRBACService {
     }
 
     const querySnapshot = await getDocs(q);
-    const videos = querySnapshot.docs.map((doc) => ({
+    let videos = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
       addedAt: formatTimestamp(doc.data().addedAt),
     })) as Video[];
+
+    // Deduplicate videos for "all-videos" view based on originalUrl
+    if (!collectionId || collectionId === "all-videos") {
+      videos = this.deduplicateVideosByOriginalUrl(videos);
+      console.log("🔄 [RBAC] Deduplicated videos from", querySnapshot.docs.length, "to", videos.length);
+    }
 
     const newLastDoc = querySnapshot.docs.length > 0 ? querySnapshot.docs[querySnapshot.docs.length - 1] : undefined;
 
@@ -182,11 +208,17 @@ export class CollectionsRBACService {
     }
 
     const querySnapshot = await getDocs(q);
-    const videos = querySnapshot.docs.map((doc) => ({
+    let videos = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
       addedAt: formatTimestamp(doc.data().addedAt),
     })) as Video[];
+
+    // Deduplicate videos for "all-videos" view based on originalUrl
+    if (!collectionId || collectionId === "all-videos") {
+      videos = this.deduplicateVideosByOriginalUrl(videos);
+      console.log("🔄 [RBAC] Deduplicated videos from", querySnapshot.docs.length, "to", videos.length);
+    }
 
     const newLastDoc = querySnapshot.docs.length > 0 ? querySnapshot.docs[querySnapshot.docs.length - 1] : undefined;
 

@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { CollectionsRBACService } from "./collections-rbac";
+import { getMockNotesData, getMockScriptsData } from "./search-mock-data";
 import { UserManagementService } from "./user-management";
 
 export interface SearchResult {
@@ -156,13 +157,29 @@ export class SearchService {
    * Check if an item matches the search term
    */
   private static matchesSearchTerm(item: SearchResult, searchTerm: string): boolean {
-    return (
-      item.title.toLowerCase().includes(searchTerm) ||
-      item.description.toLowerCase().includes(searchTerm) ||
-      (item.metadata?.author?.toLowerCase().includes(searchTerm) ?? false) ||
-      (item.metadata?.tags?.some((tag) => tag.toLowerCase().includes(searchTerm)) ?? false) ||
-      (item.metadata?.category?.toLowerCase().includes(searchTerm) ?? false)
-    );
+    const lowerTerm = searchTerm.toLowerCase();
+
+    // Check title and description
+    if (item.title.toLowerCase().includes(lowerTerm) || item.description.toLowerCase().includes(lowerTerm)) {
+      return true;
+    }
+
+    // Check metadata fields
+    if (item.metadata) {
+      if (
+        item.metadata.author?.toLowerCase().includes(lowerTerm) ||
+        item.metadata.category?.toLowerCase().includes(lowerTerm)
+      ) {
+        return true;
+      }
+
+      // Check tags
+      if (item.metadata.tags?.some((tag) => tag.toLowerCase().includes(lowerTerm))) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -317,8 +334,9 @@ export class SearchService {
    */
   private static async getVideosData(userUid: string): Promise<SearchResult[]> {
     try {
-      // Get all videos across all collections for this user
-      const videos = await CollectionsRBACService.getCollectionVideos(userUid, "all-videos");
+      // Get all videos across all collections for this user (automatically deduplicated)
+      const result = await CollectionsRBACService.getCollectionVideos(userUid, "all-videos");
+      const videos = result.videos;
 
       return videos.map((video) => ({
         id: video.id!,
@@ -345,90 +363,13 @@ export class SearchService {
    * Get notes data (currently mock data - replace with real API when available)
    */
   private static async getNotesData(): Promise<SearchResult[]> {
-    try {
-      // TODO: Replace with real notes API when implemented
-      const mockNotes = [
-        {
-          id: "1",
-          title: "Morning Routine Ideas",
-          content: "Notes about creating an effective morning routine for productivity",
-          tags: ["morning", "productivity"],
-          createdAt: "2024-01-15",
-        },
-        {
-          id: "2",
-          title: "Content Strategy Notes",
-          content: "Ideas for improving content strategy and engagement",
-          tags: ["content", "strategy"],
-          createdAt: "2024-01-20",
-        },
-      ];
-
-      return mockNotes.map((note) => ({
-        id: note.id,
-        title: note.title,
-        description: note.content,
-        type: "note" as const,
-        url: `/ideas/notes?note=${note.id}`,
-        icon: StickyNote,
-        metadata: {
-          tags: note.tags,
-          createdAt: note.createdAt,
-          category: "Notes",
-        },
-      }));
-    } catch (error) {
-      console.error("❌ [SEARCH] Error loading notes:", error);
-      return [];
-    }
+    return getMockNotesData();
   }
 
   /**
    * Get scripts data (currently mock data - replace with real API when available)
    */
   private static async getScriptsData(): Promise<SearchResult[]> {
-    try {
-      // TODO: Replace with real scripts API when implemented
-      const mockScripts = [
-        {
-          id: "1",
-          title: "Morning Routine Success",
-          summary: "Complete morning routine guide for productivity",
-          authors: "John Doe",
-          status: "Published",
-          category: "Lifestyle",
-          createdAt: "2024-01-15",
-          tags: ["morning", "productivity"],
-        },
-        {
-          id: "2",
-          title: "Tech Product Review Template",
-          summary: "Comprehensive tech review framework",
-          authors: "Jane Smith",
-          status: "Draft",
-          category: "Technology",
-          createdAt: "2024-01-20",
-          tags: ["tech", "review"],
-        },
-      ];
-
-      return mockScripts.map((script) => ({
-        id: script.id,
-        title: script.title,
-        description: script.summary,
-        type: "script" as const,
-        url: `/dashboard/scripts?script=${script.id}`,
-        icon: FileText,
-        metadata: {
-          author: script.authors,
-          tags: script.tags,
-          createdAt: script.createdAt,
-          category: "Scripts",
-        },
-      }));
-    } catch (error) {
-      console.error("❌ [SEARCH] Error loading scripts:", error);
-      return [];
-    }
+    return getMockScriptsData();
   }
 }
