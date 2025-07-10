@@ -28,6 +28,19 @@ interface VideoGridProps {
   isLoadingMore?: boolean;
 }
 
+// Helper function to check for duplicate video IDs
+const checkForDuplicates = (videos: Video[]) => {
+  const videoIds = videos.map((v) => v.id).filter(Boolean);
+  const uniqueVideoIds = new Set(videoIds);
+  if (videoIds.length !== uniqueVideoIds.size) {
+    console.warn("🚨 [VideoGrid] Duplicate video IDs detected:", {
+      totalVideos: videoIds.length,
+      uniqueVideos: uniqueVideoIds.size,
+      duplicates: videoIds.filter((id, index) => videoIds.indexOf(id) !== index),
+    });
+  }
+};
+
 export const VideoGrid = ({
   videos = [],
   collections = [],
@@ -49,7 +62,10 @@ export const VideoGrid = ({
   };
 
   // Ensure videos is always an array
-  const safeVideos = videos || [];
+  const safeVideos = videos ?? [];
+
+  // Debug: Check for duplicate video IDs
+  checkForDuplicates(safeVideos);
 
   // Loading state
   if (safeVideos.length === 0) {
@@ -69,8 +85,11 @@ export const VideoGrid = ({
           const videoId = video.id;
           if (!videoId) return null;
 
+          // Create a unique key combining video ID and collection ID to prevent duplicates
+          const uniqueKey = `${videoId}-${video.collectionId ?? "no-collection"}`;
+
           return (
-            <div key={videoId} data-video-id={videoId}>
+            <div key={uniqueKey} data-video-id={videoId}>
               <VideoCard
                 video={video}
                 collections={collections}
