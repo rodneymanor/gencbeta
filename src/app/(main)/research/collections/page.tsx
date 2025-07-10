@@ -99,7 +99,7 @@ const CollectionBadge = memo(
       >
         <Badge
           variant="outline"
-          className={`focus-visible:ring-ring cursor-pointer font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 ${
+          className={`focus-visible:ring-ring flex cursor-pointer items-center gap-1 font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 ${
             isActive
               ? "bg-secondary text-foreground hover:bg-secondary/80 border-border/60 font-semibold shadow-sm"
               : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground hover:border-border/40 bg-transparent font-normal"
@@ -109,40 +109,28 @@ const CollectionBadge = memo(
           {collection
             ? `${collection.title.length > 30 ? collection.title.slice(0, 27) + "…" : collection.title} (${collection.videoCount})`
             : `All Videos (${videoCount})`}
+          {collection && (
+            <Star
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!user || !collection.id) return;
+                CollectionsService.setFavorite(user.uid, collection.id, !collection.favorite)
+                  .then(onCollectionUpdated)
+                  .catch(console.error);
+              }}
+              className={`h-4 w-4 ${collection.favorite ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"}`}
+            />
+          )}
         </Badge>
         {collection && (
-          <>
-            {/* Favorite star */}
-            <button
-              type="button"
-              title={collection.favorite ? "Unfavorite" : "Favorite"}
-              onClick={async (e) => {
-                e.stopPropagation();
-                if (!user || !collection?.id) return;
-                try {
-                  await CollectionsService.setFavorite(user.uid, collection.id, !collection.favorite);
-                  onCollectionUpdated();
-                } catch (err) {
-                  console.error("Failed to toggle favorite", err);
-                }
-              }}
-              className="hover:bg-secondary/40 absolute -top-1 right-6 rounded-full p-0.5 focus-visible:outline-none"
-            >
-              <Star
-                className={`h-4 w-4 ${collection.favorite ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"}`}
-              />
-            </button>
-
-            {/* Existing menu */}
-            <div className="absolute -top-1 -right-1">
-              <CollectionBadgeMenu
-                collection={collection}
-                onCollectionDeleted={onCollectionDeleted}
-                onCollectionUpdated={onCollectionUpdated}
-                className="bg-background border-border rounded-md border shadow-md transition-shadow duration-200 hover:shadow-lg"
-              />
-            </div>
-          </>
+          <div className="absolute -top-1 -right-1">
+            <CollectionBadgeMenu
+              collection={collection}
+              onCollectionDeleted={onCollectionDeleted}
+              onCollectionUpdated={onCollectionUpdated}
+              className="bg-background border-border rounded-md border shadow-md transition-shadow duration-200 hover:shadow-lg"
+            />
+          </div>
         )}
       </motion.div>
     );
