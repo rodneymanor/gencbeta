@@ -78,7 +78,7 @@ const ManageModeControls = ({
         <X className="mr-2 h-4 w-4" />
         Clear
       </Button>
-      {selectedVideos.size > 0 && (
+      {selectedCollectionId && selectedVideos.size > 0 && (
         <>
           <MoveCopyVideosDialog
             collections={collections}

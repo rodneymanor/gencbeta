@@ -77,7 +77,7 @@ export const VideoActionsDropdown = ({
   onMoveVideo,
   onCopyVideo,
 }: {
-  onDelete: () => void;
+  onDelete?: () => void;
   onMoveVideo?: () => void;
   onCopyVideo?: () => void;
 }) => (
@@ -135,16 +135,18 @@ export const VideoActionsDropdown = ({
         </DropdownMenuItem>
       )}
       <DropdownMenuSeparator />
-      <DropdownMenuItem
-        className="text-destructive focus:text-destructive cursor-pointer gap-2"
-        onClick={(e) => {
-          e.preventDefault();
-          onDelete();
-        }}
-      >
-        <Trash2 className="h-4 w-4" />
-        Remove from Collection
-      </DropdownMenuItem>
+      {onDelete && (
+        <DropdownMenuItem
+          className="text-destructive focus:text-destructive cursor-pointer gap-2"
+          onClick={(e) => {
+            e.preventDefault();
+            onDelete();
+          }}
+        >
+          <Trash2 className="h-4 w-4" />
+          Remove from Collection
+        </DropdownMenuItem>
+      )}
     </DropdownMenuContent>
   </DropdownMenu>
 );

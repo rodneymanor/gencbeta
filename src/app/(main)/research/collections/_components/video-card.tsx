@@ -187,7 +187,7 @@ export const VideoCard = memo<VideoCardProps>(
                 }`}
               >
                 <VideoActionsDropdown
-                  onDelete={onDelete}
+                  onDelete={currentCollectionId ? onDelete : undefined}
                   onMoveVideo={collections.length > 0 ? () => setShowMoveDialog(true) : undefined}
                   onCopyVideo={collections.length > 0 ? () => setShowCopyDialog(true) : undefined}
                 />
