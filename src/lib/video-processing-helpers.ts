@@ -4,7 +4,7 @@ import {
   extractMetricsFromMetadata,
   extractAdditionalMetadata,
   downloadVideoFromVersions,
-  extractThumbnailUrl,
+  extractVideoVersions,
 } from "@/lib/instagram-downloader";
 import { downloadTikTokVideo as downloadTikTokVideoFromAPI, extractTikTokVideoId } from "@/lib/tiktok-downloader";
 import { transcribeVideoFile } from "@/lib/transcription";
@@ -49,7 +49,7 @@ export interface TranscriptionResult {
   };
 }
 
-const tiktokCache = new Map<string, { data: unknown; timestamp: number }>();
+// Removed unused tiktokCache variable
 
 export function detectPlatform(url: string): string {
   const urlLower = url.toLowerCase();
@@ -88,7 +88,9 @@ export async function transcribeVideoData(
 
     console.log("🎬 [DOWNLOAD] Transcribing video file...");
     // Use localhost for server-side transcription calls
-    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${process.env.PORT || 3001}`;
+    const baseUrl = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : `http://localhost:${process.env.PORT ?? 3001}`;
     const transcriptionResult = await transcribeVideoFile(file, baseUrl);
 
     return transcriptionResult;
@@ -205,8 +207,16 @@ export async function downloadInstagramVideoWithMetrics(url: string): Promise<Do
     const metrics = extractMetricsFromMetadata(metadata);
     const additionalMetadata = extractAdditionalMetadata(metadata);
 
+    console.log("🎥 [DOWNLOAD] Extracting video versions...");
+    const videoVersions = extractVideoVersions(metadata);
+
+    if (!videoVersions.length) {
+      console.error("❌ [DOWNLOAD] No video versions found in metadata");
+      return null;
+    }
+
     console.log("🎥 [DOWNLOAD] Downloading video from versions...");
-    const videoData = await downloadVideoFromVersions(metadata.video_versions, shortcode);
+    const videoData = await downloadVideoFromVersions(videoVersions, shortcode);
 
     if (!videoData) {
       console.log("❌ [DOWNLOAD] Failed to download video data");
@@ -217,7 +227,7 @@ export async function downloadInstagramVideoWithMetrics(url: string): Promise<Do
     console.log("📋 [DOWNLOAD] Additional metadata:", additionalMetadata);
     return { videoData, metrics, additionalMetadata };
   } catch (error) {
-    console.error("❌ [DOWNLOAD] Instagram RapidAPI error:", error);
+    console.error("❌ [DOWNLOAD] Instagram download error:", error);
     console.log("🔄 [DOWNLOAD] Falling back to basic download...");
     return await fallbackToBasicDownload();
   }
