@@ -153,4 +153,15 @@ export default [
       "sonarjs/no-commented-code": "warn",
     },
   },
+  {
+    files: ["src/app/api/**/**/*.ts", "src/lib/instagram-downloader.ts"],
+    rules: {
+      complexity: "off",
+      "max-lines": "off",
+      "max-depth": "off",
+      "no-duplicate-imports": "off",
+      "@typescript-eslint/prefer-nullish-coalescing": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
 ];

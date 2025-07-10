@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 
-/* eslint-disable complexity, max-depth, @typescript-eslint/prefer-nullish-coalescing */
-
 import { getAdminDb, isAdminInitialized } from "@/lib/firebase-admin";
 import {
   fetchInstagramMetadata,
@@ -136,10 +134,22 @@ export async function POST() {
         }
       }
 
-      // Fetch metrics & extra metadata if missing
+      // Fetch metrics & extra metadata if missing or incomplete
       const { metrics, extras } = await fetchMetricsAndExtras(vid);
-      if (!vid.metrics && metrics) {
-        updateFields.metrics = metrics;
+      // Merge metrics (focus on saves)
+      if (metrics) {
+        const currentMetrics = vid.metrics ? { ...vid.metrics } : {};
+        const shouldUpdateSaves =
+          (currentMetrics.saves === undefined || currentMetrics.saves === 0) &&
+          metrics.saves !== undefined &&
+          metrics.saves > 0;
+
+        // If the video had no metrics at all, just replace
+        if (!vid.metrics) {
+          updateFields.metrics = metrics;
+        } else if (shouldUpdateSaves) {
+          updateFields.metrics = { ...currentMetrics, saves: metrics.saves };
+        }
       }
 
       if (extras) {
@@ -149,7 +159,10 @@ export async function POST() {
         if (extras.description && !contentMeta?.description) {
           contentMeta.description = extras.description;
         }
-        if (extras.author && !contentMeta?.author) {
+        const currentAuthor = (contentMeta?.author as string | undefined)?.toLowerCase() ?? "";
+        const needsAuthorUpdate = !currentAuthor || currentAuthor === "unknown" || currentAuthor === "author";
+
+        if (extras.author && needsAuthorUpdate) {
           contentMeta.author = extras.author;
         }
         if (extras.hashtags && !contentMeta?.hashtags) {

@@ -2,8 +2,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { uploadToBunnyStream } from "@/lib/bunny-stream";
-import { getAdminAuth, getAdminDb, isAdminInitialized } from "@/lib/firebase-admin";
 import { generateBunnyThumbnailUrl } from "@/lib/bunny-stream";
+import { getAdminAuth, getAdminDb, isAdminInitialized } from "@/lib/firebase-admin";
 
 export async function POST(request: NextRequest) {
   try {
@@ -99,7 +99,10 @@ export async function POST(request: NextRequest) {
       guid: streamResult.guid,
       thumbnailUrl: streamResult.thumbnailUrl || downloadResult.data.thumbnailUrl,
       metrics: downloadResult.data.metrics || {},
-      metadata: downloadResult.data.metadata || {},
+      metadata: {
+        ...(downloadResult.data.metadata || {}),
+        ...(downloadResult.data.additionalMetadata || {}),
+      },
       transcriptionStatus: "pending",
       userId: userId,
     };
@@ -124,7 +127,7 @@ export async function POST(request: NextRequest) {
       addResult.videoId,
       collectionId,
       downloadResult.data.platform,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       downloadResult.data.additionalMetadata || {},
     );
 
@@ -280,7 +283,7 @@ function startBackgroundTranscription(
   videoId: string,
   collectionId: string,
   platform: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   additionalMetadata: any = {},
 ) {
   // Use setTimeout to ensure response is sent before starting background work

@@ -52,7 +52,8 @@ export function extractMetricsFromMetadata(metadata: any) {
     views: metadata.play_count ?? 0,
     shares: metadata.reshare_count ?? 0,
     comments: metadata.comment_count ?? 0,
-    saves: metadata.save_count ?? 0,
+    // Saves can appear under different fields depending on media type / API version
+    saves: metadata.save_count ?? metadata.saved_count ?? metadata.saved ?? metadata.total_viewer_save_count ?? 0,
   };
 
   console.log("📊 [DOWNLOAD] Extracted metrics:", metrics);
@@ -63,11 +64,13 @@ export function extractAdditionalMetadata(metadata: any) {
   const author = getAuthorFromMetadata(metadata);
   const duration = getDurationFromMetadata(metadata);
 
-  const captionText = metadata.caption?.text || metadata.caption_text || metadata.edge_media_to_caption?.edges?.[0]?.node?.text || "";
+  const captionText =
+    metadata.caption?.text || metadata.caption_text || metadata.edge_media_to_caption?.edges?.[0]?.node?.text || "";
 
   // Extract hashtags from caption text
-  const hashtags = Array.from(new Set((captionText.match(/#[A-Za-z0-9_]+/g) || []).map((h: string) => h.substring(1))))
-    .slice(0, 30); // limit
+  const hashtags = Array.from(
+    new Set((captionText.match(/#[A-Za-z0-9_]+/g) || []).map((h: string) => h.substring(1))),
+  ).slice(0, 30); // limit
 
   const additionalData = {
     author,
