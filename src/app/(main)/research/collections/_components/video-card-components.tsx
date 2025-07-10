@@ -143,9 +143,9 @@ export const VideoActionsDropdown = ({
             onDelete();
           }}
         >
-          <Trash2 className="h-4 w-4" />
-          Remove from Collection
-        </DropdownMenuItem>
+        <Trash2 className="h-4 w-4" />
+        Remove from Collection
+      </DropdownMenuItem>
       )}
     </DropdownMenuContent>
   </DropdownMenu>

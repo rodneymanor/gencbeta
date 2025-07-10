@@ -136,6 +136,26 @@ function detectPlatformFromUrl(videoUrl?: string): string | undefined {
   return undefined;
 }
 
+function getTranscriptResult(transcriptResult: PromiseSettledResult<string | null>): string {
+  if (transcriptResult.status === "fulfilled" && transcriptResult.value) {
+    console.log("✅ [COMPLETE_ANALYSIS] Transcription completed");
+    return transcriptResult.value;
+  } else {
+    console.log("⚠️ [COMPLETE_ANALYSIS] Transcription failed, using fallback");
+    return "Transcription failed - unable to extract spoken content from video";
+  }
+}
+
+function getVisualResult(visualResult: PromiseSettledResult<string | null>): string {
+  if (visualResult.status === "fulfilled" && visualResult.value) {
+    console.log("✅ [COMPLETE_ANALYSIS] Visual analysis completed");
+    return visualResult.value;
+  } else {
+    console.log("⚠️ [COMPLETE_ANALYSIS] Visual analysis failed, using fallback");
+    return "Visual analysis failed - unable to extract visual context from video";
+  }
+}
+
 function getScriptResult(
   scriptResult: PromiseSettledResult<AnalysisResult["components"] | null>,
 ): AnalysisResult["components"] {
@@ -237,6 +257,26 @@ async function callMetadataAnalysisService(
     return data.metadata;
   } catch (error) {
     console.error("❌ [ORCHESTRATOR] Metadata analysis service error:", error);
+    return null;
+  }
+}
+
+async function callVisualAnalysisService(videoData: ArrayBuffer): Promise<string | null> {
+  try {
+    const formData = new FormData();
+    const blob = new Blob([videoData], { type: "video/mp4" });
+    formData.append("video", blob, "video.mp4");
+
+    const response = await fetch(buildInternalUrl("/api/video/analyze-visuals"), {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.visualContext;
+  } catch (error) {
+    console.error("❌ [ORCHESTRATOR] Visual analysis service error:", error);
     return null;
   }
 }

@@ -11,7 +11,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/auth-context";
-import { type Collection, CollectionsService } from "@/lib/collections";
+import { type Collection } from "@/lib/collections";
+import { CollectionsService } from "@/lib/collections";
 
 import { DeleteCollectionDialog } from "./delete-collection-dialog";
 import { EditCollectionDialog } from "./edit-collection-dialog";
@@ -66,8 +67,8 @@ export function CollectionBadgeMenu({
         </DropdownMenuItem>
         <EditCollectionDialog collection={collection} onCollectionUpdated={onCollectionUpdated ?? (() => {})}>
           <DropdownMenuItem className="gap-2" onSelect={(e) => e.preventDefault()}>
-            <Edit3 className="h-4 w-4" />
-            Edit Collection
+          <Edit3 className="h-4 w-4" />
+          Edit Collection
           </DropdownMenuItem>
         </EditCollectionDialog>
         <DropdownMenuItem className="gap-2" onClick={toggleFavorite}>

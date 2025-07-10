@@ -282,12 +282,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
     const { videoUrl, collectionId, title } = validation.data!;
-
+    
     // Step 3: URL validation
     if (!validateUrl(videoUrl)) {
       return NextResponse.json({ error: "Only TikTok and Instagram videos are supported" }, { status: 400 });
     }
-
+    
     // Step 4: Firebase connection
     const adminDb = getAdminDb();
     if (!isAdminInitialized || !adminDb) {

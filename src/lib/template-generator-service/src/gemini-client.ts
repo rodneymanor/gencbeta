@@ -73,7 +73,6 @@ export class GeminiClient {
   /**
    * Make HTTP request to Gemini API with timeout and error handling
    */
-  // eslint-disable-next-line complexity
   private async makeRequest(url: string, body: any): Promise<any> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), GeminiClient.REQUEST_TIMEOUT);
@@ -143,7 +142,7 @@ export class GeminiClient {
   static parseJsonResponse(text: string): any {
     try {
       console.log("[GeminiClient] Parsing JSON response, length:", text.length);
-
+      
       // Clean up the response text - remove markdown code blocks and extra text
       let cleanedResponse = text.trim();
 
@@ -151,9 +150,9 @@ export class GeminiClient {
       cleanedResponse = cleanedResponse.replace(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/i, "$1");
 
       // Remove any leading/trailing text that isn't part of the JSON
-      const jsonStart = cleanedResponse.indexOf("{");
-      const jsonEnd = cleanedResponse.lastIndexOf("}");
-
+      const jsonStart = cleanedResponse.indexOf('{');
+      const jsonEnd = cleanedResponse.lastIndexOf('}');
+      
       if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
         cleanedResponse = cleanedResponse.substring(jsonStart, jsonEnd + 1);
       }
@@ -162,14 +161,14 @@ export class GeminiClient {
 
       // Try to parse the JSON
       const parsed = JSON.parse(cleanedResponse);
-
+      
       console.log("[GeminiClient] Successfully parsed JSON with keys:", Object.keys(parsed));
-
+      
       return parsed;
     } catch (parseError) {
       console.error("[GeminiClient] Failed to parse JSON response:", text);
       console.error("[GeminiClient] Parse error:", parseError);
-
+      
       // Try to extract any JSON-like structure as a fallback
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
@@ -181,7 +180,7 @@ export class GeminiClient {
           console.error("[GeminiClient] Fallback parsing also failed:", fallbackError);
         }
       }
-
+      
       throw new Error(
         `Failed to parse JSON response: ${parseError instanceof Error ? parseError.message : "Unknown error"}. Response: ${text.substring(0, 500)}...`,
       );

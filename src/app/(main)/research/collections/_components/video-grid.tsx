@@ -58,7 +58,7 @@ export const VideoGrid = ({
   const [currentlyPlayingId, setCurrentlyPlayingId] = useState<string | null>(null);
 
   const handleVideoPlay = (videoId: string) => {
-    setCurrentlyPlayingId(videoId);
+      setCurrentlyPlayingId(videoId);
   };
 
   // Ensure videos is always an array
@@ -80,7 +80,7 @@ export const VideoGrid = ({
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {safeVideos.map((video) => {
           const videoId = video.id;
           if (!videoId) return null;
@@ -88,28 +88,28 @@ export const VideoGrid = ({
           // Create a unique key combining video ID and collection ID to prevent duplicates
           const uniqueKey = `${videoId}-${video.collectionId ?? "no-collection"}`;
 
-          return (
+        return (
             <div key={uniqueKey} data-video-id={videoId}>
-              <VideoCard
-                video={video}
+            <VideoCard
+              video={video}
                 collections={collections}
                 currentCollectionId={selectedCollectionId}
                 isManageMode={manageMode ?? false}
                 isSelected={selectedVideos?.has(videoId) ?? false}
                 isDeleting={deletingVideos?.has(videoId) ?? false}
-                onToggleSelection={() => {
+              onToggleSelection={() => {
                   onToggleVideoSelection?.(videoId);
-                }}
-                onDelete={() => {
+              }}
+              onDelete={() => {
                   onDeleteVideo?.(videoId);
-                }}
+              }}
                 onVideoUpdated={onVideoAdded}
-                isPlaying={currentlyPlayingId === videoId}
-                onPlay={handleVideoPlay}
-              />
-            </div>
-          );
-        })}
+              isPlaying={currentlyPlayingId === videoId}
+              onPlay={handleVideoPlay}
+            />
+          </div>
+        );
+      })}
       </div>
 
       {/* Load More Button */}

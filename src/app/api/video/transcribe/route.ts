@@ -44,7 +44,7 @@ async function handleUrlTranscription(request: NextRequest) {
       decodedUrl = decodeURIComponent(videoUrl);
       console.log("🔍 [TRANSCRIBE] Original URL:", videoUrl);
       console.log("🔍 [TRANSCRIBE] Decoded URL:", decodedUrl);
-    } catch {
+    } catch (error) {
       console.log("⚠️ [TRANSCRIBE] URL decode failed, using original:", videoUrl);
       decodedUrl = videoUrl;
     }
@@ -134,7 +134,7 @@ async function transcribeVideoData(arrayBuffer: ArrayBuffer, mimeType: string): 
     console.log("🤖 [TRANSCRIBE] Converting video to transcript...");
 
     const base64Data = Buffer.from(arrayBuffer).toString("base64");
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
 
     // Simple, focused prompt for transcription only
     const prompt = `Provide a full, accurate transcription of all spoken content in this video. 
