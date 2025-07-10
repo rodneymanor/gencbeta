@@ -1,6 +1,6 @@
 "use client";
 
-/* eslint-disable max-lines */
+/* eslint-disable max-lines, complexity */
 // Prevent Next.js from attempting to statically prerender a client-side page
 export const dynamic = "force-dynamic";
 
@@ -9,7 +9,7 @@ import { useState, useEffect, useCallback, useMemo, useTransition, useRef, memo,
 import { useSearchParams, useRouter } from "next/navigation";
 
 import { motion } from "framer-motion";
-import { Edit3, Loader2, Check } from "lucide-react";
+import { Edit3, Loader2, Check, Star } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -25,10 +25,7 @@ import { CollectionsRBACService } from "@/lib/collections-rbac";
 import CategoryChooser from "./_components/category-chooser";
 import { CollectionBadgeMenu } from "./_components/collection-badge-menu";
 import { badgeVariants } from "./_components/collections-animations";
-import {
-  type VideoWithPlayer,
-  createVideoSelectionHandlers,
-} from "./_components/collections-helpers";
+import { type VideoWithPlayer, createVideoSelectionHandlers } from "./_components/collections-helpers";
 import { ManageModeHeader } from "./_components/manage-mode-header";
 import { VideoGrid } from "./_components/video-grid";
 
@@ -86,40 +83,70 @@ const CollectionBadge = memo(
     isTransitioning: boolean;
     onCollectionDeleted: () => void;
     onCollectionUpdated: () => void;
-  }) => (
-    <motion.div
-      variants={badgeVariants}
-      initial="inactive"
-      animate={isActive ? "active" : "inactive"}
-      whileHover="hover"
-      whileTap={{ scale: 0.98 }}
-      layout
-      transition={{ duration: 0.2, ease: "easeInOut" }}
-      className="group relative"
-    >
-      <Badge
-        variant="outline"
-        className={`focus-visible:ring-ring cursor-pointer font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 ${
-          isActive
-            ? "bg-secondary text-foreground hover:bg-secondary/80 border-border/60 font-semibold shadow-sm"
-            : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground hover:border-border/40 bg-transparent font-normal"
-        } ${isTransitioning && isActive ? "opacity-75" : ""} ${isTransitioning ? "pointer-events-none" : ""} min-h-[36px] rounded-md border-0 px-4 py-2.5 text-sm shadow-xs hover:shadow-sm`}
-        onClick={isTransitioning ? undefined : onClick}
+  }) => {
+    const { user } = useAuth();
+
+    return (
+      <motion.div
+        variants={badgeVariants}
+        initial="inactive"
+        animate={isActive ? "active" : "inactive"}
+        whileHover="hover"
+        whileTap={{ scale: 0.98 }}
+        layout
+        transition={{ duration: 0.2, ease: "easeInOut" }}
+        className="group relative"
       >
-        {collection ? `${collection.title} (${collection.videoCount})` : `All Videos (${videoCount})`}
-      </Badge>
-      {collection && (
-        <div className="absolute -top-1 -right-1">
-          <CollectionBadgeMenu
-            collection={collection}
-            onCollectionDeleted={onCollectionDeleted}
-            onCollectionUpdated={onCollectionUpdated}
-            className="bg-background border-border rounded-md border shadow-md transition-shadow duration-200 hover:shadow-lg"
-          />
-        </div>
-      )}
-    </motion.div>
-  ),
+        <Badge
+          variant="outline"
+          className={`focus-visible:ring-ring cursor-pointer font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 ${
+            isActive
+              ? "bg-secondary text-foreground hover:bg-secondary/80 border-border/60 font-semibold shadow-sm"
+              : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground hover:border-border/40 bg-transparent font-normal"
+          } ${isTransitioning && isActive ? "opacity-75" : ""} ${isTransitioning ? "pointer-events-none" : ""} min-h-[36px] rounded-md border-0 px-4 py-2.5 text-sm shadow-xs hover:shadow-sm`}
+          onClick={isTransitioning ? undefined : onClick}
+        >
+          {collection
+            ? `${collection.title.length > 30 ? collection.title.slice(0, 27) + "…" : collection.title} (${collection.videoCount})`
+            : `All Videos (${videoCount})`}
+        </Badge>
+        {collection && (
+          <>
+            {/* Favorite star */}
+            <button
+              type="button"
+              title={collection.favorite ? "Unfavorite" : "Favorite"}
+              onClick={async (e) => {
+                e.stopPropagation();
+                if (!user || !collection?.id) return;
+                try {
+                  await CollectionsService.setFavorite(user.uid, collection.id, !collection.favorite);
+                  onCollectionUpdated();
+                } catch (err) {
+                  console.error("Failed to toggle favorite", err);
+                }
+              }}
+              className="hover:bg-secondary/40 absolute -top-1 right-6 rounded-full p-0.5 focus-visible:outline-none"
+            >
+              <Star
+                className={`h-4 w-4 ${collection.favorite ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"}`}
+              />
+            </button>
+
+            {/* Existing menu */}
+            <div className="absolute -top-1 -right-1">
+              <CollectionBadgeMenu
+                collection={collection}
+                onCollectionDeleted={onCollectionDeleted}
+                onCollectionUpdated={onCollectionUpdated}
+                className="bg-background border-border rounded-md border shadow-md transition-shadow duration-200 hover:shadow-lg"
+              />
+            </div>
+          </>
+        )}
+      </motion.div>
+    );
+  },
 );
 
 CollectionBadge.displayName = "CollectionBadge";
@@ -185,13 +212,13 @@ function InlineEditableField({
   }
 
   return (
-    <span className={`relative group ${className}`}>
+    <span className={`group relative ${className}`}>
       {editing ? (
         <>
           {type === "input" ? (
             <Input
               value={inputValue}
-              onChange={e => setInputValue(e.target.value)}
+              onChange={(e) => setInputValue(e.target.value)}
               onBlur={handleBlur}
               maxLength={maxLength}
               autoFocus
@@ -201,19 +228,19 @@ function InlineEditableField({
           ) : (
             <Textarea
               value={inputValue}
-              onChange={e => setInputValue(e.target.value)}
+              onChange={(e) => setInputValue(e.target.value)}
               onBlur={handleBlur}
               maxLength={maxLength}
               autoFocus
               disabled={loading}
-              className="pr-10 min-h-[80px]"
+              className="min-h-[80px] pr-10"
               rows={3}
             />
           )}
           <Button
             size="icon"
             variant="ghost"
-            className="absolute right-1 top-1 z-10"
+            className="absolute top-1 right-1 z-10"
             onClick={handleSave}
             disabled={loading}
             tabIndex={-1}
@@ -223,17 +250,19 @@ function InlineEditableField({
         </>
       ) : (
         <span
-          className={`inline-flex items-center gap-1 rounded px-1 cursor-pointer transition group-hover:bg-accent/30`}
+          className={`group-hover:bg-accent/30 inline-flex cursor-pointer items-center gap-1 rounded px-1 transition`}
           onClick={() => setEditing(true)}
         >
           <span className={isEmpty ? "text-muted-foreground italic" : undefined}>
             {isEmpty ? (placeholder ?? "This is the place to add your videos.") : value}
           </span>
-          <Edit3 className={"ml-1 h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"} />
+          <Edit3
+            className={"text-muted-foreground ml-1 h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100"}
+          />
           {saved && <Check className="ml-1 h-4 w-4 text-green-600" />}
         </span>
       )}
-      {error && <span className="block text-xs text-destructive mt-1">{error}</span>}
+      {error && <span className="text-destructive mt-1 block text-xs">{error}</span>}
     </span>
   );
 }
@@ -693,7 +722,9 @@ function CollectionsPageContent() {
                   value={selectedCollection.description}
                   onSave={async (newDesc) => {
                     if (!user) return;
-                    await CollectionsService.updateCollection(user.uid, selectedCollection.id!, { description: newDesc });
+                    await CollectionsService.updateCollection(user.uid, selectedCollection.id!, {
+                      description: newDesc,
+                    });
                     toast.success("Collection description updated");
                     handleCollectionUpdated();
                   }}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 
-import { Folder, FolderOpen } from "lucide-react";
+import { Folder, FolderOpen, Star } from "lucide-react";
 
 import { useAuth } from "@/contexts/auth-context";
 import { CollectionsService, type Collection } from "@/lib/collections";
@@ -46,12 +46,18 @@ export function useCollectionsSidebar(baseItems: readonly NavGroup[]) {
         },
       ];
 
+      // Sort collections: favorites first, then by updatedAt desc (already sorted server-side)
+      const sortedCollections = [...collections].sort((a, b) => {
+        if (a.favorite === b.favorite) return 0;
+        return a.favorite ? -1 : 1;
+      });
+
       // Add user collections
-      collections.forEach((collection) => {
+      sortedCollections.forEach((collection) => {
         collectionsItems.push({
           title: collection.title,
           url: `/research/collections?collection=${collection.id}`,
-          icon: Folder,
+          icon: collection.favorite ? Star : Folder,
         });
       });
 
