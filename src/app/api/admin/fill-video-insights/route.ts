@@ -107,8 +107,17 @@ export async function POST() {
 
       const needsTranscript = !vid.transcript || vid.transcript.trim().length < 20;
 
-      if (!needsTranscript) {
-        continue; // Skip videos that already have transcripts
+      // Determine if author field needs update
+      const currentAuthorRaw = (vid.contentMetadata?.author as string | undefined) ?? "";
+      const currentAuthor = currentAuthorRaw.trim().toLowerCase();
+      const needsAuthorUpdate = !currentAuthor || currentAuthor === "unknown" || currentAuthor === "author";
+
+      // Determine if metrics.saves needs update (either undefined or 0)
+      const currentSaves = vid.metrics?.saves as number | undefined;
+      const needsSavesUpdate = currentSaves === undefined || currentSaves === 0;
+
+      if (!needsTranscript && !needsAuthorUpdate && !needsSavesUpdate) {
+        continue; // Skip videos that already have required insights
       }
 
       log(`\n🎯 Processing video ${vid.id}`);
