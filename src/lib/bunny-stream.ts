@@ -387,9 +387,8 @@ export function generateBunnyThumbnailUrl(videoId: string): string | null {
     return null;
   }
 
-  // The hostname should already be in format like "8416c36e-556.b-cdn.net"
-  // We just need to add the "vz-" prefix for thumbnails
-  const thumbnailUrl = `https://vz-${hostname}/${videoId}/thumbnail.jpg`;
+  const cleanedHost = hostname.startsWith("vz-") ? hostname : `vz-${hostname}`;
+  const thumbnailUrl = `https://${cleanedHost}/${videoId}/thumbnail.jpg`;
   console.log("🖼️ [BUNNY] Generated thumbnail URL:", thumbnailUrl);
   
   return thumbnailUrl;
