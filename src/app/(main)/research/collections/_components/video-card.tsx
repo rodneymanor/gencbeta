@@ -196,7 +196,7 @@ export const VideoCard = memo<VideoCardProps>(
           </div>
 
           {/* Action Buttons */}
-          <div className="mt-3">
+          <div className="mt-2">
             <div className="flex gap-2">
               {/* Insights Button */}
               <VideoInsightsDashboard video={video}>
