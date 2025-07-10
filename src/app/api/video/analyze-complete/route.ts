@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
-function getBaseUrl(): string {
+// Build URL for internal API calls that works locally & in serverless
+function buildInternalUrl(path: string): string {
+  // When deployed on Vercel, include absolute origin so fetch leaves the sandbox correctly
   if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
+    return `https://${process.env.VERCEL_URL}${path}`;
   }
-
-  // In development, check for common development ports
-  // This is a fallback since we don't have the request object here
-  return "http://localhost:3002"; // Use the port your dev server is running on
+  // During local dev Next.js already proxies /api routes inside the same process
+  return path; // e.g. "/api/video/transcribe"
 }
 
 interface AnalysisResult {
@@ -216,32 +216,15 @@ function createAnalysisResponse(result: AnalysisResult, videoUrl?: string, fileN
 
 async function callTranscribeService(videoData: ArrayBuffer, videoUrl?: string): Promise<string | null> {
   try {
-    const baseUrl = getBaseUrl();
+    const response = await fetch(buildInternalUrl(`/api/video/transcribe`), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ videoUrl }),
+    });
 
-    if (videoUrl) {
-      const response = await fetch(`${baseUrl}/api/video/transcribe`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ videoUrl }),
-      });
-
-      if (!response.ok) return null;
-      const data = await response.json();
-      return data.transcript;
-    } else {
-      const formData = new FormData();
-      const blob = new Blob([videoData], { type: "video/mp4" });
-      formData.append("video", blob, "video.mp4");
-
-      const response = await fetch(`${baseUrl}/api/video/transcribe`, {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) return null;
-      const data = await response.json();
-      return data.transcript;
-    }
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.transcript;
   } catch (error) {
     console.error("❌ [ORCHESTRATOR] Transcribe service error:", error);
     return null;
@@ -250,9 +233,7 @@ async function callTranscribeService(videoData: ArrayBuffer, videoUrl?: string):
 
 async function callScriptAnalysisService(transcript: string): Promise<AnalysisResult["components"] | null> {
   try {
-    const baseUrl = getBaseUrl();
-
-    const response = await fetch(`${baseUrl}/api/video/analyze-script`, {
+    const response = await fetch(buildInternalUrl(`/api/video/analyze-script`), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ transcript }),
@@ -273,9 +254,7 @@ async function callMetadataAnalysisService(
   platform?: string,
 ): Promise<AnalysisResult["contentMetadata"] | null> {
   try {
-    const baseUrl = getBaseUrl();
-
-    const response = await fetch(`${baseUrl}/api/video/analyze-metadata`, {
+    const response = await fetch(buildInternalUrl(`/api/video/analyze-metadata`), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ transcript, videoUrl, platform }),
