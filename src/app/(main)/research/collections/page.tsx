@@ -135,6 +135,9 @@ function CollectionsPageContent() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [lastDocRef, setLastDocRef] = useState<any>(null);
 
+  // Debug message to verify code deployment
+  console.log("🎉 Hello from Collections Page! Code updated with scrolling fixes and pagination - Version 2.0");
+
   const cacheRef = useRef<SimpleCache>({ data: new Map() });
   const previousCollectionRef = useRef<string | null>(null);
 
