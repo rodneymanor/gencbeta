@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-/* eslint-disable complexity, max-depth */
+/* eslint-disable complexity, max-depth, @typescript-eslint/prefer-nullish-coalescing */
 
 import { getAdminDb, isAdminInitialized } from "@/lib/firebase-admin";
 import {
@@ -116,6 +116,9 @@ export async function POST() {
       log(`\n🎯 Processing video ${vid.id}`);
 
       const updateFields: Record<string, unknown> = {};
+      let contentMeta: Record<string, unknown> | undefined = vid.contentMetadata
+        ? { ...vid.contentMetadata }
+        : undefined;
 
       // Fetch analysis (transcript, components, metadata)
       if (vid.originalUrl) {
@@ -128,7 +131,7 @@ export async function POST() {
             updateFields.components = analysis.components;
           }
           if (!vid.contentMetadata && analysis.contentMetadata) {
-            updateFields.contentMetadata = analysis.contentMetadata;
+            contentMeta = { ...analysis.contentMetadata };
           }
         }
       }
@@ -140,18 +143,25 @@ export async function POST() {
       }
 
       if (extras) {
-        if (!vid.contentMetadata?.description && extras.description) {
-          updateFields["contentMetadata.description"] = extras.description;
+        // Ensure contentMeta object exists if we need to add fields
+        if (!contentMeta) contentMeta = { ...vid.contentMetadata };
+
+        if (extras.description && !contentMeta?.description) {
+          contentMeta.description = extras.description;
         }
-        if (!vid.contentMetadata?.author && extras.author) {
-          updateFields["contentMetadata.author"] = extras.author;
+        if (extras.author && !contentMeta?.author) {
+          contentMeta.author = extras.author;
         }
-        if (!vid.contentMetadata?.hashtags && extras.hashtags) {
-          updateFields["contentMetadata.hashtags"] = extras.hashtags;
+        if (extras.hashtags && !contentMeta?.hashtags) {
+          contentMeta.hashtags = extras.hashtags;
         }
-        if (!vid.duration && extras.duration) {
+        if (extras.duration && !vid.duration) {
           updateFields.duration = extras.duration;
         }
+      }
+
+      if (contentMeta && JSON.stringify(contentMeta) !== JSON.stringify(vid.contentMetadata)) {
+        updateFields.contentMetadata = contentMeta;
       }
 
       if (Object.keys(updateFields).length === 0) {
