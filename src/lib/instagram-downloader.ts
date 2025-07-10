@@ -20,6 +20,31 @@ export async function fetchInstagramMetadata(shortcode: string) {
 
   if (!response.ok) {
     console.error("❌ [DOWNLOAD] Instagram RapidAPI error:", response.status);
+    // Fallback: try public Instagram oembed/graph endpoint
+    try {
+      console.log("🌐 [DOWNLOAD] Attempting fallback fetch via instagram.com/?__a=1 endpoint");
+      const igResponse = await fetch(`https://www.instagram.com/p/${shortcode}/?__a=1&__d=dis`, {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0 Safari/537.36",
+          Accept: "application/json",
+        },
+      });
+
+      if (igResponse.ok) {
+        const igData = await igResponse.json();
+        // Some responses nest the media in 'graphql.shortcode_media' or 'items[0]'
+        // Normalize to main object
+        const normalized = igData.graphql?.shortcode_media ?? igData.items?.[0] ?? igData;
+
+        console.log("🔍 [FALLBACK] Successfully fetched via public endpoint");
+        return normalized;
+      }
+
+      console.error("❌ [FALLBACK] Instagram public endpoint error:", igResponse.status);
+    } catch (fallbackErr) {
+      console.error("❌ [FALLBACK] Instagram public fetch failed:", fallbackErr);
+    }
     return null;
   }
 
