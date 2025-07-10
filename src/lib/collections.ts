@@ -87,6 +87,7 @@ export interface Collection {
   description: string;
   userId: string; // This will be the coach's UID
   videoCount: number;
+  favorite?: boolean; // pinned to top of list
   createdAt: string;
   updatedAt: string;
 }
@@ -152,6 +153,7 @@ export class CollectionsService {
         description: description.trim(),
         userId,
         videoCount: 0,
+        favorite: false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -184,6 +186,7 @@ export class CollectionsService {
       return querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
+        favorite: doc.data().favorite ?? false,
         createdAt: formatTimestamp(doc.data().createdAt),
         updatedAt: formatTimestamp(doc.data().updatedAt),
       })) as Collection[];
@@ -231,6 +234,13 @@ export class CollectionsService {
       console.error("Error updating collection:", error);
       throw new Error("Failed to update collection");
     }
+  }
+
+  /**
+   * Toggle favorite flag on a collection
+   */
+  static async setFavorite(userId: string, collectionId: string, favorite: boolean): Promise<void> {
+    return this.updateCollection(userId, collectionId, { favorite, updatedAt: new Date().toISOString() });
   }
 
   /**
