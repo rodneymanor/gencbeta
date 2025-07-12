@@ -48,14 +48,14 @@ const NavItem = ({
           <HoverCardTrigger asChild>
             <SidebarMenuButton
               asChild
-              className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex h-auto flex-col items-center justify-center gap-2 px-2 py-3"
+              className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex h-auto flex-col items-center justify-center gap-2 overflow-visible px-2 py-3"
               data-active={isActive(item.url, item.subItems)}
             >
               <div className="flex w-full flex-col items-center justify-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center">
                   {item.icon && <item.icon className="h-5 w-5 transition-transform hover:scale-110" />}
                 </div>
-                <span className="line-clamp-1 w-full text-center text-xs font-medium">{item.title}</span>
+                <span className="overflow-visible text-center text-xs font-medium whitespace-nowrap">{item.title}</span>
                 {isBrandItem && <BrandProfileIndicator />}
               </div>
             </SidebarMenuButton>
@@ -65,7 +65,7 @@ const NavItem = ({
       ) : (
         <SidebarMenuButton
           asChild
-          className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex h-auto flex-col items-center justify-center gap-2 px-2 py-3"
+          className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex h-auto flex-col items-center justify-center gap-2 overflow-visible px-2 py-3"
           data-active={isActive(item.url)}
         >
           <Link
@@ -76,7 +76,7 @@ const NavItem = ({
             <div className="flex h-8 w-8 items-center justify-center">
               {item.icon && <item.icon className="h-5 w-5 transition-transform hover:scale-110" />}
             </div>
-            <span className="line-clamp-1 w-full text-center text-xs font-medium">{item.title}</span>
+            <span className="overflow-visible text-center text-xs font-medium whitespace-nowrap">{item.title}</span>
             {isBrandItem && <BrandProfileIndicator />}
             {item.comingSoon && <IsComingSoon />}
           </Link>
@@ -105,7 +105,7 @@ export function NavMain({ items, onCollectionCreated }: NavMainProps) {
               <SidebarMenuButton
                 asChild
                 tooltip="Write Script"
-                className="text-secondary-foreground hover:text-secondary-foreground active:text-secondary-foreground flex h-8 min-w-8 items-center justify-center shadow-md transition-[width,height,padding,box-shadow] duration-200 ease-linear group-data-[collapsible=icon]:size-[40px] group-data-[collapsible=icon]:p-0"
+                className="text-secondary-foreground hover:text-secondary-foreground active:text-secondary-foreground flex h-auto flex-col items-center justify-center gap-2 overflow-visible px-2 py-3 shadow-md transition-[width,height,padding,box-shadow] duration-200 ease-linear"
                 style={
                   {
                     "--tw-bg-opacity": 1,
@@ -115,9 +115,13 @@ export function NavMain({ items, onCollectionCreated }: NavMainProps) {
                   } as React.CSSProperties
                 }
               >
-                <Link href="/dashboard/scripts/new">
-                  <Zap className="transition-transform group-data-[collapsible=icon]:h-4 group-data-[collapsible=icon]:w-4 hover:scale-110" />
-                  <span className="group-data-[collapsible=icon]:sr-only">Write Script</span>
+                <Link href="/dashboard/scripts/new" className="flex w-full flex-col items-center justify-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center">
+                    <Zap className="h-5 w-5 transition-transform hover:scale-110" />
+                  </div>
+                  <span className="overflow-visible text-center text-xs font-medium whitespace-nowrap">
+                    Write Script
+                  </span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
