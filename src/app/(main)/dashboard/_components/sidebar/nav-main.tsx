@@ -39,7 +39,7 @@ const NavItem = ({
 }) => {
   return (
     <SidebarMenuItem>
-      <div className="flex flex-col items-center gap-1">
+      <div className="gap-.5 flex flex-col items-center">
         {/* Icon container with background */}
         <Link href={item.url} className="group">
           <div className="bg-background-color-300 flex h-8 w-8 items-center justify-center rounded-md px-2 py-2 transition-all duration-200 hover:bg-[oklch(var(--background-color-300)/0.8)]">
@@ -72,28 +72,24 @@ export function NavMain({ items, onCollectionCreated }: NavMainProps) {
         <SidebarGroupContent className="flex flex-col gap-2">
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                tooltip="Write Script"
-                className="text-secondary-foreground hover:text-secondary-foreground active:text-secondary-foreground flex h-auto flex-col items-center justify-center gap-2 !overflow-visible overflow-visible px-2 py-3 shadow-md transition-[width,height,padding,box-shadow] duration-200 ease-linear"
-                style={
-                  {
-                    "--tw-bg-opacity": 1,
-                    backgroundColor: "oklch(var(--background-color-300)/var(--tw-bg-opacity))",
-                    "--hover-bg": "oklch(var(--background-color-300)/0.8)",
-                    "--active-bg": "oklch(var(--background-color-300)/0.8)",
-                  } as React.CSSProperties
-                }
-              >
-                <Link href="/dashboard/scripts/new" className="flex w-full flex-col items-center justify-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center">
+              <div className="gap-.5 flex flex-col items-center">
+                {/* Icon container with background */}
+                <Link href="/dashboard/scripts/new" className="group">
+                  <div
+                    className="bg-background-color-300 flex h-8 w-8 items-center justify-center rounded-md px-2 py-2 shadow-md transition-all duration-200 hover:bg-[oklch(var(--background-color-300)/0.8)]"
+                    style={{
+                      backgroundColor: "oklch(var(--background-color-300)/var(--tw-bg-opacity))",
+                    }}
+                  >
                     <Zap className="h-5 w-5 transition-transform hover:scale-110" />
                   </div>
-                  <span className="!text-overflow-clip !overflow-visible overflow-visible text-center text-xs font-medium whitespace-nowrap">
-                    Write Script
-                  </span>
                 </Link>
-              </SidebarMenuButton>
+
+                {/* Label outside the background container */}
+                <span className="text-secondary-foreground text-center text-xs font-medium whitespace-nowrap">
+                  Write Script
+                </span>
+              </div>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroupContent>
