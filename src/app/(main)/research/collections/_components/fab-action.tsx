@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 import { Plus, FolderPlus, Video } from "lucide-react";
 
@@ -20,7 +20,17 @@ interface DropdownItem {
 }
 
 export function FabAction({ onAddCollection, onAddVideo, className, disabled = false }: FloatingActionButtonProps) {
-  const [isHovered, setIsHovered] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const closeTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  const handleOpen = () => {
+    if (closeTimeout.current) clearTimeout(closeTimeout.current);
+    setIsOpen(true);
+  };
+  const handleClose = () => {
+    // Add a small delay to make UX forgiving
+    closeTimeout.current = setTimeout(() => setIsOpen(false), 100);
+  };
 
   const dropdownItems: DropdownItem[] = [
     {
@@ -29,6 +39,7 @@ export function FabAction({ onAddCollection, onAddVideo, className, disabled = f
       onClick: () => {
         console.log("🎯 [FAB] Add Collection dropdown item clicked");
         onAddCollection();
+        setIsOpen(false);
       },
     },
     {
@@ -37,6 +48,7 @@ export function FabAction({ onAddCollection, onAddVideo, className, disabled = f
       onClick: () => {
         console.log("🎯 [FAB] Add Video dropdown item clicked");
         onAddVideo();
+        setIsOpen(false);
       },
     },
   ];
@@ -45,20 +57,25 @@ export function FabAction({ onAddCollection, onAddVideo, className, disabled = f
     <div className="fixed right-4 bottom-4 z-50">
       {/* Dropdown Menu */}
       <div
+        onMouseEnter={handleOpen}
+        onMouseLeave={handleClose}
         className={cn(
           "absolute right-0 bottom-full mb-2 w-48",
           "rounded-lg border border-gray-200 bg-white shadow-xl",
           "transform transition-all duration-300 ease-out",
           "origin-bottom-right",
-          isHovered ? "translate-y-0 scale-100 opacity-100" : "pointer-events-none translate-y-2 scale-95 opacity-0",
+          isOpen
+            ? "pointer-events-auto translate-y-0 scale-100 opacity-100"
+            : "pointer-events-none translate-y-2 scale-95 opacity-0",
         )}
+        style={{ zIndex: 100 }}
       >
         <div className="py-2">
           {dropdownItems.map((item, index) => (
             <button
               key={index}
               onClick={item.onClick}
-              className="flex w-full items-center gap-3 px-4 py-3 text-left text-gray-700 transition-colors duration-200 hover:bg-gray-50 hover:text-gray-900"
+              className="flex w-full items-center gap-3 rounded-md px-4 py-3 text-left text-gray-700 transition-colors duration-200 hover:bg-[var(--sidebar-background)] hover:text-gray-900"
             >
               <span className="text-gray-500">{item.icon}</span>
               <span className="text-sm font-medium">{item.label}</span>
@@ -73,8 +90,8 @@ export function FabAction({ onAddCollection, onAddVideo, className, disabled = f
       <button
         onClick={() => console.log("🎯 [FAB] Main button clicked")}
         disabled={disabled}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        onMouseEnter={handleOpen}
+        onMouseLeave={handleClose}
         className={cn(
           // Base styles
           "flex items-center gap-2 px-4 py-3",
@@ -103,15 +120,12 @@ export function FabAction({ onAddCollection, onAddVideo, className, disabled = f
       >
         {/* Plus Icon with rotation and scale */}
         <Plus
-          className={cn(
-            "h-5 w-5 text-gray-600 transition-all duration-300 ease-out",
-            isHovered && "scale-110 rotate-90",
-          )}
+          className={cn("h-5 w-5 text-gray-600 transition-all duration-300 ease-out", isOpen && "scale-110 rotate-90")}
           strokeWidth={2}
           aria-hidden="true"
         />
         {/* Text with scale effect */}
-        <span className={cn("text-sm font-medium transition-all duration-300 ease-out", isHovered && "scale-105")}>
+        <span className={cn("text-sm font-medium transition-all duration-300 ease-out", isOpen && "scale-105")}>
           Add
         </span>
       </button>
