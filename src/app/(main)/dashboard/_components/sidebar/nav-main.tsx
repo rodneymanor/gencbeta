@@ -48,7 +48,9 @@ const NavItem = ({
           <div className="flex h-8 w-8 items-center justify-center rounded-md">
             {item.icon && <item.icon className="h-5 w-5 transition-transform hover:scale-110" />}
           </div>
-          <span className="overflow-visible text-center text-xs font-medium whitespace-nowrap">{item.title}</span>
+          <span className="!text-overflow-clip !overflow-visible overflow-visible text-center text-xs font-medium whitespace-nowrap">
+            {item.title}
+          </span>
         </Link>
       </SidebarMenuButton>
     </SidebarMenuItem>
@@ -88,7 +90,7 @@ export function NavMain({ items, onCollectionCreated }: NavMainProps) {
                   <div className="flex h-8 w-8 items-center justify-center">
                     <Zap className="h-5 w-5 transition-transform hover:scale-110" />
                   </div>
-                  <span className="overflow-visible text-center text-xs font-medium whitespace-nowrap">
+                  <span className="!text-overflow-clip !overflow-visible overflow-visible text-center text-xs font-medium whitespace-nowrap">
                     Write Script
                   </span>
                 </Link>
