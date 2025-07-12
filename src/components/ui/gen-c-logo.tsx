@@ -27,11 +27,11 @@ export function GenCLogo({
   showText = true 
 }: GenCLogoProps) {
   return (
-    <div className={`flex items-center space-x-3 ${className}`}>
+    <div className={`flex items-center space-x-3 transition-all duration-200 hover:scale-110 ${className}`}>
       {/* Logo Icon */}
       <svg 
         xmlns="http://www.w3.org/2000/svg" 
-        className={`${iconSizes[iconSize]} text-foreground`} 
+        className={`${iconSizes[iconSize]} text-foreground transition-all duration-200 hover:text-accent/50`} 
         viewBox="0 0 24 24"
         fill="currentColor"
       >
@@ -50,7 +50,7 @@ export function GenCLogo({
       
       {/* Logo Text */}
       {showText && (
-        <h1 className={`${textSizes[textSize]} font-bold text-foreground tracking-tighter`}>
+        <h1 className={`${textSizes[textSize]} font-bold text-foreground tracking-tighter group-data-[collapsible=icon]:sr-only transition-all duration-200 hover:text-accent/50`}>
           Gen.C
         </h1>
       )}

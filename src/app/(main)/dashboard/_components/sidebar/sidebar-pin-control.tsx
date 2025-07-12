@@ -27,7 +27,9 @@ export function SidebarPinControl() {
       )}
       aria-label={isPinned ? "Unpin sidebar" : "Pin sidebar"}
     >
-      <Pin className={cn("h-3 w-3 transition-transform duration-200", isPinned ? "rotate-0" : "rotate-45")} />
+      <Pin
+        className={cn("h-3 w-3 transition-transform duration-200 hover:scale-110", isPinned ? "rotate-0" : "rotate-45")}
+      />
     </Button>
   );
 }

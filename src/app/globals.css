@@ -419,3 +419,8 @@
 [data-next-badge] {
   display: none !important;
 }
+
+
+[data-radix-popper-content-wrapper]:has([data-slot="tooltip-content"]) {
+  display: none !important;
+}

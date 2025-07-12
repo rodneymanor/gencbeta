@@ -31,7 +31,7 @@ export function NavSecondary({
               <SidebarMenuButton asChild>
                 <a href={item.url}>
                   <item.icon />
-                  <span>{item.title}</span>
+                  <span className="group-data-[collapsible=icon]:sr-only">{item.title}</span>
                 </a>
               </SidebarMenuButton>
             </SidebarMenuItem>

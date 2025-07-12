@@ -78,10 +78,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
-              <a href="#" className="flex w-full items-center justify-between">
+            <SidebarMenuButton asChild className="hover:bg-transparent active:bg-transparent">
+              <a href="#" className="flex w-full items-center gap-2">
                 <GenCLogo iconSize="sm" textSize="sm" />
-                <SidebarPinControl />
+                <SidebarPinControl className="ml-auto" />
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

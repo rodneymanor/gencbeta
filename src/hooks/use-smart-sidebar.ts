@@ -194,41 +194,16 @@ export function useSmartSidebar(): SmartSidebarReturn {
     setPinned(pinState === "unpinned");
   }, [pinState, setPinned]);
 
-  // Hover actions (temporary, not persisted)
+  // Hover actions (disabled - sidebar persists in collapsed state)
   const handleMouseEnter = useCallback(() => {
-    // Only enable hover behavior on desktop and when not pinned
-    if (isMobile || pinState === "pinned") return;
-
-    // Only trigger hover open if manually closed
-    if (manualState === "closed") {
-      // Clear any pending close timeout
-      if (hoverCloseTimeoutRef.current) {
-        clearTimeout(hoverCloseTimeoutRef.current);
-      }
-
-      // Set delayed hover open
-      hoverOpenTimeoutRef.current = setTimeout(() => {
-        setHoverState("hovering");
-      }, HOVER_DELAY_OPEN);
-    }
-  }, [isMobile, manualState, pinState]);
+    // Hover expansion disabled - sidebar stays collapsed
+    // Only manual actions and pin state can open the sidebar
+  }, []);
 
   const handleMouseLeave = useCallback(() => {
-    // Only enable hover behavior on desktop and when not pinned
-    if (isMobile || pinState === "pinned") return;
-
-    // Clear any pending open timeout
-    if (hoverOpenTimeoutRef.current) {
-      clearTimeout(hoverOpenTimeoutRef.current);
-    }
-
-    // Only close if we're in hover mode (not manually opened)
-    if (hoverState === "hovering" && manualState === "closed") {
-      hoverCloseTimeoutRef.current = setTimeout(() => {
-        setHoverState("idle");
-      }, HOVER_DELAY_CLOSE);
-    }
-  }, [isMobile, hoverState, manualState, pinState]);
+    // Hover expansion disabled - sidebar stays collapsed
+    // Only manual actions and pin state can open the sidebar
+  }, []);
 
   // Computed states
   const isManuallyOpen = manualState === "open";

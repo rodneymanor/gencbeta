@@ -35,7 +35,7 @@ function ProfileWithBadgeInline({
     return (
       <div className="flex items-center justify-center">
         <div className="bg-primary/10 flex h-9 w-9 animate-pulse items-center justify-center rounded-lg">
-          <CircleUser className="text-primary h-4 w-4" />
+          <CircleUser className="text-primary h-4 w-4 transition-transform hover:scale-110" />
         </div>
       </div>
     );
@@ -45,7 +45,7 @@ function ProfileWithBadgeInline({
     return (
       <div className="flex items-center gap-3">
         <div className="bg-muted flex h-10 w-10 items-center justify-center rounded-lg">
-          <User className="text-muted-foreground h-5 w-5" />
+          <User className="text-muted-foreground h-5 w-5 transition-transform hover:scale-110" />
         </div>
         <div className="min-w-0 flex-1">
           <div className="text-sm font-medium">Not signed in</div>
@@ -59,14 +59,18 @@ function ProfileWithBadgeInline({
     <div className="flex items-center gap-3">
       <div className="relative">
         <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-lg">
-          <CircleUser className="text-primary h-5 w-5" />
+          <CircleUser className="text-primary h-5 w-5 transition-transform hover:scale-110" />
         </div>
         <div
           className={`absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white text-[9px] shadow-sm ${
             isPro ? "bg-gradient-to-r from-amber-400 to-orange-500 text-white" : "bg-gray-100 text-gray-600"
           }`}
         >
-          {isPro ? <Crown className="h-2 w-2" /> : <User className="h-2 w-2" />}
+          {isPro ? (
+            <Crown className="h-2 w-2 transition-transform hover:scale-110" />
+          ) : (
+            <User className="h-2 w-2 transition-transform hover:scale-110" />
+          )}
         </div>
       </div>
       <div className="min-w-0 flex-1">
@@ -88,28 +92,28 @@ function SignedInMenu({ handleLogout }: { handleLogout: () => void }) {
     <>
       <DropdownMenuGroup>
         <DropdownMenuItem>
-          <CircleUser />
+          <CircleUser className="transition-transform hover:scale-110" />
           Account
         </DropdownMenuItem>
         <DropdownMenuItem>
-          <CreditCard />
+          <CreditCard className="transition-transform hover:scale-110" />
           Billing
         </DropdownMenuItem>
         <DropdownMenuItem>
-          <MessageSquareDot />
+          <MessageSquareDot className="transition-transform hover:scale-110" />
           Notifications
         </DropdownMenuItem>
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
         <DropdownMenuItem onClick={handleSettingsClick}>
-          <Settings />
+          <Settings className="transition-transform hover:scale-110" />
           Settings
         </DropdownMenuItem>
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
       <DropdownMenuItem onClick={handleLogout}>
-        <LogOut />
+        <LogOut className="transition-transform hover:scale-110" />
         Log out
       </DropdownMenuItem>
     </>
@@ -125,7 +129,7 @@ function SignedOutMenu() {
 
   return (
     <DropdownMenuItem onClick={handleSignIn}>
-      <LogOut />
+      <LogOut className="transition-transform hover:scale-110" />
       Sign in
     </DropdownMenuItem>
   );
