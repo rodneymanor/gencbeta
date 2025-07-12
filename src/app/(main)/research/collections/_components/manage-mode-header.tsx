@@ -51,29 +51,31 @@ const ManageModeControls = ({
   onExitManageMode: () => void;
   onActionCompleted: () => void;
 }) => (
-  <div className="flex items-center gap-3">
-    <div className="bg-secondary/40 border-border/60 flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium shadow-xs">
+  <div className="flex items-center gap-4">
+    {/* Selection Counter */}
+    <div className="bg-secondary/40 border-border/60 flex items-center gap-3 rounded-lg border px-4 py-3 text-sm font-medium shadow-xs">
       <span className="text-muted-foreground">Selected:</span>
-      <Badge variant="secondary" className="bg-primary text-primary-foreground shadow-sm">
+      <Badge variant="secondary" className="bg-primary text-primary-foreground shadow-sm text-sm px-2 py-1">
         {selectedVideos.size}
       </Badge>
     </div>
 
-    <div className="flex items-center gap-2">
+    {/* Action Buttons */}
+    <div className="flex items-center gap-3">
       <Button
         variant="outline"
-        size="sm"
+        size="default"
         onClick={onSelectAll}
-        className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 shadow-xs transition-all duration-200 hover:shadow-sm"
+        className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 shadow-xs transition-all duration-200 hover:shadow-sm h-10 px-4"
       >
         <CheckSquare className="mr-2 h-4 w-4" />
         Select All
       </Button>
       <Button
         variant="outline"
-        size="sm"
+        size="default"
         onClick={onClearSelection}
-        className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 shadow-xs transition-all duration-200 hover:shadow-sm"
+        className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 shadow-xs transition-all duration-200 hover:shadow-sm h-10 px-4"
       >
         <X className="mr-2 h-4 w-4" />
         Clear
@@ -88,19 +90,19 @@ const ManageModeControls = ({
           >
             <Button
               variant="outline"
-              size="sm"
-              className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 shadow-xs transition-all duration-200 hover:shadow-sm"
+              size="default"
+              className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 shadow-xs transition-all duration-200 hover:shadow-sm h-10 px-4"
             >
-              <MoveRight className="mr-1.5 h-3.5 w-3.5" />
+              <MoveRight className="mr-2 h-4 w-4" />
               Move/Copy
             </Button>
           </MoveCopyVideosDialog>
 
           <Button
             variant="destructive"
-            size="sm"
+            size="default"
             onClick={onBulkDelete}
-            className="shadow-xs transition-all duration-200 hover:shadow-sm"
+            className="shadow-xs transition-all duration-200 hover:shadow-sm h-10 px-4"
           >
             <Trash2 className="mr-2 h-4 w-4" />
             Delete ({selectedVideos.size})
@@ -109,12 +111,13 @@ const ManageModeControls = ({
       )}
     </div>
 
-    <div className="border-border/40 ml-2 border-l pl-3">
+    {/* Exit Button */}
+    <div className="border-border/40 ml-2 border-l pl-4">
       <Button
         variant="ghost"
-        size="sm"
+        size="default"
         onClick={onExitManageMode}
-        className="text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all duration-200"
+        className="text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all duration-200 h-10 px-4"
       >
         <X className="mr-2 h-4 w-4" />
         Exit Manage Mode
@@ -139,43 +142,24 @@ const AdminControls = ({
   const ownedCollections = user ? collections.filter((c) => c.userId === user.uid) : [];
   return (
     <div className="flex items-center gap-2">
-      <CreateCollectionDialog onCollectionCreated={onVideoAdded}>
-        <Button
-          variant="outline"
-          size="sm"
-          className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 h-8 px-3 text-xs shadow-xs transition-all duration-200 hover:shadow-sm"
-        >
-          <Plus className="mr-1.5 h-3.5 w-3.5" />
-          Create Collection
-        </Button>
-      </CreateCollectionDialog>
-      <AddVideoDialog
-        collections={collections.filter((c) => c.id).map((c) => ({ id: c.id!, title: c.title }))}
-        selectedCollectionId={selectedCollectionId ?? undefined}
-        onVideoAdded={onVideoAdded}
-      >
-        <Button
-          variant="outline"
-          size="sm"
-          className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 h-8 px-3 text-xs shadow-xs transition-all duration-200 hover:shadow-sm"
-        >
-          <Plus className="mr-1.5 h-3.5 w-3.5" />
-          Add Video
-        </Button>
-      </AddVideoDialog>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground h-8 w-8">
-            <MoreVertical className="h-4 w-4" />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="text-muted-foreground hover:text-foreground h-11 w-11"
+            aria-label="More options"
+          >
+            <MoreVertical className="h-5 w-5" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={onManageModeToggle}>
-            <Settings className="mr-2 h-4 w-4" />
+        <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuItem onClick={onManageModeToggle} className="cursor-pointer">
+            <Settings className="mr-3 h-4 w-4" />
             <span>Manage Videos</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setManageCollectionsOpen(true)}>
-            <FolderOpen className="mr-2 h-4 w-4" />
+          <DropdownMenuItem onClick={() => setManageCollectionsOpen(true)} className="cursor-pointer">
+            <FolderOpen className="mr-3 h-4 w-4" />
             <span>Manage Collections</span>
           </DropdownMenuItem>
         </DropdownMenuContent>

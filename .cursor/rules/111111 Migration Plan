@@ -1,0 +1,133 @@
+# Where Your Workflows Overlap
+
+| Shared Concern | Files Appearing in **≥ 2** Workflows | Workflows Touching It |
+| --- | --- | --- |
+| **Video download + transcription** | `src/app/api/video/downloader/route.ts`  `src/app/api/video/transcribe/route.ts`  `src/lib/video-processing-helpers.ts` | Video-URL scripts -  Add-to-Collections -  AI-Voice creation -  Insights Backfill |
+| **Platform detection (TikTok / IG / YT)** | `detectPlatform()` in multiple helpers/components | Same four workflows |
+| **Voice template processing** | `src/lib/voice-template-processor.ts` | Ghost-Writer -  Speed-Write -  AI-Voice |
+| **PEQ / content-component extraction** | `src/lib/peq-extraction-service.ts`  `src/lib/template-generator-service` | Ghost-Writer -  Speed-Write -  AI-Voice |
+| **Credit / usage tracking** | `src/lib/credits-service.ts`  `src/lib/usage-tracker-admin.ts` | Speed-Write -  Ghost-Writer -  AI-Voice |
+| **Authentication / RBAC** | `src/lib/api-key-auth.ts`  `src/lib/collections-rbac.ts` | All authenticated APIs |
+| **React “processing status” UIs** | `_components/video-processor.tsx`  `video-processing-status.tsx` | Video-URL scripts -  Add-to-Collections |
+
+Duplicated logic increases maintenance risk and makes on-boarding harder. The sections below outline how to centralize these hotspots for better reuse and testability.
+
+## 1. Extract Domain-Centric Service Layers
+
+Move raw logic out of API routes and UI helpers into **singleton service modules**. A thin API route then just calls these services.
+
+### A. Video Service (`/lib/core/video`)
+* downloader.ts – unified TikTok/IG/YT download functions  
+* transcriber.ts – wrapper over Gemini/OpenAI for audio-to-text  
+* metadata.ts – engagement + author + hashtag extraction  
+* analyzer.ts – optional Hook/Bridge/Nugget/WTA analysis
+
+All workflows import from the same module, eliminating four parallel copies of `detectPlatform()` and download helpers.
+
+### B. Content Service (`/lib/core/content`)
+* peqExtractor.ts – Problems/Excuses/Questions  
+* templateGenerator.ts – wraps the current Template Generator & Voice-Template-Processor  
+* scriptValidator.ts – quality gates for any generated script  
+* negativeKeywords.ts – central blacklist
+
+Ghost-Writer, Speed-Write and AI-Voice now share one pipeline for **idea → prompt → cleaned script**.
+
+### C. User-Accounting Service (`/lib/core/billing`)
+* credits.ts – deduct & refund  
+* usage.ts – token counting, analytics, rate-limit hooks
+
+API routes only call `Credits.ensure(user, “generate_script”)` etc.  Centralizing reduces scattered edge-case handling and supports future pricing tweaks in one place.
+
+### D. Auth & RBAC (`/lib/core/auth`)
+Unify `api-key-auth.ts`, Firebase JWT checks and `collections-rbac.ts` behind one facade, then expose helpers such as `Auth.requireRole("coach")`.  This is the canonical gatekeeper—every route, job-runner and CLI script calls it.
+
+> Modular service layers align with the “module boundary” refactor pattern and keep view-specific code separate from domain logic [1].
+
+## 2. Consolidate API Surface
+
+1. **/api/video/\***  
+   ‑ `/download`, `/transcribe`, `/analyze` become thin wrappers over the new Video Service.
+2. **/api/script/**  
+   Keep `/speed-write`, add `/from-video` that reuses the same generator engine regardless of the entry mode.
+3. **/api/voices/**  
+   `/create` and `/process-profile` both post jobs to a shared **VoiceQueue** powered by the Content Service.
+
+Single-purpose endpoints remove branching for “simple vs advanced” in UI code and simplify client SDKs.
+
+## 3. Reusable React Assets
+
+| Duplicate UI | Central React Primitive | How to Reuse |
+| --- | --- | --- |
+| VideoProcessor (script editor)  &  VideoProcessingStatus (collections) | `` | Accepts a job id and subscribes to `/voices/processing-status` or `/video/processing-status` via SWR or React Query. |
+| Ghost-Writer card “Use Idea” and Collections video card “Add” buttons | `` | Pass an array of button descriptors; styling and hover logic live once. |
+| Countdown clocks (Ghost-Writer cycle & voice jobs) | `useCountdown(targetDate)` custom hook | Centralized via hook based state/logic [2]. |
+
+Adopt a **“hooks first”** approach: data fetching and side-effects live in hooks, presentation stays in components. Hooks can be shared across pages with almost no extra code.
+
+## 4. Folder Structure Proposal
+
+```
+src/
+├── lib/
+│   └── core/
+│       ├── video/
+│       ├── content/
+│       ├── billing/
+│       └── auth/
+├── api/
+│   └── (routes call lib/core modules)
+├── components/
+│   ├── common/
+│   │   ├── ActionCard/
+│   │   ├── VideoJobProgress/
+│   │   └── useCountdown.ts
+│   └── ghost-writer/
+│       └── (pure UI – no business logic)
+```
+
+> Centralizing routes and imports this way keeps **App.jsx** slim and helps scaling role-based routing [3].
+
+## 5. Migration Checklist
+
+1. **Move** duplicated helpers into the new core modules; export an identical function signature.
+2. **Refactor** API routes to consume services; add tests on the service layer first.
+3. **Replace** direct Firebase/Firestore calls in UI with hooks that tap into the services.
+4. **Create barrel files** (`index.ts`) in each core sub-folder to simplify imports and support tree-shaking [4].
+5. **Gradually delete** old helpers after all references are swapped.
+
+## 6. Benefits You’ll See
+
+* **Single source of truth** for video processing and script generation pipelines.  
+* **Smaller React bundles**: one copy of each helper instead of four variations.  
+* **Easier testing**: service functions are pure Node modules, testable without Next.js mocks.  
+* **Future extensibility**: adding YouTube Shorts, Threads, or new AI models only requires edits inside `core/video` or `core/content`.  
+* **Developer ramp-up**: clear module boundaries and shared hooks reduce cognitive load when onboarding.
+
+Following these steps aligns your codebase with widely-accepted React modularization and reusability practices [5][1].
+
+[1] https://martinfowler.com/articles/modularizing-react-apps.html
+[2] https://www.algolia.com/blog/engineering/centralizing-state-and-data-handling-with-react-hooks-on-the-road-to-reusable-components
+[3] https://dev.to/divam_jain_64fbf2c056539b/how-to-centralize-routes-in-react-like-a-pro-beginner-friendly-guide-4fm6
+[4] https://stackoverflow.com/questions/68540424/how-to-centralize-imports-in-react-components
+[5] https://dev.to/codewithshahan/writing-clean-reusable-components-in-react-best-practices-2gka
+[6] https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/1896200/af8b50fc-398f-4677-abd8-d2e07ece7116/6.-Ghostwriter-workflow.md
+[7] https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/1896200/3c6227a9-76e5-4340-b89d-2d1b0633bd44/2.-url-writing
+[8] https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/1896200/21f99054-c9f8-4501-b76b-d3789ae74477/3.-addt-to-collections
+[9] https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/1896200/c76ba93f-08a3-4192-aa12-3fdacbd2149a/4.-add-ai-voice
+[10] https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/1896200/741cc292-f5e5-4ccd-939c-1f35eb4c7e44/5.backfill-data-process.md
+[11] https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/1896200/1ef1e132-a774-4eec-8498-a2b84dd3792f/1.speedwriting
+[12] https://github.com/piglovesyou/react-overlap-transition-example/blob/master/README.md
+[13] https://stackoverflow.com/questions/35021073/overlapping-css-in-react-webpack-application
+[14] https://www.dhiwise.com/post/how-react-error-overlay-enhances-the-developer-experience
+[15] https://reactflow.dev/examples
+[16] https://js.devexpress.com/React/Documentation/Guide/UI_Components/Chart/Point_Labels/Resolve_Overlapping/
+[17] https://www.robinwieruch.de/react-folder-structure/
+[18] https://github.com/wojtekmaj/react-pdf/issues/1828
+[19] https://www.reddit.com/r/reactjs/comments/14cdt3h/best_practices_for_organizing_projects_files_in/
+[20] https://www.pluralsight.com/resources/blog/guides/workflow-of-react
+[21] https://stackoverflow.com/questions/75106882/should-we-centralise-the-components-in-reactjs
+[22] https://blog.bitsrc.io/reusable-components-in-react-a-practical-guide-ec15a81a4d71
+[23] https://dev.to/colocodes/how-to-debug-a-react-app-51l4
+[24] https://itnext.io/centralizing-api-error-handling-in-react-apps-810b2be1d39d
+[25] https://stackoverflow.com/questions/71464566/best-way-to-include-reusable-svg-in-react
+[26] https://usamabhatti.hashnode.dev/react-center-a-component-horizontally-and-vertically

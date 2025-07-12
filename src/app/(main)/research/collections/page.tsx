@@ -9,22 +9,28 @@ import { useState, useEffect, useCallback, useMemo, useTransition, useRef, memo,
 import { useSearchParams, useRouter } from "next/navigation";
 
 import { motion } from "framer-motion";
-import { Edit3, Loader2, Check, Bookmark } from "lucide-react";
+import { Edit3, Loader2, Check, Bookmark, Menu } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { InstagramVideoGrid } from "@/components/ui/instagram-video-grid";
 import { VideoCollectionLoading } from "@/components/ui/loading-animations";
 import { Textarea } from "@/components/ui/textarea";
+import { VideoLightbox } from "@/components/ui/video-lightbox";
 import { useAuth } from "@/contexts/auth-context";
 import { useTopBarConfig } from "@/hooks/use-route-topbar";
 import { CollectionsService, type Collection, type Video } from "@/lib/collections";
 import { CollectionsRBACService } from "@/lib/collections-rbac";
 
+import { AddVideoDialog } from "./_components/add-video-dialog";
 import { CollectionBadgeMenu } from "./_components/collection-badge-menu";
 import { badgeVariants } from "./_components/collections-animations";
 import { type VideoWithPlayer, createVideoSelectionHandlers } from "./_components/collections-helpers";
+import { CollectionsTabNav } from "./_components/collections-tab-nav";
+import { CreateCollectionDialog } from "./_components/create-collection-dialog";
+import { FabAction } from "./_components/fab-action";
 import { ManageModeHeader } from "./_components/manage-mode-header";
 import { VideoGrid } from "./_components/video-grid";
 
@@ -98,9 +104,12 @@ const CollectionBadge = memo(
             isActive
               ? "bg-secondary text-foreground hover:bg-secondary/80 border-border/60 font-semibold shadow-sm"
               : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground hover:border-border/40 bg-transparent font-normal"
-          } ${isTransitioning && isActive ? "opacity-75" : ""} ${isTransitioning ? "pointer-events-none" : ""} min-h-[36px] rounded-md border-0 px-4 py-2.5 text-sm shadow-xs hover:shadow-sm`}
+          } ${isTransitioning && isActive ? "opacity-75" : ""} ${
+            isTransitioning ? "pointer-events-none" : ""
+          } min-h-[36px] rounded-md border-0 px-4 py-2.5 text-sm shadow-xs hover:shadow-sm`}
           onClick={isTransitioning ? undefined : onClick}
         >
+          {collection?.favorite && <Bookmark className="h-4 w-4 text-yellow-400 mr-1" />}
           {collection
             ? `${collection.title.length > 30 ? collection.title.slice(0, 27) + "…" : collection.title} (${collection.videoCount})`
             : `All Videos (${videoCount})`}
@@ -236,11 +245,22 @@ function CollectionsPageContent() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [manageMode, setManageMode] = useState(false);
   const [selectedVideos, setSelectedVideos] = useState<Set<string>>(new Set());
+
+  // Lightbox modal state
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [currentVideoIndex, setCurrentVideoIndex] = useState<number>(0);
   const [deletingVideos, setDeletingVideos] = useState<Set<string>>(new Set());
   const [isPending, startTransition] = useTransition();
   const [hasMoreVideos, setHasMoreVideos] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [lastDocRef, setLastDocRef] = useState<any>(null);
+
+  // Dialog refs for programmatic triggering
+  const createCollectionDialogRef = useRef<HTMLButtonElement>(null);
+  const addVideoDialogRef = useRef<HTMLButtonElement>(null);
+
+  // Sentinel ref for infinite scrolling in Instagram grid
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   // Debug message to verify code deployment
   console.log("🎉 Hello from Collections Page! Code updated with scrolling fixes and pagination - Version 2.0");
@@ -401,6 +421,14 @@ function CollectionsPageContent() {
     (collectionId: string | null) => {
       if (collectionId === previousCollectionRef.current || isTransitioning) return;
 
+      // Handle favorites tab
+      if (collectionId === 'favorites') {
+        // Filter videos to show only favorited ones
+        const favoritedVideos = videos.filter(video => video.favorite);
+        setVideos(favoritedVideos);
+        return;
+      }
+
       previousCollectionRef.current = collectionId;
 
       // Reset pagination state
@@ -426,7 +454,16 @@ function CollectionsPageContent() {
         loadData(collectionId);
       }
     },
-    [router, isTransitioning, getCachedVideos, loadData],
+    [router, isTransitioning, getCachedVideos, loadData, videos],
+  );
+
+  // Thumbnail click handler for new grid
+  const handleThumbnailClick = useCallback(
+    (_video: unknown, index: number) => {
+      setCurrentVideoIndex(index);
+      setLightboxOpen(true);
+    },
+    [],
   );
 
   // Role-based access control
@@ -632,11 +669,87 @@ function CollectionsPageContent() {
     }
   }, [user, isLoadingMore, hasMoreVideos, lastDocRef, selectedCollectionId, handleVideoResult]);
 
+  // IntersectionObserver for load more when not in manage mode
+  useEffect(() => {
+    if (manageMode) return; // disable in manage mode
+    if (!hasMoreVideos) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          handleLoadMore();
+        }
+      },
+      {
+        root: null,
+        rootMargin: "0px",
+        threshold: 0.1,
+      },
+    );
+
+    const node = loadMoreRef.current;
+    if (node) observer.observe(node);
+
+    return () => {
+      if (node) observer.unobserve(node);
+    };
+  }, [manageMode, hasMoreVideos, handleLoadMore]);
+
   const selectedCollection = useMemo(() => {
     if (!selectedCollectionId) return null;
     return collections.find((c) => c.id === selectedCollectionId) ?? null;
   }, [selectedCollectionId, collections]);
   const isOwner = Boolean(user && selectedCollection && selectedCollection.userId === user?.uid);
+
+  // FAB handlers
+  const handleAddCollection = useCallback(() => {
+    console.log("🎯 [FAB] Add Collection clicked");
+    createCollectionDialogRef.current?.click();
+  }, []);
+
+  const handleAddVideo = useCallback(() => {
+    console.log("🎯 [FAB] Add Video clicked");
+    addVideoDialogRef.current?.click();
+  }, []);
+
+    // Video favoriting handler
+  const handleVideoFavorite = useCallback(async (video: any, index: number) => {
+    if (!user || !video.id) return;
+
+    try {
+      // Toggle favorite state
+      const newFavoriteState = !video.favorite;
+
+      // Update video in state optimistically
+      setVideos(prev => prev.map((v, i) =>
+        i === index ? { ...v, favorite: newFavoriteState } : v
+      ));
+
+      await fetch(`/api/video/${video.id}/favorite`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', authorization: `Bearer ${await user.getIdToken()}` },
+        body: JSON.stringify({ favorite: newFavoriteState }),
+      });
+
+      toast.success(newFavoriteState ? "Video added to favorites" : "Video removed from favorites");
+    } catch (error) {
+      console.error("Error toggling video favorite:", error);
+      // Revert optimistic update on error
+      setVideos(prev => prev.map((v, i) =>
+        i === index ? { ...v, favorite: !video.favorite } : v
+      ));
+      toast.error("Failed to update favorite status");
+    }
+  }, [user]);
+
+  // Filter, search, and sort videos
+  const filteredVideos = useMemo(() => {
+    let result = [...videos];
+    // Filter
+    // Search
+    // Sort
+    return result;
+  }, [videos]);
 
   // Don't show anything until collections are loaded
   if (isLoading) {
@@ -644,186 +757,206 @@ function CollectionsPageContent() {
   }
 
   return (
-    <div className="mx-auto flex h-full max-w-7xl justify-center gap-8 p-4 md:p-6">
+    <div className="mx-auto flex h-full max-w-7xl flex-col items-center space-y-6 p-4 md:p-6">
       {/* Left side: Main content (Video Grid) */}
       <div className="flex-1">
-        <header className="mb-6 flex items-center justify-between">
-          <div className="flex-1">
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold tracking-tight">
+        <header className="mb-6 space-y-4">
+          {/* Primary Content Area */}
+          <div className="flex items-start justify-between gap-4">
+            {/* Left: Navigation */}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-11 w-11 text-muted-foreground hover:text-foreground"
+                aria-label="Menu"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            </div>
+
+            {/* Title and Description */}
+            <div className="flex-1 min-w-0 text-center">
+              <div className="flex items-center justify-center gap-3 mb-2">
+                <h1 className="text-2xl font-bold tracking-tight">
+                  {selectedCollection ? (
+                    <InlineEditableField
+                      value={selectedCollection.title}
+                      onSave={async (newTitle) => {
+                        if (!user) return;
+                        await CollectionsService.updateCollection(user.uid, selectedCollection.id!, { title: newTitle });
+                        toast.success("Collection name updated");
+                        handleCollectionUpdated();
+                      }}
+                      isOwner={isOwner}
+                      type="input"
+                      label="Collection Name"
+                      maxLength={60}
+                      className="inline-block max-w-[240px] truncate"
+                    />
+                  ) : (
+                    pageTitle
+                  )}
+                </h1>
+                {selectedCollection && (
+                  <div className="flex items-center gap-2">
+                    <CollectionBadgeMenu
+                      collection={selectedCollection}
+                      onCollectionDeleted={handleCollectionDeleted}
+                      onCollectionUpdated={handleCollectionUpdated}
+                      className="transition-opacity duration-200"
+                    />
+                  </div>
+                )}
+              </div>
+              <p
+                 className="text-muted-foreground mx-auto max-w-[500px] h-[48px] overflow-hidden line-clamp-2"
+                 title={selectedCollection ? selectedCollection.description ?? '' : pageDescription}
+              >
                 {selectedCollection ? (
                   <InlineEditableField
-                    value={selectedCollection.title}
-                    onSave={async (newTitle) => {
+                    value={selectedCollection.description}
+                    onSave={async (newDesc) => {
                       if (!user) return;
-                      await CollectionsService.updateCollection(user.uid, selectedCollection.id!, { title: newTitle });
-                      toast.success("Collection name updated");
+                      await CollectionsService.updateCollection(user.uid, selectedCollection.id!, {
+                        description: newDesc,
+                      });
+                      toast.success("Collection description updated");
                       handleCollectionUpdated();
                     }}
                     isOwner={isOwner}
-                    type="input"
-                    label="Collection Name"
-                    maxLength={80}
-                    className="inline-block"
+                    type="textarea"
+                    label="Collection Description"
+                    maxLength={500}
+                    className="block max-w-[500px] h-[48px] overflow-hidden line-clamp-2"
+                    placeholder="This is the place to add your videos."
                   />
                 ) : (
-                  pageTitle
+                  pageDescription
                 )}
-              </h1>
-              {selectedCollection && (
-                <div className="flex items-center gap-2">
-                  <CollectionBadgeMenu
-                    collection={selectedCollection}
-                    onCollectionDeleted={handleCollectionDeleted}
-                    onCollectionUpdated={handleCollectionUpdated}
-                    className="transition-opacity duration-200"
-                  />
-                </div>
-              )}
+              </p>
             </div>
-            <p className="text-muted-foreground max-w-prose">
-              {selectedCollection ? (
-                <InlineEditableField
-                  value={selectedCollection.description}
-                  onSave={async (newDesc) => {
-                    if (!user) return;
-                    await CollectionsService.updateCollection(user.uid, selectedCollection.id!, {
-                      description: newDesc,
-                    });
-                    toast.success("Collection description updated");
-                    handleCollectionUpdated();
-                  }}
-                  isOwner={isOwner}
-                  type="textarea"
-                  label="Collection Description"
-                  maxLength={500}
-                  className="inline-block"
-                  placeholder="This is the place to add your videos."
-                />
-              ) : (
-                pageDescription
-              )}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            {selectedCollection && (
-              <Bookmark
+
+            {/* Action Buttons - Right Side */}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {/* Favorite Button - Larger touch target */}
+              <Button
+                variant="ghost"
+                size="icon"
+                disabled={!selectedCollection}
                 onClick={async () => {
-                  if (!user || !selectedCollection.id) return;
-                  await CollectionsService.setFavorite(user.uid, selectedCollection.id, !selectedCollection.favorite);
+                  if (!user || !selectedCollection?.id) return;
+                  await CollectionsService.setFavorite(
+                    user.uid,
+                    selectedCollection.id,
+                    !selectedCollection.favorite,
+                  );
                   handleCollectionUpdated();
                 }}
-                className={`h-5 w-5 cursor-pointer transition-colors ${
-                  selectedCollection.favorite
-                    ? "fill-yellow-400 text-yellow-400"
+                className={`h-11 w-11 transition-colors ${
+                  selectedCollection?.favorite
+                    ? "text-yellow-500 hover:text-yellow-600"
                     : "text-muted-foreground hover:text-foreground"
-                }`}
+                } ${!selectedCollection ? "opacity-0 pointer-events-none" : ""}`}
+                aria-label={
+                  selectedCollection?.favorite ? "Remove from favorites" : "Add to favorites"
+                }
+              >
+                <Bookmark
+                  className={`h-5 w-5 ${selectedCollection?.favorite ? "fill-current" : ""}`}
+                />
+              </Button>
+
+              {/* Admin Controls */}
+              <ManageModeHeader
+                manageMode={manageMode}
+                selectedVideos={selectedVideos}
+                collections={collections}
+                selectedCollectionId={selectedCollectionId}
+                onManageModeToggle={() => setManageMode(!manageMode)}
+                onExitManageMode={handleExitManageMode}
+                onBulkDelete={handleBulkDelete}
+                onClearSelection={clearSelection}
+                onSelectAll={selectAllVideos}
+                onVideoAdded={handleVideoAdded}
               />
-            )}
-            <ManageModeHeader
-              manageMode={manageMode}
-              selectedVideos={selectedVideos}
-              collections={collections}
-              selectedCollectionId={selectedCollectionId}
-              onManageModeToggle={() => setManageMode(!manageMode)}
-              onExitManageMode={handleExitManageMode}
-              onBulkDelete={handleBulkDelete}
-              onClearSelection={clearSelection}
-              onSelectAll={selectAllVideos}
-              onVideoAdded={handleVideoAdded}
-            />
+            </div>
           </div>
         </header>
 
-        <main>
-          <VideoGrid
-            videos={videos}
-            selectedCollectionId={selectedCollectionId}
-            loadingVideos={isTransitioning}
-            isPending={isPending}
-            manageMode={manageMode}
-            selectedVideos={selectedVideos}
-            deletingVideos={deletingVideos}
-            onToggleVideoSelection={toggleVideoSelection}
-            onDeleteVideo={handleDeleteVideo}
-            onVideoAdded={handleVideoAdded}
-            collections={collections}
-            onLoadMore={handleLoadMore}
-            hasMoreVideos={hasMoreVideos}
-            isLoadingMore={isLoadingMore}
-          />
+        {/* Collections Tab Navigation */}
+        {(() => {
+          const favoriteVideosCount = videos.filter((v) => v.favorite).length;
+          return (
+            <CollectionsTabNav
+              collections={collections}
+              activeId={selectedCollectionId}
+              onSelect={handleCollectionChange}
+              allVideosCount={videos.length}
+              favoriteVideosCount={favoriteVideosCount}
+            />
+          );
+        })()}
+
+        <main className="flex-1">
+          {!manageMode ? (
+            <div className="mx-auto max-w-5xl">
+              <InstagramVideoGrid
+                videos={videos}
+                onVideoClick={handleThumbnailClick}
+                onFavorite={handleVideoFavorite}
+                renderBadge={(video, idx) => (((video as any).createdAt && Date.now() - (video as any).createdAt < 1000 * 60 * 60 * 24) ? <Badge className="ml-2 bg-green-500 text-white">New</Badge> : null)}
+              />
+              {/* Sentinel */}
+              <div ref={loadMoreRef} className="h-8 w-full" />
+              {isLoadingMore && (
+                <div className="flex items-center justify-center py-4 text-sm text-muted-foreground">Loading…</div>
+              )}
+            </div>
+          ) : (
+            <VideoGrid
+              videos={videos}
+              selectedCollectionId={selectedCollectionId}
+              loadingVideos={isTransitioning}
+              isPending={isPending}
+              manageMode={manageMode}
+              selectedVideos={selectedVideos}
+              deletingVideos={deletingVideos}
+              onToggleVideoSelection={toggleVideoSelection}
+              onDeleteVideo={handleDeleteVideo}
+              onVideoAdded={handleVideoAdded}
+              collections={collections}
+              onLoadMore={handleLoadMore}
+              hasMoreVideos={hasMoreVideos}
+              isLoadingMore={isLoadingMore}
+            />
+          )}
         </main>
       </div>
 
-      {/* Right side: Collection Badges */}
-      <div className="w-64">
-        <div className="space-y-4">
-          {/* All Videos Badge */}
-          <CollectionBadge
-            collection={undefined}
-            isActive={!selectedCollectionId}
-            onClick={() => handleCollectionChange(null)}
-            videoCount={videos.length}
-            isTransitioning={isTransitioning}
-          />
+      {/* Sidebar */}
+      {/* Lightbox Modal */}
+      <VideoLightbox
+        videos={videos}
+        currentIndex={currentVideoIndex}
+        open={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        onChangeIndex={setCurrentVideoIndex}
+      />
 
-          {/* Starred Collections Section */}
-          {collections.filter((c) => c.favorite).length > 0 && (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 px-2">
-                <span className="text-foreground text-sm font-semibold">Favorited</span>
-              </div>
-              <div className="space-y-2">
-                {collections
-                  .filter((c) => c.favorite)
-                  .sort((a, b) => a.title.localeCompare(b.title))
-                  .map((collection) => (
-                    <CollectionBadge
-                      key={collection.id}
-                      collection={collection}
-                      isActive={selectedCollectionId === collection.id}
-                      onClick={() => handleCollectionChange(collection.id!)}
-                      videoCount={collection.videoCount}
-                      isTransitioning={isTransitioning}
-                    />
-                  ))}
-              </div>
-            </div>
-          )}
+      {/* FAB and Dialogs */}
+      <FabAction onAddCollection={handleAddCollection} onAddVideo={handleAddVideo} />
 
-          {/* Other Collections Section */}
-          {collections.filter((c) => !c.favorite).length > 0 && (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 px-2">
-                <span className="text-foreground text-sm font-semibold">Collections</span>
-              </div>
-              <div className="space-y-2">
-                {collections
-                  .filter((c) => !c.favorite)
-                  .sort((a, b) => a.title.localeCompare(b.title))
-                  .map((collection) => (
-                    <CollectionBadge
-                      key={collection.id}
-                      collection={collection}
-                      isActive={selectedCollectionId === collection.id}
-                      onClick={() => handleCollectionChange(collection.id!)}
-                      videoCount={collection.videoCount}
-                      isTransitioning={isTransitioning}
-                    />
-                  ))}
-              </div>
-            </div>
-          )}
+      <CreateCollectionDialog onCollectionCreated={handleCollectionUpdated}>
+        <button ref={createCollectionDialogRef} style={{ display: 'none' }} />
+      </CreateCollectionDialog>
 
-          {/* Empty State */}
-          {collections.length === 0 && (
-            <div className="py-8 text-center">
-              <div className="text-muted-foreground text-sm">No collections yet</div>
-              <div className="text-muted-foreground mt-1 text-xs">Create your first collection to get started</div>
-            </div>
-          )}
-        </div>
-      </div>
+      <AddVideoDialog
+        collections={collections.filter((c) => c.id).map((c) => ({ id: c.id!, title: c.title }))}
+        onVideoAdded={handleVideoAdded}
+      >
+        <button ref={addVideoDialogRef} style={{ display: 'none' }} />
+      </AddVideoDialog>
     </div>
   );
 }

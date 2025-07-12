@@ -29,6 +29,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'instagram.com',
       },
+      {
+        protocol: 'https',
+        hostname: '**.b-cdn.net',
+      },
     ],
     domains: [
       // Instagram CDN domains - regional servers

@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 
 interface VideoInsights {
   likes: number;
@@ -81,11 +82,32 @@ export function VideoInsightsTabs({ video, copiedField, onCopyToClipboard }: Vid
 
   return (
     <Tabs defaultValue="overview" className="w-full">
-      <TabsList className="grid w-full grid-cols-4">
-        <TabsTrigger value="overview">Overview</TabsTrigger>
-        <TabsTrigger value="components">Script Components</TabsTrigger>
-        <TabsTrigger value="transcript">Transcript</TabsTrigger>
-        <TabsTrigger value="metadata">Metadata</TabsTrigger>
+      <TabsList className="flex w-full gap-6 border-b border-border bg-transparent">
+        {(
+          [
+            { value: 'overview', label: 'Overview' },
+            { value: 'components', label: 'Script Components' },
+            { value: 'transcript', label: 'Transcript' },
+            { value: 'metadata', label: 'Metadata' },
+          ] as const
+        ).map((tab) => (
+          <TabsTrigger
+            key={tab.value}
+            value={tab.value}
+            className={cn(
+              'relative pb-2 text-sm font-medium text-muted-foreground transition-colors outline-none',
+              'data-[state=active]:text-foreground',
+            )}
+          >
+            {tab.label}
+            {/* Underline indicator */}
+            <span
+              className={
+                'absolute -bottom-[1px] left-0 h-[2px] w-full origin-left bg-primary transition-transform data-[state=inactive]:scale-x-0 data-[state=active]:scale-x-100'
+              }
+            />
+          </TabsTrigger>
+        ))}
       </TabsList>
 
       <TabsContent value="overview" className="space-y-6">

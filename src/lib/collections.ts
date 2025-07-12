@@ -79,6 +79,7 @@ export interface Video {
   addedAt: string;
   fileSize?: number;
   duration?: number;
+  favorite?: boolean;
 }
 
 export interface Collection {
@@ -466,6 +467,18 @@ export class CollectionsService {
     } catch (error) {
       console.error("Error copying video:", error);
       throw new Error("Failed to copy video");
+    }
+  }
+
+  /**
+   * Toggle favorite flag on a video
+   */
+  static async setVideoFavorite(userId: string, videoId: string, favorite: boolean): Promise<void> {
+    try {
+      await this.updateVideo(userId, videoId, { favorite });
+    } catch (error) {
+      console.error('Error toggling video favorite:', error);
+      throw new Error('Failed to update video favorite status');
     }
   }
 

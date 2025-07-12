@@ -9,6 +9,7 @@ export interface VideoWithPlayer extends Video {
     filename: string;
   };
   hostedOnCDN?: boolean;
+  favorite?: boolean;
 }
 
 export const getPageTitle = (selectedCollectionId: string | null, collections: Collection[]) => {

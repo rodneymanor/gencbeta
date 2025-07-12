@@ -1,0 +1,338 @@
+/**
+ * VideoJobProgress Component
+ * Centralized video processing status display
+ */
+
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import {
+  CheckCircle,
+  XCircle,
+  Clock,
+  Download,
+  FileText,
+  Search,
+  Upload,
+  RefreshCw,
+  AlertTriangle,
+} from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useAuth } from "@/contexts/auth-context";
+import type {
+  VideoProcessingStatus as VideoProcessingStatusType,
+  ProcessingStatusResponse,
+} from "@/types/video-processing";
+
+export interface VideoJobProgressProps {
+  jobId: string;
+  onComplete?: (result: ProcessingStatusResponse["result"]) => void;
+  onRetry?: () => void;
+  onError?: (error: string) => void;
+  className?: string;
+  showDetails?: boolean;
+  autoPoll?: boolean;
+  pollInterval?: number;
+}
+
+const STATUS_ICONS = {
+  queued: Clock,
+  processing: RefreshCw,
+  downloading: Download,
+  transcribing: FileText,
+  analyzing: Search,
+  uploading: Upload,
+  completed: CheckCircle,
+  failed: XCircle,
+  retrying: RefreshCw,
+  cancelled: XCircle,
+} as const;
+
+const STATUS_COLORS = {
+  queued: "bg-yellow-500",
+  processing: "bg-blue-500",
+  downloading: "bg-blue-500",
+  transcribing: "bg-purple-500",
+  analyzing: "bg-green-500",
+  uploading: "bg-[#2d93ad]",
+  completed: "bg-green-500",
+  failed: "bg-red-500",
+  retrying: "bg-yellow-500",
+  cancelled: "bg-gray-500",
+} as const;
+
+const STATUS_LABELS = {
+  queued: "Queued",
+  processing: "Processing",
+  downloading: "Downloading",
+  transcribing: "Transcribing",
+  analyzing: "Analyzing",
+  uploading: "Saving",
+  completed: "Completed",
+  failed: "Failed",
+  retrying: "Retrying",
+  cancelled: "Cancelled",
+} as const;
+
+// Helper functions to reduce complexity
+const shouldStartPolling = (status: VideoProcessingStatusType): boolean => {
+  return ["queued", "processing", "downloading", "transcribing", "analyzing", "uploading", "retrying"].includes(status);
+};
+
+const isActiveJob = (status: VideoProcessingStatusType): boolean => {
+  return ["queued", "processing", "downloading", "transcribing", "analyzing", "uploading", "retrying"].includes(status);
+};
+
+export function VideoJobProgress({ 
+  jobId, 
+  onComplete, 
+  onRetry, 
+  onError,
+  className = "",
+  showDetails = true,
+  autoPoll = true,
+  pollInterval = 2000
+}: VideoJobProgressProps) {
+  const [job, setJob] = useState<ProcessingStatusResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRetrying, setIsRetrying] = useState(false);
+  const { user } = useAuth();
+
+  const fetchJobStatus = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      const token = await user.getIdToken();
+      const response = await fetch(`/api/internal/video-processing?jobId=${jobId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setJob(data);
+
+        // Trigger completion callback
+        if (data.status === "completed" && onComplete) {
+          onComplete(data.result);
+        }
+
+        // Trigger error callback
+        if (data.status === "failed" && onError) {
+          onError(data.error?.message || "Processing failed");
+        }
+      } else {
+        console.error("Failed to fetch job status");
+        if (onError) {
+          onError("Failed to fetch job status");
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching job status:", error);
+      if (onError) {
+        onError("Error fetching job status");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [jobId, user, onComplete, onError]);
+
+  const handleRetry = async () => {
+    if (!user || !job) return;
+
+    setIsRetrying(true);
+    try {
+      const token = await user.getIdToken();
+      const response = await fetch("/api/internal/video-processing", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          jobId,
+          action: "retry",
+        }),
+      });
+
+      if (response.ok) {
+        // Refresh status
+        fetchJobStatus();
+        onRetry?.();
+      } else {
+        console.error("Failed to retry job");
+        if (onError) {
+          onError("Failed to retry job");
+        }
+      }
+    } catch (error) {
+      console.error("Error retrying job:", error);
+      if (onError) {
+        onError("Error retrying job");
+      }
+    } finally {
+      setIsRetrying(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchJobStatus();
+
+    let pollIntervalId: NodeJS.Timeout | null = null;
+
+    // Start polling for active jobs if autoPoll is enabled
+    if (autoPoll && job && shouldStartPolling(job.status)) {
+      pollIntervalId = setInterval(fetchJobStatus, pollInterval);
+    }
+
+    return () => {
+      if (pollIntervalId) {
+        clearInterval(pollIntervalId);
+      }
+    };
+  }, [fetchJobStatus, job, autoPoll, pollInterval]);
+
+  if (isLoading) {
+    return (
+      <div className={`bg-secondary/20 animate-pulse rounded-lg p-4 ${className}`}>
+        <div className="bg-secondary/40 mb-2 h-4 rounded"></div>
+        <div className="bg-secondary/40 h-2 rounded"></div>
+      </div>
+    );
+  }
+
+  if (!job) {
+    return (
+      <Alert className={className}>
+        <AlertTriangle className="h-4 w-4" />
+        <AlertDescription>Unable to load processing status. Please refresh the page.</AlertDescription>
+      </Alert>
+    );
+  }
+
+  return (
+    <StatusDisplay 
+      job={job} 
+      isRetrying={isRetrying} 
+      onRetry={handleRetry} 
+      className={className}
+      showDetails={showDetails}
+    />
+  );
+}
+
+interface StatusDisplayProps {
+  job: ProcessingStatusResponse;
+  isRetrying: boolean;
+  onRetry: () => void;
+  className: string;
+  showDetails: boolean;
+}
+
+function StatusDisplay({ job, isRetrying, onRetry, className, showDetails }: StatusDisplayProps) {
+  const StatusIcon = STATUS_ICONS[job.status];
+  const isActive = isActiveJob(job.status);
+
+  if (job.status === "completed" && job.result) {
+    return (
+      <div className={`bg-card space-y-3 rounded-lg border p-4 ${className}`}>
+        <div className="rounded-lg border border-green-200 bg-green-50 p-3">
+          <div className="mb-2 flex items-center gap-2 text-green-800">
+            <CheckCircle className="h-4 w-4" />
+            <span className="text-sm font-medium">Video processed successfully!</span>
+          </div>
+          {showDetails && (
+            <div className="space-y-1 text-xs text-green-700">
+              <div>
+                <strong>Title:</strong> {job.result.title}
+              </div>
+              <div>
+                <strong>Platform:</strong> {job.result.platform}
+              </div>
+              <div>
+                <strong>Duration:</strong> {job.result.duration}s
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (job.status === "failed") {
+    return (
+      <div className={`bg-card space-y-3 rounded-lg border p-4 ${className}`}>
+        <div className="rounded-lg border border-red-200 bg-red-50 p-3">
+          <div className="mb-2 flex items-center gap-2 text-red-800">
+            <XCircle className="h-4 w-4" />
+            <span className="text-sm font-medium">Processing failed</span>
+          </div>
+          {showDetails && job.error && (
+            <div className="text-xs text-red-700">
+              <strong>Error:</strong> {job.error.message}
+            </div>
+          )}
+          {job.canRetry && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onRetry}
+              disabled={isRetrying}
+              className="mt-2"
+            >
+              {isRetrying ? "Retrying..." : "Retry"}
+            </Button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`bg-card space-y-3 rounded-lg border p-4 ${className}`}>
+      {/* Status Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className={`rounded-full p-1 ${STATUS_COLORS[job.status]}`}>
+            <StatusIcon className={`h-3 w-3 text-white ${isActive ? "animate-spin" : ""}`} />
+          </div>
+          <span className="text-sm font-medium">{STATUS_LABELS[job.status]}</span>
+          <Badge variant="outline" className="text-xs">
+            {job.jobId.split("_")[1]}
+          </Badge>
+        </div>
+      </div>
+
+      {/* Progress Bar */}
+      {isActive && (
+        <div className="space-y-1">
+          <Progress value={job.progress.percentage} className="h-2" />
+          <div className="text-muted-foreground flex justify-between text-xs">
+            <span>{job.progress.message}</span>
+            <span>{job.progress.percentage}%</span>
+          </div>
+          {job.estimatedTimeRemaining && (
+            <div className="text-muted-foreground text-xs">
+              Estimated time remaining: {Math.ceil(job.estimatedTimeRemaining / 1000)}s
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Cancelled State */}
+      {job.status === "cancelled" && (
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+          <div className="flex items-center gap-2 text-gray-600">
+            <XCircle className="h-4 w-4" />
+            <span className="text-sm">Processing was cancelled</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+} 
