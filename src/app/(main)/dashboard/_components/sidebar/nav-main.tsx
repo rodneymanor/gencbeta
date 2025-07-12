@@ -39,7 +39,7 @@ const NavItem = ({
 }) => {
   return (
     <SidebarMenuItem>
-      <div className="flex flex-col items-center gap-2">
+      <div className="flex flex-col items-center gap-1">
         {/* Icon container with background */}
         <Link href={item.url} className="group">
           <div className="bg-background-color-300 flex h-8 w-8 items-center justify-center rounded-md px-2 py-2 transition-all duration-200 hover:bg-[oklch(var(--background-color-300)/0.8)]">
