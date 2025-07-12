@@ -30,6 +30,31 @@ const IsComingSoon = () => (
   <span className="ml-auto rounded-md bg-gray-200 px-2 py-1 text-xs dark:text-gray-800">Soon</span>
 );
 
+// Label mapping function for sidebar icons
+const getIconLabel = (title: string) => {
+  const labelMap: Record<string, string> = {
+    // Home icon
+    Home: "Home",
+    Dashboard: "Home",
+    // Notes and script section icon
+    Notes: "Library",
+    Scripts: "Library",
+    Library: "Library",
+    Create: "Library",
+    // Research area icon
+    Research: "Collections",
+    Collections: "Collections",
+    // Microphone icon (Brand)
+    "My Brand": "Brand",
+    Brand: "Brand",
+    Profile: "Brand",
+    Assets: "Brand",
+    // Settings
+    Settings: "Settings",
+  };
+  return labelMap[title] || title;
+};
+
 const NavItem = ({
   item,
   isActive,
@@ -40,22 +65,7 @@ const NavItem = ({
   onCollectionCreated?: () => void;
 }) => {
   const isBrandItem = item.title === "My Brand";
-
-  // Custom labels for each section
-  const getLabel = (title: string) => {
-    switch (title) {
-      case "Dashboard":
-        return "Home";
-      case "Create":
-        return "Library";
-      case "Research":
-        return "Collections";
-      case "Assets":
-        return "Brand";
-      default:
-        return title;
-    }
-  };
+  const iconLabel = getIconLabel(item.title);
 
   return (
     <SidebarMenuItem key={item.title}>
@@ -65,10 +75,12 @@ const NavItem = ({
             <SidebarMenuButton
               tooltip={item.title}
               isActive={isActive(item.url, item.subItems)}
-              className="flex h-auto min-h-[60px] flex-col items-center justify-center gap-1 p-2"
+              className="flex min-h-[60px] flex-col items-center gap-1 px-2 py-3"
             >
               {item.icon && <item.icon className="h-5 w-5 transition-transform hover:scale-110" />}
-              <span className="text-xs font-medium group-data-[collapsible=icon]:sr-only">{getLabel(item.title)}</span>
+              <span className="text-muted-foreground text-xs leading-tight font-medium group-data-[collapsible=icon]:sr-only group-data-[collapsible=icon]:block">
+                {iconLabel}
+              </span>
               {isBrandItem && <BrandProfileIndicator />}
               <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[collapsible=icon]:ml-0 group-data-[collapsible=icon]:hidden hover:scale-110" />
             </SidebarMenuButton>
@@ -103,11 +115,13 @@ const NavItem = ({
             asChild
             isActive={isActive(item.url)}
             tooltip={item.title}
-            className="flex h-auto min-h-[60px] flex-col items-center justify-center gap-1 p-2"
+            className="flex min-h-[60px] flex-col items-center gap-1 px-2 py-3"
           >
             <Link href={item.url} target={item.newTab ? "_blank" : undefined}>
               {item.icon && <item.icon className="h-5 w-5 transition-transform hover:scale-110" />}
-              <span className="text-xs font-medium group-data-[collapsible=icon]:sr-only">{getLabel(item.title)}</span>
+              <span className="text-muted-foreground text-xs leading-tight font-medium group-data-[collapsible=icon]:sr-only group-data-[collapsible=icon]:block">
+                {iconLabel}
+              </span>
               {isBrandItem && <BrandProfileIndicator />}
             </Link>
           </SidebarMenuButton>
