@@ -49,7 +49,7 @@ export function InstagramVideoGrid({
   return (
     <div
       className={cn(
-        'grid grid-cols-4 gap-1',
+        'grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2',
         className,
       )}
     >
@@ -61,7 +61,7 @@ export function InstagramVideoGrid({
             key={(video.id ?? 'vid') + '-' + idx}
             type="button"
             onClick={() => onVideoClick?.(video, idx)}
-            className="group relative aspect-[9/16] overflow-hidden rounded-sm bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="group relative aspect-[9/16] w-full overflow-hidden rounded-sm bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             {/* Thumbnail */}
             <Image

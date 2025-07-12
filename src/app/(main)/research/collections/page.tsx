@@ -109,7 +109,7 @@ const CollectionBadge = memo(
           } min-h-[36px] rounded-md border-0 px-4 py-2.5 text-sm shadow-xs hover:shadow-sm`}
           onClick={isTransitioning ? undefined : onClick}
         >
-          {collection?.favorite && <Bookmark className="h-4 w-4 text-yellow-400 mr-1" />}
+          {collection?.favorite && <Bookmark className="mr-1 h-4 w-4 text-yellow-400" />}
           {collection
             ? `${collection.title.length > 30 ? collection.title.slice(0, 27) + "…" : collection.title} (${collection.videoCount})`
             : `All Videos (${videoCount})`}
@@ -422,9 +422,9 @@ function CollectionsPageContent() {
       if (collectionId === previousCollectionRef.current || isTransitioning) return;
 
       // Handle favorites tab
-      if (collectionId === 'favorites') {
+      if (collectionId === "favorites") {
         // Filter videos to show only favorited ones
-        const favoritedVideos = videos.filter(video => video.favorite);
+        const favoritedVideos = videos.filter((video) => video.favorite);
         setVideos(favoritedVideos);
         return;
       }
@@ -458,13 +458,10 @@ function CollectionsPageContent() {
   );
 
   // Thumbnail click handler for new grid
-  const handleThumbnailClick = useCallback(
-    (_video: unknown, index: number) => {
-      setCurrentVideoIndex(index);
-      setLightboxOpen(true);
-    },
-    [],
-  );
+  const handleThumbnailClick = useCallback((_video: unknown, index: number) => {
+    setCurrentVideoIndex(index);
+    setLightboxOpen(true);
+  }, []);
 
   // Role-based access control
   useEffect(() => {
@@ -712,39 +709,38 @@ function CollectionsPageContent() {
     addVideoDialogRef.current?.click();
   }, []);
 
-    // Video favoriting handler
-  const handleVideoFavorite = useCallback(async (video: any, index: number) => {
-    if (!user || !video.id) return;
+  // Video favoriting handler
+  const handleVideoFavorite = useCallback(
+    async (video: any, index: number) => {
+      if (!user || !video.id) return;
 
-    try {
-      // Toggle favorite state
-      const newFavoriteState = !video.favorite;
+      try {
+        // Toggle favorite state
+        const newFavoriteState = !video.favorite;
 
-      // Update video in state optimistically
-      setVideos(prev => prev.map((v, i) =>
-        i === index ? { ...v, favorite: newFavoriteState } : v
-      ));
+        // Update video in state optimistically
+        setVideos((prev) => prev.map((v, i) => (i === index ? { ...v, favorite: newFavoriteState } : v)));
 
-      await fetch(`/api/video/${video.id}/favorite`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', authorization: `Bearer ${await user.getIdToken()}` },
-        body: JSON.stringify({ favorite: newFavoriteState }),
-      });
+        await fetch(`/api/video/${video.id}/favorite`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json", authorization: `Bearer ${await user.getIdToken()}` },
+          body: JSON.stringify({ favorite: newFavoriteState }),
+        });
 
-      toast.success(newFavoriteState ? "Video added to favorites" : "Video removed from favorites");
-    } catch (error) {
-      console.error("Error toggling video favorite:", error);
-      // Revert optimistic update on error
-      setVideos(prev => prev.map((v, i) =>
-        i === index ? { ...v, favorite: !video.favorite } : v
-      ));
-      toast.error("Failed to update favorite status");
-    }
-  }, [user]);
+        toast.success(newFavoriteState ? "Video added to favorites" : "Video removed from favorites");
+      } catch (error) {
+        console.error("Error toggling video favorite:", error);
+        // Revert optimistic update on error
+        setVideos((prev) => prev.map((v, i) => (i === index ? { ...v, favorite: !video.favorite } : v)));
+        toast.error("Failed to update favorite status");
+      }
+    },
+    [user],
+  );
 
   // Filter, search, and sort videos
   const filteredVideos = useMemo(() => {
-    let result = [...videos];
+    const result = [...videos];
     // Filter
     // Search
     // Sort
@@ -764,11 +760,11 @@ function CollectionsPageContent() {
           {/* Primary Content Area */}
           <div className="flex items-start justify-between gap-4">
             {/* Left: Navigation */}
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex flex-shrink-0 items-center gap-2">
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-11 w-11 text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground h-11 w-11"
                 aria-label="Menu"
               >
                 <Menu className="h-5 w-5" />
@@ -776,15 +772,17 @@ function CollectionsPageContent() {
             </div>
 
             {/* Title and Description */}
-            <div className="flex-1 min-w-0 text-center">
-              <div className="flex items-center justify-center gap-3 mb-2">
+            <div className="min-w-0 flex-1 text-center">
+              <div className="mb-2 flex items-center justify-center gap-3">
                 <h1 className="text-2xl font-bold tracking-tight">
                   {selectedCollection ? (
                     <InlineEditableField
                       value={selectedCollection.title}
                       onSave={async (newTitle) => {
                         if (!user) return;
-                        await CollectionsService.updateCollection(user.uid, selectedCollection.id!, { title: newTitle });
+                        await CollectionsService.updateCollection(user.uid, selectedCollection.id!, {
+                          title: newTitle,
+                        });
                         toast.success("Collection name updated");
                         handleCollectionUpdated();
                       }}
@@ -810,8 +808,8 @@ function CollectionsPageContent() {
                 )}
               </div>
               <p
-                 className="text-muted-foreground mx-auto max-w-[500px] h-[48px] overflow-hidden line-clamp-2"
-                 title={selectedCollection ? selectedCollection.description ?? '' : pageDescription}
+                className="text-muted-foreground mx-auto line-clamp-2 min-h-[48px] max-w-[500px] overflow-hidden"
+                title={selectedCollection ? (selectedCollection.description ?? "") : pageDescription}
               >
                 {selectedCollection ? (
                   <InlineEditableField
@@ -828,7 +826,7 @@ function CollectionsPageContent() {
                     type="textarea"
                     label="Collection Description"
                     maxLength={500}
-                    className="block max-w-[500px] h-[48px] overflow-hidden line-clamp-2"
+                    className="line-clamp-2 block min-h-[48px] max-w-[500px] overflow-hidden"
                     placeholder="This is the place to add your videos."
                   />
                 ) : (
@@ -838,7 +836,7 @@ function CollectionsPageContent() {
             </div>
 
             {/* Action Buttons - Right Side */}
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex flex-shrink-0 items-center gap-2">
               {/* Favorite Button - Larger touch target */}
               <Button
                 variant="ghost"
@@ -846,25 +844,17 @@ function CollectionsPageContent() {
                 disabled={!selectedCollection}
                 onClick={async () => {
                   if (!user || !selectedCollection?.id) return;
-                  await CollectionsService.setFavorite(
-                    user.uid,
-                    selectedCollection.id,
-                    !selectedCollection.favorite,
-                  );
+                  await CollectionsService.setFavorite(user.uid, selectedCollection.id, !selectedCollection.favorite);
                   handleCollectionUpdated();
                 }}
                 className={`h-11 w-11 transition-colors ${
                   selectedCollection?.favorite
                     ? "text-yellow-500 hover:text-yellow-600"
                     : "text-muted-foreground hover:text-foreground"
-                } ${!selectedCollection ? "opacity-0 pointer-events-none" : ""}`}
-                aria-label={
-                  selectedCollection?.favorite ? "Remove from favorites" : "Add to favorites"
-                }
+                } ${!selectedCollection ? "pointer-events-none opacity-0" : ""}`}
+                aria-label={selectedCollection?.favorite ? "Remove from favorites" : "Add to favorites"}
               >
-                <Bookmark
-                  className={`h-5 w-5 ${selectedCollection?.favorite ? "fill-current" : ""}`}
-                />
+                <Bookmark className={`h-5 w-5 ${selectedCollection?.favorite ? "fill-current" : ""}`} />
               </Button>
 
               {/* Admin Controls */}
@@ -900,17 +890,21 @@ function CollectionsPageContent() {
 
         <main className="flex-1">
           {!manageMode ? (
-            <div className="mx-auto max-w-5xl">
+            <div className="mx-auto w-[935px]">
               <InstagramVideoGrid
                 videos={videos}
                 onVideoClick={handleThumbnailClick}
                 onFavorite={handleVideoFavorite}
-                renderBadge={(video, idx) => (((video as any).createdAt && Date.now() - (video as any).createdAt < 1000 * 60 * 60 * 24) ? <Badge className="ml-2 bg-green-500 text-white">New</Badge> : null)}
+                renderBadge={(video, idx) =>
+                  (video as any).createdAt && Date.now() - (video as any).createdAt < 1000 * 60 * 60 * 24 ? (
+                    <Badge className="ml-2 bg-green-500 text-white">New</Badge>
+                  ) : null
+                }
               />
               {/* Sentinel */}
               <div ref={loadMoreRef} className="h-8 w-full" />
               {isLoadingMore && (
-                <div className="flex items-center justify-center py-4 text-sm text-muted-foreground">Loading…</div>
+                <div className="text-muted-foreground flex items-center justify-center py-4 text-sm">Loading…</div>
               )}
             </div>
           ) : (
@@ -948,14 +942,14 @@ function CollectionsPageContent() {
       <FabAction onAddCollection={handleAddCollection} onAddVideo={handleAddVideo} />
 
       <CreateCollectionDialog onCollectionCreated={handleCollectionUpdated}>
-        <button ref={createCollectionDialogRef} style={{ display: 'none' }} />
+        <button ref={createCollectionDialogRef} style={{ display: "none" }} />
       </CreateCollectionDialog>
 
       <AddVideoDialog
         collections={collections.filter((c) => c.id).map((c) => ({ id: c.id!, title: c.title }))}
         onVideoAdded={handleVideoAdded}
       >
-        <button ref={addVideoDialogRef} style={{ display: 'none' }} />
+        <button ref={addVideoDialogRef} style={{ display: "none" }} />
       </AddVideoDialog>
     </div>
   );
