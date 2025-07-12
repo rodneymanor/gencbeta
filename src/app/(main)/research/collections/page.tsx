@@ -753,7 +753,7 @@ function CollectionsPageContent() {
       <div className="mx-auto flex h-full max-w-7xl flex-col items-center space-y-6 p-4 md:p-6">
         {/* Header skeleton */}
         <div className="flex-1">
-          <header className="mb-6 space-y-4">
+          <header className="mb-2 space-y-4">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1 text-center">
                 <div className="mb-2 flex items-center justify-center gap-3">
@@ -807,7 +807,7 @@ function CollectionsPageContent() {
     <div className="mx-auto flex h-full max-w-7xl flex-col items-center space-y-6 p-4 md:p-6">
       {/* Left side: Main content (Video Grid) */}
       <div className="flex-1">
-        <header className="mb-6 space-y-4">
+        <header className="mb-2 space-y-4">
           {/* Primary Content Area */}
           <div className="flex items-start justify-between gap-4">
             {/* Title and Description */}
