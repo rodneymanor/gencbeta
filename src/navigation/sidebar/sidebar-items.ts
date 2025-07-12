@@ -8,6 +8,7 @@ import {
   Chrome,
   Wrench,
   Pen,
+  Home,
   type LucideIcon,
 } from "lucide-react";
 
@@ -35,7 +36,7 @@ export interface NavGroup {
 export const sidebarItems: NavGroup[] = [
   {
     id: 1,
-    items: [{ title: "Dashboard", url: "/dashboard", icon: Sparkles }],
+    items: [{ title: "Dashboard", url: "/dashboard", icon: Home }],
   },
   {
     id: 2,
