@@ -70,12 +70,12 @@ export function FabAction({ onAddCollection, onAddVideo, className, disabled = f
         )}
         style={{ zIndex: 100 }}
       >
-        <div className="py-2">
+        <div className="py-1">
           {dropdownItems.map((item, index) => (
             <button
               key={index}
               onClick={item.onClick}
-              className="flex w-full items-center gap-3 rounded-md px-4 py-3 text-left text-gray-700 transition-colors duration-200 hover:bg-[var(--sidebar-background)] hover:text-gray-900"
+              className="mx-1 flex w-full items-center gap-3 rounded-md px-4 py-3 text-left text-gray-700 transition-colors duration-200 hover:bg-[var(--sidebar-background)] hover:text-gray-900"
             >
               <span className="text-gray-500">{item.icon}</span>
               <span className="text-sm font-medium">{item.label}</span>
