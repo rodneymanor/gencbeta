@@ -76,9 +76,9 @@ export function NavMain({ items, onCollectionCreated }: NavMainProps) {
                 {/* Icon container with background */}
                 <Link href="/dashboard/scripts/new" className="group">
                   <div
-                    className="bg-background-color-300 flex h-8 w-8 items-center justify-center rounded-md px-2 py-2 shadow-md transition-all duration-200 hover:bg-[oklch(var(--background-color-300)/0.8)]"
+                    className="bg-background-color-300 flex h-8 w-8 items-center justify-center rounded-md px-2 py-2 transition-all duration-200 hover:bg-[oklch(var(--background-color-300)/0.8)]"
                     style={{
-                      backgroundColor: "oklch(var(--background-color-300)/var(--tw-bg-opacity))",
+                      backgroundColor: "oklch(var(--background-color-300)/0.8)",
                     }}
                   >
                     <Zap className="h-5 w-5 transition-transform hover:scale-110" />
