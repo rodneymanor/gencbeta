@@ -1,8 +1,8 @@
 "use client";
 
 /* eslint-disable max-lines, complexity */
-// Prevent Next.js from attempting to statically prerender a client-side page
-export const dynamic = "force-dynamic";
+// Removed dynamic export to fix React static flag error
+// export const dynamic = "force-dynamic";
 
 import { useState, useEffect, useCallback, useMemo, useTransition, useRef, memo, Suspense } from "react";
 
@@ -884,11 +884,12 @@ function CollectionsPageContent() {
                 videos={videos}
                 onVideoClick={handleThumbnailClick}
                 onFavorite={handleVideoFavorite}
-                renderBadge={(video, idx) =>
-                  (video as any).createdAt && Date.now() - (video as any).createdAt < 1000 * 60 * 60 * 24 ? (
+                renderBadge={(video, idx) => {
+                  const videoWithDate = video as { createdAt?: number };
+                  return videoWithDate.createdAt && Date.now() - videoWithDate.createdAt < 1000 * 60 * 60 * 24 ? (
                     <Badge className="ml-2 bg-green-500 text-white">New</Badge>
-                  ) : null
-                }
+                  ) : null;
+                }}
               />
               {/* Sentinel */}
               <div ref={loadMoreRef} className="h-8 w-full" />
@@ -946,5 +947,9 @@ function CollectionsPageContent() {
 
 // Main export
 export default function CollectionsPage() {
-  return <CollectionsPageContent />;
+  return (
+    <Suspense fallback={<div className="bg-background min-h-screen" />}>
+      <CollectionsPageContent />
+    </Suspense>
+  );
 }
