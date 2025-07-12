@@ -36,7 +36,7 @@ export interface NavGroup {
 export const sidebarItems: NavGroup[] = [
   {
     id: 1,
-    items: [{ title: "Dashboard", url: "/dashboard", icon: Home }],
+    items: [{ title: "Home", url: "/dashboard", icon: Home }],
   },
   {
     id: 2,
@@ -56,7 +56,7 @@ export const sidebarItems: NavGroup[] = [
     id: 3,
     items: [
       {
-        title: "Research",
+        title: "Collections",
         url: "/research/collections",
         icon: FolderOpen,
         subItems: [{ title: "Collections", url: "/research/collections", icon: FolderOpen }],
@@ -67,7 +67,7 @@ export const sidebarItems: NavGroup[] = [
     id: 4,
     items: [
       {
-        title: "Assets",
+        title: "Brand",
         url: "/dashboard/voices",
         icon: Mic,
         subItems: [
