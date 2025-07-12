@@ -759,18 +759,6 @@ function CollectionsPageContent() {
         <header className="mb-6 space-y-4">
           {/* Primary Content Area */}
           <div className="flex items-start justify-between gap-4">
-            {/* Left: Navigation */}
-            <div className="flex flex-shrink-0 items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-muted-foreground hover:text-foreground h-11 w-11"
-                aria-label="Menu"
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
-            </div>
-
             {/* Title and Description */}
             <div className="min-w-0 flex-1 text-center">
               <div className="mb-2 flex items-center justify-center gap-3">
