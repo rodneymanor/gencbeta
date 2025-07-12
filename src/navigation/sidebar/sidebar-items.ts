@@ -25,7 +25,6 @@ export interface NavMainItem {
   icon?: LucideIcon;
   subItems?: NavSubItem[];
   newTab?: boolean;
-  displayLabel?: string; // Small label shown beneath the icon
 }
 
 export interface NavGroup {
@@ -37,7 +36,7 @@ export interface NavGroup {
 export const sidebarItems: NavGroup[] = [
   {
     id: 1,
-    items: [{ title: "Dashboard", url: "/dashboard", icon: Home, displayLabel: "Home" }],
+    items: [{ title: "Dashboard", url: "/dashboard", icon: Home }],
   },
   {
     id: 2,
@@ -46,7 +45,6 @@ export const sidebarItems: NavGroup[] = [
         title: "Create",
         url: "/dashboard/scripts",
         icon: FileText,
-        displayLabel: "Library",
         subItems: [
           { title: "Scripts", url: "/dashboard/scripts", icon: FileText },
           { title: "Notes", url: "/dashboard/capture/notes", icon: Pen },
@@ -61,7 +59,6 @@ export const sidebarItems: NavGroup[] = [
         title: "Research",
         url: "/research/collections",
         icon: FolderOpen,
-        displayLabel: "Collections",
         subItems: [{ title: "Collections", url: "/research/collections", icon: FolderOpen }],
       },
     ],
@@ -73,7 +70,6 @@ export const sidebarItems: NavGroup[] = [
         title: "Assets",
         url: "/dashboard/voices",
         icon: Mic,
-        displayLabel: "Brand",
         subItems: [
           { title: "Voices", url: "/dashboard/voices", icon: Mic },
           { title: "My Brand", url: "/dashboard/my-brand", icon: Sparkles },
@@ -90,7 +86,6 @@ export const sidebarItems: NavGroup[] = [
         title: "Settings",
         url: "/dashboard/settings",
         icon: Wrench,
-        displayLabel: "Settings",
         subItems: [
           { title: "App Settings", url: "/dashboard/settings", icon: Wrench },
           { title: "Chrome Extension", url: "/dashboard/tools/chrome-extension", icon: Chrome },

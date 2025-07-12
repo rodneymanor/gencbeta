@@ -30,24 +30,6 @@ const IsComingSoon = () => (
   <span className="ml-auto rounded-md bg-gray-200 px-2 py-1 text-xs dark:text-gray-800">Soon</span>
 );
 
-const IconWithLabel = ({ item, isBrandItem }: { item: NavMainItem; isBrandItem: boolean }) => (
-  <>
-    <div className="flex items-center justify-center">
-      {item.icon && (
-        <div className="hover:bg-sidebar-accent rounded-md p-2 transition-colors">
-          <item.icon className="transition-transform hover:scale-110" />
-        </div>
-      )}
-      {isBrandItem && <BrandProfileIndicator />}
-    </div>
-    {item.displayLabel && (
-      <span className="text-muted-foreground text-center text-xs group-data-[collapsible=icon]:sr-only">
-        {item.displayLabel}
-      </span>
-    )}
-  </>
-);
-
 const NavItem = ({
   item,
   isActive,
@@ -59,30 +41,20 @@ const NavItem = ({
 }) => {
   const isBrandItem = item.title === "My Brand";
 
-  if (item.subItems) {
-    return (
-      <SidebarMenuItem key={item.title}>
+  return (
+    <SidebarMenuItem key={item.title}>
+      {item.subItems ? (
         <HoverCard openDelay={150} closeDelay={300}>
           <HoverCardTrigger asChild>
             <SidebarMenuButton
+              disabled={item.comingSoon}
               tooltip={item.title}
               isActive={isActive(item.url, item.subItems)}
-              className="group flex flex-col items-center gap-1 p-2 hover:bg-transparent"
             >
-              <div className="flex items-center justify-center">
-                {item.icon && (
-                  <div className="hover:bg-sidebar-accent rounded-md p-2 transition-colors">
-                    <item.icon className="transition-transform hover:scale-110" />
-                  </div>
-                )}
-                {isBrandItem && <BrandProfileIndicator />}
-                <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[collapsible=icon]:ml-0 group-data-[collapsible=icon]:hidden hover:scale-110" />
-              </div>
-              {item.displayLabel && (
-                <span className="text-muted-foreground text-center text-xs group-data-[collapsible=icon]:sr-only">
-                  {item.displayLabel}
-                </span>
-              )}
+              {item.icon && <item.icon className="transition-transform hover:scale-110" />}
+              <span className="group-data-[collapsible=icon]:sr-only">{item.title}</span>
+              {isBrandItem && <BrandProfileIndicator className="group-data-[collapsible=icon]:hidden" />}
+              <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[collapsible=icon]:ml-0 group-data-[collapsible=icon]:hidden hover:scale-110" />
             </SidebarMenuButton>
           </HoverCardTrigger>
           <HoverCardContent className="w-48 space-y-1 p-2" side="right" align="start" sideOffset={8}>
@@ -91,11 +63,13 @@ const NavItem = ({
                 key={subItem.title}
                 asChild
                 className="w-full justify-start"
+                aria-disabled={subItem.comingSoon}
                 isActive={isActive(subItem.url)}
               >
                 <Link href={subItem.url} target={subItem.newTab ? "_blank" : undefined}>
                   {subItem.icon && <subItem.icon className="h-4 w-4 transition-transform hover:scale-110" />}
                   <span>{subItem.title}</span>
+                  {subItem.comingSoon && <IsComingSoon className="group-data-[collapsible=icon]:hidden" />}
                 </Link>
               </SidebarMenuSubButton>
             ))}
@@ -109,25 +83,18 @@ const NavItem = ({
             )}
           </HoverCardContent>
         </HoverCard>
-      </SidebarMenuItem>
-    );
-  }
-
-  return (
-    <SidebarMenuItem key={item.title}>
-      <CustomTooltip content={item.title}>
-        <SidebarMenuButton
-          asChild
-          isActive={isActive(item.url)}
-          tooltip={item.title}
-          className="group flex flex-col items-center gap-1 p-2 hover:bg-transparent"
-          aria-label={item.displayLabel ?? item.title}
-        >
-          <Link href={item.url} target={item.newTab ? "_blank" : undefined}>
-            <IconWithLabel item={item} isBrandItem={isBrandItem} />
-          </Link>
-        </SidebarMenuButton>
-      </CustomTooltip>
+      ) : (
+        <CustomTooltip content={item.title}>
+          <SidebarMenuButton asChild aria-disabled={item.comingSoon} isActive={isActive(item.url)} tooltip={item.title}>
+            <Link href={item.url} target={item.newTab ? "_blank" : undefined}>
+              {item.icon && <item.icon className="transition-transform hover:scale-110" />}
+              <span className="group-data-[collapsible=icon]:sr-only">{item.title}</span>
+              {isBrandItem && <BrandProfileIndicator className="group-data-[collapsible=icon]:hidden" />}
+              {item.comingSoon && <IsComingSoon className="group-data-[collapsible=icon]:hidden" />}
+            </Link>
+          </SidebarMenuButton>
+        </CustomTooltip>
+      )}
     </SidebarMenuItem>
   );
 };
