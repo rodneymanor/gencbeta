@@ -33,7 +33,11 @@ const IsComingSoon = () => (
 const IconWithLabel = ({ item, isBrandItem }: { item: NavMainItem; isBrandItem: boolean }) => (
   <>
     <div className="flex items-center justify-center">
-      {item.icon && <item.icon className="transition-transform hover:scale-110" />}
+      {item.icon && (
+        <div className="hover:bg-sidebar-accent rounded-md p-2 transition-colors">
+          <item.icon className="transition-transform hover:scale-110" />
+        </div>
+      )}
       {isBrandItem && <BrandProfileIndicator />}
     </div>
     {item.displayLabel && (
@@ -63,10 +67,14 @@ const NavItem = ({
             <SidebarMenuButton
               tooltip={item.title}
               isActive={isActive(item.url, item.subItems)}
-              className="flex flex-col items-center gap-1 p-2"
+              className="group flex flex-col items-center gap-1 p-2 hover:bg-transparent"
             >
               <div className="flex items-center justify-center">
-                {item.icon && <item.icon className="transition-transform hover:scale-110" />}
+                {item.icon && (
+                  <div className="hover:bg-sidebar-accent rounded-md p-2 transition-colors">
+                    <item.icon className="transition-transform hover:scale-110" />
+                  </div>
+                )}
                 {isBrandItem && <BrandProfileIndicator />}
                 <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[collapsible=icon]:ml-0 group-data-[collapsible=icon]:hidden hover:scale-110" />
               </div>
@@ -112,7 +120,7 @@ const NavItem = ({
           asChild
           isActive={isActive(item.url)}
           tooltip={item.title}
-          className="flex flex-col items-center gap-1 p-2"
+          className="group flex flex-col items-center gap-1 p-2 hover:bg-transparent"
           aria-label={item.displayLabel ?? item.title}
         >
           <Link href={item.url} target={item.newTab ? "_blank" : undefined}>
