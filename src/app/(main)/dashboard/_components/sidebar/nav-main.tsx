@@ -33,54 +33,24 @@ const IsComingSoon = () => (
 const NavItem = ({
   item,
   isActive,
-  onCollectionCreated,
 }: {
   item: NavMainItem;
   isActive: (url: string, subItems?: NavMainItem["subItems"]) => boolean;
-  onCollectionCreated?: () => void;
 }) => {
-  const isBrandItem = item.title === "My Brand";
-
   return (
     <SidebarMenuItem>
-      {item.subItems ? (
-        <HoverCard openDelay={150}>
-          <HoverCardTrigger asChild>
-            <SidebarMenuButton
-              asChild
-              className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex h-auto flex-col items-center justify-center gap-2 overflow-visible px-2 py-3"
-              data-active={isActive(item.url, item.subItems)}
-            >
-              <div className="flex w-full flex-col items-center justify-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center">
-                  {item.icon && <item.icon className="h-5 w-5 transition-transform hover:scale-110" />}
-                </div>
-                <span className="overflow-visible text-center text-xs font-medium whitespace-nowrap">{item.title}</span>
-                {isBrandItem && <BrandProfileIndicator />}
-              </div>
-            </SidebarMenuButton>
-          </HoverCardTrigger>
-          {/* ... rest of hover card content */}
-        </HoverCard>
-      ) : (
-        <SidebarMenuButton
-          asChild
-          className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex h-auto flex-col items-center justify-center gap-2 overflow-visible px-2 py-3"
-          data-active={isActive(item.url)}
-        >
-          <Link
-            href={item.url}
-            target={item.newTab ? "_blank" : undefined}
-            className="flex w-full flex-col items-center justify-center gap-2"
-          >
-            <div className="flex h-8 w-8 items-center justify-center">
-              {item.icon && <item.icon className="h-5 w-5 transition-transform hover:scale-110" />}
-            </div>
-            <span className="overflow-visible text-center text-xs font-medium whitespace-nowrap">{item.title}</span>
-            {isBrandItem && <BrandProfileIndicator />}
-          </Link>
-        </SidebarMenuButton>
-      )}
+      <SidebarMenuButton
+        asChild
+        className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex h-auto flex-col items-center justify-center gap-2 !overflow-visible overflow-visible px-2 py-3"
+        data-active={isActive(item.url)}
+      >
+        <Link href={item.url} className="flex w-full flex-col items-center justify-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-md">
+            {item.icon && <item.icon className="h-5 w-5 transition-transform hover:scale-110" />}
+          </div>
+          <span className="overflow-visible text-center text-xs font-medium whitespace-nowrap">{item.title}</span>
+        </Link>
+      </SidebarMenuButton>
     </SidebarMenuItem>
   );
 };
@@ -104,7 +74,7 @@ export function NavMain({ items, onCollectionCreated }: NavMainProps) {
               <SidebarMenuButton
                 asChild
                 tooltip="Write Script"
-                className="text-secondary-foreground hover:text-secondary-foreground active:text-secondary-foreground flex h-auto flex-col items-center justify-center gap-2 overflow-visible px-2 py-3 shadow-md transition-[width,height,padding,box-shadow] duration-200 ease-linear"
+                className="text-secondary-foreground hover:text-secondary-foreground active:text-secondary-foreground flex h-auto flex-col items-center justify-center gap-2 !overflow-visible overflow-visible px-2 py-3 shadow-md transition-[width,height,padding,box-shadow] duration-200 ease-linear"
                 style={
                   {
                     "--tw-bg-opacity": 1,
@@ -133,12 +103,7 @@ export function NavMain({ items, onCollectionCreated }: NavMainProps) {
           <SidebarGroupContent className="flex flex-col gap-2">
             <SidebarMenu>
               {group.items.map((item) => (
-                <NavItem
-                  key={item.title}
-                  item={item}
-                  isActive={isItemActive}
-                  onCollectionCreated={onCollectionCreated}
-                />
+                <NavItem key={item.title} item={item} isActive={isItemActive} />
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
