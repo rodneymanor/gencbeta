@@ -78,7 +78,6 @@ const NavItem = ({
             </div>
             <span className="overflow-visible text-center text-xs font-medium whitespace-nowrap">{item.title}</span>
             {isBrandItem && <BrandProfileIndicator />}
-            {item.comingSoon && <IsComingSoon />}
           </Link>
         </SidebarMenuButton>
       )}
