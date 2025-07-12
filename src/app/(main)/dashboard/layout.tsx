@@ -13,12 +13,12 @@ import DashboardClientLayout from "./dashboard-client-layout";
 
 export default function Layout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={false}>
       <SmartSidebarProvider>
         <VoiceProvider>
           <TopBarProvider>
             <div className="flex h-screen w-full">
-              <AppSidebar variant="inset" collapsible="none" />
+              <AppSidebar variant="inset" collapsible="icon" />
               <SidebarInset className="flex w-screen flex-1">
                 {/* Flexible Top Bar wrapped in Suspense to avoid build errors when using useSearchParams */}
                 <Suspense fallback={null}>

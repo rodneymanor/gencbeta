@@ -55,9 +55,7 @@ const NavItem = ({
                 <div className="flex h-8 w-8 items-center justify-center">
                   {item.icon && <item.icon className="h-5 w-5 transition-transform hover:scale-110" />}
                 </div>
-                <span className="line-clamp-1 w-full text-center text-xs font-medium group-data-[collapsible=icon]:sr-only">
-                  {item.title}
-                </span>
+                <span className="line-clamp-1 w-full text-center text-xs font-medium">{item.title}</span>
                 {isBrandItem && <BrandProfileIndicator />}
               </div>
             </SidebarMenuButton>
@@ -78,9 +76,7 @@ const NavItem = ({
             <div className="flex h-8 w-8 items-center justify-center">
               {item.icon && <item.icon className="h-5 w-5 transition-transform hover:scale-110" />}
             </div>
-            <span className="line-clamp-1 w-full text-center text-xs font-medium group-data-[collapsible=icon]:sr-only">
-              {item.title}
-            </span>
+            <span className="line-clamp-1 w-full text-center text-xs font-medium">{item.title}</span>
             {isBrandItem && <BrandProfileIndicator />}
             {item.comingSoon && <IsComingSoon />}
           </Link>
