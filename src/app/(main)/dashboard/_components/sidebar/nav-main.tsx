@@ -68,12 +68,12 @@ export function NavMain({ items, onCollectionCreated }: NavMainProps) {
 
   return (
     <>
+      {/* Write Script Button - Commented Out
       <SidebarGroup>
         <SidebarGroupContent className="flex flex-col gap-2">
           <SidebarMenu>
             <SidebarMenuItem>
-              <div className="gap-.5 flex flex-col items-center">
-                {/* Icon container with background */}
+              <div className="flex flex-col items-center gap-.5">
                 <Link href="/dashboard/scripts/new" className="group">
                   <div
                     className="bg-background-color-300 flex h-8 w-8 items-center justify-center rounded-md px-2 py-2 transition-all duration-200 hover:bg-[oklch(var(--background-color-300)/0.8)]"
@@ -84,8 +84,6 @@ export function NavMain({ items, onCollectionCreated }: NavMainProps) {
                     <Zap className="h-5 w-5 transition-transform hover:scale-110" />
                   </div>
                 </Link>
-
-                {/* Label outside the background container */}
                 <span className="text-secondary-foreground text-center text-xs font-medium whitespace-nowrap">
                   Write Script
                 </span>
@@ -94,6 +92,7 @@ export function NavMain({ items, onCollectionCreated }: NavMainProps) {
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>
+      */}
       {items.map((group) => (
         <SidebarGroup key={group.id}>
           {group.label && <SidebarGroupLabel>{group.label}</SidebarGroupLabel>}
