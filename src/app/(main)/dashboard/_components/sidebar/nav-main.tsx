@@ -39,20 +39,19 @@ const NavItem = ({
 }) => {
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton
-        asChild
-        className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex h-auto flex-col items-center justify-center gap-2 !overflow-visible overflow-visible px-2 py-3"
-        data-active={isActive(item.url)}
-      >
-        <Link href={item.url} className="flex w-full flex-col items-center justify-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md">
-            {item.icon && <item.icon className="h-5 w-5 transition-transform hover:scale-110" />}
+      <div className="flex flex-col items-center gap-2">
+        {/* Icon container with background */}
+        <Link href={item.url} className="group">
+          <div className="bg-background-color-300 flex h-8 w-8 items-center justify-center rounded-md px-2 py-2 transition-all duration-200 hover:bg-[oklch(var(--background-color-300)/0.8)]">
+            {item.icon && <item.icon className="h-5 w-5" />}
           </div>
-          <span className="!text-overflow-clip !overflow-visible overflow-visible text-center text-xs font-medium whitespace-nowrap">
-            {item.title}
-          </span>
         </Link>
-      </SidebarMenuButton>
+
+        {/* Label outside the background container */}
+        <span className="text-secondary-foreground text-center text-xs font-medium whitespace-nowrap">
+          {item.title}
+        </span>
+      </div>
     </SidebarMenuItem>
   );
 };
