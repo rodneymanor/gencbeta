@@ -847,7 +847,7 @@ function CollectionsPageContent() {
                 )}
               </div>
               <p
-                className="text-muted-foreground mx-auto line-clamp-2 min-h-[48px] max-w-[500px] overflow-hidden"
+                className="text-muted-foreground mx-auto min-h-[24px] max-w-[500px] truncate"
                 title={selectedCollection ? (selectedCollection.description ?? "") : pageDescription}
               >
                 {selectedCollection ? (
@@ -865,7 +865,7 @@ function CollectionsPageContent() {
                     type="textarea"
                     label="Collection Description"
                     maxLength={500}
-                    className="line-clamp-2 block min-h-[48px] max-w-[500px] overflow-hidden"
+                    className="block min-h-[24px] max-w-[500px] truncate"
                     placeholder="This is the place to add your videos."
                   />
                 ) : (
