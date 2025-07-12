@@ -70,7 +70,6 @@ export function InstagramVideoGrid({
               fill
               sizes="(max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
               className="object-cover transition-transform duration-200 group-hover:scale-105"
-              priority={idx === 0} // Add priority to first image for LCP optimization
             />
 
             {/* Overlay darken */}

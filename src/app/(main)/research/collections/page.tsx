@@ -1,8 +1,8 @@
 "use client";
 
 /* eslint-disable max-lines, complexity */
-// Removed dynamic export to fix React static flag error
-// export const dynamic = "force-dynamic";
+// Prevent Next.js from attempting to statically prerender a client-side page
+export const dynamic = "force-dynamic";
 
 import { useState, useEffect, useCallback, useMemo, useTransition, useRef, memo, Suspense } from "react";
 
@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { InstagramVideoGrid } from "@/components/ui/instagram-video-grid";
-import { VideoCollectionLoading } from "@/components/ui/loading-animations";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { VideoLightbox } from "@/components/ui/video-lightbox";
 import { useAuth } from "@/contexts/auth-context";
@@ -748,10 +748,60 @@ function CollectionsPageContent() {
   }, [videos]);
 
   // Don't show anything until collections are loaded
-  // Removed loading state to prevent flashing teal loader
-  // if (isLoading) {
-  //   return <VideoCollectionLoading />;
-  // }
+  if (isLoading) {
+    return (
+      <div className="mx-auto flex h-full max-w-7xl flex-col items-center space-y-6 p-4 md:p-6">
+        {/* Header skeleton */}
+        <div className="flex-1">
+          <header className="mb-6 space-y-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0 flex-1 text-center">
+                <div className="mb-2 flex items-center justify-center gap-3">
+                  <Skeleton className="h-8 w-48" />
+                </div>
+                <Skeleton className="mx-auto h-4 w-96" />
+              </div>
+              <div className="flex flex-shrink-0 items-center gap-2">
+                <Skeleton className="h-11 w-11" />
+                <Skeleton className="h-9 w-24" />
+              </div>
+            </div>
+          </header>
+
+          {/* Tab navigation skeleton */}
+          <div className="mb-6 flex gap-2">
+            <Skeleton className="h-9 w-24" />
+            <Skeleton className="h-9 w-32" />
+            <Skeleton className="h-9 w-28" />
+          </div>
+
+          {/* Video grid skeleton */}
+          <main className="flex-1">
+            <div className="mx-auto w-[935px]">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <div key={i} className="animate-pulse space-y-3">
+                    <Skeleton className="aspect-video w-full rounded-lg" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-3 w-3/4" />
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Skeleton className="h-3 w-8" />
+                          <Skeleton className="h-3 w-12" />
+                        </div>
+                        <Skeleton className="h-6 w-16 rounded-full" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto flex h-full max-w-7xl flex-col items-center space-y-6 p-4 md:p-6">
@@ -884,12 +934,12 @@ function CollectionsPageContent() {
                 videos={videos}
                 onVideoClick={handleThumbnailClick}
                 onFavorite={handleVideoFavorite}
-                renderBadge={(video, idx) => {
-                  const videoWithDate = video as { createdAt?: number };
-                  return videoWithDate.createdAt && Date.now() - videoWithDate.createdAt < 1000 * 60 * 60 * 24 ? (
+                renderBadge={(video, idx) =>
+                  (video as any).addedAt &&
+                  Date.now() - new Date((video as any).addedAt).getTime() < 1000 * 60 * 60 * 24 ? (
                     <Badge className="ml-2 bg-green-500 text-white">New</Badge>
-                  ) : null;
-                }}
+                  ) : null
+                }
               />
               {/* Sentinel */}
               <div ref={loadMoreRef} className="h-8 w-full" />
@@ -947,9 +997,5 @@ function CollectionsPageContent() {
 
 // Main export
 export default function CollectionsPage() {
-  return (
-    <Suspense fallback={<div className="bg-background min-h-screen" />}>
-      <CollectionsPageContent />
-    </Suspense>
-  );
+  return <CollectionsPageContent />;
 }
