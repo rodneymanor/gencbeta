@@ -748,9 +748,10 @@ function CollectionsPageContent() {
   }, [videos]);
 
   // Don't show anything until collections are loaded
-  if (isLoading) {
-    return <VideoCollectionLoading />;
-  }
+  // Removed loading state to prevent flashing teal loader
+  // if (isLoading) {
+  //   return <VideoCollectionLoading />;
+  // }
 
   return (
     <div className="mx-auto flex h-full max-w-7xl flex-col items-center space-y-6 p-4 md:p-6">
@@ -945,9 +946,5 @@ function CollectionsPageContent() {
 
 // Main export
 export default function CollectionsPage() {
-  return (
-    <Suspense fallback={<VideoCollectionLoading />}>
-      <CollectionsPageContent />
-    </Suspense>
-  );
+  return <CollectionsPageContent />;
 }
