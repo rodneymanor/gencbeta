@@ -157,7 +157,7 @@ export const transcribeVideo = async (downloadResponse: VideoDownloadResponse): 
     // For CDN-hosted videos, send the URL to transcription service
     console.log("🎥 [ADD_VIDEO] Transcribing CDN-hosted video:", downloadResponse.cdnUrl);
 
-    const response = await fetch("/api/transcribe-video", {
+    const response = await fetch("/api/video/transcribe", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -185,7 +185,7 @@ export const transcribeVideo = async (downloadResponse: VideoDownloadResponse): 
     const formData = new FormData();
     formData.append("video", file);
 
-    const response = await fetch("/api/transcribe-video", {
+    const response = await fetch("/api/video/transcribe", {
       method: "POST",
       body: formData,
     });
@@ -256,7 +256,7 @@ export const extractVideoThumbnail = async (downloadResponse: VideoDownloadRespo
         reject(new Error("Failed to load video from CDN"));
       };
 
-      video.src = downloadResponse.cdnUrl;
+      video.src = downloadResponse.cdnUrl!;
     });
   } else if (downloadResponse.videoData) {
     // Fallback: generate thumbnail from local video data
@@ -341,8 +341,8 @@ export const createVideoObject = (
 
   return {
     url: originalUrl,
-    title: transcriptionResponse.contentMetadata.description.substring(0, 100) || "Untitled Video",
-    iframe: downloadResponse.cdnUrl || "",
+    title: transcriptionResponse.contentMetadata.description.substring(0, 100) ?? "Untitled Video",
+    iframe: downloadResponse.cdnUrl ?? "",
     platform: downloadResponse.platform,
     author: downloadResponse.additionalMetadata.author,
     thumbnail: thumbnailUrl,

@@ -8,7 +8,7 @@ export async function transcribeVideoFile(file: File, baseUrl?: string): Promise
   formData.append("video", file);
 
   // Use absolute URL for server-side calls, relative for client-side
-  const url = baseUrl ? `${baseUrl}/api/transcribe-video` : "/api/transcribe-video";
+  const url = baseUrl ? `${baseUrl}/api/video/transcribe` : "/api/video/transcribe";
 
   const response = await fetch(url, {
     method: "POST",
