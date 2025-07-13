@@ -273,3 +273,34 @@ Use the included `test-api.js` script to test your API:
 2. Run: `node test-api.js`
 
 This will test both adding a video and retrieving collection information. 
+
+
+----
+API Route and Endpoint Flow:
+Frontend calls: /api/creators POST route
+Backend processing: processCreatorProfile() function in src/lib/process-creator-utils.ts
+Platform-specific API calls:
+TikTok: https://tiktok-scrapper-videos-music-challenges-downloader.p.rapidapi.com/user/{username}/feed
+Instagram:
+Step 1: https://instagram-scrapper-posts-reels-stories-downloader.p.rapidapi.com/user_id_by_username?username={username}
+Step 2: https://instagram-scrapper-posts-reels-stories-downloader.p.rapidapi.com/reels?user_id={userId}&include_feed_video=true
+Added Logging:
+API Call Logging:
+🌐 API URLs: Shows exact endpoints being called
+📡 Response Status: HTTP status codes and messages
+❌ Error Responses: Full error text when API calls fail
+�� Response Data: Complete JSON response structure
+Data Processing Logging:
+�� Video/Reel Counts: Shows how many items found vs processed
+🔍 Individual Item Processing: Details for each video/reel being processed
+✅ Success/Failure Tracking: Shows which items were successfully extracted
+Response Handling:
+Shows exactly how we parse the API responses
+Tracks data extraction success/failure
+Logs the final processed video data structure
+Now when you try to add a creator, you'll see detailed logs showing:
+The exact API endpoints being called
+The complete response data structure
+How we parse and extract video information
+Any errors or issues in the process
+This will help us understand exactly what's happening with the API calls and why we're getting rate limit errors or missing data.

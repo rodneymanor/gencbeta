@@ -256,24 +256,31 @@ async function processInstagramProfile(username: string, videoCount: number): Pr
       const reelsData = await reelsResponse.json();
       console.log(`📊 [INSTAGRAM] Reels API Response Data:`, JSON.stringify(reelsData, null, 2));
       
-      if (!reelsData.reels || !Array.isArray(reelsData.reels)) {
-        console.error(`❌ [INSTAGRAM] No reels array found in response. Response structure:`, Object.keys(reelsData));
+      // Handle the new Instagram API response structure
+      if (!reelsData.data || !reelsData.data.items || !Array.isArray(reelsData.data.items)) {
+        console.error(`❌ [INSTAGRAM] No items array found in response. Response structure:`, Object.keys(reelsData));
         throw new Error("No reels found in Instagram API response. The profile may be private or the username may be incorrect.");
       }
 
-      console.log(`📊 [INSTAGRAM] Found ${reelsData.reels.length} reels in response`);
+      // Filter for video/reel items only
+      const videoItems = reelsData.data.items.filter((item: any) => 
+        item.media && item.media.media_type === 2 // 2 = video/reel
+      );
+
+      console.log(`📊 [INSTAGRAM] Found ${videoItems.length} video items out of ${reelsData.data.items.length} total items`);
       
-      if (reelsData.reels.length === 0) {
-        throw new Error(`No reels found for @${username}. The profile may be empty or private.`);
+      if (videoItems.length === 0) {
+        throw new Error(`No video reels found for @${username}. The profile may be empty or private.`);
       }
 
       // Process up to 2x the requested count to get best performers
-      const maxReels = Math.min(reelsData.reels.length, videoCount * 2);
-      console.log(`🔄 [INSTAGRAM] Processing ${maxReels} reels out of ${reelsData.reels.length} total`);
+      const maxReels = Math.min(videoItems.length, videoCount * 2);
+      console.log(`🔄 [INSTAGRAM] Processing ${maxReels} reels out of ${videoItems.length} total`);
       const processedVideos: VideoData[] = [];
 
       for (let i = 0; i < maxReels; i++) {
-        const reel = reelsData.reels[i];
+        const item = videoItems[i];
+        const reel = item.media; // The actual reel data is in the media object
         console.log(`🔍 [INSTAGRAM] Processing reel ${i + 1}/${maxReels}:`, {
           id: reel.id,
           title: reel.title,
@@ -338,23 +345,39 @@ function extractTikTokVideoData(video: any, username: string, i: number): VideoD
 
 // Helper function for extracting Instagram reel data
 function extractInstagramReelData(reel: any, username: string, i: number): VideoData | null {
-  const videoUrl = reel.video_url ?? reel.download_url ?? reel.url;
+  // Handle the new Instagram API structure where video data is nested
+  const videoVersions = reel.video_versions;
+  if (!videoVersions || !Array.isArray(videoVersions) || videoVersions.length === 0) {
+    console.warn(`⚠️ [INSTAGRAM] No video versions found for reel ${i}, skipping`);
+    return null;
+  }
+
+  // Get the highest quality video URL (usually the first one)
+  const videoUrl = videoVersions[0].url;
   if (!videoUrl || !isValidVideoUrl(videoUrl)) {
     console.warn(`⚠️ [INSTAGRAM] Invalid video URL for reel ${i}, skipping`);
     return null;
   }
+
+  // Get thumbnail from image_versions2
+  const imageVersions = reel.image_versions2?.candidates;
+  const thumbnailUrl = imageVersions && imageVersions.length > 0 ? imageVersions[0].url : undefined;
+
+  // Extract caption text
+  const caption = reel.caption?.text ?? '';
+
   return {
-    id: reel.id ?? `instagram_${username}_${i}_${Date.now()}`,
+    id: reel.pk ?? reel.id ?? `instagram_${username}_${i}_${Date.now()}`,
     platform: 'instagram',
     video_url: videoUrl,
-    thumbnail_url: reel.thumbnail_url ?? reel.cover,
-    viewCount: parseInt(reel.view_count ?? reel.views ?? '0'),
-    likeCount: parseInt(reel.like_count ?? reel.likes ?? '0'),
-    quality: reel.quality ?? '720p',
-    title: reel.title ?? reel.description ?? `Instagram Reel ${i + 1}`,
-    description: reel.description ?? '',
-    author: reel.author ?? username,
-    duration: parseInt(reel.duration ?? '30'),
+    thumbnail_url: thumbnailUrl,
+    viewCount: parseInt(reel.play_count ?? reel.view_count ?? '0'),
+    likeCount: parseInt(reel.like_count ?? '0'),
+    quality: videoVersions[0].width + 'x' + videoVersions[0].height,
+    title: caption || `Instagram Reel ${i + 1}`,
+    description: caption,
+    author: username,
+    duration: parseInt(reel.video_duration ?? '30'),
   };
 }
 
