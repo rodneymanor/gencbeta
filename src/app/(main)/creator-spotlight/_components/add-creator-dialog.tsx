@@ -84,7 +84,11 @@ export function AddCreatorDialog({ children, onCreatorAdded }: AddCreatorDialogP
       }
     } catch (error) {
       console.error('Error adding creator:', error);
-      setError('Failed to add creator. Please try again.');
+      if (error instanceof Error && error.message.includes('401')) {
+        setError('Authentication required. Please log in to add creators.');
+      } else {
+        setError('Failed to add creator. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

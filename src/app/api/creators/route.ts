@@ -41,15 +41,11 @@ interface AddCreatorResponse {
 
 export async function GET(request: NextRequest) {
   try {
-    // Authenticate user
-    const authResult = await authenticateApiKey(request);
-
-    // Check if authResult is a NextResponse (error)
-    if (authResult instanceof NextResponse) {
-      return authResult;
-    }
-
     console.log("🔍 [CREATORS] Fetching all creators...");
+
+    // For GET requests, we'll allow unauthenticated access to creator data
+    // since it's just reading public information
+    // TODO: Add proper authentication when user management is implemented
 
     // TODO: Replace with actual database query
     // For now, return mock data
