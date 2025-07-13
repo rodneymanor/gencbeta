@@ -22,7 +22,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -82,14 +82,14 @@ const TAB_ICONS = {
 } as const;
 
 /* ---------- 1.5. Custom Script Component Icons --------------------------- */
-const HookIcon = (props: any) => (
+const HookIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M11.8 22a8 8 0 0 0 8-8V8a8 8 0 0 0-16 0v6a8 8 0 0 0 8 8Z"/>
     <path d="M11.8 22V12"/>
   </svg>
 );
 
-const BridgeIcon = (props: any) => (
+const BridgeIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M8 3c-2.5 0-4.5 2-4.5 4.5v10.5"/>
     <path d="M16 3c2.5 0 4.5 2 4.5 4.5v10.5"/>
@@ -97,13 +97,13 @@ const BridgeIcon = (props: any) => (
   </svg>
 );
 
-const GoldenNuggetIcon = (props: any) => (
+const GoldenNuggetIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M2.7 10.3a2.41 2.41 0 0 0 0 3.41l7.59 7.59a2.41 2.41 0 0 0 3.41 0l7.59-7.59a2.41 2.41 0 0 0 0-3.41l-7.59-7.59a2.41 2.41 0 0 0-3.41 0Z"/>
   </svg>
 );
 
-const WtaIcon = (props: any) => (
+const WtaIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M5 12h14"/>
     <path d="m12 5 7 7-7 7"/>
@@ -167,7 +167,7 @@ const Indicator = ({ activeRef }: { activeRef: React.RefObject<HTMLButtonElement
     const { offsetLeft, clientWidth } = activeRef.current;
     ref.current.style.transform = `translateX(${offsetLeft}px)`;
     ref.current.style.width = `${clientWidth}px`;
-  }, [activeRef.current]);
+  }, [activeRef]);
 
   return (
     <div
@@ -233,7 +233,7 @@ const InsightCard = ({
     </div>
 
     {/* Right side content: Impact Label and Icon */}
-    {(impactLabel || impactIcon) && (
+    {(impactLabel ?? impactIcon) && (
       <div className="flex-shrink-0 ml-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1 rounded-md py-1 px-2 bg-blue-100 dark:bg-blue-900/50">
@@ -305,8 +305,8 @@ const ComponentsPanel = ({
             className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
             onClick={() => onCopyToClipboard(component.description, component.title)}
           >
-            {copiedField === component.title ? 
-              <Check className="h-4 w-4" /> : 
+            {copiedField === component.title ?
+              <Check className="h-4 w-4" /> :
               <Copy className="h-4 w-4" />
             }
           </Button>
@@ -332,13 +332,13 @@ const TranscriptPanel = ({
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-semibold">Full Transcript</CardTitle>
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => onCopyToClipboard(transcript, "Transcript")}
           >
-            {copiedField === "Transcript" ? 
-              <Check className="h-4 w-4" /> : 
+            {copiedField === "Transcript" ?
+              <Check className="h-4 w-4" /> :
               <Copy className="h-4 w-4" />
             }
           </Button>
