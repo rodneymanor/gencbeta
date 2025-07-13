@@ -43,7 +43,7 @@ export default function CreatorSpotlightPage() {
   const selectedCreatorId = searchParams.get('creator');
 
   const { creators, loading, loadCreators } = useCreators();
-  const { creatorVideos, loadingVideos, loadCreatorVideos } = useCreatorVideos();
+  const { creatorVideos, loadingVideos, loadCreatorVideos, clearVideos } = useCreatorVideos();
   const [selectedCreator, setSelectedCreator] = useState<CreatorProfile | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [platformFilter, setPlatformFilter] = useState<'all' | 'tiktok' | 'instagram'>('all');
@@ -69,7 +69,7 @@ export default function CreatorSpotlightPage() {
 
   const handleBackToGrid = () => {
     setSelectedCreator(null);
-    setCreatorVideos([]);
+    clearVideos();
     router.push('/research/creator-spotlight');
   };
 

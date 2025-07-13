@@ -55,7 +55,7 @@ export function useCreators() {
               username: 'tiktok_creator_1',
               displayName: 'TikTok Star',
               platform: 'tiktok',
-              profileImageUrl: '',
+              profileImageUrl: 'https://via.placeholder.com/150x150/FF0050/FFFFFF?text=TS',
               bio: 'Creating amazing TikTok content! 🎵',
               postsCount: 150,
               followersCount: 2500000,
@@ -71,7 +71,7 @@ export function useCreators() {
               username: 'instagram_creator_1',
               displayName: 'Instagram Influencer',
               platform: 'instagram',
-              profileImageUrl: '',
+              profileImageUrl: 'https://via.placeholder.com/150x150/E4405F/FFFFFF?text=II',
               bio: 'Lifestyle and fashion content 📸',
               postsCount: 320,
               followersCount: 1800000,
@@ -87,7 +87,7 @@ export function useCreators() {
               username: 'tiktok_creator_2',
               displayName: 'Comedy Creator',
               platform: 'tiktok',
-              profileImageUrl: '',
+              profileImageUrl: 'https://via.placeholder.com/150x150/FF0050/FFFFFF?text=CC',
               bio: 'Making people laugh one video at a time 😂',
               postsCount: 89,
               followersCount: 850000,
@@ -152,6 +152,10 @@ export function useCreatorVideos() {
       });
 
       if (!response.ok) {
+        if (response.status === 500) {
+          console.warn('API server error - using mock videos');
+          throw new Error('API_UNAVAILABLE');
+        }
         throw new Error('Failed to load creator videos');
       }
 
@@ -174,6 +178,12 @@ export function useCreatorVideos() {
       }
     } catch (error) {
       console.error('Error loading creator videos:', error);
+      
+      // Check if it's an API unavailability error
+      if (error instanceof Error && error.message === 'API_UNAVAILABLE') {
+        console.log('Using mock videos due to API unavailability');
+      }
+      
       // Fallback to mock data
       const mockVideos: CreatorVideo[] = Array.from({ length: 12 }, (_, i) => ({
         id: `video_${i}`,
@@ -192,5 +202,9 @@ export function useCreatorVideos() {
     }
   };
 
-  return { creatorVideos, loadingVideos, loadCreatorVideos };
+  const clearVideos = () => {
+    setCreatorVideos([]);
+  };
+
+  return { creatorVideos, loadingVideos, loadCreatorVideos, clearVideos };
 } 
