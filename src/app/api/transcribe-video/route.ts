@@ -1,15 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { authenticateApiKey } from "@/lib/api-key-auth";
-import { VideoTranscriber } from "@/lib/core/video/transcriber";
 import { detectPlatform } from "@/lib/core/video/platform-detector";
+import { VideoTranscriber } from "@/lib/core/video/transcriber";
 
 export async function POST(request: NextRequest) {
   try {
     // Authenticate user (keeping existing auth)
-    const user = await authenticateApiKey(request);
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const authResult = await authenticateApiKey(request);
+
+    // Check if authResult is a NextResponse (error)
+    if (authResult instanceof NextResponse) {
+      return authResult;
     }
+
+    const { user } = authResult;
 
     const contentType = request.headers.get("content-type");
 
