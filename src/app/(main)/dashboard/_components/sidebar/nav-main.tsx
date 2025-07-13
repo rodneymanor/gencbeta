@@ -60,7 +60,7 @@ const NavItem = ({
             )}
 
             {/* Label outside the background container */}
-            <span className="text-secondary-foreground text-center text-xs font-medium whitespace-nowrap">
+            <span className="text-secondary-foreground text-center text-[10px] font-medium whitespace-nowrap">
               {item.title}
             </span>
           </div>
