@@ -39,28 +39,37 @@ const NavItem = ({
 }) => {
   const hasSubItems = item.subItems && item.subItems.length > 0;
 
-  if (hasSubItems) {
-    return (
-      <SidebarMenuItem>
-        <HoverCard openDelay={150}>
-          <HoverCardTrigger asChild>
-            <div className="gap-.5 flex flex-col items-center">
-              {/* Icon container with background */}
+  return (
+    <SidebarMenuItem>
+      <HoverCard openDelay={150}>
+        <HoverCardTrigger asChild>
+          <div className="gap-.5 flex flex-col items-center">
+            {/* Icon container with background */}
+            {hasSubItems ? (
               <div className="group cursor-pointer">
                 <div className="bg-background-color-300 flex h-8 w-8 items-center justify-center rounded-md px-2 py-2 transition-all duration-200 hover:bg-[oklch(var(--background-color-300)/0.8)]">
                   {item.icon && <item.icon className="h-5 w-5" />}
                 </div>
               </div>
+            ) : (
+              <Link href={item.url} className="group">
+                <div className="bg-background-color-300 flex h-8 w-8 items-center justify-center rounded-md px-2 py-2 transition-all duration-200 hover:bg-[oklch(var(--background-color-300)/0.8)]">
+                  {item.icon && <item.icon className="h-5 w-5" />}
+                </div>
+              </Link>
+            )}
 
-              {/* Label outside the background container */}
-              <span className="text-secondary-foreground text-center text-xs font-medium whitespace-nowrap">
-                {item.title}
-              </span>
-            </div>
-          </HoverCardTrigger>
-          <HoverCardContent side="right" className="w-48 p-2">
-            <div className="flex flex-col gap-1">
-              {item.subItems?.map((subItem) => (
+            {/* Label outside the background container */}
+            <span className="text-secondary-foreground text-center text-xs font-medium whitespace-nowrap">
+              {item.title}
+            </span>
+          </div>
+        </HoverCardTrigger>
+        <HoverCardContent side="right" className="w-48 p-2">
+          <div className="flex flex-col gap-1">
+            {hasSubItems ? (
+              // Show subitems for items that have them
+              item.subItems?.map((subItem) => (
                 <Link
                   key={subItem.title}
                   href={subItem.url}
@@ -69,29 +78,20 @@ const NavItem = ({
                   {subItem.icon && <subItem.icon className="h-4 w-4" />}
                   <span>{subItem.title}</span>
                 </Link>
-              ))}
-            </div>
-          </HoverCardContent>
-        </HoverCard>
-      </SidebarMenuItem>
-    );
-  }
-
-  return (
-    <SidebarMenuItem>
-      <div className="gap-.5 flex flex-col items-center">
-        {/* Icon container with background */}
-        <Link href={item.url} className="group">
-          <div className="bg-background-color-300 flex h-8 w-8 items-center justify-center rounded-md px-2 py-2 transition-all duration-200 hover:bg-[oklch(var(--background-color-300)/0.8)]">
-            {item.icon && <item.icon className="h-5 w-5" />}
+              ))
+            ) : (
+              // Show single item for items without subitems
+              <Link
+                href={item.url}
+                className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors"
+              >
+                {item.icon && <item.icon className="h-4 w-4" />}
+                <span>{item.title}</span>
+              </Link>
+            )}
           </div>
-        </Link>
-
-        {/* Label outside the background container */}
-        <span className="text-secondary-foreground text-center text-xs font-medium whitespace-nowrap">
-          {item.title}
-        </span>
-      </div>
+        </HoverCardContent>
+      </HoverCard>
     </SidebarMenuItem>
   );
 };
