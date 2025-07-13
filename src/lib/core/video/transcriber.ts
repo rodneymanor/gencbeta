@@ -77,6 +77,43 @@ export async function transcribeVideoData(
 }
 
 /**
+ * VideoTranscriber service object for consistent API
+ */
+export const VideoTranscriber = {
+  /**
+   * Transcribes video data using AI services
+   * @param videoData - Video data to transcribe
+   * @param platform - Platform the video is from
+   * @returns TranscriptionResult with transcript and analysis
+   */
+  async transcribe(videoData: VideoData, platform: Platform): Promise<TranscriptionResult | null> {
+    return transcribeVideoData(videoData, platform);
+  },
+
+  /**
+   * Transcribes video from a URL
+   * @param url - Video URL to transcribe
+   * @param platform - Platform the video is from
+   * @returns TranscriptionResult with transcript and analysis
+   */
+  async transcribeFromUrl(url: string, platform: Platform): Promise<TranscriptionResult | null> {
+    // TODO: Implement URL-based transcription
+    // This would download the video first, then transcribe it
+    console.log(`[VideoTranscriber] Transcribing from URL: ${url}`);
+    throw new Error("URL-based transcription not yet implemented");
+  },
+
+  /**
+   * Validates video file for transcription
+   * @param file - Video file to validate
+   * @returns Validation result
+   */
+  validateFile(file: File): { valid: boolean; error?: string } {
+    return validateVideoFile(file);
+  },
+};
+
+/**
  * Creates a fallback transcription when AI transcription fails
  * @param platform - Platform the video is from
  * @returns Fallback transcription result
@@ -211,7 +248,7 @@ export function analyzeTranscriptComponents(transcript: string): {
     hook: lines[0] || "Hook not detected",
     bridge: lines[1] || "Bridge not detected", 
     nugget: lines.slice(2, -1).join(' ') || "Main content not detected",
-    wta: lines[lines.length - 1] || "Call to action not detected",
+    wta: lines[lines.length - 1] ?? "Call to action not detected",
   };
 }
 

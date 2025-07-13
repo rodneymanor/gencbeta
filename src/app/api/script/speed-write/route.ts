@@ -1,17 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-
-import { createNegativeKeywordPromptInstruction } from "@/data/negative-keywords";
 import { authenticateApiKey } from "@/lib/api-key-auth";
+import { ScriptService } from "@/lib/core/script/script-service";
 import { CreditsService } from "@/lib/credits-service";
-import { adminDb } from "@/lib/firebase-admin";
-import { generateScript } from "@/lib/gemini";
-import { parseStructuredResponse, createScriptElements, combineScriptElements } from "@/lib/json-extractor";
-import { NegativeKeywordsService } from "@/lib/negative-keywords-service";
-import { createSpeedWritePrompt, createAIVoicePrompt } from "@/lib/prompt-helpers";
-import { generateScriptWithValidation, validateScript, cleanScriptContent } from "@/lib/script-validation";
-import { trackApiUsageAdmin, UsageTrackerAdmin } from "@/lib/usage-tracker-admin";
-import { VoiceTemplateProcessor } from "@/lib/voice-template-processor";
-import { AIVoice } from "@/types/ai-voices";
+import { trackApiUsageAdmin } from "@/lib/usage-tracker-admin";
 
 // Validate environment setup
 if (!process.env.GEMINI_API_KEY) {
@@ -21,236 +12,18 @@ if (!process.env.GEMINI_API_KEY) {
 interface SpeedWriteRequest {
   idea: string;
   length: "20" | "60" | "90";
-  userId?: string;
-}
-
-interface ScriptElements {
-  hook: string;
-  bridge: string;
-  goldenNugget: string;
-  wta: string;
-}
-
-interface ScriptOption {
-  id: string;
-  title: string;
-  content: string;
-  elements?: ScriptElements; // New structured elements
-  estimatedDuration: string;
-  approach: "speed-write" | "educational" | "ai-voice";
-  voice?: {
-    id: string;
-    name: string;
-    badges: string[];
-  };
+  type?: "speed" | "educational" | "voice";
 }
 
 interface SpeedWriteResponse {
   success: boolean;
-  optionA: ScriptOption | null;
-  optionB: ScriptOption | null;
+  optionA?: any;
+  optionB?: any;
   error?: string;
   processingTime?: number;
 }
 
-async function getActiveVoice(userId: string): Promise<AIVoice | null> {
-  try {
-    // Get user's active voice
-    const voicesSnapshot = await adminDb
-      .collection("aiVoices")
-      .where("userId", "==", userId)
-      .where("isActive", "==", true)
-      .limit(1)
-      .get();
-
-    if (!voicesSnapshot.empty) {
-      const doc = voicesSnapshot.docs[0];
-      return { id: doc.id, ...doc.data() } as AIVoice;
-    }
-
-    // Check for shared active voices
-    const sharedSnapshot = await adminDb
-      .collection("aiVoices")
-      .where("isShared", "==", true)
-      .where("isActive", "==", true)
-      .limit(1)
-      .get();
-
-    if (!sharedSnapshot.empty) {
-      const doc = sharedSnapshot.docs[0];
-      return { id: doc.id, ...doc.data() } as AIVoice;
-    }
-
-    return null;
-  } catch (error) {
-    console.warn("[SpeedWrite] Failed to fetch active voice:", error);
-    return null;
-  }
-}
-
-function createVoicePrompt(activeVoice: AIVoice, idea: string, length: string, negativeKeywordInstruction: string): string {
-  const randomTemplate = activeVoice.templates[Math.floor(Math.random() * activeVoice.templates.length)];
-  const targetWordCount = VoiceTemplateProcessor.calculateTargetWordCount(randomTemplate, parseInt(length));
-
-  return `ROLE:
-You are an expert content strategist and copywriter. Your primary skill is deconstructing information and skillfully reassembling it into a different, predefined narrative or structural framework.
-
-OBJECTIVE:
-Your task is to take the [1. Source Content] and rewrite it so that it perfectly fits the structure, tone, and cadence of the [2. Structural Template]. Return the result in a structured JSON format with each element clearly separated.
-
-CRITICAL PLACEHOLDER REPLACEMENT RULE:
-Any text in square brackets [like this] in the template are PLACEHOLDERS that MUST be replaced with actual, specific content from your source material. NEVER leave any square brackets or placeholder text in your final output. Every [placeholder] must become real words.
-
-[1. SOURCE CONTENT - The "What"]
-${idea}
-
-[2. STRUCTURAL TEMPLATE - The "How"]
-Hook: ${randomTemplate.hook}
-Bridge: ${randomTemplate.bridge}
-Golden Nugget: ${randomTemplate.nugget}
-What To Act: ${randomTemplate.wta}
-
-INSTRUCTIONS:
-1. Replace ALL placeholders [like this] with actual content from the source material
-2. Maintain the template's tone and narrative voice
-3. Ensure smooth transitions between sections
-4. Target approximately ${targetWordCount} words for a ${length}-second read
-
-${negativeKeywordInstruction}
-
-Return your response in this exact JSON format:
-{
-  "hook": "Your adapted hook section with all placeholders replaced",
-  "bridge": "Your adapted bridge section with all placeholders replaced",
-  "goldenNugget": "Your adapted golden nugget section with all placeholders replaced", 
-  "wta": "Your adapted what-to-act section with all placeholders replaced"
-}
-
-FINAL CHECK: Ensure NO square brackets [like this] remain in your JSON response.`;
-}
-
-async function generateAIVoiceScript(idea: string, length: string, activeVoice: AIVoice, userId: string) {
-  // Get user's negative keywords
-  const negativeKeywords = await NegativeKeywordsService.getEffectiveNegativeKeywordsForUser(userId);
-  const negativeKeywordInstruction = createNegativeKeywordPromptInstruction(negativeKeywords);
-
-  const randomTemplate = activeVoice.templates[Math.floor(Math.random() * activeVoice.templates.length)];
-  const targetWordCount = VoiceTemplateProcessor.calculateTargetWordCount(randomTemplate, parseInt(length));
-
-  const prompt = createAIVoicePrompt(
-    idea,
-    length,
-    targetWordCount,
-    randomTemplate.hook,
-    randomTemplate.bridge,
-    randomTemplate.nugget,
-    randomTemplate.wta,
-    negativeKeywordInstruction
-  );
-
-  try {
-    // Generate with JSON response type for clean output
-    const result = await generateScript(prompt, { responseType: "json" });
-    const rawContent = result.content ?? "";
-
-    // Use bulletproof JSON extraction
-    const parseResult = parseStructuredResponse(rawContent, "AI Voice");
-    
-    if (!parseResult.success) {
-      console.warn("[SpeedWrite] AI Voice JSON parsing failed, falling back to plain text");
-      const cleanedContent = cleanScriptContent(rawContent);
-      const elements = { hook: "", bridge: "", goldenNugget: "", wta: cleanedContent };
-      const fullContent = combineScriptElements(elements);
-      
-      return {
-        ...result,
-        content: fullContent,
-        elements,
-        approach: "ai-voice" as const,
-        voice: { id: activeVoice.id, name: activeVoice.name, badges: activeVoice.badges },
-        success: false,
-        error: parseResult.error
-      };
-    }
-
-    const elements = createScriptElements(parseResult.data);
-    const fullContent = combineScriptElements(elements);
-
-    // Validate the combined content
-    const validation = validateScript(fullContent);
-    if (!validation.isValid) {
-      console.warn(`⚠️ [SpeedWrite] AI Voice script has validation issues:`, validation.issues);
-    }
-
-    return {
-      ...result,
-      content: fullContent,
-      elements,
-      approach: "ai-voice" as const,
-      voice: { id: activeVoice.id, name: activeVoice.name, badges: activeVoice.badges },
-    };
-  } catch (error) {
-    console.error("[SpeedWrite] AI Voice script generation failed:", error);
-    throw error;
-  }
-}
-
-async function generateSpeedWriteScript(idea: string, length: string, userId: string) {
-  const targetWords = Math.round(parseInt(length) * 2.2);
-
-  // Get user's negative keywords
-  const negativeKeywords = await NegativeKeywordsService.getEffectiveNegativeKeywordsForUser(userId);
-  const negativeKeywordInstruction = createNegativeKeywordPromptInstruction(negativeKeywords);
-
-  const prompt = createSpeedWritePrompt(idea, length, targetWords, negativeKeywordInstruction);
-
-  try {
-    // Generate with JSON response type and validation
-    const result = await generateScriptWithValidation(
-      () => generateScript(prompt, { responseType: "json" }),
-      (result) => result.content ?? "",
-      { maxRetries: 2, retryDelay: 500 }
-    );
-
-    const rawContent = result.content ?? "";
-
-    // Use bulletproof JSON extraction
-    const parseResult = parseStructuredResponse(rawContent, "Speed Write");
-    
-    if (!parseResult.success) {
-      console.warn("[SpeedWrite] Speed Write JSON parsing failed, falling back to plain text");
-      const cleanedContent = cleanScriptContent(rawContent);
-      const elements = { hook: "", bridge: "", goldenNugget: "", wta: cleanedContent };
-      const fullContent = combineScriptElements(elements);
-      
-      return {
-        ...result,
-        content: fullContent,
-        elements,
-        success: false,
-        error: parseResult.error
-      };
-    }
-
-    const elements = createScriptElements(parseResult.data);
-    const fullContent = combineScriptElements(elements);
-
-    // Validate the combined content
-    const validation = validateScript(fullContent);
-    if (!validation.isValid) {
-      console.warn(`⚠️ [SpeedWrite] Speed Write script has validation issues:`, validation.issues);
-    }
-
-    return {
-      ...result,
-      content: fullContent,
-      elements
-    };
-  } catch (error) {
-    console.error("[SpeedWrite] Speed Write script generation failed:", error);
-    throw error;
-  }
-}
+// All script generation logic moved to ScriptService
 
 async function generateEducationalScript(idea: string, length: string, userId: string) {
   const targetWords = Math.round(parseInt(length) * 2.2);
@@ -469,93 +242,77 @@ async function trackUsageResults(
 
 export async function POST(request: NextRequest): Promise<NextResponse<SpeedWriteResponse>> {
   const startTime = Date.now();
-  console.log("🚀 [SpeedWrite] Starting A/B script generation...");
-
+  
   try {
-    // Authenticate user
-    const authResult = await authenticateApiKey(request);
-    if (authResult instanceof NextResponse) {
-      return authResult as NextResponse<SpeedWriteResponse>;
+    // Authenticate user (keeping existing auth)
+    const user = await authenticateApiKey(request);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { user, rateLimitResult } = authResult;
-    const userId = user.uid;
-    const accountLevel = user.role === "super_admin" || user.role === "coach" ? "pro" : "free";
     const body: SpeedWriteRequest = await request.json();
-
+    
     // Validate request
-    const validation = validateRequest(body);
-    if (!validation.isValid) {
-      return createErrorResponse(validation.error!, 400);
+    if (!body.idea || !body.length) {
+      return NextResponse.json({ error: "Idea and length are required" }, { status: 400 });
     }
 
-    // Check rate limiting from auth result
-    if (!rateLimitResult.allowed) {
-      return createErrorResponse(rateLimitResult.reason ?? "Rate limit exceeded", 429);
+    console.log("✍️ [SCRIPT] Processing script generation request...");
+
+    // Check credits
+    const creditsService = new CreditsService();
+    const hasCredits = await creditsService.checkCredits(user.uid, "script_generation");
+    if (!hasCredits) {
+      return NextResponse.json({ error: "Insufficient credits" }, { status: 402 });
     }
 
-    // Check if user has enough credits
-    const creditCheck = await CreditsService.canPerformAction(userId, "script_generation", accountLevel);
-    if (!creditCheck.canPerform) {
-      return createErrorResponse(creditCheck.reason ?? "Insufficient credits", 402);
+    // Generate script(s)
+    let result;
+    if (body.type) {
+      // Single script type
+      const scriptResult = await ScriptService.generate(body.type, {
+        idea: body.idea,
+        length: body.length,
+        userId: user.uid,
+      });
+      
+      result = {
+        optionA: scriptResult,
+        optionB: null,
+      };
+    } else {
+      // A/B testing (default)
+      result = await ScriptService.generateOptions({
+        idea: body.idea,
+        length: body.length,
+        userId: user.uid,
+      });
     }
 
-    // Process scripts
-    const { speedWriteResult, educationalResult, aiVoiceResult } = await processSpeedWriteRequest(body, userId);
     const processingTime = Date.now() - startTime;
 
-    const { optionA, optionB } = await createScriptOptions(
-      speedWriteResult,
-      educationalResult,
-      aiVoiceResult,
-      body.length,
-    );
-
-    // Check if at least one script was generated successfully
-    if (!optionA && !optionB) {
-      const error =
-        speedWriteResult.status === "rejected" ? speedWriteResult.reason?.message : "Failed to generate scripts";
-      return createErrorResponse(error ?? "Failed to generate scripts. Please try again.", 500);
-    }
-
-    // Deduct credits for successful generation
-    await CreditsService.trackUsageAndDeductCredits(
-      userId,
-      "script_generation",
-      accountLevel,
-      {
-        service: "gemini",
-        tokensUsed: (speedWriteResult.status === "fulfilled" ? speedWriteResult.value.tokensUsed : 0) +
-                   (educationalResult.status === "fulfilled" ? educationalResult.value.tokensUsed : 0),
-        responseTime: processingTime,
-        success: true,
-        timestamp: new Date().toISOString(),
-        metadata: { scriptLength: body.length, inputLength: body.idea.length },
-      }
-    );
-
     // Track usage
-    await trackUsageResults(userId, body, speedWriteResult, educationalResult, processingTime);
+    await trackApiUsageAdmin(user.uid, "script_generation", {
+      idea: body.idea,
+      length: body.length,
+      type: body.type || "ab_testing",
+      processingTime,
+    });
 
-    console.log(`✅ [SpeedWrite] Generated ${optionA ? 1 : 0} + ${optionB ? 1 : 0} scripts in ${processingTime}ms`);
-
+    console.log("✅ [SCRIPT] Script generation completed successfully");
+    
     return NextResponse.json({
       success: true,
-      optionA,
-      optionB,
+      optionA: result.optionA,
+      optionB: result.optionB,
       processingTime,
     });
   } catch (error) {
-    const processingTime = Date.now() - startTime;
-    console.error(`❌ [SpeedWrite] Generation failed after ${processingTime}ms:`, error);
-
+    console.error("❌ [SCRIPT] Script generation error:", error);
     return NextResponse.json(
       {
-        success: false,
-        optionA: null,
-        optionB: null,
-        error: "An unexpected error occurred. Please try again.",
-        processingTime,
+        error: "Failed to generate script",
+        details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 },
     );

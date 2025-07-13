@@ -35,6 +35,8 @@ export function VideoLightbox({
   return (
     <VideoInsightsModalRedesigned 
       video={video}
+      open={open}
+      onOpenChange={onClose}
       onNavigatePrevious={canPrev ? () => onChangeIndex(currentIndex - 1) : undefined}
       onNavigateNext={canNext ? () => onChangeIndex(currentIndex + 1) : undefined}
       hasPrevious={canPrev}

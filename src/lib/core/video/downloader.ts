@@ -80,6 +80,39 @@ export async function downloadVideo(url: string): Promise<DownloadResult | null>
 }
 
 /**
+ * VideoDownloader service object for consistent API
+ */
+export const VideoDownloader = {
+  /**
+   * Downloads video from any supported platform
+   * @param url - Video URL to download
+   * @returns DownloadResult with video data, metrics, and metadata
+   */
+  async download(url: string): Promise<DownloadResult | null> {
+    return downloadVideo(url);
+  },
+
+  /**
+   * Detects the platform from a URL
+   * @param url - Video URL to analyze
+   * @returns Detected platform
+   */
+  detect(url: string) {
+    const platformInfo = detectPlatform(url);
+    return platformInfo.platform;
+  },
+
+  /**
+   * Downloads and uploads video to CDN in one operation
+   * @param url - Video URL to download
+   * @returns Object with download result and CDN result
+   */
+  async downloadAndUpload(url: string) {
+    return downloadAndUploadToCDN(url);
+  },
+};
+
+/**
  * Downloads TikTok video with metadata
  * @param url - TikTok video URL
  * @returns DownloadResult with video data and TikTok-specific metadata

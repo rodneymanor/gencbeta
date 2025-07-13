@@ -23,7 +23,6 @@ Testability: Write code that is inherently easy to test. This means favoring pur
 Part 1: Front-End UI Component Generation
 Component Prioritization and Styling:
 
-
 Use the custom CSS variables defined in src/app/globals.css (e.g., bg-primary, text-primary-foreground, border-input, etc.). When a specific Tweakcn-like design is requested that is not a direct template component, you must re-create its aesthetic using Shadcn UI and custom Tailwind classes, ensuring seamless visual integration.
 
 Shadcn UI: utilize standard Shadcn UI components imported from @/components/ui.
@@ -59,6 +58,53 @@ Never use left borders on cards; use transparent backgrounds.
 Maintain proper spacing with gap utilities as per the Spacing Audit rules below.
 
 Ensure all interactive elements have proper hover states.
+
+Storybook Integration (MANDATORY):
+When refactoring or creating any component, ALWAYS create or update a corresponding Storybook story. This ensures:
+
+Component Documentation: Automatic documentation generation for all components.
+
+Interactive Testing: Real-time prop manipulation and visual testing.
+
+Design System Consistency: Stories demonstrate proper usage patterns and variants.
+
+Quality Assurance: Stories serve as living documentation and testing scenarios.
+
+Story Requirements:
+- Follow project's existing story patterns (see existing .stories.tsx files)
+- Include multiple variants (default, edge cases, different prop combinations)
+- Use realistic sample data that demonstrates component capabilities
+- Include interactive controls for all props
+- Add layout examples showing component in different contexts
+- Test responsive behavior and accessibility features
+- Use proper TypeScript typing with Meta and StoryObj
+- Enable auto-documentation with tags: ['autodocs']
+
+Component Location Priority (MANDATORY):
+When creating or refactoring components, prioritize placement in the extract folder structure:
+
+Primary Location: src/components/extract/
+- This is the preferred location for all new UI components
+- Components here are part of the core extraction and display system
+- Follow existing naming conventions (e.g., detailcards.tsx, pwhitecard.tsx)
+- Maintain consistency with extract folder patterns
+
+Secondary Locations (only when extract folder is inappropriate):
+- src/components/ui/ - For fundamental UI primitives only
+- src/components/common/ - For shared business logic components
+- Component-specific folders - Only when component has complex sub-components
+
+Extract Folder Structure:
+- Each component should have its own .tsx file
+- Corresponding .stories.tsx file in the same directory
+- Follow the established pattern: component-name.tsx + component-name.stories.tsx
+- Use descriptive, kebab-case filenames that clearly indicate component purpose
+
+Benefits of Extract Folder Priority:
+- Centralized component library for extraction features
+- Consistent component organization and discovery
+- Easier maintenance and refactoring
+- Clear separation between UI primitives and business components
 
 Part 2: API Route Architecture (MANDATORY)
 When creating or refactoring API routes, follow these microservice principles:

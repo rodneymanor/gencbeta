@@ -1,22 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-import { ScriptComponents, ContentMetadata } from "@/types/transcription";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-
-interface ParsedTranscriptionData {
-  transcript?: string;
-  components?: ScriptComponents;
-  contentMetadata?: ContentMetadata;
-  visualContext?: string;
-}
+import { authenticateApiKey } from "@/lib/api-key-auth";
+import { VideoTranscriber } from "@/lib/core/video/transcriber";
+import { detectPlatform } from "@/lib/core/video/platform-detector";
 
 export async function POST(request: NextRequest) {
-  console.log("🎬 [TRANSCRIBE] Starting video transcription...");
-
   try {
+    // Authenticate user (keeping existing auth)
+    const user = await authenticateApiKey(request);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const contentType = request.headers.get("content-type");
 
     if (contentType?.includes("application/json")) {
@@ -26,8 +20,6 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     console.error("❌ [TRANSCRIBE] Transcription error:", error);
-    console.error("❌ [TRANSCRIBE] Error stack:", error instanceof Error ? error.stack : "No stack trace");
-
     return NextResponse.json(
       {
         error: "Failed to transcribe video",
