@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+
 
 export interface VideoData {
   id: string;
@@ -45,7 +45,7 @@ export async function processCreatorProfile(
 
     if (platform === "tiktok") {
       extractedVideos = await processTikTokProfile(username, videoCount);
-    } else if (platform === "instagram") {
+    } else {
       extractedVideos = await processInstagramProfile(username, videoCount);
     }
 
@@ -54,6 +54,7 @@ export async function processCreatorProfile(
         success: false,
         extractedVideos: [],
         totalFound: 0,
+        message: "No videos found",
         error: "No videos found for this profile. The profile may be private, empty, or the username may be incorrect."
       };
     }
@@ -84,6 +85,7 @@ export async function processCreatorProfile(
       success: false,
       extractedVideos: [],
       totalFound: 0,
+      message: "Processing failed",
       error: error instanceof Error ? error.message : "Failed to process profile"
     };
   }
@@ -208,12 +210,12 @@ async function processInstagramProfile(username: string, videoCount: number): Pr
 
       // Step 1: Get user ID by username
       const userIdResponse = await fetch(
-        `https://instagram-scraper-api2.p.rapidapi.com/v1/user_id_by_username?username=${username}`,
+        `https://instagram-scrapper-posts-reels-stories-downloader.p.rapidapi.com/user_id_by_username?username=${username}`,
         {
           method: "GET",
           headers: {
             "X-RapidAPI-Key": rapidApiKey,
-            "X-RapidAPI-Host": "instagram-scraper-api2.p.rapidapi.com"
+            "X-RapidAPI-Host": "instagram-scrapper-posts-reels-stories-downloader.p.rapidapi.com"
           }
         }
       );
@@ -224,7 +226,7 @@ async function processInstagramProfile(username: string, videoCount: number): Pr
       }
 
       const userIdData = await userIdResponse.json();
-      const userId = userIdData.user_id;
+      const userId = userIdData.UserID;
 
       if (!userId) {
         throw new Error(`No user ID found for @${username}. The username may be incorrect or the profile may not exist.`);
@@ -232,12 +234,12 @@ async function processInstagramProfile(username: string, videoCount: number): Pr
 
       // Step 2: Get posts by user ID
       const postsResponse = await fetch(
-        `https://instagram-scraper-api2.p.rapidapi.com/v1/user_posts?user_id=${userId}&limit=${videoCount * 2}`,
+        `https://instagram-scrapper-posts-reels-stories-downloader.p.rapidapi.com/user_posts?user_id=${userId}&limit=${videoCount * 2}`,
         {
           method: "GET",
           headers: {
             "X-RapidAPI-Key": rapidApiKey,
-            "X-RapidAPI-Host": "instagram-scraper-api2.p.rapidapi.com"
+            "X-RapidAPI-Host": "instagram-scrapper-posts-reels-stories-downloader.p.rapidapi.com"
           }
         }
       );

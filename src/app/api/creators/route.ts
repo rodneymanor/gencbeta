@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { processCreatorProfile } from "@/lib/process-creator-utils";
 
-import { authenticateApiKey } from "@/lib/api-key-auth";
+
 
 interface CreatorProfile {
   id: string;
@@ -41,7 +41,7 @@ interface AddCreatorResponse {
   error?: string;
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     console.log("🔍 [CREATORS] Fetching all creators...");
 
@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
     
     const processData = await processCreatorProfile(username, platform, 20);
 
-    if (!processData.success || !processData.extractedVideos || processData.extractedVideos.length === 0) {
+    if (!processData.success || !processData.extractedVideos?.length) {
       return NextResponse.json(
         {
           success: false,
@@ -186,7 +186,7 @@ export async function POST(request: NextRequest) {
     );
 
     if (!downloadResponse.ok) {
-      const errorData = await downloadResponse.json();
+      const errorData = await downloadResponse.json().catch(() => ({}));
       console.warn("⚠️ [CREATORS] Video download failed, but creator will still be added:", errorData);
     }
 
