@@ -33,14 +33,16 @@ const IsComingSoon = () => (
 const NavItem = ({
   item,
   isActive,
+  className,
 }: {
   item: NavMainItem;
   isActive: (url: string, subItems?: NavMainItem["subItems"]) => boolean;
+  className?: string;
 }) => {
   const hasSubItems = item.subItems && item.subItems.length > 0;
 
   return (
-    <SidebarMenuItem>
+    <SidebarMenuItem className={className}>
       <HoverCard openDelay={150}>
         <HoverCardTrigger asChild>
           <div className="gap-.5 flex flex-col items-center">
@@ -60,7 +62,7 @@ const NavItem = ({
             )}
 
             {/* Label outside the background container */}
-            <span className="text-secondary-foreground text-center text-[10px] font-medium whitespace-nowrap">
+            <span className="text-secondary-foreground text-center text-xs font-medium whitespace-nowrap">
               {item.title}
             </span>
           </div>
@@ -111,7 +113,7 @@ export function NavMain({ items, onCollectionCreated }: NavMainProps) {
       <SidebarGroup>
         <SidebarGroupContent className="flex flex-col gap-2">
           <SidebarMenu>
-            <SidebarMenuItem>
+            <SidebarMenuItem className="mt-8">
               <div className="gap-.5 flex flex-col items-center">
                 {/* Icon container with background */}
                 <Link href="/dashboard/scripts/new" className="group">
@@ -139,8 +141,8 @@ export function NavMain({ items, onCollectionCreated }: NavMainProps) {
           {group.label && <SidebarGroupLabel>{group.label}</SidebarGroupLabel>}
           <SidebarGroupContent className="flex flex-col gap-2">
             <SidebarMenu>
-              {group.items.map((item) => (
-                <NavItem key={item.title} item={item} isActive={isItemActive} />
+              {group.items.map((item, index) => (
+                <NavItem key={item.title} item={item} isActive={isItemActive} className={index === 0 ? "mt-8" : ""} />
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
