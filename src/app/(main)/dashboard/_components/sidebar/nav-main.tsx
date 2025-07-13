@@ -141,8 +141,13 @@ export function NavMain({ items, onCollectionCreated }: NavMainProps) {
           {group.label && <SidebarGroupLabel>{group.label}</SidebarGroupLabel>}
           <SidebarGroupContent className="flex flex-col gap-2">
             <SidebarMenu>
-              {group.items.map((item, index) => (
-                <NavItem key={item.title} item={item} isActive={isItemActive} className={index === 0 ? "mt-8" : ""} />
+              {group.items.map((item) => (
+                <NavItem
+                  key={item.title}
+                  item={item}
+                  isActive={isItemActive}
+                  className={group.id === 1 ? "mt-8" : ""}
+                />
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
