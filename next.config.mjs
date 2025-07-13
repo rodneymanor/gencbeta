@@ -61,7 +61,9 @@ const nextConfig = {
       'scontent-lax3-1.cdninstagram.com',
       'scontent-lax3-2.cdninstagram.com',
       'instagram.com',
-      'cdninstagram.com'
+      'cdninstagram.com',
+      // Development placeholder images
+      'via.placeholder.com'
     ],
   },
   // Force dynamic rendering and disable development features

@@ -1,17 +1,18 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, Plus, Search } from 'lucide-react';
+import { ArrowLeft, Plus, Search, Users, AlertCircle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { SocialHeader } from '@/components/extract/social-header';
 import { VideoGridDisplay } from '@/components/extract/video-grid-display';
+import { SafeImage } from '@/components/ui/safe-image';
 import { AddCreatorDialog } from './_components/add-creator-dialog';
 import { cn } from '@/lib/utils';
 
@@ -95,7 +96,7 @@ export default function CreatorSpotlightPage() {
               username: 'tiktok_creator_1',
               displayName: 'TikTok Star',
               platform: 'tiktok',
-              profileImageUrl: 'https://via.placeholder.com/150x150/FF0050/FFFFFF?text=T',
+              profileImageUrl: '',
               bio: 'Creating amazing TikTok content! 🎵',
               postsCount: 150,
               followersCount: 2500000,
@@ -111,7 +112,7 @@ export default function CreatorSpotlightPage() {
               username: 'instagram_creator_1',
               displayName: 'Instagram Influencer',
               platform: 'instagram',
-              profileImageUrl: 'https://via.placeholder.com/150x150/E4405F/FFFFFF?text=I',
+              profileImageUrl: '',
               bio: 'Lifestyle and fashion content 📸',
               postsCount: 320,
               followersCount: 1800000,
@@ -127,7 +128,7 @@ export default function CreatorSpotlightPage() {
               username: 'tiktok_creator_2',
               displayName: 'Comedy Creator',
               platform: 'tiktok',
-              profileImageUrl: 'https://via.placeholder.com/150x150/FF0050/FFFFFF?text=C',
+              profileImageUrl: '',
               bio: 'Making people laugh one video at a time 😂',
               postsCount: 89,
               followersCount: 850000,
@@ -390,12 +391,14 @@ export default function CreatorSpotlightPage() {
                 <div className="p-6 space-y-4">
                   <div className="flex items-center gap-4">
                     <div className="relative">
-                                             <Image
+                                             <SafeImage
                          src={creator.profileImageUrl}
                          alt={creator.displayName ?? creator.username}
                          width={64}
                          height={64}
-                         className="h-16 w-16 rounded-full object-cover"
+                         className="h-16 w-16 rounded-full"
+                         fallbackUsername={creator.username}
+                         fallbackPlatform={creator.platform}
                        />
                       <Badge
                         variant="outline"
@@ -459,12 +462,33 @@ export default function CreatorSpotlightPage() {
 
       {!loading && filteredCreators.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">
-            {searchTerm || platformFilter !== 'all' 
-              ? 'No creators found matching your criteria.'
-              : 'No creators available yet.'
-            }
-          </p>
+          <div className="max-w-md mx-auto space-y-4">
+            <div className="flex justify-center">
+              <Users className="h-12 w-12 text-muted-foreground" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold">
+                {searchTerm || platformFilter !== 'all' 
+                  ? 'No creators found'
+                  : 'No creators available yet'
+                }
+              </h3>
+              <p className="text-muted-foreground">
+                {searchTerm || platformFilter !== 'all' 
+                  ? 'Try adjusting your search or filter criteria.'
+                  : 'Add your first creator to get started with content analysis.'
+                }
+              </p>
+            </div>
+            {!searchTerm && platformFilter === 'all' && (
+              <AddCreatorDialog onCreatorAdded={loadCreators}>
+                <Button className="mt-4">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Your First Creator
+                </Button>
+              </AddCreatorDialog>
+            )}
+          </div>
         </div>
       )}
     </div>

@@ -49,56 +49,56 @@ export async function GET(request: NextRequest) {
 
     // TODO: Replace with actual database query
     // For now, return mock data
-    const mockCreators: CreatorProfile[] = [
-      {
-        id: '1',
-        username: 'tiktok_creator_1',
-        displayName: 'TikTok Star',
-        platform: 'tiktok',
-        profileImageUrl: 'https://via.placeholder.com/150x150/FF0050/FFFFFF?text=T',
-        bio: 'Creating amazing TikTok content! 🎵',
-        postsCount: 150,
-        followersCount: 2500000,
-        followingCount: 500,
-        isVerified: true,
-        videoCount: 45,
-        lastProcessed: '2024-01-15T10:30:00Z',
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-15T10:30:00Z'
-      },
-      {
-        id: '2',
-        username: 'instagram_creator_1',
-        displayName: 'Instagram Influencer',
-        platform: 'instagram',
-        profileImageUrl: 'https://via.placeholder.com/150x150/E4405F/FFFFFF?text=I',
-        bio: 'Lifestyle and fashion content 📸',
-        postsCount: 320,
-        followersCount: 1800000,
-        followingCount: 1200,
-        isVerified: true,
-        videoCount: 28,
-        lastProcessed: '2024-01-14T15:45:00Z',
-        createdAt: '2024-01-02T00:00:00Z',
-        updatedAt: '2024-01-14T15:45:00Z'
-      },
-      {
-        id: '3',
-        username: 'tiktok_creator_2',
-        displayName: 'Comedy Creator',
-        platform: 'tiktok',
-        profileImageUrl: 'https://via.placeholder.com/150x150/FF0050/FFFFFF?text=C',
-        bio: 'Making people laugh one video at a time 😂',
-        postsCount: 89,
-        followersCount: 850000,
-        followingCount: 200,
-        isVerified: false,
-        videoCount: 32,
-        lastProcessed: '2024-01-13T09:20:00Z',
-        createdAt: '2024-01-03T00:00:00Z',
-        updatedAt: '2024-01-13T09:20:00Z'
-      }
-    ];
+          const mockCreators: CreatorProfile[] = [
+        {
+          id: '1',
+          username: 'tiktok_creator_1',
+          displayName: 'TikTok Star',
+          platform: 'tiktok',
+          profileImageUrl: '',
+          bio: 'Creating amazing TikTok content! 🎵',
+          postsCount: 150,
+          followersCount: 2500000,
+          followingCount: 500,
+          isVerified: true,
+          videoCount: 45,
+          lastProcessed: '2024-01-15T10:30:00Z',
+          createdAt: '2024-01-01T00:00:00Z',
+          updatedAt: '2024-01-15T10:30:00Z'
+        },
+        {
+          id: '2',
+          username: 'instagram_creator_1',
+          displayName: 'Instagram Influencer',
+          platform: 'instagram',
+          profileImageUrl: '',
+          bio: 'Lifestyle and fashion content 📸',
+          postsCount: 320,
+          followersCount: 1800000,
+          followingCount: 1200,
+          isVerified: true,
+          videoCount: 28,
+          lastProcessed: '2024-01-14T15:45:00Z',
+          createdAt: '2024-01-02T00:00:00Z',
+          updatedAt: '2024-01-14T15:45:00Z'
+        },
+        {
+          id: '3',
+          username: 'tiktok_creator_2',
+          displayName: 'Comedy Creator',
+          platform: 'tiktok',
+          profileImageUrl: '',
+          bio: 'Making people laugh one video at a time 😂',
+          postsCount: 89,
+          followersCount: 850000,
+          followingCount: 200,
+          isVerified: false,
+          videoCount: 32,
+          lastProcessed: '2024-01-13T09:20:00Z',
+          createdAt: '2024-01-03T00:00:00Z',
+          updatedAt: '2024-01-13T09:20:00Z'
+        }
+      ];
 
     return NextResponse.json({
       success: true,

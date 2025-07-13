@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
 import { Plus, Loader2, Check, AlertCircle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -256,13 +255,14 @@ export function AddCreatorDialog({ children, onCreatorAdded }: AddCreatorDialogP
               <h4 className="font-medium mb-2">Preview</h4>
               <div className="flex items-center gap-3">
                 <div className="relative">
-                                  <Image
-                  src={formData.profileImageUrl ?? `https://via.placeholder.com/50x50/${formData.platform === 'tiktok' ? 'FF0050' : 'E4405F'}/FFFFFF?text=${formData.username.charAt(0).toUpperCase()}`}
-                  alt="Profile preview"
-                  width={48}
-                  height={48}
-                  className="w-12 h-12 rounded-full object-cover"
-                />
+                                  <div 
+                  className="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-white"
+                  style={{
+                    backgroundColor: formData.platform === 'tiktok' ? '#FF0050' : '#E4405F'
+                  }}
+                >
+                  {formData.username.charAt(0).toUpperCase()}
+                </div>
                   <Badge
                     variant="outline"
                     className={cn(
