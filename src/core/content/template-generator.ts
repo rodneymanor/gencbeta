@@ -9,8 +9,8 @@ import { parseStructuredResponse, createScriptElements, combineScriptElements } 
 import { generateScriptWithValidation, validateScript, cleanScriptContent } from "@/lib/script-validation";
 import { createSpeedWritePrompt, createAIVoicePrompt } from "@/lib/prompt-helpers";
 import { createNegativeKeywordPromptInstruction } from "@/data/negative-keywords";
-import { getEffectiveNegativeKeywordsForUser } from "@/lib/core/content";
-import { VoiceTemplateProcessor } from "@/lib/core/content";
+import { getEffectiveNegativeKeywordsForUser } from "@/core/content";
+import { VoiceTemplateProcessor } from "@/core/content";
 import { AIVoice } from "@/types/ai-voices";
 
 export interface ScriptGenerationResult {

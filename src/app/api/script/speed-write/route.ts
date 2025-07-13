@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { authenticateApiKey } from "@/lib/api-key-auth";
-import { ScriptService } from "@/lib/core/script/script-service";
+import { ScriptService } from "@/core/script/script-service";
 import { CreditsService } from "@/lib/credits-service";
 import { trackApiUsageAdmin } from "@/lib/usage-tracker-admin";
 

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { authenticateApiKey } from "@/lib/api-key-auth";
-import { detectPlatform } from "@/lib/core/video/platform-detector";
-import { VideoTranscriber } from "@/lib/core/video/transcriber";
+import { detectPlatform } from "@/core/video/platform-detector";
+import { VideoTranscriber } from "@/core/video/transcriber";
 
 export async function POST(request: NextRequest) {
   try {

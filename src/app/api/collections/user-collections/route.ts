@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { authenticateApiKey, authenticateFirebaseRequest } from "@/lib/core/auth";
-import { RBACService } from "@/lib/core/auth";
+import { authenticateApiKey, authenticateFirebaseRequest } from "@/core/auth";
+import { RBACService } from "@/core/auth";
 
 export async function GET(request: NextRequest) {
   try {

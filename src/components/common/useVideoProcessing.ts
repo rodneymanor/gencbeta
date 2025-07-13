@@ -7,7 +7,7 @@
 
 import { useState, useCallback } from "react";
 import { useAuth } from "@/contexts/auth-context";
-import { useVideoService } from "@/lib/core/video";
+import { useVideoService } from "@/core/video";
 
 export interface VideoProcessingOptions {
   onProgress?: (progress: number, message: string) => void;

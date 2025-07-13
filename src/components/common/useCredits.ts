@@ -7,7 +7,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { useAuth } from "@/contexts/auth-context";
-import { useBillingService } from "@/lib/core/billing";
+import { useBillingService } from "@/core/billing";
 
 export interface CreditsState {
   available: number;

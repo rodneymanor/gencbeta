@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateApiKey } from "@/lib/api-key-auth";
-import { SocialProfileService } from "@/lib/core/social/profile-service";
+import { SocialProfileService } from "@/core/social/profile-service";
 
 interface ProfileRequest {
   url: string;

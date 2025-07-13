@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { authenticateApiKey } from "@/lib/api-key-auth";
-import { VideoDownloader } from "@/lib/core/video/downloader";
+import { VideoDownloader } from "@/core/video/downloader";
 
 export async function POST(request: NextRequest) {
   try {
