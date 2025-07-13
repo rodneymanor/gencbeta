@@ -59,7 +59,10 @@ export const sidebarItems: NavGroup[] = [
         title: "Research",
         url: "/research/collections",
         icon: FolderOpen,
-        subItems: [{ title: "Collections", url: "/research/collections", icon: FolderOpen }],
+        subItems: [
+          { title: "Collections", url: "/research/collections", icon: FolderOpen },
+          { title: "Creator Spotlight", url: "/research/creator-spotlight", icon: Users },
+        ],
       },
     ],
   },

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs';
 import CreatorSpotlightPage from './page';
 
 const meta: Meta<typeof CreatorSpotlightPage> = {
@@ -41,9 +41,8 @@ export const Loading: Story = {
       },
     },
   },
-  play: async ({ canvasElement }) => {
+  play: async () => {
     // Simulate loading state by mocking the API
-    const originalFetch = global.fetch;
     global.fetch = jest.fn(() => 
       new Promise(resolve => 
         setTimeout(() => resolve({
@@ -64,9 +63,8 @@ export const EmptyState: Story = {
       },
     },
   },
-  play: async ({ canvasElement }) => {
+  play: async () => {
     // Mock empty creators list
-    const originalFetch = global.fetch;
     global.fetch = jest.fn(() => 
       Promise.resolve({
         ok: true,
@@ -85,9 +83,8 @@ export const WithCreators: Story = {
       },
     },
   },
-  play: async ({ canvasElement }) => {
+  play: async () => {
     // Mock creators data
-    const originalFetch = global.fetch;
     global.fetch = jest.fn(() => 
       Promise.resolve({
         ok: true,
@@ -158,16 +155,14 @@ export const CreatorDetailView: Story = {
       },
     },
   },
-  play: async ({ canvasElement }) => {
+  play: async () => {
     // Mock URL with creator parameter
-    const originalSearchParams = URLSearchParams.prototype.get;
     URLSearchParams.prototype.get = jest.fn((key) => {
       if (key === 'creator') return '1';
       return null;
     });
 
     // Mock creators data
-    const originalFetch = global.fetch;
     global.fetch = jest.fn((url) => {
       if (url === '/api/creators') {
         return Promise.resolve({

@@ -28,10 +28,6 @@ interface AddCreatorDialogProps {
 interface CreatorFormData {
   username: string;
   platform: 'tiktok' | 'instagram';
-  displayName?: string;
-  profileImageUrl?: string;
-  bio?: string;
-  website?: string;
 }
 
 export function AddCreatorDialog({ children, onCreatorAdded }: AddCreatorDialogProps) {
@@ -39,14 +35,33 @@ export function AddCreatorDialog({ children, onCreatorAdded }: AddCreatorDialogP
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<CreatorFormData>({
     username: '',
-    platform: 'tiktok',
-    displayName: '',
-    profileImageUrl: '',
-    bio: '',
-    website: ''
+    platform: 'tiktok'
   });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  const submitCreator = async () => {
+    const response = await fetch('/api/creators', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData)
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      setSuccess(data.message);
+      resetForm();
+      setTimeout(() => {
+        setOpen(false);
+        onCreatorAdded();
+      }, 2000);
+    } else {
+      setError(data.error ?? 'Failed to add creator');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,26 +76,7 @@ export function AddCreatorDialog({ children, onCreatorAdded }: AddCreatorDialogP
     setSuccess(null);
 
     try {
-      const response = await fetch('/api/creators', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setSuccess(data.message);
-        resetForm();
-        setTimeout(() => {
-          setOpen(false);
-          onCreatorAdded();
-        }, 2000);
-      } else {
-        setError(data.error ?? 'Failed to add creator');
-      }
+      await submitCreator();
     } catch (error) {
       console.error('Error adding creator:', error);
       if (error instanceof Error && error.message.includes('401')) {
@@ -96,19 +92,66 @@ export function AddCreatorDialog({ children, onCreatorAdded }: AddCreatorDialogP
   const resetForm = () => {
     setFormData({
       username: '',
-      platform: 'tiktok',
-      displayName: '',
-      profileImageUrl: '',
-      bio: '',
-      website: ''
+      platform: 'tiktok'
     });
   };
 
+  const detectPlatformFromUrl = (url: string): 'tiktok' | 'instagram' | null => {
+    if (url.includes('tiktok.com') || url.includes('tiktok')) {
+      return 'tiktok';
+    }
+    if (url.includes('instagram.com') || url.includes('instagram')) {
+      return 'instagram';
+    }
+    return null;
+  };
+
+  const extractUsernameFromUrl = (url: string): string => {
+    // Remove protocol and domain
+    let username = url.replace(/^https?:\/\//, '');
+    username = username.replace(/^www\./, '');
+    
+    // Extract username from various URL patterns
+    const patterns = [
+      /(?:tiktok\.com|instagram\.com)\/@?([^/?]+)/,
+      /(?:tiktok\.com|instagram\.com)\/([^/?]+)/,
+    ];
+    
+    for (const pattern of patterns) {
+      const match = username.match(pattern);
+      if (match) {
+        return match[1].replace('@', '');
+      }
+    }
+    
+    return username;
+  };
+
   const handleInputChange = (field: keyof CreatorFormData, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    if (field === 'username') {
+      // Check if input looks like a URL
+      if (value.includes('http') || value.includes('tiktok.com') || value.includes('instagram.com')) {
+        const detectedPlatform = detectPlatformFromUrl(value);
+        const extractedUsername = extractUsernameFromUrl(value);
+        
+        setFormData((prev) => ({
+          ...prev,
+          username: extractedUsername,
+          platform: detectedPlatform ?? prev.platform,
+        }));
+      } else {
+        // Regular username input
+        setFormData((prev) => ({
+          ...prev,
+          username: value.replace('@', ''),
+        }));
+      }
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    }
   };
 
   return (
@@ -120,14 +163,41 @@ export function AddCreatorDialog({ children, onCreatorAdded }: AddCreatorDialogP
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Plus className="h-5 w-5" />
-            Add Creator to Spotlight
+            Add Creator
           </DialogTitle>
-          <DialogDescription>
-            Add a new creator from TikTok or Instagram to analyze their content and videos.
-          </DialogDescription>
+                      <DialogDescription>
+              Enter a creator&apos;s username or paste their profile URL to add them to the spotlight.
+            </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Username/URL Input */}
+          <div className="space-y-2">
+            <Label htmlFor="username">
+              Username or Profile URL *
+              <span className="text-muted-foreground ml-1">
+                (paste username or full profile URL)
+              </span>
+            </Label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
+                @
+              </span>
+              <Input
+                id="username"
+                type="text"
+                value={formData.username}
+                onChange={(e) => handleInputChange('username', e.target.value)}
+                placeholder="username or https://tiktok.com/@username"
+                className="pl-8"
+                required
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              You can paste a full profile URL and we&apos;ll automatically detect the platform and extract the username.
+            </p>
+          </div>
+
           {/* Platform Selection */}
           <div className="space-y-2">
             <Label htmlFor="platform">Platform *</Label>
@@ -159,78 +229,6 @@ export function AddCreatorDialog({ children, onCreatorAdded }: AddCreatorDialogP
                 </SelectItem>
               </SelectContent>
             </Select>
-          </div>
-
-          {/* Username */}
-          <div className="space-y-2">
-            <Label htmlFor="username">
-              Username *
-              <span className="text-muted-foreground ml-1">
-                (without @ symbol)
-              </span>
-            </Label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
-                @
-              </span>
-              <Input
-                id="username"
-                type="text"
-                value={formData.username}
-                onChange={(e) => handleInputChange('username', e.target.value.replace('@', ''))}
-                placeholder="username"
-                className="pl-8"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Display Name */}
-          <div className="space-y-2">
-            <Label htmlFor="displayName">Display Name</Label>
-            <Input
-              id="displayName"
-              type="text"
-              value={formData.displayName}
-              onChange={(e) => handleInputChange('displayName', e.target.value)}
-              placeholder="Optional display name"
-            />
-          </div>
-
-          {/* Profile Image URL */}
-          <div className="space-y-2">
-            <Label htmlFor="profileImageUrl">Profile Image URL</Label>
-            <Input
-              id="profileImageUrl"
-              type="url"
-              value={formData.profileImageUrl}
-              onChange={(e) => handleInputChange('profileImageUrl', e.target.value)}
-              placeholder="https://example.com/profile.jpg"
-            />
-          </div>
-
-          {/* Bio */}
-          <div className="space-y-2">
-            <Label htmlFor="bio">Bio</Label>
-            <Input
-              id="bio"
-              type="text"
-              value={formData.bio}
-              onChange={(e) => handleInputChange('bio', e.target.value)}
-              placeholder="Creator's bio or description"
-            />
-          </div>
-
-          {/* Website */}
-          <div className="space-y-2">
-            <Label htmlFor="website">Website</Label>
-            <Input
-              id="website"
-              type="url"
-              value={formData.website}
-              onChange={(e) => handleInputChange('website', e.target.value)}
-              placeholder="https://example.com"
-            />
           </div>
 
           {/* Error Alert */}
