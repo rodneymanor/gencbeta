@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { processCreatorProfile } from "@/lib/process-creator-utils";
 
 import { authenticateApiKey } from "@/lib/api-key-auth";
 
@@ -56,7 +57,7 @@ export async function GET(request: NextRequest) {
         username: "tiktok_creator_1",
         displayName: "TikTok Star",
         platform: "tiktok",
-        profileImageUrl: "https://via.placeholder.com/150x150/FF0050/FFFFFF?text=TS",
+        profileImageUrl: "/images/placeholder.svg",
         bio: "Creating amazing TikTok content! 🎵",
         postsCount: 150,
         followersCount: 2500000,
@@ -72,7 +73,7 @@ export async function GET(request: NextRequest) {
         username: "instagram_creator_1",
         displayName: "Instagram Influencer",
         platform: "instagram",
-        profileImageUrl: "https://via.placeholder.com/150x150/E4405F/FFFFFF?text=II",
+        profileImageUrl: "/images/placeholder.svg",
         bio: "Lifestyle and fashion content 📸",
         postsCount: 320,
         followersCount: 1800000,
@@ -88,7 +89,7 @@ export async function GET(request: NextRequest) {
         username: "tiktok_creator_2",
         displayName: "Comedy Creator",
         platform: "tiktok",
-        profileImageUrl: "https://via.placeholder.com/150x150/FF0050/FFFFFF?text=CC",
+        profileImageUrl: "/images/placeholder.svg",
         bio: "Making people laugh one video at a time 😂",
         postsCount: 89,
         followersCount: 850000,
@@ -152,34 +153,9 @@ export async function POST(request: NextRequest) {
     console.log(`🔍 [CREATORS] Adding ${platform} creator: @${username}`);
 
     // Step 1: Process the creator to get profile data and videos
-    const processResponse = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001"}/api/process-creator`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.INTERNAL_API_KEY || "internal_key"}`,
-        },
-        body: JSON.stringify({
-          username,
-          platform,
-          videoCount: 20,
-        }),
-      },
-    );
-
-    if (!processResponse.ok) {
-      const errorData = await processResponse.json();
-      return NextResponse.json(
-        {
-          success: false,
-          error: errorData.error || "Failed to process creator profile",
-        },
-        { status: 400 },
-      );
-    }
-
-    const processData = await processResponse.json();
+    console.log(`🔍 [CREATORS] Processing creator profile directly...`);
+    
+    const processData = await processCreatorProfile(username, platform, 20);
 
     if (!processData.success || !processData.extractedVideos || processData.extractedVideos.length === 0) {
       return NextResponse.json(
@@ -222,7 +198,7 @@ export async function POST(request: NextRequest) {
       platform,
       profileImageUrl:
         profileImageUrl ||
-        `https://via.placeholder.com/150x150/${platform === "tiktok" ? "FF0050" : "E4405F"}/FFFFFF?text=${username.charAt(0).toUpperCase()}`,
+        `/images/placeholder.svg`,
       bio: bio || `Content creator on ${platform}`,
       website,
       postsCount: processData.extractedVideos.length,
