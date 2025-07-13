@@ -56,7 +56,7 @@ export const sidebarItems: NavGroup[] = [
     id: 3,
     items: [
       {
-        title: "Collections",
+        title: "Research",
         url: "/research/collections",
         icon: FolderOpen,
         subItems: [{ title: "Collections", url: "/research/collections", icon: FolderOpen }],
