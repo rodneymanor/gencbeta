@@ -33,6 +33,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: '**.b-cdn.net',
       },
+      {
+        protocol: 'https',
+        hostname: 'bunny.net',
+      },
     ],
     domains: [
       // Instagram CDN domains - regional servers
@@ -62,6 +66,9 @@ const nextConfig = {
       'scontent-lax3-2.cdninstagram.com',
       'instagram.com',
       'cdninstagram.com',
+      // Bunny.net CDN domains
+      'bunny.net',
+      '**.b-cdn.net',
       // Development placeholder images
       'via.placeholder.com'
     ],
