@@ -43,7 +43,7 @@ export const processAndAddVideo = async (
       console.error("❌ [VIDEO_PROCESS] Processing failed:", data);
       return {
         success: false,
-        error: data.error || "Video processing failed",
+        error: data.error ?? "Video processing failed",
         details: data.details,
       };
     }

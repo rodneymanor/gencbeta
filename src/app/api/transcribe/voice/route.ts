@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { authenticateApiKey } from "@/lib/api-key-auth";
 import { GeminiService } from "@/lib/gemini";
 
 export async function POST(request: NextRequest) {
   try {
+    // Authenticate user
+    const authResult = await authenticateApiKey(request);
+
+    // Check if authResult is a NextResponse (error)
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+
     console.log("🎤 [VOICE] Starting voice transcription...");
 
     const body = await request.json();
