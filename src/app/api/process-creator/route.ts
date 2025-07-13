@@ -12,6 +12,11 @@ interface VideoData {
   description?: string;
   author?: string;
   duration?: number;
+  // Add fields for processing status
+  downloadStatus?: "pending" | "downloading" | "completed" | "failed";
+  transcriptionStatus?: "pending" | "transcribing" | "completed" | "failed";
+  downloadUrl?: string; // CDN URL after download
+  transcriptionId?: string; // ID of transcription result
 }
 
 interface ProcessCreatorRequest {
@@ -89,7 +94,12 @@ export async function POST(request: NextRequest) {
     // Sort by engagement (views + likes) and take the top performers
     const sortedVideos = extractedVideos
       .sort((a, b) => (b.viewCount + b.likeCount) - (a.viewCount + a.likeCount))
-      .slice(0, videoCount);
+      .slice(0, videoCount)
+      .map(video => ({
+        ...video,
+        downloadStatus: "pending" as const,
+        transcriptionStatus: "pending" as const
+      }));
 
     console.log(`✅ [PROCESS_CREATOR] Successfully extracted ${sortedVideos.length} videos`);
 
@@ -97,7 +107,7 @@ export async function POST(request: NextRequest) {
       success: true,
       extractedVideos: sortedVideos,
       totalFound: extractedVideos.length,
-      message: `Successfully extracted ${sortedVideos.length} videos from @${username}'s ${platform} profile`
+      message: `Successfully extracted ${sortedVideos.length} videos from @${username}'s ${platform} profile. Use /api/process-creator/download-all to download and transcribe these videos.`
     };
 
     return NextResponse.json(response);

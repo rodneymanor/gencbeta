@@ -1,0 +1,210 @@
+'use client';
+
+import React from 'react';
+import Image from 'next/image';
+import { ChevronDown, MoreHorizontal, Check } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+
+export interface SocialHeaderProps {
+  username: string;
+  displayName?: string;
+  profileImageUrl: string;
+  bio?: string;
+  website?: string;
+  postsCount: number;
+  followersCount: number;
+  followingCount: number;
+  isFollowing?: boolean;
+  isVerified?: boolean;
+  mutualFollowers?: Array<{
+    username: string;
+    displayName: string;
+  }>;
+  className?: string;
+  onFollowClick?: () => void;
+  onMoreClick?: () => void;
+}
+
+export function SocialHeader({
+  username,
+  displayName,
+  profileImageUrl,
+  bio,
+  website,
+  postsCount,
+  followersCount,
+  followingCount,
+  isFollowing = false,
+  isVerified = false,
+  mutualFollowers = [],
+  className,
+  onFollowClick,
+  onMoreClick,
+}: SocialHeaderProps) {
+  const formatNumber = (num: number): string => {
+    if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + 'M';
+    if (num >= 1_000) return (num / 1_000).toFixed(1) + 'K';
+    return num.toString();
+  };
+
+  return (
+    <header className={cn('w-full bg-white text-black text-sm leading-[18px] font-sans', className)}>
+      <div className="flex flex-col md:flex-row gap-8 p-6">
+        {/* Profile Image Section */}
+        <div className="flex justify-center md:justify-start">
+          <div className="relative">
+            <a
+              href={`/${username}/`}
+              className="block w-[150px] h-[150px] rounded-full overflow-hidden bg-[#f5f5f5]"
+            >
+              <Image
+                src={profileImageUrl}
+                alt={`${username}'s profile picture`}
+                width={150}
+                height={150}
+                className="object-cover w-full h-full"
+                crossOrigin="anonymous"
+                draggable={false}
+              />
+            </a>
+          </div>
+        </div>
+
+        {/* Content Section */}
+        <div className="flex-1 min-w-0">
+          {/* Header Info Section */}
+          <div className="mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              {/* Username and Verification */}
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-normal text-black break-words">
+                  {username}
+                </h2>
+                {isVerified && (
+                  <Check className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant={isFollowing ? 'outline' : 'default'}
+                  size="sm"
+                  onClick={onFollowClick}
+                  className="bg-[#efefef] text-black font-semibold hover:bg-[#e5e5e5] min-w-[120px]"
+                >
+                  <span className="flex items-center gap-1">
+                    {isFollowing ? 'Following' : 'Follow'}
+                    {isFollowing && (
+                      <ChevronDown className="h-4 w-4 rotate-180" />
+                    )}
+                  </span>
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onMoreClick}
+                  className="p-2"
+                >
+                  <MoreHorizontal className="h-5 w-5 text-black" />
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats Section */}
+          <div className="mb-4">
+            <ul className="flex gap-8 text-base">
+              <li>
+                <span className="text-[#737373]">
+                  <span className="font-semibold text-black">
+                    {formatNumber(postsCount)}
+                  </span>
+                  {' posts'}
+                </span>
+              </li>
+              <li>
+                <a
+                  href={`/${username}/followers/`}
+                  className="text-[#737373] hover:text-black transition-colors"
+                >
+                  <span title={followersCount.toString()} className="font-semibold text-black">
+                    {formatNumber(followersCount)}
+                  </span>
+                  {' followers'}
+                </a>
+              </li>
+              <li>
+                <a
+                  href={`/${username}/following/`}
+                  className="text-[#737373] hover:text-black transition-colors"
+                >
+                  <span className="font-semibold text-black">
+                    {formatNumber(followingCount)}
+                  </span>
+                  {' following'}
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Bio Section */}
+          <div className="space-y-2">
+            {/* Display Name */}
+            <div className="font-semibold text-black text-sm">
+              {displayName || username}
+            </div>
+
+            {/* Bio Text */}
+            <div className="text-[#737373] text-sm leading-[18px] whitespace-pre-line">
+              {bio || 'Reel creator'}
+            </div>
+
+            {/* Website Link */}
+            {website && (
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-[#00376b] text-xs">
+                  🌐
+                </Badge>
+                <a
+                  href={website}
+                  rel="me nofollow noopener noreferrer"
+                  target="_blank"
+                  className="text-[#00376b] font-semibold text-sm hover:underline truncate"
+                >
+                  {website.replace(/^https?:\/\//, '')}
+                </a>
+              </div>
+            )}
+
+            {/* Mutual Followers */}
+            {mutualFollowers.length > 0 && (
+              <a
+                href={`/${username}/followers/mutualOnly`}
+                className="block text-xs text-[#737373] hover:text-black transition-colors"
+              >
+                Followed by{' '}
+                <span className="text-black font-medium">
+                  {mutualFollowers[0]?.username}
+                </span>
+                {mutualFollowers.length > 1 && (
+                  <>
+                    ,{' '}
+                    <span className="text-black font-medium">
+                      {mutualFollowers[1]?.username}
+                    </span>
+                    {mutualFollowers.length > 2 && ` + ${mutualFollowers.length - 2} more`}
+                  </>
+                )}
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+} 
