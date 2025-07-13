@@ -139,7 +139,7 @@ export const titleResolvers = {
       // This would ideally fetch from collections context/store
       return "Collection"; // Will be overridden by page component
     }
-    return "All Videos";
+    return "Collections";
   },
 
   collectionDetail: (pathname: string) => {

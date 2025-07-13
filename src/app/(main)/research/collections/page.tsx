@@ -502,10 +502,6 @@ function CollectionsPageContent() {
     }
   }, [user, userProfile, isLoading, loadData]);
 
-  useEffect(() => {
-    setTopBarConfig({ title: "Collections" });
-  }, [setTopBarConfig]);
-
   // Video management functions
   const handleVideoAdded = useCallback(async () => {
     if (!user) return;

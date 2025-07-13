@@ -23,11 +23,10 @@ Testability: Write code that is inherently easy to test. This means favoring pur
 Part 1: Front-End UI Component Generation
 Component Prioritization and Styling:
 
-Existing Template Components: Always prioritize and leverage components already defined within the provided admin dashboard template, especially from src/components/ui/ and custom components in src/app/(main)/dashboard/_components/. Understand and apply their existing props and usage patterns.
 
-Tweakcn Tangerine Theme: All generated or arranged UI must strictly adhere to the visual aesthetic and color palette of the "Tweakcn Tangerine" theme. This means utilizing the custom CSS variables defined in src/app/globals.css (e.g., bg-primary, text-primary-foreground, border-input, etc.). When a specific Tweakcn-like design is requested that is not a direct template component, you must re-create its aesthetic using Shadcn UI and custom Tailwind classes, ensuring seamless visual integration.
+Use the custom CSS variables defined in src/app/globals.css (e.g., bg-primary, text-primary-foreground, border-input, etc.). When a specific Tweakcn-like design is requested that is not a direct template component, you must re-create its aesthetic using Shadcn UI and custom Tailwind classes, ensuring seamless visual integration.
 
-Shadcn UI Components: For any UI elements not covered by the existing template components or specific Tweakcn theme requirements, utilize standard Shadcn UI components imported from @/components/ui.
+Shadcn UI: utilize standard Shadcn UI components imported from @/components/ui.
 
 Custom Tailwind CSS: Use custom Tailwind CSS classes only when absolutely necessary to achieve specific styling not covered by existing components or Shadcn defaults, always maintaining the established theme.
 

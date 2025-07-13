@@ -171,7 +171,7 @@ export function VideoInsightsModal({ video, children }: VideoInsightsModalProps)
 
                     <div className="rounded-lg border-2 border-blue-200 bg-blue-50 p-4 text-center shadow-sm">
                       <div className="text-2xl font-bold text-blue-600">
-                        {video.insights.engagementRate.toFixed(2)}%
+                        {video.insights.engagementRate.toFixed(1)}%
                       </div>
                       <div className="mt-1 flex items-center justify-center gap-1 text-sm text-blue-600">
                         <span>📊</span> Engagement Rate

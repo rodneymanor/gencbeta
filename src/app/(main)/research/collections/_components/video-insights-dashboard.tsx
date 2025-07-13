@@ -17,6 +17,8 @@ import {
   Check,
   ExternalLink,
   Calendar,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -211,6 +213,44 @@ export function VideoInsightsDashboard({ video, children }: VideoInsightsDashboa
     );
   };
 
+  // Individual Metric Card Component
+  const SocialMediaMetricCard = ({
+    icon,
+    metric,
+    label,
+    trend,
+    trendDirection
+  }: {
+    icon: React.ReactNode;
+    metric: string;
+    label: string;
+    trend?: string;
+    trendDirection?: 'up' | 'down';
+  }) => {
+    const TrendIcon = trendDirection === 'up' ? ArrowUp : ArrowDown;
+    const trendColor = trendDirection === 'up' ? 'text-green-500' : 'text-red-500';
+
+    return (
+      <div className="border border-border/50 bg-card/50 rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-all duration-300 ease-in-out transform hover:scale-[1.02]">
+        <div className="flex items-center gap-x-4">
+          <div className="p-2 bg-muted/50 rounded-lg">
+            {icon}
+          </div>
+          <div className="flex flex-col">
+            <p className="text-2xl font-bold text-foreground">{metric}</p>
+            <p className="text-xs text-muted-foreground">{label}</p>
+          </div>
+          {trend && (
+            <div className={`flex items-center ml-auto text-xs ${trendColor}`}>
+              <TrendIcon className="w-4 h-4 mr-1" />
+              <span>{trend}</span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -320,49 +360,49 @@ export function VideoInsightsDashboard({ video, children }: VideoInsightsDashboa
                   <CardTitle className="text-foreground text-base">Metrics</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="bg-gradient-to-br from-muted/50 to-muted/30 rounded-lg p-4 text-center">
-                      <div className="text-2xl font-bold text-primary mb-1">{formatNumber(getLikes())}</div>
-                      <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
-                        <Heart className="w-3 h-3" />
-                        <span>Likes</span>
-                      </div>
-                    </div>
-                    <div className="bg-gradient-to-br from-muted/50 to-muted/30 rounded-lg p-4 text-center">
-                      <div className="text-2xl font-bold text-primary mb-1">{formatNumber(getComments())}</div>
-                      <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
-                        <MessageCircle className="w-3 h-3" />
-                        <span>Comments</span>
-                      </div>
-                    </div>
-                    <div className="bg-gradient-to-br from-muted/50 to-muted/30 rounded-lg p-4 text-center">
-                      <div className="text-2xl font-bold text-primary mb-1">{formatNumber(getShares())}</div>
-                      <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
-                        <Share className="w-3 h-3" />
-                        <span>Shares</span>
-                      </div>
-                    </div>
-                    <div className="bg-gradient-to-br from-muted/50 to-muted/30 rounded-lg p-4 text-center">
-                      <div className="text-2xl font-bold text-primary mb-1">{formatNumber(getViews())}</div>
-                      <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
-                        <Eye className="w-3 h-3" />
-                        <span>Views</span>
-                      </div>
-                    </div>
-                    <div className="bg-gradient-to-br from-muted/50 to-muted/30 rounded-lg p-4 text-center">
-                      <div className="text-2xl font-bold text-primary mb-1">{formatNumber(getSaves())}</div>
-                      <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
-                        <Bookmark className="w-3 h-3" />
-                        <span>Saves</span>
-                      </div>
-                    </div>
-                    <div className="bg-gradient-to-br from-muted/50 to-muted/30 rounded-lg p-4 text-center">
-                      <div className="text-2xl font-bold text-primary mb-1">{calculateEngagementRate().toFixed(2)}%</div>
-                      <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
-                        <TrendingUp className="w-3 h-3" />
-                        <span>Engagement Rate</span>
-                      </div>
-                    </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
+                    <SocialMediaMetricCard
+                      icon={<Heart className="w-6 h-6 text-red-500" />}
+                      metric={formatNumber(getLikes())}
+                      label="Likes"
+                      trend="5.2%"
+                      trendDirection="up"
+                    />
+                    <SocialMediaMetricCard
+                      icon={<MessageCircle className="w-6 h-6 text-green-500" />}
+                      metric={formatNumber(getComments())}
+                      label="Comments"
+                      trend="8.9%"
+                      trendDirection="up"
+                    />
+                    <SocialMediaMetricCard
+                      icon={<Share className="w-6 h-6 text-purple-500" />}
+                      metric={formatNumber(getShares())}
+                      label="Shares"
+                      trend="2.1%"
+                      trendDirection="down"
+                    />
+                    <SocialMediaMetricCard
+                      icon={<Eye className="w-6 h-6 text-blue-500" />}
+                      metric={formatNumber(getViews())}
+                      label="Views"
+                      trend="12.5%"
+                      trendDirection="up"
+                    />
+                    <SocialMediaMetricCard
+                      icon={<Bookmark className="w-6 h-6 text-[#2d93ad]" />}
+                      metric={formatNumber(getSaves())}
+                      label="Saves"
+                      trend="3.4%"
+                      trendDirection="up"
+                    />
+                    <SocialMediaMetricCard
+                      icon={<TrendingUp className="w-6 h-6 text-indigo-500" />}
+                      metric={`${calculateEngagementRate().toFixed(1)}%`}
+                      label="Engagement Rate"
+                      trend="1.2%"
+                      trendDirection="up"
+                    />
                   </div>
                 </CardContent>
               </Card>
