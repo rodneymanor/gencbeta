@@ -133,24 +133,34 @@ export function NavMain({ items, onCollectionCreated }: NavMainProps) {
         <SidebarGroupContent className="flex flex-col gap-2">
           <SidebarMenu>
             <SidebarMenuItem className="mt-8">
-              <div className="gap-.5 flex flex-col items-center">
-                {/* Icon container with background */}
-                <Link href="/dashboard/scripts/new" className="group">
-                  <div
-                    className="bg-background-color-300 flex h-8 w-8 items-center justify-center rounded-md px-2 py-2 transition-all duration-200 hover:bg-[oklch(var(--background-color-300)/0.8)]"
-                    style={{
-                      backgroundColor: "oklch(var(--background-color-300)/0.8)",
-                    }}
-                  >
-                    <Zap className="h-5 w-5 transition-transform hover:scale-110" />
-                  </div>
-                </Link>
+              <HoverCard openDelay={150}>
+                <HoverCardTrigger asChild>
+                  <div className="gap-.5 flex flex-col items-center">
+                    {/* Icon container with background */}
+                    <Link href="/dashboard/scripts/new" className="group">
+                      <div
+                        className="bg-background-color-300 flex h-8 w-8 items-center justify-center rounded-md px-2 py-2 transition-all duration-200 hover:bg-[oklch(var(--background-color-300)/0.8)]"
+                        style={{
+                          backgroundColor: "oklch(var(--background-color-300)/0.8)",
+                        }}
+                      >
+                        <Zap className="h-5 w-5 transition-transform hover:scale-110" />
+                      </div>
+                    </Link>
 
-                {/* Label outside the background container */}
-                {/* <span className="text-secondary-foreground text-center text-xs font-medium whitespace-nowrap">
-                  Write Script
-                </span> */}
-              </div>
+                    {/* Label outside the background container */}
+                    {/* <span className="text-secondary-foreground text-center text-xs font-medium whitespace-nowrap">
+                      Write Script
+                    </span> */}
+                  </div>
+                </HoverCardTrigger>
+                <HoverCardContent side="right" className="w-32 p-2">
+                  <div className="flex items-center gap-2">
+                    <Zap className="h-4 w-4" />
+                    <span className="text-sm font-medium">New Script</span>
+                  </div>
+                </HoverCardContent>
+              </HoverCard>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroupContent>
