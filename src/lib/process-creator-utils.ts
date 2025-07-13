@@ -33,6 +33,10 @@ export interface ProcessCreatorResponse {
   error?: string;
 }
 
+// Global rate limiting for Instagram API
+let lastInstagramCall = 0;
+const INSTAGRAM_RATE_LIMIT_MS = 3000; // 3 seconds between calls
+
 export async function processCreatorProfile(
   username: string,
   platform: "tiktok" | "instagram",
@@ -191,6 +195,16 @@ async function processTikTokProfile(username: string, videoCount: number): Promi
 async function processInstagramProfile(username: string, videoCount: number): Promise<VideoData[]> {
   console.log(`📸 [INSTAGRAM] Processing profile: @${username}`);
   
+  // Rate limiting: ensure we don't make calls too frequently
+  const now = Date.now();
+  const timeSinceLastCall = now - lastInstagramCall;
+  if (timeSinceLastCall < INSTAGRAM_RATE_LIMIT_MS) {
+    const waitTime = INSTAGRAM_RATE_LIMIT_MS - timeSinceLastCall;
+    console.log(`⏳ [INSTAGRAM] Rate limiting: waiting ${waitTime}ms before making API call...`);
+    await new Promise(resolve => setTimeout(resolve, waitTime));
+  }
+  lastInstagramCall = Date.now();
+  
   const maxRetries = 3;
   let lastError: Error | null = null;
 
@@ -310,8 +324,8 @@ async function processInstagramProfile(username: string, videoCount: number): Pr
       console.error(`❌ [INSTAGRAM] Attempt ${attempt}/${maxRetries} failed:`, lastError.message);
       
       if (attempt < maxRetries) {
-        const delayMs = attempt * 2000; // Exponential backoff: 2s, 4s, 6s
-        console.log(`⏳ [INSTAGRAM] Retrying in ${delayMs}ms...`);
+        const delayMs = attempt * 5000; // Longer delays: 5s, 10s, 15s to respect rate limits
+        console.log(`⏳ [INSTAGRAM] Retrying in ${delayMs}ms... (respecting rate limits)`);
         await new Promise(resolve => setTimeout(resolve, delayMs));
       }
     }
