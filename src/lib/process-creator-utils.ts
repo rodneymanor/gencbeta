@@ -108,64 +108,60 @@ async function processTikTokProfile(username: string, videoCount: number): Promi
       }
 
       // Fetch user feed from TikTok scraper API
-      const response = await fetch(
-        `https://tiktok-scrapper-videos-music-challenges-downloader.p.rapidapi.com/user/${username}/feed`,
-        {
-          method: "GET",
-          headers: {
-            "X-RapidAPI-Key": rapidApiKey,
-            "X-RapidAPI-Host": "tiktok-scrapper-videos-music-challenges-downloader.p.rapidapi.com"
-          }
+      const tiktokApiUrl = `https://tiktok-scrapper-videos-music-challenges-downloader.p.rapidapi.com/user/${username}/feed`;
+      console.log(`🌐 [TIKTOK] Making API call to: ${tiktokApiUrl}`);
+      
+      const response = await fetch(tiktokApiUrl, {
+        method: "GET",
+        headers: {
+          "X-RapidAPI-Key": rapidApiKey,
+          "X-RapidAPI-Host": "tiktok-scrapper-videos-music-challenges-downloader.p.rapidapi.com"
         }
-      );
+      });
 
+      console.log(`📡 [TIKTOK] API Response Status: ${response.status} ${response.statusText}`);
+      
       if (!response.ok) {
         const errorText = await response.text();
+        console.error(`❌ [TIKTOK] API Error Response:`, errorText);
         throw new Error(`TikTok API request failed with status ${response.status}: ${errorText}`);
       }
 
       const data = await response.json();
+      console.log(`📊 [TIKTOK] API Response Data:`, JSON.stringify(data, null, 2));
       
       if (!data.videos || !Array.isArray(data.videos)) {
+        console.error(`❌ [TIKTOK] No videos array found in response. Response structure:`, Object.keys(data));
         throw new Error("No videos found in TikTok API response. The profile may be private or the username may be incorrect.");
       }
 
+      console.log(`📊 [TIKTOK] Found ${data.videos.length} videos in response`);
+      
       if (data.videos.length === 0) {
         throw new Error(`No videos found for @${username}. The profile may be empty or private.`);
       }
 
       // Process up to 2x the requested count to get best performers
       const maxVideos = Math.min(data.videos.length, videoCount * 2);
+      console.log(`🔄 [TIKTOK] Processing ${maxVideos} videos out of ${data.videos.length} total`);
       const processedVideos: VideoData[] = [];
 
       for (let i = 0; i < maxVideos; i++) {
         const video = data.videos[i];
+        console.log(`🔍 [TIKTOK] Processing video ${i + 1}/${maxVideos}:`, {
+          id: video.id,
+          title: video.title,
+          video_url: video.video_url,
+          view_count: video.view_count,
+          like_count: video.like_count
+        });
         
-        try {
-          // Extract video data with proper validation
-          const videoUrl = video.video_url || video.download_url || video.url;
-          if (!videoUrl || !isValidVideoUrl(videoUrl)) {
-            console.warn(`⚠️ [TIKTOK] Invalid video URL for video ${i}, skipping`);
-            continue;
-          }
-
-          const videoData: VideoData = {
-            id: video.id || `tiktok_${username}_${i}_${Date.now()}`,
-            platform: "tiktok",
-            video_url: videoUrl,
-            thumbnail_url: video.thumbnail_url || video.cover,
-            viewCount: parseInt(video.view_count || video.views || "0"),
-            likeCount: parseInt(video.like_count || video.likes || "0"),
-            quality: video.quality || "720p",
-            title: video.title || video.description || `TikTok Video ${i + 1}`,
-            description: video.description || "",
-            author: video.author || username,
-            duration: parseInt(video.duration || "30")
-          };
-
+        const videoData = extractTikTokVideoData(video, username, i);
+        if (videoData) {
           processedVideos.push(videoData);
-        } catch (error) {
-          console.warn(`⚠️ [TIKTOK] Failed to process video ${i}:`, error);
+          console.log(`✅ [TIKTOK] Successfully extracted video ${i + 1}`);
+        } else {
+          console.log(`⚠️ [TIKTOK] Failed to extract video ${i + 1}`);
         }
       }
 
@@ -209,88 +205,89 @@ async function processInstagramProfile(username: string, videoCount: number): Pr
       }
 
       // Step 1: Get user ID by username
-      const userIdResponse = await fetch(
-        `https://instagram-scrapper-posts-reels-stories-downloader.p.rapidapi.com/user_id_by_username?username=${username}`,
-        {
-          method: "GET",
-          headers: {
-            "X-RapidAPI-Key": rapidApiKey,
-            "X-RapidAPI-Host": "instagram-scrapper-posts-reels-stories-downloader.p.rapidapi.com"
-          }
+      const userIdApiUrl = `https://instagram-scrapper-posts-reels-stories-downloader.p.rapidapi.com/user_id_by_username?username=${username}`;
+      console.log(`🌐 [INSTAGRAM] Making User ID API call to: ${userIdApiUrl}`);
+      
+      const userIdResponse = await fetch(userIdApiUrl, {
+        method: "GET",
+        headers: {
+          "X-RapidAPI-Key": rapidApiKey,
+          "X-RapidAPI-Host": "instagram-scrapper-posts-reels-stories-downloader.p.rapidapi.com"
         }
-      );
+      });
+
+      console.log(`📡 [INSTAGRAM] User ID API Response Status: ${userIdResponse.status} ${userIdResponse.statusText}`);
 
       if (!userIdResponse.ok) {
         const errorText = await userIdResponse.text();
+        console.error(`❌ [INSTAGRAM] User ID API Error Response:`, errorText);
         throw new Error(`Instagram user ID lookup failed with status ${userIdResponse.status}: ${errorText}`);
       }
 
       const userIdData = await userIdResponse.json();
+      console.log(`📊 [INSTAGRAM] User ID API Response Data:`, JSON.stringify(userIdData, null, 2));
+      
       const userId = userIdData.UserID;
 
       if (!userId) {
         throw new Error(`No user ID found for @${username}. The username may be incorrect or the profile may not exist.`);
       }
 
-      // Step 2: Get posts by user ID
-      const postsResponse = await fetch(
-        `https://instagram-scrapper-posts-reels-stories-downloader.p.rapidapi.com/user_posts?user_id=${userId}&limit=${videoCount * 2}`,
-        {
-          method: "GET",
-          headers: {
-            "X-RapidAPI-Key": rapidApiKey,
-            "X-RapidAPI-Host": "instagram-scrapper-posts-reels-stories-downloader.p.rapidapi.com"
-          }
-        }
-      );
-
-      if (!postsResponse.ok) {
-        const errorText = await postsResponse.text();
-        throw new Error(`Instagram posts fetch failed with status ${postsResponse.status}: ${errorText}`);
-      }
-
-      const postsData = await postsResponse.json();
+      // Step 2: Get reels by user ID
+      const reelsApiUrl = `https://instagram-scrapper-posts-reels-stories-downloader.p.rapidapi.com/reels?user_id=${userId}&include_feed_video=true`;
+      console.log(`🌐 [INSTAGRAM] Making Reels API call to: ${reelsApiUrl}`);
       
-      if (!postsData.posts || !Array.isArray(postsData.posts)) {
-        throw new Error("No posts found in Instagram API response. The profile may be private or the username may be incorrect.");
+      const reelsResponse = await fetch(reelsApiUrl, {
+        method: "GET",
+        headers: {
+          "X-RapidAPI-Key": rapidApiKey,
+          "X-RapidAPI-Host": "instagram-scrapper-posts-reels-stories-downloader.p.rapidapi.com"
+        }
+      });
+
+      console.log(`📡 [INSTAGRAM] Reels API Response Status: ${reelsResponse.status} ${reelsResponse.statusText}`);
+
+      if (!reelsResponse.ok) {
+        const errorText = await reelsResponse.text();
+        console.error(`❌ [INSTAGRAM] Reels API Error Response:`, errorText);
+        throw new Error(`Instagram reels fetch failed with status ${reelsResponse.status}: ${errorText}`);
       }
 
-      if (postsData.posts.length === 0) {
-        throw new Error(`No posts found for @${username}. The profile may be empty or private.`);
+      const reelsData = await reelsResponse.json();
+      console.log(`📊 [INSTAGRAM] Reels API Response Data:`, JSON.stringify(reelsData, null, 2));
+      
+      if (!reelsData.reels || !Array.isArray(reelsData.reels)) {
+        console.error(`❌ [INSTAGRAM] No reels array found in response. Response structure:`, Object.keys(reelsData));
+        throw new Error("No reels found in Instagram API response. The profile may be private or the username may be incorrect.");
+      }
+
+      console.log(`📊 [INSTAGRAM] Found ${reelsData.reels.length} reels in response`);
+      
+      if (reelsData.reels.length === 0) {
+        throw new Error(`No reels found for @${username}. The profile may be empty or private.`);
       }
 
       // Process up to 2x the requested count to get best performers
-      const maxPosts = Math.min(postsData.posts.length, videoCount * 2);
+      const maxReels = Math.min(reelsData.reels.length, videoCount * 2);
+      console.log(`🔄 [INSTAGRAM] Processing ${maxReels} reels out of ${reelsData.reels.length} total`);
       const processedVideos: VideoData[] = [];
 
-      for (let i = 0; i < maxPosts; i++) {
-        const post = postsData.posts[i];
+      for (let i = 0; i < maxReels; i++) {
+        const reel = reelsData.reels[i];
+        console.log(`🔍 [INSTAGRAM] Processing reel ${i + 1}/${maxReels}:`, {
+          id: reel.id,
+          title: reel.title,
+          video_url: reel.video_url,
+          view_count: reel.view_count,
+          like_count: reel.like_count
+        });
         
-        try {
-          // Extract video data with proper validation
-          const videoUrl = post.video_url || post.download_url || post.url;
-          if (!videoUrl || !isValidVideoUrl(videoUrl)) {
-            console.warn(`⚠️ [INSTAGRAM] Invalid video URL for post ${i}, skipping`);
-            continue;
-          }
-
-          const videoData: VideoData = {
-            id: post.id || `instagram_${username}_${i}_${Date.now()}`,
-            platform: "instagram",
-            video_url: videoUrl,
-            thumbnail_url: post.thumbnail_url || post.cover,
-            viewCount: parseInt(post.view_count || post.views || "0"),
-            likeCount: parseInt(post.like_count || post.likes || "0"),
-            quality: post.quality || "720p",
-            title: post.title || post.description || `Instagram Post ${i + 1}`,
-            description: post.description || "",
-            author: post.author || username,
-            duration: parseInt(post.duration || "30")
-          };
-
+        const videoData = extractInstagramReelData(reel, username, i);
+        if (videoData) {
           processedVideos.push(videoData);
-        } catch (error) {
-          console.warn(`⚠️ [INSTAGRAM] Failed to process post ${i}:`, error);
+          console.log(`✅ [INSTAGRAM] Successfully extracted reel ${i + 1}`);
+        } else {
+          console.log(`⚠️ [INSTAGRAM] Failed to extract reel ${i + 1}`);
         }
       }
 
@@ -315,6 +312,50 @@ async function processInstagramProfile(username: string, videoCount: number): Pr
 
   // All retries failed
   throw new Error(`Failed to process Instagram profile @${username} after ${maxRetries} attempts. Last error: ${lastError?.message}`);
+}
+
+// Helper function for extracting TikTok video data
+function extractTikTokVideoData(video: any, username: string, i: number): VideoData | null {
+  const videoUrl = video.video_url ?? video.download_url ?? video.url;
+  if (!videoUrl || !isValidVideoUrl(videoUrl)) {
+    console.warn(`⚠️ [TIKTOK] Invalid video URL for video ${i}, skipping`);
+    return null;
+  }
+  return {
+    id: video.id ?? `tiktok_${username}_${i}_${Date.now()}`,
+    platform: 'tiktok',
+    video_url: videoUrl,
+    thumbnail_url: video.thumbnail_url ?? video.cover,
+    viewCount: parseInt(video.view_count ?? video.views ?? '0'),
+    likeCount: parseInt(video.like_count ?? video.likes ?? '0'),
+    quality: video.quality ?? '720p',
+    title: video.title ?? video.description ?? `TikTok Video ${i + 1}`,
+    description: video.description ?? '',
+    author: video.author ?? username,
+    duration: parseInt(video.duration ?? '30'),
+  };
+}
+
+// Helper function for extracting Instagram reel data
+function extractInstagramReelData(reel: any, username: string, i: number): VideoData | null {
+  const videoUrl = reel.video_url ?? reel.download_url ?? reel.url;
+  if (!videoUrl || !isValidVideoUrl(videoUrl)) {
+    console.warn(`⚠️ [INSTAGRAM] Invalid video URL for reel ${i}, skipping`);
+    return null;
+  }
+  return {
+    id: reel.id ?? `instagram_${username}_${i}_${Date.now()}`,
+    platform: 'instagram',
+    video_url: videoUrl,
+    thumbnail_url: reel.thumbnail_url ?? reel.cover,
+    viewCount: parseInt(reel.view_count ?? reel.views ?? '0'),
+    likeCount: parseInt(reel.like_count ?? reel.likes ?? '0'),
+    quality: reel.quality ?? '720p',
+    title: reel.title ?? reel.description ?? `Instagram Reel ${i + 1}`,
+    description: reel.description ?? '',
+    author: reel.author ?? username,
+    duration: parseInt(reel.duration ?? '30'),
+  };
 }
 
 function isValidVideoUrl(url: string): boolean {
