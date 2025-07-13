@@ -1,6 +1,58 @@
 import { NextRequest, NextResponse } from "next/server";
 import { processCreatorProfile } from "@/lib/process-creator-utils";
 
+// In-memory storage for creators (temporary until database is implemented)
+let creatorsStorage: CreatorProfile[] = [
+  {
+    id: "1",
+    username: "tiktok_creator_1",
+    displayName: "TikTok Star",
+    platform: "tiktok",
+    profileImageUrl: "/images/placeholder.svg",
+    bio: "Creating amazing TikTok content! 🎵",
+    postsCount: 150,
+    followersCount: 2500000,
+    followingCount: 500,
+    isVerified: true,
+    videoCount: 45,
+    lastProcessed: "2024-01-15T10:30:00Z",
+    createdAt: "2024-01-01T00:00:00Z",
+    updatedAt: "2024-01-15T10:30:00Z",
+  },
+  {
+    id: "2",
+    username: "instagram_creator_1",
+    displayName: "Instagram Influencer",
+    platform: "instagram",
+    profileImageUrl: "/images/placeholder.svg",
+    bio: "Lifestyle and fashion content 📸",
+    postsCount: 320,
+    followersCount: 1800000,
+    followingCount: 1200,
+    isVerified: true,
+    videoCount: 28,
+    lastProcessed: "2024-01-14T15:45:00Z",
+    createdAt: "2024-01-02T00:00:00Z",
+    updatedAt: "2024-01-14T15:45:00Z",
+  },
+  {
+    id: "3",
+    username: "tiktok_creator_2",
+    displayName: "Comedy Creator",
+    platform: "tiktok",
+    profileImageUrl: "/images/placeholder.svg",
+    bio: "Making people laugh one video at a time 😂",
+    postsCount: 89,
+    followersCount: 850000,
+    followingCount: 200,
+    isVerified: false,
+    videoCount: 32,
+    lastProcessed: "2024-01-13T09:20:00Z",
+    createdAt: "2024-01-03T00:00:00Z",
+    updatedAt: "2024-01-13T09:20:00Z",
+  },
+];
+
 
 
 interface CreatorProfile {
@@ -49,63 +101,12 @@ export async function GET() {
     // since it's just reading public information
     // TODO: Add proper authentication when user management is implemented
 
-    // TODO: Replace with actual database query
-    // For now, return mock data
-    const mockCreators: CreatorProfile[] = [
-      {
-        id: "1",
-        username: "tiktok_creator_1",
-        displayName: "TikTok Star",
-        platform: "tiktok",
-        profileImageUrl: "/images/placeholder.svg",
-        bio: "Creating amazing TikTok content! 🎵",
-        postsCount: 150,
-        followersCount: 2500000,
-        followingCount: 500,
-        isVerified: true,
-        videoCount: 45,
-        lastProcessed: "2024-01-15T10:30:00Z",
-        createdAt: "2024-01-01T00:00:00Z",
-        updatedAt: "2024-01-15T10:30:00Z",
-      },
-      {
-        id: "2",
-        username: "instagram_creator_1",
-        displayName: "Instagram Influencer",
-        platform: "instagram",
-        profileImageUrl: "/images/placeholder.svg",
-        bio: "Lifestyle and fashion content 📸",
-        postsCount: 320,
-        followersCount: 1800000,
-        followingCount: 1200,
-        isVerified: true,
-        videoCount: 28,
-        lastProcessed: "2024-01-14T15:45:00Z",
-        createdAt: "2024-01-02T00:00:00Z",
-        updatedAt: "2024-01-14T15:45:00Z",
-      },
-      {
-        id: "3",
-        username: "tiktok_creator_2",
-        displayName: "Comedy Creator",
-        platform: "tiktok",
-        profileImageUrl: "/images/placeholder.svg",
-        bio: "Making people laugh one video at a time 😂",
-        postsCount: 89,
-        followersCount: 850000,
-        followingCount: 200,
-        isVerified: false,
-        videoCount: 32,
-        lastProcessed: "2024-01-13T09:20:00Z",
-        createdAt: "2024-01-03T00:00:00Z",
-        updatedAt: "2024-01-13T09:20:00Z",
-      },
-    ];
+    console.log(`📊 [CREATORS] Returning ${creatorsStorage.length} creators from storage`);
 
     return NextResponse.json({
       success: true,
-      creators: mockCreators,
-      total: mockCreators.length,
+      creators: creatorsStorage,
+      total: creatorsStorage.length,
     });
   } catch (error) {
     console.error("🔥 [CREATORS] Failed to fetch creators:", error);
@@ -152,6 +153,21 @@ export async function POST(request: NextRequest) {
 
     console.log(`🔍 [CREATORS] Adding ${platform} creator: @${username}`);
 
+    // Check if creator already exists
+    const existingCreator = creatorsStorage.find(
+      (creator) => creator.username === username && creator.platform === platform
+    );
+    
+    if (existingCreator) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Creator @${username} already exists in Creator Spotlight.`,
+        },
+        { status: 409 },
+      );
+    }
+
     // Step 1: Process the creator to get profile data and videos
     console.log(`🔍 [CREATORS] Processing creator profile directly...`);
     
@@ -196,8 +212,10 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date().toISOString(),
     };
 
-    // TODO: Save to database
-    console.log("✅ [CREATORS] Creator profile created:", creatorProfile);
+    // Save to in-memory storage
+    creatorsStorage.push(creatorProfile);
+    console.log("✅ [CREATORS] Creator profile saved to storage:", creatorProfile);
+    console.log(`📊 [CREATORS] Total creators in storage: ${creatorsStorage.length}`);
 
     const response: AddCreatorResponse = {
       success: true,
