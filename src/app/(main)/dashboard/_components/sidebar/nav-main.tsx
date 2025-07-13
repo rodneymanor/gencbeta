@@ -40,6 +40,7 @@ const NavItem = ({
   className?: string;
 }) => {
   const hasSubItems = item.subItems && item.subItems.length > 0;
+  const active = isActive(item.url, item.subItems);
 
   return (
     <SidebarMenuItem className={className}>
@@ -49,13 +50,31 @@ const NavItem = ({
             {/* Icon container with background */}
             {hasSubItems ? (
               <div className="group cursor-pointer">
-                <div className="bg-background-color-300 flex h-8 w-8 items-center justify-center rounded-md px-2 py-2 transition-all duration-200 hover:bg-[oklch(var(--background-color-300)/0.8)]">
+                <div
+                  className="bg-background-color-300 flex h-8 w-8 items-center justify-center rounded-md px-2 py-2 transition-all duration-200 hover:bg-[oklch(var(--background-color-300)/0.8)]"
+                  style={
+                    active
+                      ? {
+                          backgroundColor: "oklch(var(--background-color-300)/0.8)",
+                        }
+                      : undefined
+                  }
+                >
                   {item.icon && <item.icon className="h-5 w-5" />}
                 </div>
               </div>
             ) : (
               <Link href={item.url} className="group">
-                <div className="bg-background-color-300 flex h-8 w-8 items-center justify-center rounded-md px-2 py-2 transition-all duration-200 hover:bg-[oklch(var(--background-color-300)/0.8)]">
+                <div
+                  className="bg-background-color-300 flex h-8 w-8 items-center justify-center rounded-md px-2 py-2 transition-all duration-200 hover:bg-[oklch(var(--background-color-300)/0.8)]"
+                  style={
+                    active
+                      ? {
+                          backgroundColor: "oklch(var(--background-color-300)/0.8)",
+                        }
+                      : undefined
+                  }
+                >
                   {item.icon && <item.icon className="h-5 w-5" />}
                 </div>
               </Link>
