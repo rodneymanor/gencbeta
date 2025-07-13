@@ -168,27 +168,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Step 2: Download and transcribe all videos
-    const downloadResponse = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001"}/api/process-creator/download-all`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.INTERNAL_API_KEY || "internal_key"}`,
-        },
-        body: JSON.stringify({
-          videos: processData.extractedVideos,
-          creatorUsername: username,
-          platform,
-        }),
-      },
-    );
-
-    if (!downloadResponse.ok) {
-      const errorData = await downloadResponse.json().catch(() => ({}));
-      console.warn("⚠️ [CREATORS] Video download failed, but creator will still be added:", errorData);
-    }
+    // Step 2: Download and transcribe all videos (skip for now to avoid redirect loop)
+    console.log(`🔍 [CREATORS] Skipping video download/transcription for now to avoid redirect loop`);
+    console.log(`📊 [CREATORS] Successfully extracted ${processData.extractedVideos.length} videos for @${username}`);
+    
+    // TODO: Implement direct function calls instead of HTTP requests
+    // const downloadResponse = await fetch(...);
 
     // Step 3: Create creator profile
     const creatorProfile: CreatorProfile = {

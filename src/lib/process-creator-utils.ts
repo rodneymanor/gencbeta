@@ -282,10 +282,10 @@ async function processInstagramProfile(username: string, videoCount: number): Pr
         const item = videoItems[i];
         const reel = item.media; // The actual reel data is in the media object
         console.log(`🔍 [INSTAGRAM] Processing reel ${i + 1}/${maxReels}:`, {
-          id: reel.id,
-          title: reel.title,
-          video_url: reel.video_url,
-          view_count: reel.view_count,
+          id: reel.pk,
+          title: reel.caption?.text,
+          video_url: reel.video_versions?.[0]?.url,
+          view_count: reel.play_count,
           like_count: reel.like_count
         });
         
