@@ -40,28 +40,31 @@ export class CreatorMediaService {
       }
 
       console.log(`✅ [CREATOR_MEDIA_SERVICE] Found creator @${creator.username} on ${creator.platform}`);
-      
+
       // Validate Bunny.net environment variables
-      const requiredEnvVars = ['BUNNY_STREAM_LIBRARY_ID', 'BUNNY_STREAM_API_KEY', 'BUNNY_CDN_HOSTNAME'];
-      const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
-      
+      const requiredEnvVars = ["BUNNY_STREAM_LIBRARY_ID", "BUNNY_STREAM_API_KEY", "BUNNY_CDN_HOSTNAME"];
+      const missingVars = requiredEnvVars.filter((varName) => !process.env[varName]);
+
       if (missingVars.length > 0) {
-        console.error(`❌ [CREATOR_MEDIA_SERVICE] Missing required environment variables: ${missingVars.join(', ')}`);
+        console.error(`❌ [CREATOR_MEDIA_SERVICE] Missing required environment variables: ${missingVars.join(", ")}`);
         return null;
       }
-      
+
       console.log(`✅ [CREATOR_MEDIA_SERVICE] Bunny.net environment variables validated`);
-      
+
       // Double-check if creator already has recent Bunny media (prevent race conditions)
       const existingMedia = (creator as any).bunnyMediaUrls;
       const uploadedAt = (creator as any).bunnyUploadedAt;
-      
+
       if (existingMedia && uploadedAt) {
         const uploadDate = new Date(uploadedAt);
         const daysSinceUpload = (Date.now() - uploadDate.getTime()) / (1000 * 60 * 60 * 24);
-        
-        if (daysSinceUpload < 1) { // If uploaded within last day, use existing
-          console.log(`♻️ [CREATOR_MEDIA_SERVICE] Using existing recent Bunny media (${daysSinceUpload.toFixed(1)} days old)`);
+
+        if (daysSinceUpload < 1) {
+          // If uploaded within last day, use existing
+          console.log(
+            `♻️ [CREATOR_MEDIA_SERVICE] Using existing recent Bunny media (${daysSinceUpload.toFixed(1)} days old)`,
+          );
           return existingMedia;
         }
       }
@@ -173,7 +176,7 @@ export class CreatorMediaService {
   /**
    * Upload an image to Bunny.net and get iframe URL + thumbnail
    */
-  private static async uploadImageToBunny(
+  static async uploadImageToBunny(
     imageUrl: string,
     filename: string,
   ): Promise<{

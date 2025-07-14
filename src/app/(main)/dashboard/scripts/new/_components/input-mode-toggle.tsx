@@ -1,33 +1,23 @@
 "use client";
 
-import { Type, Video, ExternalLink } from "lucide-react";
+import { ExternalLink, Zap, Lightbulb } from "lucide-react";
 
 import { ShineBorder } from "@/components/magicui/shine-border";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 import { IdeaInboxDialog } from "./idea-inbox-dialog";
 
-export type InputMode = "text" | "video";
+export type InputMode = "script-writer" | "hook-generator";
 
 export interface InputModeToggleProps {
   inputMode: InputMode;
   onInputModeChange: (mode: InputMode) => void;
   textValue: string;
   onTextChange: (value: string) => void;
-  videoUrl: string;
-  onVideoUrlChange: (url: string) => void;
   onSubmit: () => void;
   disabled?: boolean;
   showIdeaInbox?: boolean;
-}
-
-interface UrlValidation {
-  isValid: boolean;
-  platform: string | null;
-  error?: string;
 }
 
 interface TabProps {
@@ -36,50 +26,6 @@ interface TabProps {
   label: string;
   onClick: () => void;
 }
-
-interface PlatformInfo {
-  name: string;
-  color: string;
-  available: boolean;
-  example: string;
-}
-
-const detectVideoPlatform = (url: string): string | null => {
-  if (!url) return null;
-  const normalizedUrl = url.toLowerCase();
-
-  if (normalizedUrl.includes("tiktok.com")) return "tiktok";
-  if (normalizedUrl.includes("instagram.com")) return "instagram";
-  if (normalizedUrl.includes("youtube.com") || normalizedUrl.includes("youtu.be")) return "youtube";
-
-  return null;
-};
-
-const validateUrl = (url: string): UrlValidation => {
-  if (!url.trim()) {
-    return { isValid: false, platform: null };
-  }
-
-  const platform = detectVideoPlatform(url);
-
-  if (!platform) {
-    return {
-      isValid: false,
-      platform: null,
-      error: "Only TikTok, Instagram, and YouTube URLs are supported",
-    };
-  }
-
-  if (platform === "youtube") {
-    return {
-      isValid: false,
-      platform,
-      error: "YouTube support coming soon",
-    };
-  }
-
-  return { isValid: true, platform };
-};
 
 const TabButton = ({ isActive, icon, label, onClick }: TabProps) => (
   <button
@@ -97,53 +43,13 @@ const TabButton = ({ isActive, icon, label, onClick }: TabProps) => (
 
 const ModeDescription = ({ mode }: { mode: InputMode }) => {
   const getDescription = (inputMode: InputMode): string => {
-    if (inputMode === "text") {
-      return "Describe your video idea and we'll help you script it";
+    if (inputMode === "script-writer") {
+      return "Describe your video idea and we'll generate complete scripts using our fast writer workflow";
     }
-    return "Provide a video URL to transcribe and create a new script from it";
+    return "Enter an idea and we'll generate hook ideas to help you start your script";
   };
 
   return <p className="text-muted-foreground text-sm leading-relaxed">{getDescription(mode)}</p>;
-};
-
-const PlatformList = () => {
-  const supportedPlatforms: PlatformInfo[] = [
-    { name: "TikTok", color: "bg-pink-500", available: true, example: "tiktok.com/@username/video/7123456789" },
-    {
-      name: "Instagram",
-      color: "bg-gradient-to-r from-purple-500 to-pink-500",
-      available: true,
-      example: "instagram.com/reel/CAbCdEfGhIj",
-    },
-    { name: "YouTube", color: "bg-red-500", available: false, example: "youtube.com/watch?v=dQw4w9WgXcQ" },
-  ];
-
-  return (
-    <div className="bg-muted/30 rounded-lg border p-4">
-      <h4 className="mb-3 text-sm font-medium">Supported Platforms for Transcription</h4>
-      <div className="space-y-2">
-        {supportedPlatforms.map((platform) => (
-          <div key={platform.name} className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className={`h-3 w-3 rounded-full ${platform.color} ${!platform.available && "opacity-50"}`} />
-              <span className={`text-sm ${!platform.available && "text-muted-foreground"}`}>
-                {platform.name}
-                {!platform.available && (
-                  <Badge variant="secondary" className="ml-2 text-xs">
-                    Coming Soon
-                  </Badge>
-                )}
-              </span>
-            </div>
-            <span className="text-muted-foreground text-xs">{platform.example}</span>
-          </div>
-        ))}
-      </div>
-      <p className="text-muted-foreground mt-3 text-xs">
-        We&apos;ll extract the audio, transcribe the speech, and help you create a new script based on the content.
-      </p>
-    </div>
-  );
 };
 
 export function InputModeToggle({
@@ -151,14 +57,11 @@ export function InputModeToggle({
   onInputModeChange,
   textValue,
   onTextChange,
-  videoUrl,
-  onVideoUrlChange,
   onSubmit,
   disabled = false,
   showIdeaInbox = false,
 }: InputModeToggleProps) {
-  const urlValidation = validateUrl(videoUrl);
-  const finalSubmitDisabled = disabled || (inputMode === "text" ? !textValue.trim() : !urlValidation.isValid);
+  const finalSubmitDisabled = disabled || !textValue.trim();
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && !finalSubmitDisabled) {
@@ -173,17 +76,17 @@ export function InputModeToggle({
       <div className="space-y-3">
         <div className="flex items-center border-b">
           <TabButton
-            isActive={inputMode === "text"}
-            icon={<Type className="mr-2 inline h-4 w-4" />}
-            label="Text Idea"
-            onClick={() => onInputModeChange("text")}
+            isActive={inputMode === "script-writer"}
+            icon={<Zap className="mr-2 inline h-4 w-4" />}
+            label="Script Writer"
+            onClick={() => onInputModeChange("script-writer")}
           />
           <div className="bg-border mx-6 h-4 w-px" />
           <TabButton
-            isActive={inputMode === "video"}
-            icon={<Video className="mr-2 inline h-4 w-4" />}
-            label="Video URL"
-            onClick={() => onInputModeChange("video")}
+            isActive={inputMode === "hook-generator"}
+            icon={<Lightbulb className="mr-2 inline h-4 w-4" />}
+            label="Hook Generator"
+            onClick={() => onInputModeChange("hook-generator")}
           />
         </div>
 
@@ -192,102 +95,53 @@ export function InputModeToggle({
       </div>
 
       {/* Input Content */}
-      {inputMode === "text" ? (
-        <div className="space-y-4">
-          <div className="relative">
-            <ShineBorder
-              shineColor={["hsl(var(--primary)/0.3)", "hsl(var(--muted-foreground)/0.2)", "hsl(var(--accent)/0.25)"]}
-              duration={6}
-              borderWidth={1}
-              className="rounded-2xl"
-            >
-              <Textarea
-                placeholder="My script idea is about productivity tips for remote workers..."
-                value={textValue}
-                onChange={(e) => onTextChange(e.target.value)}
-                onKeyDown={handleKeyDown}
-                className="bg-background dark:bg-background text-foreground dark:text-foreground placeholder:text-muted-foreground dark:placeholder:text-muted-foreground border-border/50 dark:border-border/50 ring-border/50 dark:ring-border/50 focus:ring-primary/70 dark:focus:ring-primary/70 caret-primary selection:bg-primary/30 selection:text-foreground scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent block h-14 max-h-[45vh] min-h-[56px] w-full resize-none appearance-none rounded-2xl border px-4 py-3 pr-16 text-base leading-6 shadow-sm transition-colors transition-shadow duration-150 hover:shadow focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:ring-2 focus:ring-offset-0 focus-visible:outline-none sm:max-h-[25vh] lg:max-h-[40vh]"
-                disabled={disabled}
-                style={{
-                  fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-                  height: "auto",
-                  minHeight: "56px",
-                  maxHeight: "45vh",
-                }}
-                onInput={(e) => {
-                  const target = e.target as HTMLTextAreaElement;
-                  target.style.height = "auto";
-                  target.style.height = Math.min(target.scrollHeight, window.innerHeight * 0.45) + "px";
-                }}
-              />
-            </ShineBorder>
-            <Button
-              onClick={onSubmit}
-              disabled={finalSubmitDisabled}
-              size="sm"
-              className="absolute top-1/2 right-3 z-10 h-8 w-8 -translate-y-1/2 p-0 shadow-sm"
-            >
-              <ExternalLink className="h-4 w-4" />
-            </Button>
-          </div>
-          {showIdeaInbox && (
-            <div className="flex justify-center">
-              <IdeaInboxDialog />
-            </div>
-          )}
+      <div className="space-y-4">
+        <div className="relative">
+          <ShineBorder
+            shineColor={["hsl(var(--primary)/0.3)", "hsl(var(--muted-foreground)/0.2)", "hsl(var(--accent)/0.25)"]}
+            duration={6}
+            borderWidth={1}
+            className="rounded-2xl"
+          >
+            <Textarea
+              placeholder={
+                inputMode === "script-writer"
+                  ? "My script idea is about productivity tips for remote workers..."
+                  : "I want to create content about morning routines that boost productivity..."
+              }
+              value={textValue}
+              onChange={(e) => onTextChange(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="bg-background dark:bg-background text-foreground dark:text-foreground placeholder:text-muted-foreground dark:placeholder:text-muted-foreground border-border/50 dark:border-border/50 ring-border/50 dark:ring-border/50 focus:ring-primary/70 dark:focus:ring-primary/70 caret-primary selection:bg-primary/30 selection:text-foreground scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent block h-14 max-h-[45vh] min-h-[56px] w-full resize-none appearance-none rounded-2xl border px-4 py-3 pr-16 text-base leading-6 shadow-sm transition-colors transition-shadow duration-150 hover:shadow focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:ring-2 focus:ring-offset-0 focus-visible:outline-none sm:max-h-[25vh] lg:max-h-[40vh]"
+              disabled={disabled}
+              style={{
+                fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                height: "auto",
+                minHeight: "56px",
+                maxHeight: "45vh",
+              }}
+              onInput={(e) => {
+                const target = e.target as HTMLTextAreaElement;
+                target.style.height = "auto";
+                target.style.height = Math.min(target.scrollHeight, window.innerHeight * 0.45) + "px";
+              }}
+            />
+          </ShineBorder>
+          <Button
+            onClick={onSubmit}
+            disabled={finalSubmitDisabled}
+            size="sm"
+            className="absolute top-1/2 right-3 z-10 h-8 w-8 -translate-y-1/2 p-0 shadow-sm"
+          >
+            <ExternalLink className="h-4 w-4" />
+          </Button>
         </div>
-      ) : (
-        <div className="space-y-4">
-          <div className="relative">
-            <ShineBorder
-              shineColor={["hsl(var(--primary)/0.3)", "hsl(var(--muted-foreground)/0.2)", "hsl(var(--accent)/0.25)"]}
-              duration={6}
-              borderWidth={1}
-              className="rounded-2xl"
-            >
-              <Input
-                type="url"
-                placeholder="https://www.tiktok.com/@user/video/123456789..."
-                value={videoUrl}
-                onChange={(e) => onVideoUrlChange(e.target.value)}
-                onKeyDown={handleKeyDown}
-                className="bg-background dark:bg-background text-foreground dark:text-foreground placeholder:text-muted-foreground dark:placeholder:text-muted-foreground border-border/50 dark:border-border/50 ring-border/50 dark:ring-border/50 focus:ring-primary/70 dark:focus:ring-primary/70 caret-primary selection:bg-primary/30 selection:text-foreground block h-14 w-full appearance-none rounded-2xl border px-4 py-3 pr-12 text-base leading-6 shadow-sm transition-colors transition-shadow duration-150 hover:shadow focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:ring-2 focus:ring-offset-0 focus-visible:outline-none"
-                disabled={disabled}
-                style={{
-                  fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-                }}
-              />
-            </ShineBorder>
-            <Button
-              onClick={onSubmit}
-              disabled={finalSubmitDisabled}
-              size="sm"
-              className="absolute top-1/2 right-3 z-10 h-8 w-8 -translate-y-1/2 p-0 shadow-sm"
-            >
-              <ExternalLink className="h-4 w-4" />
-            </Button>
+        {showIdeaInbox && inputMode === "script-writer" && (
+          <div className="flex justify-center">
+            <IdeaInboxDialog />
           </div>
-
-          {/* URL Validation Feedback */}
-          {videoUrl && (
-            <div className="space-y-2">
-              {urlValidation.error ? (
-                <p className="text-destructive text-sm">{urlValidation.error}</p>
-              ) : urlValidation.platform ? (
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="border-primary/30 text-primary bg-primary/10 capitalize">
-                    {urlValidation.platform} detected
-                  </Badge>
-                  <span className="text-muted-foreground text-sm">Ready to transcribe and script</span>
-                </div>
-              ) : null}
-            </div>
-          )}
-
-          {/* Supported Platforms Info */}
-          <PlatformList />
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

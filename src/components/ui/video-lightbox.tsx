@@ -23,7 +23,7 @@ export function VideoLightbox({
 }: VideoLightboxProps) {
   const video = videos[currentIndex];
 
-  if (!video) return null;
+  if (!video || !open) return null;
 
   // Derive playback URL preference order: iframeUrl > directUrl > originalUrl
   const playbackUrl =

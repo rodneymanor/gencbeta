@@ -1,10 +1,51 @@
 'use client';
 
 import Image from 'next/image';
-import React from 'react';
+import React, { useState } from 'react';
 import { Play, Heart, Eye, Bookmark } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+
+/**
+ * Component to handle thumbnail with iframe fallback
+ */
+function VideoThumbnail({ 
+  video, 
+  alt = "Video thumbnail" 
+}: { 
+  video: GridVideo; 
+  alt?: string; 
+}) {
+  const [thumbnailError, setThumbnailError] = useState(false);
+  
+  // Get fallback iframe URL
+  const fallbackIframeUrl = video.bunnyIframeUrl || video.iframeUrl;
+  
+  // If thumbnail failed and we have iframe fallback, use iframe
+  if (thumbnailError && fallbackIframeUrl) {
+    return (
+      <iframe
+        src={fallbackIframeUrl}
+        title={alt}
+        className="h-full w-full object-cover"
+        frameBorder="0"
+        loading="lazy"
+        allow="accelerometer; encrypted-media; gyroscope; picture-in-picture"
+      />
+    );
+  }
+  
+  return (
+    <Image
+      src={video.thumbnailUrl}
+      alt={alt}
+      fill
+      sizes="(max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
+      className="object-cover transition-transform duration-200 group-hover:scale-105"
+      onError={() => setThumbnailError(true)}
+    />
+  );
+}
 
 /**
  * Generic shape expected from CollectionsPage helpers.
@@ -17,6 +58,8 @@ export interface GridVideo {
   likes?: number;
   views?: number;
   favorite?: boolean;
+  bunnyIframeUrl?: string; // Fallback iframe URL for when thumbnail fails
+  iframeUrl?: string; // Alternative iframe URL field
 }
 
 interface InstagramVideoGridProps {
@@ -63,14 +106,8 @@ export function InstagramVideoGrid({
             onClick={() => onVideoClick?.(video, idx)}
             className="group relative aspect-[9/16] w-full overflow-hidden rounded-sm bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
-            {/* Thumbnail */}
-            <Image
-              src={video.thumbnailUrl}
-              alt="Video thumbnail"
-              fill
-              sizes="(max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
-              className="object-cover transition-transform duration-200 group-hover:scale-105"
-            />
+            {/* Thumbnail with iframe fallback */}
+            <VideoThumbnail video={video} alt="Video thumbnail" />
 
             {/* Overlay darken */}
             <div className="absolute inset-0 bg-black/0 transition-colors duration-200 group-hover:bg-black/50" />

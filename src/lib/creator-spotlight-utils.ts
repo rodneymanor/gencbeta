@@ -74,7 +74,9 @@ export function enhanceCreatorForSpotlight(creator: CreatorProfile): EnhancedCre
 
   // Use Bunny profile image if available
   if (creator.bunnyProfileImageUrl) {
-    enhanced.profileImageUrl = creator.bunnyMediaUrls?.profileImage?.thumbnailUrl || creator.profileImageUrl;
+    enhanced.profileImageUrl = creator.bunnyProfileImageUrl;
+  } else if (creator.bunnyMediaUrls?.profileImage?.thumbnailUrl) {
+    enhanced.profileImageUrl = creator.bunnyMediaUrls.profileImage.thumbnailUrl;
   }
 
   return enhanced;
@@ -85,6 +87,9 @@ export function enhanceCreatorForSpotlight(creator: CreatorProfile): EnhancedCre
  */
 export function getOptimizedProfileImageUrl(creator: CreatorProfile): string {
   // Prefer Bunny thumbnail for faster loading, fallback to original
+  if (creator.bunnyProfileImageUrl) {
+    return creator.bunnyProfileImageUrl;
+  }
   if (creator.bunnyMediaUrls?.profileImage?.thumbnailUrl) {
     return creator.bunnyMediaUrls.profileImage.thumbnailUrl;
   }
@@ -141,6 +146,7 @@ export function convertToVideoWithPlayer(video: EnhancedCreatorVideo): any {
     directUrl: video.originalVideoUrl || "",
     platform: video.platform,
     thumbnailUrl: video.thumbnailUrl,
+    bunnyIframeUrl: video.bunnyIframeUrl, // Include for thumbnail fallback
     title: video.title || "",
     transcript: undefined,
     components: undefined,

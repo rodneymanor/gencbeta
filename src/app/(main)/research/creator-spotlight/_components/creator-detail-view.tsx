@@ -93,19 +93,17 @@ export function CreatorDetailView({ creator, videos, loadingVideos, onBack }: Cr
             ))}
           </div>
         ) : (
-          <div className="mx-auto w-[935px]">
-            <InstagramVideoGrid
-              videos={videos}
-              onVideoClick={handleVideoClick}
-              onFavorite={handleVideoFavorite}
-              renderBadge={(video, idx) =>
-                (video as any).addedAt &&
-                Date.now() - new Date((video as any).addedAt).getTime() < 1000 * 60 * 60 * 24 ? (
-                  <Badge className="ml-2 bg-green-500 text-white">New</Badge>
-                ) : null
-              }
-            />
-          </div>
+          <InstagramVideoGrid
+            videos={videos}
+            onVideoClick={handleVideoClick}
+            onFavorite={handleVideoFavorite}
+            renderBadge={(video, idx) =>
+              (video as any).addedAt &&
+              Date.now() - new Date((video as any).addedAt).getTime() < 1000 * 60 * 60 * 24 ? (
+                <Badge className="ml-2 bg-green-500 text-white">New</Badge>
+              ) : null
+            }
+          />
         )}
       </div>
 

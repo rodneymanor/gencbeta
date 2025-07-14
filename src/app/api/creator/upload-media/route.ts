@@ -73,26 +73,54 @@ export async function POST(request: NextRequest) {
     // Create a new upload promise with timeout and add it to the lock
     const uploadPromise = Promise.race([
       (async () => {
-      try {
-        // Get creator profile
-        const creator = await CreatorService.getCreatorById(creatorId);
-        if (!creator) {
-          return NextResponse.json(
-            {
-              success: false,
-              error: "Creator not found",
-            },
-            { status: 404 },
-          );
-        }
+        try {
+          // Get creator profile
+          const creator = await CreatorService.getCreatorById(creatorId);
+          if (!creator) {
+            return NextResponse.json(
+              {
+                success: false,
+                error: "Creator not found",
+              },
+              { status: 404 },
+            );
+          }
 
-        console.log(`✅ [CREATOR_MEDIA] Found creator @${creator.username} on ${creator.platform}`);
+          console.log(`✅ [CREATOR_MEDIA] Found creator @${creator.username} on ${creator.platform}`);
 
-        // Check if creator already has Bunny media to avoid re-processing
-        const hasExistingMedia = await CreatorMediaService.hasCreatorBunnyMedia(creatorId);
-        if (hasExistingMedia) {
-          console.log(`ℹ️ [CREATOR_MEDIA] Creator already has Bunny media, retrieving existing URLs...`);
-          const existingMedia = await CreatorMediaService.getCreatorBunnyMedia(creatorId);
+          // Check if creator already has Bunny media to avoid re-processing
+          const hasExistingMedia = await CreatorMediaService.hasCreatorBunnyMedia(creatorId);
+          if (hasExistingMedia) {
+            console.log(`ℹ️ [CREATOR_MEDIA] Creator already has Bunny media, retrieving existing URLs...`);
+            const existingMedia = await CreatorMediaService.getCreatorBunnyMedia(creatorId);
+
+            return NextResponse.json({
+              success: true,
+              creator: {
+                id: creator.id,
+                username: creator.username,
+                platform: creator.platform,
+              },
+              results: existingMedia,
+              message: `Using existing Bunny media for @${creator.username}`,
+              cached: true,
+            });
+          }
+
+          // Upload all media using the service
+          const results = await CreatorMediaService.uploadCreatorMediaToBunny(creatorId);
+
+          if (!results) {
+            return NextResponse.json(
+              {
+                success: false,
+                error: `Failed to upload media for @${creator.username}`,
+              },
+              { status: 500 },
+            );
+          }
+
+          console.log(`🎉 [CREATOR_MEDIA] Upload completed for @${creator.username}`);
 
           return NextResponse.json({
             success: true,
@@ -101,52 +129,24 @@ export async function POST(request: NextRequest) {
               username: creator.username,
               platform: creator.platform,
             },
-            results: existingMedia,
-            message: `Using existing Bunny media for @${creator.username}`,
-            cached: true,
+            results,
+            message: `Successfully processed media for @${creator.username}`,
+            cached: false,
           });
+        } finally {
+          // Always clean up the lock when done
+          uploadLocks.delete(creatorId);
+          console.log(`🧹 [CREATOR_MEDIA] Cleaned up upload lock for creator: ${creatorId}`);
         }
-
-        // Upload all media using the service
-        const results = await CreatorMediaService.uploadCreatorMediaToBunny(creatorId);
-
-        if (!results) {
-          return NextResponse.json(
-            {
-              success: false,
-              error: `Failed to upload media for @${creator.username}`,
-            },
-            { status: 500 },
-          );
-        }
-
-        console.log(`🎉 [CREATOR_MEDIA] Upload completed for @${creator.username}`);
-
-        return NextResponse.json({
-          success: true,
-          creator: {
-            id: creator.id,
-            username: creator.username,
-            platform: creator.platform,
-          },
-          results,
-          message: `Successfully processed media for @${creator.username}`,
-          cached: false,
-        });
-      } finally {
-        // Always clean up the lock when done
-        uploadLocks.delete(creatorId);
-        console.log(`🧹 [CREATOR_MEDIA] Cleaned up upload lock for creator: ${creatorId}`);
-      }
-    })(),
-    // Timeout promise
-    new Promise((_, reject) => 
-      setTimeout(() => {
-        uploadLocks.delete(creatorId);
-        reject(new Error(`Upload timeout after ${UPLOAD_TIMEOUT_MS / 1000} seconds`));
-      }, UPLOAD_TIMEOUT_MS)
-    )
-  ]);
+      })(),
+      // Timeout promise
+      new Promise((_, reject) =>
+        setTimeout(() => {
+          uploadLocks.delete(creatorId);
+          reject(new Error(`Upload timeout after ${UPLOAD_TIMEOUT_MS / 1000} seconds`));
+        }, UPLOAD_TIMEOUT_MS),
+      ),
+    ]);
 
     // Add the promise to the lock map
     uploadLocks.set(creatorId, uploadPromise);
@@ -155,7 +155,7 @@ export async function POST(request: NextRequest) {
     return await uploadPromise;
   } catch (error) {
     console.error("🔥 [CREATOR_MEDIA] Failed to upload creator media:", error);
-    
+
     // Clean up lock in case of error
     if (creatorId) {
       uploadLocks.delete(creatorId);

@@ -5,6 +5,7 @@ This API allows administrators to perform background syncing of creator profile 
 ## Setup
 
 1. Add your admin key to `.env.local`:
+
 ```bash
 ADMIN_SYNC_KEY=your-super-secret-admin-key-here
 ```
@@ -26,6 +27,7 @@ ADMIN_SYNC_KEY=your-super-secret-admin-key-here
 ### Examples
 
 #### Sync all creators (profile data only)
+
 ```bash
 curl -X POST http://localhost:3000/api/admin/sync-creators \
   -H "Content-Type: application/json" \
@@ -35,6 +37,7 @@ curl -X POST http://localhost:3000/api/admin/sync-creators \
 ```
 
 #### Sync specific creators with new videos
+
 ```bash
 curl -X POST http://localhost:3000/api/admin/sync-creators \
   -H "Content-Type: application/json" \
@@ -65,11 +68,12 @@ curl -X POST http://localhost:3000/api/admin/sync-creators \
 ## What Gets Synced
 
 The sync process updates the following profile data:
+
 - ✅ **Display name and full name**
 - ✅ **Profile image URL (high resolution)**
 - ✅ **Bio/caption text**
 - ✅ **Follower count**
-- ✅ **Following count**  
+- ✅ **Following count**
 - ✅ **Post count**
 - ✅ **Verification status**
 - ✅ **Privacy status**
@@ -81,6 +85,7 @@ The sync process updates the following profile data:
 ## Rate Limiting
 
 The sync includes automatic rate limiting:
+
 - 2-second delay between each creator
 - Respects existing RapidAPI rate limits
 - Uses the same request queue system as regular creator processing

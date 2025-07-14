@@ -40,9 +40,8 @@ export default function NewScriptPage() {
   const { currentVoice } = useVoice();
 
   // Input mode state
-  const [inputMode, setInputMode] = useState<InputMode>("text");
+  const [inputMode, setInputMode] = useState<InputMode>("script-writer");
   const [scriptIdea, setScriptIdea] = useState("");
-  const [videoUrl, setVideoUrl] = useState("");
 
   // Other state
   const [scriptLength, setScriptLength] = useState("20");
@@ -166,17 +165,18 @@ export default function NewScriptPage() {
   };
 
   const handleSubmit = async () => {
-    if (inputMode === "text") {
-      if (!scriptIdea.trim()) return;
-      await handleSpeedWrite(scriptIdea);
-    } else {
-      if (!videoUrl.trim()) return;
+    if (!scriptIdea.trim()) return;
 
+    if (inputMode === "script-writer") {
+      // Use the existing speed write workflow for script writer
+      await handleSpeedWrite(scriptIdea);
+    } else if (inputMode === "hook-generator") {
+      // For hook generator, navigate to Hemingway editor with hook generation mode
       const params = new URLSearchParams({
-        videoUrl: encodeURIComponent(videoUrl),
-        mode: "speed-write",
+        idea: encodeURIComponent(scriptIdea),
+        mode: "hook-generator",
         length: scriptLength,
-        inputType: "video",
+        inputType: "text",
       });
 
       router.push(`/dashboard/scripts/editor?${params.toString()}`);
@@ -190,9 +190,9 @@ export default function NewScriptPage() {
         <div className="flex w-full flex-col items-center justify-center">
           {/* Header */}
           <div className="mb-8 text-center">
-            <h1 className="text-foreground font-inter mb-2 text-5xl font-bold">What&apos;s your script idea?</h1>
+            <h1 className="text-foreground font-inter mb-2 text-5xl font-bold">What&apos;s your content idea?</h1>
             <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
-              Transform your ideas into engaging scripts with AI assistance
+              Transform your ideas into engaging content with AI assistance
             </p>
           </div>
 
@@ -224,8 +224,6 @@ export default function NewScriptPage() {
               onInputModeChange={setInputMode}
               textValue={scriptIdea}
               onTextChange={setScriptIdea}
-              videoUrl={videoUrl}
-              onVideoUrlChange={setVideoUrl}
               onSubmit={handleSubmit}
               disabled={isGenerating}
               showIdeaInbox={true}
@@ -233,7 +231,7 @@ export default function NewScriptPage() {
 
             {/* Controls Row - Simplified */}
             <div className="mt-4 flex items-center justify-center gap-4">
-              <div className="text-muted-foreground text-sm">Press ⌘+Enter to generate scripts</div>
+              <div className="text-muted-foreground text-sm">Press ⌘+Enter to generate content</div>
             </div>
           </div>
         </div>

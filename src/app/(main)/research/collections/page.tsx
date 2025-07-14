@@ -25,6 +25,7 @@ import { CollectionsService, type Collection, type Video } from "@/lib/collectio
 import { CollectionsRBACService } from "@/lib/collections-rbac";
 
 import { AddVideoDialog } from "./_components/add-video-dialog";
+import CategoryChooser from "./_components/category-chooser";
 import { CollectionBadgeMenu } from "./_components/collection-badge-menu";
 import { badgeVariants } from "./_components/collections-animations";
 import { type VideoWithPlayer, createVideoSelectionHandlers } from "./_components/collections-helpers";
@@ -705,6 +706,25 @@ function CollectionsPageContent() {
     addVideoDialogRef.current?.click();
   }, []);
 
+  // Configure top bar with action buttons
+  useEffect(() => {
+    setTopBarConfig({
+      title: "Collections",
+      showTitle: true,
+      titlePosition: "left",
+      actions: (
+        <div className="flex items-center gap-2">
+          <Button onClick={handleAddCollection} className="gap-2" variant="outline" size="sm">
+            📁 Add Collection
+          </Button>
+          <Button onClick={handleAddVideo} className="gap-2" variant="default" size="sm">
+            📹 Add Video to Collection
+          </Button>
+        </div>
+      ),
+    });
+  }, [setTopBarConfig, handleAddCollection, handleAddVideo]);
+
   // Video favoriting handler
   const handleVideoFavorite = useCallback(
     async (video: any, index: number) => {
@@ -800,9 +820,9 @@ function CollectionsPageContent() {
   }
 
   return (
-    <div className="mx-auto flex h-full max-w-7xl flex-col items-center space-y-6 p-4 md:p-6">
+    <div className="mx-auto flex h-full max-w-7xl gap-6 p-4 md:p-6">
       {/* Left side: Main content (Video Grid) */}
-      <div className="flex-1">
+      <div className="flex-1 space-y-6">
         <header className="mb-2 space-y-4">
           {/* Primary Content Area */}
           <div className="flex items-start justify-between gap-4">
@@ -964,7 +984,24 @@ function CollectionsPageContent() {
         </main>
       </div>
 
-      {/* Sidebar */}
+      {/* Right sidebar: Category Chooser */}
+      <div className="w-80 flex-shrink-0">
+        <CategoryChooser
+          items={[
+            { id: "all", name: "All Videos", description: "Browse all your videos" },
+            ...collections.map((collection) => ({
+              id: collection.id!,
+              name: collection.title,
+              description: collection.description,
+            })),
+          ]}
+          selectedId={selectedCollectionId ?? "all"}
+          onSelectionChange={(item) => handleCollectionChange(item.id === "all" ? null : item.id)}
+          className="sticky top-6"
+          label="Collections"
+        />
+      </div>
+
       {/* Lightbox Modal */}
       <VideoLightbox
         videos={videos}

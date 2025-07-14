@@ -6,6 +6,8 @@ export interface VideoDocument {
   platform: "tiktok" | "instagram";
   video_url: string;
   thumbnail_url?: string;
+  original_thumbnail_url?: string; // Original thumbnail URL before Bunny optimization
+  bunny_thumbnail_url?: string; // Bunny.net optimized thumbnail URL
   viewCount: number;
   likeCount: number;
   quality: string;

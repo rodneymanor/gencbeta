@@ -197,33 +197,36 @@ export function useCreatorVideos() {
     }));
   }, []);
 
-  const loadCreatorVideos = useCallback(async (creator: EnhancedCreatorProfile) => {
-    try {
-      setLoadingVideos(true);
+  const loadCreatorVideos = useCallback(
+    async (creator: EnhancedCreatorProfile) => {
+      try {
+        setLoadingVideos(true);
 
-      // First try to get stored videos from the creator's video collection
-      const hasStoredVideos = await loadStoredVideos(creator);
-      if (hasStoredVideos) {
-        return;
+        // First try to get stored videos from the creator's video collection
+        const hasStoredVideos = await loadStoredVideos(creator);
+        if (hasStoredVideos) {
+          return;
+        }
+
+        // Fallback: Call process-creator API to get fresh videos if no stored videos
+        await loadFreshVideos(creator);
+      } catch (error) {
+        console.error("Error loading creator videos:", error);
+
+        // Check if it's an API unavailability error
+        if (error instanceof Error && error.message === "API_UNAVAILABLE") {
+          console.log("Using mock videos due to API unavailability");
+        }
+
+        // Fallback to mock data
+        const mockVideos = createMockVideos(creator);
+        setCreatorVideos(mockVideos);
+      } finally {
+        setLoadingVideos(false);
       }
-
-      // Fallback: Call process-creator API to get fresh videos if no stored videos
-      await loadFreshVideos(creator);
-    } catch (error) {
-      console.error("Error loading creator videos:", error);
-
-      // Check if it's an API unavailability error
-      if (error instanceof Error && error.message === "API_UNAVAILABLE") {
-        console.log("Using mock videos due to API unavailability");
-      }
-
-      // Fallback to mock data
-      const mockVideos = createMockVideos(creator);
-      setCreatorVideos(mockVideos);
-    } finally {
-      setLoadingVideos(false);
-    }
-  }, [loadStoredVideos, loadFreshVideos, createMockVideos]);
+    },
+    [loadStoredVideos, loadFreshVideos, createMockVideos],
+  );
 
   const clearVideos = useCallback(() => {
     setCreatorVideos([]);

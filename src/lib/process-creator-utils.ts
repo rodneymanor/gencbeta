@@ -802,7 +802,7 @@ async function processInstagramProfile(
 
           // Extract website/external URL from bio or dedicated field
           let externalUrl = profileInfo.external_url;
-          const bio = profileInfo.biography || '';
+          const bio = profileInfo.biography || "";
 
           // Try to extract URL from bio if not in external_url field
           if (!externalUrl && bio) {
