@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { authenticateApiKey } from "@/lib/api-key-auth";
 import { CreditsService } from "@/lib/credits-service";
 
@@ -18,7 +19,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // Get user's account level from their profile
     const { getAdminDb } = await import("@/lib/firebase-admin");
     const adminDb = getAdminDb();
-    
+
     if (!adminDb) {
       throw new Error("Database not available");
     }
@@ -42,9 +43,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json(usageStats);
   } catch (error) {
     console.error("❌ [Usage Stats] Error fetching usage statistics:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch usage statistics" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch usage statistics" }, { status: 500 });
   }
-} 
+}

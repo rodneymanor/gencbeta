@@ -2,12 +2,7 @@
 
 import React, { useState, useCallback, useMemo, useEffect } from "react";
 
-import {
-  FileText,
-  BarChart3,
-  Lightbulb,
-  Target,
-} from "lucide-react";
+import { FileText, BarChart3, Lightbulb, Target } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,16 +19,14 @@ import {
   ReadabilitySettings,
   defaultReadabilitySettings,
 } from "@/lib/enhanced-readability-service";
-
-import { 
-  analyzeElement, 
+import {
+  analyzeElement,
   generateAlternatives,
   enhanceHook,
   strengthenBridge,
   amplifyGoldenNugget,
-  optimizeCTA
+  optimizeCTA,
 } from "@/lib/script-element-actions";
-
 
 import { ContextualMenu } from "./contextual-menu";
 import { HighlightOverlay } from "./highlight-overlay";
@@ -64,10 +57,6 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
   const [readabilityService] = useState(() => new EnhancedReadabilityService(readabilitySettings));
   const [elementDetectionService] = useState(() => new EnhancedElementDetection(elementDetectionSettings));
 
-
-
-
-
   // Update services when settings change
   useEffect(() => {
     readabilityService.updateSettings(readabilitySettings);
@@ -76,8 +65,6 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
   useEffect(() => {
     elementDetectionService.updateSettings(elementDetectionSettings);
   }, [elementDetectionSettings, elementDetectionService]);
-
-
 
   const readabilityAnalysis = useMemo(() => {
     if (!text.trim() || !readabilitySettings.enabled) return null;
@@ -137,16 +124,16 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
 
   const enhanceElement = useCallback(async (elementType: string, elementText: string) => {
     switch (elementType) {
-      case 'hook':
+      case "hook":
         const hookResult = await enhanceHook(elementText);
         return hookResult.success ? hookResult.result : null;
-      case 'bridge':
+      case "bridge":
         const bridgeResult = await strengthenBridge(elementText);
         return bridgeResult.success ? bridgeResult.result : null;
-      case 'golden-nugget':
+      case "golden-nugget":
         const nuggetResult = await amplifyGoldenNugget(elementText);
         return nuggetResult.success ? nuggetResult.result : null;
-      case 'cta':
+      case "cta":
         const ctaResult = await optimizeCTA(elementText);
         return ctaResult.success ? ctaResult.result : null;
       default:
@@ -201,8 +188,6 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
     onSave?.(text);
   }, [text, onSave]);
 
-
-
   return (
     <div className="app-shell">
       {/* Main Content Area */}
@@ -237,8 +222,6 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
                   placeholder="Start writing your script here..."
                   className="h-full resize-none border-0 bg-transparent p-0 text-base leading-relaxed focus:ring-0 focus:outline-none"
                 />
-
-
               </div>
             </CardContent>
           </Card>
@@ -352,7 +335,6 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
               </CardContent>
             </Card>
           )}
-
         </div>
       </div>
 

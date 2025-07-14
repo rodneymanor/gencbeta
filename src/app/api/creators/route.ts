@@ -1,81 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { processCreatorProfile } from "@/lib/process-creator-utils";
 
-// In-memory storage for creators (temporary until database is implemented)
-let creatorsStorage: CreatorProfile[] = [
-  {
-    id: "1",
-    username: "tiktok_creator_1",
-    displayName: "TikTok Star",
-    platform: "tiktok",
-    profileImageUrl: "/images/placeholder.svg",
-    bio: "Creating amazing TikTok content! 🎵",
-    postsCount: 150,
-    followersCount: 2500000,
-    followingCount: 500,
-    isVerified: true,
-    videoCount: 45,
-    lastProcessed: "2024-01-15T10:30:00Z",
-    createdAt: "2024-01-01T00:00:00Z",
-    updatedAt: "2024-01-15T10:30:00Z",
-  },
-  {
-    id: "2",
-    username: "instagram_creator_1",
-    displayName: "Instagram Influencer",
-    platform: "instagram",
-    profileImageUrl: "/images/placeholder.svg",
-    bio: "Lifestyle and fashion content 📸",
-    postsCount: 320,
-    followersCount: 1800000,
-    followingCount: 1200,
-    isVerified: true,
-    videoCount: 28,
-    lastProcessed: "2024-01-14T15:45:00Z",
-    createdAt: "2024-01-02T00:00:00Z",
-    updatedAt: "2024-01-14T15:45:00Z",
-  },
-  {
-    id: "3",
-    username: "tiktok_creator_2",
-    displayName: "Comedy Creator",
-    platform: "tiktok",
-    profileImageUrl: "/images/placeholder.svg",
-    bio: "Making people laugh one video at a time 😂",
-    postsCount: 89,
-    followersCount: 850000,
-    followingCount: 200,
-    isVerified: false,
-    videoCount: 32,
-    lastProcessed: "2024-01-13T09:20:00Z",
-    createdAt: "2024-01-03T00:00:00Z",
-    updatedAt: "2024-01-13T09:20:00Z",
-  },
-];
-
-
-
-interface CreatorProfile {
-  id: string;
-  username: string;
-  displayName?: string;
-  platform: "tiktok" | "instagram";
-  profileImageUrl: string;
-  bio?: string;
-  website?: string;
-  postsCount: number;
-  followersCount: number;
-  followingCount: number;
-  isVerified?: boolean;
-  mutualFollowers?: Array<{
-    username: string;
-    displayName: string;
-  }>;
-  lastProcessed?: string;
-  videoCount?: number;
-  createdAt: string;
-  updatedAt: string;
-}
+import { processCreatorProfile } from "../../../lib/process-creator-utils";
+import { CreatorService, CreatorProfile } from "../../../lib/creator-service";
+import { VideoService } from "../../../lib/video-service";
 
 interface AddCreatorRequest {
   username: string;
@@ -101,12 +28,13 @@ export async function GET() {
     // since it's just reading public information
     // TODO: Add proper authentication when user management is implemented
 
-    console.log(`📊 [CREATORS] Returning ${creatorsStorage.length} creators from storage`);
+    const creators = await CreatorService.getAllCreators();
+    console.log(`📊 [CREATORS] Returning ${creators.length} creators from Firestore`);
 
     return NextResponse.json({
       success: true,
-      creators: creatorsStorage,
-      total: creatorsStorage.length,
+      creators,
+      total: creators.length,
     });
   } catch (error) {
     console.error("🔥 [CREATORS] Failed to fetch creators:", error);
@@ -127,7 +55,30 @@ export async function POST(request: NextRequest) {
     // TODO: Add proper authentication when user management is implemented
     console.log("🔍 [CREATORS] Adding new creator (unauthenticated access allowed)...");
 
-    const body: AddCreatorRequest = await request.json();
+    // Validate request has content
+    const contentLength = request.headers.get("content-length");
+    if (!contentLength || contentLength === "0") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Empty request body. Please provide username and platform.",
+        },
+        { status: 400 },
+      );
+    }
+
+    let body: AddCreatorRequest;
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Invalid JSON in request body",
+        },
+        { status: 400 },
+      );
+    }
     const { username, platform, displayName, profileImageUrl, bio, website } = body;
 
     // Validate input
@@ -154,10 +105,8 @@ export async function POST(request: NextRequest) {
     console.log(`🔍 [CREATORS] Adding ${platform} creator: @${username}`);
 
     // Check if creator already exists
-    const existingCreator = creatorsStorage.find(
-      (creator) => creator.username === username && creator.platform === platform
-    );
-    
+    const existingCreator = await CreatorService.getCreatorByUsernameAndPlatform(username, platform);
+
     if (existingCreator) {
       return NextResponse.json(
         {
@@ -170,7 +119,7 @@ export async function POST(request: NextRequest) {
 
     // Step 1: Process the creator to get profile data and videos
     console.log(`🔍 [CREATORS] Processing creator profile directly...`);
-    
+
     const processData = await processCreatorProfile(username, platform, 20);
 
     if (!processData.success || !processData.extractedVideos?.length) {
@@ -187,40 +136,68 @@ export async function POST(request: NextRequest) {
     // Step 2: Download and transcribe all videos (skip for now to avoid redirect loop)
     console.log(`🔍 [CREATORS] Skipping video download/transcription for now to avoid redirect loop`);
     console.log(`📊 [CREATORS] Successfully extracted ${processData.extractedVideos.length} videos for @${username}`);
-    
+
     // TODO: Implement direct function calls instead of HTTP requests
     // const downloadResponse = await fetch(...);
 
-    // Step 3: Create creator profile
-    const creatorProfile: CreatorProfile = {
-      id: `creator_${Date.now()}`,
+    // Step 3: Create creator profile (without embedded videos)
+    const profileData = processData.profileData;
+    const now = new Date().toISOString();
+    
+    const creatorData = {
       username,
-      displayName: displayName || username,
+      displayName: displayName || profileData?.displayName || username,
+      fullName: profileData?.displayName || undefined,
       platform,
-      profileImageUrl:
-        profileImageUrl ||
-        `/images/placeholder.svg`,
-      bio: bio || `Content creator on ${platform}`,
-      website,
-      postsCount: processData.extractedVideos.length,
-      followersCount: 0, // TODO: Extract from profile data
-      followingCount: 0, // TODO: Extract from profile data
-      isVerified: false, // TODO: Extract from profile data
+      profileImageUrl: profileImageUrl || profileData?.profileImageUrl || `/images/placeholder.svg`,
+      bio: bio || profileData?.bio || `Content creator on ${platform}`,
+      website: website || profileData?.externalUrl || undefined,
+      externalUrl: profileData?.externalUrl || undefined,
+      category: profileData?.category || undefined,
+      postsCount: profileData?.postsCount || processData.extractedVideos.length,
+      followersCount: profileData?.followersCount || 0,
+      followingCount: profileData?.followingCount || 0,
+      isVerified: profileData?.isVerified || false,
+      isPrivate: profileData?.isPrivate || false,
       videoCount: processData.extractedVideos.length,
-      lastProcessed: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      lastProcessed: now,
+      lastSynced: now,
     };
 
-    // Save to in-memory storage
-    creatorsStorage.push(creatorProfile);
-    console.log("✅ [CREATORS] Creator profile saved to storage:", creatorProfile);
-    console.log(`📊 [CREATORS] Total creators in storage: ${creatorsStorage.length}`);
+    console.log(`📸 [CREATORS] Using profile data from API:`, profileData);
+
+    // Save creator profile to Firestore
+    const creatorProfile = await CreatorService.createCreator(creatorData);
+    console.log("✅ [CREATORS] Creator profile saved to Firestore:", creatorProfile);
+    console.log(`📊 [CREATORS] Creator ID: ${creatorProfile.id}`);
+
+    // Step 4: Store videos separately in the videos collection
+    if (processData.extractedVideos.length > 0 && creatorProfile.id) {
+      console.log(`📹 [CREATORS] Storing ${processData.extractedVideos.length} videos separately...`);
+      
+      const videoDocuments = processData.extractedVideos.map(video => ({
+        platform: video.platform,
+        video_url: video.video_url,
+        thumbnail_url: video.thumbnail_url,
+        viewCount: video.viewCount,
+        likeCount: video.likeCount,
+        quality: video.quality,
+        title: video.title,
+        description: video.description,
+        author: video.author,
+        duration: video.duration,
+        downloadStatus: video.downloadStatus,
+        transcriptionStatus: video.transcriptionStatus,
+      }));
+
+      const savedVideos = await VideoService.createVideosForCreator(creatorProfile.id, videoDocuments);
+      console.log(`✅ [CREATORS] Saved ${savedVideos.length} videos to separate collection`);
+    }
 
     const response: AddCreatorResponse = {
       success: true,
       creator: creatorProfile,
-      message: `Successfully added @${username} to Creator Spotlight. ${processData.extractedVideos.length} videos processed.`,
+      message: `Successfully added @${username} to Creator Spotlight. ${processData.extractedVideos.length} videos processed and stored separately.`,
     };
 
     return NextResponse.json(response);

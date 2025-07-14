@@ -12,7 +12,7 @@ import {
   UsageRecord,
   CREDIT_COSTS,
   ACCOUNT_LIMITS,
-  CreditOperation
+  CreditOperation,
 } from "@/types/usage-tracking";
 
 export interface CreditCheckResult {
@@ -108,11 +108,7 @@ export async function getUserCredits(userId: string, accountLevel: AccountLevel)
       throw new Error("Database not available");
     }
 
-    const snapshot = await adminDb
-      .collection("user_credits")
-      .where("userId", "==", userId)
-      .limit(1)
-      .get();
+    const snapshot = await adminDb.collection("user_credits").where("userId", "==", userId).limit(1).get();
 
     let userCredits: UserCredits;
 
@@ -144,7 +140,7 @@ export async function getUserCredits(userId: string, accountLevel: AccountLevel)
 export async function canPerformAction(
   userId: string,
   operation: CreditOperation,
-  accountLevel: AccountLevel
+  accountLevel: AccountLevel,
 ): Promise<CreditCheckResult> {
   try {
     const userCredits = await getUserCredits(userId, accountLevel);
@@ -152,11 +148,11 @@ export async function canPerformAction(
     const creditsRemaining = userCredits.creditsLimit - userCredits.creditsUsed;
 
     if (creditsRemaining >= creditsNeeded) {
-      return { 
-        canPerform: true, 
+      return {
+        canPerform: true,
         creditsNeeded,
         creditsRemaining,
-        accountLevel
+        accountLevel,
       };
     }
 
@@ -166,16 +162,16 @@ export async function canPerformAction(
       reason: `Insufficient credits. Need ${creditsNeeded}, have ${creditsRemaining}. Resets ${periodType}.`,
       creditsNeeded,
       creditsRemaining,
-      accountLevel
+      accountLevel,
     };
   } catch (error) {
     console.error("❌ [Credits] Failed to check action permission:", error);
-    return { 
-      canPerform: false, 
-      reason: "Error checking credits", 
+    return {
+      canPerform: false,
+      reason: "Error checking credits",
       creditsNeeded: 0,
       creditsRemaining: 0,
-      accountLevel
+      accountLevel,
     };
   }
 }
@@ -192,7 +188,7 @@ export async function deductCredits(
   userId: string,
   operation: CreditOperation,
   accountLevel: AccountLevel,
-  metadata?: Record<string, unknown>
+  metadata?: Record<string, unknown>,
 ): Promise<CreditDeductionResult> {
   try {
     const adminDb = getAdminDb();
@@ -292,7 +288,7 @@ export async function refundCredits(
   userId: string,
   amount: number,
   reason: string,
-  metadata?: Record<string, unknown>
+  metadata?: Record<string, unknown>,
 ): Promise<CreditRefundResult> {
   try {
     const adminDb = getAdminDb();
@@ -363,7 +359,7 @@ export async function refundCredits(
 export async function getUsageStats(userId: string, accountLevel: AccountLevel): Promise<UsageStats> {
   try {
     const userCredits = await getUserCredits(userId, accountLevel);
-    
+
     return {
       userId,
       accountLevel,
@@ -400,7 +396,7 @@ export async function trackUsageAndDeductCredits(
   userId: string,
   operation: CreditOperation,
   accountLevel: AccountLevel,
-  usageData: Omit<UsageRecord, "userId" | "creditsUsed" | "operation">
+  usageData: Omit<UsageRecord, "userId" | "creditsUsed" | "operation">,
 ): Promise<{ success: boolean; newBalance: number }> {
   try {
     const deductionResult = await deductCredits(userId, operation, accountLevel, {
@@ -501,4 +497,4 @@ function getMonthEnd(): string {
 async function trackUsage(userId: string, operation: CreditOperation, usageData: any): Promise<void> {
   // This will be implemented in the usage service
   console.log(`📊 [Credits] Usage tracking placeholder for ${operation}`);
-} 
+}

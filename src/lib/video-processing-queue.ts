@@ -1,6 +1,5 @@
 // Production-ready video processing queue system
 
-import { getAdminDb, isAdminInitialized } from "./firebase-admin";
 import type {
   VideoProcessingJob,
   VideoProcessingStatus,
@@ -9,6 +8,8 @@ import type {
   ProcessedVideoResult,
   JobPriority,
 } from "@/types/video-processing";
+
+import { getAdminDb, isAdminInitialized } from "./firebase-admin";
 
 export class VideoProcessingQueue {
   private static readonly JOBS_COLLECTION = "video_processing_jobs";

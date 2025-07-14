@@ -1,6 +1,9 @@
 import { useCallback } from "react";
+
 import { useRouter } from "next/navigation";
+
 import { toast } from "sonner";
+
 import { useUsage } from "@/contexts/usage-context";
 
 interface UseScriptSaveProps {
@@ -32,7 +35,7 @@ export function useScriptSave({ script, scriptId, refetch }: UseScriptSaveProps)
 
       const response = await fetch("/api/scripts", {
         method: scriptId ? "PUT" : "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
@@ -65,4 +68,4 @@ export function useScriptSave({ script, scriptId, refetch }: UseScriptSaveProps)
   }, [script, scriptId, triggerUsageUpdate, refetch, router]);
 
   return { handleSave };
-} 
+}

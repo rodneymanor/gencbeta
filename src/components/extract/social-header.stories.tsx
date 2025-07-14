@@ -1,60 +1,62 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { useState } from 'react';
+import { useState } from "react";
 
-import { SocialHeader, type SocialHeaderProps } from './social-header';
+import type { Meta, StoryObj } from "@storybook/react";
+
+import { SocialHeader, type SocialHeaderProps } from "./social-header";
 
 const meta: Meta<typeof SocialHeader> = {
-  title: 'Extract/SocialHeader',
+  title: "Extract/SocialHeader",
   component: SocialHeader,
   parameters: {
-    layout: 'padded',
+    layout: "padded",
     docs: {
       description: {
-        component: 'A comprehensive social media profile header component that mimics Instagram\'s profile layout with full functionality.',
+        component:
+          "A comprehensive social media profile header component that mimics Instagram's profile layout with full functionality.",
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     username: {
-      control: { type: 'text' },
-      description: 'The username/handle of the profile',
+      control: { type: "text" },
+      description: "The username/handle of the profile",
     },
     displayName: {
-      control: { type: 'text' },
-      description: 'The display name (optional, falls back to username)',
+      control: { type: "text" },
+      description: "The display name (optional, falls back to username)",
     },
     profileImageUrl: {
-      control: { type: 'text' },
-      description: 'URL of the profile image',
+      control: { type: "text" },
+      description: "URL of the profile image",
     },
     bio: {
-      control: { type: 'text' },
-      description: 'Bio text for the profile',
+      control: { type: "text" },
+      description: "Bio text for the profile",
     },
     website: {
-      control: { type: 'text' },
-      description: 'Website URL (optional)',
+      control: { type: "text" },
+      description: "Website URL (optional)",
     },
     postsCount: {
-      control: { type: 'number' },
-      description: 'Number of posts',
+      control: { type: "number" },
+      description: "Number of posts",
     },
     followersCount: {
-      control: { type: 'number' },
-      description: 'Number of followers',
+      control: { type: "number" },
+      description: "Number of followers",
     },
     followingCount: {
-      control: { type: 'number' },
-      description: 'Number of accounts being followed',
+      control: { type: "number" },
+      description: "Number of accounts being followed",
     },
     isFollowing: {
-      control: { type: 'boolean' },
-      description: 'Whether the current user is following this profile',
+      control: { type: "boolean" },
+      description: "Whether the current user is following this profile",
     },
     isVerified: {
-      control: { type: 'boolean' },
-      description: 'Whether the profile is verified',
+      control: { type: "boolean" },
+      description: "Whether the profile is verified",
     },
   },
 };
@@ -63,10 +65,10 @@ export default meta;
 type Story = StoryObj<typeof SocialHeader>;
 
 const sampleMutualFollowers = [
-  { username: 'theclarkgary', displayName: 'Clark Gary' },
-  { username: 'itstylergermain', displayName: 'Tyler Germain' },
-  { username: 'johndoe', displayName: 'John Doe' },
-  { username: 'janedoe', displayName: 'Jane Doe' },
+  { username: "theclarkgary", displayName: "Clark Gary" },
+  { username: "itstylergermain", displayName: "Tyler Germain" },
+  { username: "johndoe", displayName: "John Doe" },
+  { username: "janedoe", displayName: "Jane Doe" },
 ];
 
 // Interactive story with state management
@@ -76,15 +78,15 @@ const InteractiveTemplate: Story = {
 
     const handleFollowClick = () => {
       setIsFollowing(!isFollowing);
-      console.log('Follow/Unfollow clicked');
+      console.log("Follow/Unfollow clicked");
     };
 
     const handleMoreClick = () => {
-      console.log('More options clicked');
+      console.log("More options clicked");
     };
 
     return (
-      <div className="max-w-4xl mx-auto">
+      <div className="mx-auto max-w-4xl">
         <SocialHeader
           {...args}
           isFollowing={isFollowing}
@@ -99,11 +101,11 @@ const InteractiveTemplate: Story = {
 export const Default: Story = {
   ...InteractiveTemplate,
   args: {
-    username: 'aronsogi',
-    displayName: 'ARON SŌGI | Video Strategist',
-    profileImageUrl: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=150&h=150&fit=crop',
-    bio: '📈 Build a Personal Brand that drives business growth\n📲 14 Years Film Industry Experience\n🎬 Apple, Dark Knight Rises, ...',
-    website: 'https://form.fillout.com/t/ra7kMzjoBbus',
+    username: "aronsogi",
+    displayName: "ARON SŌGI | Video Strategist",
+    profileImageUrl: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=150&h=150&fit=crop",
+    bio: "📈 Build a Personal Brand that drives business growth\n📲 14 Years Film Industry Experience\n🎬 Apple, Dark Knight Rises, ...",
+    website: "https://form.fillout.com/t/ra7kMzjoBbus",
     postsCount: 110,
     followersCount: 46130,
     followingCount: 978,
@@ -116,10 +118,10 @@ export const Default: Story = {
 export const VerifiedProfile: Story = {
   ...InteractiveTemplate,
   args: {
-    username: 'celebrity',
-    displayName: 'Celebrity Name',
-    profileImageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=150&h=150&fit=crop',
-    bio: 'Official account of a verified celebrity with millions of followers.',
+    username: "celebrity",
+    displayName: "Celebrity Name",
+    profileImageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=150&h=150&fit=crop",
+    bio: "Official account of a verified celebrity with millions of followers.",
     postsCount: 1250,
     followersCount: 2500000,
     followingCount: 150,
@@ -131,10 +133,10 @@ export const VerifiedProfile: Story = {
 export const Following: Story = {
   ...InteractiveTemplate,
   args: {
-    username: 'friend',
-    displayName: 'My Friend',
-    profileImageUrl: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=150&h=150&fit=crop',
-    bio: 'Personal friend with mutual connections.',
+    username: "friend",
+    displayName: "My Friend",
+    profileImageUrl: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=150&h=150&fit=crop",
+    bio: "Personal friend with mutual connections.",
     postsCount: 45,
     followersCount: 320,
     followingCount: 280,
@@ -147,8 +149,8 @@ export const Following: Story = {
 export const MinimalProfile: Story = {
   ...InteractiveTemplate,
   args: {
-    username: 'minimalist',
-    profileImageUrl: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=150&h=150&fit=crop',
+    username: "minimalist",
+    profileImageUrl: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=150&h=150&fit=crop",
     postsCount: 5,
     followersCount: 12,
     followingCount: 8,
@@ -160,11 +162,11 @@ export const MinimalProfile: Story = {
 export const WithWebsite: Story = {
   ...InteractiveTemplate,
   args: {
-    username: 'business',
-    displayName: 'Business Account',
-    profileImageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=150&h=150&fit=crop',
-    bio: 'Professional business account with website link.',
-    website: 'https://example.com',
+    username: "business",
+    displayName: "Business Account",
+    profileImageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=150&h=150&fit=crop",
+    bio: "Professional business account with website link.",
+    website: "https://example.com",
     postsCount: 89,
     followersCount: 15420,
     followingCount: 234,
@@ -176,11 +178,11 @@ export const WithWebsite: Story = {
 export const LongBio: Story = {
   ...InteractiveTemplate,
   args: {
-    username: 'longbio',
-    displayName: 'Long Bio Example',
-    profileImageUrl: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=150&h=150&fit=crop',
-    bio: 'This is a very long bio that demonstrates how the component handles lengthy text content. It includes multiple lines and should show proper text wrapping and overflow handling. The bio contains emojis 🎉 and various formatting to test the component\'s text rendering capabilities.',
-    website: 'https://verylongwebsiteurl.com/very-long-path',
+    username: "longbio",
+    displayName: "Long Bio Example",
+    profileImageUrl: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=150&h=150&fit=crop",
+    bio: "This is a very long bio that demonstrates how the component handles lengthy text content. It includes multiple lines and should show proper text wrapping and overflow handling. The bio contains emojis 🎉 and various formatting to test the component's text rendering capabilities.",
+    website: "https://verylongwebsiteurl.com/very-long-path",
     postsCount: 567,
     followersCount: 89012,
     followingCount: 1234,
@@ -192,10 +194,10 @@ export const LongBio: Story = {
 export const HighNumbers: Story = {
   ...InteractiveTemplate,
   args: {
-    username: 'influencer',
-    displayName: 'Mega Influencer',
-    profileImageUrl: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=150&h=150&fit=crop',
-    bio: 'Mega influencer with millions of followers.',
+    username: "influencer",
+    displayName: "Mega Influencer",
+    profileImageUrl: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=150&h=150&fit=crop",
+    bio: "Mega influencer with millions of followers.",
     postsCount: 15420,
     followersCount: 2500000,
     followingCount: 1500,
@@ -207,10 +209,10 @@ export const HighNumbers: Story = {
 export const NoHighlights: Story = {
   ...InteractiveTemplate,
   args: {
-    username: 'nohighlights',
-    displayName: 'No Highlights Profile',
-    profileImageUrl: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=150&h=150&fit=crop',
-    bio: 'Profile without any highlights.',
+    username: "nohighlights",
+    displayName: "No Highlights Profile",
+    profileImageUrl: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=150&h=150&fit=crop",
+    bio: "Profile without any highlights.",
     postsCount: 23,
     followersCount: 156,
     followingCount: 89,
@@ -222,24 +224,24 @@ export const NoHighlights: Story = {
 export const ManyMutualFollowers: Story = {
   ...InteractiveTemplate,
   args: {
-    username: 'mutual',
-    displayName: 'Many Mutual Followers',
-    profileImageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=150&h=150&fit=crop',
-    bio: 'Profile with many mutual followers.',
+    username: "mutual",
+    displayName: "Many Mutual Followers",
+    profileImageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=150&h=150&fit=crop",
+    bio: "Profile with many mutual followers.",
     postsCount: 67,
     followersCount: 890,
     followingCount: 234,
     isFollowing: false,
     isVerified: false,
     mutualFollowers: [
-      { username: 'user1', displayName: 'User One' },
-      { username: 'user2', displayName: 'User Two' },
-      { username: 'user3', displayName: 'User Three' },
-      { username: 'user4', displayName: 'User Four' },
-      { username: 'user5', displayName: 'User Five' },
-      { username: 'user6', displayName: 'User Six' },
-      { username: 'user7', displayName: 'User Seven' },
-      { username: 'user8', displayName: 'User Eight' },
+      { username: "user1", displayName: "User One" },
+      { username: "user2", displayName: "User Two" },
+      { username: "user3", displayName: "User Three" },
+      { username: "user4", displayName: "User Four" },
+      { username: "user5", displayName: "User Five" },
+      { username: "user6", displayName: "User Six" },
+      { username: "user7", displayName: "User Seven" },
+      { username: "user8", displayName: "User Eight" },
     ],
   },
 };
@@ -247,10 +249,10 @@ export const ManyMutualFollowers: Story = {
 export const Responsive: Story = {
   ...InteractiveTemplate,
   args: {
-    username: 'responsive',
-    displayName: 'Responsive Test',
-    profileImageUrl: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=150&h=150&fit=crop',
-    bio: 'Testing responsive behavior on different screen sizes.',
+    username: "responsive",
+    displayName: "Responsive Test",
+    profileImageUrl: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=150&h=150&fit=crop",
+    bio: "Testing responsive behavior on different screen sizes.",
     postsCount: 123,
     followersCount: 4567,
     followingCount: 890,
@@ -259,7 +261,7 @@ export const Responsive: Story = {
   },
   parameters: {
     viewport: {
-      defaultViewport: 'mobile1',
+      defaultViewport: "mobile1",
     },
   },
-}; 
+};

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { authenticateApiKey } from "@/lib/api-key-auth";
 import { GhostWriterService } from "@/lib/ghost-writer-service";
 import { BrandProfileForIdeas } from "@/types/ghost-writer";
@@ -14,13 +15,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     // Authenticate user
     const authResult = await authenticateApiKey(request);
-    
+
     // Check if authResult is a NextResponse (error case)
     if (authResult instanceof NextResponse) {
       console.log("🔐 [GhostWriter API] Auth result: ❌ Authentication failed");
       return authResult;
     }
-    
+
     console.log("🔐 [GhostWriter API] Auth result: ✅ Success");
     const { user } = authResult;
     const userId = user.uid;
@@ -30,11 +31,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     console.log("🔄 [GhostWriter API] Getting current cycle...");
     const currentCycle = await GhostWriterService.getCurrentCycle();
     console.log("📅 [GhostWriter API] Current cycle:", currentCycle.id);
-    
+
     // Get user data
     console.log("👤 [GhostWriter API] Getting user data...");
     const userData = await GhostWriterService.getUserData(userId);
-    console.log("📊 [GhostWriter API] User data:", { savedIdeas: userData.savedIdeas.length, dismissedIdeas: userData.dismissedIdeas.length });
+    console.log("📊 [GhostWriter API] User data:", {
+      savedIdeas: userData.savedIdeas.length,
+      dismissedIdeas: userData.dismissedIdeas.length,
+    });
 
     // Check if user already has ideas for current cycle
     console.log("💡 [GhostWriter API] Getting existing ideas for cycle...");
@@ -43,11 +47,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     // If no ideas exist for current cycle or user wants to generate more, generate them
     if (ideas.length === 0 || generateMore) {
-      console.log(`🔄 [GhostWriter] ${generateMore ? "Generating more ideas" : "No ideas found for cycle"} ${currentCycle.id}, checking brand profile...`);
-      
+      console.log(
+        `🔄 [GhostWriter] ${generateMore ? "Generating more ideas" : "No ideas found for cycle"} ${currentCycle.id}, checking brand profile...`,
+      );
+
       // Get user's brand profile
       const brandProfile = await getBrandProfileForUser(userId);
-      
+
       let effectiveBrandProfile = brandProfile;
 
       if (!effectiveBrandProfile) {
@@ -69,22 +75,25 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
 
       // Generate new ideas
-      console.log(`🎨 [GhostWriter] Generating ${generateMore ? "additional" : "new"} ideas with brand profile:`, JSON.stringify(effectiveBrandProfile, null, 2));
+      console.log(
+        `🎨 [GhostWriter] Generating ${generateMore ? "additional" : "new"} ideas with brand profile:`,
+        JSON.stringify(effectiveBrandProfile, null, 2),
+      );
       const newIdeas = await GhostWriterService.generateIdeasForUser(userId, effectiveBrandProfile, currentCycle.id);
-      
+
       // If generating more, combine with existing ideas
       if (generateMore) {
         ideas = [...ideas, ...newIdeas];
       } else {
         ideas = newIdeas;
       }
-      
+
       // Update user data with new cycle
       await updateUserCycleData(userId, currentCycle.id, newIdeas.length);
     }
 
     // Filter out dismissed ideas
-    const filteredIdeas = ideas.filter(idea => !userData.dismissedIdeas.includes(idea.id));
+    const filteredIdeas = ideas.filter((idea) => !userData.dismissedIdeas.includes(idea.id));
 
     console.log(`✅ [GhostWriter] Returning ${filteredIdeas.length} ideas for user ${userId}`);
 
@@ -95,15 +104,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       userData: {
         savedIdeas: userData.savedIdeas,
         dismissedIdeas: userData.dismissedIdeas,
-      }
+      },
     });
-
   } catch (error) {
     console.error("❌ [GhostWriter] Error fetching ideas:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch content ideas" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch content ideas" }, { status: 500 });
   }
 }
 
@@ -111,7 +116,7 @@ async function getBrandProfileForUser(userId: string): Promise<BrandProfileForId
   try {
     // Import here to avoid circular dependencies
     const { adminDb } = await import("@/lib/firebase-admin");
-    
+
     const snapshot = await adminDb
       .collection("brandProfiles")
       .where("userId", "==", userId)
@@ -125,14 +130,14 @@ async function getBrandProfileForUser(userId: string): Promise<BrandProfileForId
 
     const brandData = snapshot.docs[0].data();
     console.log("🔍 [GhostWriter] Found brand profile data:", JSON.stringify(brandData, null, 2));
-    
+
     // Map brand profile to the format needed for idea generation
     const questionnaire = brandData.questionnaire || {};
     const profile = brandData.profile || {};
-    
+
     console.log("🔍 [GhostWriter] Mapped questionnaire:", JSON.stringify(questionnaire, null, 2));
     console.log("🔍 [GhostWriter] Mapped profile:", JSON.stringify(profile, null, 2));
-    
+
     return {
       businessProfession: questionnaire.profession || "Content Creator",
       brandPersonality: questionnaire.brandPersonality || "Professional and helpful",
@@ -155,12 +160,8 @@ async function getBrandProfileForUser(userId: string): Promise<BrandProfileForId
 async function updateUserCycleData(userId: string, cycleId: string, ideasGenerated: number): Promise<void> {
   try {
     const { adminDb } = await import("@/lib/firebase-admin");
-    
-    const snapshot = await adminDb
-      .collection("user_ghost_writer_data")
-      .where("userId", "==", userId)
-      .limit(1)
-      .get();
+
+    const snapshot = await adminDb.collection("user_ghost_writer_data").where("userId", "==", userId).limit(1).get();
 
     if (!snapshot.empty) {
       const userData = snapshot.docs[0].data();
@@ -177,4 +178,4 @@ async function updateUserCycleData(userId: string, cycleId: string, ideasGenerat
   } catch (error) {
     console.error("❌ [GhostWriter] Error updating user cycle data:", error);
   }
-} 
+}

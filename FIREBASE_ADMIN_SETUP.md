@@ -14,8 +14,9 @@ To enable API endpoints to work with Firestore, you need to configure Firebase A
 ## Step 2: Extract Required Values
 
 From the downloaded JSON file, you need these values:
+
 - `project_id`
-- `private_key` 
+- `private_key`
 - `client_email`
 
 ## Step 3: Add to Environment Variables
@@ -46,9 +47,9 @@ After setup, your API endpoints should work:
 curl -X GET "http://localhost:3001/api/collections?userId=YOUR_USER_ID" \
   -H "x-api-key: YOUR_API_KEY"
 
-# Test list collections endpoint  
+# Test list collections endpoint
 curl -X GET "http://localhost:3001/api/list-collections" \
   -H "x-api-key: YOUR_API_KEY"
 ```
 
-If you see "Firebase Admin SDK not configured" errors, check that all environment variables are set correctly. 
+If you see "Firebase Admin SDK not configured" errors, check that all environment variables are set correctly.

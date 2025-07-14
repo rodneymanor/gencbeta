@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+
 import { AlertTriangle, RefreshCw } from "lucide-react";
+
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 interface PlaceholderDetectorProps {
   content: string;
@@ -12,18 +14,14 @@ interface PlaceholderDetectorProps {
   isRegenerating?: boolean;
 }
 
-export function ScriptPlaceholderDetector({
-  content,
-  onRegenerate,
-  isRegenerating = false,
-}: PlaceholderDetectorProps) {
+export function ScriptPlaceholderDetector({ content, onRegenerate, isRegenerating = false }: PlaceholderDetectorProps) {
   const [placeholders, setPlaceholders] = useState<string[]>([]);
 
   useEffect(() => {
     // Detect placeholders in square brackets
     const placeholderRegex = /\[([^\]]+)\]/g;
     const matches = [...content.matchAll(placeholderRegex)];
-    const foundPlaceholders = matches.map(match => match[0]);
+    const foundPlaceholders = matches.map((match) => match[0]);
     setPlaceholders(foundPlaceholders);
   }, [content]);
 
@@ -37,7 +35,7 @@ export function ScriptPlaceholderDetector({
       <AlertDescription className="space-y-3">
         <div>
           <strong>Script contains unfilled placeholders:</strong>
-          <div className="flex flex-wrap gap-1 mt-2">
+          <div className="mt-2 flex flex-wrap gap-1">
             {placeholders.map((placeholder, index) => (
               <Badge key={index} variant="destructive" className="text-xs">
                 {placeholder}
@@ -46,16 +44,11 @@ export function ScriptPlaceholderDetector({
           </div>
         </div>
         <p className="text-sm">
-          These placeholders should have been filled with actual content. The AI may have misunderstood the instructions.
+          These placeholders should have been filled with actual content. The AI may have misunderstood the
+          instructions.
         </p>
         {onRegenerate && (
-          <Button
-            onClick={onRegenerate}
-            disabled={isRegenerating}
-            size="sm"
-            variant="destructive"
-            className="mt-2"
-          >
+          <Button onClick={onRegenerate} disabled={isRegenerating} size="sm" variant="destructive" className="mt-2">
             {isRegenerating ? (
               <>
                 <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
@@ -72,4 +65,4 @@ export function ScriptPlaceholderDetector({
       </AlertDescription>
     </Alert>
   );
-} 
+}

@@ -5,6 +5,7 @@ This guide will walk you through generating an API key for your Chrome extension
 ## Overview
 
 The API key allows your Chrome extension to:
+
 - **Add videos** to your collections from any website
 - **List all collections** to choose where to save videos
 - **Retrieve collection information** and video counts
@@ -63,6 +64,7 @@ The API key allows your Chrome extension to:
 ### 5. API Key Information
 
 Your API key provides access with these limits:
+
 - **Rate Limit**: Requests per minute (typically 60)
 - **Violation Threshold**: Maximum violations before lockout (typically 3)
 - **Lockout Duration**: Time locked out after violations (typically 1 hour)
@@ -70,6 +72,7 @@ Your API key provides access with these limits:
 ## Using Your API Key in Chrome Extension
 
 ### Base URL
+
 ```
 https://gencbeta-57yb9m9q1-rodneymanors-projects.vercel.app
 ```
@@ -77,29 +80,31 @@ https://gencbeta-57yb9m9q1-rodneymanors-projects.vercel.app
 ### Available Endpoints
 
 #### 1. List All Collections
+
 ```javascript
 // GET /api/collections
 const response = await fetch(`${BASE_URL}/api/collections`, {
   headers: {
-    'x-api-key': 'your-api-key-here'
-  }
+    "x-api-key": "your-api-key-here",
+  },
 });
 ```
 
 #### 2. Add Video to Collection
+
 ```javascript
 // POST /api/add-video-to-collection
 const response = await fetch(`${BASE_URL}/api/add-video-to-collection`, {
-  method: 'POST',
+  method: "POST",
   headers: {
-    'Content-Type': 'application/json',
-    'x-api-key': 'your-api-key-here'
+    "Content-Type": "application/json",
+    "x-api-key": "your-api-key-here",
   },
   body: JSON.stringify({
-    videoUrl: 'https://example.com/video.mp4',
-    collectionId: 'your-collection-id',
-    title: 'Optional video title'
-  })
+    videoUrl: "https://example.com/video.mp4",
+    collectionId: "your-collection-id",
+    title: "Optional video title",
+  }),
 });
 ```
 
@@ -110,24 +115,24 @@ const response = await fetch(`${BASE_URL}/api/add-video-to-collection`, {
 class VideoCollectionAPI {
   constructor(apiKey) {
     this.apiKey = apiKey;
-    this.baseUrl = 'https://gencbeta-57yb9m9q1-rodneymanors-projects.vercel.app';
+    this.baseUrl = "https://gencbeta-57yb9m9q1-rodneymanors-projects.vercel.app";
   }
 
   async getCollections() {
     try {
       const response = await fetch(`${this.baseUrl}/api/collections`, {
         headers: {
-          'x-api-key': this.apiKey
-        }
+          "x-api-key": this.apiKey,
+        },
       });
-      
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
-      
+
       return await response.json();
     } catch (error) {
-      console.error('Failed to fetch collections:', error);
+      console.error("Failed to fetch collections:", error);
       throw error;
     }
   }
@@ -135,47 +140,44 @@ class VideoCollectionAPI {
   async addVideo(videoUrl, collectionId, title = null) {
     try {
       const response = await fetch(`${this.baseUrl}/api/add-video-to-collection`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': this.apiKey
+          "Content-Type": "application/json",
+          "x-api-key": this.apiKey,
         },
         body: JSON.stringify({
           videoUrl,
           collectionId,
-          title
-        })
+          title,
+        }),
       });
-      
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
-      
+
       return await response.json();
     } catch (error) {
-      console.error('Failed to add video:', error);
+      console.error("Failed to add video:", error);
       throw error;
     }
   }
 }
 
 // Usage
-const api = new VideoCollectionAPI('your-api-key-here');
+const api = new VideoCollectionAPI("your-api-key-here");
 
 // Get collections for dropdown
 const collections = await api.getCollections();
 
 // Add current page video
-const result = await api.addVideo(
-  window.location.href, 
-  'selected-collection-id',
-  document.title
-);
+const result = await api.addVideo(window.location.href, "selected-collection-id", document.title);
 ```
 
 ## Security Best Practices
 
 ### ✅ DO:
+
 - **Store API key securely** in Chrome extension storage
 - **Use HTTPS** for all API requests (already configured)
 - **Handle errors gracefully** with user-friendly messages
@@ -183,18 +185,20 @@ const result = await api.addVideo(
 - **Check rate limits** and implement retry logic
 
 ### ❌ DON'T:
+
 - **Never expose API key** in public repositories
 - **Don't hardcode API key** in extension source code
 - **Don't ignore error responses** from the API
 - **Don't spam requests** - respect rate limits
 
 ### Chrome Extension Storage Example:
+
 ```javascript
 // Store API key securely
-chrome.storage.sync.set({ apiKey: 'your-api-key' });
+chrome.storage.sync.set({ apiKey: "your-api-key" });
 
 // Retrieve API key
-const { apiKey } = await chrome.storage.sync.get('apiKey');
+const { apiKey } = await chrome.storage.sync.get("apiKey");
 ```
 
 ## Troubleshooting
@@ -202,16 +206,19 @@ const { apiKey } = await chrome.storage.sync.get('apiKey');
 ### Common Issues:
 
 1. **401 Unauthorized**
+
    - Check if API key is correct
    - Ensure key hasn't been revoked
    - Verify header format: `x-api-key: your-key`
 
 2. **429 Rate Limited**
+
    - You've exceeded the rate limit
    - Wait before making more requests
    - Check if key is locked out
 
 3. **400 Bad Request**
+
    - Missing required fields (videoUrl, collectionId)
    - Invalid URL format
    - Check request body structure
@@ -230,20 +237,23 @@ const { apiKey } = await chrome.storage.sync.get('apiKey');
 ## API Key Management
 
 ### Monitoring Usage:
+
 - View **request count** in settings
 - Check **last used** date
 - Monitor **violations** count
 
 ### Security Actions:
+
 - **Revoke immediately** if compromised
 - **Generate new key** periodically for security
 - **Monitor unusual activity** in request counts
 
 ### Lockout Recovery:
+
 - If locked out due to violations, wait for lockout period to expire
 - Check lockout status in settings
 - Reduce request frequency to avoid future lockouts
 
 ---
 
-**Need more help?** Check the full [API Documentation](../API_DOCUMENTATION.md) for detailed endpoint specifications and examples. 
+**Need more help?** Check the full [API Documentation](../API_DOCUMENTATION.md) for detailed endpoint specifications and examples.

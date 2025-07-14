@@ -1,6 +1,7 @@
 # API Route Fixes Summary
 
 ## Issue Identified
+
 After the service-based refactor, the existing features were broken due to authentication handling issues in the refactored API routes. The main problems were:
 
 1. **Authentication Result Handling**: The `authenticateApiKey()` function returns either a success object or a `NextResponse` error, but the routes were not handling this correctly.
@@ -12,16 +13,19 @@ After the service-based refactor, the existing features were broken due to authe
 ## Routes Fixed
 
 ### 1. `/api/script/speed-write` (Primary Fix)
+
 - **Issue**: Authentication result handling was causing "Cannot read properties of undefined (reading 'uid')" error
 - **Fix**: Properly check if `authResult instanceof NextResponse` and handle accordingly
 - **Result**: ✅ Script generation now works correctly, generating both speed and educational scripts
 
 ### 2. `/api/download-video`
+
 - **Issue**: Same authentication handling problem
 - **Fix**: Applied same authentication pattern fix
 - **Result**: ✅ Video download functionality restored
 
 ### 3. `/api/transcribe-video`
+
 - **Issue**: Same authentication handling problem
 - **Fix**: Applied same authentication pattern fix
 - **Result**: ✅ Video transcription functionality restored
@@ -54,23 +58,23 @@ const creditsService = new CreditsService();
 const hasCredits = await creditsService.checkCredits(user.uid, "script_generation");
 
 // After (Fixed)
-const creditCheck = await CreditsService.canPerformAction(
-  user.uid, 
-  "script_generation", 
-  "free"
-);
+const creditCheck = await CreditsService.canPerformAction(user.uid, "script_generation", "free");
 
 if (!creditCheck.canPerform) {
-  return NextResponse.json({ 
-    success: false,
-    error: creditCheck.reason || "Insufficient credits" 
-  }, { status: 402 });
+  return NextResponse.json(
+    {
+      success: false,
+      error: creditCheck.reason || "Insufficient credits",
+    },
+    { status: 402 },
+  );
 }
 ```
 
 ## Testing Results
 
 ### Script Generation Test
+
 ```bash
 curl -X POST http://localhost:3001/api/script/speed-write \
   -H "Content-Type: application/json" \
@@ -78,6 +82,7 @@ curl -X POST http://localhost:3001/api/script/speed-write \
 ```
 
 **Result**: ✅ Successfully generates both speed and educational scripts with proper structure:
+
 - `optionA`: Speed Write Formula script
 - `optionB`: Educational Approach script
 - Both include proper script elements (hook, bridge, goldenNugget, wta)
@@ -113,4 +118,4 @@ curl -X POST http://localhost:3001/api/script/speed-write \
 
 ---
 
-**Summary**: The service-based refactor is now fully functional with proper authentication, credits checking, and error handling. The core script generation, video download, and transcription features are working correctly. 
+**Summary**: The service-based refactor is now fully functional with proper authentication, credits checking, and error handling. The core script generation, video download, and transcription features are working correctly.

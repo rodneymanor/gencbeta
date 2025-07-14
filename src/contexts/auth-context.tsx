@@ -14,8 +14,8 @@ import {
   updateProfile,
 } from "firebase/auth";
 
-import { auth } from "@/lib/firebase";
 import { getAuthCache, setAuthCache, clearAuthCache, type AccountLevel } from "@/lib/auth-cache";
+import { auth } from "@/lib/firebase";
 import { UserManagementService, type UserProfile, type UserRole } from "@/lib/user-management";
 
 interface AuthContextType {

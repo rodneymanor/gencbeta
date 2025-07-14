@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { AIVoicesService } from "@/lib/ai-voices-service";
 
 export async function GET(_request: NextRequest) {
@@ -11,9 +12,6 @@ export async function GET(_request: NextRequest) {
     return NextResponse.json({ sharedVoices, customVoices });
   } catch (error) {
     console.error("🔥 [API] Failed to get voices:", error);
-    return NextResponse.json(
-      { error: "Failed to get voices" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to get voices" }, { status: 500 });
   }
-} 
+}

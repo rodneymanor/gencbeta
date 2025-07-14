@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { authenticateApiKey } from "@/lib/api-key-auth";
 
 interface VideoData {
@@ -52,21 +53,21 @@ export async function POST(request: NextRequest) {
     // Validate input
     if (!videos || !Array.isArray(videos) || videos.length === 0) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: "Videos array is required and must not be empty" 
+        {
+          success: false,
+          error: "Videos array is required and must not be empty",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!creatorUsername || !platform) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: "Creator username and platform are required" 
+        {
+          success: false,
+          error: "Creator username and platform are required",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -83,7 +84,7 @@ export async function POST(request: NextRequest) {
       try {
         // Step 1: Download the video
         const updatedVideo = await downloadVideo(video);
-        
+
         // Step 2: Transcribe the video (if download was successful)
         if (updatedVideo.downloadStatus === "completed" && updatedVideo.downloadUrl) {
           const finalVideo = await transcribeVideo(updatedVideo);
@@ -95,18 +96,17 @@ export async function POST(request: NextRequest) {
 
         // Add delay between requests to be respectful to APIs
         if (i < videos.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+          await new Promise((resolve) => setTimeout(resolve, 1000)); // 1 second delay
         }
-
       } catch (error) {
         console.error(`❌ [DOWNLOAD_ALL] Failed to process video ${video.id}:`, error);
-        
+
         const failedVideo: VideoData = {
           ...video,
           downloadStatus: "failed",
-          transcriptionStatus: "failed"
+          transcriptionStatus: "failed",
         };
-        
+
         processedVideos.push(failedVideo);
         totalFailed++;
       }
@@ -121,20 +121,19 @@ export async function POST(request: NextRequest) {
       processedVideos,
       totalProcessed,
       totalFailed,
-      message: `Successfully processed ${totalProcessed} videos for @${creatorUsername}. ${totalFailed} videos failed.`
+      message: `Successfully processed ${totalProcessed} videos for @${creatorUsername}. ${totalFailed} videos failed.`,
     };
 
     return NextResponse.json(response);
-
   } catch (error) {
     console.error("🔥 [DOWNLOAD_ALL] Failed to process videos:", error);
-    
+
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : "Failed to process videos"
+        error: error instanceof Error ? error.message : "Failed to process videos",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -142,21 +141,21 @@ export async function POST(request: NextRequest) {
 async function downloadVideo(video: VideoData): Promise<VideoData> {
   try {
     console.log(`📥 [DOWNLOAD] Downloading video: ${video.id}`);
-    
+
     const updatedVideo: VideoData = {
       ...video,
-      downloadStatus: "downloading"
+      downloadStatus: "downloading",
     };
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/api/video/download`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001"}/api/video/download`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.INTERNAL_API_KEY || 'internal_key'}` // Use internal key for server-to-server calls
+        Authorization: `Bearer ${process.env.INTERNAL_API_KEY || "internal_key"}`, // Use internal key for server-to-server calls
       },
       body: JSON.stringify({
-        url: video.video_url
-      })
+        url: video.video_url,
+      }),
     });
 
     if (!response.ok) {
@@ -164,22 +163,21 @@ async function downloadVideo(video: VideoData): Promise<VideoData> {
     }
 
     const downloadResult = await response.json();
-    
+
     if (downloadResult.success && downloadResult.videoData) {
       return {
         ...updatedVideo,
         downloadStatus: "completed",
-        downloadUrl: downloadResult.videoData.cdnUrl || downloadResult.videoData.url
+        downloadUrl: downloadResult.videoData.cdnUrl || downloadResult.videoData.url,
       };
     } else {
       throw new Error(downloadResult.error || "Download failed");
     }
-
   } catch (error) {
     console.error(`❌ [DOWNLOAD] Failed to download video ${video.id}:`, error);
     return {
       ...video,
-      downloadStatus: "failed"
+      downloadStatus: "failed",
     };
   }
 }
@@ -187,26 +185,26 @@ async function downloadVideo(video: VideoData): Promise<VideoData> {
 async function transcribeVideo(video: VideoData): Promise<VideoData> {
   try {
     console.log(`🎤 [TRANSCRIBE] Transcribing video: ${video.id}`);
-    
+
     const updatedVideo: VideoData = {
       ...video,
-      transcriptionStatus: "transcribing"
+      transcriptionStatus: "transcribing",
     };
 
     if (!video.downloadUrl) {
       throw new Error("No download URL available for transcription");
     }
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/api/video/transcribe`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001"}/api/video/transcribe`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.INTERNAL_API_KEY || 'internal_key'}` // Use internal key for server-to-server calls
+        Authorization: `Bearer ${process.env.INTERNAL_API_KEY || "internal_key"}`, // Use internal key for server-to-server calls
       },
       body: JSON.stringify({
         videoUrl: video.downloadUrl,
-        platform: video.platform
-      })
+        platform: video.platform,
+      }),
     });
 
     if (!response.ok) {
@@ -214,22 +212,21 @@ async function transcribeVideo(video: VideoData): Promise<VideoData> {
     }
 
     const transcriptionResult = await response.json();
-    
+
     if (transcriptionResult.success) {
       return {
         ...updatedVideo,
         transcriptionStatus: "completed",
-        transcriptionId: transcriptionResult.transcriptionId || `trans_${video.id}`
+        transcriptionId: transcriptionResult.transcriptionId || `trans_${video.id}`,
       };
     } else {
       throw new Error(transcriptionResult.error || "Transcription failed");
     }
-
   } catch (error) {
     console.error(`❌ [TRANSCRIBE] Failed to transcribe video ${video.id}:`, error);
     return {
       ...video,
-      transcriptionStatus: "failed"
+      transcriptionStatus: "failed",
     };
   }
-} 
+}

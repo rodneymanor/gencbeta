@@ -1,8 +1,9 @@
+import { createNegativeKeywordPromptInstruction } from "@/data/negative-keywords";
 import { generateScript } from "@/lib/gemini";
 import { parseStructuredResponse, createScriptElements, combineScriptElements } from "@/lib/json-extractor";
 import { NegativeKeywordsService } from "@/lib/negative-keywords-service";
 import { generateScriptWithValidation, validateScript, cleanScriptContent } from "@/lib/script-validation";
-import { createNegativeKeywordPromptInstruction } from "@/data/negative-keywords";
+
 import type { ScriptInput, ScriptResult } from "./speed";
 
 export class EducationalEngine {
@@ -22,25 +23,25 @@ export class EducationalEngine {
       const result = await generateScriptWithValidation(
         () => generateScript(prompt, { responseType: "json" }),
         (result) => result.content ?? "",
-        { maxRetries: 2, retryDelay: 500 }
+        { maxRetries: 2, retryDelay: 500 },
       );
 
       const rawContent = result.content ?? "";
 
       // Use bulletproof JSON extraction
       const parseResult = parseStructuredResponse(rawContent, "Educational");
-      
+
       if (!parseResult.success) {
         console.warn("[EducationalEngine] JSON parsing failed, falling back to plain text");
         const cleanedContent = cleanScriptContent(rawContent);
         const elements = { hook: "", bridge: "", goldenNugget: "", wta: cleanedContent };
         const fullContent = combineScriptElements(elements);
-        
+
         return {
           success: false,
           content: fullContent,
           elements,
-          error: parseResult.error
+          error: parseResult.error,
         };
       }
 
@@ -56,7 +57,7 @@ export class EducationalEngine {
       return {
         success: true,
         content: fullContent,
-        elements
+        elements,
       };
     } catch (error) {
       console.error("[EducationalEngine] Script generation failed:", error);
@@ -100,4 +101,4 @@ SOURCE IDEA: ${this.input.idea}
 
 FINAL CHECK: Ensure your response is ONLY valid JSON with no additional text.`;
   }
-} 
+}

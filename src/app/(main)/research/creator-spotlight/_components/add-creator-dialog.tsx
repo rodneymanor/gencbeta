@@ -1,9 +1,12 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Plus, Loader2, Check, AlertCircle } from 'lucide-react';
+import React, { useState } from "react";
 
-import { Button } from '@/components/ui/button';
+import { Plus, Loader2, Check, AlertCircle } from "lucide-react";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -12,13 +15,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 interface AddCreatorDialogProps {
   children: React.ReactNode;
@@ -27,26 +28,26 @@ interface AddCreatorDialogProps {
 
 interface CreatorFormData {
   username: string;
-  platform: 'tiktok' | 'instagram';
+  platform: "tiktok" | "instagram";
 }
 
 export function AddCreatorDialog({ children, onCreatorAdded }: AddCreatorDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<CreatorFormData>({
-    username: '',
-    platform: 'tiktok'
+    username: "",
+    platform: "tiktok",
   });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   const submitCreator = async () => {
-    const response = await fetch('/api/creators', {
-      method: 'POST',
+    const response = await fetch("/api/creators", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(formData)
+      body: JSON.stringify(formData),
     });
 
     const data = await response.json();
@@ -59,7 +60,7 @@ export function AddCreatorDialog({ children, onCreatorAdded }: AddCreatorDialogP
         onCreatorAdded();
       }, 2000);
     } else {
-      setError(data.error ?? 'Failed to add creator');
+      setError(data.error ?? "Failed to add creator");
     }
   };
 
@@ -67,7 +68,7 @@ export function AddCreatorDialog({ children, onCreatorAdded }: AddCreatorDialogP
     e.preventDefault();
 
     if (!formData.username || !formData.platform) {
-      setError('Username and platform are required');
+      setError("Username and platform are required");
       return;
     }
 
@@ -78,11 +79,11 @@ export function AddCreatorDialog({ children, onCreatorAdded }: AddCreatorDialogP
     try {
       await submitCreator();
     } catch (error) {
-      console.error('Error adding creator:', error);
-      if (error instanceof Error && error.message.includes('401')) {
-        setError('Authentication required. Please log in to add creators.');
+      console.error("Error adding creator:", error);
+      if (error instanceof Error && error.message.includes("401")) {
+        setError("Authentication required. Please log in to add creators.");
       } else {
-        setError('Failed to add creator. Please try again.');
+        setError("Failed to add creator. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -91,49 +92,46 @@ export function AddCreatorDialog({ children, onCreatorAdded }: AddCreatorDialogP
 
   const resetForm = () => {
     setFormData({
-      username: '',
-      platform: 'tiktok'
+      username: "",
+      platform: "tiktok",
     });
   };
 
-  const detectPlatformFromUrl = (url: string): 'tiktok' | 'instagram' | null => {
-    if (url.includes('tiktok.com') || url.includes('tiktok')) {
-      return 'tiktok';
+  const detectPlatformFromUrl = (url: string): "tiktok" | "instagram" | null => {
+    if (url.includes("tiktok.com") || url.includes("tiktok")) {
+      return "tiktok";
     }
-    if (url.includes('instagram.com') || url.includes('instagram')) {
-      return 'instagram';
+    if (url.includes("instagram.com") || url.includes("instagram")) {
+      return "instagram";
     }
     return null;
   };
 
   const extractUsernameFromUrl = (url: string): string => {
     // Remove protocol and domain
-    let username = url.replace(/^https?:\/\//, '');
-    username = username.replace(/^www\./, '');
-    
+    let username = url.replace(/^https?:\/\//, "");
+    username = username.replace(/^www\./, "");
+
     // Extract username from various URL patterns
-    const patterns = [
-      /(?:tiktok\.com|instagram\.com)\/@?([^/?]+)/,
-      /(?:tiktok\.com|instagram\.com)\/([^/?]+)/,
-    ];
-    
+    const patterns = [/(?:tiktok\.com|instagram\.com)\/@?([^/?]+)/, /(?:tiktok\.com|instagram\.com)\/([^/?]+)/];
+
     for (const pattern of patterns) {
       const match = username.match(pattern);
       if (match) {
-        return match[1].replace('@', '');
+        return match[1].replace("@", "");
       }
     }
-    
+
     return username;
   };
 
   const handleInputChange = (field: keyof CreatorFormData, value: string) => {
-    if (field === 'username') {
+    if (field === "username") {
       // Check if input looks like a URL
-      if (value.includes('http') || value.includes('tiktok.com') || value.includes('instagram.com')) {
+      if (value.includes("http") || value.includes("tiktok.com") || value.includes("instagram.com")) {
         const detectedPlatform = detectPlatformFromUrl(value);
         const extractedUsername = extractUsernameFromUrl(value);
-        
+
         setFormData((prev) => ({
           ...prev,
           username: extractedUsername,
@@ -143,7 +141,7 @@ export function AddCreatorDialog({ children, onCreatorAdded }: AddCreatorDialogP
         // Regular username input
         setFormData((prev) => ({
           ...prev,
-          username: value.replace('@', ''),
+          username: value.replace("@", ""),
         }));
       }
     } else {
@@ -156,18 +154,16 @@ export function AddCreatorDialog({ children, onCreatorAdded }: AddCreatorDialogP
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Plus className="h-5 w-5" />
             Add Creator
           </DialogTitle>
-                      <DialogDescription>
-              Enter a creator&apos;s username or paste their profile URL to add them to the spotlight.
-            </DialogDescription>
+          <DialogDescription>
+            Enter a creator&apos;s username or paste their profile URL to add them to the spotlight.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -175,26 +171,23 @@ export function AddCreatorDialog({ children, onCreatorAdded }: AddCreatorDialogP
           <div className="space-y-2">
             <Label htmlFor="username">
               Username or Profile URL *
-              <span className="text-muted-foreground ml-1">
-                (paste username or full profile URL)
-              </span>
+              <span className="text-muted-foreground ml-1">(paste username or full profile URL)</span>
             </Label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
-                @
-              </span>
+              <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2 transform">@</span>
               <Input
                 id="username"
                 type="text"
                 value={formData.username}
-                onChange={(e) => handleInputChange('username', e.target.value)}
+                onChange={(e) => handleInputChange("username", e.target.value)}
                 placeholder="username or https://tiktok.com/@username"
                 className="pl-8"
                 required
               />
             </div>
-            <p className="text-xs text-muted-foreground">
-              You can paste a full profile URL and we&apos;ll automatically detect the platform and extract the username.
+            <p className="text-muted-foreground text-xs">
+              You can paste a full profile URL and we&apos;ll automatically detect the platform and extract the
+              username.
             </p>
           </div>
 
@@ -203,7 +196,7 @@ export function AddCreatorDialog({ children, onCreatorAdded }: AddCreatorDialogP
             <Label htmlFor="platform">Platform *</Label>
             <Select
               value={formData.platform}
-              onValueChange={(value: 'tiktok' | 'instagram') => handleInputChange('platform', value)}
+              onValueChange={(value: "tiktok" | "instagram") => handleInputChange("platform", value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select platform" />
@@ -213,7 +206,7 @@ export function AddCreatorDialog({ children, onCreatorAdded }: AddCreatorDialogP
                   <div className="flex items-center gap-2">
                     <span className="text-lg">🎵</span>
                     <span>TikTok</span>
-                    <Badge variant="outline" className="ml-auto bg-[#FF0050] text-white border-[#FF0050]">
+                    <Badge variant="outline" className="ml-auto border-[#FF0050] bg-[#FF0050] text-white">
                       TikTok
                     </Badge>
                   </div>
@@ -222,7 +215,7 @@ export function AddCreatorDialog({ children, onCreatorAdded }: AddCreatorDialogP
                   <div className="flex items-center gap-2">
                     <span className="text-lg">📸</span>
                     <span>Instagram</span>
-                    <Badge variant="outline" className="ml-auto bg-[#E4405F] text-white border-[#E4405F]">
+                    <Badge variant="outline" className="ml-auto border-[#E4405F] bg-[#E4405F] text-white">
                       Instagram
                     </Badge>
                   </div>
@@ -249,53 +242,40 @@ export function AddCreatorDialog({ children, onCreatorAdded }: AddCreatorDialogP
 
           {/* Preview */}
           {formData.username && (
-            <div className="p-4 border rounded-lg bg-muted/50">
-              <h4 className="font-medium mb-2">Preview</h4>
+            <div className="bg-muted/50 rounded-lg border p-4">
+              <h4 className="mb-2 font-medium">Preview</h4>
               <div className="flex items-center gap-3">
                 <div className="relative">
-                                  <div 
-                  className="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-white"
-                  style={{
-                    backgroundColor: formData.platform === 'tiktok' ? '#FF0050' : '#E4405F'
-                  }}
-                >
-                  {formData.username.charAt(0).toUpperCase()}
-                </div>
+                  <div
+                    className="flex h-12 w-12 items-center justify-center rounded-full font-semibold text-white"
+                    style={{
+                      backgroundColor: formData.platform === "tiktok" ? "#FF0050" : "#E4405F",
+                    }}
+                  >
+                    {formData.username.charAt(0).toUpperCase()}
+                  </div>
                   <Badge
                     variant="outline"
                     className={cn(
-                      "absolute -bottom-1 -right-1 text-xs capitalize",
-                      formData.platform === 'tiktok' && "bg-[#FF0050] text-white border-[#FF0050]",
-                      formData.platform === 'instagram' && "bg-[#E4405F] text-white border-[#E4405F]"
+                      "absolute -right-1 -bottom-1 text-xs capitalize",
+                      formData.platform === "tiktok" && "border-[#FF0050] bg-[#FF0050] text-white",
+                      formData.platform === "instagram" && "border-[#E4405F] bg-[#E4405F] text-white",
                     )}
                   >
                     {formData.platform}
                   </Badge>
                 </div>
                 <div>
-                  <p className="font-medium">
-                    {formData.displayName ?? formData.username}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    @{formData.username}
-                  </p>
-                  {formData.bio && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {formData.bio}
-                    </p>
-                  )}
+                  <p className="font-medium">{formData.displayName ?? formData.username}</p>
+                  <p className="text-muted-foreground text-sm">@{formData.username}</p>
+                  {formData.bio && <p className="text-muted-foreground mt-1 text-sm">{formData.bio}</p>}
                 </div>
               </div>
             </div>
           )}
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setOpen(false)}
-              disabled={loading}
-            >
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>
               Cancel
             </Button>
             <Button
@@ -303,8 +283,8 @@ export function AddCreatorDialog({ children, onCreatorAdded }: AddCreatorDialogP
               disabled={loading || !formData.username || !formData.platform}
               className={cn(
                 "flex items-center gap-2",
-                formData.platform === 'tiktok' && "bg-[#FF0050] hover:bg-[#E6004C]",
-                formData.platform === 'instagram' && "bg-[#E4405F] hover:bg-[#D6336C]"
+                formData.platform === "tiktok" && "bg-[#FF0050] hover:bg-[#E6004C]",
+                formData.platform === "instagram" && "bg-[#E4405F] hover:bg-[#D6336C]",
               )}
             >
               {loading ? (
@@ -324,4 +304,4 @@ export function AddCreatorDialog({ children, onCreatorAdded }: AddCreatorDialogP
       </DialogContent>
     </Dialog>
   );
-} 
+}

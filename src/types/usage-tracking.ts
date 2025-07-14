@@ -24,29 +24,29 @@ export interface UserCredits {
   id?: string;
   userId: string;
   accountLevel: "free" | "pro";
-  
+
   // Current period credits
   creditsUsed: number;
   creditsLimit: number;
-  
+
   // Period tracking
   currentPeriodStart: string;
   currentPeriodEnd: string;
-  
+
   // Daily tracking for free users
   dailyCreditsUsed?: number;
   dailyCreditsLimit?: number;
   lastDailyReset?: string;
-  
+
   // Monthly tracking for pro users
   monthlyCreditsUsed?: number;
   monthlyCreditsLimit?: number;
   lastMonthlyReset?: string;
-  
+
   // Metadata
   createdAt: string;
   updatedAt: string;
-  
+
   // Usage history
   totalCreditsUsed: number;
   totalScriptsGenerated: number;
@@ -115,4 +115,4 @@ export const ACCOUNT_LIMITS = {
   },
 } as const;
 
-export type CreditOperation = keyof typeof CREDIT_COSTS; 
+export type CreditOperation = keyof typeof CREDIT_COSTS;

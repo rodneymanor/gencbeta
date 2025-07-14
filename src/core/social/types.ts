@@ -25,4 +25,4 @@ export interface ProfileFetchOptions {
   includeMetrics?: boolean;
   includeAvatar?: boolean;
   includeBio?: boolean;
-} 
+}

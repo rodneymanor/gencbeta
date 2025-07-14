@@ -61,7 +61,7 @@
 
   /* Custom background colors */
   --background-color-100: 0.96 0.01 110; /* Light sage/cream for shadows */
-  --background-color-300: 0.90 0.01 115; /* Light sage/cream for active states */
+  --background-color-300: 0.9 0.01 115; /* Light sage/cream for active states */
   --text-color-100: 0.25 0.02 30; /* Dark brown for text shadows */
 
   --font-sans: Poppins, sans-serif;
@@ -80,7 +80,7 @@
   --shadow-lg: 0px 0px 1px 0px hsl(0 0% 0% / 0.13), 0px 4px 6px -1px hsl(0 0% 0% / 0.13);
   --shadow-xl: 0px 0px 1px 0px hsl(0 0% 0% / 0.13), 0px 8px 10px -1px hsl(0 0% 0% / 0.13);
   --shadow-2xl: 0px 0px 1px 0px hsl(0 0% 0% / 0.33);
-  
+
   /* Script Element Highlighting Colors - Updated with new palette */
   --script-hook: oklch(0.72 0.15 65); /* Orange for hooks */
   --script-hook-foreground: oklch(1 0 0);
@@ -98,11 +98,11 @@
   --foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
 
   /* Card and surface colors */
-  --card: oklch(0.30 0.02 25); /* Slightly lighter brown */
+  --card: oklch(0.3 0.02 25); /* Slightly lighter brown */
   --card-foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
 
   /* Popover colors */
-  --popover: oklch(0.30 0.02 25); /* Slightly lighter brown */
+  --popover: oklch(0.3 0.02 25); /* Slightly lighter brown */
   --popover-foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
 
   /* Primary colors */
@@ -168,7 +168,7 @@
   --shadow-lg: 0px 0px 1px 0px hsl(0 0% 0% / 0.13), 0px 4px 6px -1px hsl(0 0% 0% / 0.13);
   --shadow-xl: 0px 0px 1px 0px hsl(0 0% 0% / 0.13), 0px 8px 10px -1px hsl(0 0% 0% / 0.13);
   --shadow-2xl: 0px 0px 1px 0px hsl(0 0% 0% / 0.33);
-  
+
   /* Script Element Highlighting Colors - Dark Mode */
   --script-hook: oklch(0.62 0.12 65); /* Darker orange for dark mode */
   --script-hook-foreground: oklch(0.95 0.005 240);
@@ -214,7 +214,7 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  
+
   /* Script Element Colors */
   --color-script-hook: var(--script-hook);
   --color-script-hook-foreground: var(--script-hook-foreground);
@@ -385,12 +385,13 @@
 
 /* Hide scrollbars while keeping scroll functionality */
 .hide-scrollbar {
-  overflow: auto;                 /* still scrollable */
-  scrollbar-width: none;          /* Firefox */
-  -ms-overflow-style: none;       /* IE / old Edge */
+  overflow: auto; /* still scrollable */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE / old Edge */
 }
 
-.hide-scrollbar::-webkit-scrollbar {   /* Chrome, Safari, Opera */
+.hide-scrollbar::-webkit-scrollbar {
+  /* Chrome, Safari, Opera */
   display: none;
 }
 
@@ -398,7 +399,7 @@
 .app-shell {
   display: grid;
   grid-template-columns: 1fr 320px;
-  gap: 24px;         /* matches their generous gutters */
+  gap: 24px; /* matches their generous gutters */
   height: 100vh;
 }
 
@@ -419,7 +420,6 @@
 [data-next-badge] {
   display: none !important;
 }
-
 
 [data-radix-popper-content-wrapper]:has([data-slot="tooltip-content"]) {
   display: none !important;

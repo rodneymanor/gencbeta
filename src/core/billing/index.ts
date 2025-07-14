@@ -15,7 +15,7 @@ export {
   type CreditCheckResult,
   type CreditDeductionResult,
   type CreditRefundResult,
-} from './credits';
+} from "./credits";
 
 // Usage Tracking Service
 export {
@@ -31,10 +31,10 @@ export {
   type DailyUsageStats,
   type UserUsageStats,
   type RateLimitConfig,
-} from './usage';
+} from "./usage";
 
 // Re-export types for convenience
-export type { CreditOperation } from '@/types/usage-tracking';
+export type { CreditOperation } from "@/types/usage-tracking";
 
 // Billing service instance for easy importing
 import {
@@ -45,8 +45,7 @@ import {
   refundCredits,
   getUsageStats,
   trackUsageAndDeductCredits,
-} from './credits';
-
+} from "./credits";
 import {
   trackUsage,
   calculateCost,
@@ -56,7 +55,7 @@ import {
   getUserUsageStats,
   getSystemUsage,
   trackApiUsage,
-} from './usage';
+} from "./usage";
 
 export const billingService = {
   initializeUserCredits,
@@ -76,4 +75,4 @@ export const billingService = {
   trackApiUsage,
   // Alias for backward compatibility
   checkCredits: canPerformAction,
-}; 
+};

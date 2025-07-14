@@ -1,7 +1,7 @@
-import { SpeedEngine } from "./engines/speed";
 import { EducationalEngine } from "./engines/educational";
-import { VoiceEngine } from "./engines/voice";
+import { SpeedEngine } from "./engines/speed";
 import type { ScriptInput } from "./engines/speed";
+import { VoiceEngine } from "./engines/voice";
 import type { VoiceScriptResult } from "./engines/voice";
 
 export type ScriptType = "speed" | "educational" | "voice";
@@ -98,14 +98,15 @@ export const ScriptService = {
       }
 
       // Create option A (speed or voice fallback)
-      const optionA = speedResult.status === "fulfilled" 
-        ? speedResult.value 
-        : voiceResult;
+      const optionA = speedResult.status === "fulfilled" ? speedResult.value : voiceResult;
 
       // Create option B (educational or voice fallback)
-      const optionB = educationalResult.status === "fulfilled" 
-        ? educationalResult.value 
-        : (voiceResult && optionA !== voiceResult ? voiceResult : null);
+      const optionB =
+        educationalResult.status === "fulfilled"
+          ? educationalResult.value
+          : voiceResult && optionA !== voiceResult
+            ? voiceResult
+            : null;
 
       return { optionA, optionB };
     } catch (error) {
@@ -113,4 +114,4 @@ export const ScriptService = {
       throw error;
     }
   },
-}; 
+};

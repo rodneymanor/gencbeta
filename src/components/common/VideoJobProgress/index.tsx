@@ -6,6 +6,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+
 import {
   CheckCircle,
   XCircle,
@@ -18,10 +19,10 @@ import {
   AlertTriangle,
 } from "lucide-react";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/auth-context";
 import type {
   VideoProcessingStatus as VideoProcessingStatusType,
@@ -87,15 +88,15 @@ const isActiveJob = (status: VideoProcessingStatusType): boolean => {
   return ["queued", "processing", "downloading", "transcribing", "analyzing", "uploading", "retrying"].includes(status);
 };
 
-export function VideoJobProgress({ 
-  jobId, 
-  onComplete, 
-  onRetry, 
+export function VideoJobProgress({
+  jobId,
+  onComplete,
+  onRetry,
   onError,
   className = "",
   showDetails = true,
   autoPoll = true,
-  pollInterval = 2000
+  pollInterval = 2000,
 }: VideoJobProgressProps) {
   const [job, setJob] = useState<ProcessingStatusResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -216,10 +217,10 @@ export function VideoJobProgress({
   }
 
   return (
-    <StatusDisplay 
-      job={job} 
-      isRetrying={isRetrying} 
-      onRetry={handleRetry} 
+    <StatusDisplay
+      job={job}
+      isRetrying={isRetrying}
+      onRetry={handleRetry}
       className={className}
       showDetails={showDetails}
     />
@@ -278,13 +279,7 @@ function StatusDisplay({ job, isRetrying, onRetry, className, showDetails }: Sta
             </div>
           )}
           {job.canRetry && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={onRetry}
-              disabled={isRetrying}
-              className="mt-2"
-            >
+            <Button size="sm" variant="outline" onClick={onRetry} disabled={isRetrying} className="mt-2">
               {isRetrying ? "Retrying..." : "Retry"}
             </Button>
           )}
@@ -335,4 +330,4 @@ function StatusDisplay({ job, isRetrying, onRetry, className, showDetails }: Sta
       )}
     </div>
   );
-} 
+}

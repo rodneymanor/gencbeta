@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { Settings, Trash2, Plus, CheckSquare, X, MoreVertical, MoveRight, FolderOpen } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -12,11 +14,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/auth-context";
 import { type Collection } from "@/lib/collections";
-import { useState } from "react";
-import { ManageCollectionsModal } from "./manage-collections-modal";
 
 import { AddVideoDialog } from "./add-video-dialog";
 import { CreateCollectionDialog } from "./create-collection-dialog";
+import { ManageCollectionsModal } from "./manage-collections-modal";
 import { MoveCopyVideosDialog } from "./move-copy-videos-dialog";
 
 interface ManageModeHeaderProps {
@@ -55,7 +56,7 @@ const ManageModeControls = ({
     {/* Selection Counter */}
     <div className="bg-secondary/40 border-border/60 flex items-center gap-3 rounded-lg border px-4 py-3 text-sm font-medium shadow-xs">
       <span className="text-muted-foreground">Selected:</span>
-      <Badge variant="secondary" className="bg-primary text-primary-foreground shadow-sm text-sm px-2 py-1">
+      <Badge variant="secondary" className="bg-primary text-primary-foreground px-2 py-1 text-sm shadow-sm">
         {selectedVideos.size}
       </Badge>
     </div>
@@ -66,7 +67,7 @@ const ManageModeControls = ({
         variant="outline"
         size="default"
         onClick={onSelectAll}
-        className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 shadow-xs transition-all duration-200 hover:shadow-sm h-10 px-4"
+        className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 h-10 px-4 shadow-xs transition-all duration-200 hover:shadow-sm"
       >
         <CheckSquare className="mr-2 h-4 w-4" />
         Select All
@@ -75,7 +76,7 @@ const ManageModeControls = ({
         variant="outline"
         size="default"
         onClick={onClearSelection}
-        className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 shadow-xs transition-all duration-200 hover:shadow-sm h-10 px-4"
+        className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 h-10 px-4 shadow-xs transition-all duration-200 hover:shadow-sm"
       >
         <X className="mr-2 h-4 w-4" />
         Clear
@@ -91,7 +92,7 @@ const ManageModeControls = ({
             <Button
               variant="outline"
               size="default"
-              className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 shadow-xs transition-all duration-200 hover:shadow-sm h-10 px-4"
+              className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 h-10 px-4 shadow-xs transition-all duration-200 hover:shadow-sm"
             >
               <MoveRight className="mr-2 h-4 w-4" />
               Move/Copy
@@ -102,7 +103,7 @@ const ManageModeControls = ({
             variant="destructive"
             size="default"
             onClick={onBulkDelete}
-            className="shadow-xs transition-all duration-200 hover:shadow-sm h-10 px-4"
+            className="h-10 px-4 shadow-xs transition-all duration-200 hover:shadow-sm"
           >
             <Trash2 className="mr-2 h-4 w-4" />
             Delete ({selectedVideos.size})
@@ -117,7 +118,7 @@ const ManageModeControls = ({
         variant="ghost"
         size="default"
         onClick={onExitManageMode}
-        className="text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all duration-200 h-10 px-4"
+        className="text-muted-foreground hover:text-foreground hover:bg-secondary/50 h-10 px-4 transition-all duration-200"
       >
         <X className="mr-2 h-4 w-4" />
         Exit Manage Mode
@@ -144,9 +145,9 @@ const AdminControls = ({
     <div className="flex items-center gap-2">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             className="text-muted-foreground hover:text-foreground h-11 w-11"
             aria-label="More options"
           >

@@ -12,13 +12,13 @@ import { motion } from "framer-motion";
 import { Edit3, Loader2, Check, Bookmark, Menu } from "lucide-react";
 import { toast } from "sonner";
 
+import { VideoGridDisplay, type VideoGridVideo } from "@/components/extract/video-grid-display";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { VideoLightbox } from "@/components/ui/video-lightbox";
-import { VideoGridDisplay, type VideoGridVideo } from "@/components/extract/video-grid-display";
 import { useAuth } from "@/contexts/auth-context";
 import { useTopBarConfig } from "@/hooks/use-route-topbar";
 import { CollectionsService, type Collection, type Video } from "@/lib/collections";
@@ -206,18 +206,13 @@ function InlineEditableField({
               placeholder={placeholder}
             />
           )}
-          <div className="absolute right-2 top-1/2 -translate-y-1/2">
+          <div className="absolute top-1/2 right-2 -translate-y-1/2">
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : saved ? (
               <Check className="h-4 w-4 text-green-500" />
             ) : (
-              <Button
-                size="sm"
-                onClick={handleSave}
-                disabled={loading}
-                className="h-6 w-6 p-0"
-              >
+              <Button size="sm" onClick={handleSave} disabled={loading} className="h-6 w-6 p-0">
                 <Check className="h-3 w-3" />
               </Button>
             )}
@@ -233,7 +228,7 @@ function InlineEditableField({
           <Edit3 className="ml-1 h-3 w-3 opacity-0 transition-opacity group-hover:opacity-100" />
         </button>
       )}
-      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+      {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
     </span>
   );
 }
@@ -738,7 +733,7 @@ function CollectionsPageContent() {
   const videoGridVideos: VideoGridVideo[] = useMemo(() => {
     return videos.map((video) => ({
       id: video.id,
-      thumbnailUrl: video.thumbnailUrl || '',
+      thumbnailUrl: video.thumbnailUrl || "",
       title: video.title,
       description: video.description,
       duration: video.duration,
@@ -1058,4 +1053,4 @@ export default function CollectionsPage() {
       <CollectionsPageContent />
     </Suspense>
   );
-} 
+}

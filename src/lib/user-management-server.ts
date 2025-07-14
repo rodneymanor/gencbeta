@@ -1,5 +1,6 @@
-import { getAdminDb, isAdminInitialized } from "@/lib/firebase-admin";
 import { format } from "date-fns";
+
+import { getAdminDb, isAdminInitialized } from "@/lib/firebase-admin";
 import type { UserProfile } from "@/lib/user-management";
 
 function formatTimestamp(ts: any): string {
@@ -65,7 +66,7 @@ export class UserManagementService {
           .where("role", "==", "coach")
           .where("isActive", "==", true)
           .get();
-        return coachesSnapshot.docs.map((doc) => (doc.data() as any).uid);
+        return coachesSnapshot.docs.map((doc) => doc.data().uid);
       }
 
       // Coach: can access own UID
@@ -84,4 +85,4 @@ export class UserManagementService {
       return [];
     }
   }
-} 
+}

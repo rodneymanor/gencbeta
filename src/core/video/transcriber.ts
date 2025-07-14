@@ -4,8 +4,9 @@
  */
 
 import { transcribeVideoFile } from "@/lib/transcription";
-import type { Platform } from "./platform-detector";
+
 import type { VideoData } from "./downloader";
+import type { Platform } from "./platform-detector";
 
 export interface TranscriptionResult {
   success: boolean;
@@ -58,12 +59,12 @@ export async function transcribeVideoData(
     });
 
     console.log("🎬 [TRANSCRIBER] Transcribing video file...");
-    
+
     // Use localhost for server-side transcription calls
     const baseUrl = process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
       : `http://localhost:${process.env.PORT ?? 3001}`;
-    
+
     const transcriptionResult = await transcribeVideoFile(file, baseUrl);
 
     return transcriptionResult;
@@ -242,12 +243,12 @@ export function analyzeTranscriptComponents(transcript: string): {
   wta: string;
 } {
   // Simple analysis - in production, this would use AI to extract components
-  const lines = transcript.split('\n').filter(line => line.trim());
-  
+  const lines = transcript.split("\n").filter((line) => line.trim());
+
   return {
     hook: lines[0] || "Hook not detected",
-    bridge: lines[1] || "Bridge not detected", 
-    nugget: lines.slice(2, -1).join(' ') || "Main content not detected",
+    bridge: lines[1] || "Bridge not detected",
+    nugget: lines.slice(2, -1).join(" ") || "Main content not detected",
     wta: lines[lines.length - 1] ?? "Call to action not detected",
   };
 }
@@ -260,4 +261,4 @@ export function analyzeTranscriptComponents(transcript: string): {
 export function extractHashtags(text: string): string[] {
   const hashtagRegex = /#[\w\u0590-\u05ff]+/g;
   return text.match(hashtagRegex) || [];
-} 
+}

@@ -1,6 +1,6 @@
 export interface ReadabilityScore {
   score: number;
-  level: 'easy' | 'medium' | 'hard';
+  level: "easy" | "medium" | "hard";
   description: string;
   suggestions: string[];
 }
@@ -10,7 +10,7 @@ export interface ReadabilityAnalysis {
   sentences: Array<{
     text: string;
     score: number;
-    level: 'easy' | 'medium' | 'hard';
+    level: "easy" | "medium" | "hard";
     issues: string[];
     startIndex: number;
     endIndex: number;
@@ -27,7 +27,7 @@ export interface ReadabilityAnalysis {
 }
 
 export interface ReadabilitySettings {
-  algorithm: 'flesch' | 'gunning-fog' | 'coleman-liau' | 'automated';
+  algorithm: "flesch" | "gunning-fog" | "coleman-liau" | "automated";
   thresholds: {
     easy: number;
     medium: number;
@@ -62,10 +62,8 @@ class EnhancedReadabilityService {
   analyzeText(text: string): ReadabilityAnalysis {
     const sentences = this.splitIntoSentences(text);
     const words = this.extractWords(text);
-    
-    const sentenceAnalyses = sentences.map(sentence => 
-      this.analyzeSentence(sentence, text)
-    );
+
+    const sentenceAnalyses = sentences.map((sentence) => this.analyzeSentence(sentence, text));
 
     const statistics = this.calculateStatistics(text, words, sentences);
     const overallScore = this.calculateOverallScore(statistics);
@@ -73,7 +71,7 @@ class EnhancedReadabilityService {
     return {
       overall: overallScore,
       sentences: sentenceAnalyses,
-      statistics
+      statistics,
     };
   }
 
@@ -86,15 +84,15 @@ class EnhancedReadabilityService {
     while ((match = sentenceRegex.exec(text)) !== null) {
       const endIndex = match.index + match[0].length;
       const sentenceText = text.slice(lastIndex, endIndex).trim();
-      
+
       if (sentenceText.length > 0) {
         sentences.push({
           text: sentenceText,
           startIndex: lastIndex,
-          endIndex: endIndex
+          endIndex: endIndex,
         });
       }
-      
+
       lastIndex = endIndex;
     }
 
@@ -105,7 +103,7 @@ class EnhancedReadabilityService {
         sentences.push({
           text: remainingText,
           startIndex: lastIndex,
-          endIndex: text.length
+          endIndex: text.length,
         });
       }
     }
@@ -114,19 +112,17 @@ class EnhancedReadabilityService {
   }
 
   private extractWords(text: string): string[] {
-    return text.toLowerCase()
-      .replace(/[^\w\s]/g, ' ')
+    return text
+      .toLowerCase()
+      .replace(/[^\w\s]/g, " ")
       .split(/\s+/)
-      .filter(word => word.length > 0);
+      .filter((word) => word.length > 0);
   }
 
-  private analyzeSentence(
-    sentence: { text: string; startIndex: number; endIndex: number }, 
-    fullText: string
-  ) {
+  private analyzeSentence(sentence: { text: string; startIndex: number; endIndex: number }, fullText: string) {
     const words = this.extractWords(sentence.text);
     const issues: string[] = [];
-    
+
     // Check sentence length
     if (this.settings.enabledChecks.sentenceLength && words.length > 20) {
       issues.push(`Long sentence (${words.length} words). Consider breaking it up.`);
@@ -134,14 +130,14 @@ class EnhancedReadabilityService {
 
     // Check for passive voice
     if (this.settings.enabledChecks.passiveVoice && this.hasPassiveVoice(sentence.text)) {
-      issues.push('Contains passive voice. Consider using active voice.');
+      issues.push("Contains passive voice. Consider using active voice.");
     }
 
     // Check for adverbs
     if (this.settings.enabledChecks.adverbs) {
       const adverbs = this.findAdverbs(sentence.text);
       if (adverbs.length > 0) {
-        issues.push(`Contains ${adverbs.length} adverb(s): ${adverbs.join(', ')}. Consider stronger verbs.`);
+        issues.push(`Contains ${adverbs.length} adverb(s): ${adverbs.join(", ")}. Consider stronger verbs.`);
       }
     }
 
@@ -149,7 +145,7 @@ class EnhancedReadabilityService {
     if (this.settings.enabledChecks.syllableComplexity) {
       const avgSyllables = this.calculateAverageSyllables(words);
       if (avgSyllables > 1.8) {
-        issues.push('Complex words detected. Consider simpler alternatives.');
+        issues.push("Complex words detected. Consider simpler alternatives.");
       }
     }
 
@@ -162,13 +158,13 @@ class EnhancedReadabilityService {
       level,
       issues,
       startIndex: sentence.startIndex,
-      endIndex: sentence.endIndex
+      endIndex: sentence.endIndex,
     };
   }
 
   private calculateSentenceScore(sentenceText: string, words: string[], issues: string[]): number {
     let score = 100;
-    
+
     // Penalize based on sentence length
     if (words.length > 15) {
       score -= (words.length - 15) * this.settings.customWeights.sentenceLength;
@@ -191,17 +187,21 @@ class EnhancedReadabilityService {
     return Math.max(0, Math.min(100, score));
   }
 
-  private calculateStatistics(text: string, words: string[], sentences: Array<{ text: string; startIndex: number; endIndex: number }>) {
+  private calculateStatistics(
+    text: string,
+    words: string[],
+    sentences: Array<{ text: string; startIndex: number; endIndex: number }>,
+  ) {
     const totalWords = words.length;
     const totalSentences = sentences.length;
     const averageWordsPerSentence = totalWords / totalSentences;
-    
-    const syllableCounts = words.map(word => this.countSyllables(word));
+
+    const syllableCounts = words.map((word) => this.countSyllables(word));
     const totalSyllables = syllableCounts.reduce((sum, count) => sum + count, 0);
     const averageSyllablesPerWord = totalSyllables / totalWords;
-    
-    const complexWords = words.filter(word => this.countSyllables(word) >= 3).length;
-    const passiveVoiceCount = sentences.filter(s => this.hasPassiveVoice(s.text)).length;
+
+    const complexWords = words.filter((word) => this.countSyllables(word) >= 3).length;
+    const passiveVoiceCount = sentences.filter((s) => this.hasPassiveVoice(s.text)).length;
     const adverbCount = sentences.reduce((count, s) => count + this.findAdverbs(s.text).length, 0);
 
     return {
@@ -211,24 +211,24 @@ class EnhancedReadabilityService {
       averageSyllablesPerWord,
       complexWords,
       passiveVoiceCount,
-      adverbCount
+      adverbCount,
     };
   }
 
   private calculateOverallScore(statistics: any): ReadabilityScore {
     let score: number;
-    
+
     switch (this.settings.algorithm) {
-      case 'flesch':
+      case "flesch":
         score = this.calculateFleschScore(statistics);
         break;
-      case 'gunning-fog':
+      case "gunning-fog":
         score = this.calculateGunningFogScore(statistics);
         break;
-      case 'coleman-liau':
+      case "coleman-liau":
         score = this.calculateColemanLiauScore(statistics);
         break;
-      case 'automated':
+      case "automated":
         score = this.calculateAutomatedScore(statistics);
         break;
       default:
@@ -243,13 +243,13 @@ class EnhancedReadabilityService {
       score,
       level,
       description,
-      suggestions
+      suggestions,
     };
   }
 
   private calculateFleschScore(stats: any): number {
     const { averageWordsPerSentence, averageSyllablesPerWord } = stats;
-    return 206.835 - (1.015 * averageWordsPerSentence) - (84.6 * averageSyllablesPerWord);
+    return 206.835 - 1.015 * averageWordsPerSentence - 84.6 * averageSyllablesPerWord;
   }
 
   private calculateGunningFogScore(stats: any): number {
@@ -272,49 +272,49 @@ class EnhancedReadabilityService {
     return 4.71 * (avgLettersPerWord / totalWords) + 0.5 * (totalWords / totalSentences) - 21.43;
   }
 
-  private determineLevel(score: number): 'easy' | 'medium' | 'hard' {
-    if (score >= this.settings.thresholds.easy) return 'easy';
-    if (score >= this.settings.thresholds.medium) return 'medium';
-    return 'hard';
+  private determineLevel(score: number): "easy" | "medium" | "hard" {
+    if (score >= this.settings.thresholds.easy) return "easy";
+    if (score >= this.settings.thresholds.medium) return "medium";
+    return "hard";
   }
 
   private getScoreDescription(score: number, algorithm: string): string {
     const level = this.determineLevel(score);
     const algorithmName = algorithm.charAt(0).toUpperCase() + algorithm.slice(1);
-    
+
     switch (level) {
-      case 'easy':
+      case "easy":
         return `${algorithmName} score: ${score.toFixed(1)} - Easy to read`;
-      case 'medium':
+      case "medium":
         return `${algorithmName} score: ${score.toFixed(1)} - Moderately difficult`;
-      case 'hard':
+      case "hard":
         return `${algorithmName} score: ${score.toFixed(1)} - Difficult to read`;
     }
   }
 
-  private generateSuggestions(stats: any, level: 'easy' | 'medium' | 'hard'): string[] {
+  private generateSuggestions(stats: any, level: "easy" | "medium" | "hard"): string[] {
     const suggestions: string[] = [];
 
-    if (level === 'hard' || level === 'medium') {
+    if (level === "hard" || level === "medium") {
       if (stats.averageWordsPerSentence > 20) {
-        suggestions.push('Break up long sentences for better readability');
+        suggestions.push("Break up long sentences for better readability");
       }
-      
+
       if (stats.complexWords / stats.totalWords > 0.15) {
-        suggestions.push('Replace complex words with simpler alternatives');
+        suggestions.push("Replace complex words with simpler alternatives");
       }
-      
+
       if (stats.passiveVoiceCount > 0) {
-        suggestions.push('Convert passive voice to active voice');
+        suggestions.push("Convert passive voice to active voice");
       }
-      
+
       if (stats.adverbCount > stats.totalSentences * 0.1) {
-        suggestions.push('Reduce adverbs and use stronger verbs');
+        suggestions.push("Reduce adverbs and use stronger verbs");
       }
     }
 
     if (suggestions.length === 0) {
-      suggestions.push('Great job! Your text is clear and readable.');
+      suggestions.push("Great job! Your text is clear and readable.");
     }
 
     return suggestions;
@@ -323,11 +323,11 @@ class EnhancedReadabilityService {
   private countSyllables(word: string): number {
     word = word.toLowerCase();
     if (word.length <= 3) return 1;
-    
-    const vowels = 'aeiouy';
+
+    const vowels = "aeiouy";
     let syllableCount = 0;
     let previousWasVowel = false;
-    
+
     for (let i = 0; i < word.length; i++) {
       const isVowel = vowels.includes(word[i]);
       if (isVowel && !previousWasVowel) {
@@ -335,12 +335,12 @@ class EnhancedReadabilityService {
       }
       previousWasVowel = isVowel;
     }
-    
+
     // Handle silent 'e'
-    if (word.endsWith('e') && syllableCount > 1) {
+    if (word.endsWith("e") && syllableCount > 1) {
       syllableCount--;
     }
-    
+
     return Math.max(1, syllableCount);
   }
 
@@ -353,42 +353,42 @@ class EnhancedReadabilityService {
     const passivePatterns = [
       /\b(am|is|are|was|were|being|been|be)\s+\w+ed\b/i,
       /\b(am|is|are|was|were|being|been|be)\s+\w+en\b/i,
-      /\bby\s+\w+\b/i
+      /\bby\s+\w+\b/i,
     ];
-    
-    return passivePatterns.some(pattern => pattern.test(sentence));
+
+    return passivePatterns.some((pattern) => pattern.test(sentence));
   }
 
   private findAdverbs(sentence: string): string[] {
     const adverbPattern = /\b\w+ly\b/gi;
     const matches = sentence.match(adverbPattern) || [];
-    
+
     // Filter out common words that end in 'ly' but aren't adverbs
-    const nonAdverbs = ['early', 'only', 'likely', 'lovely', 'friendly', 'family'];
-    return matches.filter(word => !nonAdverbs.includes(word.toLowerCase()));
+    const nonAdverbs = ["early", "only", "likely", "lovely", "friendly", "family"];
+    return matches.filter((word) => !nonAdverbs.includes(word.toLowerCase()));
   }
 }
 
 export const defaultReadabilitySettings: ReadabilitySettings = {
-  algorithm: 'flesch',
+  algorithm: "flesch",
   thresholds: {
     easy: 70,
     medium: 40,
-    hard: 0
+    hard: 0,
   },
   enabledChecks: {
     sentenceLength: true,
     syllableComplexity: true,
     passiveVoice: true,
     adverbs: true,
-    readingLevel: true
+    readingLevel: true,
   },
   customWeights: {
     wordLength: 1.0,
     sentenceLength: 2.0,
     syllableCount: 1.5,
-    passiveVoice: 10.0
-  }
+    passiveVoice: 10.0,
+  },
 };
 
-export { EnhancedReadabilityService }; 
+export { EnhancedReadabilityService };

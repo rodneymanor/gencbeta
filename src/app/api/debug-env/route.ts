@@ -123,7 +123,7 @@ async function handleCompleteUserCreation(userData: UserCreationData) {
 }
 
 // Extract environment variable checking to reduce complexity
-// eslint-disable-next-line complexity
+
 function getEnvironmentStatus() {
   return {
     NODE_ENV: process.env.NODE_ENV,

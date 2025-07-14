@@ -30,10 +30,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (!authResult.success) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
 
     const userId = authResult.user.uid;
@@ -49,7 +46,7 @@ export async function GET(request: NextRequest) {
       userId,
       collectionId || undefined,
       limit,
-      lastDocId ? { id: lastDocId } as any : undefined
+      lastDocId ? ({ id: lastDocId } as any) : undefined,
     );
 
     console.log("✅ [Collection Videos API] Successfully fetched", result.videos.length, "videos");
@@ -77,4 +74,4 @@ export async function GET(request: NextRequest) {
       { status: 500 },
     );
   }
-} 
+}

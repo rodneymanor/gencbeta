@@ -298,8 +298,9 @@ export function extractAdditionalMetadataFromTikTok(metadata: any) {
   const description: string = metadata?.data?.aweme_detail?.desc ?? "";
 
   // Parse hashtags from caption text (max 30, unique)
-  const hashtags = Array.from(new Set((description.match(/#[A-Za-z0-9_]+/g) || []).map((h: string) => h.substring(1))))
-    .slice(0, 30);
+  const hashtags = Array.from(
+    new Set((description.match(/#[A-Za-z0-9_]+/g) || []).map((h: string) => h.substring(1))),
+  ).slice(0, 30);
 
   return {
     author,
@@ -312,7 +313,7 @@ export function extractAdditionalMetadataFromTikTok(metadata: any) {
 export function extractTikTokThumbnailUrl(metadata: any): string | undefined {
   try {
     const videoData = metadata?.data?.aweme_detail?.video;
-    
+
     // Try dynamic_cover first (animated thumbnail)
     if (videoData?.dynamic_cover?.url_list?.length > 0) {
       const thumbnail = videoData.dynamic_cover.url_list[0];
@@ -337,7 +338,7 @@ export function extractTikTokThumbnailUrl(metadata: any): string | undefined {
 
 export function extractTikTokMetrics(metadata: any) {
   const statistics = metadata?.data?.aweme_detail?.statistics;
-  
+
   if (!statistics) {
     console.log("⚠️ [METRICS] No statistics found in TikTok metadata");
     return {

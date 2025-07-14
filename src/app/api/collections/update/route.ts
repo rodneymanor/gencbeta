@@ -39,7 +39,6 @@ async function authenticateApiKey(request: NextRequest) {
   return authResult;
 }
 
-/* eslint-disable complexity */
 export async function PATCH(request: Request) {
   try {
     // 1. Authenticate

@@ -1,6 +1,7 @@
 // Diagnostic endpoint for troubleshooting configuration issues
 
 import { NextResponse } from "next/server";
+
 import { getAdminDb, getAdminAuth, isAdminInitialized } from "@/lib/firebase-admin";
 
 interface DiagnosticResult {

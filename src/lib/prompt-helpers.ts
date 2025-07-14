@@ -22,10 +22,10 @@ ${jsonSchema}`;
  * Creates a hardened Speed Write prompt with explicit JSON formatting rules
  */
 export function createSpeedWritePrompt(
-  idea: string, 
-  length: string, 
-  targetWords: number, 
-  negativeKeywordInstruction: string
+  idea: string,
+  length: string,
+  targetWords: number,
+  negativeKeywordInstruction: string,
 ): string {
   const basePrompt = `Write a video script using the Speed Write formula. Each section should be complete and ready to record.
 
@@ -56,7 +56,7 @@ export function createAIVoicePrompt(
   templateBridge: string,
   templateNugget: string,
   templateWta: string,
-  negativeKeywordInstruction: string
+  negativeKeywordInstruction: string,
 ): string {
   const basePrompt = `ROLE:
 You are an expert content strategist and copywriter. Your primary skill is deconstructing information and skillfully reassembling it into a different, predefined narrative or structural framework.
@@ -116,4 +116,4 @@ FINAL CHECK: Ensure NO square brackets [like this] remain in your response.`;
 }`;
 
   return addJsonFormatting(basePrompt, jsonSchema);
-} 
+}

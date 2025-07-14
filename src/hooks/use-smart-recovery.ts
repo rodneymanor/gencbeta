@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback } from "react";
 
 interface RecoveryStats {
   attempts: number;
@@ -16,17 +16,20 @@ export const useSmartRecovery = ({ videoId: _videoId }: SmartRecoveryProps) => {
     attempts: 0,
     successfulStrategy: null,
     issueTypes: [],
-    recoveryTimes: []
+    recoveryTimes: [],
   });
 
-  const recordRecoveryAttempt = useCallback((issueType: string, strategy: string, success: boolean, recoveryTime?: number) => {
-    setRecoveryStats(prev => ({
-      attempts: prev.attempts + 1,
-      successfulStrategy: success ? strategy : prev.successfulStrategy,
-      issueTypes: [...prev.issueTypes, issueType],
-      recoveryTimes: recoveryTime ? [...prev.recoveryTimes, recoveryTime] : prev.recoveryTimes
-    }));
-  }, []);
+  const recordRecoveryAttempt = useCallback(
+    (issueType: string, strategy: string, success: boolean, recoveryTime?: number) => {
+      setRecoveryStats((prev) => ({
+        attempts: prev.attempts + 1,
+        successfulStrategy: success ? strategy : prev.successfulStrategy,
+        issueTypes: [...prev.issueTypes, issueType],
+        recoveryTimes: recoveryTime ? [...prev.recoveryTimes, recoveryTime] : prev.recoveryTimes,
+      }));
+    },
+    [],
+  );
 
   const getOptimalStrategy = useCallback(() => {
     // Use analytics to determine best recovery strategy
@@ -37,21 +40,21 @@ export const useSmartRecovery = ({ videoId: _videoId }: SmartRecoveryProps) => {
     }
 
     // Default strategy based on issue patterns
-    const hasStallIssues = issueTypes.includes('stalled');
-    const hasBufferIssues = issueTypes.includes('buffer_gap') || issueTypes.includes('low_buffer');
-    const hasErrorIssues = issueTypes.includes('error');
+    const hasStallIssues = issueTypes.includes("stalled");
+    const hasBufferIssues = issueTypes.includes("buffer_gap") || issueTypes.includes("low_buffer");
+    const hasErrorIssues = issueTypes.includes("error");
 
-    if (hasStallIssues) return 'iframe_recreation';
-    if (hasBufferIssues) return 'url_refresh';
-    if (hasErrorIssues) return 'progressive_delay';
+    if (hasStallIssues) return "iframe_recreation";
+    if (hasBufferIssues) return "url_refresh";
+    if (hasErrorIssues) return "progressive_delay";
 
-    return 'iframe_reload';
+    return "iframe_reload";
   }, [recoveryStats]);
 
   const getAverageRecoveryTime = useCallback(() => {
     const { recoveryTimes } = recoveryStats;
     if (recoveryTimes.length === 0) return 0;
-    
+
     return recoveryTimes.reduce((sum, time) => sum + time, 0) / recoveryTimes.length;
   }, [recoveryStats]);
 
@@ -60,7 +63,7 @@ export const useSmartRecovery = ({ videoId: _videoId }: SmartRecoveryProps) => {
       attempts: 0,
       successfulStrategy: null,
       issueTypes: [],
-      recoveryTimes: []
+      recoveryTimes: [],
     });
   }, []);
 
@@ -69,6 +72,6 @@ export const useSmartRecovery = ({ videoId: _videoId }: SmartRecoveryProps) => {
     getOptimalStrategy,
     getAverageRecoveryTime,
     resetStats,
-    recoveryStats
+    recoveryStats,
   };
-}; 
+};

@@ -189,7 +189,6 @@ async function makeRapidApiRequest(shortcode: string) {
   return response;
 }
 
-// eslint-disable-next-line complexity, @typescript-eslint/no-explicit-any
 function processInstagramResponse(data: any) {
   if (!data.video_versions || data.video_versions.length === 0) {
     return { success: false, error: "No video versions found in response" };

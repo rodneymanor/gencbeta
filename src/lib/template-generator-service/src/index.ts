@@ -14,4 +14,5 @@ export type {
 
 // Default export for easy importing
 import { TemplateGenerator } from "./template-generator";
+
 export default TemplateGenerator;

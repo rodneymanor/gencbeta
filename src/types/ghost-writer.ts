@@ -15,9 +15,9 @@ export interface ContentIdea {
   cycleId: string;
 }
 
-export type ContentPillar = 
+export type ContentPillar =
   | "hyper_focused_value"
-  | "quick_hit_value" 
+  | "quick_hit_value"
   | "major_perspective"
   | "the_trend"
   | "inspiration_bomb";
@@ -93,34 +93,34 @@ export const CONTENT_PILLARS: Record<ContentPillar, ContentPillarInfo> = {
     name: "Deep Dive",
     description: "In-depth, actionable how-to guidance",
     color: "bg-[#2d93ad]",
-    icon: "🎯"
+    icon: "🎯",
   },
   quick_hit_value: {
-    id: "quick_hit_value", 
+    id: "quick_hit_value",
     name: "Quick Win",
     description: "Fast, high-impact tips for immediate results",
     color: "bg-green-500",
-    icon: "⚡"
+    icon: "⚡",
   },
   major_perspective: {
     id: "major_perspective",
-    name: "Game Changer", 
+    name: "Game Changer",
     description: "Industry insights that shift perspectives",
     color: "bg-[#412722]",
-    icon: "💡"
+    icon: "💡",
   },
   the_trend: {
     id: "the_trend",
     name: "Trending Now",
-    description: "Current events connected to your expertise", 
+    description: "Current events connected to your expertise",
     color: "bg-[#2d93ad]",
-    icon: "📈"
+    icon: "📈",
   },
   inspiration_bomb: {
     id: "inspiration_bomb",
     name: "Motivation",
     description: "Powerful content that inspires action",
-    color: "bg-[#412722]", 
-    icon: "🚀"
-  }
-}; 
+    color: "bg-[#412722]",
+    icon: "🚀",
+  },
+};

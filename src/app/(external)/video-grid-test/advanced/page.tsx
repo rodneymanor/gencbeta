@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from "react";
+
+import Link from "next/link";
+
 import { useAuth } from "@/contexts/auth-context";
 import { CollectionsRBACService, type Video } from "@/lib/collections-rbac";
-import Link from "next/link";
 
 // Advanced Video Grid Component with Player.js integration
 const AdvancedVideoGrid = () => {
@@ -18,9 +20,9 @@ const AdvancedVideoGrid = () => {
   // Function to stop all videos
   const stopAllVideos = useCallback(() => {
     console.log("⏸️ [ADVANCED] Stopping all videos");
-    
-    Object.values(playerInstances.current).forEach(player => {
-      if (player && typeof player.pause === 'function') {
+
+    Object.values(playerInstances.current).forEach((player) => {
+      if (player && typeof player.pause === "function") {
         try {
           player.pause();
         } catch (error) {
@@ -28,12 +30,12 @@ const AdvancedVideoGrid = () => {
         }
       }
     });
-    
+
     // Also use postMessage for iframe communication
-    Object.values(videoRefs.current).forEach(iframe => {
+    Object.values(videoRefs.current).forEach((iframe) => {
       if (iframe && iframe.contentWindow) {
         try {
-          iframe.contentWindow.postMessage({ command: 'pause' }, '*');
+          iframe.contentWindow.postMessage({ command: "pause" }, "*");
         } catch (error) {
           console.warn("⚠️ [ADVANCED] Error sending postMessage:", error);
         }
@@ -42,25 +44,28 @@ const AdvancedVideoGrid = () => {
   }, []);
 
   // Function to handle video play
-  const handleVideoPlay = useCallback((videoId: string) => {
-    console.log("🎬 [ADVANCED] Playing video:", videoId);
-    
-    // Stop all other videos first
-    stopAllVideos();
-    
-    // Set current playing video
-    setCurrentPlayingVideo(videoId);
-    
-    // Play the selected video
-    const targetIframe = videoRefs.current[videoId];
-    if (targetIframe && targetIframe.contentWindow) {
-      try {
-        targetIframe.contentWindow.postMessage({ command: 'play' }, '*');
-      } catch (error) {
-        console.warn("⚠️ [ADVANCED] Error sending play command:", error);
+  const handleVideoPlay = useCallback(
+    (videoId: string) => {
+      console.log("🎬 [ADVANCED] Playing video:", videoId);
+
+      // Stop all other videos first
+      stopAllVideos();
+
+      // Set current playing video
+      setCurrentPlayingVideo(videoId);
+
+      // Play the selected video
+      const targetIframe = videoRefs.current[videoId];
+      if (targetIframe && targetIframe.contentWindow) {
+        try {
+          targetIframe.contentWindow.postMessage({ command: "play" }, "*");
+        } catch (error) {
+          console.warn("⚠️ [ADVANCED] Error sending play command:", error);
+        }
       }
-    }
-  }, [stopAllVideos]);
+    },
+    [stopAllVideos],
+  );
 
   // Load videos
   useEffect(() => {
@@ -70,7 +75,7 @@ const AdvancedVideoGrid = () => {
       try {
         setIsLoading(true);
         console.log("🔍 [ADVANCED] Loading all videos for user:", user.uid);
-        
+
         const allVideos = await CollectionsRBACService.getCollectionVideos(user.uid);
         console.log("✅ [ADVANCED] Loaded videos:", allVideos.length);
         setVideos(allVideos);
@@ -88,7 +93,7 @@ const AdvancedVideoGrid = () => {
   // Initialize Player.js for each video
   useEffect(() => {
     const initializePlayers = () => {
-      videos.forEach(video => {
+      videos.forEach((video) => {
         const iframe = videoRefs.current[video.id!];
         if (iframe && !playerInstances.current[video.id!]) {
           // Wait for iframe to load
@@ -97,35 +102,35 @@ const AdvancedVideoGrid = () => {
               // Check if Player.js is available
               if (window.playerjs) {
                 console.log(`🎬 [ADVANCED] Initializing Player.js for video ${video.id}`);
-                
+
                 // Initialize player.js for this iframe
                 const player = new window.playerjs.Player(iframe);
-                
-                player.on('ready', () => {
+
+                player.on("ready", () => {
                   console.log(`✅ [ADVANCED] Player ${video.id} is ready`);
                 });
-                
-                player.on('play', () => {
+
+                player.on("play", () => {
                   console.log(`▶️ [ADVANCED] Video ${video.id} started playing`);
                   // Stop all other videos when this one starts
                   if (currentPlayingVideo !== video.id) {
                     stopAllVideos();
-                    setCurrentPlayingVideo(video.id!);
+                    setCurrentPlayingVideo(video.id);
                   }
                 });
-                
-                player.on('pause', () => {
+
+                player.on("pause", () => {
                   console.log(`⏸️ [ADVANCED] Video ${video.id} paused`);
                   if (currentPlayingVideo === video.id) {
                     setCurrentPlayingVideo(null);
                   }
                 });
-                
-                player.on('ended', () => {
+
+                player.on("ended", () => {
                   console.log(`🔚 [ADVANCED] Video ${video.id} ended`);
                   setCurrentPlayingVideo(null);
                 });
-                
+
                 playerInstances.current[video.id!] = player;
               } else {
                 console.warn("⚠️ [ADVANCED] Player.js not available, using postMessage fallback");
@@ -141,8 +146,8 @@ const AdvancedVideoGrid = () => {
     // Load Player.js if not already loaded
     if (!window.playerjs) {
       console.log("📦 [ADVANCED] Loading Player.js...");
-      const script = document.createElement('script');
-      script.src = 'https://cdn.embed.ly/player-0.1.0.min.js';
+      const script = document.createElement("script");
+      script.src = "https://cdn.embed.ly/player-0.1.0.min.js";
       script.onload = () => {
         console.log("✅ [ADVANCED] Player.js loaded successfully");
         initializePlayers();
@@ -158,8 +163,8 @@ const AdvancedVideoGrid = () => {
 
     // Cleanup function
     return () => {
-      Object.values(playerInstances.current).forEach(player => {
-        if (player && typeof player.destroy === 'function') {
+      Object.values(playerInstances.current).forEach((player) => {
+        if (player && typeof player.destroy === "function") {
           try {
             player.destroy();
           } catch (error) {
@@ -174,7 +179,7 @@ const AdvancedVideoGrid = () => {
   // Listen for messages from iframes
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.data && event.data.event === 'video-play') {
+      if (event.data && event.data.event === "video-play") {
         console.log("📡 [ADVANCED] Received video-play event:", event.data.videoId);
         // A video started playing, stop all others
         const playingVideoId = event.data.videoId;
@@ -185,15 +190,15 @@ const AdvancedVideoGrid = () => {
       }
     };
 
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
   }, [currentPlayingVideo, stopAllVideos]);
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <div className="border-primary mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2"></div>
           <p className="text-muted-foreground">Loading videos...</p>
         </div>
       </div>
@@ -202,10 +207,10 @@ const AdvancedVideoGrid = () => {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="text-red-500 mb-4">❌</div>
-          <h2 className="text-xl font-semibold mb-2">Error Loading Videos</h2>
+          <div className="mb-4 text-red-500">❌</div>
+          <h2 className="mb-2 text-xl font-semibold">Error Loading Videos</h2>
           <p className="text-muted-foreground">{error}</p>
         </div>
       </div>
@@ -214,10 +219,10 @@ const AdvancedVideoGrid = () => {
 
   if (videos.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="text-muted-foreground mb-4">📹</div>
-          <h2 className="text-xl font-semibold mb-2">No Videos Found</h2>
+          <h2 className="mb-2 text-xl font-semibold">No Videos Found</h2>
           <p className="text-muted-foreground">No videos are available in your collections.</p>
         </div>
       </div>
@@ -228,34 +233,34 @@ const AdvancedVideoGrid = () => {
   const displayVideos = videos.slice(0, 9);
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="bg-background min-h-screen p-6">
+      <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold mb-2">Advanced Video Grid Test</h1>
+          <h1 className="mb-2 text-3xl font-bold">Advanced Video Grid Test</h1>
           <p className="text-muted-foreground">
             Testing Player.js integration with {displayVideos.length} videos from "All Videos" collection
           </p>
-          <div className="mt-4 text-sm text-muted-foreground">
+          <div className="text-muted-foreground mt-4 text-sm">
             Only one video can play at a time. Uses Player.js API for enhanced control.
           </div>
           {currentPlayingVideo && (
-            <div className="mt-2 text-sm text-primary">
+            <div className="text-primary mt-2 text-sm">
               Currently playing: {currentPlayingVideo.substring(0, 20)}...
             </div>
           )}
-          
+
           {/* Navigation Links */}
           <div className="mt-6 flex justify-center gap-4">
-            <Link 
+            <Link
               href="/video-grid-test"
-              className="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              className="bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-md px-4 py-2 text-sm font-medium transition-colors"
             >
               Basic Test
             </Link>
-            <Link 
+            <Link
               href="/research/collections"
-              className="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              className="bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-md px-4 py-2 text-sm font-medium transition-colors"
             >
               Back to Collections
             </Link>
@@ -263,44 +268,40 @@ const AdvancedVideoGrid = () => {
         </div>
 
         {/* Video Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {displayVideos.map((video, index) => (
             <div
               key={video.id}
-              className="bg-card border border-border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+              className="bg-card border-border overflow-hidden rounded-lg border shadow-sm transition-shadow hover:shadow-md"
             >
               {/* Video Container */}
               <div className="relative aspect-[9/16] bg-black">
                 <iframe
-                  ref={el => videoRefs.current[video.id!] = el}
+                  ref={(el) => (videoRefs.current[video.id!] = el)}
                   src={video.iframeUrl || video.directUrl || ""}
                   title={video.title || `Video ${index + 1}`}
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
-                  className="w-full h-full"
+                  className="h-full w-full"
                 />
-                
+
                 {/* Play Button Overlay */}
                 <div
-                  className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
-                  onClick={() => handleVideoPlay(video.id!)}
+                  className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/20 opacity-0 transition-opacity hover:opacity-100"
+                  onClick={() => handleVideoPlay(video.id)}
                 >
                   <div className="rounded-full bg-black/60 p-4 backdrop-blur-sm transition-all hover:scale-110 hover:bg-black/80">
-                    <span className="text-white text-2xl">
-                      {currentPlayingVideo === video.id ? '⏸️' : '▶️'}
-                    </span>
+                    <span className="text-2xl text-white">{currentPlayingVideo === video.id ? "⏸️" : "▶️"}</span>
                   </div>
                 </div>
               </div>
 
               {/* Video Info */}
               <div className="p-4">
-                <h3 className="font-semibold text-sm mb-2 line-clamp-2">
-                  {video.title || `Video ${index + 1}`}
-                </h3>
-                
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <h3 className="mb-2 line-clamp-2 text-sm font-semibold">{video.title || `Video ${index + 1}`}</h3>
+
+                <div className="text-muted-foreground flex items-center justify-between text-xs">
                   <span className="capitalize">{video.platform}</span>
                   {video.metrics && (
                     <div className="flex items-center gap-2">
@@ -311,17 +312,15 @@ const AdvancedVideoGrid = () => {
                 </div>
 
                 {video.metadata?.author && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    by @{video.metadata.author}
-                  </p>
+                  <p className="text-muted-foreground mt-1 text-xs">by @{video.metadata.author}</p>
                 )}
 
                 {/* Play Button */}
                 <button
-                  onClick={() => handleVideoPlay(video.id!)}
-                  className="mt-3 w-full bg-primary text-primary-foreground hover:bg-primary/90 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  onClick={() => handleVideoPlay(video.id)}
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 mt-3 w-full rounded-md px-3 py-2 text-sm font-medium transition-colors"
                 >
-                  {currentPlayingVideo === video.id ? 'Pause' : 'Play'} Video
+                  {currentPlayingVideo === video.id ? "Pause" : "Play"} Video
                 </button>
               </div>
             </div>
@@ -329,11 +328,11 @@ const AdvancedVideoGrid = () => {
         </div>
 
         {/* Footer Info */}
-        <div className="mt-8 text-center text-sm text-muted-foreground">
-          <p>Showing {displayVideos.length} of {videos.length} total videos</p>
-          {videos.length > 9 && (
-            <p className="mt-1">Only first 9 videos displayed for testing</p>
-          )}
+        <div className="text-muted-foreground mt-8 text-center text-sm">
+          <p>
+            Showing {displayVideos.length} of {videos.length} total videos
+          </p>
+          {videos.length > 9 && <p className="mt-1">Only first 9 videos displayed for testing</p>}
         </div>
       </div>
     </div>
@@ -350,4 +349,4 @@ declare global {
   interface Window {
     playerjs: any;
   }
-} 
+}

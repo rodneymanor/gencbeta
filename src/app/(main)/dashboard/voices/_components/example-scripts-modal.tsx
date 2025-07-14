@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { OriginalScript } from "@/types/ai-voices";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
+import { ChevronLeft, ChevronRight, Eye, ThumbsUp, Play } from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight, Eye, ThumbsUp, Play } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { OriginalScript } from "@/types/ai-voices";
 
 interface ExampleScriptsModalProps {
   open: boolean;

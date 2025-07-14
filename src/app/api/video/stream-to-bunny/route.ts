@@ -8,7 +8,6 @@ import {
 } from "@/lib/instagram-downloader";
 import { detectPlatform } from "@/lib/video-processing-helpers";
 
-// eslint-disable-next-line complexity
 export async function POST(request: NextRequest) {
   console.log("🌊 [STREAM_TO_BUNNY] Starting direct stream service...");
 

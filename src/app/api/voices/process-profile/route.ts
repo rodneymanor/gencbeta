@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { authenticateApiKey } from "@/lib/api-key-auth";
-import { adminDb } from "@/lib/firebase-admin";
 import { CollectionsService } from "@/lib/collections";
+import { adminDb } from "@/lib/firebase-admin";
 
 interface ProfileProcessingRequest {
   profileUrl: string;
@@ -26,10 +27,7 @@ export async function POST(request: NextRequest) {
     // Authenticate the request
     const authResult = await authenticateApiKey(request);
     if (!authResult.success) {
-      return NextResponse.json(
-        { error: "Authentication failed" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Authentication failed" }, { status: 401 });
     }
 
     const userId = authResult.user.uid;
@@ -40,33 +38,21 @@ export async function POST(request: NextRequest) {
 
     // Validate input
     if (!profileUrl || !platform) {
-      return NextResponse.json(
-        { error: "Profile URL and platform are required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Profile URL and platform are required" }, { status: 400 });
     }
 
     if (!["tiktok", "instagram"].includes(platform)) {
-      return NextResponse.json(
-        { error: "Platform must be 'tiktok' or 'instagram'" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Platform must be 'tiktok' or 'instagram'" }, { status: 400 });
     }
 
     if (videoCount < 10 || videoCount > 200) {
-      return NextResponse.json(
-        { error: "Video count must be between 10 and 200" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Video count must be between 10 and 200" }, { status: 400 });
     }
 
     // Extract username from URL
     const username = extractUsernameFromUrl(profileUrl, platform);
     if (!username) {
-      return NextResponse.json(
-        { error: "Could not extract username from profile URL" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Could not extract username from profile URL" }, { status: 400 });
     }
 
     console.log(`🎤 [VOICE_PROFILE] Processing ${platform} profile: @${username}`);
@@ -89,8 +75,8 @@ export async function POST(request: NextRequest) {
         platform: platform,
         username: username,
         targetVideoCount: videoCount,
-        jobId: jobId
-      }
+        jobId: jobId,
+      },
     });
 
     if (!collection.success || !collection.collectionId) {
@@ -116,15 +102,15 @@ export async function POST(request: NextRequest) {
       currentStep: 1,
       stepName: "Discovering Videos",
       startedAt: new Date().toISOString(),
-      estimatedCompletionAt: new Date(Date.now() + (videoCount * 15000)).toISOString(), // ~15s per video
+      estimatedCompletionAt: new Date(Date.now() + videoCount * 15000).toISOString(), // ~15s per video
       videosDiscovered: 0,
       videosProcessed: 0,
       templatesGenerated: 0,
       errors: [],
       metadata: {
         collectionName,
-        collectionId
-      }
+        collectionId,
+      },
     };
 
     await adminDb.collection("voice_creation_jobs").doc(jobId).set(jobData);
@@ -143,20 +129,19 @@ export async function POST(request: NextRequest) {
       collectionName,
       estimatedProcessingTime: estimatedTime,
       videoCount,
-      message: `Started processing ${username}'s ${platform} profile. Collection created with ${videoCount} videos to process.`
+      message: `Started processing ${username}'s ${platform} profile. Collection created with ${videoCount} videos to process.`,
     };
 
     return NextResponse.json(response);
-
   } catch (error) {
     console.error("🔥 [VOICE_PROFILE] Failed to process profile:", error);
-    
+
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : "Failed to process profile"
+        error: error instanceof Error ? error.message : "Failed to process profile",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -164,10 +149,10 @@ export async function POST(request: NextRequest) {
 function extractUsernameFromUrl(url: string, platform: string): string | null {
   try {
     // Remove @ symbol if present and clean URL
-    let username = url.replace('@', '').trim();
-    
+    const username = url.replace("@", "").trim();
+
     // If it's just a username, return it
-    if (!username.includes('/') && !username.includes('.')) {
+    if (!username.includes("/") && !username.includes(".")) {
       return username;
     }
 
@@ -206,43 +191,47 @@ async function startBackgroundProcessing(jobId: string, jobData: any) {
       await createFinalVoice(jobData);
 
       console.log(`✅ [BACKGROUND] Completed profile processing for job: ${jobId}`);
-
     } catch (error) {
       console.error(`❌ [BACKGROUND] Failed to process profile for job ${jobId}:`, error);
-      
+
       // Update job with error status
-      await adminDb.collection("voice_creation_jobs").doc(jobId).update({
-        status: "failed",
-        error: error instanceof Error ? error.message : "Unknown error",
-        completedAt: new Date().toISOString(),
-        progress: 100
-      });
+      await adminDb
+        .collection("voice_creation_jobs")
+        .doc(jobId)
+        .update({
+          status: "failed",
+          error: error instanceof Error ? error.message : "Unknown error",
+          completedAt: new Date().toISOString(),
+          progress: 100,
+        });
     }
   }, 100);
 }
 
 async function discoverAndProcessVideos(jobData: any) {
   console.log(`🔍 [BACKGROUND] Step 1: Discovering videos for ${jobData.username}`);
-  
+
   // Update job status
   await adminDb.collection("voice_creation_jobs").doc(jobData.jobId).update({
     status: "discovering_videos",
     currentStep: 1,
     stepName: "Discovering Videos",
-    progress: 10
+    progress: 10,
   });
 
   // Call the existing process-creator API to discover videos
-  const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${process.env.PORT || 3001}`;
-  
+  const baseUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : `http://localhost:${process.env.PORT || 3001}`;
+
   const discoverResponse = await fetch(`${baseUrl}/api/process-creator`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       username: jobData.username,
       platform: jobData.platform,
-      videoCount: jobData.videoCount
-    })
+      videoCount: jobData.videoCount,
+    }),
   });
 
   if (!discoverResponse.ok) {
@@ -250,7 +239,7 @@ async function discoverAndProcessVideos(jobData: any) {
   }
 
   const discoverData = await discoverResponse.json();
-  
+
   if (!discoverData.success || !discoverData.extractedVideos) {
     throw new Error("No videos found in profile");
   }
@@ -264,12 +253,12 @@ async function discoverAndProcessVideos(jobData: any) {
     status: "processing_videos",
     currentStep: 2,
     stepName: "Processing Videos",
-    progress: 25
+    progress: 25,
   });
 
   // Process videos through the collection pipeline
-  const videoPromises = discoverData.extractedVideos.map((video: any, index: number) => 
-    processVideoToCollection(jobData.collectionId, video, index, jobData.jobId)
+  const videoPromises = discoverData.extractedVideos.map((video: any, index: number) =>
+    processVideoToCollection(jobData.collectionId, video, index, jobData.jobId),
   );
 
   // Process in batches of 10 to avoid overwhelming the system
@@ -277,21 +266,21 @@ async function discoverAndProcessVideos(jobData: any) {
   for (let i = 0; i < videoPromises.length; i += batchSize) {
     const batch = videoPromises.slice(i, i + batchSize);
     await Promise.allSettled(batch);
-    
+
     // Update progress
     const processed = Math.min(i + batchSize, videoPromises.length);
     const progress = 25 + Math.round((processed / videoPromises.length) * 40); // 25-65%
-    
+
     await adminDb.collection("voice_creation_jobs").doc(jobData.jobId).update({
       videosProcessed: processed,
-      progress: progress
+      progress: progress,
     });
 
     console.log(`📊 [BACKGROUND] Processed ${processed}/${videoPromises.length} videos`);
-    
+
     // Small delay between batches
     if (i + batchSize < videoPromises.length) {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     }
   }
 }
@@ -301,8 +290,10 @@ async function processVideoToCollection(collectionId: string, video: any, index:
     console.log(`🎬 [BACKGROUND] Processing video ${index + 1}: ${video.id}`);
 
     // Use the existing video processing pipeline
-    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${process.env.PORT || 3001}`;
-    
+    const baseUrl = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : `http://localhost:${process.env.PORT || 3001}`;
+
     const response = await fetch(`${baseUrl}/api/add-video-to-collection`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -317,9 +308,9 @@ async function processVideoToCollection(collectionId: string, video: any, index:
           likeCount: video.likeCount,
           quality: video.quality,
           voiceTrainingSource: true,
-          jobId: jobId
-        }
-      })
+          jobId: jobId,
+        },
+      }),
     });
 
     if (response.ok) {
@@ -338,12 +329,12 @@ async function processVideoToCollection(collectionId: string, video: any, index:
 
 async function waitForVideoProcessing(jobData: any) {
   console.log(`⏳ [BACKGROUND] Step 2: Waiting for video transcriptions to complete`);
-  
+
   await adminDb.collection("voice_creation_jobs").doc(jobData.jobId).update({
     status: "waiting_transcriptions",
     currentStep: 3,
     stepName: "Transcribing Videos",
-    progress: 65
+    progress: 65,
   });
 
   // Wait for transcriptions to complete (check every 30 seconds, max 30 minutes)
@@ -352,22 +343,19 @@ async function waitForVideoProcessing(jobData: any) {
   const startTime = Date.now();
 
   while (Date.now() - startTime < maxWaitTime) {
-    const videosSnapshot = await adminDb
-      .collection("videos")
-      .where("collectionId", "==", jobData.collectionId)
-      .get();
+    const videosSnapshot = await adminDb.collection("videos").where("collectionId", "==", jobData.collectionId).get();
 
-    const videos = videosSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    const completedTranscriptions = videos.filter(video => 
-      video.transcriptionStatus === "completed" && video.transcript
+    const videos = videosSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const completedTranscriptions = videos.filter(
+      (video) => video.transcriptionStatus === "completed" && video.transcript,
     );
 
     const progress = 65 + Math.round((completedTranscriptions.length / videos.length) * 20); // 65-85%
-    
+
     await adminDb.collection("voice_creation_jobs").doc(jobData.jobId).update({
       transcriptionsCompleted: completedTranscriptions.length,
       totalVideos: videos.length,
-      progress: progress
+      progress: progress,
     });
 
     console.log(`📊 [BACKGROUND] Transcriptions: ${completedTranscriptions.length}/${videos.length} completed`);
@@ -378,18 +366,18 @@ async function waitForVideoProcessing(jobData: any) {
       break;
     }
 
-    await new Promise(resolve => setTimeout(resolve, checkInterval));
+    await new Promise((resolve) => setTimeout(resolve, checkInterval));
   }
 }
 
 async function generateVoiceTemplates(jobData: any) {
   console.log(`🧠 [BACKGROUND] Step 3: Generating voice templates`);
-  
+
   await adminDb.collection("voice_creation_jobs").doc(jobData.jobId).update({
     status: "generating_templates",
     currentStep: 4,
     stepName: "Generating Templates",
-    progress: 85
+    progress: 85,
   });
 
   // Get completed transcriptions
@@ -399,8 +387,8 @@ async function generateVoiceTemplates(jobData: any) {
     .where("transcriptionStatus", "==", "completed")
     .get();
 
-  const transcribedVideos = videosSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  
+  const transcribedVideos = videosSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
   if (transcribedVideos.length === 0) {
     throw new Error("No transcribed videos available for template generation");
   }
@@ -410,7 +398,7 @@ async function generateVoiceTemplates(jobData: any) {
   // Use the existing template generation service
   const { TemplateGenerator } = await import("@/lib/template-generator-service/dist/template-generator");
   const templateGenerator = new TemplateGenerator();
-  
+
   const templates = [];
   let successCount = 0;
 
@@ -418,7 +406,7 @@ async function generateVoiceTemplates(jobData: any) {
     try {
       if (video.transcript && video.transcript.length > 50) {
         const result = await templateGenerator.generateTemplatesFromTranscription(video.transcript);
-        
+
         if (result.success && result.templates) {
           templates.push({
             id: `template_${video.id}_${Date.now()}`,
@@ -432,8 +420,8 @@ async function generateVoiceTemplates(jobData: any) {
               viewCount: video.metrics?.viewCount,
               likeCount: video.metrics?.likeCount,
               platform: jobData.platform,
-              url: video.originalUrl
-            }
+              url: video.originalUrl,
+            },
           });
           successCount++;
         }
@@ -443,7 +431,7 @@ async function generateVoiceTemplates(jobData: any) {
     }
 
     // Small delay between template generations
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
   }
 
   if (templates.length === 0) {
@@ -456,7 +444,7 @@ async function generateVoiceTemplates(jobData: any) {
   await adminDb.collection("voice_creation_jobs").doc(jobData.jobId).update({
     templatesGenerated: templates.length,
     templates: templates,
-    progress: 95
+    progress: 95,
   });
 
   return templates;
@@ -464,24 +452,24 @@ async function generateVoiceTemplates(jobData: any) {
 
 async function createFinalVoice(jobData: any) {
   console.log(`🎤 [BACKGROUND] Step 4: Creating final AI voice`);
-  
+
   await adminDb.collection("voice_creation_jobs").doc(jobData.jobId).update({
     status: "creating_voice",
     stepName: "Creating Voice",
-    progress: 95
+    progress: 95,
   });
 
   // Get the generated templates
   const jobDoc = await adminDb.collection("voice_creation_jobs").doc(jobData.jobId).get();
   const currentJobData = jobDoc.data();
-  
+
   if (!currentJobData?.templates || currentJobData.templates.length === 0) {
     throw new Error("No templates available for voice creation");
   }
 
   // Create the AI voice using existing service
   const { AIVoicesService } = await import("@/lib/ai-voices-service");
-  
+
   const voiceData = {
     name: jobData.voiceName,
     badges: generateVoiceBadges(currentJobData.templates),
@@ -500,12 +488,12 @@ async function createFinalVoice(jobData: any) {
       platform: jobData.platform,
       jobId: jobData.jobId,
       videosAnalyzed: currentJobData.videosProcessed,
-      templatesGenerated: currentJobData.templatesGenerated
-    }
+      templatesGenerated: currentJobData.templatesGenerated,
+    },
   };
 
   const docRef = await adminDb.collection("ai_voices").add(voiceData);
-  
+
   console.log(`✅ [BACKGROUND] Created AI voice: ${docRef.id}`);
 
   // Update job with completion
@@ -514,7 +502,7 @@ async function createFinalVoice(jobData: any) {
     voiceId: docRef.id,
     completedAt: new Date().toISOString(),
     progress: 100,
-    stepName: "Completed"
+    stepName: "Completed",
   });
 
   return docRef.id;
@@ -532,13 +520,16 @@ function generateVoiceBadges(templates: any[]): string[] {
   }
 
   // Analyze template content for additional badges
-  const templateTexts = templates.map(t => `${t.hook} ${t.nugget} ${t.wta}`).join(' ').toLowerCase();
-  
-  if (templateTexts.includes('learn') || templateTexts.includes('tip') || templateTexts.includes('secret')) {
+  const templateTexts = templates
+    .map((t) => `${t.hook} ${t.nugget} ${t.wta}`)
+    .join(" ")
+    .toLowerCase();
+
+  if (templateTexts.includes("learn") || templateTexts.includes("tip") || templateTexts.includes("secret")) {
     badges.push("Educational");
   }
-  
-  if (templateTexts.includes('start') || templateTexts.includes('action') || templateTexts.includes('success')) {
+
+  if (templateTexts.includes("start") || templateTexts.includes("action") || templateTexts.includes("success")) {
     badges.push("Motivational");
   }
 
@@ -548,4 +539,4 @@ function generateVoiceBadges(templates: any[]): string[] {
   }
 
   return badges.slice(0, 3);
-} 
+}

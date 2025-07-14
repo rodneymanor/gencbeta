@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { SocialHeader, type SocialHeaderProps } from './social-header';
+import React, { useState } from "react";
+
+import { SocialHeader, type SocialHeaderProps } from "./social-header";
 
 // Example usage of the SocialHeader component
 export function SocialHeaderExample() {
@@ -11,28 +12,28 @@ export function SocialHeaderExample() {
   // Sample profiles
   const profiles: SocialHeaderProps[] = [
     {
-      username: 'aronsogi',
-      displayName: 'ARON SŌGI | Video Strategist',
-      profileImageUrl: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=150&h=150&fit=crop',
-      bio: '📈 Build a Personal Brand that drives business growth\n📲 14 Years Film Industry Experience\n🎬 Apple, Dark Knight Rises, ...',
-      website: 'https://form.fillout.com/t/ra7kMzjoBbus',
+      username: "aronsogi",
+      displayName: "ARON SŌGI | Video Strategist",
+      profileImageUrl: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=150&h=150&fit=crop",
+      bio: "📈 Build a Personal Brand that drives business growth\n📲 14 Years Film Industry Experience\n🎬 Apple, Dark Knight Rises, ...",
+      website: "https://form.fillout.com/t/ra7kMzjoBbus",
       postsCount: 110,
       followersCount: 46130,
       followingCount: 978,
       isFollowing: false,
       isVerified: false,
       mutualFollowers: [
-        { username: 'theclarkgary', displayName: 'Clark Gary' },
-        { username: 'itstylergermain', displayName: 'Tyler Germain' },
-        { username: 'johndoe', displayName: 'John Doe' },
-        { username: 'janedoe', displayName: 'Jane Doe' },
+        { username: "theclarkgary", displayName: "Clark Gary" },
+        { username: "itstylergermain", displayName: "Tyler Germain" },
+        { username: "johndoe", displayName: "John Doe" },
+        { username: "janedoe", displayName: "Jane Doe" },
       ],
     },
     {
-      username: 'celebrity',
-      displayName: 'Celebrity Name',
-      profileImageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=150&h=150&fit=crop',
-      bio: 'Official account of a verified celebrity with millions of followers.',
+      username: "celebrity",
+      displayName: "Celebrity Name",
+      profileImageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=150&h=150&fit=crop",
+      bio: "Official account of a verified celebrity with millions of followers.",
       postsCount: 1250,
       followersCount: 2500000,
       followingCount: 150,
@@ -40,11 +41,11 @@ export function SocialHeaderExample() {
       isVerified: true,
     },
     {
-      username: 'business',
-      displayName: 'Business Account',
-      profileImageUrl: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=150&h=150&fit=crop',
-      bio: 'Professional business account with website link and long description that demonstrates text wrapping capabilities.',
-      website: 'https://example.com',
+      username: "business",
+      displayName: "Business Account",
+      profileImageUrl: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=150&h=150&fit=crop",
+      bio: "Professional business account with website link and long description that demonstrates text wrapping capabilities.",
+      website: "https://example.com",
       postsCount: 89,
       followersCount: 15420,
       followingCount: 234,
@@ -57,11 +58,11 @@ export function SocialHeaderExample() {
 
   const handleFollowClick = () => {
     setIsFollowing(!isFollowing);
-    console.log(`${isFollowing ? 'Unfollowed' : 'Followed'}: ${currentProfileData.username}`);
+    console.log(`${isFollowing ? "Unfollowed" : "Followed"}: ${currentProfileData.username}`);
   };
 
   const handleMoreClick = () => {
-    console.log('More options clicked for:', currentProfileData.username);
+    console.log("More options clicked for:", currentProfileData.username);
   };
 
   const handleProfileChange = (index: number) => {
@@ -78,7 +79,7 @@ export function SocialHeaderExample() {
           <select
             value={currentProfile}
             onChange={(e) => handleProfileChange(Number(e.target.value))}
-            className="px-3 py-1 border border-gray-300 rounded-md text-sm"
+            className="rounded-md border border-gray-300 px-3 py-1 text-sm"
           >
             {profiles.map((profile, index) => (
               <option key={index} value={index}>
@@ -89,7 +90,7 @@ export function SocialHeaderExample() {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto">
+      <div className="mx-auto max-w-4xl">
         <SocialHeader
           {...currentProfileData}
           isFollowing={isFollowing}
@@ -98,9 +99,9 @@ export function SocialHeaderExample() {
         />
       </div>
 
-      <div className="mt-8 p-4 bg-muted rounded-lg">
-        <h3 className="text-lg font-semibold mb-2">Usage Instructions:</h3>
-        <ul className="space-y-1 text-sm text-muted-foreground">
+      <div className="bg-muted mt-8 rounded-lg p-4">
+        <h3 className="mb-2 text-lg font-semibold">Usage Instructions:</h3>
+        <ul className="text-muted-foreground space-y-1 text-sm">
           <li>• Switch between different profile types using the dropdown</li>
           <li>• Click Follow/Following button to toggle follow state</li>
           <li>• Click More options (three dots) for additional actions</li>
@@ -109,8 +110,8 @@ export function SocialHeaderExample() {
         </ul>
       </div>
 
-      <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-        <h3 className="text-lg font-semibold mb-2 text-blue-900">Component Features:</h3>
+      <div className="mt-8 rounded-lg bg-blue-50 p-4">
+        <h3 className="mb-2 text-lg font-semibold text-blue-900">Component Features:</h3>
         <ul className="space-y-1 text-sm text-blue-800">
           <li>✅ Fully responsive design with Tailwind CSS</li>
           <li>✅ TypeScript support with comprehensive props interface</li>
@@ -125,4 +126,4 @@ export function SocialHeaderExample() {
       </div>
     </div>
   );
-} 
+}

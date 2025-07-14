@@ -3,11 +3,13 @@
 ## Critical Rule: Client vs Admin SDK Context
 
 ### The Problem We Solved
+
 **Issue**: Usage tracking was failing with "Permission Denied" errors because we were using the client-side Firebase SDK (`@/lib/firebase`) in API routes, which run on the server without user authentication context.
 
 **Error**: `7 PERMISSION_DENIED: Missing or insufficient permissions`
 
 ### The Solution
+
 **Rule**: Always use the appropriate Firebase SDK based on execution context:
 
 - **Client-Side Components**: Use client SDK (`@/lib/firebase`)
@@ -15,17 +17,18 @@
 
 ## SDK Usage Matrix
 
-| Context | SDK to Use | Import From | Authentication |
-|---------|------------|-------------|----------------|
-| React Components | Client SDK | `@/lib/firebase` | User auth tokens |
-| Custom Hooks | Client SDK | `@/lib/firebase` | User auth tokens |
-| API Routes | Admin SDK | `@/lib/firebase-admin` | Service account |
-| Server Actions | Admin SDK | `@/lib/firebase-admin` | Service account |
-| Middleware | Admin SDK | `@/lib/firebase-admin` | Service account |
+| Context          | SDK to Use | Import From            | Authentication   |
+| ---------------- | ---------- | ---------------------- | ---------------- |
+| React Components | Client SDK | `@/lib/firebase`       | User auth tokens |
+| Custom Hooks     | Client SDK | `@/lib/firebase`       | User auth tokens |
+| API Routes       | Admin SDK  | `@/lib/firebase-admin` | Service account  |
+| Server Actions   | Admin SDK  | `@/lib/firebase-admin` | Service account  |
+| Middleware       | Admin SDK  | `@/lib/firebase-admin` | Service account  |
 
 ## Usage Tracking Implementation
 
 ### ❌ Wrong Pattern (Causes Permission Errors)
+
 ```typescript
 // In API route - DON'T DO THIS
 import { collection, addDoc } from "firebase/firestore";
@@ -38,6 +41,7 @@ export async function POST(request: Request) {
 ```
 
 ### ✅ Correct Pattern
+
 ```typescript
 // In API route - DO THIS
 import { adminDb } from "@/lib/firebase-admin"; // Admin SDK
@@ -59,12 +63,14 @@ src/lib/
 ```
 
 ### Client Version (`usage-tracker.ts`)
+
 - Uses `firebase/firestore` client SDK
 - For React components and hooks
 - Requires user authentication
 - Subject to Firestore security rules
 
 ### Admin Version (`usage-tracker-admin.ts`)
+
 - Uses Firebase Admin SDK
 - For API routes and server functions
 - Uses service account authentication
@@ -93,6 +99,7 @@ Usage tracking is critical for our business model:
 5. **Pricing Strategy**: Data-driven decisions on pricing tiers
 
 ### Tracked Metrics
+
 - AI tokens consumed per request
 - Response times for performance monitoring
 - Success/failure rates for reliability metrics
@@ -137,4 +144,4 @@ try {
 **Always match your Firebase SDK to your execution context.** This prevents permission errors and ensures proper authentication flow. When in doubt, check where your code runs:
 
 - Browser/Client → Client SDK
-- Server/API → Admin SDK 
+- Server/API → Admin SDK

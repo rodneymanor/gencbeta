@@ -148,7 +148,9 @@ Target approximately ${targetWordCount} words for a one-minute read.`;
     const randomIndex = Math.floor(Math.random() * voice.templates.length);
     const selectedTemplate = voice.templates[randomIndex];
 
-    console.log(`🎲 [VoiceProcessor] Selected random template ${randomIndex + 1}/${voice.templates.length} for voice: ${voice.name}`);
+    console.log(
+      `🎲 [VoiceProcessor] Selected random template ${randomIndex + 1}/${voice.templates.length} for voice: ${voice.name}`,
+    );
 
     return selectedTemplate;
   }
@@ -164,9 +166,10 @@ Target approximately ${targetWordCount} words for a one-minute read.`;
     const templateText = `${template.hook} ${template.bridge} ${template.nugget} ${template.wta}`;
 
     // If template has shorter sentences, increase pace
-    const avgSentenceLength = templateText.split(/[.!?]/).reduce((acc, sentence) => {
-      return acc + sentence.trim().split(/\s+/).length;
-    }, 0) / templateText.split(/[.!?]/).length;
+    const avgSentenceLength =
+      templateText.split(/[.!?]/).reduce((acc, sentence) => {
+        return acc + sentence.trim().split(/\s+/).length;
+      }, 0) / templateText.split(/[.!?]/).length;
 
     if (avgSentenceLength < 8) {
       wordsPerSecond = 2.5; // Faster for punchy templates
@@ -176,8 +179,10 @@ Target approximately ${targetWordCount} words for a one-minute read.`;
 
     const targetWords = Math.round(baseDuration * wordsPerSecond);
 
-    console.log(`📊 [VoiceProcessor] Calculated target: ${targetWords} words for ${baseDuration}s (${wordsPerSecond} wps)`);
+    console.log(
+      `📊 [VoiceProcessor] Calculated target: ${targetWords} words for ${baseDuration}s (${wordsPerSecond} wps)`,
+    );
 
     return targetWords;
   }
-} 
+}

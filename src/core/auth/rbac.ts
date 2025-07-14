@@ -4,6 +4,7 @@
  */
 
 import { collection, query, where, orderBy, getDocs, limit, startAfter, DocumentSnapshot } from "firebase/firestore";
+
 import { type Collection, type Video } from "@/lib/collections";
 import { formatTimestamp } from "@/lib/collections-helpers";
 import { db } from "@/lib/firebase";
@@ -37,7 +38,7 @@ export class RBACService {
   static async getRBACContext(userId: string): Promise<RBACContext> {
     const userProfile = await UserManagementService.getUserProfile(userId);
     const accessibleCoaches = await UserManagementService.getUserAccessibleCoaches(userId);
-    
+
     return {
       userId,
       role: userProfile?.role || "creator",
@@ -51,7 +52,7 @@ export class RBACService {
    */
   static async hasAccess(userId: string, resourceType: "collection" | "video", resourceId: string): Promise<boolean> {
     const context = await this.getRBACContext(userId);
-    
+
     if (context.isSuperAdmin) {
       return true;
     }
@@ -66,8 +67,8 @@ export class RBACService {
         query(
           collection(db, this.COLLECTIONS_PATH),
           where("id", "==", resourceId),
-          where("userId", "in", context.accessibleCoaches)
-        )
+          where("userId", "in", context.accessibleCoaches),
+        ),
       );
       return !collectionDoc.empty;
     }
@@ -78,8 +79,8 @@ export class RBACService {
         query(
           collection(db, this.VIDEOS_PATH),
           where("id", "==", resourceId),
-          where("userId", "in", context.accessibleCoaches)
-        )
+          where("userId", "in", context.accessibleCoaches),
+        ),
       );
       return !videoDoc.empty;
     }
@@ -93,14 +94,14 @@ export class RBACService {
   static async getUserCollections(userId: string): Promise<CollectionAccessResult> {
     try {
       const context = await this.getRBACContext(userId);
-      
+
       if (context.isSuperAdmin) {
         console.log("🔍 [RBAC] Super admin loading all collections");
 
         // For super admin, get all collections
         const q = query(collection(db, this.COLLECTIONS_PATH), orderBy("updatedAt", "desc"));
         const querySnapshot = await getDocs(q);
-        
+
         const collections = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
@@ -150,7 +151,7 @@ export class RBACService {
       console.log("🔍 [RBAC] User ID:", userId, "Limit:", videoLimit, "HasCursor:", !!lastDoc);
 
       const context = await this.getRBACContext(userId);
-      
+
       if (context.isSuperAdmin) {
         return this.getSuperAdminVideos(userId, collectionId, videoLimit, lastDoc);
       }
@@ -247,7 +248,7 @@ export class RBACService {
     lastDoc?: DocumentSnapshot,
     context?: RBACContext,
   ): Promise<VideoAccessResult> {
-    const userContext = context || await this.getRBACContext(userId);
+    const userContext = context || (await this.getRBACContext(userId));
     console.log("🔍 [RBAC] Accessible coaches:", userContext.accessibleCoaches);
 
     if (userContext.accessibleCoaches.length === 0) {
@@ -341,10 +342,10 @@ export class RBACService {
     userId: string,
     action: "read" | "write" | "delete",
     resourceType: "collection" | "video" | "user",
-    resourceId?: string
+    resourceId?: string,
   ): Promise<boolean> {
     const context = await this.getRBACContext(userId);
-    
+
     // Super admin can do everything
     if (context.isSuperAdmin) {
       return true;
@@ -383,4 +384,4 @@ export class RBACService {
     const context = await this.getRBACContext(userId);
     return context.isSuperAdmin;
   }
-} 
+}

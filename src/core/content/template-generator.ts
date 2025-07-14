@@ -3,14 +3,14 @@
  * Centralized script generation and template processing
  */
 
+import { getEffectiveNegativeKeywordsForUser } from "@/core/content";
+import { VoiceTemplateProcessor } from "@/core/content";
+import { createNegativeKeywordPromptInstruction } from "@/data/negative-keywords";
 import { adminDb } from "@/lib/firebase-admin";
 import { generateScript } from "@/lib/gemini";
 import { parseStructuredResponse, createScriptElements, combineScriptElements } from "@/lib/json-extractor";
-import { generateScriptWithValidation, validateScript, cleanScriptContent } from "@/lib/script-validation";
 import { createSpeedWritePrompt, createAIVoicePrompt } from "@/lib/prompt-helpers";
-import { createNegativeKeywordPromptInstruction } from "@/data/negative-keywords";
-import { getEffectiveNegativeKeywordsForUser } from "@/core/content";
-import { VoiceTemplateProcessor } from "@/core/content";
+import { generateScriptWithValidation, validateScript, cleanScriptContent } from "@/lib/script-validation";
 import { AIVoice } from "@/types/ai-voices";
 
 export interface ScriptGenerationResult {
@@ -34,7 +34,11 @@ export interface ScriptGenerationResult {
 /**
  * Generates a speed write script using the content service
  */
-export async function generateSpeedWriteScript(idea: string, length: string, userId: string): Promise<ScriptGenerationResult> {
+export async function generateSpeedWriteScript(
+  idea: string,
+  length: string,
+  userId: string,
+): Promise<ScriptGenerationResult> {
   const targetWords = Math.round(parseInt(length) * 2.2);
 
   // Get user's negative keywords
@@ -48,26 +52,26 @@ export async function generateSpeedWriteScript(idea: string, length: string, use
     const result = await generateScriptWithValidation(
       () => generateScript(prompt, { responseType: "json" }),
       (result) => result.content ?? "",
-      { maxRetries: 2, retryDelay: 500 }
+      { maxRetries: 2, retryDelay: 500 },
     );
 
     const rawContent = result.content ?? "";
 
     // Use bulletproof JSON extraction
     const parseResult = parseStructuredResponse(rawContent, "Speed Write");
-    
+
     if (!parseResult.success) {
       console.warn("[TemplateGenerator] Speed Write JSON parsing failed, falling back to plain text");
       const cleanedContent = cleanScriptContent(rawContent);
       const elements = { hook: "", bridge: "", goldenNugget: "", wta: cleanedContent };
       const fullContent = combineScriptElements(elements);
-      
+
       return {
         success: false,
         content: fullContent,
         elements,
         tokensUsed: result.tokensUsed || 0,
-        error: parseResult.error
+        error: parseResult.error,
       };
     }
 
@@ -84,7 +88,7 @@ export async function generateSpeedWriteScript(idea: string, length: string, use
       success: true,
       content: fullContent,
       elements,
-      tokensUsed: result.tokensUsed || 0
+      tokensUsed: result.tokensUsed || 0,
     };
   } catch (error) {
     console.error("[TemplateGenerator] Speed Write script generation failed:", error);
@@ -95,7 +99,11 @@ export async function generateSpeedWriteScript(idea: string, length: string, use
 /**
  * Generates an educational script using the content service
  */
-export async function generateEducationalScript(idea: string, length: string, userId: string): Promise<ScriptGenerationResult> {
+export async function generateEducationalScript(
+  idea: string,
+  length: string,
+  userId: string,
+): Promise<ScriptGenerationResult> {
   const targetWords = Math.round(parseInt(length) * 2.2);
 
   // Get user's negative keywords
@@ -124,14 +132,14 @@ Write the complete script now:`;
     const result = await generateScriptWithValidation(
       () => generateScript(prompt),
       (result) => result.content ?? "",
-      { maxRetries: 2, retryDelay: 500 }
+      { maxRetries: 2, retryDelay: 500 },
     );
 
     const cleanedContent = cleanScriptContent(result.content ?? "");
     return {
       success: true,
       content: cleanedContent,
-      tokensUsed: result.tokensUsed || 0
+      tokensUsed: result.tokensUsed || 0,
     };
   } catch (error) {
     console.error("[TemplateGenerator] Educational script generation failed:", error);
@@ -142,7 +150,11 @@ Write the complete script now:`;
 /**
  * Generates an AI voice script using the content service
  */
-export async function generateAIVoiceScript(idea: string, length: string, userId: string): Promise<ScriptGenerationResult> {
+export async function generateAIVoiceScript(
+  idea: string,
+  length: string,
+  userId: string,
+): Promise<ScriptGenerationResult> {
   // Get user's active voice
   const activeVoice = await getActiveVoice(userId);
   if (!activeVoice) {
@@ -150,7 +162,7 @@ export async function generateAIVoiceScript(idea: string, length: string, userId
       success: false,
       content: "No active AI voice found",
       tokensUsed: 0,
-      error: "No active AI voice configured"
+      error: "No active AI voice configured",
     };
   }
 
@@ -169,7 +181,7 @@ export async function generateAIVoiceScript(idea: string, length: string, userId
     randomTemplate.bridge,
     randomTemplate.nugget,
     randomTemplate.wta,
-    negativeKeywordInstruction
+    negativeKeywordInstruction,
   );
 
   try {
@@ -179,20 +191,20 @@ export async function generateAIVoiceScript(idea: string, length: string, userId
 
     // Use bulletproof JSON extraction
     const parseResult = parseStructuredResponse(rawContent, "AI Voice");
-    
+
     if (!parseResult.success) {
       console.warn("[TemplateGenerator] AI Voice JSON parsing failed, falling back to plain text");
       const cleanedContent = cleanScriptContent(rawContent);
       const elements = { hook: "", bridge: "", goldenNugget: "", wta: cleanedContent };
       const fullContent = combineScriptElements(elements);
-      
+
       return {
         success: false,
         content: fullContent,
         elements,
         tokensUsed: result.tokensUsed || 0,
         voice: { id: activeVoice.id, name: activeVoice.name, badges: activeVoice.badges },
-        error: parseResult.error
+        error: parseResult.error,
       };
     }
 
@@ -210,7 +222,7 @@ export async function generateAIVoiceScript(idea: string, length: string, userId
       content: fullContent,
       elements,
       tokensUsed: result.tokensUsed || 0,
-      voice: { id: activeVoice.id, name: activeVoice.name, badges: activeVoice.badges }
+      voice: { id: activeVoice.id, name: activeVoice.name, badges: activeVoice.badges },
     };
   } catch (error) {
     console.error("[TemplateGenerator] AI Voice script generation failed:", error);
@@ -254,4 +266,4 @@ async function getActiveVoice(userId: string): Promise<AIVoice | null> {
     console.warn("[TemplateGenerator] Failed to fetch active voice:", error);
     return null;
   }
-} 
+}

@@ -3,10 +3,12 @@
 ## Video Insights Dashboard - Remix Functionality
 
 ### 1. Hook Remix Feature
+
 **Status**: TODO
 **Location**: `src/app/(main)/research/collections/_components/video-insights-dashboard.tsx`
 
 **Requirements**:
+
 - [ ] Create API endpoint `/api/script/remix-hook` for hook remixing
 - [ ] Implement hook analysis and remix logic
 - [ ] Add topic-based hook generation
@@ -15,16 +17,19 @@
 - [ ] Store remixed hooks in user's script library
 
 **Implementation Notes**:
+
 - Use the existing `remixTopic` state in the dashboard
 - Leverage the current script generation infrastructure
 - Consider using the same AI model as speed-write for consistency
 - Add validation for topic input (minimum length, content filtering)
 
 ### 2. Transcript Remix Feature
+
 **Status**: TODO
 **Location**: `src/app/(main)/research/collections/_components/video-insights-dashboard.tsx`
 
 **Requirements**:
+
 - [ ] Create API endpoint `/api/script/remix-transcript` for transcript remixing
 - [ ] Implement transcript analysis and restructuring
 - [ ] Add multiple remix styles (educational, entertainment, tutorial, etc.)
@@ -33,6 +38,7 @@
 - [ ] Integrate with script editor for seamless workflow
 
 **Implementation Notes**:
+
 - Use the existing transcript data from video object
 - Consider different remix approaches:
   - Educational breakdown
@@ -43,10 +49,12 @@
 - Generate multiple options for user selection
 
 ### 3. Idea Generation Feature
+
 **Status**: TODO
 **Location**: `src/app/(main)/research/collections/_components/video-insights-dashboard.tsx`
 
 **Requirements**:
+
 - [ ] Create API endpoint `/api/script/generate-ideas` for idea generation
 - [ ] Implement brand-aware idea generation
 - [ ] Use video content as inspiration source
@@ -55,6 +63,7 @@
 - [ ] Integrate with user's brand profile data
 
 **Implementation Notes**:
+
 - Leverage user's brand profile for personalized ideas
 - Use video transcript and components as inspiration
 - Generate ideas in different categories:
@@ -64,9 +73,11 @@
   - Trending topic connections
 
 ### 4. UI/UX Enhancements
+
 **Status**: TODO
 
 **Requirements**:
+
 - [ ] Add loading states for all remix operations
 - [ ] Implement progress indicators for long-running operations
 - [ ] Add success/error toast notifications
@@ -75,9 +86,11 @@
 - [ ] Implement undo/redo functionality for remix operations
 
 ### 5. Integration Points
+
 **Status**: TODO
 
 **Requirements**:
+
 - [ ] Integrate with script editor for seamless workflow
 - [ ] Add "Create Script" button for remixed content
 - [ ] Implement script library integration
@@ -87,6 +100,7 @@
 ## Technical Implementation Notes
 
 ### API Structure
+
 ```typescript
 // Hook Remix API
 POST /api/script/remix-hook
@@ -114,16 +128,19 @@ POST /api/script/generate-ideas
 ```
 
 ### State Management
+
 - Use React Query for API calls and caching
 - Implement optimistic updates for better UX
 - Add proper error boundaries and fallbacks
 
 ### Performance Considerations
+
 - Implement request debouncing for real-time features
 - Add proper loading states to prevent UI blocking
 - Consider implementing progressive enhancement
 
 ## Priority Order
+
 1. Hook Remix Feature (High Priority)
 2. Transcript Remix Feature (High Priority)
 3. Idea Generation Feature (Medium Priority)
@@ -131,7 +148,8 @@ POST /api/script/generate-ideas
 5. Integration Points (Low Priority)
 
 ## Success Metrics
+
 - User engagement with remix features
 - Script generation success rate
 - User feedback and satisfaction scores
-- Integration with existing workflow adoption 
+- Integration with existing workflow adoption

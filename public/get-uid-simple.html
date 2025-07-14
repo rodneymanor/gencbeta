@@ -1,93 +1,94 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
+  <head>
     <title>Get Firebase UID - Simple Version</title>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Get Your Firebase UID</h1>
-    
+
     <div id="result">
-        <h2>Checking all possible locations for your UID...</h2>
-        <div id="output"></div>
-        
-        <h3>Manual Steps:</h3>
-        <ol>
-            <li>Open your app at <a href="http://localhost:3000" target="_blank">http://localhost:3000</a></li>
-            <li>Make sure you're logged in</li>
-            <li>Open Developer Tools (F12)</li>
-            <li>Go to Application tab → Local Storage → http://localhost:3000</li>
-            <li>Look for keys that contain "firebase" or "auth"</li>
-            <li>Copy the UID value and use it below</li>
-        </ol>
-        
-        <h3>Create Super Admin Profile:</h3>
-        <p>Once you have your UID, run this command in terminal:</p>
-        <code style="background: #f0f0f0; padding: 10px; display: block; margin: 10px 0;">
-            node scripts/setup-admin.js YOUR_UID_HERE
-        </code>
-        
-        <p>Or use the quick setup with your password:</p>
-        <code style="background: #f0f0f0; padding: 10px; display: block; margin: 10px 0;">
-            node scripts/quick-setup.js rodney@rodneymanor.com YOUR_PASSWORD
-        </code>
+      <h2>Checking all possible locations for your UID...</h2>
+      <div id="output"></div>
+
+      <h3>Manual Steps:</h3>
+      <ol>
+        <li>Open your app at <a href="http://localhost:3000" target="_blank">http://localhost:3000</a></li>
+        <li>Make sure you're logged in</li>
+        <li>Open Developer Tools (F12)</li>
+        <li>Go to Application tab → Local Storage → http://localhost:3000</li>
+        <li>Look for keys that contain "firebase" or "auth"</li>
+        <li>Copy the UID value and use it below</li>
+      </ol>
+
+      <h3>Create Super Admin Profile:</h3>
+      <p>Once you have your UID, run this command in terminal:</p>
+      <code style="background: #f0f0f0; padding: 10px; display: block; margin: 10px 0">
+        node scripts/setup-admin.js YOUR_UID_HERE
+      </code>
+
+      <p>Or use the quick setup with your password:</p>
+      <code style="background: #f0f0f0; padding: 10px; display: block; margin: 10px 0">
+        node scripts/quick-setup.js rodney@rodneymanor.com YOUR_PASSWORD
+      </code>
     </div>
 
     <script>
-        function checkAllStorageLocations() {
-            const output = document.getElementById('output');
-            let found = false;
-            
-            // Check all localStorage keys
-            output.innerHTML += '<h4>Checking localStorage keys:</h4>';
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key && key.includes('firebase')) {
-                    output.innerHTML += `<p><strong>Key:</strong> ${key}</p>`;
-                    try {
-                        const value = localStorage.getItem(key);
-                        if (value) {
-                            const parsed = JSON.parse(value);
-                            if (parsed.uid) {
-                                output.innerHTML += `<p style="color: green;"><strong>✅ FOUND UID:</strong> ${parsed.uid}</p>`;
-                                output.innerHTML += `<p><strong>Email:</strong> ${parsed.email || 'Not found'}</p>`;
-                                found = true;
-                            }
-                        }
-                    } catch (e) {
-                        // Not JSON, skip
-                    }
+      function checkAllStorageLocations() {
+        const output = document.getElementById("output");
+        let found = false;
+
+        // Check all localStorage keys
+        output.innerHTML += "<h4>Checking localStorage keys:</h4>";
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.includes("firebase")) {
+            output.innerHTML += `<p><strong>Key:</strong> ${key}</p>`;
+            try {
+              const value = localStorage.getItem(key);
+              if (value) {
+                const parsed = JSON.parse(value);
+                if (parsed.uid) {
+                  output.innerHTML += `<p style="color: green;"><strong>✅ FOUND UID:</strong> ${parsed.uid}</p>`;
+                  output.innerHTML += `<p><strong>Email:</strong> ${parsed.email || "Not found"}</p>`;
+                  found = true;
                 }
+              }
+            } catch (e) {
+              // Not JSON, skip
             }
-            
-            // Check sessionStorage too
-            output.innerHTML += '<h4>Checking sessionStorage keys:</h4>';
-            for (let i = 0; i < sessionStorage.length; i++) {
-                const key = sessionStorage.key(i);
-                if (key && key.includes('firebase')) {
-                    output.innerHTML += `<p><strong>Key:</strong> ${key}</p>`;
-                    try {
-                        const value = sessionStorage.getItem(key);
-                        if (value) {
-                            const parsed = JSON.parse(value);
-                            if (parsed.uid) {
-                                output.innerHTML += `<p style="color: green;"><strong>✅ FOUND UID:</strong> ${parsed.uid}</p>`;
-                                output.innerHTML += `<p><strong>Email:</strong> ${parsed.email || 'Not found'}</p>`;
-                                found = true;
-                            }
-                        }
-                    } catch (e) {
-                        // Not JSON, skip
-                    }
-                }
-            }
-            
-            if (!found) {
-                output.innerHTML += '<p style="color: red;">❌ No Firebase UID found in storage. Make sure you are logged in to your app first.</p>';
-            }
+          }
         }
-        
-        // Run the check when page loads
-        window.onload = checkAllStorageLocations;
+
+        // Check sessionStorage too
+        output.innerHTML += "<h4>Checking sessionStorage keys:</h4>";
+        for (let i = 0; i < sessionStorage.length; i++) {
+          const key = sessionStorage.key(i);
+          if (key && key.includes("firebase")) {
+            output.innerHTML += `<p><strong>Key:</strong> ${key}</p>`;
+            try {
+              const value = sessionStorage.getItem(key);
+              if (value) {
+                const parsed = JSON.parse(value);
+                if (parsed.uid) {
+                  output.innerHTML += `<p style="color: green;"><strong>✅ FOUND UID:</strong> ${parsed.uid}</p>`;
+                  output.innerHTML += `<p><strong>Email:</strong> ${parsed.email || "Not found"}</p>`;
+                  found = true;
+                }
+              }
+            } catch (e) {
+              // Not JSON, skip
+            }
+          }
+        }
+
+        if (!found) {
+          output.innerHTML +=
+            '<p style="color: red;">❌ No Firebase UID found in storage. Make sure you are logged in to your app first.</p>';
+        }
+      }
+
+      // Run the check when page loads
+      window.onload = checkAllStorageLocations;
     </script>
-</body>
-</html> 
+  </body>
+</html>

@@ -9,16 +9,19 @@ The Gen C Beta API Key Authentication System provides secure, rate-limited acces
 ### Core Components
 
 1. **API Key Generation** (`/api/keys`)
+
    - Secure key generation using Node.js crypto module
    - Single active key policy per user
    - Stripe-style single-display key management
 
 2. **Authentication Middleware** (`src/middleware.ts`)
+
    - Request interception and validation
    - Rate limiting with violation tracking
    - User context injection
 
 3. **RBAC Integration** (`src/lib/collections-rbac.ts`)
+
    - Permission-based collection access
    - Role-specific functionality (creator, coach, super_admin)
    - Ownership verification
@@ -43,11 +46,13 @@ The Gen C Beta API Key Authentication System provides secure, rate-limited acces
 **Endpoint:** `POST /api/keys`
 
 **Headers:**
+
 ```
 Authorization: Bearer <firebase-id-token>
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -73,11 +78,13 @@ Authorization: Bearer <firebase-id-token>
 **Endpoint:** `GET /api/keys`
 
 **Headers:**
+
 ```
 Authorization: Bearer <firebase-id-token>
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -107,11 +114,13 @@ Authorization: Bearer <firebase-id-token>
 **Endpoint:** `DELETE /api/keys`
 
 **Headers:**
+
 ```
 Authorization: Bearer <firebase-id-token>
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -130,11 +139,13 @@ Authorization: Bearer <firebase-id-token>
 **Endpoint:** `GET /api/collections`
 
 **Headers:**
+
 ```
 x-api-key: gencbeta_your-api-key-here
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -162,12 +173,14 @@ x-api-key: gencbeta_your-api-key-here
 **Endpoint:** `POST /api/add-video-to-collection`
 
 **Headers:**
+
 ```
 x-api-key: gencbeta_your-api-key-here
 Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
   "videoUrl": "https://www.tiktok.com/@user/video/1234567890",
@@ -177,6 +190,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -202,20 +216,18 @@ Content-Type: application/json
 ### Setup
 
 1. **Store API Key Securely:**
+
 ```javascript
 // In your Chrome extension background script
-const API_KEY = 'gencbeta_your-api-key-here';
-const BASE_URL = 'https://your-domain.vercel.app';
+const API_KEY = "gencbeta_your-api-key-here";
+const BASE_URL = "https://your-domain.vercel.app";
 ```
 
 2. **Add Permissions to manifest.json:**
+
 ```json
 {
-  "permissions": [
-    "storage",
-    "activeTab",
-    "https://your-domain.vercel.app/*"
-  ]
+  "permissions": ["storage", "activeTab", "https://your-domain.vercel.app/*"]
 }
 ```
 
@@ -228,8 +240,8 @@ async function getCollections() {
   try {
     const response = await fetch(`${BASE_URL}/api/collections`, {
       headers: {
-        'x-api-key': API_KEY
-      }
+        "x-api-key": API_KEY,
+      },
     });
 
     if (!response.ok) {
@@ -239,7 +251,7 @@ async function getCollections() {
     const data = await response.json();
     return data.collections;
   } catch (error) {
-    console.error('Failed to fetch collections:', error);
+    console.error("Failed to fetch collections:", error);
     throw error;
   }
 }
@@ -251,16 +263,16 @@ async function getCollections() {
 async function addVideoToCollection(videoUrl, collectionId, title = null) {
   try {
     const response = await fetch(`${BASE_URL}/api/add-video-to-collection`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'x-api-key': API_KEY,
-        'Content-Type': 'application/json'
+        "x-api-key": API_KEY,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         videoUrl,
         collectionId,
-        title
-      })
+        title,
+      }),
     });
 
     if (!response.ok) {
@@ -271,7 +283,7 @@ async function addVideoToCollection(videoUrl, collectionId, title = null) {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Failed to add video:', error);
+    console.error("Failed to add video:", error);
     throw error;
   }
 }
@@ -285,28 +297,28 @@ async function makeApiCall(url, options = {}) {
     const response = await fetch(url, {
       ...options,
       headers: {
-        'x-api-key': API_KEY,
-        ...options.headers
-      }
+        "x-api-key": API_KEY,
+        ...options.headers,
+      },
     });
 
     if (response.status === 429) {
       const errorData = await response.json();
       const resetTime = errorData.rateLimitInfo?.resetTime;
-      
+
       if (resetTime) {
         const waitTime = new Date(resetTime) - new Date();
         console.log(`Rate limited. Waiting ${waitTime}ms before retry.`);
-        
+
         // Wait and retry
-        await new Promise(resolve => setTimeout(resolve, waitTime));
+        await new Promise((resolve) => setTimeout(resolve, waitTime));
         return makeApiCall(url, options);
       }
     }
 
     return response;
   } catch (error) {
-    console.error('API call failed:', error);
+    console.error("API call failed:", error);
     throw error;
   }
 }
@@ -316,11 +328,11 @@ async function makeApiCall(url, options = {}) {
 
 ### Permission Matrix
 
-| Role | Own Collections | Shared Collections (Read) | Shared Collections (Write) | Admin Collections |
-|------|-----------------|---------------------------|----------------------------|-------------------|
-| **Creator** | ✅ Full Access | ✅ View Only | ❌ No Access | ❌ No Access |
-| **Coach** | ✅ Full Access | ✅ View Only | ✅ Own Shared Only | ❌ No Access |
-| **Super Admin** | ✅ Full Access | ✅ View All | ✅ Write All | ✅ Full Access |
+| Role            | Own Collections | Shared Collections (Read) | Shared Collections (Write) | Admin Collections |
+| --------------- | --------------- | ------------------------- | -------------------------- | ----------------- |
+| **Creator**     | ✅ Full Access  | ✅ View Only              | ❌ No Access               | ❌ No Access      |
+| **Coach**       | ✅ Full Access  | ✅ View Only              | ✅ Own Shared Only         | ❌ No Access      |
+| **Super Admin** | ✅ Full Access  | ✅ View All               | ✅ Write All               | ✅ Full Access    |
 
 ### Access Rules
 
@@ -430,18 +442,22 @@ node scripts/test-api-keys.js
 ### Common Issues
 
 #### "Invalid Firebase token"
+
 - Ensure the Firebase ID token is current (they expire every hour)
 - Verify the token is from the correct Firebase project
 
 #### "Collection not found or access denied"
+
 - Check that the collection ID exists
 - Verify the user owns the collection or has appropriate permissions
 
 #### "Rate limit exceeded"
+
 - Wait for the rate limit window to reset
 - Implement proper rate limiting in your extension
 
 #### "API key already exists"
+
 - Each user can only have one active API key
 - Revoke the existing key before generating a new one
 
@@ -475,4 +491,4 @@ If an API key is compromised:
 
 ---
 
-This documentation provides a complete guide to implementing and using the Gen C Beta API Key Authentication System. The system is production-ready and designed to scale with your Chrome extension's needs while maintaining robust security and user access controls. 
+This documentation provides a complete guide to implementing and using the Gen C Beta API Key Authentication System. The system is production-ready and designed to scale with your Chrome extension's needs while maintaining robust security and user access controls.

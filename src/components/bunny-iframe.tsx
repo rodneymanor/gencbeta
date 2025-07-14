@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+
 import Script from "next/script";
 
 interface BunnyIframeProps {
@@ -23,14 +24,11 @@ export default function BunnyIframe({ src, className = "", iframeKey, videoId }:
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const Player = (window as any).Player;
       if (!Player || !iframeRef.current) return;
-
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
       playerInstance = new Player.Player(iframeRef.current);
 
       // Autoplay flows better on desktop; mute first to satisfy mobile policies
       playerInstance.on("ready", () => {
         try {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
           playerInstance.mute();
         } catch {
           /* ignored */
@@ -59,7 +57,9 @@ export default function BunnyIframe({ src, className = "", iframeKey, videoId }:
               try {
                 fn();
                 void playerInstance.play().catch(() => {});
-              } catch {/* ignore */}
+              } catch {
+                /* ignore */
+              }
             }, idx * 500);
           });
         });
@@ -83,13 +83,17 @@ export default function BunnyIframe({ src, className = "", iframeKey, videoId }:
             } catch {
               const iframe = iframeRef.current;
               if (iframe?.src) {
-                iframe.src = iframe.src.replace(/[?&]_retry=\d+/, "") + (iframe.src.includes("?") ? "&" : "?") + "_retry=" + Date.now();
+                iframe.src =
+                  iframe.src.replace(/[?&]_retry=\d+/, "") +
+                  (iframe.src.includes("?") ? "&" : "?") +
+                  "_retry=" +
+                  Date.now();
               }
             }
           }, 500);
         }
       });
-    }
+    };
 
     if ((window as any).Player) {
       handleScriptLoad();
@@ -122,4 +126,4 @@ export default function BunnyIframe({ src, className = "", iframeKey, videoId }:
       />
     </>
   );
-} 
+}

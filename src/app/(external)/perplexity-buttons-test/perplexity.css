@@ -2,7 +2,7 @@
 :root {
   --c-teal-700: #218090;
   --c-teal-800: #2e565d;
-  --c-teal-50:  #badfde;
+  --c-teal-50: #badfde;
   --c-neutral-900: #091717;
   --c-neutral-100: #f9f9f7;
   --c-neutral-200: #ededeb;
@@ -11,9 +11,21 @@
 }
 
 /* Layout helpers */
-.pxy-wrapper   { max-width: 32rem; margin: 2rem auto; padding: 0 1rem; }
-.pxy-heading   { font-family: "FK Grotesk", sans-serif; margin-bottom: 1.5rem; }
-.pxy-list      { list-style: none; padding: 0; display: grid; gap: 0.75rem; }
+.pxy-wrapper {
+  max-width: 32rem;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+.pxy-heading {
+  font-family: "FK Grotesk", sans-serif;
+  margin-bottom: 1.5rem;
+}
+.pxy-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
 
 /* Base button style */
 .pxy-button {
@@ -23,9 +35,11 @@
   line-height: 1;
   padding: 0.55rem 1.1rem;
   border: none;
-  border-radius: 6px;         /* Perplexity uses gentle 6-8 px curves */
+  border-radius: 6px; /* Perplexity uses gentle 6-8 px curves */
   cursor: pointer;
-  transition: background 0.18s ease, color 0.18s ease;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease;
 }
 
 /* Variants */
@@ -33,29 +47,39 @@
   background: var(--c-teal-700);
   color: #fff;
 }
-.pxy-primary:hover   { background: var(--c-teal-800); }
+.pxy-primary:hover {
+  background: var(--c-teal-800);
+}
 
 .pxy-secondary {
   background: var(--c-teal-50);
   color: var(--c-teal-800);
 }
-.pxy-secondary:hover { background: #d6e8e8; }
+.pxy-secondary:hover {
+  background: #d6e8e8;
+}
 
 .pxy-subtle {
   background: var(--c-neutral-100);
   color: var(--c-neutral-900);
 }
-.pxy-subtle:hover    { background: var(--c-neutral-200); }
+.pxy-subtle:hover {
+  background: var(--c-neutral-200);
+}
 
 .pxy-danger {
   background: var(--c-danger);
   color: #fff;
 }
-.pxy-danger:hover    { background: #a12f23; }
+.pxy-danger:hover {
+  background: #a12f23;
+}
 
 .pxy-link {
   background: transparent;
   color: var(--c-link);
-  padding: 0;        /* mimic inline text link */
+  padding: 0; /* mimic inline text link */
 }
-.pxy-link:hover      { text-decoration: underline; } 
+.pxy-link:hover {
+  text-decoration: underline;
+}

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { authenticateApiKey } from "@/lib/api-key-auth";
-import { VideoTranscriber } from "@/core/video/transcriber";
+
 import { detectPlatform } from "@/core/video/platform-detector";
+import { VideoTranscriber } from "@/core/video/transcriber";
+import { authenticateApiKey } from "@/lib/api-key-auth";
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,7 +39,7 @@ async function handleCdnTranscription(request: NextRequest) {
   }
 
   console.log("🌐 [TRANSCRIBE] Transcribing CDN-hosted video:", videoUrl);
-  
+
   const detectedPlatform = platform || detectPlatform(videoUrl).platform;
   const result = await VideoTranscriber.transcribeFromUrl(videoUrl, detectedPlatform);
 
@@ -47,7 +48,7 @@ async function handleCdnTranscription(request: NextRequest) {
   }
 
   console.log("✅ [TRANSCRIBE] CDN transcription completed successfully");
-  
+
   return NextResponse.json({
     success: true,
     transcript: result.transcript,
@@ -92,7 +93,7 @@ async function handleFileTranscription(request: NextRequest) {
   }
 
   console.log("✅ [TRANSCRIBE] File transcription completed successfully");
-  
+
   return NextResponse.json({
     success: true,
     transcript: result.transcript,

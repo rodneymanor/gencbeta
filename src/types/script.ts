@@ -60,4 +60,4 @@ export interface ScriptResponse {
   success: boolean;
   script?: Script;
   error?: string;
-} 
+}

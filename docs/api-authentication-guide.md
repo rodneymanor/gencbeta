@@ -7,17 +7,20 @@ This guide explains how to handle authentication in API routes and when to requi
 ## Authentication Methods
 
 ### 1. API Key Authentication
+
 - **File**: `src/lib/api-key-auth.ts`
 - **Function**: `authenticateApiKey(request)`
 - **Usage**: For authenticated API endpoints that require user identification
 
 ### 2. Firebase Authentication
+
 - **File**: `src/lib/firebase-auth-helpers.ts`
 - **Usage**: For user session-based authentication
 
 ## When to Require Authentication
 
 ### ✅ **Require Authentication For:**
+
 - User-specific data (user profiles, settings, preferences)
 - Protected resources (private collections, personal videos)
 - Administrative functions (user management, system settings)
@@ -25,6 +28,7 @@ This guide explains how to handle authentication in API routes and when to requi
 - Rate-limited operations
 
 ### ❌ **Skip Authentication For:**
+
 - Public data (public creator profiles, public videos)
 - Demo/development features
 - Public API endpoints
@@ -34,6 +38,7 @@ This guide explains how to handle authentication in API routes and when to requi
 ## Implementation Patterns
 
 ### Pattern 1: Require Authentication
+
 ```typescript
 export async function POST(request: NextRequest) {
   try {
@@ -57,6 +62,7 @@ export async function POST(request: NextRequest) {
 ```
 
 ### Pattern 2: Optional Authentication
+
 ```typescript
 export async function GET(request: NextRequest) {
   try {
@@ -80,6 +86,7 @@ export async function GET(request: NextRequest) {
 ```
 
 ### Pattern 3: No Authentication Required
+
 ```typescript
 export async function GET(request: NextRequest) {
   try {
@@ -96,57 +103,64 @@ export async function GET(request: NextRequest) {
 ## Error Responses
 
 ### 401 Unauthorized
+
 ```typescript
 return NextResponse.json(
   {
     success: false,
-    error: "Authentication required"
+    error: "Authentication required",
   },
-  { status: 401 }
+  { status: 401 },
 );
 ```
 
 ### 403 Forbidden
+
 ```typescript
 return NextResponse.json(
   {
     success: false,
-    error: "Insufficient permissions"
+    error: "Insufficient permissions",
   },
-  { status: 403 }
+  { status: 403 },
 );
 ```
 
 ### 429 Too Many Requests
+
 ```typescript
 return NextResponse.json(
   {
     success: false,
     error: "Rate limit exceeded",
-    resetTime: rateLimitResult.resetTime
+    resetTime: rateLimitResult.resetTime,
   },
-  { status: 429 }
+  { status: 429 },
 );
 ```
 
 ## Best Practices
 
 ### 1. **Clear Documentation**
+
 - Document which endpoints require authentication
 - Explain what data is public vs. private
 - Provide examples of authentication headers
 
 ### 2. **Consistent Error Messages**
+
 - Use consistent error response format
 - Include helpful error messages
 - Provide guidance on how to fix authentication issues
 
 ### 3. **Graceful Degradation**
+
 - Allow public access to basic features
 - Provide enhanced features for authenticated users
 - Don't break functionality for unauthenticated users
 
 ### 4. **Security Considerations**
+
 - Never expose sensitive data in public endpoints
 - Validate all inputs regardless of authentication
 - Use HTTPS in production
@@ -155,16 +169,19 @@ return NextResponse.json(
 ## Current Implementation Status
 
 ### Public Endpoints (No Auth Required)
+
 - `GET /api/creators` - List public creators
 - `POST /api/creators` - Add creator to spotlight (public feature)
 - `GET /api/process-creator` - Process creator videos (public feature)
 
 ### Protected Endpoints (Auth Required)
+
 - User management endpoints
 - Billing and subscription endpoints
 - Administrative functions
 
 ### TODO: Implement Authentication For
+
 - User-specific collections
 - Personal video management
 - User preferences and settings
@@ -173,6 +190,7 @@ return NextResponse.json(
 ## Testing Authentication
 
 ### Test Unauthenticated Access
+
 ```bash
 curl -X POST http://localhost:3000/api/creators \
   -H "Content-Type: application/json" \
@@ -180,6 +198,7 @@ curl -X POST http://localhost:3000/api/creators \
 ```
 
 ### Test Authenticated Access
+
 ```bash
 curl -X POST http://localhost:3000/api/protected-endpoint \
   -H "Content-Type: application/json" \
@@ -192,14 +211,17 @@ curl -X POST http://localhost:3000/api/protected-endpoint \
 ### Common Issues
 
 1. **401 Unauthorized on Public Endpoints**
+
    - Check if authentication is being required unnecessarily
    - Verify the endpoint is intended to be public
 
 2. **Missing API Key**
+
    - Ensure the frontend is sending the API key in headers
    - Check if the user is logged in and has an API key
 
 3. **Rate Limiting**
+
    - Check if the user has exceeded rate limits
    - Verify the rate limiting configuration
 
@@ -213,4 +235,4 @@ curl -X POST http://localhost:3000/api/protected-endpoint \
 2. Verify API key format and validity
 3. Test with different authentication methods
 4. Check rate limiting status
-5. Verify user permissions and roles 
+5. Verify user permissions and roles

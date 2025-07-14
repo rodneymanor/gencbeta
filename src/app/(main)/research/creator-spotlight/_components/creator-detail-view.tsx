@@ -1,18 +1,20 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { SocialHeader } from '@/components/extract/social-header';
-import { VideoGridDisplay } from '@/components/extract/video-grid-display';
+import React from "react";
+
+import { ArrowLeft } from "lucide-react";
+
+import { SocialHeader } from "@/components/extract/social-header";
+import { VideoGridDisplay } from "@/components/extract/video-grid-display";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface CreatorProfile {
   id: string;
   username: string;
   displayName?: string;
-  platform: 'tiktok' | 'instagram';
+  platform: "tiktok" | "instagram";
   profileImageUrl: string;
   bio?: string;
   website?: string;
@@ -41,7 +43,7 @@ interface CreatorVideo {
   description?: string;
   collectionId?: string;
   addedAt?: string;
-  platform: 'tiktok' | 'instagram';
+  platform: "tiktok" | "instagram";
 }
 
 interface CreatorDetailViewProps {
@@ -51,20 +53,11 @@ interface CreatorDetailViewProps {
   onBack: () => void;
 }
 
-export function CreatorDetailView({ 
-  creator, 
-  videos, 
-  loadingVideos, 
-  onBack 
-}: CreatorDetailViewProps) {
+export function CreatorDetailView({ creator, videos, loadingVideos, onBack }: CreatorDetailViewProps) {
   return (
-    <div className="container mx-auto px-4 py-6 space-y-6">
+    <div className="container mx-auto space-y-6 px-4 py-6">
       {/* Back Button */}
-      <Button
-        variant="ghost"
-        onClick={onBack}
-        className="flex items-center gap-2"
-      >
+      <Button variant="ghost" onClick={onBack} className="flex items-center gap-2">
         <ArrowLeft className="h-4 w-4" />
         Back to Creators
       </Button>
@@ -81,9 +74,9 @@ export function CreatorDetailView({
         followingCount={creator.followingCount}
         isVerified={creator.isVerified}
         mutualFollowers={creator.mutualFollowers}
-        onFollowClick={() => console.log('Follow clicked')}
-        onMoreClick={() => console.log('More clicked')}
-        className="border rounded-lg"
+        onFollowClick={() => console.log("Follow clicked")}
+        onMoreClick={() => console.log("More clicked")}
+        className="rounded-lg border"
       />
 
       {/* Videos Section */}
@@ -94,9 +87,9 @@ export function CreatorDetailView({
             {creator.platform}
           </Badge>
         </div>
-        
+
         {loadingVideos ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4">
             {Array.from({ length: 8 }, (_, i) => (
               <Skeleton key={i} className="aspect-[9/16] w-full" />
             ))}
@@ -105,12 +98,12 @@ export function CreatorDetailView({
           <VideoGridDisplay
             videos={videos}
             mode="instagram"
-            onVideoClick={(video, index) => console.log('Video clicked:', video, index)}
-            onFavorite={(video, index) => console.log('Favorite clicked:', video, index)}
+            onVideoClick={(video, index) => console.log("Video clicked:", video, index)}
+            onFavorite={(video, index) => console.log("Favorite clicked:", video, index)}
             emptyStateMessage="No videos found for this creator."
           />
         )}
       </div>
     </div>
   );
-} 
+}

@@ -16,6 +16,7 @@ import { UserManagementService, type UserProfile, type UserRole } from "@/lib/us
 
 import { AssignCreatorDialog } from "./_components/assign-creator-dialog";
 import { CreateUserDialog } from "./_components/create-user-dialog";
+import { CreatorSyncWidget } from "./_components/creator-sync-widget";
 
 export default function AdminPage() {
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -274,6 +275,32 @@ export default function AdminPage() {
                 Go to Insights Tool
               </Button>
             </Link>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Creator Management Section */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <CreatorSyncWidget />
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Creator Statistics</CardTitle>
+            <Users className="text-muted-foreground h-4 w-4" />
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div className="text-xs text-muted-foreground">
+              Track creator profile data quality and sync status
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div>
+                <span className="font-medium">Total Creators:</span>
+                <div className="text-muted-foreground">Check /api/creators</div>
+              </div>
+              <div>
+                <span className="font-medium">Last Sync:</span>
+                <div className="text-muted-foreground">Check lastSynced field</div>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>

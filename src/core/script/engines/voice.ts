@@ -1,12 +1,13 @@
+import { createNegativeKeywordPromptInstruction } from "@/data/negative-keywords";
+import { adminDb } from "@/lib/firebase-admin";
 import { generateScript } from "@/lib/gemini";
 import { parseStructuredResponse, createScriptElements, combineScriptElements } from "@/lib/json-extractor";
 import { NegativeKeywordsService } from "@/lib/negative-keywords-service";
 import { createAIVoicePrompt } from "@/lib/prompt-helpers";
 import { validateScript, cleanScriptContent } from "@/lib/script-validation";
-import { createNegativeKeywordPromptInstruction } from "@/data/negative-keywords";
 import { VoiceTemplateProcessor } from "@/lib/voice-template-processor";
-import { adminDb } from "@/lib/firebase-admin";
 import type { AIVoice } from "@/types/ai-voices";
+
 import type { ScriptInput, ScriptResult } from "./speed";
 
 export interface VoiceScriptResult extends ScriptResult {
@@ -30,7 +31,10 @@ export class VoiceEngine {
     const negativeKeywordInstruction = createNegativeKeywordPromptInstruction(negativeKeywords);
 
     const randomTemplate = activeVoice.templates[Math.floor(Math.random() * activeVoice.templates.length)];
-    const targetWordCount = VoiceTemplateProcessor.calculateTargetWordCount(randomTemplate, parseInt(this.input.length));
+    const targetWordCount = VoiceTemplateProcessor.calculateTargetWordCount(
+      randomTemplate,
+      parseInt(this.input.length),
+    );
 
     const prompt = createAIVoicePrompt(
       this.input.idea,
@@ -40,7 +44,7 @@ export class VoiceEngine {
       randomTemplate.bridge,
       randomTemplate.nugget,
       randomTemplate.wta,
-      negativeKeywordInstruction
+      negativeKeywordInstruction,
     );
 
     try {
@@ -50,19 +54,19 @@ export class VoiceEngine {
 
       // Use bulletproof JSON extraction
       const parseResult = parseStructuredResponse(rawContent, "AI Voice");
-      
+
       if (!parseResult.success) {
         console.warn("[VoiceEngine] JSON parsing failed, falling back to plain text");
         const cleanedContent = cleanScriptContent(rawContent);
         const elements = { hook: "", bridge: "", goldenNugget: "", wta: cleanedContent };
         const fullContent = combineScriptElements(elements);
-        
+
         return {
           success: false,
           content: fullContent,
           elements,
           voice: { id: activeVoice.id, name: activeVoice.name, badges: activeVoice.badges },
-          error: parseResult.error
+          error: parseResult.error,
         };
       }
 
@@ -79,7 +83,7 @@ export class VoiceEngine {
         success: true,
         content: fullContent,
         elements,
-        voice: { id: activeVoice.id, name: activeVoice.name, badges: activeVoice.badges }
+        voice: { id: activeVoice.id, name: activeVoice.name, badges: activeVoice.badges },
       };
     } catch (error) {
       console.error("[VoiceEngine] Script generation failed:", error);
@@ -121,4 +125,4 @@ export class VoiceEngine {
       return null;
     }
   }
-} 
+}

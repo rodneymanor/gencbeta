@@ -3,8 +3,8 @@
  * Centralized video content analysis for Hook/Bridge/Nugget/WTA extraction
  */
 
-import type { Platform } from "./platform-detector";
 import type { ContentMetadata, EngagementMetrics } from "./metadata";
+import type { Platform } from "./platform-detector";
 
 export interface ScriptElement {
   type: "hook" | "bridge" | "golden-nugget" | "wta";
@@ -57,7 +57,7 @@ export async function analyzeVideoContent(
   transcript: string,
   metadata: ContentMetadata,
   metrics: EngagementMetrics,
-  config: HighlightConfig = { hooks: true, bridges: true, goldenNuggets: true, wtas: true }
+  config: HighlightConfig = { hooks: true, bridges: true, goldenNuggets: true, wtas: true },
 ): Promise<VideoAnalysisResult> {
   console.log("🔍 [ANALYZER] Starting video content analysis...");
 
@@ -318,23 +318,23 @@ function generateWtaSuggestions(): string[] {
  */
 function calculateContentScore(transcript: string, metadata: ContentMetadata, metrics: EngagementMetrics): number {
   let score = 0;
-  
+
   // Transcript quality (30%)
   const transcriptLength = transcript.length;
   score += Math.min(transcriptLength / 100, 30);
-  
+
   // Hashtag optimization (20%)
   score += Math.min(metadata.hashtags.length * 2, 20);
-  
+
   // Engagement rate (30%)
   const engagementRate = calculateEngagementRate(metrics);
   score += Math.min(engagementRate * 3, 30);
-  
+
   // Content completeness (20%)
   if (metadata.description) score += 10;
   if (metadata.duration) score += 5;
-  if (metadata.author !== 'Unknown') score += 5;
-  
+  if (metadata.author !== "Unknown") score += 5;
+
   return Math.min(score, 100);
 }
 
@@ -345,31 +345,31 @@ function calculateViralPotential(metadata: ContentMetadata, metrics: EngagementM
   const engagementRate = calculateEngagementRate(metrics);
   const hashtagCount = metadata.hashtags.length;
   const hasDescription = metadata.description.length > 0;
-  
+
   let score = 0;
-  
+
   // Engagement rate weight (40%)
   score += Math.min(engagementRate * 2, 40);
-  
+
   // Hashtag optimization weight (30%)
   score += Math.min(hashtagCount * 3, 30);
-  
+
   // Content completeness weight (20%)
   score += hasDescription ? 20 : 0;
-  
+
   // Platform-specific factors (10%)
   switch (metadata.platform) {
-    case 'tiktok':
+    case "tiktok":
       score += metrics.shares > 100 ? 10 : 0;
       break;
-    case 'instagram':
+    case "instagram":
       score += metrics.saves > 50 ? 10 : 0;
       break;
-    case 'youtube':
+    case "youtube":
       score += metrics.comments > 20 ? 10 : 0;
       break;
   }
-  
+
   return Math.min(score, 100);
 }
 
@@ -378,9 +378,9 @@ function calculateViralPotential(metadata: ContentMetadata, metrics: EngagementM
  */
 function calculateEngagementRate(metrics: EngagementMetrics): number {
   const { likes, views, shares, comments } = metrics;
-  
+
   if (views === 0) return 0;
-  
+
   const totalEngagement = likes + shares + comments;
   return (totalEngagement / views) * 100;
 }
@@ -388,25 +388,29 @@ function calculateEngagementRate(metrics: EngagementMetrics): number {
 /**
  * Generates content recommendations
  */
-function generateRecommendations(analysis: ScriptAnalysis, metadata: ContentMetadata, metrics: EngagementMetrics): string[] {
+function generateRecommendations(
+  analysis: ScriptAnalysis,
+  metadata: ContentMetadata,
+  metrics: EngagementMetrics,
+): string[] {
   const recommendations: string[] = [];
-  
+
   if (analysis.hooks.length === 0) {
     recommendations.push("Add a strong hook at the beginning to grab attention");
   }
-  
+
   if (analysis.wtas.length === 0) {
     recommendations.push("Include a clear call-to-action at the end");
   }
-  
+
   if (metadata.hashtags.length < 3) {
     recommendations.push("Add more relevant hashtags to increase discoverability");
   }
-  
+
   if (calculateEngagementRate(metrics) < 2) {
     recommendations.push("Focus on creating more engaging content to improve interaction rates");
   }
-  
+
   return recommendations;
 }
 
@@ -432,7 +436,7 @@ export function generateContextualActions(element: ScriptElement): ContextualAct
           label: "Make Question",
           icon: "❓",
           description: "Convert to a question format",
-        }
+        },
       );
       break;
     case "bridge":
@@ -456,4 +460,4 @@ export function generateContextualActions(element: ScriptElement): ContextualAct
   }
 
   return actions;
-} 
+}

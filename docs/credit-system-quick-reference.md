@@ -5,6 +5,7 @@
 ### Frontend Integration (2 steps)
 
 1. **Import the hook**
+
    ```typescript
    import { useUsage } from "@/contexts/usage-context";
    const { triggerUsageUpdate } = useUsage();
@@ -21,6 +22,7 @@
 ### Backend Integration (3 steps)
 
 1. **Check credits before operation**
+
    ```typescript
    const creditCheck = await CreditsService.canPerformAction(userId, "operation_type", accountLevel);
    if (!creditCheck.canPerform) {
@@ -29,6 +31,7 @@
    ```
 
 2. **Perform your operation**
+
    ```typescript
    const result = await yourOperationLogic(requestData);
    ```
@@ -49,12 +52,12 @@
 Add your operation to `src/types/usage-tracking.ts`:
 
 ```typescript
-export type CreditOperation = 
-  | "script_generation"    // 1 credit
-  | "voice_creation"       // 5 credits  
-  | "video_processing"     // 2 credits
-  | "chat_refinement"      // 1 credit
-  | "your_new_operation";  // Define your cost
+export type CreditOperation =
+  | "script_generation" // 1 credit
+  | "voice_creation" // 5 credits
+  | "video_processing" // 2 credits
+  | "chat_refinement" // 1 credit
+  | "your_new_operation"; // Define your cost
 
 export const CREDIT_COSTS: Record<CreditOperation, number> = {
   // ... existing costs
@@ -65,6 +68,7 @@ export const CREDIT_COSTS: Record<CreditOperation, number> = {
 ## 🎯 Copy-Paste Templates
 
 ### Frontend Component Template
+
 ```typescript
 import { useUsage } from "@/contexts/usage-context";
 
@@ -77,7 +81,7 @@ export function YourFeatureComponent() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${await user.getIdToken()}`,
+          Authorization: `Bearer ${await user.getIdToken()}`,
         },
         body: JSON.stringify(requestData),
       });
@@ -96,6 +100,7 @@ export function YourFeatureComponent() {
 ```
 
 ### API Route Template
+
 ```typescript
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateApiKey } from "@/lib/api-key-auth";
@@ -103,16 +108,16 @@ import { CreditsService } from "@/lib/credits-service";
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
-  
+
   try {
     // 1. Authenticate
     const authResult = await authenticateApiKey(request);
     if (authResult instanceof NextResponse) return authResult;
-    
+
     const { user } = authResult;
     const userId = user.uid;
     const accountLevel = user.role === "super_admin" ? "pro" : "free";
-    
+
     // 2. Check credits
     const creditCheck = await CreditsService.canPerformAction(userId, "your_operation", accountLevel);
     if (!creditCheck.canPerform) {
@@ -121,7 +126,7 @@ export async function POST(request: NextRequest) {
 
     // 3. Your logic here
     const result = await yourFeatureLogic(await request.json());
-    
+
     // 4. Deduct credits
     await CreditsService.trackUsageAndDeductCredits(userId, "your_operation", accountLevel, {
       service: "gemini",
@@ -140,11 +145,11 @@ export async function POST(request: NextRequest) {
 
 ## 🐛 Troubleshooting
 
-| Problem | Solution |
-|---------|----------|
+| Problem                    | Solution                                                                    |
+| -------------------------- | --------------------------------------------------------------------------- |
 | Credits not updating in UI | Ensure `triggerUsageUpdate()` is called after `response.ok && data.success` |
-| Credits deducted on error | Only call `trackUsageAndDeductCredits` after successful operation |
-| Multiple deductions | Don't call `triggerUsageUpdate()` multiple times - it's debounced |
+| Credits deducted on error  | Only call `trackUsageAndDeductCredits` after successful operation           |
+| Multiple deductions        | Don't call `triggerUsageUpdate()` multiple times - it's debounced           |
 
 ## 🔍 Debug Logs
 
@@ -154,7 +159,7 @@ Add these to track credit flow:
 // Frontend
 console.log("💳 [YourFeature] Triggering usage stats update");
 
-// Backend  
+// Backend
 console.log(`💳 [YourFeature] Checking credits for user ${userId}`);
 console.log(`💳 [YourFeature] Credits available: ${creditCheck.canPerform}`);
 console.log(`💳 [YourFeature] Deducting credits for operation`);
@@ -163,10 +168,11 @@ console.log(`💳 [YourFeature] Deducting credits for operation`);
 ## ⚡ That's It!
 
 The system handles:
+
 - ✅ Real-time UI updates (no polling!)
 - ✅ Debounced refresh (1-second delay)
 - ✅ Error handling
 - ✅ Authentication validation
 - ✅ Credit validation
 
-Just follow the 2 frontend steps + 3 backend steps and you're done! 
+Just follow the 2 frontend steps + 3 backend steps and you're done!

@@ -1,17 +1,12 @@
 "use client";
 
 import * as React from "react";
+
 import { useRouter } from "next/navigation";
 
 import { Search, Mic, Wand2 } from "lucide-react";
 
-import {
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandList,
-} from "@/components/ui/command";
+import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandList } from "@/components/ui/command";
 import { useAuth } from "@/contexts/auth-context";
 import { SearchService, type SearchData, type SearchResult } from "@/lib/search-service";
 
@@ -127,11 +122,11 @@ export function SearchDialog() {
 
   const getTotalResultsCount = () => {
     return (
-      (searchResults.collections.length) +
-      (searchResults.videos.length) +
-      (searchResults.notes.length) +
-      (searchResults.scripts.length) +
-      (searchResults.pages.length)
+      searchResults.collections.length +
+      searchResults.videos.length +
+      searchResults.notes.length +
+      searchResults.scripts.length +
+      searchResults.pages.length
     );
   };
 
@@ -207,11 +202,41 @@ export function SearchDialog() {
           {getTotalResultsCount()} result{getTotalResultsCount() !== 1 ? "s" : ""} found
         </div>
 
-        <SearchResultGroup title="Pages" items={searchResults.pages} emptyMessage="No pages found" onSelect={handleSelect} formatDate={formatDate} />
-        <SearchResultGroup title="Collections" items={searchResults.collections} emptyMessage="No collections found" onSelect={handleSelect} formatDate={formatDate} />
-        <SearchResultGroup title="Videos" items={searchResults.videos} emptyMessage="No videos found" onSelect={handleSelect} formatDate={formatDate} />
-        <SearchResultGroup title="Notes" items={searchResults.notes} emptyMessage="No notes found" onSelect={handleSelect} formatDate={formatDate} />
-        <SearchResultGroup title="Scripts" items={searchResults.scripts} emptyMessage="No scripts found" onSelect={handleSelect} formatDate={formatDate} />
+        <SearchResultGroup
+          title="Pages"
+          items={searchResults.pages}
+          emptyMessage="No pages found"
+          onSelect={handleSelect}
+          formatDate={formatDate}
+        />
+        <SearchResultGroup
+          title="Collections"
+          items={searchResults.collections}
+          emptyMessage="No collections found"
+          onSelect={handleSelect}
+          formatDate={formatDate}
+        />
+        <SearchResultGroup
+          title="Videos"
+          items={searchResults.videos}
+          emptyMessage="No videos found"
+          onSelect={handleSelect}
+          formatDate={formatDate}
+        />
+        <SearchResultGroup
+          title="Notes"
+          items={searchResults.notes}
+          emptyMessage="No notes found"
+          onSelect={handleSelect}
+          formatDate={formatDate}
+        />
+        <SearchResultGroup
+          title="Scripts"
+          items={searchResults.scripts}
+          emptyMessage="No scripts found"
+          onSelect={handleSelect}
+          formatDate={formatDate}
+        />
       </>
     );
   };
@@ -224,7 +249,7 @@ export function SearchDialog() {
       >
         <Search className="size-4" />
         Search
-        <kbd className="bg-transparent inline-flex h-5 items-center gap-1 rounded border px-1.5 text-[10px] font-medium select-none">
+        <kbd className="inline-flex h-5 items-center gap-1 rounded border bg-transparent px-1.5 text-[10px] font-medium select-none">
           <span className="text-xs">⌘</span>J
         </kbd>
       </div>

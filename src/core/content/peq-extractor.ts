@@ -36,7 +36,7 @@ export async function extractPEQ(questionnaire: BrandQuestionnaire): Promise<PEQ
     console.log("🔍 [PEQ] Extracting Problems, Excuses, Questions from brand profile");
 
     const prompt = buildPEQExtractionPrompt(questionnaire);
-    
+
     const result = await GeminiService.generateContent({
       prompt,
       maxTokens: 1000,
@@ -59,7 +59,7 @@ export async function extractPEQ(questionnaire: BrandQuestionnaire): Promise<PEQ
         console.error("❌ [PEQ] No JSON found in AI response");
         throw new Error("No JSON found in response");
       }
-      
+
       console.log("🔍 [PEQ] Extracted JSON:", jsonMatch[0]);
       parsedPEQ = JSON.parse(jsonMatch[0]);
       console.log("✅ [PEQ] Parsed PEQ data:", JSON.stringify(parsedPEQ, null, 2));
@@ -74,7 +74,9 @@ export async function extractPEQ(questionnaire: BrandQuestionnaire): Promise<PEQ
       throw new Error("Invalid PEQ structure - missing required fields");
     }
 
-    console.log(`✅ [PEQ] Successfully extracted ${parsedPEQ.problems.length} problems, ${parsedPEQ.excuses.length} excuses, ${parsedPEQ.questions.length} questions`);
+    console.log(
+      `✅ [PEQ] Successfully extracted ${parsedPEQ.problems.length} problems, ${parsedPEQ.excuses.length} excuses, ${parsedPEQ.questions.length} questions`,
+    );
 
     return {
       success: true,
@@ -175,30 +177,34 @@ FINAL REMINDER: Your response must be PURE JSON starting with { and ending with 
  */
 function categorizeProblems(problems: string[]): string[] {
   const categories = new Set<string>();
-  
-  problems.forEach(problem => {
+
+  problems.forEach((problem) => {
     const lowerProblem = problem.toLowerCase();
-    
-    if (lowerProblem.includes('time') || lowerProblem.includes('busy') || lowerProblem.includes('schedule')) {
-      categories.add('Time Management');
+
+    if (lowerProblem.includes("time") || lowerProblem.includes("busy") || lowerProblem.includes("schedule")) {
+      categories.add("Time Management");
     }
-    if (lowerProblem.includes('money') || lowerProblem.includes('cost') || lowerProblem.includes('budget')) {
-      categories.add('Financial');
+    if (lowerProblem.includes("money") || lowerProblem.includes("cost") || lowerProblem.includes("budget")) {
+      categories.add("Financial");
     }
-    if (lowerProblem.includes('skill') || lowerProblem.includes('knowledge') || lowerProblem.includes('learn')) {
-      categories.add('Skills & Knowledge');
+    if (lowerProblem.includes("skill") || lowerProblem.includes("knowledge") || lowerProblem.includes("learn")) {
+      categories.add("Skills & Knowledge");
     }
-    if (lowerProblem.includes('confidence') || lowerProblem.includes('fear') || lowerProblem.includes('doubt')) {
-      categories.add('Confidence & Mindset');
+    if (lowerProblem.includes("confidence") || lowerProblem.includes("fear") || lowerProblem.includes("doubt")) {
+      categories.add("Confidence & Mindset");
     }
-    if (lowerProblem.includes('network') || lowerProblem.includes('connection') || lowerProblem.includes('relationship')) {
-      categories.add('Networking');
+    if (
+      lowerProblem.includes("network") ||
+      lowerProblem.includes("connection") ||
+      lowerProblem.includes("relationship")
+    ) {
+      categories.add("Networking");
     }
-    if (lowerProblem.includes('technology') || lowerProblem.includes('tool') || lowerProblem.includes('platform')) {
-      categories.add('Technology');
+    if (lowerProblem.includes("technology") || lowerProblem.includes("tool") || lowerProblem.includes("platform")) {
+      categories.add("Technology");
     }
   });
-  
+
   return Array.from(categories);
 }
 
@@ -209,27 +215,27 @@ function categorizeProblems(problems: string[]): string[] {
  */
 function identifyExcusePatterns(excuses: string[]): string[] {
   const patterns = new Set<string>();
-  
-  excuses.forEach(excuse => {
+
+  excuses.forEach((excuse) => {
     const lowerExcuse = excuse.toLowerCase();
-    
-    if (lowerExcuse.includes('not enough') || lowerExcuse.includes('lack of')) {
-      patterns.add('Resource Scarcity');
+
+    if (lowerExcuse.includes("not enough") || lowerExcuse.includes("lack of")) {
+      patterns.add("Resource Scarcity");
     }
-    if (lowerExcuse.includes('too late') || lowerExcuse.includes('missed')) {
-      patterns.add('Timing Concerns');
+    if (lowerExcuse.includes("too late") || lowerExcuse.includes("missed")) {
+      patterns.add("Timing Concerns");
     }
-    if (lowerExcuse.includes('not ready') || lowerExcuse.includes('need more')) {
-      patterns.add('Readiness Issues');
+    if (lowerExcuse.includes("not ready") || lowerExcuse.includes("need more")) {
+      patterns.add("Readiness Issues");
     }
-    if (lowerExcuse.includes('what if') || lowerExcuse.includes('worried')) {
-      patterns.add('Fear & Uncertainty');
+    if (lowerExcuse.includes("what if") || lowerExcuse.includes("worried")) {
+      patterns.add("Fear & Uncertainty");
     }
-    if (lowerExcuse.includes('tried before') || lowerExcuse.includes('failed')) {
-      patterns.add('Past Failures');
+    if (lowerExcuse.includes("tried before") || lowerExcuse.includes("failed")) {
+      patterns.add("Past Failures");
     }
   });
-  
+
   return Array.from(patterns);
 }
 
@@ -240,27 +246,27 @@ function identifyExcusePatterns(excuses: string[]): string[] {
  */
 function categorizeQuestions(questions: string[]): string[] {
   const types = new Set<string>();
-  
-  questions.forEach(question => {
+
+  questions.forEach((question) => {
     const lowerQuestion = question.toLowerCase();
-    
-    if (lowerQuestion.includes('how') || lowerQuestion.includes('what steps')) {
-      types.add('How-To Questions');
+
+    if (lowerQuestion.includes("how") || lowerQuestion.includes("what steps")) {
+      types.add("How-To Questions");
     }
-    if (lowerQuestion.includes('when') || lowerQuestion.includes('timing')) {
-      types.add('Timing Questions');
+    if (lowerQuestion.includes("when") || lowerQuestion.includes("timing")) {
+      types.add("Timing Questions");
     }
-    if (lowerQuestion.includes('why') || lowerQuestion.includes('reason')) {
-      types.add('Why Questions');
+    if (lowerQuestion.includes("why") || lowerQuestion.includes("reason")) {
+      types.add("Why Questions");
     }
-    if (lowerQuestion.includes('worth') || lowerQuestion.includes('value')) {
-      types.add('Value Questions');
+    if (lowerQuestion.includes("worth") || lowerQuestion.includes("value")) {
+      types.add("Value Questions");
     }
-    if (lowerQuestion.includes('start') || lowerQuestion.includes('begin')) {
-      types.add('Starting Questions');
+    if (lowerQuestion.includes("start") || lowerQuestion.includes("begin")) {
+      types.add("Starting Questions");
     }
   });
-  
+
   return Array.from(types);
 }
 
@@ -271,25 +277,25 @@ function categorizeQuestions(questions: string[]): string[] {
  */
 function generateContentOpportunities(peqData: PEQData): string[] {
   const opportunities: string[] = [];
-  
+
   // Problem-based content
-  peqData.problems.forEach(problem => {
+  peqData.problems.forEach((problem) => {
     opportunities.push(`How to solve: ${problem}`);
     opportunities.push(`The truth about: ${problem}`);
   });
-  
+
   // Excuse-busting content
-  peqData.excuses.forEach(excuse => {
+  peqData.excuses.forEach((excuse) => {
     opportunities.push(`Why ${excuse} is just an excuse`);
     opportunities.push(`How to overcome: ${excuse}`);
   });
-  
+
   // Question-answering content
-  peqData.questions.forEach(question => {
+  peqData.questions.forEach((question) => {
     opportunities.push(`Answering: ${question}`);
-    opportunities.push(`The complete guide to: ${question.replace('?', '')}`);
+    opportunities.push(`The complete guide to: ${question.replace("?", "")}`);
   });
-  
+
   return opportunities.slice(0, 10); // Limit to top 10 opportunities
 }
 
@@ -300,33 +306,33 @@ function generateContentOpportunities(peqData: PEQData): string[] {
  */
 export function validatePEQData(peqData: PEQData): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
-  
+
   if (!peqData.problems || !Array.isArray(peqData.problems)) {
-    errors.push('Problems must be an array');
+    errors.push("Problems must be an array");
   }
-  
+
   if (!peqData.excuses || !Array.isArray(peqData.excuses)) {
-    errors.push('Excuses must be an array');
+    errors.push("Excuses must be an array");
   }
-  
+
   if (!peqData.questions || !Array.isArray(peqData.questions)) {
-    errors.push('Questions must be an array');
+    errors.push("Questions must be an array");
   }
-  
+
   if (peqData.problems && peqData.problems.length < 3) {
-    errors.push('At least 3 problems required');
+    errors.push("At least 3 problems required");
   }
-  
+
   if (peqData.excuses && peqData.excuses.length < 2) {
-    errors.push('At least 2 excuses required');
+    errors.push("At least 2 excuses required");
   }
-  
+
   if (peqData.questions && peqData.questions.length < 3) {
-    errors.push('At least 3 questions required');
+    errors.push("At least 3 questions required");
   }
-  
+
   return {
     valid: errors.length === 0,
     errors,
   };
-} 
+}

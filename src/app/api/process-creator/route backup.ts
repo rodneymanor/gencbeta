@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { processCreatorProfile, ProcessCreatorRequest, ProcessCreatorResponse, VideoData } from "@/lib/process-creator-utils";
+
+import {
+  processCreatorProfile,
+  ProcessCreatorRequest,
+  ProcessCreatorResponse,
+  VideoData,
+} from "@/lib/process-creator-utils";
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,31 +17,31 @@ export async function POST(request: NextRequest) {
     // Validate input
     if (!username || !platform || !videoCount) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: "Username, platform, and video count are required" 
+        {
+          success: false,
+          error: "Username, platform, and video count are required",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!["tiktok", "instagram"].includes(platform)) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: "Platform must be 'tiktok' or 'instagram'" 
+        {
+          success: false,
+          error: "Platform must be 'tiktok' or 'instagram'",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (videoCount < 1 || videoCount > 200) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: "Video count must be between 1 and 200" 
+        {
+          success: false,
+          error: "Video count must be between 1 and 200",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -48,9 +54,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: result.error || "Failed to process profile"
+          error: result.error || "Failed to process profile",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -60,27 +66,26 @@ export async function POST(request: NextRequest) {
       success: true,
       extractedVideos: result.extractedVideos,
       totalFound: result.totalFound,
-      message: `Successfully extracted ${result.extractedVideos.length} videos from @${username}'s ${platform} profile. Use /api/process-creator/download-all to download and transcribe these videos.`
+      message: `Successfully extracted ${result.extractedVideos.length} videos from @${username}'s ${platform} profile. Use /api/process-creator/download-all to download and transcribe these videos.`,
     };
 
     return NextResponse.json(response);
-
   } catch (error) {
     console.error("🔥 [PROCESS_CREATOR] Failed to process profile:", error);
-    
+
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : "Failed to process profile"
+        error: error instanceof Error ? error.message : "Failed to process profile",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 async function processTikTokProfile(username: string, videoCount: number): Promise<VideoData[]> {
   console.log(`🎵 [TIKTOK] Processing profile: @${username}`);
-  
+
   const maxRetries = 3;
   let lastError: Error | null = null;
 
@@ -101,9 +106,9 @@ async function processTikTokProfile(username: string, videoCount: number): Promi
           method: "GET",
           headers: {
             "X-RapidAPI-Key": rapidApiKey,
-            "X-RapidAPI-Host": "tiktok-scrapper-videos-music-challenges-downloader.p.rapidapi.com"
-          }
-        }
+            "X-RapidAPI-Host": "tiktok-scrapper-videos-music-challenges-downloader.p.rapidapi.com",
+          },
+        },
       );
 
       if (!response.ok) {
@@ -112,9 +117,11 @@ async function processTikTokProfile(username: string, videoCount: number): Promi
       }
 
       const data = await response.json();
-      
+
       if (!data.videos || !Array.isArray(data.videos)) {
-        throw new Error("No videos found in TikTok API response. The profile may be private or the username may be incorrect.");
+        throw new Error(
+          "No videos found in TikTok API response. The profile may be private or the username may be incorrect.",
+        );
       }
 
       if (data.videos.length === 0) {
@@ -127,7 +134,7 @@ async function processTikTokProfile(username: string, videoCount: number): Promi
 
       for (let i = 0; i < maxVideos; i++) {
         const video = data.videos[i];
-        
+
         try {
           // Extract video data with proper validation
           const videoUrl = video.video_url || video.download_url || video.url;
@@ -147,7 +154,7 @@ async function processTikTokProfile(username: string, videoCount: number): Promi
             title: video.title || video.description || `TikTok Video ${i + 1}`,
             description: video.description || "",
             author: video.author || username,
-            duration: parseInt(video.duration || "30")
+            duration: parseInt(video.duration || "30"),
           };
 
           processedVideos.push(videoData);
@@ -157,31 +164,34 @@ async function processTikTokProfile(username: string, videoCount: number): Promi
       }
 
       if (processedVideos.length === 0) {
-        throw new Error(`No valid videos could be extracted from @${username}'s TikTok profile. All video URLs were invalid or inaccessible.`);
+        throw new Error(
+          `No valid videos could be extracted from @${username}'s TikTok profile. All video URLs were invalid or inaccessible.`,
+        );
       }
 
       console.log(`✅ [TIKTOK] Successfully processed ${processedVideos.length} videos for @${username}`);
       return processedVideos;
-
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
       console.error(`❌ [TIKTOK] Attempt ${attempt}/${maxRetries} failed:`, lastError.message);
-      
+
       if (attempt < maxRetries) {
         const delayMs = attempt * 2000; // Exponential backoff: 2s, 4s, 6s
         console.log(`⏳ [TIKTOK] Retrying in ${delayMs}ms...`);
-        await new Promise(resolve => setTimeout(resolve, delayMs));
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
       }
     }
   }
 
   // All retries failed
-  throw new Error(`Failed to process TikTok profile @${username} after ${maxRetries} attempts. Last error: ${lastError?.message}`);
+  throw new Error(
+    `Failed to process TikTok profile @${username} after ${maxRetries} attempts. Last error: ${lastError?.message}`,
+  );
 }
 
 async function processInstagramProfile(username: string, videoCount: number): Promise<VideoData[]> {
   console.log(`📸 [INSTAGRAM] Processing profile: @${username}`);
-  
+
   const maxRetries = 3;
   let lastError: Error | null = null;
 
@@ -202,9 +212,9 @@ async function processInstagramProfile(username: string, videoCount: number): Pr
           method: "GET",
           headers: {
             "X-RapidAPI-Key": rapidApiKey,
-            "X-RapidAPI-Host": "instagram-scraper-api2.p.rapidapi.com"
-          }
-        }
+            "X-RapidAPI-Host": "instagram-scraper-api2.p.rapidapi.com",
+          },
+        },
       );
 
       if (!userIdResponse.ok) {
@@ -216,7 +226,9 @@ async function processInstagramProfile(username: string, videoCount: number): Pr
       const userId = userIdData.user_id;
 
       if (!userId) {
-        throw new Error(`No user ID found for @${username}. The username may be incorrect or the profile may not exist.`);
+        throw new Error(
+          `No user ID found for @${username}. The username may be incorrect or the profile may not exist.`,
+        );
       }
 
       // Step 2: Get posts by user ID
@@ -226,9 +238,9 @@ async function processInstagramProfile(username: string, videoCount: number): Pr
           method: "GET",
           headers: {
             "X-RapidAPI-Key": rapidApiKey,
-            "X-RapidAPI-Host": "instagram-scraper-api2.p.rapidapi.com"
-          }
-        }
+            "X-RapidAPI-Host": "instagram-scraper-api2.p.rapidapi.com",
+          },
+        },
       );
 
       if (!postsResponse.ok) {
@@ -237,23 +249,25 @@ async function processInstagramProfile(username: string, videoCount: number): Pr
       }
 
       const postsData = await postsResponse.json();
-      
+
       if (!postsData.posts || !Array.isArray(postsData.posts)) {
         throw new Error("No posts found in Instagram API response. The profile may be private or empty.");
       }
 
       // Filter for video content only (media_type === 2)
       const videoContent = postsData.posts.filter((post: any) => post.media_type === 2);
-      
+
       if (videoContent.length === 0) {
-        throw new Error(`No video content found for @${username}. The profile may only contain photos or may be private.`);
+        throw new Error(
+          `No video content found for @${username}. The profile may only contain photos or may be private.`,
+        );
       }
 
       const processedVideos: VideoData[] = [];
 
       for (let i = 0; i < Math.min(videoContent.length, videoCount * 2); i++) {
         const post = videoContent[i];
-        
+
         try {
           // Extract video data with proper validation
           const videoUrl = post.video_url || post.download_url;
@@ -273,7 +287,7 @@ async function processInstagramProfile(username: string, videoCount: number): Pr
             title: post.caption ? post.caption.substring(0, 100) : `Instagram Video ${i + 1}`,
             description: post.caption || "",
             author: post.owner?.username || username,
-            duration: parseInt(post.video_duration || "30")
+            duration: parseInt(post.video_duration || "30"),
           };
 
           processedVideos.push(videoData);
@@ -283,33 +297,36 @@ async function processInstagramProfile(username: string, videoCount: number): Pr
       }
 
       if (processedVideos.length === 0) {
-        throw new Error(`No valid videos could be extracted from @${username}'s Instagram profile. All video URLs were invalid or inaccessible.`);
+        throw new Error(
+          `No valid videos could be extracted from @${username}'s Instagram profile. All video URLs were invalid or inaccessible.`,
+        );
       }
 
       console.log(`✅ [INSTAGRAM] Successfully processed ${processedVideos.length} videos for @${username}`);
       return processedVideos;
-
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
       console.error(`❌ [INSTAGRAM] Attempt ${attempt}/${maxRetries} failed:`, lastError.message);
-      
+
       if (attempt < maxRetries) {
         const delayMs = attempt * 2000; // Exponential backoff: 2s, 4s, 6s
         console.log(`⏳ [INSTAGRAM] Retrying in ${delayMs}ms...`);
-        await new Promise(resolve => setTimeout(resolve, delayMs));
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
       }
     }
   }
 
   // All retries failed
-  throw new Error(`Failed to process Instagram profile @${username} after ${maxRetries} attempts. Last error: ${lastError?.message}`);
+  throw new Error(
+    `Failed to process Instagram profile @${username} after ${maxRetries} attempts. Last error: ${lastError?.message}`,
+  );
 }
 
 function isValidVideoUrl(url: string): boolean {
   try {
     const urlObj = new URL(url);
-    return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+    return urlObj.protocol === "http:" || urlObj.protocol === "https:";
   } catch {
     return false;
   }
-} 
+}

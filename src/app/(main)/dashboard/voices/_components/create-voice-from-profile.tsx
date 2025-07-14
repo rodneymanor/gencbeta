@@ -1,36 +1,46 @@
 "use client";
 
 import { useState, useEffect } from "react";
+
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
-import { toast } from "sonner";
-import { 
-  Play, 
-  Pause, 
-  Square, 
-  ExternalLink, 
-  CheckCircle, 
-  AlertCircle, 
-  Clock, 
-  Video, 
-  FileText, 
+
+import {
+  Play,
+  Pause,
+  Square,
+  ExternalLink,
+  CheckCircle,
+  AlertCircle,
+  Clock,
+  Video,
+  FileText,
   Sparkles,
   Users,
-  Eye
+  Eye,
 } from "lucide-react";
+import { toast } from "sonner";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 
 interface ProcessingStatus {
   success: boolean;
   jobId: string;
-  status: "discovering_videos" | "processing_videos" | "waiting_transcriptions" | "generating_templates" | "creating_voice" | "completed" | "failed";
+  status:
+    | "discovering_videos"
+    | "processing_videos"
+    | "waiting_transcriptions"
+    | "generating_templates"
+    | "creating_voice"
+    | "completed"
+    | "failed";
   progress: number;
   currentStep: number;
   totalSteps: number;
@@ -60,10 +70,7 @@ interface CreateVoiceFromProfileProps {
   onCollectionCreated?: (collectionId: string) => void;
 }
 
-export function CreateVoiceFromProfile({ 
-  onVoiceCreated, 
-  onCollectionCreated 
-}: CreateVoiceFromProfileProps) {
+export function CreateVoiceFromProfile({ onVoiceCreated, onCollectionCreated }: CreateVoiceFromProfileProps) {
   const [profileUrl, setProfileUrl] = useState("");
   const [platform, setPlatform] = useState<"tiktok" | "instagram">("tiktok");
   const [voiceName, setVoiceName] = useState("");
@@ -73,7 +80,7 @@ export function CreateVoiceFromProfile({
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
   const [error, setError] = useState<string | null>(null);
-  
+
   const router = useRouter();
 
   // Cleanup polling on unmount
@@ -86,9 +93,9 @@ export function CreateVoiceFromProfile({
   }, [pollingInterval]);
 
   const extractUsername = (url: string): string => {
-    const cleaned = url.replace('@', '').trim();
-    
-    if (!cleaned.includes('/') && !cleaned.includes('.')) {
+    const cleaned = url.replace("@", "").trim();
+
+    if (!cleaned.includes("/") && !cleaned.includes(".")) {
       return cleaned;
     }
 
@@ -133,29 +140,29 @@ export function CreateVoiceFromProfile({
       const username = extractUsername(profileUrl);
       const finalVoiceName = voiceName.trim() || `${username} Voice`;
 
-      const response = await fetch('/api/voices/process-profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/voices/process-profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           profileUrl,
           platform,
           voiceName: finalVoiceName,
-          videoCount
-        })
+          videoCount,
+        }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to start processing');
+        throw new Error(data.error || "Failed to start processing");
       }
 
       if (!data.success) {
-        throw new Error(data.error || 'Failed to start processing');
+        throw new Error(data.error || "Failed to start processing");
       }
 
       setCurrentJobId(data.jobId);
-      
+
       // Notify about collection creation
       if (onCollectionCreated && data.collectionId) {
         onCollectionCreated(data.collectionId);
@@ -164,11 +171,12 @@ export function CreateVoiceFromProfile({
       // Start polling for status updates
       startStatusPolling(data.jobId);
 
-      toast.success(`Processing Started: ${username}'s ${platform} profile. This may take ${Math.ceil(data.estimatedProcessingTime / 60)} minutes.`);
-
+      toast.success(
+        `Processing Started: ${username}'s ${platform} profile. This may take ${Math.ceil(data.estimatedProcessingTime / 60)} minutes.`,
+      );
     } catch (error) {
-      console.error('Failed to start processing:', error);
-      setError(error instanceof Error ? error.message : 'Failed to start processing');
+      console.error("Failed to start processing:", error);
+      setError(error instanceof Error ? error.message : "Failed to start processing");
       setIsProcessing(false);
     }
   };
@@ -186,22 +194,24 @@ export function CreateVoiceFromProfile({
           if (data.status === "completed") {
             clearInterval(interval);
             setIsProcessing(false);
-            
+
             if (onVoiceCreated && data.voiceId) {
               onVoiceCreated(data.voiceId);
             }
 
-            toast.success(`Voice Created Successfully! Your AI voice "${data.metadata?.voiceName}" has been created and is ready to use.`);
+            toast.success(
+              `Voice Created Successfully! Your AI voice "${data.metadata?.voiceName}" has been created and is ready to use.`,
+            );
           } else if (data.status === "failed") {
             clearInterval(interval);
             setIsProcessing(false);
             setError(data.error || "Processing failed");
-            
+
             toast.error(data.error || "An error occurred during processing");
           }
         }
       } catch (error) {
-        console.error('Failed to fetch status:', error);
+        console.error("Failed to fetch status:", error);
       }
     }, 5000); // Poll every 5 seconds
 
@@ -213,7 +223,7 @@ export function CreateVoiceFromProfile({
 
     try {
       const response = await fetch(`/api/voices/processing-status/${currentJobId}`, {
-        method: 'DELETE'
+        method: "DELETE",
       });
 
       if (response.ok) {
@@ -223,22 +233,22 @@ export function CreateVoiceFromProfile({
         setIsProcessing(false);
         setProcessingStatus(null);
         setCurrentJobId(null);
-        
+
         toast.success("Processing Cancelled: Voice creation has been cancelled.");
       }
     } catch (error) {
-      console.error('Failed to cancel processing:', error);
+      console.error("Failed to cancel processing:", error);
     }
   };
 
   const formatTimeRemaining = (estimatedCompletionAt?: string): string => {
     if (!estimatedCompletionAt) return "Calculating...";
-    
+
     const remaining = new Date(estimatedCompletionAt).getTime() - Date.now();
     if (remaining <= 0) return "Almost done...";
-    
+
     const minutes = Math.ceil(remaining / 60000);
-    return `~${minutes} minute${minutes !== 1 ? 's' : ''} remaining`;
+    return `~${minutes} minute${minutes !== 1 ? "s" : ""} remaining`;
   };
 
   const getStatusIcon = (status: string) => {
@@ -264,7 +274,7 @@ export function CreateVoiceFromProfile({
 
   if (isProcessing && processingStatus) {
     return (
-      <Card className="w-full max-w-2xl mx-auto">
+      <Card className="mx-auto w-full max-w-2xl">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             {getStatusIcon(processingStatus.status)}
@@ -277,16 +287,14 @@ export function CreateVoiceFromProfile({
         <CardContent className="space-y-6">
           {/* Progress Overview */}
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between">
               <span className="text-sm font-medium">
                 Step {processingStatus.currentStep} of {processingStatus.totalSteps}: {processingStatus.stepName}
               </span>
-              <span className="text-sm text-muted-foreground">
-                {processingStatus.progress}%
-              </span>
+              <span className="text-muted-foreground text-sm">{processingStatus.progress}%</span>
             </div>
             <Progress value={processingStatus.progress} className="h-2" />
-            <div className="flex justify-between items-center text-sm text-muted-foreground">
+            <div className="text-muted-foreground flex items-center justify-between text-sm">
               <span>Started {new Date(processingStatus.startedAt).toLocaleTimeString()}</span>
               <span>{formatTimeRemaining(processingStatus.estimatedCompletionAt)}</span>
             </div>
@@ -301,9 +309,7 @@ export function CreateVoiceFromProfile({
                 <Video className="h-4 w-4" />
                 <span className="text-sm font-medium">Videos Discovered</span>
               </div>
-              <div className="text-2xl font-bold">
-                {processingStatus.videosDiscovered || 0}
-              </div>
+              <div className="text-2xl font-bold">{processingStatus.videosDiscovered || 0}</div>
             </div>
 
             <div className="space-y-2">
@@ -311,9 +317,7 @@ export function CreateVoiceFromProfile({
                 <Play className="h-4 w-4" />
                 <span className="text-sm font-medium">Videos Processed</span>
               </div>
-              <div className="text-2xl font-bold">
-                {processingStatus.videosProcessed || 0}
-              </div>
+              <div className="text-2xl font-bold">{processingStatus.videosProcessed || 0}</div>
             </div>
 
             <div className="space-y-2">
@@ -323,7 +327,7 @@ export function CreateVoiceFromProfile({
               </div>
               <div className="text-2xl font-bold">
                 {processingStatus.transcriptionsCompleted || 0}
-                {processingStatus.totalVideos ? ` / ${processingStatus.totalVideos}` : ''}
+                {processingStatus.totalVideos ? ` / ${processingStatus.totalVideos}` : ""}
               </div>
             </div>
 
@@ -332,9 +336,7 @@ export function CreateVoiceFromProfile({
                 <Sparkles className="h-4 w-4" />
                 <span className="text-sm font-medium">Templates Generated</span>
               </div>
-              <div className="text-2xl font-bold">
-                {processingStatus.templatesGenerated || 0}
-              </div>
+              <div className="text-2xl font-bold">{processingStatus.templatesGenerated || 0}</div>
             </div>
           </div>
 
@@ -344,12 +346,12 @@ export function CreateVoiceFromProfile({
               <Eye className="h-4 w-4" />
               <AlertDescription className="flex items-center justify-between">
                 <span>Collection "{processingStatus.collectionName}" has been created</span>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={() => router.push(`/dashboard/research/collections/${processingStatus.collectionId}`)}
                 >
-                  View Collection <ExternalLink className="h-3 w-3 ml-1" />
+                  View Collection <ExternalLink className="ml-1 h-3 w-3" />
                 </Button>
               </AlertDescription>
             </Alert>
@@ -357,12 +359,12 @@ export function CreateVoiceFromProfile({
 
           {/* Action Buttons */}
           <div className="flex gap-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={cancelProcessing}
               disabled={processingStatus.status === "completed" || processingStatus.status === "failed"}
             >
-              <Square className="h-4 w-4 mr-2" />
+              <Square className="mr-2 h-4 w-4" />
               Cancel Processing
             </Button>
           </div>
@@ -372,7 +374,7 @@ export function CreateVoiceFromProfile({
   }
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <Card className="mx-auto w-full max-w-2xl">
       <CardHeader>
         <CardTitle>Create AI Voice from Profile</CardTitle>
         <CardDescription>
@@ -405,7 +407,9 @@ export function CreateVoiceFromProfile({
             <Label htmlFor="profileUrl">Profile URL or Username</Label>
             <Input
               id="profileUrl"
-              placeholder={platform === "tiktok" ? "@username or tiktok.com/@username" : "@username or instagram.com/username"}
+              placeholder={
+                platform === "tiktok" ? "@username or tiktok.com/@username" : "@username or instagram.com/username"
+              }
               value={profileUrl}
               onChange={(e) => setProfileUrl(e.target.value)}
             />
@@ -423,10 +427,7 @@ export function CreateVoiceFromProfile({
 
           <div className="space-y-2">
             <Label htmlFor="videoCount">Number of Videos to Analyze</Label>
-            <Select 
-              value={videoCount.toString()} 
-              onValueChange={(value) => setVideoCount(parseInt(value))}
-            >
+            <Select value={videoCount.toString()} onValueChange={(value) => setVideoCount(parseInt(value))}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -442,9 +443,9 @@ export function CreateVoiceFromProfile({
           </div>
         </div>
 
-        <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+        <div className="bg-muted/50 space-y-2 rounded-lg p-4">
           <h4 className="font-medium">What happens next:</h4>
-          <ul className="text-sm text-muted-foreground space-y-1">
+          <ul className="text-muted-foreground space-y-1 text-sm">
             <li>• Videos are discovered and analyzed from the profile</li>
             <li>• A collection is created with all the videos for your review</li>
             <li>• Videos are transcribed and analyzed for content patterns</li>
@@ -453,19 +454,15 @@ export function CreateVoiceFromProfile({
           </ul>
         </div>
 
-        <Button 
-          onClick={startProcessing} 
-          disabled={isProcessing || !profileUrl.trim()}
-          className="w-full"
-        >
+        <Button onClick={startProcessing} disabled={isProcessing || !profileUrl.trim()} className="w-full">
           {isProcessing ? (
             <>
-              <Pause className="h-4 w-4 mr-2" />
+              <Pause className="mr-2 h-4 w-4" />
               Processing...
             </>
           ) : (
             <>
-              <Play className="h-4 w-4 mr-2" />
+              <Play className="mr-2 h-4 w-4" />
               Start Processing
             </>
           )}
@@ -473,4 +470,4 @@ export function CreateVoiceFromProfile({
       </CardContent>
     </Card>
   );
-} 
+}

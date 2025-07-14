@@ -33,14 +33,9 @@ export interface CountdownControls {
 
 export function useCountdown(
   targetDate: Date | string | number,
-  options: CountdownOptions = {}
+  options: CountdownOptions = {},
 ): [CountdownState, CountdownControls] {
-  const {
-    autoStart = true,
-    onComplete,
-    onTick,
-    interval = 1000,
-  } = options;
+  const { autoStart = true, onComplete, onTick, interval = 1000 } = options;
 
   const [state, setState] = useState<CountdownState>({
     days: 0,
@@ -140,7 +135,7 @@ export function useCountdown(
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
-    setState(prev => ({ ...prev, isRunning: false }));
+    setState((prev) => ({ ...prev, isRunning: false }));
   }, []);
 
   // Reset countdown
@@ -234,9 +229,9 @@ export function formatCountdown(state: CountdownState, format: "short" | "long" 
 export function useFormattedCountdown(
   targetDate: Date | string | number,
   format: "short" | "long" | "compact" = "short",
-  options: CountdownOptions = {}
+  options: CountdownOptions = {},
 ): [string, CountdownState, CountdownControls] {
   const [state, controls] = useCountdown(targetDate, options);
   const formatted = formatCountdown(state, format);
   return [formatted, state, controls];
-} 
+}

@@ -4,6 +4,7 @@
  */
 
 import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, limit } from "firebase/firestore";
+
 import { db } from "@/lib/firebase";
 
 export interface UsageRecord {
@@ -86,7 +87,7 @@ export async function trackUsage(data: {
 }): Promise<void> {
   try {
     const cost = calculateCost(data.service, data.tokensUsed);
-    
+
     const usageRecord: Omit<UsageRecord, "timestamp"> = {
       userId: data.userId,
       service: data.service,
@@ -109,7 +110,9 @@ export async function trackUsage(data: {
 
     await addDoc(collection(db, "usage_tracking"), usageRecord);
 
-    console.log(`📊 [Usage] Tracked ${data.service} usage for user ${data.userId}: ${data.tokensUsed} tokens ($${cost.toFixed(4)})`);
+    console.log(
+      `📊 [Usage] Tracked ${data.service} usage for user ${data.userId}: ${data.tokensUsed} tokens ($${cost.toFixed(4)})`,
+    );
   } catch (error) {
     console.error("❌ [Usage] Failed to track usage:", error);
     // Don't throw - usage tracking failures shouldn't break the main flow
@@ -144,12 +147,12 @@ export function estimateTokens(text: string): number {
  * @returns Rate limit check result
  */
 export async function checkRateLimit(
-  userId: string, 
+  userId: string,
   config: RateLimitConfig = {
     maxRequestsPerMinute: 60,
     maxRequestsPerHour: 1000,
     maxTokensPerDay: 1000000,
-  }
+  },
 ): Promise<{ allowed: boolean; reason?: string; limits: Record<string, number> }> {
   try {
     const now = new Date();
@@ -162,7 +165,7 @@ export async function checkRateLimit(
       collection(db, "usage_tracking"),
       where("userId", "==", userId),
       where("timestamp", ">=", oneMinuteAgo),
-      orderBy("timestamp", "desc")
+      orderBy("timestamp", "desc"),
     );
     const minuteSnapshot = await getDocs(minuteQuery);
     const requestsPerMinute = minuteSnapshot.size;
@@ -172,7 +175,7 @@ export async function checkRateLimit(
       collection(db, "usage_tracking"),
       where("userId", "==", userId),
       where("timestamp", ">=", oneHourAgo),
-      orderBy("timestamp", "desc")
+      orderBy("timestamp", "desc"),
     );
     const hourSnapshot = await getDocs(hourQuery);
     const requestsPerHour = hourSnapshot.size;
@@ -182,7 +185,7 @@ export async function checkRateLimit(
       collection(db, "usage_tracking"),
       where("userId", "==", userId),
       where("timestamp", ">=", oneDayAgo),
-      orderBy("timestamp", "desc")
+      orderBy("timestamp", "desc"),
     );
     const daySnapshot = await getDocs(dayQuery);
     const tokensPerDay = daySnapshot.docs.reduce((sum, doc) => {
@@ -223,10 +226,10 @@ export async function checkRateLimit(
     return { allowed: true, limits };
   } catch (error) {
     console.error("❌ [RateLimit] Rate limit check failed:", error);
-    return { 
-      allowed: true, 
+    return {
+      allowed: true,
       reason: "Rate limit check failed, allowing request",
-      limits: { requestsPerMinute: 0, requestsPerHour: 0, tokensPerDay: 0 }
+      limits: { requestsPerMinute: 0, requestsPerHour: 0, tokensPerDay: 0 },
     };
   }
 }
@@ -249,22 +252,21 @@ export async function getUserDailyUsage(userId: string, date?: Date): Promise<Da
         where("userId", "==", userId),
         where("timestamp", ">=", startOfDay),
         where("timestamp", "<", endOfDay),
-        orderBy("timestamp", "desc")
-      )
+        orderBy("timestamp", "desc"),
+      ),
     );
 
     if (querySnapshot.empty) {
       return null;
     }
 
-    const records = querySnapshot.docs.map(doc => doc.data() as UsageRecord);
+    const records = querySnapshot.docs.map((doc) => doc.data() as UsageRecord);
     const totalRequests = records.length;
     const totalTokens = records.reduce((sum, record) => sum + record.tokensUsed, 0);
-    const successfulRequests = records.filter(record => record.success).length;
+    const successfulRequests = records.filter((record) => record.success).length;
     const successRate = totalRequests > 0 ? (successfulRequests / totalRequests) * 100 : 0;
-    const averageResponseTime = totalRequests > 0 
-      ? records.reduce((sum, record) => sum + record.responseTime, 0) / totalRequests 
-      : 0;
+    const averageResponseTime =
+      totalRequests > 0 ? records.reduce((sum, record) => sum + record.responseTime, 0) / totalRequests : 0;
     const costEstimate = records.reduce((sum, record) => {
       const cost = record.metadata?.cost || calculateCost(record.service, record.tokensUsed);
       return sum + cost;
@@ -272,12 +274,12 @@ export async function getUserDailyUsage(userId: string, date?: Date): Promise<Da
 
     // Group by operation
     const operations: Record<string, number> = {};
-    records.forEach(record => {
+    records.forEach((record) => {
       operations[record.operation] = (operations[record.operation] || 0) + 1;
     });
 
     return {
-      date: startOfDay.toISOString().split('T')[0],
+      date: startOfDay.toISOString().split("T")[0],
       totalRequests,
       totalTokens,
       successRate,
@@ -297,7 +299,10 @@ export async function getUserDailyUsage(userId: string, date?: Date): Promise<Da
  * @param period - Time period
  * @returns User usage statistics
  */
-export async function getUserUsageStats(userId: string, period: "daily" | "weekly" | "monthly"): Promise<UserUsageStats | null> {
+export async function getUserUsageStats(
+  userId: string,
+  period: "daily" | "weekly" | "monthly",
+): Promise<UserUsageStats | null> {
   try {
     const now = new Date();
     let startDate: Date;
@@ -319,22 +324,21 @@ export async function getUserUsageStats(userId: string, period: "daily" | "weekl
         collection(db, "usage_tracking"),
         where("userId", "==", userId),
         where("timestamp", ">=", startDate),
-        orderBy("timestamp", "desc")
-      )
+        orderBy("timestamp", "desc"),
+      ),
     );
 
     if (querySnapshot.empty) {
       return null;
     }
 
-    const records = querySnapshot.docs.map(doc => doc.data() as UsageRecord);
+    const records = querySnapshot.docs.map((doc) => doc.data() as UsageRecord);
     const totalRequests = records.length;
     const totalTokens = records.reduce((sum, record) => sum + record.tokensUsed, 0);
-    const successfulRequests = records.filter(record => record.success).length;
+    const successfulRequests = records.filter((record) => record.success).length;
     const successRate = totalRequests > 0 ? (successfulRequests / totalRequests) * 100 : 0;
-    const averageResponseTime = totalRequests > 0 
-      ? records.reduce((sum, record) => sum + record.responseTime, 0) / totalRequests 
-      : 0;
+    const averageResponseTime =
+      totalRequests > 0 ? records.reduce((sum, record) => sum + record.responseTime, 0) / totalRequests : 0;
     const costEstimate = records.reduce((sum, record) => {
       const cost = record.metadata?.cost || calculateCost(record.service, record.tokensUsed);
       return sum + cost;
@@ -343,8 +347,8 @@ export async function getUserUsageStats(userId: string, period: "daily" | "weekl
     // Group by operation and service
     const operations: Record<string, number> = {};
     const services: Record<string, number> = {};
-    
-    records.forEach(record => {
+
+    records.forEach((record) => {
       operations[record.operation] = (operations[record.operation] || 0) + 1;
       services[record.service] = (services[record.service] || 0) + 1;
     });
@@ -377,23 +381,19 @@ export async function getSystemUsage(days: number = 30): Promise<DailyUsageStats
     startDate.setDate(startDate.getDate() - days);
 
     const querySnapshot = await getDocs(
-      query(
-        collection(db, "usage_tracking"),
-        where("timestamp", ">=", startDate),
-        orderBy("timestamp", "desc")
-      )
+      query(collection(db, "usage_tracking"), where("timestamp", ">=", startDate), orderBy("timestamp", "desc")),
     );
 
     if (querySnapshot.empty) {
       return [];
     }
 
-    const records = querySnapshot.docs.map(doc => doc.data() as UsageRecord);
-    
+    const records = querySnapshot.docs.map((doc) => doc.data() as UsageRecord);
+
     // Group by date
     const dailyStats: Record<string, UsageRecord[]> = {};
-    records.forEach(record => {
-      const date = new Date(record.timestamp.toDate()).toISOString().split('T')[0];
+    records.forEach((record) => {
+      const date = new Date(record.timestamp.toDate()).toISOString().split("T")[0];
       if (!dailyStats[date]) {
         dailyStats[date] = [];
       }
@@ -401,34 +401,35 @@ export async function getSystemUsage(days: number = 30): Promise<DailyUsageStats
     });
 
     // Calculate stats for each day
-    return Object.entries(dailyStats).map(([date, dayRecords]) => {
-      const totalRequests = dayRecords.length;
-      const totalTokens = dayRecords.reduce((sum, record) => sum + record.tokensUsed, 0);
-      const successfulRequests = dayRecords.filter(record => record.success).length;
-      const successRate = totalRequests > 0 ? (successfulRequests / totalRequests) * 100 : 0;
-      const averageResponseTime = totalRequests > 0 
-        ? dayRecords.reduce((sum, record) => sum + record.responseTime, 0) / totalRequests 
-        : 0;
-      const costEstimate = dayRecords.reduce((sum, record) => {
-        const cost = record.metadata?.cost || calculateCost(record.service, record.tokensUsed);
-        return sum + cost;
-      }, 0);
+    return Object.entries(dailyStats)
+      .map(([date, dayRecords]) => {
+        const totalRequests = dayRecords.length;
+        const totalTokens = dayRecords.reduce((sum, record) => sum + record.tokensUsed, 0);
+        const successfulRequests = dayRecords.filter((record) => record.success).length;
+        const successRate = totalRequests > 0 ? (successfulRequests / totalRequests) * 100 : 0;
+        const averageResponseTime =
+          totalRequests > 0 ? dayRecords.reduce((sum, record) => sum + record.responseTime, 0) / totalRequests : 0;
+        const costEstimate = dayRecords.reduce((sum, record) => {
+          const cost = record.metadata?.cost || calculateCost(record.service, record.tokensUsed);
+          return sum + cost;
+        }, 0);
 
-      const operations: Record<string, number> = {};
-      dayRecords.forEach(record => {
-        operations[record.operation] = (operations[record.operation] || 0) + 1;
-      });
+        const operations: Record<string, number> = {};
+        dayRecords.forEach((record) => {
+          operations[record.operation] = (operations[record.operation] || 0) + 1;
+        });
 
-      return {
-        date,
-        totalRequests,
-        totalTokens,
-        successRate,
-        averageResponseTime,
-        costEstimate,
-        operations,
-      };
-    }).sort((a, b) => a.date.localeCompare(b.date));
+        return {
+          date,
+          totalRequests,
+          totalTokens,
+          successRate,
+          averageResponseTime,
+          costEstimate,
+          operations,
+        };
+      })
+      .sort((a, b) => a.date.localeCompare(b.date));
   } catch (error) {
     console.error("❌ [Usage] Failed to get system usage:", error);
     return [];
@@ -467,4 +468,4 @@ export async function trackApiUsage(
     error: result.error,
     metadata,
   });
-} 
+}

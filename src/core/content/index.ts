@@ -1,15 +1,15 @@
 // Content Service - Centralized content generation and processing
-export * from './peq-extractor';
-export * from './template-generator';
-export * from './script-validator';
-export * from './negative-keywords';
-export * from './voice-processor';
+export * from "./peq-extractor";
+export * from "./template-generator";
+export * from "./script-validator";
+export * from "./negative-keywords";
+export * from "./voice-processor";
 
 // Content service instance for easy importing
-import { generateSpeedWriteScript, generateEducationalScript, generateAIVoiceScript } from './template-generator';
-import { extractPEQ } from './peq-extractor';
-import { validateScript } from './script-validator';
-import { getEffectiveNegativeKeywordsForUser } from './negative-keywords';
+import { getEffectiveNegativeKeywordsForUser } from "./negative-keywords";
+import { extractPEQ } from "./peq-extractor";
+import { validateScript } from "./script-validator";
+import { generateSpeedWriteScript, generateEducationalScript, generateAIVoiceScript } from "./template-generator";
 
 // Placeholder functions for missing services (to be implemented)
 async function processVoiceCreation(userId: string, request: any) {
@@ -37,4 +37,4 @@ export const contentService = {
   processVoiceCreation,
   getUserCollections,
   createCollection,
-}; 
+};

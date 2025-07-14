@@ -1,7 +1,13 @@
 "use client";
 
-import { AIVoice, VoiceCreationRequest, VoiceActivationResponse, CustomVoiceLimit, OriginalScript } from "@/types/ai-voices";
 import { auth } from "@/lib/firebase";
+import {
+  AIVoice,
+  VoiceCreationRequest,
+  VoiceActivationResponse,
+  CustomVoiceLimit,
+  OriginalScript,
+} from "@/types/ai-voices";
 
 export class AIVoicesClient {
   private static async getAuthHeaders(): Promise<HeadersInit> {
@@ -14,7 +20,7 @@ export class AIVoicesClient {
       const token = await currentUser.getIdToken();
       return {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       };
     } catch (error) {
       console.error("[AIVoicesClient] Failed to get auth headers:", error);
@@ -178,4 +184,4 @@ export class AIVoicesClient {
       throw error;
     }
   }
-} 
+}

@@ -1,7 +1,7 @@
 // Production-ready video collection service
 
-import { getAdminDb, isAdminInitialized } from "./firebase-admin";
 import type { Video } from "./collections";
+import { getAdminDb, isAdminInitialized } from "./firebase-admin";
 
 export interface VideoCollectionResult {
   success: boolean;

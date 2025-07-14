@@ -3,18 +3,18 @@
  * Centralized negative keyword management for content filtering
  */
 
-import { getAdminDb } from "@/lib/firebase-admin";
-import { 
-  DEFAULT_NEGATIVE_KEYWORDS, 
-  NegativeKeywordSettings, 
+import {
+  DEFAULT_NEGATIVE_KEYWORDS,
+  NegativeKeywordSettings,
   UserNegativeKeywords,
-  getEffectiveNegativeKeywords
+  getEffectiveNegativeKeywords,
 } from "@/data/negative-keywords";
+import { getAdminDb } from "@/lib/firebase-admin";
 
 export interface NegativeKeywordFilter {
   keywords: string[];
   enabled: boolean;
-  severity: 'block' | 'warn' | 'suggest';
+  severity: "block" | "warn" | "suggest";
 }
 
 export interface ContentFilterResult {
@@ -38,20 +38,16 @@ export async function getUserNegativeKeywords(userId: string): Promise<UserNegat
       throw new Error("Database not available");
     }
 
-    const snapshot = await adminDb
-      .collection("user_negative_keywords")
-      .where("userId", "==", userId)
-      .limit(1)
-      .get();
+    const snapshot = await adminDb.collection("user_negative_keywords").where("userId", "==", userId).limit(1).get();
 
     if (!snapshot.empty) {
       const doc = snapshot.docs[0];
       const data = doc.data() as Omit<UserNegativeKeywords, "id">;
-      
+
       console.log("✅ [NegativeKeywords] Found existing settings");
       return {
         id: doc.id,
-        ...data
+        ...data,
       };
     }
 
@@ -62,20 +58,19 @@ export async function getUserNegativeKeywords(userId: string): Promise<UserNegat
       settings: {
         defaultKeywords: DEFAULT_NEGATIVE_KEYWORDS,
         userRemovedKeywords: [],
-        userAddedKeywords: []
+        userAddedKeywords: [],
       },
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
     const docRef = await adminDb.collection("user_negative_keywords").add(defaultSettings);
-    
+
     console.log("✅ [NegativeKeywords] Created default settings");
     return {
       id: docRef.id,
-      ...defaultSettings
+      ...defaultSettings,
     };
-
   } catch (error) {
     console.error("❌ [NegativeKeywords] Error fetching settings:", error);
     throw new Error("Failed to fetch negative keyword settings");
@@ -89,8 +84,8 @@ export async function getUserNegativeKeywords(userId: string): Promise<UserNegat
  * @returns Updated settings
  */
 export async function updateUserNegativeKeywords(
-  userId: string, 
-  settings: NegativeKeywordSettings
+  userId: string,
+  settings: NegativeKeywordSettings,
 ): Promise<UserNegativeKeywords> {
   try {
     console.log("🔧 [NegativeKeywords] Updating settings for user:", userId);
@@ -101,24 +96,20 @@ export async function updateUserNegativeKeywords(
     }
 
     const existingSettings = await getUserNegativeKeywords(userId);
-    
+
     const updatedData = {
       settings,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
-    await adminDb
-      .collection("user_negative_keywords")
-      .doc(existingSettings.id!)
-      .update(updatedData);
+    await adminDb.collection("user_negative_keywords").doc(existingSettings.id!).update(updatedData);
 
     console.log("✅ [NegativeKeywords] Settings updated successfully");
-    
+
     return {
       ...existingSettings,
-      ...updatedData
+      ...updatedData,
     };
-
   } catch (error) {
     console.error("❌ [NegativeKeywords] Error updating settings:", error);
     throw new Error("Failed to update negative keyword settings");
@@ -166,11 +157,10 @@ export async function addCustomKeyword(userId: string, keyword: string): Promise
 
     const updatedSettings: NegativeKeywordSettings = {
       ...userSettings.settings,
-      userAddedKeywords: [...userSettings.settings.userAddedKeywords, trimmedKeyword]
+      userAddedKeywords: [...userSettings.settings.userAddedKeywords, trimmedKeyword],
     };
 
     return await updateUserNegativeKeywords(userId, updatedSettings);
-
   } catch (error) {
     console.error("❌ [NegativeKeywords] Error adding custom keyword:", error);
     throw error;
@@ -192,11 +182,10 @@ export async function removeCustomKeyword(userId: string, keyword: string): Prom
 
     const updatedSettings: NegativeKeywordSettings = {
       ...userSettings.settings,
-      userAddedKeywords: userSettings.settings.userAddedKeywords.filter(k => k !== trimmedKeyword)
+      userAddedKeywords: userSettings.settings.userAddedKeywords.filter((k) => k !== trimmedKeyword),
     };
 
     return await updateUserNegativeKeywords(userId, updatedSettings);
-
   } catch (error) {
     console.error("❌ [NegativeKeywords] Error removing custom keyword:", error);
     throw error;
@@ -222,16 +211,15 @@ export async function toggleDefaultKeyword(userId: string, keyword: string): Pro
     }
 
     const isCurrentlyRemoved = userSettings.settings.userRemovedKeywords.includes(trimmedKeyword);
-    
+
     const updatedSettings: NegativeKeywordSettings = {
       ...userSettings.settings,
       userRemovedKeywords: isCurrentlyRemoved
-        ? userSettings.settings.userRemovedKeywords.filter(k => k !== trimmedKeyword)
-        : [...userSettings.settings.userRemovedKeywords, trimmedKeyword]
+        ? userSettings.settings.userRemovedKeywords.filter((k) => k !== trimmedKeyword)
+        : [...userSettings.settings.userRemovedKeywords, trimmedKeyword],
     };
 
     return await updateUserNegativeKeywords(userId, updatedSettings);
-
   } catch (error) {
     console.error("❌ [NegativeKeywords] Error toggling default keyword:", error);
     throw error;
@@ -250,11 +238,10 @@ export async function resetToDefault(userId: string): Promise<UserNegativeKeywor
     const defaultSettings: NegativeKeywordSettings = {
       defaultKeywords: DEFAULT_NEGATIVE_KEYWORDS,
       userRemovedKeywords: [],
-      userAddedKeywords: []
+      userAddedKeywords: [],
     };
 
     return await updateUserNegativeKeywords(userId, defaultSettings);
-
   } catch (error) {
     console.error("❌ [NegativeKeywords] Error resetting to default:", error);
     throw error;
@@ -272,7 +259,7 @@ export function filterContent(content: string, keywords: string[]): ContentFilte
   const violations: string[] = [];
   const suggestions: string[] = [];
 
-  keywords.forEach(keyword => {
+  keywords.forEach((keyword) => {
     if (lowerContent.includes(keyword.toLowerCase())) {
       violations.push(keyword);
       suggestions.push(`Consider replacing "${keyword}" with a more positive alternative`);
@@ -280,9 +267,9 @@ export function filterContent(content: string, keywords: string[]): ContentFilte
   });
 
   let filteredContent = content;
-  violations.forEach(violation => {
+  violations.forEach((violation) => {
     // Replace with placeholder for now - in production, you might want to suggest alternatives
-    filteredContent = filteredContent.replace(new RegExp(violation, 'gi'), `[${violation}]`);
+    filteredContent = filteredContent.replace(new RegExp(violation, "gi"), `[${violation}]`);
   });
 
   return {
@@ -301,7 +288,7 @@ export function filterContent(content: string, keywords: string[]): ContentFilte
  */
 export function hasNegativeKeywords(content: string, keywords: string[]): boolean {
   const lowerContent = content.toLowerCase();
-  return keywords.some(keyword => lowerContent.includes(keyword.toLowerCase()));
+  return keywords.some((keyword) => lowerContent.includes(keyword.toLowerCase()));
 }
 
 /**
@@ -311,16 +298,16 @@ export function hasNegativeKeywords(content: string, keywords: string[]): boolea
  */
 export function getKeywordSuggestions(keyword: string): string[] {
   const suggestions: Record<string, string[]> = {
-    'buy': ['get', 'acquire', 'obtain', 'purchase'],
-    'sell': ['offer', 'provide', 'share', 'deliver'],
-    'cheap': ['affordable', 'cost-effective', 'budget-friendly', 'value'],
-    'expensive': ['premium', 'high-quality', 'investment', 'valuable'],
-    'free': ['complimentary', 'included', 'no-cost', 'gratis'],
-    'limited': ['exclusive', 'select', 'curated', 'special'],
-    'urgent': ['important', 'timely', 'relevant', 'current'],
-    'secret': ['insight', 'strategy', 'approach', 'method'],
-    'hack': ['tip', 'technique', 'strategy', 'method'],
-    'trick': ['technique', 'method', 'approach', 'strategy'],
+    buy: ["get", "acquire", "obtain", "purchase"],
+    sell: ["offer", "provide", "share", "deliver"],
+    cheap: ["affordable", "cost-effective", "budget-friendly", "value"],
+    expensive: ["premium", "high-quality", "investment", "valuable"],
+    free: ["complimentary", "included", "no-cost", "gratis"],
+    limited: ["exclusive", "select", "curated", "special"],
+    urgent: ["important", "timely", "relevant", "current"],
+    secret: ["insight", "strategy", "approach", "method"],
+    hack: ["tip", "technique", "strategy", "method"],
+    trick: ["technique", "method", "approach", "strategy"],
   };
 
   return suggestions[keyword.toLowerCase()] || [];
@@ -332,11 +319,11 @@ export function getKeywordSuggestions(keyword: string): string[] {
  * @returns Formatted prompt string
  */
 export function buildNegativeKeywordsPrompt(keywords: string[]): string {
-  if (keywords.length === 0) return '';
+  if (keywords.length === 0) return "";
 
   return `
 IMPORTANT: Avoid using these negative keywords in your content:
-${keywords.map(keyword => `- ${keyword}`).join('\n')}
+${keywords.map((keyword) => `- ${keyword}`).join("\n")}
 
 Instead, use positive, engaging language that builds trust and provides value.`;
 }
@@ -348,22 +335,22 @@ Instead, use positive, engaging language that builds trust and provides value.`;
  */
 export function validateKeyword(keyword: string): { valid: boolean; error?: string } {
   const trimmed = keyword.trim();
-  
+
   if (trimmed.length === 0) {
-    return { valid: false, error: 'Keyword cannot be empty' };
+    return { valid: false, error: "Keyword cannot be empty" };
   }
-  
+
   if (trimmed.length < 2) {
-    return { valid: false, error: 'Keyword must be at least 2 characters' };
+    return { valid: false, error: "Keyword must be at least 2 characters" };
   }
-  
+
   if (trimmed.length > 50) {
-    return { valid: false, error: 'Keyword must be less than 50 characters' };
+    return { valid: false, error: "Keyword must be less than 50 characters" };
   }
-  
+
   if (!/^[a-zA-Z0-9\s\-_]+$/.test(trimmed)) {
-    return { valid: false, error: 'Keyword can only contain letters, numbers, spaces, hyphens, and underscores' };
+    return { valid: false, error: "Keyword can only contain letters, numbers, spaces, hyphens, and underscores" };
   }
-  
+
   return { valid: true };
-} 
+}

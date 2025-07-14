@@ -2,21 +2,27 @@
 
 /* 1. Brand tokens (teal, sky-blue, warm neutrals) */
 :root {
-  --c-teal-700:  #218090;
-  --c-sky-50:    #eef8ff;
+  --c-teal-700: #218090;
+  --c-sky-50: #eef8ff;
   --c-neutral-0: #ffffff;
-  --c-neutral-50:#f9f9f7;
-  --c-neutral-100:#ededeb;
-  --c-neutral-900:#091717;
+  --c-neutral-50: #f9f9f7;
+  --c-neutral-100: #ededeb;
+  --c-neutral-900: #091717;
 
-  --radius-sm: 6px;          /* gentle curves seen in Perplexity UI */
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.07),
-               0 2px 6px rgba(0,0,0,0.06);
+  --radius-sm: 6px; /* gentle curves seen in Perplexity UI */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.07), 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 /* 2. Layout helpers reused across pages */
-.pxy-wrapper { max-width: 56rem; margin: 2rem auto; padding: 0 1rem; }
-.pxy-heading { font-family: "FK Grotesk", sans-serif; margin-bottom: 1.5rem; }
+.pxy-wrapper {
+  max-width: 56rem;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+.pxy-heading {
+  font-family: "FK Grotesk", sans-serif;
+  margin-bottom: 1.5rem;
+}
 .pxy-card-grid {
   display: grid;
   gap: 1.25rem;
@@ -32,11 +38,15 @@
   display: flex;
   flex-direction: column;
   row-gap: 0.75rem;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 .pxy-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08), 0 6px 18px rgba(0,0,0,0.06);
+  box-shadow:
+    0 4px 10px rgba(0, 0, 0, 0.08),
+    0 6px 18px rgba(0, 0, 0, 0.06);
 }
 
 .pxy-card-title {
@@ -54,16 +64,20 @@
 }
 
 /* 4. Variants */
-.pxy-default   { /* inherits base background */ }
+.pxy-default {
+  /* inherits base background */
+}
 
 .pxy-highlight {
   background: var(--c-teal-700);
   color: #fff;
 }
 .pxy-highlight .pxy-card-title,
-.pxy-highlight .pxy-card-body { color: #fff; }
+.pxy-highlight .pxy-card-body {
+  color: #fff;
+}
 
 .pxy-info {
   background: var(--c-sky-50);
   border: 1px solid var(--c-neutral-100);
-} 
+}

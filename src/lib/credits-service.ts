@@ -7,7 +7,7 @@ import {
   UsageRecord,
   CREDIT_COSTS,
   ACCOUNT_LIMITS,
-  CreditOperation
+  CreditOperation,
 } from "@/types/usage-tracking";
 
 export class CreditsService {
@@ -105,7 +105,7 @@ export class CreditsService {
   static async canPerformAction(
     userId: string,
     operation: CreditOperation,
-    accountLevel: AccountLevel
+    accountLevel: AccountLevel,
   ): Promise<{ canPerform: boolean; reason?: string; creditsNeeded: number }> {
     try {
       const userCredits = await this.getUserCredits(userId, accountLevel);
@@ -120,7 +120,7 @@ export class CreditsService {
       return {
         canPerform: false,
         reason: `Insufficient credits. Need ${creditsNeeded}, have ${creditsRemaining}. Resets ${periodType}.`,
-        creditsNeeded
+        creditsNeeded,
       };
     } catch (error) {
       console.error("❌ [Credits] Failed to check action permission:", error);
@@ -132,7 +132,7 @@ export class CreditsService {
     userId: string,
     operation: CreditOperation,
     accountLevel: AccountLevel,
-    metadata?: Record<string, unknown>
+    metadata?: Record<string, unknown>,
   ): Promise<{ success: boolean; newBalance: number; transaction?: CreditTransaction }> {
     try {
       const adminDb = getAdminDb();
@@ -244,7 +244,7 @@ export class CreditsService {
     userId: string,
     operation: CreditOperation,
     accountLevel: AccountLevel,
-    usageData: Omit<UsageRecord, "userId" | "creditsUsed" | "operation">
+    usageData: Omit<UsageRecord, "userId" | "creditsUsed" | "operation">,
   ): Promise<{ success: boolean; newBalance: number }> {
     try {
       const adminDb = getAdminDb();
@@ -276,10 +276,7 @@ export class CreditsService {
     }
   }
 
-  private static async checkAndResetPeriod(
-    userCredits: UserCredits,
-    accountLevel: AccountLevel
-  ): Promise<boolean> {
+  private static async checkAndResetPeriod(userCredits: UserCredits, accountLevel: AccountLevel): Promise<boolean> {
     const adminDb = getAdminDb();
     if (!adminDb) {
       throw new Error("Database not available");
@@ -320,12 +317,9 @@ export class CreditsService {
     if (needsReset) {
       updateData.updatedAt = now.toISOString();
 
-      await adminDb
-        .collection(this.COLLECTIONS.USER_CREDITS)
-        .doc(userCredits.id!)
-        .update(updateData);
+      await adminDb.collection(this.COLLECTIONS.USER_CREDITS).doc(userCredits.id!).update(updateData);
 
-      console.log(`🔄 [Credits] Reset ${isProAccount ? 'monthly' : 'daily'} credits for user ${userCredits.userId}`);
+      console.log(`🔄 [Credits] Reset ${isProAccount ? "monthly" : "daily"} credits for user ${userCredits.userId}`);
     }
 
     return needsReset;
@@ -365,11 +359,11 @@ export class CreditsService {
 
     if (hours > 24) {
       const days = Math.floor(hours / 24);
-      return `${days} day${days !== 1 ? 's' : ''}`;
+      return `${days} day${days !== 1 ? "s" : ""}`;
     } else if (hours > 0) {
       return `${hours}h ${minutes}m`;
     } else {
       return `${minutes}m`;
     }
   }
-} 
+}

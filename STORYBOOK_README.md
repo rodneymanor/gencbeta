@@ -31,12 +31,14 @@ Storybook is configured to import your global styles from `src/app/globals.css`.
 ### Component Paths
 
 Storybook is configured to find stories in:
+
 - `src/**/*.stories.@(js|jsx|mjs|ts|tsx)` - All story files
 - `src/**/*.mdx` - Documentation files
 
 ### Aliases
 
 The following path aliases are configured in Storybook:
+
 - `@` → `/src`
 - `@/components` → `/src/components`
 - `@/lib` → `/src/lib`
@@ -54,21 +56,21 @@ The following path aliases are configured in Storybook:
 ### Basic Story Structure
 
 ```tsx
-import type { Meta, StoryObj } from '@storybook/react';
-import { YourComponent } from './YourComponent';
+import type { Meta, StoryObj } from "@storybook/react";
+import { YourComponent } from "./YourComponent";
 
 const meta: Meta<typeof YourComponent> = {
-  title: 'Category/ComponentName',
+  title: "Category/ComponentName",
   component: YourComponent,
   parameters: {
-    layout: 'centered', // or 'padded', 'fullscreen'
+    layout: "centered", // or 'padded', 'fullscreen'
   },
-  tags: ['autodocs'], // Enables automatic documentation
+  tags: ["autodocs"], // Enables automatic documentation
   argTypes: {
     // Define controls for your component props
     variant: {
-      control: { type: 'select' },
-      options: ['default', 'secondary', 'destructive'],
+      control: { type: "select" },
+      options: ["default", "secondary", "destructive"],
     },
   },
 };
@@ -84,7 +86,7 @@ export const Default: Story = {
 
 export const Secondary: Story = {
   args: {
-    variant: 'secondary',
+    variant: "secondary",
   },
 };
 ```
@@ -109,12 +111,12 @@ parameters: {
   layout: 'centered', // Centers the component
   layout: 'padded',   // Adds padding around the component
   layout: 'fullscreen', // Full screen layout
-  
+
   // Viewport for responsive testing
   viewport: {
     defaultViewport: 'mobile1',
   },
-  
+
   // Background colors
   backgrounds: {
     default: 'light',
@@ -154,6 +156,7 @@ argTypes: {
 ### UI Components
 
 - **Button** (`src/components/ui/button.stories.tsx`)
+
   - All variants (default, secondary, destructive, outline, ghost, link)
   - All sizes (sm, default, lg, icon)
   - With icons and disabled states
@@ -189,9 +192,9 @@ Use the `autodocs` tag to automatically generate documentation:
 
 ```tsx
 const meta: Meta<typeof YourComponent> = {
-  title: 'Category/ComponentName',
+  title: "Category/ComponentName",
   component: YourComponent,
-  tags: ['autodocs'], // This enables automatic documentation
+  tags: ["autodocs"], // This enables automatic documentation
 };
 ```
 
@@ -211,6 +214,7 @@ const meta: Meta<typeof YourComponent> = {
 ### 4. Testing Different States
 
 Create stories for:
+
 - Default state
 - Different variants/props
 - Loading states
@@ -283,4 +287,4 @@ Example Vercel configuration:
   "outputDirectory": "storybook-static",
   "installCommand": "npm install"
 }
-``` 
+```

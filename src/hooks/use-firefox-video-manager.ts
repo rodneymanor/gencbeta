@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback } from "react";
 
 interface FirefoxVideoManagerProps {
   videoId: string;
@@ -13,7 +13,7 @@ export const useFirefoxVideoManager = ({ videoId, isPlaying, onVideoStop }: Fire
 
   // Detect Firefox browser
   useEffect(() => {
-    isFirefox.current = navigator.userAgent.includes('Firefox');
+    isFirefox.current = navigator.userAgent.includes("Firefox");
   }, []);
 
   // Function to pause all other videos on the page - SIMPLIFIED VERSION
@@ -23,7 +23,7 @@ export const useFirefoxVideoManager = ({ videoId, isPlaying, onVideoStop }: Fire
     console.log("🦊 [Firefox Video Manager] Pausing all other videos for:", currentVideoId);
 
     // Method 1: Pause all HTML5 video elements
-    const allVideos = document.querySelectorAll('video');
+    const allVideos = document.querySelectorAll("video");
     allVideos.forEach((video) => {
       if (video && !video.paused) {
         console.log("🦊 [Firefox Video Manager] Pausing HTML5 video");
@@ -32,13 +32,13 @@ export const useFirefoxVideoManager = ({ videoId, isPlaying, onVideoStop }: Fire
     });
 
     // Method 2: Send pause messages to all iframes - ONLY THIS METHOD
-    const allIframes = document.querySelectorAll('iframe[data-video-id]');
+    const allIframes = document.querySelectorAll("iframe[data-video-id]");
     allIframes.forEach((iframe) => {
-      const iframeVideoId = iframe.getAttribute('data-video-id');
+      const iframeVideoId = iframe.getAttribute("data-video-id");
       if (iframeVideoId && iframeVideoId !== currentVideoId) {
         try {
           console.log("🦊 [Firefox Video Manager] Sending pause message to iframe:", iframeVideoId);
-          iframe.contentWindow?.postMessage({ command: 'pause' }, '*');
+          iframe.contentWindow?.postMessage({ command: "pause" }, "*");
         } catch (error) {
           console.log("🦊 [Firefox Video Manager] Cannot send message to iframe due to CORS");
         }
@@ -50,26 +50,32 @@ export const useFirefoxVideoManager = ({ videoId, isPlaying, onVideoStop }: Fire
   }, []);
 
   // Function to handle video play events
-  const handleVideoPlay = useCallback((event: Event) => {
-    if (!isFirefox.current) return;
+  const handleVideoPlay = useCallback(
+    (event: Event) => {
+      if (!isFirefox.current) return;
 
-    const video = event.target as HTMLVideoElement;
-    console.log("🦊 [Firefox Video Manager] Video play event detected");
-    
-    // Pause all other videos when this one starts playing
-    pauseAllOtherVideos(videoId);
-  }, [videoId, pauseAllOtherVideos]);
+      const video = event.target as HTMLVideoElement;
+      console.log("🦊 [Firefox Video Manager] Video play event detected");
+
+      // Pause all other videos when this one starts playing
+      pauseAllOtherVideos(videoId);
+    },
+    [videoId, pauseAllOtherVideos],
+  );
 
   // Function to handle iframe messages
-  const handleIframeMessage = useCallback((event: MessageEvent) => {
-    if (!isFirefox.current) return;
+  const handleIframeMessage = useCallback(
+    (event: MessageEvent) => {
+      if (!isFirefox.current) return;
 
-    // Listen for play events from iframes
-    if (event.data && event.data.type === 'video-play') {
-      console.log("🦊 [Firefox Video Manager] Iframe play event received");
-      pauseAllOtherVideos(event.data.videoId || videoId);
-    }
-  }, [videoId, pauseAllOtherVideos]);
+      // Listen for play events from iframes
+      if (event.data && event.data.type === "video-play") {
+        console.log("🦊 [Firefox Video Manager] Iframe play event received");
+        pauseAllOtherVideos(event.data.videoId || videoId);
+      }
+    },
+    [videoId, pauseAllOtherVideos],
+  );
 
   // Set up event listeners when component mounts
   useEffect(() => {
@@ -78,13 +84,13 @@ export const useFirefoxVideoManager = ({ videoId, isPlaying, onVideoStop }: Fire
     console.log("🦊 [Firefox Video Manager] Setting up Firefox-specific video management");
 
     // Add global event listener for iframe messages
-    window.addEventListener('message', handleIframeMessage);
+    window.addEventListener("message", handleIframeMessage);
 
     // Find and set up video element if it exists
     const videoElement = document.querySelector(`video[data-video-id="${videoId}"]`) as HTMLVideoElement;
     if (videoElement) {
       videoRef.current = videoElement;
-      videoElement.addEventListener('play', handleVideoPlay);
+      videoElement.addEventListener("play", handleVideoPlay);
     }
 
     // Find and set up iframe element if it exists
@@ -95,10 +101,10 @@ export const useFirefoxVideoManager = ({ videoId, isPlaying, onVideoStop }: Fire
 
     return () => {
       // Cleanup event listeners
-      window.removeEventListener('message', handleIframeMessage);
-      
+      window.removeEventListener("message", handleIframeMessage);
+
       if (videoRef.current) {
-        videoRef.current.removeEventListener('play', handleVideoPlay);
+        videoRef.current.removeEventListener("play", handleVideoPlay);
       }
     };
   }, [videoId, handleVideoPlay, handleIframeMessage]);
@@ -120,7 +126,7 @@ export const useFirefoxVideoManager = ({ videoId, isPlaying, onVideoStop }: Fire
     console.log("🦊 [Firefox Video Manager] Force stopping all videos");
 
     // Stop all HTML5 videos
-    const allVideos = document.querySelectorAll('video');
+    const allVideos = document.querySelectorAll("video");
     allVideos.forEach((video) => {
       if (video && !video.paused) {
         video.pause();
@@ -128,10 +134,10 @@ export const useFirefoxVideoManager = ({ videoId, isPlaying, onVideoStop }: Fire
     });
 
     // Send stop messages to all iframes - ONLY postMessage, no reloading
-    const allIframes = document.querySelectorAll('iframe[data-video-id]');
+    const allIframes = document.querySelectorAll("iframe[data-video-id]");
     allIframes.forEach((iframe) => {
       try {
-        iframe.contentWindow?.postMessage({ command: 'pause' }, '*');
+        iframe.contentWindow?.postMessage({ command: "pause" }, "*");
       } catch (error) {
         console.log("🦊 [Firefox Video Manager] Cannot send stop message to iframe");
       }
@@ -145,6 +151,6 @@ export const useFirefoxVideoManager = ({ videoId, isPlaying, onVideoStop }: Fire
 
   return {
     forceStopAllVideos,
-    isFirefox: isFirefox.current
+    isFirefox: isFirefox.current,
   };
-}; 
+};

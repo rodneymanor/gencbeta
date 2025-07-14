@@ -1,4 +1,4 @@
-import ScriptCard from "./script-card"
+import ScriptCard from "./script-card";
 
 export default function ScriptCardDemo() {
   const sampleScript = `🎬 MORNING ROUTINE THAT CHANGED MY LIFE
@@ -25,7 +25,7 @@ export default function ScriptCardDemo() {
 
 *Show more organized life*
 
-"Try it for 7 days and watch your life transform. Who's in?"`
+"Try it for 7 days and watch your life transform. Who's in?"`;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
@@ -43,5 +43,5 @@ export default function ScriptCardDemo() {
         }}
       />
     </div>
-  )
+  );
 }

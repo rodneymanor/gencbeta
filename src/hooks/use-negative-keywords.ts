@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useCallback } from "react";
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
 import { UserNegativeKeywords, NegativeKeywordSettings } from "@/data/negative-keywords";
 
 // Helper function to get auth headers
@@ -87,7 +89,7 @@ async function performKeywordAction(action: string, keyword?: string): Promise<U
 
 export function useNegativeKeywords() {
   const queryClient = useQueryClient();
-  
+
   // Loading states
   const [isUpdating, setIsUpdating] = useState(false);
   const [isAddingKeyword, setIsAddingKeyword] = useState(false);
@@ -117,8 +119,7 @@ export function useNegativeKeywords() {
 
   // Keyword action mutations
   const keywordActionMutation = useMutation({
-    mutationFn: ({ action, keyword }: { action: string; keyword?: string }) =>
-      performKeywordAction(action, keyword),
+    mutationFn: ({ action, keyword }: { action: string; keyword?: string }) => performKeywordAction(action, keyword),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["negative-keywords"] });
     },
@@ -138,7 +139,7 @@ export function useNegativeKeywords() {
         setIsUpdating(false);
       }
     },
-    [updateSettingsMutation]
+    [updateSettingsMutation],
   );
 
   const handleAddCustomKeyword = useCallback(
@@ -157,7 +158,7 @@ export function useNegativeKeywords() {
         setIsAddingKeyword(false);
       }
     },
-    [keywordActionMutation]
+    [keywordActionMutation],
   );
 
   const handleRemoveCustomKeyword = useCallback(
@@ -176,7 +177,7 @@ export function useNegativeKeywords() {
         setIsRemovingKeyword(false);
       }
     },
-    [keywordActionMutation]
+    [keywordActionMutation],
   );
 
   const handleToggleDefaultKeyword = useCallback(
@@ -195,26 +196,23 @@ export function useNegativeKeywords() {
         setIsTogglingDefault(false);
       }
     },
-    [keywordActionMutation]
+    [keywordActionMutation],
   );
 
-  const handleResetToDefault = useCallback(
-    async (): Promise<UserNegativeKeywords | null> => {
-      setIsResetting(true);
-      try {
-        const result = await keywordActionMutation.mutateAsync({
-          action: "reset_to_default",
-        });
-        return result;
-      } catch (error) {
-        console.error("Reset to default error:", error);
-        return null;
-      } finally {
-        setIsResetting(false);
-      }
-    },
-    [keywordActionMutation]
-  );
+  const handleResetToDefault = useCallback(async (): Promise<UserNegativeKeywords | null> => {
+    setIsResetting(true);
+    try {
+      const result = await keywordActionMutation.mutateAsync({
+        action: "reset_to_default",
+      });
+      return result;
+    } catch (error) {
+      console.error("Reset to default error:", error);
+      return null;
+    } finally {
+      setIsResetting(false);
+    }
+  }, [keywordActionMutation]);
 
   return {
     // Data
@@ -237,4 +235,4 @@ export function useNegativeKeywords() {
     isTogglingDefault,
     isResetting,
   };
-} 
+}

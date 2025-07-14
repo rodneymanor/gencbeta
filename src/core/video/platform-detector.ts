@@ -3,7 +3,7 @@
  * Centralized platform detection for TikTok, Instagram, YouTube, and other platforms
  */
 
-export type Platform = 'tiktok' | 'instagram' | 'youtube' | 'unknown';
+export type Platform = "tiktok" | "instagram" | "youtube" | "unknown";
 
 export interface PlatformInfo {
   platform: Platform;
@@ -107,7 +107,7 @@ export function extractYouTubeVideoId(url: string): string | null {
  * @returns True if platform is supported
  */
 export function isSupportedPlatform(platform: Platform): boolean {
-  return ['tiktok', 'instagram', 'youtube'].includes(platform);
+  return ["tiktok", "instagram", "youtube"].includes(platform);
 }
 
 /**
@@ -119,17 +119,17 @@ export function getPlatformConfig(platform: Platform) {
   const configs = {
     tiktok: {
       maxDuration: 600, // 10 minutes
-      supportedFormats: ['mp4'],
+      supportedFormats: ["mp4"],
       requiresAuth: false,
     },
     instagram: {
       maxDuration: 60, // 1 minute for reels
-      supportedFormats: ['mp4'],
+      supportedFormats: ["mp4"],
       requiresAuth: false,
     },
     youtube: {
       maxDuration: 43200, // 12 hours
-      supportedFormats: ['mp4', 'webm'],
+      supportedFormats: ["mp4", "webm"],
       requiresAuth: false,
     },
     unknown: {
@@ -140,4 +140,4 @@ export function getPlatformConfig(platform: Platform) {
   };
 
   return configs[platform] || configs.unknown;
-} 
+}

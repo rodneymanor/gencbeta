@@ -67,7 +67,7 @@ export class CollectionsApiClient {
     collectionId?: string,
     limit: number = 24,
     lastDocId?: string,
-    firebaseToken?: string
+    firebaseToken?: string,
   ): Promise<VideosApiResponse> {
     const params = new URLSearchParams();
     if (collectionId) params.append("collectionId", collectionId);
@@ -93,4 +93,4 @@ export class CollectionsApiClient {
 
     return response.json();
   }
-} 
+}

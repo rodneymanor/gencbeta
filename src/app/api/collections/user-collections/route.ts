@@ -30,10 +30,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (!authResult.success) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
 
     const userId = authResult.user.uid;
@@ -67,4 +64,4 @@ export async function GET(request: NextRequest) {
       { status: 500 },
     );
   }
-} 
+}

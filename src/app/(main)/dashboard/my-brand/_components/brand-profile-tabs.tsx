@@ -8,8 +8,8 @@ import { FileText, MessageSquare, Target, Hash, AlertCircle } from "lucide-react
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BrandProfileService } from "@/lib/brand-profile";
 import { useAuth } from "@/contexts/auth-context";
+import { BrandProfileService } from "@/lib/brand-profile";
 
 import { ContentPillarsTab } from "./content-pillars-tab";
 import { KeywordsTab } from "./keywords-tab";

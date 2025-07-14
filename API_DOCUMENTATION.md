@@ -25,10 +25,12 @@ VIDEO_API_KEY=your-secret-api-key
 Add a video to an existing collection.
 
 **Headers:**
+
 - `Content-Type: application/json`
 - `x-api-key: your-secret-api-key`
 
 **Request Body:**
+
 ```json
 {
   "videoUrl": "https://example.com/video.mp4",
@@ -38,13 +40,16 @@ Add a video to an existing collection.
 ```
 
 **Required Fields:**
+
 - `videoUrl`: The URL of the video to add
 - `collectionId`: The ID of the collection to add the video to
 
 **Optional Fields:**
+
 - `title`: Custom title for the video (defaults to auto-generated title)
 
 **Success Response (201):**
+
 ```json
 {
   "success": true,
@@ -62,6 +67,7 @@ Add a video to an existing collection.
 ```
 
 **Error Responses:**
+
 - `401 Unauthorized`: Invalid or missing API key
 - `400 Bad Request`: Missing required fields or invalid URL format
 - `404 Not Found`: Collection not found
@@ -72,12 +78,15 @@ Add a video to an existing collection.
 Retrieve collection information and videos.
 
 **Headers:**
+
 - `x-api-key: your-secret-api-key`
 
 **Query Parameters:**
+
 - `collectionId`: The ID of the collection to retrieve
 
 **Success Response (200):**
+
 ```json
 {
   "collection": {
@@ -103,6 +112,7 @@ Retrieve collection information and videos.
 ### Using cURL
 
 **Add a video:**
+
 ```bash
 curl -X POST https://your-domain.com/api/add-video-to-collection \
   -H "Content-Type: application/json" \
@@ -115,6 +125,7 @@ curl -X POST https://your-domain.com/api/add-video-to-collection \
 ```
 
 **Get collection info:**
+
 ```bash
 curl -X GET "https://your-domain.com/api/add-video-to-collection?collectionId=your-collection-id" \
   -H "x-api-key: your-secret-api-key"
@@ -123,16 +134,16 @@ curl -X GET "https://your-domain.com/api/add-video-to-collection?collectionId=yo
 ### Using JavaScript/Node.js
 
 ```javascript
-const API_BASE_URL = 'https://your-domain.com';
-const API_KEY = 'your-secret-api-key';
+const API_BASE_URL = "https://your-domain.com";
+const API_KEY = "your-secret-api-key";
 
 // Add a video
 async function addVideo(videoUrl, collectionId, title) {
   const response = await fetch(`${API_BASE_URL}/api/add-video-to-collection`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': API_KEY,
+      "Content-Type": "application/json",
+      "x-api-key": API_KEY,
     },
     body: JSON.stringify({
       videoUrl,
@@ -147,9 +158,9 @@ async function addVideo(videoUrl, collectionId, title) {
 // Get collection
 async function getCollection(collectionId) {
   const response = await fetch(`${API_BASE_URL}/api/add-video-to-collection?collectionId=${collectionId}`, {
-    method: 'GET',
+    method: "GET",
     headers: {
-      'x-api-key': API_KEY,
+      "x-api-key": API_KEY,
     },
   });
 
@@ -196,13 +207,16 @@ def get_collection(collection_id):
 Get all collections for a user.
 
 **Headers:**
+
 - `x-api-key: your-secret-api-key`
 - `x-user-id: user-uid-here` (optional, can use query param instead)
 
 **Query Parameters:**
+
 - `userId`: The UID of the user whose collections to retrieve
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -229,6 +243,7 @@ Get all collections for a user.
 ```
 
 **Error Responses:**
+
 - `401 Unauthorized`: Invalid or missing API key
 - `400 Bad Request`: Missing userId parameter
 - `404 Not Found`: User not found
@@ -257,10 +272,10 @@ Always check the response status and handle errors appropriately:
 const result = await addVideo(videoUrl, collectionId, title);
 
 if (result.error) {
-  console.error('API Error:', result.error);
+  console.error("API Error:", result.error);
   // Handle error appropriately
 } else {
-  console.log('Success:', result.message);
+  console.log("Success:", result.message);
   // Process successful response
 }
 ```
@@ -272,10 +287,10 @@ Use the included `test-api.js` script to test your API:
 1. Update the API_KEY and collection ID in the script
 2. Run: `node test-api.js`
 
-This will test both adding a video and retrieving collection information. 
+This will test both adding a video and retrieving collection information.
 
+---
 
-----
 API Route and Endpoint Flow:
 Frontend calls: /api/creators POST route
 Backend processing: processCreatorProfile() function in src/lib/process-creator-utils.ts

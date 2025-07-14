@@ -14,11 +14,13 @@ export const formatTimeUntilRefresh = (expiresAt: string): string => {
   return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 };
 
-export const createScriptQueryParams = (idea: ContentIdea & { concept?: string; script?: string; peqCategory?: string }): URLSearchParams => {
+export const createScriptQueryParams = (
+  idea: ContentIdea & { concept?: string; script?: string; peqCategory?: string },
+): URLSearchParams => {
   return new URLSearchParams({
     idea: idea.concept ?? idea.title ?? "Content Idea",
     script: idea.script ?? idea.hook,
     length: idea.estimatedDuration,
     category: idea.peqCategory ?? idea.pillar ?? "general",
   });
-}; 
+};

@@ -6,6 +6,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+
 import { useAuth } from "@/contexts/auth-context";
 import { useBillingService } from "@/core/billing";
 
@@ -57,104 +58,116 @@ export function useCredits(options: CreditsOptions = {}): [CreditsState, Credits
     return Math.round((used / limit) * 100);
   }, []);
 
-  const updateState = useCallback((creditsData: { available: number; used: number; limit: number }) => {
-    const { available, used, limit } = creditsData;
-    const percentageUsed = calculatePercentage(used, limit);
-    
-    const newState = {
-      available,
-      used,
-      limit,
-      percentageUsed,
-      isLoading: false,
-      error: null,
-    };
-    
-    setState(newState);
-    onCreditsUpdated?.(newState);
-  }, [calculatePercentage, onCreditsUpdated]);
+  const updateState = useCallback(
+    (creditsData: { available: number; used: number; limit: number }) => {
+      const { available, used, limit } = creditsData;
+      const percentageUsed = calculatePercentage(used, limit);
+
+      const newState = {
+        available,
+        used,
+        limit,
+        percentageUsed,
+        isLoading: false,
+        error: null,
+      };
+
+      setState(newState);
+      onCreditsUpdated?.(newState);
+    },
+    [calculatePercentage, onCreditsUpdated],
+  );
 
   const refreshCredits = useCallback(async () => {
     if (!user) {
-      setState(prev => ({ ...prev, isLoading: false, error: "User not authenticated" }));
+      setState((prev) => ({ ...prev, isLoading: false, error: "User not authenticated" }));
       return;
     }
 
-    setState(prev => ({ ...prev, isLoading: true, error: null }));
+    setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
     try {
       const credits = await getCredits(user.uid);
       updateState(credits);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to fetch credits";
-      setState(prev => ({ 
-        ...prev, 
-        isLoading: false, 
-        error: errorMessage 
+      setState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error: errorMessage,
       }));
     }
   }, [user, getCredits, updateState]);
 
-  const deductCredits = useCallback(async (amount: number, operation: string): Promise<boolean> => {
-    if (!user) {
-      setState(prev => ({ ...prev, error: "User not authenticated" }));
-      return false;
-    }
-
-    if (state.available < amount) {
-      onInsufficientCredits?.(amount, state.available);
-      return false;
-    }
-
-    try {
-      const success = await deductCreditsService(user.uid, amount, operation);
-      if (success) {
-        // Update local state immediately for better UX
-        const newUsed = state.used + amount;
-        const newAvailable = state.available - amount;
-        updateState({
-          available: newAvailable,
-          used: newUsed,
-          limit: state.limit,
-        });
+  const deductCredits = useCallback(
+    async (amount: number, operation: string): Promise<boolean> => {
+      if (!user) {
+        setState((prev) => ({ ...prev, error: "User not authenticated" }));
+        return false;
       }
-      return success;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to deduct credits";
-      setState(prev => ({ ...prev, error: errorMessage }));
-      return false;
-    }
-  }, [user, state.available, state.used, state.limit, deductCreditsService, updateState, onInsufficientCredits]);
 
-  const refundCredits = useCallback(async (amount: number, operation: string): Promise<boolean> => {
-    if (!user) {
-      setState(prev => ({ ...prev, error: "User not authenticated" }));
-      return false;
-    }
-
-    try {
-      const success = await refundCreditsService(user.uid, amount, operation);
-      if (success) {
-        // Update local state immediately for better UX
-        const newUsed = Math.max(0, state.used - amount);
-        const newAvailable = Math.min(state.limit, state.available + amount);
-        updateState({
-          available: newAvailable,
-          used: newUsed,
-          limit: state.limit,
-        });
+      if (state.available < amount) {
+        onInsufficientCredits?.(amount, state.available);
+        return false;
       }
-      return success;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to refund credits";
-      setState(prev => ({ ...prev, error: errorMessage }));
-      return false;
-    }
-  }, [user, state.available, state.used, state.limit, refundCreditsService, updateState]);
 
-  const checkCredits = useCallback((required: number): boolean => {
-    return state.available >= required;
-  }, [state.available]);
+      try {
+        const success = await deductCreditsService(user.uid, amount, operation);
+        if (success) {
+          // Update local state immediately for better UX
+          const newUsed = state.used + amount;
+          const newAvailable = state.available - amount;
+          updateState({
+            available: newAvailable,
+            used: newUsed,
+            limit: state.limit,
+          });
+        }
+        return success;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Failed to deduct credits";
+        setState((prev) => ({ ...prev, error: errorMessage }));
+        return false;
+      }
+    },
+    [user, state.available, state.used, state.limit, deductCreditsService, updateState, onInsufficientCredits],
+  );
+
+  const refundCredits = useCallback(
+    async (amount: number, operation: string): Promise<boolean> => {
+      if (!user) {
+        setState((prev) => ({ ...prev, error: "User not authenticated" }));
+        return false;
+      }
+
+      try {
+        const success = await refundCreditsService(user.uid, amount, operation);
+        if (success) {
+          // Update local state immediately for better UX
+          const newUsed = Math.max(0, state.used - amount);
+          const newAvailable = Math.min(state.limit, state.available + amount);
+          updateState({
+            available: newAvailable,
+            used: newUsed,
+            limit: state.limit,
+          });
+        }
+        return success;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Failed to refund credits";
+        setState((prev) => ({ ...prev, error: errorMessage }));
+        return false;
+      }
+    },
+    [user, state.available, state.used, state.limit, refundCreditsService, updateState],
+  );
+
+  const checkCredits = useCallback(
+    (required: number): boolean => {
+      return state.available >= required;
+    },
+    [state.available],
+  );
 
   // Initial load
   useEffect(() => {
@@ -182,10 +195,10 @@ export function useCredits(options: CreditsOptions = {}): [CreditsState, Credits
 // Specialized hook for credit checking
 export function useCreditCheck(requiredCredits: number) {
   const [creditsState, creditsControls] = useCredits();
-  
+
   const hasEnoughCredits = creditsState.available >= requiredCredits;
   const creditsNeeded = Math.max(0, requiredCredits - creditsState.available);
-  
+
   return {
     hasEnoughCredits,
     creditsNeeded,
@@ -215,37 +228,39 @@ export function useCreditUsageTracking() {
       success,
       error,
     };
-    
-    setUsageHistory(prev => [usage, ...prev.slice(0, 49)]); // Keep last 50 entries
+
+    setUsageHistory((prev) => [usage, ...prev.slice(0, 49)]); // Keep last 50 entries
   }, []);
 
-  const deductCreditsWithTracking = useCallback(async (amount: number, operation: string): Promise<boolean> => {
-    try {
-      const success = await creditsControls.deductCredits(amount, operation);
-      trackUsage(operation, amount, success);
-      return success;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      trackUsage(operation, amount, false, errorMessage);
-      throw error;
-    }
-  }, [creditsControls, trackUsage]);
+  const deductCreditsWithTracking = useCallback(
+    async (amount: number, operation: string): Promise<boolean> => {
+      try {
+        const success = await creditsControls.deductCredits(amount, operation);
+        trackUsage(operation, amount, success);
+        return success;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        trackUsage(operation, amount, false, errorMessage);
+        throw error;
+      }
+    },
+    [creditsControls, trackUsage],
+  );
 
   const getUsageStats = useCallback(() => {
-    const totalUsed = usageHistory
-      .filter(u => u.success)
-      .reduce((sum, u) => sum + u.amount, 0);
-    
-    const totalFailed = usageHistory
-      .filter(u => !u.success)
-      .reduce((sum, u) => sum + u.amount, 0);
-    
+    const totalUsed = usageHistory.filter((u) => u.success).reduce((sum, u) => sum + u.amount, 0);
+
+    const totalFailed = usageHistory.filter((u) => !u.success).reduce((sum, u) => sum + u.amount, 0);
+
     const operationBreakdown = usageHistory
-      .filter(u => u.success)
-      .reduce((acc, u) => {
-        acc[u.operation] = (acc[u.operation] || 0) + u.amount;
-        return acc;
-      }, {} as Record<string, number>);
+      .filter((u) => u.success)
+      .reduce(
+        (acc, u) => {
+          acc[u.operation] = (acc[u.operation] || 0) + u.amount;
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
 
     return {
       totalUsed,
@@ -264,4 +279,4 @@ export function useCreditUsageTracking() {
     usageHistory,
     getUsageStats,
   };
-} 
+}

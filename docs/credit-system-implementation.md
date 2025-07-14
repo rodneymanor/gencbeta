@@ -37,7 +37,7 @@ import { useUsage } from "@/contexts/usage-context";
 
 export function YourComponent() {
   const { triggerUsageUpdate } = useUsage();
-  
+
   // Your component logic
 }
 ```
@@ -52,7 +52,7 @@ const handleCreditConsumingAction = async () => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${await user.getIdToken()}`,
+        Authorization: `Bearer ${await user.getIdToken()}`,
       },
       body: JSON.stringify(requestData),
     });
@@ -63,7 +63,7 @@ const handleCreditConsumingAction = async () => {
       // ✅ CRITICAL: Trigger usage stats update after successful credit consumption
       console.log("💳 [YourFeature] Triggering usage stats update after credit consumption");
       triggerUsageUpdate();
-      
+
       // Handle success
     }
   } catch (error) {
@@ -84,7 +84,7 @@ import { CreditsService } from "@/lib/credits-service";
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
-  
+
   try {
     // 1. Authenticate user
     const authResult = await authenticateApiKey(request);
@@ -95,27 +95,24 @@ export async function POST(request: NextRequest) {
     const { user } = authResult;
     const userId = user.uid;
     const accountLevel = user.role === "super_admin" || user.role === "coach" ? "pro" : "free";
-    
+
     // 2. Parse request
     const body = await request.json();
-    
+
     // 3. Check if user has enough credits
     const creditCheck = await CreditsService.canPerformAction(
-      userId, 
+      userId,
       "your_operation_type", // e.g., "script_generation", "voice_creation", "video_processing"
-      accountLevel
+      accountLevel,
     );
-    
+
     if (!creditCheck.canPerform) {
-      return NextResponse.json(
-        { error: creditCheck.reason ?? "Insufficient credits" },
-        { status: 402 }
-      );
+      return NextResponse.json({ error: creditCheck.reason ?? "Insufficient credits" }, { status: 402 });
     }
 
     // 4. Perform your feature's main logic
     const result = await performYourFeatureLogic(body);
-    
+
     // 5. ✅ CRITICAL: Deduct credits for successful operation
     await CreditsService.trackUsageAndDeductCredits(
       userId,
@@ -132,20 +129,16 @@ export async function POST(request: NextRequest) {
           inputLength: body.input?.length,
           outputLength: result.output?.length,
         },
-      }
+      },
     );
 
     return NextResponse.json({
       success: true,
       data: result,
     });
-
   } catch (error) {
     console.error(`❌ [YourFeature] Error:`, error);
-    return NextResponse.json(
-      { error: "Operation failed" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Operation failed" }, { status: 500 });
   }
 }
 ```
@@ -155,9 +148,9 @@ export async function POST(request: NextRequest) {
 Define your operation type in `src/types/usage-tracking.ts`:
 
 ```typescript
-export type CreditOperation = 
+export type CreditOperation =
   | "script_generation"
-  | "voice_creation" 
+  | "voice_creation"
   | "video_processing"
   | "chat_refinement"
   | "your_new_operation"; // Add your operation here
@@ -192,7 +185,7 @@ export function CreateVoiceModal() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${await user.getIdToken()}`,
+          Authorization: `Bearer ${await user.getIdToken()}`,
         },
         body: JSON.stringify(voiceData),
       });
@@ -202,7 +195,7 @@ export function CreateVoiceModal() {
       if (response.ok && data.success) {
         // Trigger usage update after successful voice creation
         triggerUsageUpdate();
-        
+
         toast.success("Voice created successfully!");
         onSuccess(data.voice);
       }
@@ -219,39 +212,27 @@ export async function POST(request: NextRequest) {
   // ... authentication and validation
 
   // Check credits
-  const creditCheck = await CreditsService.canPerformAction(
-    userId, 
-    "voice_creation", 
-    accountLevel
-  );
-  
+  const creditCheck = await CreditsService.canPerformAction(userId, "voice_creation", accountLevel);
+
   if (!creditCheck.canPerform) {
-    return NextResponse.json(
-      { error: "Insufficient credits for voice creation" },
-      { status: 402 }
-    );
+    return NextResponse.json({ error: "Insufficient credits for voice creation" }, { status: 402 });
   }
 
   // Create voice
   const voice = await createVoiceLogic(body);
-  
+
   // Deduct credits
-  await CreditsService.trackUsageAndDeductCredits(
-    userId,
-    "voice_creation",
-    accountLevel,
-    {
-      service: "openai",
-      tokensUsed: voice.tokensUsed,
-      responseTime: Date.now() - startTime,
-      success: true,
-      timestamp: new Date().toISOString(),
-      metadata: {
-        voiceName: voice.name,
-        templateCount: voice.templates?.length,
-      },
-    }
-  );
+  await CreditsService.trackUsageAndDeductCredits(userId, "voice_creation", accountLevel, {
+    service: "openai",
+    tokensUsed: voice.tokensUsed,
+    responseTime: Date.now() - startTime,
+    success: true,
+    timestamp: new Date().toISOString(),
+    metadata: {
+      voiceName: voice.name,
+      templateCount: voice.templates?.length,
+    },
+  });
 
   return NextResponse.json({ success: true, voice });
 }
@@ -267,7 +248,7 @@ const handleChatSubmit = async (message: string) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${await user.getIdToken()}`,
+        Authorization: `Bearer ${await user.getIdToken()}`,
       },
       body: JSON.stringify({
         message,
@@ -280,7 +261,7 @@ const handleChatSubmit = async (message: string) => {
     if (response.ok && data.success) {
       // Trigger usage update after successful refinement
       triggerUsageUpdate();
-      
+
       setRefinedScript(data.refinedScript);
     }
   } catch (error) {
@@ -319,7 +300,7 @@ const initialText = usageTracker.textContent;
 await performAction();
 
 // Wait for debounced update (1 second)
-await new Promise(resolve => setTimeout(resolve, 1500));
+await new Promise((resolve) => setTimeout(resolve, 1500));
 
 const updatedText = usageTracker.textContent;
 console.log(`UI updated: ${initialText} → ${updatedText}`);
@@ -330,11 +311,13 @@ console.log(`UI updated: ${initialText} → ${updatedText}`);
 ### Common Issues
 
 1. **Credits not updating in UI**
+
    - ✅ Ensure `triggerUsageUpdate()` is called after successful API response
    - ✅ Check that the API actually deducts credits with `CreditsService.trackUsageAndDeductCredits`
    - ✅ Verify user authentication is working
 
 2. **Credits deducted but operation failed**
+
    - ✅ Only call `trackUsageAndDeductCredits` after successful operation
    - ✅ Use try/catch to prevent credit deduction on errors
 
@@ -359,6 +342,7 @@ console.log(`💳 [YourFeature] Triggering usage stats update`);
 ## Best Practices
 
 ### 1. Credit Check Pattern
+
 Always check credits before performing expensive operations:
 
 ```typescript
@@ -375,6 +359,7 @@ const creditCheck = await CreditsService.canPerformAction(userId, operation, acc
 ```
 
 ### 2. Error Handling
+
 Only deduct credits for successful operations:
 
 ```typescript
@@ -390,6 +375,7 @@ try {
 ```
 
 ### 3. Frontend Updates
+
 Always trigger updates after successful operations:
 
 ```typescript
@@ -409,6 +395,7 @@ if (response.ok) {
 ## Future Enhancements
 
 ### 1. Credit Limits by Feature
+
 ```typescript
 // Add feature-specific limits
 export const FEATURE_LIMITS = {
@@ -419,6 +406,7 @@ export const FEATURE_LIMITS = {
 ```
 
 ### 2. Usage Analytics
+
 ```typescript
 // Track feature usage patterns
 export interface FeatureUsageStats {
@@ -431,6 +419,7 @@ export interface FeatureUsageStats {
 ```
 
 ### 3. Credit Packages
+
 ```typescript
 // Support different credit packages
 export interface CreditPackage {
@@ -450,6 +439,6 @@ The real-time credit system provides:
 ✅ **Accurate Tracking** - Credits update exactly when consumed  
 ✅ **Easy Integration** - Simple pattern for new features  
 ✅ **Resource Efficient** - No wasteful background polling  
-✅ **Scalable Architecture** - Centralized state management  
+✅ **Scalable Architecture** - Centralized state management
 
-Follow this guide to integrate the credit system with any new feature that consumes user credits. 
+Follow this guide to integrate the credit system with any new feature that consumes user credits.

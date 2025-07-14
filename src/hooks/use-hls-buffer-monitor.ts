@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef } from "react";
 
 interface HLSBufferMonitorProps {
   videoRef: React.RefObject<HTMLIFrameElement>;
@@ -21,7 +21,7 @@ export const useHLSBufferMonitor = ({ videoRef, isPlaying, onBufferIssue }: HLSB
       const iframeDoc = iframe.contentDocument ?? iframe.contentWindow?.document;
       if (!iframeDoc) return;
 
-      const videoElement = iframeDoc.querySelector('video');
+      const videoElement = iframeDoc.querySelector("video");
       if (!videoElement) return;
 
       const currentTime = videoElement.currentTime;
@@ -29,11 +29,12 @@ export const useHLSBufferMonitor = ({ videoRef, isPlaying, onBufferIssue }: HLSB
 
       // If currentTime hasn't progressed for 3 seconds while playing
       if (timeDiff < 0.1 && isPlaying) {
-        setStallCount(prev => prev + 1);
-        
-        if (stallCount >= 3) { // 3 consecutive stalls
+        setStallCount((prev) => prev + 1);
+
+        if (stallCount >= 3) {
+          // 3 consecutive stalls
           console.warn("🚨 [HLS Monitor] Playback stalled - no time progression");
-          onBufferIssue('stalled');
+          onBufferIssue("stalled");
           setStallCount(0);
         }
       } else {
@@ -56,7 +57,7 @@ export const useHLSBufferMonitor = ({ videoRef, isPlaying, onBufferIssue }: HLSB
       const iframeDoc = iframe.contentDocument ?? iframe.contentWindow?.document;
       if (!iframeDoc) return;
 
-      const videoElement = iframeDoc.querySelector('video');
+      const videoElement = iframeDoc.querySelector("video");
       if (!videoElement) return;
 
       const buffered = videoElement.buffered;
@@ -66,16 +67,15 @@ export const useHLSBufferMonitor = ({ videoRef, isPlaying, onBufferIssue }: HLSB
       for (let i = 0; i < buffered.length; i++) {
         const start = buffered.start(i);
         const end = buffered.end(i);
-        
+
         const inRange = currentTime >= start && currentTime < end;
         const isInBufferGap = !inRange;
 
         if (isInBufferGap && isPlaying) {
           console.warn("🚨 [HLS Monitor] Buffer gap detected at:", currentTime);
-          onBufferIssue('buffer_gap');
+          onBufferIssue("buffer_gap");
         }
       }
-
     } catch {
       console.log("🔍 [HLS Monitor] Cannot access buffer info due to CORS");
     }
@@ -90,27 +90,27 @@ export const useHLSBufferMonitor = ({ videoRef, isPlaying, onBufferIssue }: HLSB
       const iframeDoc = iframe.contentDocument ?? iframe.contentWindow?.document;
       if (!iframeDoc) return;
 
-      const videoElement = iframeDoc.querySelector('video');
+      const videoElement = iframeDoc.querySelector("video");
       if (!videoElement) return;
 
       // Event listeners for various stall conditions
       const events = {
-        'stalled': () => {
+        stalled: () => {
           console.warn("🚨 [HLS Monitor] Video stalled event fired");
-          onBufferIssue('stalled');
+          onBufferIssue("stalled");
         },
-        'waiting': () => {
+        waiting: () => {
           console.warn("🚨 [HLS Monitor] Video waiting event fired");
-          onBufferIssue('waiting');
+          onBufferIssue("waiting");
         },
-        'suspend': () => {
+        suspend: () => {
           console.warn("🚨 [HLS Monitor] Video suspend event fired");
-          onBufferIssue('suspend');
+          onBufferIssue("suspend");
         },
-        'error': (event: Event) => {
+        error: (event: Event) => {
           console.error("🚨 [HLS Monitor] Video error event:", event);
-          onBufferIssue('error');
-        }
+          onBufferIssue("error");
+        },
       };
 
       Object.entries(events).forEach(([eventType, handler]) => {
@@ -133,13 +133,13 @@ export const useHLSBufferMonitor = ({ videoRef, isPlaying, onBufferIssue }: HLSB
     if (isPlaying) {
       // Check playback progress every 2 seconds
       progressCheckInterval.current = setInterval(checkPlaybackProgress, 2000);
-      
+
       // Check buffer health every 1 second
       bufferCheckInterval.current = setInterval(checkBufferHealth, 1000);
-      
+
       // Setup media event listeners
       const cleanup = setupMediaEventListeners();
-      
+
       return () => {
         if (progressCheckInterval.current) {
           clearInterval(progressCheckInterval.current);
@@ -160,6 +160,6 @@ export const useHLSBufferMonitor = ({ videoRef, isPlaying, onBufferIssue }: HLSB
 
   return {
     lastCurrentTime,
-    stallCount
+    stallCount,
   };
-}; 
+};

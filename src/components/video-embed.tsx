@@ -44,7 +44,7 @@ const createPreloadIframe = (url: string, videoId: string, isFirefox: boolean) =
   }
 
   const preloadFrame = document.createElement("iframe");
-  preloadFrame.src = buildIframeSrc(url, { metrics: 'false', preload: 'true', autoplay: 'false' });
+  preloadFrame.src = buildIframeSrc(url, { metrics: "false", preload: "true", autoplay: "false" });
   preloadFrame.style.display = "none";
   preloadFrame.setAttribute("data-preload", "true");
   preloadFrame.setAttribute("data-video-id", videoId);
@@ -55,18 +55,14 @@ const createPreloadIframe = (url: string, videoId: string, isFirefox: boolean) =
 const renderErrorOverlay = (isRecovering: boolean, onRetry: () => void) => (
   <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/60">
     <div className="text-center text-white">
-      <AlertTriangle className="mx-auto h-8 w-8 mb-2" />
-      <div className="text-sm mb-3">Video playback error</div>
+      <AlertTriangle className="mx-auto mb-2 h-8 w-8" />
+      <div className="mb-3 text-sm">Video playback error</div>
       <button
         onClick={onRetry}
         disabled={isRecovering}
-        className="flex items-center gap-2 mx-auto px-4 py-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors"
+        className="mx-auto flex items-center gap-2 rounded-lg bg-white/20 px-4 py-2 transition-colors hover:bg-white/30"
       >
-        {isRecovering ? (
-          <RefreshCw className="h-4 w-4 animate-spin" />
-        ) : (
-          <RefreshCw className="h-4 w-4" />
-        )}
+        {isRecovering ? <RefreshCw className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
         {isRecovering ? "Recovering..." : "Retry"}
       </button>
     </div>
@@ -78,10 +74,8 @@ const renderFirefoxIndicator = (isFirefox: boolean) => {
   if (!isFirefox) return null;
 
   return (
-    <div className="absolute bottom-2 right-2 z-10">
-      <div className="rounded-full bg-blue-500/80 px-2 py-1 text-xs text-white">
-        Firefox Mode
-      </div>
+    <div className="absolute right-2 bottom-2 z-10">
+      <div className="rounded-full bg-blue-500/80 px-2 py-1 text-xs text-white">Firefox Mode</div>
     </div>
   );
 };
@@ -92,17 +86,17 @@ const handleVideoPlayLogic = async (
   setCurrentlyPlaying: (id: string) => void,
   onPlay?: () => void,
   isFirefox?: boolean,
-  forceStopAllVideos?: () => void
+  forceStopAllVideos?: () => void,
 ) => {
   console.log("🎬 [VideoEmbed] Starting video:", videoId.substring(0, 50) + "...");
-  
+
   // Direct callback execution
   if (onPlay) {
     onPlay();
   } else {
     setCurrentlyPlaying(videoId);
   }
-  
+
   // Firefox handling - run after play, not during
   if (isFirefox && forceStopAllVideos) {
     console.log("🦊 [VideoEmbed] Firefox - cleaning up other videos");
@@ -112,7 +106,15 @@ const handleVideoPlayLogic = async (
 
 // BUNNY.NET ONLY VIDEO EMBED - Rejects all non-Bunny URLs
 export const VideoEmbed = memo<VideoEmbedProps>(
-  ({ url, className = "", videoId: externalVideoId, isPlaying: externalIsPlaying, onPlay, preload = false, thumbnailUrl }) => {
+  ({
+    url,
+    className = "",
+    videoId: externalVideoId,
+    isPlaying: externalIsPlaying,
+    onPlay,
+    preload = false,
+    thumbnailUrl,
+  }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [iframeKey, setIframeKey] = useState(0); // Make key mutable for recovery
@@ -132,19 +134,19 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     const isCurrentlyPlaying = externalIsPlaying ?? isPlaying;
 
     // Firefox detection - disable preloading for Firefox
-    const isFirefox = useMemo(() => navigator.userAgent.includes('Firefox'), []);
+    const isFirefox = useMemo(() => navigator.userAgent.includes("Firefox"), []);
     const effectivePreload = isFirefox ? false : preload;
 
     // Enhanced HLS monitoring and recovery
     const { attemptRecovery, recoveryAttempts, maxAttempts } = useHLSRecovery({
       videoRef: iframeRef,
       videoId,
-      url
+      url,
     });
 
     const { bufferHealth } = usePreemptiveBufferManagement({
       videoRef: iframeRef,
-      isPlaying: isCurrentlyPlaying
+      isPlaying: isCurrentlyPlaying,
     });
 
     // Firefox video manager for handling Firefox-specific issues
@@ -154,53 +156,59 @@ export const VideoEmbed = memo<VideoEmbedProps>(
       onVideoStop: () => {
         console.log("🦊 [VideoEmbed] Firefox video stop callback triggered");
         setIsPlaying(false);
-      }
+      },
     });
 
     // Handle HLS recovery by recreating iframe
     const handleHLSRecovery = useCallback(() => {
       console.log("🔄 [VideoEmbed] Force recreating iframe for HLS recovery");
-      setIframeKey(prev => prev + 1);
+      setIframeKey((prev) => prev + 1);
       setHasError(false);
       setIsRecovering(false);
     }, []);
 
     // Enhanced buffer issue handler
-    const handleBufferIssue = useCallback((issueType: string) => {
-      console.warn(`🚨 [VideoEmbed] Buffer issue detected: ${issueType}`);
-      setHasError(true);
+    const handleBufferIssue = useCallback(
+      (issueType: string) => {
+        console.warn(`🚨 [VideoEmbed] Buffer issue detected: ${issueType}`);
+        setHasError(true);
 
-      if (recoveryAttempts >= maxAttempts) {
-        console.error("❌ [VideoEmbed] Max recovery attempts reached");
-        return;
-      }
-
-      setIsRecovering(true);
-      attemptRecovery(issueType).then(result => {
-        if (result === 'recreate_iframe') {
-          handleHLSRecovery();
+        if (recoveryAttempts >= maxAttempts) {
+          console.error("❌ [VideoEmbed] Max recovery attempts reached");
+          return;
         }
-        setIsRecovering(false);
-      });
-    }, [recoveryAttempts, maxAttempts, attemptRecovery, handleHLSRecovery]);
+
+        setIsRecovering(true);
+        attemptRecovery(issueType).then((result) => {
+          if (result === "recreate_iframe") {
+            handleHLSRecovery();
+          }
+          setIsRecovering(false);
+        });
+      },
+      [recoveryAttempts, maxAttempts, attemptRecovery, handleHLSRecovery],
+    );
 
     // Use the enhanced monitoring hook
     useHLSBufferMonitor({
       videoRef: iframeRef,
       isPlaying: isCurrentlyPlaying,
-      onBufferIssue: handleBufferIssue
+      onBufferIssue: handleBufferIssue,
     });
 
     // Firefox-aware iframe parameters
-    const getIframeParams = useCallback((playing: boolean): Record<string, string> => {
-      if (playing) {
-        return { metrics: 'false', autoplay: 'true', muted: 'true', preload: 'true' };
-      }
-      // For non-playing videos, explicitly set autoplay=false and preload=none for Firefox
-      return isFirefox 
-        ? { metrics: 'false', autoplay: 'false', preload: 'none' }
-        : { metrics: 'false', autoplay: 'false', preload: 'true' };
-    }, [isFirefox]);
+    const getIframeParams = useCallback(
+      (playing: boolean): Record<string, string> => {
+        if (playing) {
+          return { metrics: "false", autoplay: "true", muted: "true", preload: "true" };
+        }
+        // For non-playing videos, explicitly set autoplay=false and preload=none for Firefox
+        return isFirefox
+          ? { metrics: "false", autoplay: "false", preload: "none" }
+          : { metrics: "false", autoplay: "false", preload: "true" };
+      },
+      [isFirefox],
+    );
 
     // Dynamic iframe src based on playing state
     const iframeSrc = useMemo(() => {
@@ -250,11 +258,11 @@ export const VideoEmbed = memo<VideoEmbedProps>(
     const handlePlay = useCallback(async () => {
       if (!isCurrentlyPlaying && videoId) {
         console.log("🎬 [VideoEmbed] Starting video play:", videoId);
-        
+
         // Set loading state immediately
         setIsLoading(true);
         setHasError(false);
-        
+
         try {
           // Direct state update - no complex logic
           if (onPlay) {
@@ -262,18 +270,17 @@ export const VideoEmbed = memo<VideoEmbedProps>(
           } else {
             setCurrentlyPlaying(videoId);
           }
-          
+
           // Firefox handling - but don't let it block play
           if (isFirefox && forceStopAllVideos) {
             console.log("🦊 [VideoEmbed] Firefox - stopping other videos");
             // Run this after our video starts, not before
             setTimeout(() => forceStopAllVideos(), 100);
           }
-          
+
           // Immediate state update - no 800ms delay
           setIsPlaying(true);
           setIsLoading(false);
-          
         } catch (error) {
           console.error("❌ [VideoEmbed] Play failed:", error);
           setHasError(true);
@@ -328,7 +335,7 @@ export const VideoEmbed = memo<VideoEmbedProps>(
             />
           ) : (
             <img
-              src={thumbnailUrl ?? ''}
+              src={thumbnailUrl ?? ""}
               alt="Video thumbnail"
               className="absolute inset-0 h-full w-full object-cover"
             />
@@ -359,12 +366,14 @@ export const VideoEmbed = memo<VideoEmbedProps>(
           {/* Preload indicator removed per user request */}
 
           {/* Buffer health indicator */}
-          {isCurrentlyPlaying && bufferHealth !== 'healthy' && (
+          {isCurrentlyPlaying && bufferHealth !== "healthy" && (
             <div className="absolute top-2 left-2 z-10">
-              <div className={`rounded-full px-2 py-1 text-xs text-white ${
-                bufferHealth === 'critical' ? 'bg-red-500/80' : 'bg-yellow-500/80'
-              }`}>
-                {bufferHealth === 'critical' ? 'Low Buffer' : 'Buffer Low'}
+              <div
+                className={`rounded-full px-2 py-1 text-xs text-white ${
+                  bufferHealth === "critical" ? "bg-red-500/80" : "bg-yellow-500/80"
+                }`}
+              >
+                {bufferHealth === "critical" ? "Low Buffer" : "Buffer Low"}
               </div>
             </div>
           )}

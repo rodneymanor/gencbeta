@@ -1,15 +1,17 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+
 import { Clock, RefreshCw, CheckCircle, XCircle, Eye } from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/contexts/auth-context";
-import { VideoProcessingStatus } from "./video-processing-status";
 import type { VideoProcessingJob } from "@/types/video-processing";
+
+import { VideoProcessingStatus } from "./video-processing-status";
 
 interface ProcessingQueueProps {
   onVideoAdded?: () => void;

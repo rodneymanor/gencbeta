@@ -7,8 +7,8 @@ import {
   extractAdditionalMetadata as extractInstagramAdditional,
 } from "@/lib/instagram-downloader";
 import { getTikTokMetrics, getTikTokAdditionalMetadata } from "@/lib/tiktok-downloader";
-import { extractInstagramShortcode } from "@/lib/video-processing-helpers";
 import { buildInternalUrl } from "@/lib/utils/url";
+import { extractInstagramShortcode } from "@/lib/video-processing-helpers";
 
 interface VideoDoc {
   id: string;
@@ -23,15 +23,11 @@ interface VideoDoc {
 
 // Rate limiting and delay utilities
 async function delayBetweenRequests(ms = 6000) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 // Retry logic with exponential backoff
-async function retryWithBackoff<T>(
-  fn: () => Promise<T>,
-  maxRetries = 3,
-  baseDelay = 1000
-): Promise<T> {
+async function retryWithBackoff<T>(fn: () => Promise<T>, maxRetries = 3, baseDelay = 1000): Promise<T> {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       return await fn();
@@ -39,20 +35,20 @@ async function retryWithBackoff<T>(
       if (attempt === maxRetries) {
         throw error;
       }
-      
+
       const delay = baseDelay * Math.pow(2, attempt - 1);
       console.log(`⚠️ [INSIGHTS] Attempt ${attempt} failed, retrying in ${delay}ms...`);
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
-  throw new Error('Max retries exceeded');
+  throw new Error("Max retries exceeded");
 }
 
 async function analyzeVideo(url: string) {
   try {
     // Add delay before API call to respect rate limits
     await delayBetweenRequests(6000);
-    
+
     const response = await fetch(buildInternalUrl("/api/video/analyze-complete"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -79,12 +75,12 @@ async function fetchMetricsAndExtras(video: VideoDoc) {
   if (!video.originalUrl) return { metrics: undefined, extras: undefined };
 
   const platform = (video.platform ?? "").toLowerCase();
-  
+
   try {
     if (platform === "tiktok") {
       // Add delay before TikTok API calls
       await delayBetweenRequests(2000);
-      
+
       const [metrics, extras] = await Promise.all([
         retryWithBackoff(() => getTikTokMetrics(video.originalUrl!)),
         retryWithBackoff(() => getTikTokAdditionalMetadata(video.originalUrl!)),
@@ -95,13 +91,13 @@ async function fetchMetricsAndExtras(video: VideoDoc) {
     if (platform === "instagram") {
       // Add delay before Instagram API calls
       await delayBetweenRequests(3000);
-      
+
       const shortcode = extractInstagramShortcode(video.originalUrl);
       if (!shortcode) return { metrics: undefined, extras: undefined };
-      
+
       const metadata = await retryWithBackoff(() => fetchInstagramMetadata(shortcode));
       if (!metadata) return { metrics: undefined, extras: undefined };
-      
+
       const metrics = extractInstagramMetrics(metadata);
       const extras = extractInstagramAdditional(metadata);
       return { metrics, extras };
@@ -149,12 +145,11 @@ export async function POST() {
 
       // More robust checking for empty/missing values
       const needsTranscript = !vid.transcript || vid.transcript.trim().length < 20;
-      
+
       // Better author checking
       const currentAuthorRaw = (vid.contentMetadata?.author as string | undefined) ?? "";
       const currentAuthor = currentAuthorRaw.trim().toLowerCase();
-      const needsAuthorUpdate = !currentAuthor || 
-        ['unknown', 'author', '', 'n/a'].includes(currentAuthor);
+      const needsAuthorUpdate = !currentAuthor || ["unknown", "author", "", "n/a"].includes(currentAuthor);
 
       // Better saves checking
       const currentSaves = vid.metrics?.saves as number | undefined;
@@ -193,7 +188,7 @@ export async function POST() {
 
         // Fetch metrics & extra metadata if missing or incomplete
         const { metrics, extras } = await fetchMetricsAndExtras(vid);
-        
+
         // Merge metrics (focus on saves)
         if (metrics) {
           const currentMetrics = vid.metrics ? { ...vid.metrics } : {};
@@ -216,26 +211,25 @@ export async function POST() {
           // Ensure contentMeta object exists if we need to add fields
           if (!contentMeta) contentMeta = { ...vid.contentMetadata };
 
-                  if (extras.description && !contentMeta.description) {
-          contentMeta.description = extras.description;
-          log(`  ✅ Added description`);
-        }
-        const currentAuthor = (contentMeta.author as string | undefined)?.toLowerCase() ?? "";
-        const needsAuthorUpdate = !currentAuthor || 
-          ['unknown', 'author', '', 'n/a'].includes(currentAuthor);
+          if (extras.description && !contentMeta.description) {
+            contentMeta.description = extras.description;
+            log(`  ✅ Added description`);
+          }
+          const currentAuthor = (contentMeta.author as string | undefined)?.toLowerCase() ?? "";
+          const needsAuthorUpdate = !currentAuthor || ["unknown", "author", "", "n/a"].includes(currentAuthor);
 
-        if (extras.author && needsAuthorUpdate) {
-          contentMeta.author = extras.author;
-          log(`  ✅ Updated author: ${extras.author}`);
-        }
-        if (extras.hashtags && !contentMeta.hashtags) {
-          contentMeta.hashtags = extras.hashtags;
-          log(`  ✅ Added hashtags (${extras.hashtags.length})`);
-        }
-        if (extras.duration && !vid.duration) {
-          updateFields.duration = extras.duration;
-          log(`  ✅ Added duration: ${extras.duration}s`);
-        }
+          if (extras.author && needsAuthorUpdate) {
+            contentMeta.author = extras.author;
+            log(`  ✅ Updated author: ${extras.author}`);
+          }
+          if (extras.hashtags && !contentMeta.hashtags) {
+            contentMeta.hashtags = extras.hashtags;
+            log(`  ✅ Added hashtags (${extras.hashtags.length})`);
+          }
+          if (extras.duration && !vid.duration) {
+            updateFields.duration = extras.duration;
+            log(`  ✅ Added duration: ${extras.duration}s`);
+          }
         }
       } catch (error) {
         log(`  ⚠️ Error processing video ${vid.id}: ${error instanceof Error ? error.message : String(error)}`);

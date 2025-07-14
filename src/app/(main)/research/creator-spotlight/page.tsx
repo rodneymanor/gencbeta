@@ -1,23 +1,24 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Plus, Search, Users } from 'lucide-react';
+import React, { useState, useEffect } from "react";
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { useRouter, useSearchParams } from "next/navigation";
 
-import { AddCreatorDialog } from './_components/add-creator-dialog';
-import { CreatorGrid } from './_components/creator-grid';
-import { CreatorDetailView } from './_components/creator-detail-view';
-import { useCreators, useCreatorVideos } from './_hooks/use-creators';
+import { Plus, Search, Users } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+import { AddCreatorDialog } from "./_components/add-creator-dialog";
+import { CreatorDetailView } from "./_components/creator-detail-view";
+import { CreatorGrid } from "./_components/creator-grid";
+import { useCreators, useCreatorVideos } from "./_hooks/use-creators";
 
 interface CreatorProfile {
   id: string;
   username: string;
   displayName?: string;
-  platform: 'tiktok' | 'instagram';
+  platform: "tiktok" | "instagram";
   profileImageUrl: string;
   bio?: string;
   website?: string;
@@ -35,31 +36,27 @@ interface CreatorProfile {
   updatedAt?: string;
 }
 
-
-
 export default function CreatorSpotlightPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const selectedCreatorId = searchParams.get('creator');
+  const selectedCreatorId = searchParams.get("creator");
 
   const { creators, loading, loadCreators } = useCreators();
   const { creatorVideos, loadingVideos, loadCreatorVideos, clearVideos } = useCreatorVideos();
   const [selectedCreator, setSelectedCreator] = useState<CreatorProfile | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [platformFilter, setPlatformFilter] = useState<'all' | 'tiktok' | 'instagram'>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [platformFilter, setPlatformFilter] = useState<"all" | "tiktok" | "instagram">("all");
 
   // Handle creator selection from URL
   useEffect(() => {
     if (selectedCreatorId && creators.length > 0) {
-      const creator = creators.find(c => c.id === selectedCreatorId);
+      const creator = creators.find((c) => c.id === selectedCreatorId);
       if (creator) {
         setSelectedCreator(creator);
         loadCreatorVideos(creator);
       }
     }
-  }, [selectedCreatorId, creators, loadCreatorVideos]);
-
-
+  }, [selectedCreatorId, creators]); // Removed loadCreatorVideos to prevent infinite loop
 
   const handleCreatorClick = (creator: CreatorProfile) => {
     setSelectedCreator(creator);
@@ -70,13 +67,14 @@ export default function CreatorSpotlightPage() {
   const handleBackToGrid = () => {
     setSelectedCreator(null);
     clearVideos();
-    router.push('/research/creator-spotlight');
+    router.push("/research/creator-spotlight");
   };
 
-  const filteredCreators = creators.filter(creator => {
-    const matchesSearch = creator.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         creator.displayName?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesPlatform = platformFilter === 'all' || creator.platform === platformFilter;
+  const filteredCreators = creators.filter((creator) => {
+    const matchesSearch =
+      creator.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      creator.displayName?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesPlatform = platformFilter === "all" || creator.platform === platformFilter;
     return matchesSearch && matchesPlatform;
   });
 
@@ -92,15 +90,13 @@ export default function CreatorSpotlightPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-6">
+    <div className="container mx-auto space-y-6 px-4 py-6">
       {/* Header */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">Creator Spotlight</h1>
-            <p className="text-muted-foreground">
-              Discover and analyze top creators from TikTok and Instagram
-            </p>
+            <p className="text-muted-foreground">Discover and analyze top creators from TikTok and Instagram</p>
           </div>
           <AddCreatorDialog onCreatorAdded={loadCreators}>
             <Button className="flex items-center gap-2">
@@ -111,9 +107,9 @@ export default function CreatorSpotlightPage() {
         </div>
 
         {/* Search and Filter */}
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
             <Input
               placeholder="Search creators..."
               value={searchTerm}
@@ -123,25 +119,25 @@ export default function CreatorSpotlightPage() {
           </div>
           <div className="flex gap-2">
             <Button
-              variant={platformFilter === 'all' ? 'default' : 'outline'}
+              variant={platformFilter === "all" ? "default" : "outline"}
               size="sm"
-              onClick={() => setPlatformFilter('all')}
+              onClick={() => setPlatformFilter("all")}
             >
               All
             </Button>
             <Button
-              variant={platformFilter === 'tiktok' ? 'default' : 'outline'}
+              variant={platformFilter === "tiktok" ? "default" : "outline"}
               size="sm"
-              onClick={() => setPlatformFilter('tiktok')}
-              className="bg-[#FF0050] hover:bg-[#E6004C] text-white"
+              onClick={() => setPlatformFilter("tiktok")}
+              className="bg-[#FF0050] text-white hover:bg-[#E6004C]"
             >
               TikTok
             </Button>
             <Button
-              variant={platformFilter === 'instagram' ? 'default' : 'outline'}
+              variant={platformFilter === "instagram" ? "default" : "outline"}
               size="sm"
-              onClick={() => setPlatformFilter('instagram')}
-              className="bg-[#E4405F] hover:bg-[#D6336C] text-white"
+              onClick={() => setPlatformFilter("instagram")}
+              className="bg-[#E4405F] text-white hover:bg-[#D6336C]"
             >
               Instagram
             </Button>
@@ -149,34 +145,26 @@ export default function CreatorSpotlightPage() {
         </div>
       </div>
 
-            {/* Creators Grid */}
-      <CreatorGrid
-        creators={filteredCreators}
-        loading={loading}
-        onCreatorClick={handleCreatorClick}
-      />
+      {/* Creators Grid */}
+      <CreatorGrid creators={filteredCreators} loading={loading} onCreatorClick={handleCreatorClick} />
 
       {!loading && filteredCreators.length === 0 && (
-        <div className="text-center py-12">
-          <div className="max-w-md mx-auto space-y-4">
+        <div className="py-12 text-center">
+          <div className="mx-auto max-w-md space-y-4">
             <div className="flex justify-center">
-              <Users className="h-12 w-12 text-muted-foreground" />
+              <Users className="text-muted-foreground h-12 w-12" />
             </div>
             <div className="space-y-2">
               <h3 className="text-lg font-semibold">
-                {searchTerm || platformFilter !== 'all' 
-                  ? 'No creators found'
-                  : 'No creators available yet'
-                }
+                {searchTerm || platformFilter !== "all" ? "No creators found" : "No creators available yet"}
               </h3>
               <p className="text-muted-foreground">
-                {searchTerm || platformFilter !== 'all' 
-                  ? 'Try adjusting your search or filter criteria.'
-                  : 'Add your first creator to get started with content analysis.'
-                }
+                {searchTerm || platformFilter !== "all"
+                  ? "Try adjusting your search or filter criteria."
+                  : "Add your first creator to get started with content analysis."}
               </p>
             </div>
-            {!searchTerm && platformFilter === 'all' && (
+            {!searchTerm && platformFilter === "all" && (
               <AddCreatorDialog onCreatorAdded={loadCreators}>
                 <Button className="mt-4">
                   <Plus className="mr-2 h-4 w-4" />
@@ -189,4 +177,4 @@ export default function CreatorSpotlightPage() {
       )}
     </div>
   );
-} 
+}

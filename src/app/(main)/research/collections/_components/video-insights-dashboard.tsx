@@ -1,7 +1,7 @@
 "use client";
 
-import { VideoInsightsModalRedesigned } from "./video-insights-modal-redesigned";
 import type { VideoWithPlayer } from "./collections-helpers";
+import { VideoInsightsModalRedesigned } from "./video-insights-modal-redesigned";
 
 interface VideoInsightsDashboardProps {
   video: VideoWithPlayer;
@@ -9,9 +9,5 @@ interface VideoInsightsDashboardProps {
 }
 
 export function VideoInsightsDashboard({ video, children }: VideoInsightsDashboardProps) {
-  return (
-    <VideoInsightsModalRedesigned video={video}>
-      {children}
-    </VideoInsightsModalRedesigned>
-  );
-} 
+  return <VideoInsightsModalRedesigned video={video}>{children}</VideoInsightsModalRedesigned>;
+}

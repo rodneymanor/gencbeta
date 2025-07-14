@@ -1,17 +1,18 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { SafeImage } from '@/components/ui/safe-image';
-import { cn } from '@/lib/utils';
+import React from "react";
+
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { SafeImage } from "@/components/ui/safe-image";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 interface CreatorProfile {
   id: string;
   username: string;
   displayName?: string;
-  platform: 'tiktok' | 'instagram';
+  platform: "tiktok" | "instagram";
   profileImageUrl: string;
   bio?: string;
   website?: string;
@@ -38,14 +39,14 @@ interface CreatorGridProps {
 export function CreatorGrid({ creators, loading, onCreatorClick }: CreatorGridProps) {
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }, (_, i) => (
           <Card key={i} className="overflow-hidden">
             <CardContent className="p-0">
-              <div className="p-6 space-y-4">
+              <div className="space-y-4 p-6">
                 <div className="flex items-center gap-4">
                   <Skeleton className="h-16 w-16 rounded-full" />
-                  <div className="space-y-2 flex-1">
+                  <div className="flex-1 space-y-2">
                     <Skeleton className="h-4 w-24" />
                     <Skeleton className="h-3 w-32" />
                   </div>
@@ -61,15 +62,15 @@ export function CreatorGrid({ creators, loading, onCreatorClick }: CreatorGridPr
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {creators.map((creator) => (
         <Card
           key={creator.id}
-          className="overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02]"
+          className="cursor-pointer overflow-hidden transition-all duration-200 hover:scale-[1.02] hover:shadow-lg"
           onClick={() => onCreatorClick(creator)}
         >
           <CardContent className="p-0">
-            <div className="p-6 space-y-4">
+            <div className="space-y-4 p-6">
               <div className="flex items-center gap-4">
                 <div className="relative">
                   <SafeImage
@@ -84,47 +85,39 @@ export function CreatorGrid({ creators, loading, onCreatorClick }: CreatorGridPr
                   <Badge
                     variant="outline"
                     className={cn(
-                      "absolute -bottom-1 -right-1 text-xs capitalize",
-                      creator.platform === 'tiktok' && "bg-[#FF0050] text-white border-[#FF0050]",
-                      creator.platform === 'instagram' && "bg-[#E4405F] text-white border-[#E4405F]"
+                      "absolute -right-1 -bottom-1 text-xs capitalize",
+                      creator.platform === "tiktok" && "border-[#FF0050] bg-[#FF0050] text-white",
+                      creator.platform === "instagram" && "border-[#E4405F] bg-[#E4405F] text-white",
                     )}
                   >
                     {creator.platform}
                   </Badge>
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-semibold truncate">
-                      {creator.displayName ?? creator.username}
-                    </h3>
+                    <h3 className="truncate font-semibold">{creator.displayName ?? creator.username}</h3>
                     {creator.isVerified && (
                       <Badge variant="outline" className="text-xs">
                         ✓
                       </Badge>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground truncate">
-                    @{creator.username}
-                  </p>
+                  <p className="text-muted-foreground truncate text-sm">@{creator.username}</p>
                 </div>
               </div>
-              
-              {creator.bio && (
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {creator.bio}
-                </p>
-              )}
-              
+
+              {creator.bio && <p className="text-muted-foreground line-clamp-2 text-sm">{creator.bio}</p>}
+
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-4">
                   <span className="text-muted-foreground">
-                    <span className="font-semibold text-foreground">
-                      {creator.followersCount >= 1000000 
+                    <span className="text-foreground font-semibold">
+                      {creator.followersCount >= 1000000
                         ? `${(creator.followersCount / 1000000).toFixed(1)}M`
                         : creator.followersCount >= 1000
-                        ? `${(creator.followersCount / 1000).toFixed(1)}K`
-                        : creator.followersCount
-                      } followers
+                          ? `${(creator.followersCount / 1000).toFixed(1)}K`
+                          : creator.followersCount}{" "}
+                      followers
                     </span>
                   </span>
                 </div>
@@ -140,4 +133,4 @@ export function CreatorGrid({ creators, loading, onCreatorClick }: CreatorGridPr
       ))}
     </div>
   );
-} 
+}

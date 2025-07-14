@@ -1,25 +1,20 @@
 import type { StorybookConfig } from "@storybook/nextjs-vite";
 
 const config: StorybookConfig = {
-  "stories": [
-    "../src/**/*.mdx",
-    "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"
-  ],
-  "addons": [
+  stories: ["../src/**/*.mdx", "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
+  addons: [
     "@chromatic-com/storybook",
     "@storybook/addon-docs",
     "@storybook/addon-onboarding",
     "@storybook/addon-a11y",
-    "@storybook/addon-vitest"
+    "@storybook/addon-vitest",
   ],
-  "framework": {
-    "name": "@storybook/nextjs-vite",
-    "options": {}
+  framework: {
+    name: "@storybook/nextjs-vite",
+    options: {},
   },
-  "staticDirs": [
-    "../public"
-  ],
-  "webpackFinal": async (config) => {
+  staticDirs: ["../public"],
+  webpackFinal: async (config) => {
     // Ensure aliases work in Storybook
     if (config.resolve) {
       config.resolve.alias = {
@@ -39,7 +34,7 @@ const config: StorybookConfig = {
     }
     return config;
   },
-  "viteFinal": async (config) => {
+  viteFinal: async (config) => {
     // Ensure aliases work in Vite
     if (config.resolve) {
       config.resolve.alias = {

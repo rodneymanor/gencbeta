@@ -4,7 +4,9 @@
  */
 
 import { createHash } from "crypto";
+
 import { NextResponse } from "next/server";
+
 import { getAdminDb, isAdminInitialized } from "@/lib/firebase-admin";
 import { authenticateWithFirebaseToken } from "@/lib/firebase-auth-helpers";
 import { UserManagementAdminService } from "@/lib/user-management-admin";
@@ -274,31 +276,25 @@ export class ApiKeyAuthService {
    */
   static async authenticateRequest(request: Request): Promise<ApiKeyValidationResult | NextResponse> {
     const apiKey = this.extractApiKey(request);
-    
+
     if (!apiKey) {
-      return NextResponse.json(
-        { error: "API key required" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "API key required" }, { status: 401 });
     }
 
     const validationResult = await this.validateApiKey(apiKey);
-    
+
     if (!validationResult) {
-      return NextResponse.json(
-        { error: "Invalid API key" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Invalid API key" }, { status: 401 });
     }
 
     if (!validationResult.rateLimitResult.allowed) {
       return NextResponse.json(
-        { 
+        {
           error: "Rate limit exceeded",
           details: validationResult.rateLimitResult.reason,
           resetTime: validationResult.rateLimitResult.resetTime,
         },
-        { status: 429 }
+        { status: 429 },
       );
     }
 
@@ -313,22 +309,19 @@ export async function authenticateWithApiKey(
   apiKey: string,
 ): Promise<{ user: AuthenticatedUser; rateLimitResult: RateLimitResult } | NextResponse> {
   const validationResult = await ApiKeyAuthService.validateApiKey(apiKey);
-  
+
   if (!validationResult) {
-    return NextResponse.json(
-      { error: "Invalid API key" },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "Invalid API key" }, { status: 401 });
   }
 
   if (!validationResult.rateLimitResult.allowed) {
     return NextResponse.json(
-      { 
+      {
         error: "Rate limit exceeded",
         details: validationResult.rateLimitResult.reason,
         resetTime: validationResult.rateLimitResult.resetTime,
       },
-      { status: 429 }
+      { status: 429 },
     );
   }
 
@@ -342,4 +335,4 @@ export async function authenticateApiKey(
   request: Request,
 ): Promise<{ user: AuthenticatedUser; rateLimitResult: RateLimitResult } | NextResponse> {
   return ApiKeyAuthService.authenticateRequest(request);
-} 
+}

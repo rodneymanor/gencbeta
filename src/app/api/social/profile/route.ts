@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { authenticateApiKey } from "@/lib/api-key-auth";
+
 import { SocialProfileService } from "@/core/social/profile-service";
+import { authenticateApiKey } from "@/lib/api-key-auth";
 
 interface ProfileRequest {
   url: string;
@@ -18,7 +19,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body: ProfileRequest = await request.json();
-    
+
     if (!body.url) {
       return NextResponse.json({ error: "Profile URL is required" }, { status: 400 });
     }
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.log("✅ [SOCIAL] Profile fetch completed successfully");
-    
+
     return NextResponse.json({
       success: true,
       profile: result.profile,
@@ -51,4 +52,4 @@ export async function POST(request: NextRequest) {
       { status: 500 },
     );
   }
-} 
+}

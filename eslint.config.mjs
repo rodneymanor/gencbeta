@@ -19,7 +19,19 @@ const compat = new FlatCompat({
 /** @type {import('eslint').Linter.Config[]} */
 export default [
   { files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"] },
-  { ignores: [".github/", ".husky/", "node_modules/", ".next/", "src/components/ui", "scripts/", "*.config.ts", "*.mjs", "**/dist/**"] },
+  {
+    ignores: [
+      ".github/",
+      ".husky/",
+      "node_modules/",
+      ".next/",
+      "src/components/ui",
+      "scripts/",
+      "*.config.ts",
+      "*.mjs",
+      "**/dist/**",
+    ],
+  },
   {
     languageOptions: {
       globals: globals.browser,
@@ -123,7 +135,7 @@ export default [
       "no-underscore-dangle": ["error", { allow: ["_id", "__dirname"] }],
 
       // Complexity
-      "complexity": ["error", { max: 10 }],
+      complexity: ["error", { max: 10 }],
       "max-lines": ["error", { max: 300, skipBlankLines: true, skipComments: true }],
       "max-depth": ["error", 4],
 
@@ -167,5 +179,5 @@ export default [
       "@typescript-eslint/no-explicit-any": "off",
     },
   },
-  ...storybook.configs["flat/recommended"]
+  ...storybook.configs["flat/recommended"],
 ];

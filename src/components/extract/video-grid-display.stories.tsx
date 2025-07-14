@@ -1,42 +1,45 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { useState } from 'react';
+import { useState } from "react";
 
-import { Badge } from '@/components/ui/badge';
-import { VideoGridDisplay, type VideoGridVideo } from './video-grid-display';
+import type { Meta, StoryObj } from "@storybook/react";
+
+import { Badge } from "@/components/ui/badge";
+
+import { VideoGridDisplay, type VideoGridVideo } from "./video-grid-display";
 
 const meta: Meta<typeof VideoGridDisplay> = {
-  title: 'Extract/VideoGridDisplay',
+  title: "Extract/VideoGridDisplay",
   component: VideoGridDisplay,
   parameters: {
-    layout: 'padded',
+    layout: "padded",
     docs: {
       description: {
-        component: 'A comprehensive video grid component that supports both Instagram-style and traditional layouts with full management capabilities.',
+        component:
+          "A comprehensive video grid component that supports both Instagram-style and traditional layouts with full management capabilities.",
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     mode: {
-      control: { type: 'select' },
-      options: ['instagram', 'traditional'],
-      description: 'Display mode for the video grid',
+      control: { type: "select" },
+      options: ["instagram", "traditional"],
+      description: "Display mode for the video grid",
     },
     manageMode: {
-      control: { type: 'boolean' },
-      description: 'Enable management mode with selection and deletion capabilities',
+      control: { type: "boolean" },
+      description: "Enable management mode with selection and deletion capabilities",
     },
     hasMoreVideos: {
-      control: { type: 'boolean' },
-      description: 'Show load more button',
+      control: { type: "boolean" },
+      description: "Show load more button",
     },
     isLoadingMore: {
-      control: { type: 'boolean' },
-      description: 'Loading state for load more functionality',
+      control: { type: "boolean" },
+      description: "Loading state for load more functionality",
     },
     emptyStateMessage: {
-      control: { type: 'text' },
-      description: 'Message to display when no videos are available',
+      control: { type: "text" },
+      description: "Message to display when no videos are available",
     },
   },
 };
@@ -47,70 +50,70 @@ type Story = StoryObj<typeof VideoGridDisplay>;
 // Sample video data
 const sampleVideos: VideoGridVideo[] = [
   {
-    id: '1',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&h=600&fit=crop',
-    title: 'Amazing Sunset Views',
-    description: 'Breathtaking sunset captured from the mountains',
+    id: "1",
+    thumbnailUrl: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&h=600&fit=crop",
+    title: "Amazing Sunset Views",
+    description: "Breathtaking sunset captured from the mountains",
     duration: 125,
     views: 15420,
     likes: 892,
     favorite: true,
-    collectionId: 'collection-1',
+    collectionId: "collection-1",
   },
   {
-    id: '2',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=600&fit=crop',
-    title: 'Mountain Adventure',
-    description: 'Exploring the highest peaks',
+    id: "2",
+    thumbnailUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=600&fit=crop",
+    title: "Mountain Adventure",
+    description: "Exploring the highest peaks",
     duration: 89,
     views: 8920,
     likes: 456,
     favorite: false,
-    collectionId: 'collection-1',
+    collectionId: "collection-1",
   },
   {
-    id: '3',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&h=600&fit=crop',
-    title: 'Forest Walk',
-    description: 'Peaceful walk through ancient forests',
+    id: "3",
+    thumbnailUrl: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&h=600&fit=crop",
+    title: "Forest Walk",
+    description: "Peaceful walk through ancient forests",
     duration: 203,
     views: 23410,
     likes: 1234,
     favorite: true,
-    collectionId: 'collection-2',
+    collectionId: "collection-2",
   },
   {
-    id: '4',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=600&fit=crop',
-    title: 'Ocean Waves',
-    description: 'The calming sound of ocean waves',
+    id: "4",
+    thumbnailUrl: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=600&fit=crop",
+    title: "Ocean Waves",
+    description: "The calming sound of ocean waves",
     duration: 67,
     views: 5670,
     likes: 234,
     favorite: false,
-    collectionId: 'collection-2',
+    collectionId: "collection-2",
   },
   {
-    id: '5',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=600&fit=crop',
-    title: 'City Lights',
-    description: 'Urban exploration at night',
+    id: "5",
+    thumbnailUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=600&fit=crop",
+    title: "City Lights",
+    description: "Urban exploration at night",
     duration: 156,
     views: 18920,
     likes: 987,
     favorite: true,
-    collectionId: 'collection-3',
+    collectionId: "collection-3",
   },
   {
-    id: '6',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&h=600&fit=crop',
-    title: 'Desert Sunrise',
-    description: 'Morning light over sand dunes',
+    id: "6",
+    thumbnailUrl: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&h=600&fit=crop",
+    title: "Desert Sunrise",
+    description: "Morning light over sand dunes",
     duration: 98,
     views: 7890,
     likes: 345,
     favorite: false,
-    collectionId: 'collection-3',
+    collectionId: "collection-3",
   },
 ];
 
@@ -122,7 +125,7 @@ const InteractiveTemplate: Story = {
     const [videos, setVideos] = useState<VideoGridVideo[]>(sampleVideos);
 
     const handleToggleSelection = (videoId: string) => {
-      setSelectedVideos(prev => {
+      setSelectedVideos((prev) => {
         const newSet = new Set(prev);
         if (newSet.has(videoId)) {
           newSet.delete(videoId);
@@ -134,13 +137,13 @@ const InteractiveTemplate: Story = {
     };
 
     const handleDeleteVideo = async (videoId: string) => {
-      setDeletingVideos(prev => new Set([...prev, videoId]));
-      
+      setDeletingVideos((prev) => new Set([...prev, videoId]));
+
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setVideos(prev => prev.filter(v => v.id !== videoId));
-      setDeletingVideos(prev => {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      setVideos((prev) => prev.filter((v) => v.id !== videoId));
+      setDeletingVideos((prev) => {
         const newSet = new Set(prev);
         newSet.delete(videoId);
         return newSet;
@@ -148,19 +151,17 @@ const InteractiveTemplate: Story = {
     };
 
     const handleFavorite = (video: VideoGridVideo, index: number) => {
-      setVideos(prev => prev.map((v, i) => 
-        i === index ? { ...v, favorite: !v.favorite } : v
-      ));
+      setVideos((prev) => prev.map((v, i) => (i === index ? { ...v, favorite: !v.favorite } : v)));
     };
 
     const handleVideoClick = (video: VideoGridVideo, index: number) => {
-      console.log('Video clicked:', video, 'at index:', index);
+      console.log("Video clicked:", video, "at index:", index);
     };
 
     const handleLoadMore = async () => {
       // Simulate loading more videos
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      console.log('Loading more videos...');
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      console.log("Loading more videos...");
     };
 
     const renderBadge = (video: VideoGridVideo) => {
@@ -175,12 +176,10 @@ const InteractiveTemplate: Story = {
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold">Video Collection</h2>
           {args.manageMode && selectedVideos.size > 0 && (
-            <Badge variant="secondary">
-              {selectedVideos.size} selected
-            </Badge>
+            <Badge variant="secondary">{selectedVideos.size} selected</Badge>
           )}
         </div>
-        
+
         <VideoGridDisplay
           {...args}
           videos={videos}
@@ -201,7 +200,7 @@ const InteractiveTemplate: Story = {
 export const InstagramMode: Story = {
   ...InteractiveTemplate,
   args: {
-    mode: 'instagram',
+    mode: "instagram",
     manageMode: false,
     hasMoreVideos: true,
     isLoadingMore: false,
@@ -211,7 +210,7 @@ export const InstagramMode: Story = {
 export const TraditionalMode: Story = {
   ...InteractiveTemplate,
   args: {
-    mode: 'traditional',
+    mode: "traditional",
     manageMode: false,
     hasMoreVideos: true,
     isLoadingMore: false,
@@ -221,7 +220,7 @@ export const TraditionalMode: Story = {
 export const ManageModeInstagram: Story = {
   ...InteractiveTemplate,
   args: {
-    mode: 'instagram',
+    mode: "instagram",
     manageMode: true,
     hasMoreVideos: false,
     isLoadingMore: false,
@@ -231,7 +230,7 @@ export const ManageModeInstagram: Story = {
 export const ManageModeTraditional: Story = {
   ...InteractiveTemplate,
   args: {
-    mode: 'traditional',
+    mode: "traditional",
     manageMode: true,
     hasMoreVideos: false,
     isLoadingMore: false,
@@ -241,7 +240,7 @@ export const ManageModeTraditional: Story = {
 export const LoadingMore: Story = {
   ...InteractiveTemplate,
   args: {
-    mode: 'instagram',
+    mode: "instagram",
     manageMode: false,
     hasMoreVideos: true,
     isLoadingMore: true,
@@ -257,7 +256,7 @@ export const EmptyState: Story = {
     />
   ),
   args: {
-    mode: 'instagram',
+    mode: "instagram",
     manageMode: false,
   },
 };
@@ -265,7 +264,7 @@ export const EmptyState: Story = {
 export const WithCustomBadges: Story = {
   ...InteractiveTemplate,
   args: {
-    mode: 'instagram',
+    mode: "instagram",
     manageMode: false,
     hasMoreVideos: true,
     isLoadingMore: false,
@@ -275,7 +274,7 @@ export const WithCustomBadges: Story = {
       sampleVideos.map((video, index) => ({
         ...video,
         addedAt: index < 2 ? new Date().toISOString() : undefined,
-      }))
+      })),
     );
 
     const renderBadge = (video: VideoGridVideo) => {
@@ -288,27 +287,21 @@ export const WithCustomBadges: Story = {
       return null;
     };
 
-    return (
-      <VideoGridDisplay
-        {...args}
-        videos={videos}
-        renderBadge={renderBadge}
-      />
-    );
+    return <VideoGridDisplay {...args} videos={videos} renderBadge={renderBadge} />;
   },
 };
 
 export const ResponsiveGrid: Story = {
   ...InteractiveTemplate,
   args: {
-    mode: 'instagram',
+    mode: "instagram",
     manageMode: false,
     hasMoreVideos: false,
     isLoadingMore: false,
   },
   parameters: {
     viewport: {
-      defaultViewport: 'mobile1',
+      defaultViewport: "mobile1",
     },
   },
 };
@@ -316,7 +309,7 @@ export const ResponsiveGrid: Story = {
 export const HighVolumeContent: Story = {
   ...InteractiveTemplate,
   args: {
-    mode: 'instagram',
+    mode: "instagram",
     manageMode: false,
     hasMoreVideos: true,
     isLoadingMore: false,
@@ -333,14 +326,9 @@ export const HighVolumeContent: Story = {
         likes: Math.floor(Math.random() * 2000) + 50,
         favorite: Math.random() > 0.7,
         collectionId: `collection-${Math.floor(i / 6) + 1}`,
-      }))
+      })),
     );
 
-    return (
-      <VideoGridDisplay
-        {...args}
-        videos={videos}
-      />
-    );
+    return <VideoGridDisplay {...args} videos={videos} />;
   },
-}; 
+};

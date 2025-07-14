@@ -1,17 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
+import { Loader2, Instagram, Music, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, Instagram, Music, AlertCircle } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AIVoicesClient } from "@/lib/ai-voices-client";
 import { VoiceCreationRequest } from "@/types/ai-voices";
-import { toast } from "sonner";
 
 interface CreateVoiceModalProps {
   open: boolean;
@@ -36,7 +38,7 @@ function validateUrl(url: string, platform: "tiktok" | "instagram"): boolean {
 }
 
 async function createVoice(request: VoiceCreationRequest, onSuccess: () => void) {
-        await AIVoicesClient.createCustomVoice(request);
+  await AIVoicesClient.createCustomVoice(request);
   onSuccess();
   toast.success("Custom voice created successfully!");
 }

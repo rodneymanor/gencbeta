@@ -381,7 +381,7 @@ async function streamVideoToBunny(sourceUrl: string, videoGuid: string): Promise
  */
 export function generateBunnyThumbnailUrl(videoId: string): string | null {
   const hostname = process.env.BUNNY_CDN_HOSTNAME;
-  
+
   if (!hostname) {
     console.error("❌ [BUNNY] BUNNY_CDN_HOSTNAME not configured");
     return null;
@@ -390,7 +390,7 @@ export function generateBunnyThumbnailUrl(videoId: string): string | null {
   const cleanedHost = hostname.startsWith("vz-") ? hostname : `vz-${hostname}`;
   const thumbnailUrl = `https://${cleanedHost}/${videoId}/thumbnail.jpg`;
   console.log("🖼️ [BUNNY] Generated thumbnail URL:", thumbnailUrl);
-  
+
   return thumbnailUrl;
 }
 
@@ -401,14 +401,14 @@ export function generateBunnyThumbnailUrl(videoId: string): string | null {
 export function extractVideoIdFromIframeUrl(iframeUrl: string): string | null {
   try {
     const url = new URL(iframeUrl);
-    const pathParts = url.pathname.split('/');
+    const pathParts = url.pathname.split("/");
     const videoId = pathParts[pathParts.length - 1];
-    
+
     if (videoId && videoId.length > 0) {
       console.log("🆔 [BUNNY] Extracted video ID from iframe:", videoId);
       return videoId;
     }
-    
+
     console.error("❌ [BUNNY] Could not extract video ID from iframe URL");
     return null;
   } catch (error) {

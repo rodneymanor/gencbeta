@@ -28,7 +28,9 @@ interface EnhancedGhostWriterResponse {
   };
 }
 
-const createLegacyFallbackResponse = async (request: NextRequest): Promise<NextResponse<EnhancedGhostWriterResponse>> => {
+const createLegacyFallbackResponse = async (
+  request: NextRequest,
+): Promise<NextResponse<EnhancedGhostWriterResponse>> => {
   // Clone headers to plain object to avoid issues with reusing the same Headers instance
   const forwardHeaders: Record<string, string> = {};
   request.headers.forEach((value, key) => {
@@ -161,14 +163,9 @@ export async function GET(request: NextRequest): Promise<NextResponse<EnhancedGh
     const timeRemaining = Math.max(0, expiresAt.getTime() - now.getTime());
 
     // Get user data (saved and dismissed ideas)
-    const userDataSnapshot = await adminDb
-      .collection("users")
-      .doc(userId)
-      .get();
-    
-    const userData = userDataSnapshot.exists 
-      ? userDataSnapshot.data() 
-      : { savedIdeas: [], dismissedIdeas: [] };
+    const userDataSnapshot = await adminDb.collection("users").doc(userId).get();
+
+    const userData = userDataSnapshot.exists ? userDataSnapshot.data() : { savedIdeas: [], dismissedIdeas: [] };
 
     console.log(`🎉 [EnhancedGhostWriter] Returning ${ideas.length} ideas`);
 
@@ -218,4 +215,4 @@ export async function GET(request: NextRequest): Promise<NextResponse<EnhancedGh
       { status: 500 },
     );
   }
-} 
+}

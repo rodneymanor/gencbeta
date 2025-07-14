@@ -477,8 +477,8 @@ export class CollectionsService {
     try {
       await this.updateVideo(userId, videoId, { favorite });
     } catch (error) {
-      console.error('Error toggling video favorite:', error);
-      throw new Error('Failed to update video favorite status');
+      console.error("Error toggling video favorite:", error);
+      throw new Error("Failed to update video favorite status");
     }
   }
 

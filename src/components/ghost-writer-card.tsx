@@ -101,7 +101,7 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
       </div>
 
       {/* Placeholder engagement metrics */}
-      <div className="flex items-center justify-between pt-2 text-xs text-muted-foreground">
+      <div className="text-muted-foreground flex items-center justify-between pt-2 text-xs">
         <div className="flex items-center gap-1">
           <Heart className="h-3 w-3" />
           <span>{engagement.likes.toLocaleString()}</span>

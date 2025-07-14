@@ -9,17 +9,20 @@ Successfully moved all core business logic services from `src/lib/core/` to `src
 ### Total: 25 files moved and reorganized
 
 ### Auth Services
+
 - `src/lib/core/auth/api-key-auth.ts` → `src/core/auth/api-key-auth.ts`
 - `src/lib/core/auth/firebase-auth.ts` → `src/core/auth/firebase-auth.ts`
 - `src/lib/core/auth/index.ts` → `src/core/auth/index.ts`
 - `src/lib/core/auth/rbac.ts` → `src/core/auth/rbac.ts`
 
 ### Billing Services
+
 - `src/lib/core/billing/credits.ts` → `src/core/billing/credits.ts`
 - `src/lib/core/billing/index.ts` → `src/core/billing/index.ts`
 - `src/lib/core/billing/usage.ts` → `src/core/billing/usage.ts`
 
 ### Content Services
+
 - `src/lib/core/content/index.ts` → `src/core/content/index.ts`
 - `src/lib/core/content/negative-keywords.ts` → `src/core/content/negative-keywords.ts`
 - `src/lib/core/content/peq-extractor.ts` → `src/core/content/peq-extractor.ts`
@@ -28,6 +31,7 @@ Successfully moved all core business logic services from `src/lib/core/` to `src
 - `src/lib/core/content/voice-processor.ts` → `src/core/content/voice-processor.ts`
 
 ### Script Services
+
 - `src/lib/core/script/index.ts` → `src/core/script/index.ts`
 - `src/lib/core/script/script-service.ts` → `src/core/script/script-service.ts`
 - `src/lib/core/script/engines/speed.ts` → `src/core/script/engines/speed.ts`
@@ -35,11 +39,13 @@ Successfully moved all core business logic services from `src/lib/core/` to `src
 - `src/lib/core/script/engines/voice.ts` → `src/core/script/engines/voice.ts`
 
 ### Social Services
+
 - `src/lib/core/social/index.ts` → `src/core/social/index.ts`
 - `src/lib/core/social/profile-service.ts` → `src/core/social/profile-service.ts`
 - `src/lib/core/social/types.ts` → `src/core/social/types.ts`
 
 ### Video Services
+
 - `src/lib/core/video/analyzer.ts` → `src/core/video/analyzer.ts`
 - `src/lib/core/video/downloader.ts` → `src/core/video/downloader.ts`
 - `src/lib/core/video/index.ts` → `src/core/video/index.ts`
@@ -52,6 +58,7 @@ Successfully moved all core business logic services from `src/lib/core/` to `src
 Updated all import statements throughout the codebase to use the new `@/core/` path:
 
 ### API Routes Updated
+
 - `src/app/api/script/speed-write/route.ts`
 - `src/app/api/script/write/route.ts`
 - `src/app/api/download-video/route.ts`
@@ -63,15 +70,18 @@ Updated all import statements throughout the codebase to use the new `@/core/` p
 - `src/app/api/collections/user-collections/route.ts`
 
 ### Component Files Updated
+
 - `src/components/common/useCredits.ts`
 - `src/components/common/useVideoProcessing.ts`
 
 ### Internal Core Imports Updated
+
 - `src/core/content/template-generator.ts`
 
 ## Benefits of New Structure
 
 ### 1. **Clearer Separation of Concerns**
+
 ```
 src/
 ├── core/          # Core business logic and services
@@ -82,16 +92,19 @@ src/
 ```
 
 ### 2. **Better Discoverability**
+
 - Developers know to look in `src/core/` for main business services
 - Clear distinction between core logic and utility functions
 - Easier to understand the application architecture
 
 ### 3. **Industry Standard Organization**
+
 - Follows common patterns used in enterprise applications
 - Aligns with clean architecture principles
 - Makes the codebase more maintainable
 
 ### 4. **Improved Maintainability**
+
 - All core services in one centralized location
 - Easier to refactor and extend core functionality
 - Better dependency management
@@ -119,4 +132,4 @@ src/
 
 ---
 
-**Summary**: Successfully reorganized the codebase with a cleaner, more maintainable structure that separates core business logic from utility libraries. The move improves code organization while maintaining all existing functionality. 
+**Summary**: Successfully reorganized the codebase with a cleaner, more maintainable structure that separates core business logic from utility libraries. The move improves code organization while maintaining all existing functionality.

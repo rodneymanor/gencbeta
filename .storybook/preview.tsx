@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import type { Preview } from "@storybook/nextjs-vite";
 import "../src/app/globals.css";
 
@@ -22,24 +22,24 @@ const preview: Preview = {
     viewport: {
       viewports: {
         mobile: {
-          name: 'Mobile',
+          name: "Mobile",
           styles: {
-            width: '375px',
-            height: '667px',
+            width: "375px",
+            height: "667px",
           },
         },
         tablet: {
-          name: 'Tablet',
+          name: "Tablet",
           styles: {
-            width: '768px',
-            height: '1024px',
+            width: "768px",
+            height: "1024px",
           },
         },
         desktop: {
-          name: 'Desktop',
+          name: "Desktop",
           styles: {
-            width: '1280px',
-            height: '800px',
+            width: "1280px",
+            height: "800px",
           },
         },
       },
@@ -47,15 +47,15 @@ const preview: Preview = {
 
     // Add background configurations
     backgrounds: {
-      default: 'light',
+      default: "light",
       values: [
         {
-          name: 'light',
-          value: '#fcfdf8',
+          name: "light",
+          value: "#fcfdf8",
         },
         {
-          name: 'dark',
-          value: '#412722',
+          name: "dark",
+          value: "#412722",
         },
       ],
     },
@@ -64,7 +64,7 @@ const preview: Preview = {
   // Global decorators to apply to all stories
   decorators: [
     (Story) => (
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="bg-background text-foreground min-h-screen">
         <Story />
       </div>
     ),

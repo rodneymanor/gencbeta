@@ -10,11 +10,12 @@ import {
   extractAdditionalMetadata,
   downloadVideoFromVersions,
 } from "@/lib/instagram-downloader";
-import { 
-  downloadTikTokVideo as downloadTikTokVideoFromAPI, 
+import {
+  downloadTikTokVideo as downloadTikTokVideoFromAPI,
   getTikTokAdditionalMetadata,
-  getTikTokMetrics 
+  getTikTokMetrics,
 } from "@/lib/tiktok-downloader";
+
 import { detectPlatform, type Platform } from "./platform-detector";
 
 export interface VideoData {
@@ -60,19 +61,19 @@ export interface CdnResult {
  */
 export async function downloadVideo(url: string): Promise<DownloadResult | null> {
   const platformInfo = detectPlatform(url);
-  
-  if (!platformInfo.platform || platformInfo.platform === 'unknown') {
+
+  if (!platformInfo.platform || platformInfo.platform === "unknown") {
     throw new Error(`Unsupported platform for URL: ${url}`);
   }
 
   console.log(`🎥 [DOWNLOADER] Downloading from ${platformInfo.platform}...`);
 
   switch (platformInfo.platform) {
-    case 'tiktok':
+    case "tiktok":
       return await downloadTikTokVideo(url);
-    case 'instagram':
+    case "instagram":
       return await downloadInstagramVideo(url);
-    case 'youtube':
+    case "youtube":
       return await downloadYouTubeVideo(url);
     default:
       throw new Error(`Platform ${platformInfo.platform} not yet implemented`);
@@ -120,7 +121,7 @@ export const VideoDownloader = {
 export async function downloadTikTokVideo(url: string): Promise<DownloadResult | null> {
   try {
     console.log("📱 [DOWNLOADER] Downloading TikTok video...");
-    
+
     const videoData = await downloadTikTokVideoFromAPI(url);
     if (!videoData) {
       console.error("❌ [DOWNLOADER] Failed to download TikTok video");
@@ -130,13 +131,13 @@ export async function downloadTikTokVideo(url: string): Promise<DownloadResult |
     // Get additional metadata in parallel
     const [additionalMetadata, metrics] = await Promise.allSettled([
       getTikTokAdditionalMetadata(url),
-      getTikTokMetrics(url)
+      getTikTokMetrics(url),
     ]);
 
     return {
       videoData,
-      additionalMetadata: additionalMetadata.status === 'fulfilled' ? additionalMetadata.value : undefined,
-      metrics: metrics.status === 'fulfilled' ? metrics.value : undefined,
+      additionalMetadata: additionalMetadata.status === "fulfilled" ? additionalMetadata.value : undefined,
+      metrics: metrics.status === "fulfilled" ? metrics.value : undefined,
     };
   } catch (error) {
     console.error("❌ [DOWNLOADER] TikTok download failed:", error);
@@ -152,7 +153,7 @@ export async function downloadTikTokVideo(url: string): Promise<DownloadResult |
 export async function downloadInstagramVideo(url: string): Promise<DownloadResult | null> {
   try {
     console.log("📱 [DOWNLOADER] Downloading Instagram video...");
-    
+
     const { shortcode } = detectPlatform(url);
     if (!shortcode) {
       throw new Error("Could not extract Instagram shortcode from URL");
@@ -204,11 +205,7 @@ export async function uploadToCDN(videoData: VideoData): Promise<CdnResult | nul
     }
 
     const buffer = Buffer.from(videoData.buffer);
-    const result = await uploadToBunnyStream(
-      buffer, 
-      videoData.filename ?? "video.mp4", 
-      videoData.mimeType
-    );
+    const result = await uploadToBunnyStream(buffer, videoData.filename ?? "video.mp4", videoData.mimeType);
 
     if (result) {
       console.log("✅ [DOWNLOADER] CDN upload successful");
@@ -238,7 +235,7 @@ export async function downloadAndUploadToCDN(url: string): Promise<{
   }
 
   const cdnResult = await uploadToCDN(downloadResult.videoData);
-  
+
   return {
     downloadResult,
     cdnResult,
@@ -256,7 +253,7 @@ export function validateVideoData(videoData: VideoData): boolean {
     videoData.buffer.byteLength > 0 &&
     videoData.size > 0 &&
     videoData.mimeType &&
-    videoData.mimeType.startsWith('video/')
+    videoData.mimeType.startsWith("video/")
   );
 }
 
@@ -267,4 +264,4 @@ export function validateVideoData(videoData: VideoData): boolean {
  */
 export function getVideoSizeMB(videoData: VideoData): number {
   return Math.round((videoData.size / 1024 / 1024) * 100) / 100;
-} 
+}

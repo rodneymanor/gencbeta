@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { AIVoicesService } from "@/lib/ai-voices-service";
 
 export async function GET(_request: NextRequest) {
@@ -17,4 +18,4 @@ export async function GET(_request: NextRequest) {
     console.error("🔥 [API] Failed to get active voice:", error);
     return NextResponse.json(null);
   }
-} 
+}

@@ -1,9 +1,9 @@
+import { createNegativeKeywordPromptInstruction } from "@/data/negative-keywords";
 import { generateScript } from "@/lib/gemini";
 import { parseStructuredResponse, createScriptElements, combineScriptElements } from "@/lib/json-extractor";
 import { NegativeKeywordsService } from "@/lib/negative-keywords-service";
 import { createSpeedWritePrompt } from "@/lib/prompt-helpers";
 import { generateScriptWithValidation, validateScript, cleanScriptContent } from "@/lib/script-validation";
-import { createNegativeKeywordPromptInstruction } from "@/data/negative-keywords";
 
 export interface ScriptInput {
   idea: string;
@@ -40,25 +40,25 @@ export class SpeedEngine {
       const result = await generateScriptWithValidation(
         () => generateScript(prompt, { responseType: "json" }),
         (result) => result.content ?? "",
-        { maxRetries: 2, retryDelay: 500 }
+        { maxRetries: 2, retryDelay: 500 },
       );
 
       const rawContent = result.content ?? "";
 
       // Use bulletproof JSON extraction
       const parseResult = parseStructuredResponse(rawContent, "Speed Write");
-      
+
       if (!parseResult.success) {
         console.warn("[SpeedEngine] JSON parsing failed, falling back to plain text");
         const cleanedContent = cleanScriptContent(rawContent);
         const elements = { hook: "", bridge: "", goldenNugget: "", wta: cleanedContent };
         const fullContent = combineScriptElements(elements);
-        
+
         return {
           success: false,
           content: fullContent,
           elements,
-          error: parseResult.error
+          error: parseResult.error,
         };
       }
 
@@ -74,11 +74,11 @@ export class SpeedEngine {
       return {
         success: true,
         content: fullContent,
-        elements
+        elements,
       };
     } catch (error) {
       console.error("[SpeedEngine] Script generation failed:", error);
       throw error;
     }
   }
-} 
+}

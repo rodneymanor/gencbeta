@@ -4,8 +4,8 @@ import { useEffect } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { useAuth } from "@/contexts/auth-context";
 import AuthLoading from "@/components/ui/auth-loading";
+import { useAuth } from "@/contexts/auth-context";
 
 export default function withAuth<P extends object>(WrappedComponent: React.ComponentType<P>) {
   const WithAuthComponent = (props: P) => {

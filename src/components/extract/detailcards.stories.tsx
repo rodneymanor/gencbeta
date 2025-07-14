@@ -1,18 +1,19 @@
-import type { Meta, StoryObj } from '@storybook/nextjs';
-import { DetailCard, DetailCardProps } from './detailcards';
+import type { Meta, StoryObj } from "@storybook/nextjs";
+
+import { DetailCard, DetailCardProps } from "./detailcards";
 
 const meta: Meta<typeof DetailCard> = {
-  title: 'Components/DetailCard',
+  title: "Components/DetailCard",
   component: DetailCard,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
-    faviconUrl: { control: 'text' },
-    domain: { control: 'text' },
-    title: { control: 'text' },
-    className: { control: 'text' },
+    faviconUrl: { control: "text" },
+    domain: { control: "text" },
+    title: { control: "text" },
+    className: { control: "text" },
   },
 };
 
@@ -21,42 +22,43 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    faviconUrl: 'https://www.google.com/s2/favicons?sz=128&domain=reddit.com',
-    domain: 'reddit.com',
-    title: 'Scrolling Modals? : r/UXDesign - Reddit',
+    faviconUrl: "https://www.google.com/s2/favicons?sz=128&domain=reddit.com",
+    domain: "reddit.com",
+    title: "Scrolling Modals? : r/UXDesign - Reddit",
   },
 };
 
 export const LongTitle: Story = {
   args: {
-    faviconUrl: 'https://www.google.com/s2/favicons?sz=128&domain=stackoverflow.com',
-    domain: 'stackoverflow.com',
-    title: 'How to implement infinite scrolling with React hooks and TypeScript for better performance and user experience?',
+    faviconUrl: "https://www.google.com/s2/favicons?sz=128&domain=stackoverflow.com",
+    domain: "stackoverflow.com",
+    title:
+      "How to implement infinite scrolling with React hooks and TypeScript for better performance and user experience?",
   },
 };
 
 export const ShortTitle: Story = {
   args: {
-    faviconUrl: 'https://www.google.com/s2/favicons?sz=128&domain=github.com',
-    domain: 'github.com',
-    title: 'React Component',
+    faviconUrl: "https://www.google.com/s2/favicons?sz=128&domain=github.com",
+    domain: "github.com",
+    title: "React Component",
   },
 };
 
 export const LongDomain: Story = {
   args: {
-    faviconUrl: 'https://www.google.com/s2/favicons?sz=128&domain=very-long-domain-name-example.com',
-    domain: 'very-long-domain-name-example.com',
-    title: 'Example article with a very long domain name that should be truncated',
+    faviconUrl: "https://www.google.com/s2/favicons?sz=128&domain=very-long-domain-name-example.com",
+    domain: "very-long-domain-name-example.com",
+    title: "Example article with a very long domain name that should be truncated",
   },
 };
 
 export const CustomStyling: Story = {
   args: {
-    faviconUrl: 'https://www.google.com/s2/favicons?sz=128&domain=twitter.com',
-    domain: 'twitter.com',
-    title: 'Custom styled detail card with hover effects',
-    className: 'hover:shadow-lg hover:scale-105 transition-all duration-300',
+    faviconUrl: "https://www.google.com/s2/favicons?sz=128&domain=twitter.com",
+    domain: "twitter.com",
+    title: "Custom styled detail card with hover effects",
+    className: "hover:shadow-lg hover:scale-105 transition-all duration-300",
   },
 };
 
@@ -84,7 +86,7 @@ export const DifferentPlatforms: Story = {
 
 export const MultipleCards: Story = {
   render: () => (
-    <div className="grid grid-cols-2 gap-4 max-w-md">
+    <div className="grid max-w-md grid-cols-2 gap-4">
       <DetailCard
         faviconUrl="https://www.google.com/s2/favicons?sz=128&domain=reddit.com"
         domain="reddit.com"
@@ -107,4 +109,4 @@ export const MultipleCards: Story = {
       />
     </div>
   ),
-}; 
+};

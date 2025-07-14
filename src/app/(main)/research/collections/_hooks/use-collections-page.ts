@@ -201,12 +201,12 @@ export function useCollectionsPage() {
 
   const handleVideoAdded = useCallback(async () => {
     if (!user) return;
-    
+
     // Clear cache and force fresh data fetch
     cacheRef.current.data.clear();
-    
+
     console.log("🔄 [Collections] Refreshing collections after video/collection added");
-    
+
     try {
       // Force fresh fetch of both collections and videos
       const [collectionsResult, videosResult] = await Promise.allSettled([

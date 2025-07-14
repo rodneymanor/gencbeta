@@ -4,7 +4,9 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+
 import { getAuth } from "firebase-admin/auth";
+
 import { getAdminDb, isAdminInitialized } from "@/lib/firebase-admin";
 
 export interface FirebaseUser {
@@ -39,7 +41,7 @@ export async function validateFirebaseToken(token: string): Promise<FirebaseUser
   try {
     const auth = getAuth();
     const decodedToken = await auth.verifyIdToken(token);
-    
+
     return {
       uid: decodedToken.uid,
       email: decodedToken.email || "",
@@ -70,7 +72,7 @@ export async function getUserProfile(uid: string): Promise<any | null> {
     }
 
     const userDoc = await adminDb.collection("users").doc(uid).get();
-    
+
     if (!userDoc.exists) {
       return null;
     }
@@ -97,7 +99,7 @@ export async function setCustomClaims(uid: string, claims: Record<string, any>):
   try {
     const auth = getAuth();
     await auth.setCustomUserClaims(uid, claims);
-    
+
     console.log(`✅ [Firebase Auth] Set custom claims for user ${uid}:`, claims);
     return true;
   } catch (error) {
@@ -118,7 +120,7 @@ export async function getCustomClaims(uid: string): Promise<Record<string, any> 
   try {
     const auth = getAuth();
     const userRecord = await auth.getUser(uid);
-    
+
     return userRecord.customClaims || null;
   } catch (error) {
     console.error("❌ [Firebase Auth] Failed to get custom claims:", error);
@@ -131,22 +133,16 @@ export async function getCustomClaims(uid: string): Promise<Record<string, any> 
  */
 export async function authenticateFirebaseRequest(request: NextRequest): Promise<FirebaseUser | NextResponse> {
   const authHeader = request.headers.get("authorization");
-  
+
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return NextResponse.json(
-      { error: "Authorization header required" },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "Authorization header required" }, { status: 401 });
   }
 
   const token = authHeader.substring(7);
   const user = await validateFirebaseToken(token);
-  
+
   if (!user) {
-    return NextResponse.json(
-      { error: "Invalid or expired token" },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
   }
 
   return user;
@@ -198,7 +194,7 @@ export async function createSessionToken(uid: string, additionalClaims?: Record<
     const sessionToken = await auth.createSessionCookie(uid, {
       expiresIn: 60 * 60 * 24 * 5 * 1000, // 5 days
     });
-    
+
     return sessionToken;
   } catch (error) {
     console.error("❌ [Firebase Auth] Failed to create session token:", error);
@@ -218,7 +214,7 @@ export async function verifySessionToken(sessionToken: string): Promise<Firebase
   try {
     const auth = getAuth();
     const decodedClaims = await auth.verifySessionCookie(sessionToken, true);
-    
+
     return {
       uid: decodedClaims.uid,
       email: decodedClaims.email || "",
@@ -245,7 +241,7 @@ export async function revokeUserTokens(uid: string): Promise<boolean> {
   try {
     const auth = getAuth();
     await auth.revokeRefreshTokens(uid);
-    
+
     console.log(`✅ [Firebase Auth] Revoked all tokens for user ${uid}`);
     return true;
   } catch (error) {
@@ -266,7 +262,7 @@ export async function deleteUser(uid: string): Promise<boolean> {
   try {
     const auth = getAuth();
     await auth.deleteUser(uid);
-    
+
     console.log(`✅ [Firebase Auth] Deleted user ${uid}`);
     return true;
   } catch (error) {
@@ -278,12 +274,15 @@ export async function deleteUser(uid: string): Promise<boolean> {
 /**
  * Update user profile
  */
-export async function updateUserProfile(uid: string, updates: {
-  displayName?: string;
-  email?: string;
-  photoURL?: string;
-  emailVerified?: boolean;
-}): Promise<boolean> {
+export async function updateUserProfile(
+  uid: string,
+  updates: {
+    displayName?: string;
+    email?: string;
+    photoURL?: string;
+    emailVerified?: boolean;
+  },
+): Promise<boolean> {
   if (!isAdminInitialized) {
     console.error("❌ [Firebase Auth] Firebase Admin SDK not initialized");
     return false;
@@ -292,11 +291,11 @@ export async function updateUserProfile(uid: string, updates: {
   try {
     const auth = getAuth();
     await auth.updateUser(uid, updates);
-    
+
     console.log(`✅ [Firebase Auth] Updated profile for user ${uid}`);
     return true;
   } catch (error) {
     console.error("❌ [Firebase Auth] Failed to update user profile:", error);
     return false;
   }
-} 
+}

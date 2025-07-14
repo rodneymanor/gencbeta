@@ -1,8 +1,9 @@
 "use client";
 
+import { Clock, Target, Users, TrendingUp, Heart, Eye, MessageCircle, Share } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Clock, Target, Users, TrendingUp, Heart, Eye, MessageCircle, Share } from "lucide-react";
 
 interface VideoMetrics {
   views: number;
