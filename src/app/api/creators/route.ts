@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { processCreatorProfile } from "../../../lib/process-creator-utils";
 import { CreatorService, CreatorProfile } from "../../../lib/creator-service";
+import { processCreatorProfile } from "../../../lib/process-creator-utils";
 import { VideoService } from "../../../lib/video-service";
 
 interface AddCreatorRequest {
@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
     // Step 3: Create creator profile (without embedded videos)
     const profileData = processData.profileData;
     const now = new Date().toISOString();
-    
+
     const creatorData = {
       username,
       displayName: displayName || profileData?.displayName || username,
@@ -174,8 +174,8 @@ export async function POST(request: NextRequest) {
     // Step 4: Store videos separately in the videos collection
     if (processData.extractedVideos.length > 0 && creatorProfile.id) {
       console.log(`📹 [CREATORS] Storing ${processData.extractedVideos.length} videos separately...`);
-      
-      const videoDocuments = processData.extractedVideos.map(video => ({
+
+      const videoDocuments = processData.extractedVideos.map((video) => ({
         platform: video.platform,
         video_url: video.video_url,
         thumbnail_url: video.thumbnail_url,

@@ -1,43 +1,16 @@
 import { useState, useEffect, useCallback } from "react";
 
-interface CreatorProfile {
-  id: string;
-  username: string;
-  displayName?: string;
-  platform: "tiktok" | "instagram";
-  profileImageUrl: string;
-  bio?: string;
-  website?: string;
-  postsCount: number;
-  followersCount: number;
-  followingCount: number;
-  isVerified?: boolean;
-  mutualFollowers?: Array<{
-    username: string;
-    displayName: string;
-  }>;
-  lastProcessed?: string;
-  videoCount?: number;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-interface CreatorVideo {
-  id: string;
-  thumbnailUrl: string;
-  duration?: number;
-  likes?: number;
-  views?: number;
-  favorite?: boolean;
-  title?: string;
-  description?: string;
-  collectionId?: string;
-  addedAt?: string;
-  platform: "tiktok" | "instagram";
-}
+import { CreatorProfile } from "@/lib/creator-service";
+import {
+  EnhancedCreatorProfile,
+  EnhancedCreatorVideo,
+  enhanceCreatorForSpotlight,
+  enhanceVideoWithBunny,
+  needsMediaOptimization,
+} from "@/lib/creator-spotlight-utils";
 
 export function useCreators() {
-  const [creators, setCreators] = useState<CreatorProfile[]>([]);
+  const [creators, setCreators] = useState<EnhancedCreatorProfile[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadCreators = async () => {
@@ -108,7 +81,9 @@ export function useCreators() {
       const data = await response.json();
 
       if (data.success) {
-        setCreators(data.creators);
+        // Enhance creators with Bunny optimization data
+        const enhancedCreators = data.creators.map((creator: CreatorProfile) => enhanceCreatorForSpotlight(creator));
+        setCreators(enhancedCreators);
       } else {
         console.error("Error loading creators:", data.error);
         // Fallback to empty array
@@ -131,51 +106,109 @@ export function useCreators() {
 }
 
 export function useCreatorVideos() {
-  const [creatorVideos, setCreatorVideos] = useState<CreatorVideo[]>([]);
+  const [creatorVideos, setCreatorVideos] = useState<EnhancedCreatorVideo[]>([]);
   const [loadingVideos, setLoadingVideos] = useState(false);
 
-  const loadCreatorVideos = useCallback(async (creator: CreatorProfile) => {
+  const loadStoredVideos = useCallback(async (creator: EnhancedCreatorProfile): Promise<boolean> => {
+    const videosResponse = await fetch(`/api/creators/${creator.id}/videos`);
+
+    if (videosResponse.ok) {
+      const videosData = await videosResponse.json();
+
+      if (videosData.success && videosData.videos && videosData.videos.length > 0) {
+        console.log(`✅ [CREATOR_VIDEOS] Found ${videosData.videos.length} stored videos for @${creator.username}`);
+
+        // Enhance videos with Bunny URLs if available
+        const enhancedVideos = videosData.videos.map((video: any) =>
+          enhanceVideoWithBunny(video, creator.bunnyMediaUrls),
+        );
+
+        setCreatorVideos(enhancedVideos);
+
+        // Trigger media optimization if needed (background process)
+        if (needsMediaOptimization(creator)) {
+          console.log(`🔄 [CREATOR_VIDEOS] Creator @${creator.username} needs media optimization`);
+          triggerMediaOptimization(creator.id!);
+        }
+
+        return true;
+      }
+    }
+    return false;
+  }, []);
+
+  const loadFreshVideos = useCallback(async (creator: EnhancedCreatorProfile) => {
+    console.log(`🔄 [CREATOR_VIDEOS] No stored videos found, fetching fresh data for @${creator.username}`);
+    const response = await fetch("/api/process-creator", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: creator.username,
+        platform: creator.platform,
+        videoCount: 20,
+      }),
+    });
+
+    if (!response.ok) {
+      if (response.status === 500) {
+        console.warn("API server error - using mock videos");
+        throw new Error("API_UNAVAILABLE");
+      }
+      throw new Error("Failed to load creator videos");
+    }
+
+    const data = await response.json();
+
+    if (data.success && data.extractedVideos) {
+      const videos: EnhancedCreatorVideo[] = data.extractedVideos.map((video: Record<string, unknown>) => ({
+        id: video.id as string,
+        thumbnailUrl: (video.thumbnail_url as string) ?? "https://via.placeholder.com/300x400",
+        duration: video.duration as number,
+        likes: video.likeCount as number,
+        views: video.viewCount as number,
+        title: video.title as string,
+        description: video.description as string,
+        platform: video.platform as "tiktok" | "instagram",
+        addedAt: new Date().toISOString(),
+        originalVideoUrl: video.video_url as string,
+      }));
+
+      setCreatorVideos(videos);
+
+      // Trigger media optimization for new videos (background process)
+      triggerMediaOptimization(creator.id!);
+    }
+  }, []);
+
+  const createMockVideos = useCallback((creator: EnhancedCreatorProfile): EnhancedCreatorVideo[] => {
+    return Array.from({ length: 12 }, (_, i) => ({
+      id: `video_${i}`,
+      thumbnailUrl: `https://via.placeholder.com/300x400/${creator.platform === "tiktok" ? "FF0050" : "E4405F"}/FFFFFF?text=V${i + 1}`,
+      duration: Math.floor(Math.random() * 60) + 15,
+      likes: Math.floor(Math.random() * 100000) + 1000,
+      views: Math.floor(Math.random() * 1000000) + 10000,
+      title: `${creator.displayName} Video ${i + 1}`,
+      description: `Amazing content from ${creator.displayName}`,
+      platform: creator.platform,
+      addedAt: new Date().toISOString(),
+      originalVideoUrl: `https://example.com/video_${i}.mp4`,
+    }));
+  }, []);
+
+  const loadCreatorVideos = useCallback(async (creator: EnhancedCreatorProfile) => {
     try {
       setLoadingVideos(true);
 
-      // Call the process-creator API to get videos
-      const response = await fetch("/api/process-creator", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: creator.username,
-          platform: creator.platform,
-          videoCount: 20,
-        }),
-      });
-
-      if (!response.ok) {
-        if (response.status === 500) {
-          console.warn("API server error - using mock videos");
-          throw new Error("API_UNAVAILABLE");
-        }
-        throw new Error("Failed to load creator videos");
+      // First try to get stored videos from the creator's video collection
+      const hasStoredVideos = await loadStoredVideos(creator);
+      if (hasStoredVideos) {
+        return;
       }
 
-      const data = await response.json();
-
-      if (data.success && data.extractedVideos) {
-        const videos: CreatorVideo[] = data.extractedVideos.map((video: Record<string, unknown>) => ({
-          id: video.id,
-          thumbnailUrl: (video.thumbnail_url as string) || "https://via.placeholder.com/300x400",
-          duration: video.duration,
-          likes: video.likeCount,
-          views: video.viewCount,
-          title: video.title,
-          description: video.description,
-          platform: video.platform,
-          addedAt: new Date().toISOString(),
-        }));
-
-        setCreatorVideos(videos);
-      }
+      // Fallback: Call process-creator API to get fresh videos if no stored videos
+      await loadFreshVideos(creator);
     } catch (error) {
       console.error("Error loading creator videos:", error);
 
@@ -185,26 +218,53 @@ export function useCreatorVideos() {
       }
 
       // Fallback to mock data
-      const mockVideos: CreatorVideo[] = Array.from({ length: 12 }, (_, i) => ({
-        id: `video_${i}`,
-        thumbnailUrl: `https://via.placeholder.com/300x400/${creator.platform === "tiktok" ? "FF0050" : "E4405F"}/FFFFFF?text=V${i + 1}`,
-        duration: Math.floor(Math.random() * 60) + 15,
-        likes: Math.floor(Math.random() * 100000) + 1000,
-        views: Math.floor(Math.random() * 1000000) + 10000,
-        title: `${creator.displayName} Video ${i + 1}`,
-        description: `Amazing content from ${creator.displayName}`,
-        platform: creator.platform,
-        addedAt: new Date().toISOString(),
-      }));
+      const mockVideos = createMockVideos(creator);
       setCreatorVideos(mockVideos);
     } finally {
       setLoadingVideos(false);
     }
-  }, []); // Empty dependency array since the function doesn't depend on any props or state
+  }, [loadStoredVideos, loadFreshVideos, createMockVideos]);
 
-  const clearVideos = () => {
+  const clearVideos = useCallback(() => {
     setCreatorVideos([]);
-  };
+  }, []);
 
   return { creatorVideos, loadingVideos, loadCreatorVideos, clearVideos };
+}
+
+/**
+ * Trigger background media optimization for a creator
+ */
+function triggerMediaOptimization(creatorId: string) {
+  // Non-blocking background call to optimize media
+  setTimeout(async () => {
+    try {
+      console.log(`🚀 [MEDIA_OPTIMIZATION] Starting background optimization for creator: ${creatorId}`);
+
+      const response = await fetch("/api/creator/upload-media", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          creatorId,
+          adminKey: "GenC-Admin-Sync-2025", // TODO: Make this configurable
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log(`✅ [MEDIA_OPTIMIZATION] Completed optimization for creator: ${creatorId}`, {
+          cached: result.cached,
+          profileImage: !!result.results?.profileImage,
+          thumbnails: result.results?.videoThumbnails?.length ?? 0,
+          videos: result.results?.lowQualityVideos?.length ?? 0,
+        });
+      } else {
+        console.warn(`⚠️ [MEDIA_OPTIMIZATION] Failed to optimize media for creator: ${creatorId}`);
+      }
+    } catch (error) {
+      console.error(`❌ [MEDIA_OPTIMIZATION] Error optimizing media for creator: ${creatorId}`, error);
+    }
+  }, 1000); // Start after 1 second delay
 }

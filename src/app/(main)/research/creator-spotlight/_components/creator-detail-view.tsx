@@ -1,59 +1,49 @@
 "use client";
 
-import React from "react";
+import React, { useState, useCallback } from "react";
 
 import { ArrowLeft } from "lucide-react";
 
 import { SocialHeader } from "@/components/extract/social-header";
-import { VideoGridDisplay } from "@/components/extract/video-grid-display";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { InstagramVideoGrid } from "@/components/ui/instagram-video-grid";
 import { Skeleton } from "@/components/ui/skeleton";
-
-interface CreatorProfile {
-  id: string;
-  username: string;
-  displayName?: string;
-  platform: "tiktok" | "instagram";
-  profileImageUrl: string;
-  bio?: string;
-  website?: string;
-  postsCount: number;
-  followersCount: number;
-  followingCount: number;
-  isVerified?: boolean;
-  mutualFollowers?: Array<{
-    username: string;
-    displayName: string;
-  }>;
-  lastProcessed?: string;
-  videoCount?: number;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-interface CreatorVideo {
-  id: string;
-  thumbnailUrl: string;
-  duration?: number;
-  likes?: number;
-  views?: number;
-  favorite?: boolean;
-  title?: string;
-  description?: string;
-  collectionId?: string;
-  addedAt?: string;
-  platform: "tiktok" | "instagram";
-}
+import { VideoLightbox } from "@/components/ui/video-lightbox";
+import {
+  EnhancedCreatorProfile,
+  EnhancedCreatorVideo,
+  getOptimizedProfileImageUrl,
+  convertToVideoWithPlayer,
+} from "@/lib/creator-spotlight-utils";
 
 interface CreatorDetailViewProps {
-  creator: CreatorProfile;
-  videos: CreatorVideo[];
+  creator: EnhancedCreatorProfile;
+  videos: EnhancedCreatorVideo[];
   loadingVideos: boolean;
   onBack: () => void;
 }
 
 export function CreatorDetailView({ creator, videos, loadingVideos, onBack }: CreatorDetailViewProps) {
+  // Lightbox state
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [currentVideoIndex, setCurrentVideoIndex] = useState<number>(0);
+
+  // Convert videos to VideoWithPlayer format for lightbox compatibility
+  const convertedVideos = videos.map(convertToVideoWithPlayer);
+
+  // Video click handler to open lightbox
+  const handleVideoClick = useCallback((video: any, index: number) => {
+    setCurrentVideoIndex(index);
+    setLightboxOpen(true);
+  }, []);
+
+  // Video favoriting handler (placeholder for now)
+  const handleVideoFavorite = useCallback((video: any, index: number) => {
+    console.log("Favorite clicked:", video, index);
+    // TODO: Implement favorite functionality for creator videos
+  }, []);
+
   return (
     <div className="container mx-auto space-y-6 px-4 py-6">
       {/* Back Button */}
@@ -66,7 +56,7 @@ export function CreatorDetailView({ creator, videos, loadingVideos, onBack }: Cr
       <SocialHeader
         username={creator.username}
         displayName={creator.displayName}
-        profileImageUrl={creator.profileImageUrl}
+        profileImageUrl={getOptimizedProfileImageUrl(creator)}
         bio={creator.bio}
         website={creator.website}
         postsCount={creator.postsCount}
@@ -77,15 +67,23 @@ export function CreatorDetailView({ creator, videos, loadingVideos, onBack }: Cr
         onFollowClick={() => console.log("Follow clicked")}
         onMoreClick={() => console.log("More clicked")}
         className="rounded-lg border"
+        priority={true}
       />
 
       {/* Videos Section */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold">Videos</h2>
-          <Badge variant="outline" className="capitalize">
-            {creator.platform}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="capitalize">
+              {creator.platform}
+            </Badge>
+            {creator.hasOptimizedMedia && (
+              <Badge variant="outline" className="border-green-600 text-green-600">
+                ⚡ Optimized
+              </Badge>
+            )}
+          </div>
         </div>
 
         {loadingVideos ? (
@@ -95,15 +93,30 @@ export function CreatorDetailView({ creator, videos, loadingVideos, onBack }: Cr
             ))}
           </div>
         ) : (
-          <VideoGridDisplay
-            videos={videos}
-            mode="instagram"
-            onVideoClick={(video, index) => console.log("Video clicked:", video, index)}
-            onFavorite={(video, index) => console.log("Favorite clicked:", video, index)}
-            emptyStateMessage="No videos found for this creator."
-          />
+          <div className="mx-auto w-[935px]">
+            <InstagramVideoGrid
+              videos={videos}
+              onVideoClick={handleVideoClick}
+              onFavorite={handleVideoFavorite}
+              renderBadge={(video, idx) =>
+                (video as any).addedAt &&
+                Date.now() - new Date((video as any).addedAt).getTime() < 1000 * 60 * 60 * 24 ? (
+                  <Badge className="ml-2 bg-green-500 text-white">New</Badge>
+                ) : null
+              }
+            />
+          </div>
         )}
       </div>
+
+      {/* Video Lightbox Modal */}
+      <VideoLightbox
+        videos={convertedVideos}
+        currentIndex={currentVideoIndex}
+        open={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        onChangeIndex={setCurrentVideoIndex}
+      />
     </div>
   );
 }

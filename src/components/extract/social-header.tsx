@@ -28,6 +28,7 @@ export interface SocialHeaderProps {
   className?: string;
   onFollowClick?: () => void;
   onMoreClick?: () => void;
+  priority?: boolean;
 }
 
 export function SocialHeader({
@@ -45,6 +46,7 @@ export function SocialHeader({
   className,
   onFollowClick,
   onMoreClick,
+  priority = false,
 }: SocialHeaderProps) {
   const formatNumber = (num: number): string => {
     if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + "M";
@@ -66,6 +68,7 @@ export function SocialHeader({
                 height={150}
                 className="h-full w-full object-cover"
                 crossOrigin="anonymous"
+                priority={priority}
                 draggable={false}
               />
             </a>

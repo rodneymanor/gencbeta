@@ -23,6 +23,31 @@ export interface CreatorProfile {
   lastProcessed?: string;
   lastSynced?: string; // When profile data was last synced
   videoCount: number; // Count of videos, not the actual video data
+
+  // Bunny.net CDN URLs for faster loading
+  bunnyProfileImageUrl?: string; // Bunny iframe URL for profile image
+  bunnyMediaUrls?: {
+    profileImage?: {
+      originalUrl: string;
+      bunnyIframeUrl: string;
+      thumbnailUrl: string;
+      videoId: string;
+    };
+    videoThumbnails: Array<{
+      videoId: string;
+      originalUrl: string;
+      bunnyIframeUrl: string;
+      thumbnailUrl: string;
+    }>;
+    lowQualityVideos: Array<{
+      videoId: string;
+      originalUrl: string;
+      bunnyIframeUrl: string;
+      thumbnailUrl: string;
+    }>;
+  };
+  bunnyUploadedAt?: string; // When media was uploaded to Bunny
+
   createdAt: string;
   updatedAt: string;
 }
@@ -36,15 +61,12 @@ export class CreatorService {
   static async getAllCreators(): Promise<CreatorProfile[]> {
     try {
       console.log("📋 [CREATOR_SERVICE] Fetching all creator profiles from Firestore...");
-      
+
       if (!adminDb) {
         throw new Error("Firebase Admin SDK not initialized");
       }
 
-      const snapshot = await adminDb
-        .collection(this.CREATORS_COLLECTION)
-        .orderBy("createdAt", "desc")
-        .get();
+      const snapshot = await adminDb.collection(this.CREATORS_COLLECTION).orderBy("createdAt", "desc").get();
 
       const creators: CreatorProfile[] = [];
       snapshot.forEach((doc: any) => {
@@ -71,7 +93,7 @@ export class CreatorService {
   ): Promise<CreatorProfile | null> {
     try {
       console.log(`🔍 [CREATOR_SERVICE] Looking for creator @${username} on ${platform}...`);
-      
+
       if (!adminDb) {
         throw new Error("Firebase Admin SDK not initialized");
       }
@@ -105,20 +127,20 @@ export class CreatorService {
   /**
    * Create a new creator profile
    */
-  static async createCreator(creatorData: Omit<CreatorProfile, "id" | "createdAt" | "updatedAt">): Promise<CreatorProfile> {
+  static async createCreator(
+    creatorData: Omit<CreatorProfile, "id" | "createdAt" | "updatedAt">,
+  ): Promise<CreatorProfile> {
     try {
       console.log(`✨ [CREATOR_SERVICE] Creating new creator profile for @${creatorData.username}...`);
-      
+
       if (!adminDb) {
         throw new Error("Firebase Admin SDK not initialized");
       }
 
       const now = new Date().toISOString();
-      
+
       // Filter out undefined values to prevent Firestore errors
-      const cleanedData = Object.fromEntries(
-        Object.entries(creatorData).filter(([_, value]) => value !== undefined)
-      );
+      const cleanedData = Object.fromEntries(Object.entries(creatorData).filter(([_, value]) => value !== undefined));
 
       const creatorWithTimestamps = {
         ...cleanedData,
@@ -127,7 +149,7 @@ export class CreatorService {
       };
 
       const docRef = await adminDb.collection(this.CREATORS_COLLECTION).add(creatorWithTimestamps);
-      
+
       const newCreator: CreatorProfile = {
         id: docRef.id,
         ...creatorWithTimestamps,
@@ -150,15 +172,13 @@ export class CreatorService {
   ): Promise<void> {
     try {
       console.log(`🔄 [CREATOR_SERVICE] Updating creator profile ${creatorId}...`);
-      
+
       if (!adminDb) {
         throw new Error("Firebase Admin SDK not initialized");
       }
 
       // Filter out undefined values to prevent Firestore errors
-      const cleanedUpdates = Object.fromEntries(
-        Object.entries(updates).filter(([_, value]) => value !== undefined)
-      );
+      const cleanedUpdates = Object.fromEntries(Object.entries(updates).filter(([_, value]) => value !== undefined));
 
       const updateData = {
         ...cleanedUpdates,
@@ -166,7 +186,7 @@ export class CreatorService {
       };
 
       await adminDb.collection(this.CREATORS_COLLECTION).doc(creatorId).update(updateData);
-      
+
       console.log(`✅ [CREATOR_SERVICE] Creator profile ${creatorId} updated successfully`);
     } catch (error) {
       console.error(`🔥 [CREATOR_SERVICE] Failed to update creator ${creatorId}:`, error);
@@ -180,7 +200,7 @@ export class CreatorService {
   static async getCreatorById(creatorId: string): Promise<CreatorProfile | null> {
     try {
       console.log(`🔍 [CREATOR_SERVICE] Fetching creator profile ${creatorId}...`);
-      
+
       if (!adminDb) {
         throw new Error("Firebase Admin SDK not initialized");
       }
@@ -211,7 +231,7 @@ export class CreatorService {
   static async updateVideoCount(creatorId: string, videoCount: number): Promise<void> {
     try {
       console.log(`🔄 [CREATOR_SERVICE] Updating video count for creator ${creatorId} to ${videoCount}...`);
-      
+
       if (!adminDb) {
         throw new Error("Firebase Admin SDK not initialized");
       }
@@ -220,7 +240,7 @@ export class CreatorService {
         videoCount,
         updatedAt: new Date().toISOString(),
       });
-      
+
       console.log(`✅ [CREATOR_SERVICE] Video count updated for creator ${creatorId}`);
     } catch (error) {
       console.error(`🔥 [CREATOR_SERVICE] Failed to update video count for creator ${creatorId}:`, error);

@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { CreatorService } from "../../../../lib/creator-service";
-import { VideoService } from "../../../../lib/video-service";
 import { processCreatorProfile } from "../../../../lib/process-creator-utils";
+import { VideoService } from "../../../../lib/video-service";
 
 interface SyncCreatorsRequest {
-  creatorIds?: string[]; // Specific creator IDs to sync, or empty for all
+  creatorIds?: string[]; // Specific creator IDs to sync, or empty for all (deprecated)
+  creatorUsernames?: string[]; // Specific creator usernames to sync, or empty for all
   syncVideos?: boolean; // Whether to sync new videos too
   adminKey?: string; // Admin authentication
   dryRun?: boolean; // Test mode - don't actually call APIs
@@ -37,17 +39,18 @@ export async function POST(request: NextRequest) {
           success: false,
           error: "Invalid JSON in request body",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const { 
-      creatorIds, 
-      syncVideos = false, 
-      adminKey, 
+    const {
+      creatorIds,
+      creatorUsernames,
+      syncVideos = false,
+      adminKey,
       dryRun = false,
       maxConcurrent = 1,
-      delayBetweenCreators = 3000 // 3 seconds default
+      delayBetweenCreators = 3000, // 3 seconds default
     } = body;
 
     // Basic admin authentication check
@@ -57,7 +60,7 @@ export async function POST(request: NextRequest) {
           success: false,
           error: "Unauthorized - Invalid admin key",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -65,9 +68,25 @@ export async function POST(request: NextRequest) {
 
     // Get creators to sync
     let creatorsToSync;
-    if (creatorIds && creatorIds.length > 0) {
-      // Sync specific creators
-      console.log(`🔄 [ADMIN_SYNC] Syncing specific creators: ${creatorIds.join(', ')}`);
+    if (creatorUsernames && creatorUsernames.length > 0) {
+      // Sync specific creators by username
+      console.log(`🔄 [ADMIN_SYNC] Syncing specific creators by username: ${creatorUsernames.join(", ")}`);
+      creatorsToSync = [];
+      for (const username of creatorUsernames) {
+        // Try to find creator by username on Instagram first, then TikTok
+        let creator = await CreatorService.getCreatorByUsernameAndPlatform(username, "instagram");
+        if (!creator) {
+          creator = await CreatorService.getCreatorByUsernameAndPlatform(username, "tiktok");
+        }
+        if (creator) {
+          creatorsToSync.push(creator);
+        } else {
+          console.log(`⚠️ [ADMIN_SYNC] Creator @${username} not found on any platform`);
+        }
+      }
+    } else if (creatorIds && creatorIds.length > 0) {
+      // Fallback to IDs for backward compatibility
+      console.log(`🔄 [ADMIN_SYNC] Syncing specific creators by ID: ${creatorIds.join(", ")}`);
       creatorsToSync = [];
       for (const creatorId of creatorIds) {
         const creator = await CreatorService.getCreatorById(creatorId);
@@ -82,7 +101,9 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`🔄 [ADMIN_SYNC] Found ${creatorsToSync.length} creators to sync`);
-    console.log(`⚙️ [ADMIN_SYNC] Settings: dryRun=${dryRun}, maxConcurrent=${maxConcurrent}, delay=${delayBetweenCreators}ms`);
+    console.log(
+      `⚙️ [ADMIN_SYNC] Settings: dryRun=${dryRun}, maxConcurrent=${maxConcurrent}, delay=${delayBetweenCreators}ms`,
+    );
 
     const syncResults = {
       syncedCreators: 0,
@@ -92,17 +113,19 @@ export async function POST(request: NextRequest) {
     // Process creators with rate limiting
     for (let i = 0; i < creatorsToSync.length; i++) {
       const creator = creatorsToSync[i];
-      
+
       try {
-        console.log(`🔄 [ADMIN_SYNC] Syncing creator @${creator.username} (${creator.id}) [${i + 1}/${creatorsToSync.length}]...`);
+        console.log(
+          `🔄 [ADMIN_SYNC] Syncing creator @${creator.username} (${creator.id}) [${i + 1}/${creatorsToSync.length}]...`,
+        );
 
         if (dryRun) {
           // Dry run mode - simulate sync without API calls
           console.log(`🧪 [ADMIN_SYNC] DRY RUN: Would sync @${creator.username} (platform: ${creator.platform})`);
           syncResults.syncedCreators++;
-          
+
           // Simulate a small delay even in dry run
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise((resolve) => setTimeout(resolve, 100));
           continue;
         }
 
@@ -112,7 +135,7 @@ export async function POST(request: NextRequest) {
           creator.username,
           creator.platform,
           syncVideos ? 20 : 0, // If syncVideos is false, don't fetch new videos
-          true // profileOnly = true to skip video URL validation
+          true, // profileOnly = true to skip video URL validation
         );
 
         if (processResult.success && processResult.profileData) {
@@ -139,9 +162,11 @@ export async function POST(request: NextRequest) {
 
           // If syncing videos, add new ones
           if (syncVideos && processResult.extractedVideos.length > 0) {
-            console.log(`📹 [ADMIN_SYNC] Adding ${processResult.extractedVideos.length} new videos for @${creator.username}...`);
-            
-            const videoDocuments = processResult.extractedVideos.map(video => ({
+            console.log(
+              `📹 [ADMIN_SYNC] Adding ${processResult.extractedVideos.length} new videos for @${creator.username}...`,
+            );
+
+            const videoDocuments = processResult.extractedVideos.map((video) => ({
               platform: video.platform,
               video_url: video.video_url,
               thumbnail_url: video.thumbnail_url,
@@ -157,7 +182,7 @@ export async function POST(request: NextRequest) {
             }));
 
             await VideoService.createVideosForCreator(creator.id!, videoDocuments);
-            
+
             // Update video count
             const newVideoCount = await VideoService.getVideoCountByCreatorId(creator.id!);
             await CreatorService.updateVideoCount(creator.id!, newVideoCount);
@@ -185,9 +210,10 @@ export async function POST(request: NextRequest) {
       }
 
       // Add configurable delay between requests to avoid rate limiting
-      if (i < creatorsToSync.length - 1) { // Don't wait after the last creator
+      if (i < creatorsToSync.length - 1) {
+        // Don't wait after the last creator
         console.log(`⏳ [ADMIN_SYNC] Waiting ${delayBetweenCreators}ms before next creator...`);
-        await new Promise(resolve => setTimeout(resolve, delayBetweenCreators));
+        await new Promise((resolve) => setTimeout(resolve, delayBetweenCreators));
       }
     }
 
@@ -208,7 +234,7 @@ export async function POST(request: NextRequest) {
         success: false,
         error: error instanceof Error ? error.message : "Failed to sync creators",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -221,7 +247,8 @@ export async function GET() {
       usage: {
         method: "POST",
         body: {
-          creatorIds: "Array<string> (optional) - specific creator IDs to sync",
+          creatorUsernames: "Array<string> (optional) - specific creator usernames to sync",
+          creatorIds: "Array<string> (optional) - specific creator IDs to sync (deprecated)",
           syncVideos: "boolean (optional) - whether to fetch new videos",
           adminKey: "string (required) - admin authentication key",
         },
@@ -230,13 +257,13 @@ export async function GET() {
             adminKey: "your-admin-key",
           },
           "Sync specific creators with videos": {
-            creatorIds: ["creatorId1", "creatorId2"],
+            creatorUsernames: ["john_doe", "jane_smith"],
             syncVideos: true,
             adminKey: "your-admin-key",
           },
         },
       },
     },
-    { status: 405 }
+    { status: 405 },
   );
 }

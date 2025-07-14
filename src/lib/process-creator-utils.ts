@@ -47,7 +47,7 @@ export interface ProcessCreatorResponse {
 let lastRapidApiCall = 0; // Single rate limiter for all RapidAPI calls
 let consecutiveFailures = 0; // Track failures for dynamic rate limiting
 let last429Time = 0; // Track when we last got rate limited
-let apiHealthStatus: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
+let apiHealthStatus: "healthy" | "degraded" | "unhealthy" = "healthy";
 
 // Dynamic rate limiting based on API health
 const BASE_RATE_LIMIT_MS = 2000; // Start with 2 seconds (more conservative)
@@ -60,31 +60,33 @@ const HEALTH_CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes
 function getDynamicRateLimit(): number {
   const timeSince429 = Date.now() - last429Time;
   const recent429 = timeSince429 < 10 * 60 * 1000; // Within last 10 minutes
-  
+
   // Base multiplier based on consecutive failures
-  let multiplier = 1 + (consecutiveFailures * 0.5);
-  
+  let multiplier = 1 + consecutiveFailures * 0.5;
+
   // Health-based adjustment
   switch (apiHealthStatus) {
-    case 'unhealthy':
+    case "unhealthy":
       multiplier *= 4; // 4x slower when unhealthy
       break;
-    case 'degraded':
+    case "degraded":
       multiplier *= 2; // 2x slower when degraded
       break;
-    case 'healthy':
+    case "healthy":
       multiplier *= 1; // Normal speed
       break;
   }
-  
+
   // Recent 429 penalty
   if (recent429) {
     multiplier *= 3; // 3x slower if we got rate limited recently
   }
-  
+
   const dynamicLimit = Math.min(BASE_RATE_LIMIT_MS * multiplier, MAX_RATE_LIMIT_MS);
-  console.log(`📊 [RATE_LIMIT] Dynamic rate limit: ${dynamicLimit}ms (health: ${apiHealthStatus}, failures: ${consecutiveFailures}, recent429: ${recent429})`);
-  
+  console.log(
+    `📊 [RATE_LIMIT] Dynamic rate limit: ${dynamicLimit}ms (health: ${apiHealthStatus}, failures: ${consecutiveFailures}, recent429: ${recent429})`,
+  );
+
   return dynamicLimit;
 }
 
@@ -136,33 +138,33 @@ function isCircuitOpen(platform: string): boolean {
 function updateApiHealth(success: boolean, isRateLimit: boolean = false): void {
   if (success) {
     consecutiveFailures = Math.max(0, consecutiveFailures - 1);
-    
+
     // Gradually improve health status on success
-    if (apiHealthStatus === 'unhealthy' && consecutiveFailures === 0) {
-      apiHealthStatus = 'degraded';
+    if (apiHealthStatus === "unhealthy" && consecutiveFailures === 0) {
+      apiHealthStatus = "degraded";
       console.log(`🟡 [API_HEALTH] Status improved to: degraded`);
-    } else if (apiHealthStatus === 'degraded' && consecutiveFailures === 0) {
-      apiHealthStatus = 'healthy';
+    } else if (apiHealthStatus === "degraded" && consecutiveFailures === 0) {
+      apiHealthStatus = "healthy";
       console.log(`🟢 [API_HEALTH] Status improved to: healthy`);
     }
   } else {
     consecutiveFailures++;
-    
+
     if (isRateLimit) {
       last429Time = Date.now();
-      apiHealthStatus = 'unhealthy';
+      apiHealthStatus = "unhealthy";
       console.log(`🔴 [API_HEALTH] Rate limited! Status set to: unhealthy`);
     } else if (consecutiveFailures >= FAILURE_THRESHOLD) {
-      if (apiHealthStatus === 'healthy') {
-        apiHealthStatus = 'degraded';
+      if (apiHealthStatus === "healthy") {
+        apiHealthStatus = "degraded";
         console.log(`🟡 [API_HEALTH] ${consecutiveFailures} failures, status degraded`);
       } else if (consecutiveFailures >= FAILURE_THRESHOLD * 2) {
-        apiHealthStatus = 'unhealthy';
+        apiHealthStatus = "unhealthy";
         console.log(`🔴 [API_HEALTH] ${consecutiveFailures} failures, status unhealthy`);
       }
     }
   }
-  
+
   console.log(`📊 [API_HEALTH] Current status: ${apiHealthStatus}, consecutive failures: ${consecutiveFailures}`);
 }
 
@@ -237,10 +239,12 @@ async function processQueue(): Promise<void> {
       const now = Date.now();
       const dynamicRateLimit = getDynamicRateLimit();
       const timeSinceLastCall = now - lastRapidApiCall;
-      
+
       if (timeSinceLastCall < dynamicRateLimit) {
         const waitTime = dynamicRateLimit - timeSinceLastCall;
-        console.log(`⏳ [QUEUE] Waiting ${waitTime}ms before next RapidAPI call... (dynamic rate limit, queue: ${requestQueue.length + 1})`);
+        console.log(
+          `⏳ [QUEUE] Waiting ${waitTime}ms before next RapidAPI call... (dynamic rate limit, queue: ${requestQueue.length + 1})`,
+        );
         await new Promise((resolve) => setTimeout(resolve, waitTime));
       }
 
@@ -302,7 +306,7 @@ export async function processCreatorProfile(
       return cachedResult;
     }
 
-    let processResult: { videos: VideoData[], profileData?: ProcessCreatorResponse["profileData"] };
+    let processResult: { videos: VideoData[]; profileData?: ProcessCreatorResponse["profileData"] };
 
     if (platform === "tiktok") {
       processResult = await processTikTokProfile(username, videoCount, profileOnly);
@@ -345,13 +349,15 @@ export async function processCreatorProfile(
         transcriptionStatus: "pending" as const,
       }));
 
-    console.log(`✅ [PROCESS_CREATOR_UTILS] Successfully extracted ${sortedVideos.length} videos${profileOnly ? ' (profile-only mode)' : ''}`);
+    console.log(
+      `✅ [PROCESS_CREATOR_UTILS] Successfully extracted ${sortedVideos.length} videos${profileOnly ? " (profile-only mode)" : ""}`,
+    );
 
     const result: ProcessCreatorResponse = {
       success: true,
       extractedVideos: sortedVideos,
       totalFound: extractedVideos.length,
-      message: profileOnly 
+      message: profileOnly
         ? `Successfully extracted profile data for @${username} (${sortedVideos.length} videos found but not validated)`
         : `Successfully extracted ${sortedVideos.length} videos from @${username}'s ${platform} profile.`,
       profileData,
@@ -374,7 +380,11 @@ export async function processCreatorProfile(
   }
 }
 
-async function processTikTokProfile(username: string, videoCount: number, profileOnly: boolean = false): Promise<{ videos: VideoData[], profileData?: ProcessCreatorResponse["profileData"] }> {
+async function processTikTokProfile(
+  username: string,
+  videoCount: number,
+  profileOnly: boolean = false,
+): Promise<{ videos: VideoData[]; profileData?: ProcessCreatorResponse["profileData"] }> {
   console.log(`🎵 [TIKTOK] Processing profile: @${username}`);
 
   // Check circuit breaker
@@ -395,9 +405,73 @@ async function processTikTokProfile(username: string, videoCount: number, profil
         throw new Error("RapidAPI key not configured. Please set RAPIDAPI_KEY environment variable.");
       }
 
-      // Queue the TikTok API call with global rate limiting
+      // Queue the TikTok profile API call first to get user data
+      const profileApiUrl = `https://tiktok-scrapper-videos-music-challenges-downloader.p.rapidapi.com/user/${username}`;
+      console.log(`🌐 [TIKTOK] Queueing profile API call to: ${profileApiUrl}`);
+
+      const profileResponse = await queueRapidApiCall(`tiktok_profile_${username}_${attempt}`, async () => {
+        return await fetch(profileApiUrl, {
+          method: "GET",
+          headers: {
+            "X-RapidAPI-Key": rapidApiKey,
+            "X-RapidAPI-Host": "tiktok-scrapper-videos-music-challenges-downloader.p.rapidapi.com",
+          },
+        });
+      });
+
+      console.log(`📡 [TIKTOK] Profile API Response Status: ${profileResponse.status} ${profileResponse.statusText}`);
+
+      let profileData: ProcessCreatorResponse["profileData"] | undefined = undefined;
+
+      // Handle 429 (Too Many Requests) specifically for profile API
+      if (profileResponse.status === 429) {
+        recordFailure("tiktok", true); // Mark as rate limit failure
+        const retryAfter = profileResponse.headers.get("retry-after");
+        const baseWait = retryAfter ? parseInt(retryAfter) * 1000 : Math.pow(2, attempt) * 1000;
+        const waitTime = Math.max(baseWait, getDynamicRateLimit() * 2); // Use at least 2x dynamic rate limit
+        console.log(`🚫 [TIKTOK] Rate limited (429) on profile fetch. Waiting ${waitTime}ms before retry...`);
+        await new Promise((resolve) => setTimeout(resolve, waitTime));
+        continue;
+      }
+
+      if (profileResponse.ok) {
+        try {
+          const profileInfo = await profileResponse.json();
+          console.log(`📊 [TIKTOK] Profile API Response Data:`, JSON.stringify(profileInfo, null, 2));
+
+          if (profileInfo && profileInfo.data) {
+            const userInfo = profileInfo.data;
+            console.log(`🔍 [TIKTOK] Available profile fields:`, Object.keys(userInfo));
+
+            profileData = {
+              profileImageUrl: userInfo.avatar || userInfo.avatarThumb || userInfo.avatarMedium || undefined,
+              displayName: userInfo.nickname || userInfo.uniqueId || username,
+              bio: userInfo.signature || undefined,
+              followersCount: userInfo.followerCount || userInfo.followers || 0,
+              followingCount: userInfo.followingCount || userInfo.following || 0,
+              postsCount: userInfo.videoCount || userInfo.videos || 0,
+              isVerified: userInfo.verified || false,
+              isPrivate: userInfo.privateAccount || userInfo.secret || false,
+              externalUrl: userInfo.bioLink?.link || undefined,
+              category: undefined, // TikTok doesn't provide category in this API
+            };
+            console.log(`🎵 [TIKTOK] Extracted profile data:`, profileData);
+          }
+        } catch (error) {
+          console.error(`⚠️ [TIKTOK] Failed to parse profile data:`, error);
+        }
+      }
+
+      // In profile-only mode, skip video fetching if we already have profile data
+      if (profileOnly && profileData) {
+        console.log(`✅ [TIKTOK] Profile-only mode: Successfully fetched profile data for @${username}`);
+        recordSuccess("tiktok");
+        return { videos: [], profileData };
+      }
+
+      // Queue the TikTok API call with global rate limiting for videos
       const tiktokApiUrl = `https://tiktok-scrapper-videos-music-challenges-downloader.p.rapidapi.com/user/${username}/feed`;
-      console.log(`🌐 [TIKTOK] Queueing API call to: ${tiktokApiUrl}`);
+      console.log(`🌐 [TIKTOK] Queueing feed API call to: ${tiktokApiUrl}`);
 
       const response = await queueRapidApiCall(`tiktok_feed_${username}_${attempt}`, async () => {
         return await fetch(tiktokApiUrl, {
@@ -432,32 +506,86 @@ async function processTikTokProfile(username: string, videoCount: number, profil
       const data = await response.json();
       console.log(`📊 [TIKTOK] API Response Data:`, JSON.stringify(data, null, 2));
 
-      if (!data.videos || !Array.isArray(data.videos)) {
-        console.error(`❌ [TIKTOK] No videos array found in response. Response structure:`, Object.keys(data));
+      // TikTok API can return videos in different structures
+      let videos = [];
+      if (data.status === "ok" && data.data) {
+        // Try multiple possible locations for videos
+        if (Array.isArray(data.data.aweme_list)) {
+          videos = data.data.aweme_list;
+          console.log(`✅ [TIKTOK] Found ${videos.length} videos at data.data.aweme_list`);
+        } else if (Array.isArray(data.data.videos)) {
+          videos = data.data.videos;
+          console.log(`✅ [TIKTOK] Found ${videos.length} videos at data.data.videos`);
+        } else if (Array.isArray(data.videos)) {
+          videos = data.videos;
+          console.log(`✅ [TIKTOK] Found ${videos.length} videos at data.videos`);
+        } else if (Array.isArray(data.aweme_list)) {
+          videos = data.aweme_list;
+          console.log(`✅ [TIKTOK] Found ${videos.length} videos at data.aweme_list`);
+        }
+      }
+
+      if (videos.length === 0) {
+        console.error(`❌ [TIKTOK] No videos array found. Response structure:`, {
+          status: data.status,
+          topLevelKeys: Object.keys(data),
+          hasData: !!data.data,
+          dataKeys: data.data ? Object.keys(data.data) : "no data object",
+          possibleVideoLocations: {
+            "data.data.aweme_list": data.data?.aweme_list
+              ? `array with ${data.data.aweme_list.length} items`
+              : "not found",
+            "data.data.videos": data.data?.videos ? `array with ${data.data.videos.length} items` : "not found",
+            "data.videos": data.videos ? `array with ${data.videos.length} items` : "not found",
+            "data.aweme_list": data.aweme_list ? `array with ${data.aweme_list.length} items` : "not found",
+          },
+        });
         throw new Error(
           "No videos found in TikTok API response. The profile may be private or the username may be incorrect.",
         );
       }
 
-      console.log(`📊 [TIKTOK] Found ${data.videos.length} videos in response`);
+      console.log(`📊 [TIKTOK] Found ${videos.length} videos in response`);
 
-      if (data.videos.length === 0) {
-        throw new Error(`No videos found for @${username}. The profile may be empty or private.`);
+      // Extract profile data from video response if we don't have it yet
+      if (!profileData && videos.length > 0) {
+        const firstVideo = videos[0];
+        const authorInfo = firstVideo.author;
+        if (authorInfo) {
+          console.log(`🔍 [TIKTOK] Extracting profile data from video author info`);
+          profileData = {
+            profileImageUrl:
+              authorInfo.avatar_larger?.url_list?.[0] ||
+              authorInfo.avatar_medium?.url_list?.[0] ||
+              authorInfo.avatar_thumb?.url_list?.[0] ||
+              undefined,
+            displayName: authorInfo.nickname || authorInfo.unique_id || username,
+            bio: authorInfo.signature || undefined,
+            followersCount: authorInfo.follower_count || 0,
+            followingCount: authorInfo.following_count || 0,
+            postsCount: authorInfo.aweme_count || 0,
+            isVerified: authorInfo.verification_type === 1 || false,
+            isPrivate: authorInfo.user_mode !== 1 || false,
+            externalUrl: undefined, // Not available in video author data
+            category: undefined,
+          };
+          console.log(`🎵 [TIKTOK] Extracted profile data from video:`, profileData);
+        }
       }
 
       // Process up to 2x the requested count to get best performers
-      const maxVideos = Math.min(data.videos.length, videoCount * 2);
-      console.log(`🔄 [TIKTOK] Processing ${maxVideos} videos out of ${data.videos.length} total`);
+      const maxVideos = Math.min(videos.length, videoCount * 2);
+      console.log(`🔄 [TIKTOK] Processing ${maxVideos} videos out of ${videos.length} total`);
       const processedVideos: VideoData[] = [];
 
       for (let i = 0; i < maxVideos; i++) {
-        const video = data.videos[i];
+        const video = videos[i];
         console.log(`🔍 [TIKTOK] Processing video ${i + 1}/${maxVideos}:`, {
-          id: video.id,
-          title: video.title,
-          video_url: video.video_url,
-          view_count: video.view_count,
-          like_count: video.like_count,
+          id: video.aweme_id || video.id,
+          title: video.desc || video.description,
+          video_url: video.video?.play_addr?.url_list?.[0] || video.video_url,
+          view_count: video.statistics?.play_count || video.view_count,
+          like_count: video.statistics?.digg_count || video.like_count,
         });
 
         const videoData = extractTikTokVideoData(video, username, i);
@@ -477,7 +605,7 @@ async function processTikTokProfile(username: string, videoCount: number, profil
 
       console.log(`✅ [TIKTOK] Successfully processed ${processedVideos.length} videos for @${username}`);
       recordSuccess("tiktok");
-      return { videos: processedVideos, profileData: undefined }; // TikTok profile data extraction not implemented yet
+      return { videos: processedVideos, profileData };
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
       console.error(`❌ [TIKTOK] Attempt ${attempt}/${maxRetries} failed:`, lastError.message);
@@ -506,7 +634,11 @@ async function processTikTokProfile(username: string, videoCount: number, profil
   );
 }
 
-async function processInstagramProfile(username: string, videoCount: number, profileOnly: boolean = false): Promise<{ videos: VideoData[], profileData?: ProcessCreatorResponse["profileData"] }> {
+async function processInstagramProfile(
+  username: string,
+  videoCount: number,
+  profileOnly: boolean = false,
+): Promise<{ videos: VideoData[]; profileData?: ProcessCreatorResponse["profileData"] }> {
   console.log(`📸 [INSTAGRAM] Processing profile: @${username}`);
 
   // Check circuit breaker
@@ -586,7 +718,9 @@ async function processInstagramProfile(username: string, videoCount: number, pro
         });
       });
 
-      console.log(`📡 [INSTAGRAM] Profile Info API Response Status: ${profileResponse.status} ${profileResponse.statusText}`);
+      console.log(
+        `📡 [INSTAGRAM] Profile Info API Response Status: ${profileResponse.status} ${profileResponse.statusText}`,
+      );
 
       let profileInfoData = null;
       if (profileResponse.ok) {
@@ -643,33 +777,33 @@ async function processInstagramProfile(username: string, videoCount: number, pro
 
       // Extract profile information - prioritize dedicated profile API, fallback to reels data
       let profileData: ProcessCreatorResponse["profileData"] = undefined;
-      
+
       // First try to extract from dedicated profile info API
       if (profileInfoData) {
         console.log(`🔍 [INSTAGRAM] Extracting from profile info API data...`);
         // The profile_by_username endpoint returns data at root level, not nested
         const profileInfo = profileInfoData;
-        
+
         if (profileInfo) {
           console.log(`🔍 [INSTAGRAM] Profile info available fields:`, Object.keys(profileInfo));
           console.log(`🔍 [INSTAGRAM] Profile follower data:`, {
             follower_count: profileInfo.follower_count,
-            edge_followed_by: profileInfo.edge_followed_by?.count
+            edge_followed_by: profileInfo.edge_followed_by?.count,
           });
           console.log(`🔍 [INSTAGRAM] Profile following data:`, {
             following_count: profileInfo.following_count,
-            edge_follow: profileInfo.edge_follow?.count
+            edge_follow: profileInfo.edge_follow?.count,
           });
           console.log(`🔍 [INSTAGRAM] Profile bio data:`, {
             biography: profileInfo.biography,
             external_url: profileInfo.external_url,
-            business_category_name: profileInfo.business_category_name
+            business_category_name: profileInfo.business_category_name,
           });
 
           // Extract website/external URL from bio or dedicated field
           let externalUrl = profileInfo.external_url;
-          let bio = profileInfo.biography || '';
-          
+          const bio = profileInfo.biography || '';
+
           // Try to extract URL from bio if not in external_url field
           if (!externalUrl && bio) {
             const urlMatch = bio.match(/(https?:\/\/[^\s]+)/);
@@ -693,23 +827,26 @@ async function processInstagramProfile(username: string, videoCount: number, pro
           console.log(`📸 [INSTAGRAM] Extracted profile data from profile API:`, profileData);
         }
       }
-      
+
       // Fallback to extracting from reels data if profile API didn't work
       if (!profileData && reelsData.data.items.length > 0) {
         console.log(`🔍 [INSTAGRAM] Falling back to extracting from reels data...`);
         const firstItem = reelsData.data.items[0];
         const userInfo = firstItem.media?.user || firstItem.user || firstItem.media?.owner;
-        
+
         if (userInfo) {
           console.log(`🔍 [INSTAGRAM] Available user fields from reels:`, Object.keys(userInfo));
-          
+
           profileData = {
-            profileImageUrl: userInfo.profile_pic_url || userInfo.profile_picture || userInfo.profile_pic_url_hd || undefined,
+            profileImageUrl:
+              userInfo.profile_pic_url || userInfo.profile_picture || userInfo.profile_pic_url_hd || undefined,
             displayName: userInfo.full_name || userInfo.display_name || userInfo.name || username,
             bio: userInfo.biography || userInfo.bio || undefined,
-            followersCount: userInfo.follower_count || userInfo.followers_count || userInfo.edge_followed_by?.count || 0,
+            followersCount:
+              userInfo.follower_count || userInfo.followers_count || userInfo.edge_followed_by?.count || 0,
             followingCount: userInfo.following_count || userInfo.followings_count || userInfo.edge_follow?.count || 0,
-            postsCount: userInfo.media_count || userInfo.posts_count || userInfo.edge_owner_to_timeline_media?.count || 0,
+            postsCount:
+              userInfo.media_count || userInfo.posts_count || userInfo.edge_owner_to_timeline_media?.count || 0,
             isVerified: userInfo.is_verified || userInfo.verified || false,
             isPrivate: userInfo.is_private || userInfo.private || false,
           };
@@ -733,7 +870,7 @@ async function processInstagramProfile(username: string, videoCount: number, pro
         throw new Error(`No video reels found for @${username}. The profile may be empty or private.`);
       }
 
-      let processedVideos: VideoData[] = [];
+      const processedVideos: VideoData[] = [];
 
       // Only process videos if we have video items and it's not profile-only mode
       if (videoItems.length > 0) {
@@ -811,23 +948,51 @@ async function processInstagramProfile(username: string, videoCount: number, pro
 
 // Helper function for extracting TikTok video data
 function extractTikTokVideoData(video: any, username: string, i: number): VideoData | null {
-  const videoUrl = video.video_url ?? video.download_url ?? video.url;
+  // Handle the nested video structure from TikTok API
+  const videoData = video.video || {};
+  const statistics = video.statistics || {};
+
+  // Extract video URLs from different possible locations
+  let videoUrl = null;
+  if (videoData.play_addr?.url_list?.length > 0) {
+    videoUrl = videoData.play_addr.url_list[0];
+  } else if (videoData.download_addr?.url_list?.length > 0) {
+    videoUrl = videoData.download_addr.url_list[0];
+  } else if (video.video_url) {
+    videoUrl = video.video_url;
+  }
+
   if (!videoUrl || !isValidVideoUrl(videoUrl)) {
     console.warn(`⚠️ [TIKTOK] Invalid video URL for video ${i}, skipping`);
     return null;
   }
+
+  // Extract thumbnail URL
+  let thumbnailUrl = null;
+  if (videoData.cover?.url_list?.length > 0) {
+    thumbnailUrl = videoData.cover.url_list[0];
+  } else if (videoData.origin_cover?.url_list?.length > 0) {
+    thumbnailUrl = videoData.origin_cover.url_list[0];
+  } else if (video.thumbnail_url) {
+    thumbnailUrl = video.thumbnail_url;
+  }
+
+  // Extract description/title
+  const description = video.desc || video.description || "";
+  const title = description || `TikTok Video ${i + 1}`;
+
   return {
-    id: video.id ?? `tiktok_${username}_${i}_${Date.now()}`,
+    id: video.aweme_id || video.id || `tiktok_${username}_${i}_${Date.now()}`,
     platform: "tiktok",
     video_url: videoUrl,
-    thumbnail_url: video.thumbnail_url ?? video.cover,
-    viewCount: parseInt(video.view_count ?? video.views ?? "0"),
-    likeCount: parseInt(video.like_count ?? video.likes ?? "0"),
-    quality: video.quality ?? "720p",
-    title: video.title ?? video.description ?? `TikTok Video ${i + 1}`,
-    description: video.description ?? "",
-    author: video.author ?? username,
-    duration: parseInt(video.duration ?? "30"),
+    thumbnail_url: thumbnailUrl,
+    viewCount: parseInt(statistics.play_count || statistics.view_count || video.view_count || "0"),
+    likeCount: parseInt(statistics.digg_count || statistics.like_count || video.like_count || "0"),
+    quality: videoData.ratio || video.quality || "720p",
+    title: title,
+    description: description,
+    author: video.author?.nickname || video.author?.unique_id || username,
+    duration: parseInt(videoData.duration || video.duration || "30"),
   };
 }
 
@@ -837,14 +1002,14 @@ function extractInstagramReelDataProfileOnly(reel: any, username: string, i: num
     // Get basic metadata without validating video URLs
     const videoVersions = reel.video_versions;
     const videoUrl = videoVersions && videoVersions.length > 0 ? videoVersions[0].url : `placeholder-${i}`;
-    
+
     // Get thumbnail from image_versions2
     const imageVersions = reel.image_versions2?.candidates;
     const thumbnailUrl = imageVersions && imageVersions.length > 0 ? imageVersions[0].url : undefined;
-    
+
     // Extract caption text
     const caption = reel.caption?.text ?? "";
-    
+
     return {
       id: reel.pk ?? reel.id ?? `instagram_${username}_${i}_${Date.now()}`,
       platform: "instagram",

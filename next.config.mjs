@@ -37,6 +37,22 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'bunny.net',
       },
+      {
+        protocol: 'https',
+        hostname: '**.tiktokcdn.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.tiktokcdn-us.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.tiktokv.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.byteoversea.com',
+      },
     ],
     domains: [
       // Instagram CDN domains - regional servers
@@ -69,6 +85,16 @@ const nextConfig = {
       // Bunny.net CDN domains
       'bunny.net',
       '**.b-cdn.net',
+      // TikTok CDN domains
+      'p16-sign.tiktokcdn-us.com',
+      'p19-sign.tiktokcdn-us.com',
+      'p77-sign.tiktokcdn-us.com',
+      'p16-va.tiktokcdn.com',
+      'p19-va.tiktokcdn.com',
+      'p77-va.tiktokcdn.com',
+      'lf16-tiktok-common.tiktokcdn-us.com',
+      'lf19-tiktok-common.tiktokcdn-us.com',
+      'sf16-website-login.neutral.ttwstatic.com',
       // Development placeholder images
       'via.placeholder.com'
     ],

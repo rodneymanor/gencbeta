@@ -21,6 +21,9 @@ export interface VideoGridVideo {
   description?: string;
   collectionId?: string;
   addedAt?: string;
+  // Video playback URLs
+  bunnyIframeUrl?: string; // Bunny.net iframe for optimized playback
+  originalVideoUrl?: string; // Original video URL as fallback
   // Additional properties for management mode
   isSelected?: boolean;
   isDeleting?: boolean;
@@ -295,11 +298,16 @@ export function VideoGridDisplay({
                 {/* Thumbnail */}
                 <div className="relative aspect-video">
                   <Image
-                    src={video.thumbnailUrl}
+                    src={video.thumbnailUrl || "/images/placeholder.svg"}
                     alt={video.title || "Video thumbnail"}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     className="object-cover"
+                    priority={idx < 6}
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "/images/placeholder.svg";
+                    }}
                   />
 
                   {/* Play button overlay */}

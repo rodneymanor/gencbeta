@@ -6,34 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { SafeImage } from "@/components/ui/safe-image";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EnhancedCreatorProfile, getOptimizedProfileImageUrl } from "@/lib/creator-spotlight-utils";
 import { cn } from "@/lib/utils";
 
-interface CreatorProfile {
-  id: string;
-  username: string;
-  displayName?: string;
-  platform: "tiktok" | "instagram";
-  profileImageUrl: string;
-  bio?: string;
-  website?: string;
-  postsCount: number;
-  followersCount: number;
-  followingCount: number;
-  isVerified?: boolean;
-  mutualFollowers?: Array<{
-    username: string;
-    displayName: string;
-  }>;
-  lastProcessed?: string;
-  videoCount?: number;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
 interface CreatorGridProps {
-  creators: CreatorProfile[];
+  creators: EnhancedCreatorProfile[];
   loading: boolean;
-  onCreatorClick: (creator: CreatorProfile) => void;
+  onCreatorClick: (creator: EnhancedCreatorProfile) => void;
 }
 
 export function CreatorGrid({ creators, loading, onCreatorClick }: CreatorGridProps) {
@@ -63,7 +42,7 @@ export function CreatorGrid({ creators, loading, onCreatorClick }: CreatorGridPr
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {creators.map((creator) => (
+      {creators.map((creator, index) => (
         <Card
           key={creator.id}
           className="cursor-pointer overflow-hidden transition-all duration-200 hover:scale-[1.02] hover:shadow-lg"
@@ -74,13 +53,14 @@ export function CreatorGrid({ creators, loading, onCreatorClick }: CreatorGridPr
               <div className="flex items-center gap-4">
                 <div className="relative">
                   <SafeImage
-                    src={creator.profileImageUrl}
+                    src={getOptimizedProfileImageUrl(creator)}
                     alt={creator.displayName ?? creator.username}
                     width={64}
                     height={64}
                     className="h-16 w-16 rounded-full"
                     fallbackUsername={creator.username}
                     fallbackPlatform={creator.platform}
+                    priority={index < 6}
                   />
                   <Badge
                     variant="outline"
@@ -125,6 +105,11 @@ export function CreatorGrid({ creators, loading, onCreatorClick }: CreatorGridPr
                   <Badge variant="secondary" className="text-xs">
                     {creator.videoCount ?? 0} videos
                   </Badge>
+                  {creator.hasOptimizedMedia && (
+                    <Badge variant="outline" className="border-green-600 text-xs text-green-600">
+                      ⚡ Fast
+                    </Badge>
+                  )}
                 </div>
               </div>
             </div>

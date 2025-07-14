@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { VideoService } from "../../../../../lib/video-service";
+
 import { CreatorService } from "../../../../../lib/creator-service";
+import { VideoService } from "../../../../../lib/video-service";
 
 interface GetCreatorVideosResponse {
   success: boolean;
@@ -10,20 +11,17 @@ interface GetCreatorVideosResponse {
   error?: string;
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { creatorId: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ creatorId: string }> }) {
   try {
-    const { creatorId } = params;
-    
+    const { creatorId } = await params;
+
     if (!creatorId) {
       return NextResponse.json(
         {
           success: false,
           error: "Creator ID is required",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -37,13 +35,13 @@ export async function GET(
           success: false,
           error: "Creator not found",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     // Get videos for the creator
     const videos = await VideoService.getVideosByCreatorId(creatorId);
-    
+
     console.log(`📊 [CREATOR_VIDEOS] Found ${videos.length} videos for creator ${creatorId}`);
 
     const response: GetCreatorVideosResponse = {
@@ -62,7 +60,7 @@ export async function GET(
         success: false,
         error: error instanceof Error ? error.message : "Failed to fetch creator videos",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

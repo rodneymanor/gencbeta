@@ -13,13 +13,13 @@ export interface VideoDocument {
   description?: string;
   author?: string;
   duration?: number;
-  
+
   // Processing status fields
   downloadStatus?: "pending" | "downloading" | "completed" | "failed";
   transcriptionStatus?: "pending" | "transcribing" | "completed" | "failed";
   downloadUrl?: string; // CDN URL after download
   transcriptionId?: string; // ID of transcription result
-  
+
   // Metadata
   createdAt: string;
   updatedAt: string;
@@ -33,12 +33,12 @@ export class VideoService {
    * Create multiple videos for a creator
    */
   static async createVideosForCreator(
-    creatorId: string, 
-    videos: Omit<VideoDocument, "id" | "creatorId" | "createdAt" | "updatedAt">[]
+    creatorId: string,
+    videos: Omit<VideoDocument, "id" | "creatorId" | "createdAt" | "updatedAt">[],
   ): Promise<VideoDocument[]> {
     try {
       console.log(`📹 [VIDEO_SERVICE] Creating ${videos.length} videos for creator ${creatorId}...`);
-      
+
       if (!adminDb) {
         throw new Error("Firebase Admin SDK not initialized");
       }
@@ -63,9 +63,7 @@ export class VideoService {
         };
 
         // Filter out undefined values
-        const cleanedData = Object.fromEntries(
-          Object.entries(videoData).filter(([_, value]) => value !== undefined)
-        );
+        const cleanedData = Object.fromEntries(Object.entries(videoData).filter(([_, value]) => value !== undefined));
 
         batch.set(videoRef, cleanedData);
       }
@@ -98,15 +96,12 @@ export class VideoService {
   static async getVideosByCreatorId(creatorId: string): Promise<VideoDocument[]> {
     try {
       console.log(`🔍 [VIDEO_SERVICE] Fetching videos for creator ${creatorId}...`);
-      
+
       if (!adminDb) {
         throw new Error("Firebase Admin SDK not initialized");
       }
 
-      const snapshot = await adminDb
-        .collection(this.VIDEOS_COLLECTION)
-        .where("creatorId", "==", creatorId)
-        .get();
+      const snapshot = await adminDb.collection(this.VIDEOS_COLLECTION).where("creatorId", "==", creatorId).get();
 
       const videos: VideoDocument[] = [];
       snapshot.forEach((doc: any) => {
@@ -130,7 +125,7 @@ export class VideoService {
   static async getVideoById(videoId: string): Promise<VideoDocument | null> {
     try {
       console.log(`🔍 [VIDEO_SERVICE] Fetching video ${videoId}...`);
-      
+
       if (!adminDb) {
         throw new Error("Firebase Admin SDK not initialized");
       }
@@ -165,19 +160,17 @@ export class VideoService {
       transcriptionStatus?: VideoDocument["transcriptionStatus"];
       downloadUrl?: string;
       transcriptionId?: string;
-    }
+    },
   ): Promise<void> {
     try {
       console.log(`🔄 [VIDEO_SERVICE] Updating video ${videoId} status...`);
-      
+
       if (!adminDb) {
         throw new Error("Firebase Admin SDK not initialized");
       }
 
       // Filter out undefined values
-      const cleanedUpdates = Object.fromEntries(
-        Object.entries(updates).filter(([_, value]) => value !== undefined)
-      );
+      const cleanedUpdates = Object.fromEntries(Object.entries(updates).filter(([_, value]) => value !== undefined));
 
       const updateData = {
         ...cleanedUpdates,
@@ -185,7 +178,7 @@ export class VideoService {
       };
 
       await adminDb.collection(this.VIDEOS_COLLECTION).doc(videoId).update(updateData);
-      
+
       console.log(`✅ [VIDEO_SERVICE] Video ${videoId} status updated successfully`);
     } catch (error) {
       console.error(`🔥 [VIDEO_SERVICE] Failed to update video ${videoId}:`, error);
@@ -199,15 +192,12 @@ export class VideoService {
   static async getVideoCountByCreatorId(creatorId: string): Promise<number> {
     try {
       console.log(`📊 [VIDEO_SERVICE] Getting video count for creator ${creatorId}...`);
-      
+
       if (!adminDb) {
         throw new Error("Firebase Admin SDK not initialized");
       }
 
-      const snapshot = await adminDb
-        .collection(this.VIDEOS_COLLECTION)
-        .where("creatorId", "==", creatorId)
-        .get();
+      const snapshot = await adminDb.collection(this.VIDEOS_COLLECTION).where("creatorId", "==", creatorId).get();
 
       const count = snapshot.size;
       console.log(`📊 [VIDEO_SERVICE] Creator ${creatorId} has ${count} videos`);
@@ -224,15 +214,12 @@ export class VideoService {
   static async deleteVideosByCreatorId(creatorId: string): Promise<void> {
     try {
       console.log(`🗑️ [VIDEO_SERVICE] Deleting all videos for creator ${creatorId}...`);
-      
+
       if (!adminDb) {
         throw new Error("Firebase Admin SDK not initialized");
       }
 
-      const snapshot = await adminDb
-        .collection(this.VIDEOS_COLLECTION)
-        .where("creatorId", "==", creatorId)
-        .get();
+      const snapshot = await adminDb.collection(this.VIDEOS_COLLECTION).where("creatorId", "==", creatorId).get();
 
       if (snapshot.empty) {
         console.log(`📊 [VIDEO_SERVICE] No videos found for creator ${creatorId}`);
@@ -258,11 +245,11 @@ export class VideoService {
    */
   static async getVideosWithPagination(
     limit: number = 20,
-    startAfter?: string
+    startAfter?: string,
   ): Promise<{ videos: VideoDocument[]; hasMore: boolean; lastDoc?: string }> {
     try {
       console.log(`📄 [VIDEO_SERVICE] Fetching videos with pagination (limit: ${limit})...`);
-      
+
       if (!adminDb) {
         throw new Error("Firebase Admin SDK not initialized");
       }
@@ -281,7 +268,7 @@ export class VideoService {
 
       const snapshot = await query.get();
       const videos: VideoDocument[] = [];
-      
+
       snapshot.forEach((doc: any) => {
         videos.push({
           id: doc.id,

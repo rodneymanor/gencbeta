@@ -8,33 +8,12 @@ import { Plus, Search, Users } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { EnhancedCreatorProfile } from "@/lib/creator-spotlight-utils";
 
 import { AddCreatorDialog } from "./_components/add-creator-dialog";
 import { CreatorDetailView } from "./_components/creator-detail-view";
 import { CreatorGrid } from "./_components/creator-grid";
 import { useCreators, useCreatorVideos } from "./_hooks/use-creators";
-
-interface CreatorProfile {
-  id: string;
-  username: string;
-  displayName?: string;
-  platform: "tiktok" | "instagram";
-  profileImageUrl: string;
-  bio?: string;
-  website?: string;
-  postsCount: number;
-  followersCount: number;
-  followingCount: number;
-  isVerified?: boolean;
-  mutualFollowers?: Array<{
-    username: string;
-    displayName: string;
-  }>;
-  lastProcessed?: string;
-  videoCount?: number;
-  createdAt?: string;
-  updatedAt?: string;
-}
 
 export default function CreatorSpotlightPage() {
   const router = useRouter();
@@ -43,7 +22,7 @@ export default function CreatorSpotlightPage() {
 
   const { creators, loading, loadCreators } = useCreators();
   const { creatorVideos, loadingVideos, loadCreatorVideos, clearVideos } = useCreatorVideos();
-  const [selectedCreator, setSelectedCreator] = useState<CreatorProfile | null>(null);
+  const [selectedCreator, setSelectedCreator] = useState<EnhancedCreatorProfile | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [platformFilter, setPlatformFilter] = useState<"all" | "tiktok" | "instagram">("all");
 
@@ -56,9 +35,9 @@ export default function CreatorSpotlightPage() {
         loadCreatorVideos(creator);
       }
     }
-  }, [selectedCreatorId, creators]); // Removed loadCreatorVideos to prevent infinite loop
+  }, [selectedCreatorId, creators, loadCreatorVideos]);
 
-  const handleCreatorClick = (creator: CreatorProfile) => {
+  const handleCreatorClick = (creator: EnhancedCreatorProfile) => {
     setSelectedCreator(creator);
     router.push(`/research/creator-spotlight?creator=${creator.id}`);
     loadCreatorVideos(creator);
