@@ -109,25 +109,25 @@ export function FloatingToolbar({ script }: FloatingToolbarProps) {
   };
 
   return (
-    <div className="fixed top-6 right-6 z-50">
+    <div className="fixed top-[var(--space-3)] right-[var(--space-3)] z-50">
       <Card className="bg-background/95 border shadow-lg backdrop-blur-sm">
-        <CardContent className="p-2">
-          <div className="flex items-center gap-1">
+        <CardContent className="p-[var(--space-1)]">
+          <div className="flex items-center gap-[var(--space-1)]">
             {/* Save Button */}
             <Button
               variant="ghost"
               size="sm"
               onClick={handleSave}
               disabled={isSaving || !script.trim()}
-              className="h-8 px-3"
+              className="h-10 px-[var(--space-3)]"
             >
-              <Save className="mr-1 h-4 w-4" />
+              <Save className="mr-[var(--space-1)] h-4 w-4" />
               {isSaving ? "Saving..." : "Save"}
             </Button>
 
             {/* Download Button */}
             <Button variant="ghost" size="sm" onClick={handleDownload} disabled={!script.trim()} className="h-8 px-3">
-              <Download className="mr-1 h-4 w-4" />
+              <Download className="mr-[var(--space-1)] h-4 w-4" />
               Export
             </Button>
 
@@ -137,7 +137,7 @@ export function FloatingToolbar({ script }: FloatingToolbarProps) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" disabled={isRewriting} className="h-8 px-3">
-                  <Mic className="mr-1 h-4 w-4" />
+                  <Mic className="mr-[var(--space-1)] h-4 w-4" />
                   {currentVoice}
                 </Button>
               </DropdownMenuTrigger>
@@ -149,7 +149,7 @@ export function FloatingToolbar({ script }: FloatingToolbarProps) {
                     onClick={() => handleChangeVoice(voice)}
                     className={voice === currentVoice ? "bg-accent" : ""}
                   >
-                    <Mic className="mr-2 h-4 w-4" />
+                    <Mic className="mr-[var(--space-1)] h-4 w-4" />
                     {voice} Voice
                     {voice === currentVoice && <span className="ml-auto">✓</span>}
                   </DropdownMenuItem>
@@ -164,7 +164,7 @@ export function FloatingToolbar({ script }: FloatingToolbarProps) {
                     onClick={() => handleRewriteWithVoice(voice)}
                     disabled={!script.trim()}
                   >
-                    <RefreshCw className="mr-2 h-4 w-4" />
+                    <RefreshCw className="mr-[var(--space-1)] h-4 w-4" />
                     Rewrite as {voice}
                   </DropdownMenuItem>
                 ))}
@@ -175,7 +175,7 @@ export function FloatingToolbar({ script }: FloatingToolbarProps) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" disabled={isRewriting || !script.trim()} className="h-8 px-3">
-                  <Sparkles className="mr-1 h-4 w-4" />
+                  <Sparkles className="mr-[var(--space-1)] h-4 w-4" />
                   AI Tools
                 </Button>
               </DropdownMenuTrigger>
@@ -186,23 +186,23 @@ export function FloatingToolbar({ script }: FloatingToolbarProps) {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => handleRewriteWithVoice("Hook")}>
-                  <Sparkles className="mr-2 h-4 w-4" />
+                  <Sparkles className="mr-[var(--space-1)] h-4 w-4" />
                   Improve Hook
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleRewriteWithVoice("CTA")}>
-                  <Sparkles className="mr-2 h-4 w-4" />
+                  <Sparkles className="mr-[var(--space-1)] h-4 w-4" />
                   Strengthen CTA
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleRewriteWithVoice("Flow")}>
-                  <Sparkles className="mr-2 h-4 w-4" />
+                  <Sparkles className="mr-[var(--space-1)] h-4 w-4" />
                   Improve Flow
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
             {/* Keyboard Shortcuts Indicator */}
-            <div className="text-muted-foreground ml-2 flex items-center gap-1 text-xs">
-              <kbd className="bg-muted rounded px-1.5 py-0.5">⌘S</kbd>
+            <div className="text-muted-foreground ml-[var(--space-1)] flex items-center gap-[var(--space-1)] text-xs">
+              <kbd className="bg-muted rounded px-[var(--space-1)] py-[calc(var(--space-1)/2)]">⌘S</kbd>
             </div>
           </div>
         </CardContent>

@@ -1,12 +1,15 @@
 "use client";
 
-import { ExternalLink, Zap, Lightbulb } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 
-import { ShineBorder } from "@/components/magicui/shine-border";
+import { ArrowUp, Zap, Lightbulb, Plus, ChevronDown, Check } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-
-import { IdeaInboxDialog } from "./idea-inbox-dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 export type InputMode = "script-writer" | "hook-generator";
 
@@ -17,7 +20,6 @@ export interface InputModeToggleProps {
   onTextChange: (value: string) => void;
   onSubmit: () => void;
   disabled?: boolean;
-  showIdeaInbox?: boolean;
 }
 
 interface TabProps {
@@ -31,7 +33,7 @@ const TabButton = ({ isActive, icon, label, onClick }: TabProps) => (
   <button
     type="button"
     onClick={onClick}
-    className={`relative px-1 pb-3 text-sm font-medium transition-colors ${
+    className={`relative px-[var(--space-1)] pb-[var(--space-2)] text-sm font-medium transition-colors ${
       isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
     }`}
   >
@@ -52,6 +54,23 @@ const ModeDescription = ({ mode }: { mode: InputMode }) => {
   return <p className="text-muted-foreground text-sm leading-relaxed">{getDescription(mode)}</p>;
 };
 
+// Sample ideas from idea inbox - in real app this would come from props or API
+const sampleIdeas = [
+  "10 productivity tips for remote workers",
+  "Morning routines that boost energy",
+  "Simple meal prep ideas for busy professionals",
+  "How to stay motivated when working from home",
+  "Budget-friendly home workout routines",
+  "Time management techniques for entrepreneurs",
+];
+
+// Duration options in seconds
+const durationOptions = [
+  { value: "20", label: "20 seconds" },
+  { value: "30", label: "30 seconds" },
+  { value: "60", label: "60 seconds" },
+];
+
 export function InputModeToggle({
   inputMode,
   onInputModeChange,
@@ -59,9 +78,20 @@ export function InputModeToggle({
   onTextChange,
   onSubmit,
   disabled = false,
-  showIdeaInbox = false,
 }: InputModeToggleProps) {
+  const [isIdeaComboboxOpen, setIsIdeaComboboxOpen] = useState(false);
+  const [duration, setDuration] = useState("30");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const finalSubmitDisabled = disabled || !textValue.trim();
+
+  // Initialize textarea height on mount
+  useEffect(() => {
+    if (textareaRef.current) {
+      const el = textareaRef.current;
+      el.style.height = "70px";
+    }
+  }, []);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && !finalSubmitDisabled) {
@@ -70,21 +100,26 @@ export function InputModeToggle({
     }
   };
 
+  const handleIdeaSelect = (idea: string) => {
+    onTextChange(idea);
+    setIsIdeaComboboxOpen(false);
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-[var(--space-3)]">
       {/* Input Mode Tabs */}
-      <div className="space-y-3">
+      <div className="space-y-[var(--space-1)]">
         <div className="flex items-center border-b">
           <TabButton
             isActive={inputMode === "script-writer"}
-            icon={<Zap className="mr-2 inline h-4 w-4" />}
+            icon={<Zap className="mr-[var(--space-1)] inline h-4 w-4" />}
             label="Script Writer"
             onClick={() => onInputModeChange("script-writer")}
           />
-          <div className="bg-border mx-6 h-4 w-px" />
+          <div className="bg-border mx-[var(--space-3)] h-4 w-px" />
           <TabButton
             isActive={inputMode === "hook-generator"}
-            icon={<Lightbulb className="mr-2 inline h-4 w-4" />}
+            icon={<Lightbulb className="mr-[var(--space-1)] inline h-4 w-4" />}
             label="Hook Generator"
             onClick={() => onInputModeChange("hook-generator")}
           />
@@ -95,52 +130,113 @@ export function InputModeToggle({
       </div>
 
       {/* Input Content */}
-      <div className="space-y-4">
-        <div className="relative">
-          <ShineBorder
-            shineColor={["hsl(var(--primary)/0.3)", "hsl(var(--muted-foreground)/0.2)", "hsl(var(--accent)/0.25)"]}
-            duration={6}
-            borderWidth={1}
-            className="rounded-2xl"
-          >
-            <Textarea
-              placeholder={
-                inputMode === "script-writer"
-                  ? "My script idea is about productivity tips for remote workers..."
-                  : "I want to create content about morning routines that boost productivity..."
-              }
-              value={textValue}
-              onChange={(e) => onTextChange(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className="bg-background dark:bg-background text-foreground dark:text-foreground placeholder:text-muted-foreground dark:placeholder:text-muted-foreground border-border/50 dark:border-border/50 ring-border/50 dark:ring-border/50 focus:ring-primary/70 dark:focus:ring-primary/70 caret-primary selection:bg-primary/30 selection:text-foreground scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent block h-14 max-h-[45vh] min-h-[56px] w-full resize-none appearance-none rounded-2xl border px-4 py-3 pr-16 text-base leading-6 shadow-sm transition-colors transition-shadow duration-150 hover:shadow focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:ring-2 focus:ring-offset-0 focus-visible:outline-none sm:max-h-[25vh] lg:max-h-[40vh]"
-              disabled={disabled}
-              style={{
-                fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-                height: "auto",
-                minHeight: "56px",
-                maxHeight: "45vh",
-              }}
-              onInput={(e) => {
-                const target = e.target as HTMLTextAreaElement;
-                target.style.height = "auto";
-                target.style.height = Math.min(target.scrollHeight, window.innerHeight * 0.45) + "px";
-              }}
-            />
-          </ShineBorder>
-          <Button
-            onClick={onSubmit}
-            disabled={finalSubmitDisabled}
-            size="sm"
-            className="absolute top-1/2 right-3 z-10 h-8 w-8 -translate-y-1/2 p-0 shadow-sm"
-          >
-            <ExternalLink className="h-4 w-4" />
+      <div ref={containerRef} className="border-border/50 space-y-[var(--space-2)] rounded-2xl border px-[var(--space-3)]">
+        {/* Simplified Textarea */}
+        <Textarea
+          ref={textareaRef}
+          placeholder={
+            inputMode === "script-writer"
+              ? "My script idea is about productivity tips for remote workers..."
+              : "I want to create content about morning routines that boost productivity..."
+          }
+          value={textValue}
+          onChange={(e) => onTextChange(e.target.value)}
+          onKeyDown={handleKeyDown}
+          className="vertical-scroll-fade-mask text-foreground placeholder:text-muted-foreground caret-primary selection:bg-primary/30 block w-full resize-none border-0 bg-transparent px-0 py-[var(--space-2)] text-base leading-6 transition-all duration-75 focus:ring-0 focus-visible:outline-none"
+          disabled={disabled}
+          style={
+            {
+              fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+              minHeight: "70px",
+              paddingBottom: "64px",
+            } as React.CSSProperties & { fieldSizing?: string }
+          }
+          onInput={(e) => {
+            const el = e.currentTarget;
+
+            // Auto-resize logic
+            el.style.height = "auto";
+            const maxHeight = Math.min(window.innerHeight * 0.45, 350);
+            const contentHeight = el.scrollHeight;
+            const newHeight = Math.min(contentHeight, maxHeight);
+            el.style.height = newHeight + "px";
+            el.style.overflowY = contentHeight > maxHeight ? "auto" : "hidden";
+
+            // Also adjust container height to accommodate the textarea growth
+            if (containerRef.current) {
+              // Container height = textarea height + spacing + controls height + container padding
+              const controlsHeight = 32; // approximate height of bottom controls
+              const spacing = 16; // var(--space-2)
+              const containerPadding = 0; // no vertical padding now
+              const totalContainerHeight = newHeight + spacing + controlsHeight + containerPadding;
+              containerRef.current.style.minHeight = totalContainerHeight + "px";
+            }
+          }}
+        />
+
+        {/* Bottom Controls - Positioned below textarea */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-[var(--space-1)]">
+            {/* Plus Button for Idea Inbox */}
+            <Popover open={isIdeaComboboxOpen} onOpenChange={setIsIdeaComboboxOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  disabled={disabled}
+                  className="text-muted-foreground hover:text-foreground hover:bg-muted h-8 w-8 p-0"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Search ideas..." className="h-8" />
+                  <CommandList className="max-h-48">
+                    <CommandEmpty>No ideas found.</CommandEmpty>
+                    <CommandGroup heading="Ideas">
+                      {sampleIdeas.map((idea) => (
+                        <CommandItem
+                          key={idea}
+                          value={idea}
+                          onSelect={() => handleIdeaSelect(idea)}
+                          className="cursor-pointer py-[var(--space-1)] text-sm"
+                        >
+                          <Check
+                            className={cn(
+                              "mr-[var(--space-1)] h-3 w-3",
+                              textValue === idea ? "opacity-100" : "opacity-0",
+                            )}
+                          />
+                          {idea}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+
+            {/* Duration Dropdown */}
+            <Select value={duration} onValueChange={setDuration} disabled={disabled}>
+              <SelectTrigger className="text-muted-foreground hover:text-foreground focus:ring-primary h-8 w-auto min-w-[100px] border-0 bg-transparent focus:ring-1">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {durationOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Submit Button */}
+          <Button onClick={onSubmit} disabled={finalSubmitDisabled} size="sm" className="h-8 w-8 p-0 shadow-sm">
+            <ArrowUp className="h-4 w-4" />
           </Button>
         </div>
-        {showIdeaInbox && inputMode === "script-writer" && (
-          <div className="flex justify-center">
-            <IdeaInboxDialog />
-          </div>
-        )}
       </div>
     </div>
   );

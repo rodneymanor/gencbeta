@@ -60,7 +60,7 @@ export function SocialHeader({
         {/* Profile Image Section */}
         <div className="flex justify-center md:justify-start">
           <div className="relative">
-            <a href={`/${username}/`} className="block h-[150px] w-[150px] overflow-hidden rounded-full bg-[#f5f5f5]">
+            <a href={`/${username}/`} className="block h-[150px] w-[150px] overflow-hidden rounded-full bg-gray-50">
               <Image
                 src={profileImageUrl}
                 alt={`${username}'s profile picture`}
@@ -82,7 +82,7 @@ export function SocialHeader({
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
               {/* Username and Verification */}
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-normal break-words text-black">{username}</h2>
+                <h2 className="text-2xl leading-tight font-medium break-words text-gray-900">{username}</h2>
                 {isVerified && <Check className="h-4 w-4 flex-shrink-0 text-blue-500" />}
               </div>
 
@@ -92,7 +92,7 @@ export function SocialHeader({
                   variant={isFollowing ? "outline" : "default"}
                   size="sm"
                   onClick={onFollowClick}
-                  className="min-w-[120px] bg-[#efefef] font-semibold text-black hover:bg-[#e5e5e5]"
+                  className="min-w-[120px] bg-blue-500 text-base font-medium text-white hover:bg-blue-600"
                 >
                   <span className="flex items-center gap-1">
                     {isFollowing ? "Following" : "Follow"}
@@ -101,7 +101,7 @@ export function SocialHeader({
                 </Button>
 
                 <Button variant="ghost" size="icon" onClick={onMoreClick} className="p-2">
-                  <MoreHorizontal className="h-5 w-5 text-black" />
+                  <MoreHorizontal className="h-5 w-5 text-gray-900" />
                 </Button>
               </div>
             </div>
@@ -109,24 +109,30 @@ export function SocialHeader({
 
           {/* Stats Section */}
           <div className="mb-4">
-            <ul className="flex gap-8 text-base">
+            <ul className="flex gap-8 text-base leading-normal font-normal">
               <li>
-                <span className="text-[#737373]">
-                  <span className="font-semibold text-black">{formatNumber(postsCount)}</span>
+                <span className="text-base font-normal text-gray-600">
+                  <span className="text-base font-medium text-gray-900">{formatNumber(postsCount)}</span>
                   {" posts"}
                 </span>
               </li>
               <li>
-                <a href={`/${username}/followers/`} className="text-[#737373] transition-colors hover:text-black">
-                  <span title={followersCount.toString()} className="font-semibold text-black">
+                <a
+                  href={`/${username}/followers/`}
+                  className="text-base font-normal text-gray-600 transition-colors hover:text-black"
+                >
+                  <span title={followersCount.toString()} className="text-base font-medium text-gray-900">
                     {formatNumber(followersCount)}
                   </span>
                   {" followers"}
                 </a>
               </li>
               <li>
-                <a href={`/${username}/following/`} className="text-[#737373] transition-colors hover:text-black">
-                  <span className="font-semibold text-black">{formatNumber(followingCount)}</span>
+                <a
+                  href={`/${username}/following/`}
+                  className="text-base font-normal text-gray-600 transition-colors hover:text-black"
+                >
+                  <span className="text-base font-medium text-gray-900">{formatNumber(followingCount)}</span>
                   {" following"}
                 </a>
               </li>
@@ -136,22 +142,22 @@ export function SocialHeader({
           {/* Bio Section */}
           <div className="space-y-2">
             {/* Display Name */}
-            <div className="text-sm font-semibold text-black">{displayName || username}</div>
+            <div className="text-base font-medium text-gray-900">{displayName || username}</div>
 
             {/* Bio Text */}
-            <div className="text-sm leading-[18px] whitespace-pre-line text-[#737373]">{bio || "Reel creator"}</div>
+            <div className="text-base leading-normal font-normal whitespace-pre-line text-gray-600">
+              {bio || "Reel creator"}
+            </div>
 
             {/* Website Link */}
             {website && (
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-xs text-[#00376b]">
-                  🌐
-                </Badge>
+                <span className="text-xs text-gray-600">🌐</span>
                 <a
                   href={website}
                   rel="me nofollow noopener noreferrer"
                   target="_blank"
-                  className="truncate text-sm font-semibold text-[#00376b] hover:underline"
+                  className="truncate text-base font-medium text-blue-500 hover:underline"
                 >
                   {website.replace(/^https?:\/\//, "")}
                 </a>
@@ -162,12 +168,12 @@ export function SocialHeader({
             {mutualFollowers.length > 0 && (
               <a
                 href={`/${username}/followers/mutualOnly`}
-                className="block text-xs text-[#737373] transition-colors hover:text-black"
+                className="block text-sm font-normal text-gray-400 transition-colors hover:text-black"
               >
-                Followed by <span className="font-medium text-black">{mutualFollowers[0]?.username}</span>
+                Followed by <span className="text-base font-medium text-gray-900">{mutualFollowers[0]?.username}</span>
                 {mutualFollowers.length > 1 && (
                   <>
-                    , <span className="font-medium text-black">{mutualFollowers[1]?.username}</span>
+                    , <span className="text-base font-medium text-gray-900">{mutualFollowers[1]?.username}</span>
                     {mutualFollowers.length > 2 && ` + ${mutualFollowers.length - 2} more`}
                   </>
                 )}

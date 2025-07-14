@@ -186,11 +186,13 @@ export default function NewScriptPage() {
   return (
     <div className="hide-scrollbar flex min-h-[calc(100vh-6rem)] flex-col overflow-y-auto">
       {/* Hero Section - Vertically Centered */}
-      <div className="flex flex-1 items-center justify-center py-8 pt-20">
+      <div className="flex flex-1 items-center justify-center py-[var(--space-4)] pt-[var(--space-8)]">
         <div className="flex w-full flex-col items-center justify-center">
           {/* Header */}
-          <div className="mb-8 text-center">
-            <h1 className="text-foreground font-inter mb-2 text-5xl font-bold">What&apos;s your content idea?</h1>
+          <div className="mb-[var(--space-4)] text-center">
+            <h1 className="text-foreground font-inter mb-[var(--space-1)] text-5xl font-bold">
+              What&apos;s your content idea?
+            </h1>
             <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
               Transform your ideas into engaging content with AI assistance
             </p>
@@ -198,8 +200,8 @@ export default function NewScriptPage() {
 
           {/* Error Display */}
           {speedWriteResponse && !speedWriteResponse.success && (
-            <Card className="border-destructive bg-destructive/5 mb-6 w-full max-w-2xl p-4">
-              <div className="text-destructive flex items-center gap-2">
+            <Card className="border-destructive bg-destructive/5 mb-[var(--space-3)] w-full max-w-2xl p-[var(--space-2)]">
+              <div className="text-destructive flex items-center gap-[var(--space-1)]">
                 <span className="font-medium">Generation Failed:</span>
                 <span>{speedWriteResponse.error}</span>
                 <Button variant="outline" size="sm" onClick={() => setSpeedWriteResponse(null)} className="ml-auto">
@@ -212,9 +214,12 @@ export default function NewScriptPage() {
           {/* Main Input Section - 700px width */}
           <div className="w-full max-w-2xl">
             {/* Voice Badge */}
-            <div className="mb-4 flex justify-center">
-              <Badge variant="outline" className="border-primary/30 text-primary bg-primary/10 px-3 py-1 text-sm">
-                <Mic className="mr-1 h-3 w-3" />
+            <div className="mb-[var(--space-2)] flex justify-center">
+              <Badge
+                variant="outline"
+                className="border-primary/30 text-primary bg-primary/10 px-[var(--space-2)] py-[var(--space-1)] text-sm"
+              >
+                <Mic className="mr-[var(--space-1)] h-3 w-3" />
                 {currentVoice} Voice
               </Badge>
             </div>
@@ -230,7 +235,7 @@ export default function NewScriptPage() {
             />
 
             {/* Controls Row - Simplified */}
-            <div className="mt-4 flex items-center justify-center gap-4">
+            <div className="mt-[var(--space-2)] flex items-center justify-center gap-[var(--space-2)]">
               <div className="text-muted-foreground text-sm">Press ⌘+Enter to generate content</div>
             </div>
           </div>
@@ -238,8 +243,8 @@ export default function NewScriptPage() {
       </div>
 
       {/* Ghost Writer Section - Below Hero */}
-      <div className="mx-auto w-full max-w-7xl px-4 pt-12 pb-8">
-        <div className="bg-sidebar rounded-lg p-4 md:p-8">
+      <div className="mx-auto w-full max-w-7xl px-[var(--space-2)] pt-[var(--space-6)] pb-[var(--space-4)]">
+        <div className="bg-sidebar rounded-lg p-[var(--space-2)] md:p-[var(--space-4)]">
           <GhostWriter />
         </div>
       </div>

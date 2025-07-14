@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-import { BarChart3, Settings, Palette } from "lucide-react";
+import { BarChart3, Settings, Palette, Clock } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
@@ -38,6 +38,7 @@ interface AnalysisStats {
   wtas: number;
   words: number;
   characters: number;
+  estimatedTime: string;
 }
 
 // Footer stats component
@@ -63,6 +64,11 @@ function EditorFooter({
           </div>
           <span>•</span>
           <span>{stats.characters} characters</span>
+          <span>•</span>
+          <div className="flex items-center gap-1">
+            <Clock className="h-4 w-4" />
+            <span>{stats.estimatedTime}</span>
+          </div>
         </div>
 
         {showAnalysis && stats.total > 0 && (
@@ -193,12 +199,35 @@ export function HemingwayEditor({
     wtas: [],
   });
 
+  // Calculate estimated reading/speaking time based on word count
+  const calculateEstimatedTime = (words: number): string => {
+    if (words === 0) return "0s";
+    
+    // Average speaking rate: 150-180 words per minute for content creation
+    // Using 160 wpm as a good middle ground for social media scripts
+    const wordsPerMinute = 160;
+    const totalSeconds = Math.round((words / wordsPerMinute) * 60);
+    
+    if (totalSeconds < 60) {
+      return `${totalSeconds}s`;
+    } else if (totalSeconds < 3600) {
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return seconds > 0 ? `${minutes}m ${seconds}s` : `${minutes}m`;
+    } else {
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+    }
+  };
+
   // Get analysis stats from current analysis
   const getAnalysisStats = (): AnalysisStats => {
     const hooks = currentAnalysis.hooks.length;
     const bridges = currentAnalysis.bridges.length;
     const goldenNuggets = currentAnalysis.goldenNuggets.length;
     const wtas = currentAnalysis.wtas.length;
+    const words = value.trim() ? value.trim().split(/\s+/).length : 0;
 
     return {
       total: hooks + bridges + goldenNuggets + wtas,
@@ -206,8 +235,9 @@ export function HemingwayEditor({
       bridges,
       goldenNuggets,
       wtas,
-      words: value.trim() ? value.trim().split(/\s+/).length : 0,
+      words,
       characters: value.length,
+      estimatedTime: calculateEstimatedTime(words),
     };
   };
 

@@ -4,87 +4,82 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Invisible Design Color Palette */
-  /* Background: #FFFFFF */
-  --background: #ffffff;
-  --foreground: #1a1a1a; /* Text Primary */
+  /* Main backgrounds */
+  --background: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
+  --foreground: oklch(0.25 0.02 30); /* #412722 - Dark brown */
 
-  /* Surface: #FAFAFA */
-  --card: #fafafa;
-  --card-foreground: #1a1a1a; /* Text Primary */
+  /* Card and surface colors */
+  --card: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
+  --card-foreground: oklch(0.25 0.02 30); /* #412722 - Dark brown */
 
   /* Popover colors */
-  --popover: #fafafa;
-  --popover-foreground: #1a1a1a; /* Text Primary */
+  --popover: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
+  --popover-foreground: oklch(0.25 0.02 30); /* #412722 - Dark brown */
 
-  /* Accent: #4A90E2 - ONLY for primary actions and active states */
-  --primary: #4a90e2;
-  --primary-foreground: #ffffff;
+  /* Primary colors */
+  --primary: oklch(0.58 0.08 220); /* #2d93ad - Teal blue */
+  --primary-foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
 
-  /* Secondary uses surface colors */
-  --secondary: #fafafa; /* Surface */
-  --secondary-foreground: #1a1a1a; /* Text Primary */
+  /* Secondary colors */
+  --secondary: oklch(0.87 0.01 120); /* #d9dcd6 - Light gray-green */
+  --secondary-foreground: oklch(0.25 0.02 30); /* #412722 - Dark brown */
 
-  /* Muted uses secondary text */
-  --muted: #fafafa; /* Surface */
-  --muted-foreground: #666666; /* Text Secondary */
+  /* Muted colors */
+  --muted: oklch(0.87 0.01 120); /* #d9dcd6 - Light gray-green */
+  --muted-foreground: oklch(0.45 0.02 30); /* Slightly lighter brown */
 
-  /* Accent color */
-  --accent: #4a90e2;
-  --accent-foreground: #ffffff;
+  /* Accent colors */
+  --accent: oklch(0.58 0.08 220); /* #2d93ad - Teal blue */
+  --accent-foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
 
-  /* Danger: #DC3545 - ONLY for destructive actions, shown on hover only */
-  --destructive: #dc3545;
-  --destructive-foreground: #ffffff;
+  /* Destructive colors */
+  --destructive: oklch(0.55 0.15 25); /* Red tone */
+  --destructive-foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
 
-  /* Border: #E5E5E5 */
-  --border: #e5e5e5;
-  --border-subtle: #e5e5e5;
-  --input: #fafafa; /* Surface */
-  --ring: #4a90e2; /* Accent */
+  /* Border and input colors */
+  --border: oklch(0.87 0.01 120); /* #d9dcd6 - Light gray-green */
+  --border-subtle: oklch(0.87 0.01 120 / 0.3); /* More subtle border for headers */
+  --input: oklch(0.995 0.002 100); /* #fefffa - Very light off-white */
+  --ring: oklch(0.58 0.08 220); /* #2d93ad - Teal blue */
 
-  /* Chart colors - simplified for invisible design */
-  --chart-1: #4a90e2; /* Accent */
-  --chart-2: #1a1a1a; /* Text Primary */
-  --chart-3: #666666; /* Text Secondary */
-  --chart-4: #e5e5e5; /* Border */
-  --chart-5: #fafafa; /* Surface */
+  /* Chart colors */
+  --chart-1: oklch(0.58 0.08 220); /* #2d93ad - Teal blue */
+  --chart-2: oklch(0.25 0.02 30); /* #412722 - Dark brown */
+  --chart-3: oklch(0.87 0.01 120); /* #d9dcd6 - Light gray-green */
+  --chart-4: oklch(0.96 0.01 110); /* #f2f3ed - Light sage/cream */
+  --chart-5: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
 
   /* Sidebar colors */
-  --sidebar-background: #fafafa; /* Surface */
-  --sidebar-foreground: #1a1a1a; /* Text Primary */
-  --sidebar-primary: #4a90e2; /* Accent */
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #fafafa; /* Surface */
-  --sidebar-accent-foreground: #1a1a1a; /* Text Primary */
-  --sidebar-border: #e5e5e5; /* Border */
-  --sidebar-ring: #4a90e2; /* Accent */
+  --sidebar-background: oklch(0.96 0.01 110); /* #f2f3ed - Light sage/cream */
+  --sidebar-foreground: oklch(0.25 0.02 30); /* #412722 - Dark brown */
+  --sidebar-primary: oklch(0.58 0.08 220); /* #2d93ad - Teal blue */
+  --sidebar-primary-foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
+  --sidebar-accent: oklch(0.87 0.01 120); /* #d9dcd6 - Light gray-green */
+  --sidebar-accent-foreground: oklch(0.25 0.02 30); /* #412722 - Dark brown */
+  --sidebar-border: oklch(0.87 0.01 120); /* #d9dcd6 - Light gray-green */
+  --sidebar-ring: oklch(0.58 0.08 220); /* #2d93ad - Teal blue */
 
-  /* Custom background colors - removed for invisible design */
-  --background-color-100: rgba(0, 0, 0, 0.05); /* Only transparency for hover states */
-  --background-color-300: rgba(0, 0, 0, 0.05); /* Only transparency for hover states */
-  --text-color-100: #1a1a1a; /* Text Primary */
+  /* Custom background colors */
+  --background-color-100: 0.96 0.01 110; /* Light sage/cream for shadows */
+  --background-color-300: 0.9 0.01 115; /* Light sage/cream for active states */
+  --text-color-100: 0.25 0.02 30; /* Dark brown for text shadows */
 
-  /* 8px Spacing Grid System */
-  --space-0: 0px;
-  --space-1: 8px;
-  --space-2: 16px;
-  --space-3: 24px;
-  --space-4: 32px;
-  --space-5: 40px;
-  --space-6: 48px;
-  --space-8: 64px;
-
-  --font-sans: Inter, sans-serif;
+  --font-sans: Poppins, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Geist Mono, monospace;
-
   --radius: 0.5rem;
   --radius-sm: 0.25rem; /* 4px - Small radius for tags */
   --radius-md: 0.5rem; /* 8px - Standard radius for buttons and inputs */
   --radius-lg: 0.75rem; /* 12px - Large radius for cards and containers */
   --radius-xl: calc(var(--radius) + 4px);
-  /* Shadows removed for invisible design */
+  --shadow-2xs: 0px 0px 1px 0px hsl(0 0% 0% / 0.07);
+  --shadow-xs: 0px 0px 1px 0px hsl(0 0% 0% / 0.07);
+  --shadow-sm: 0px 0px 1px 0px hsl(0 0% 0% / 0.13), 0px 1px 2px -1px hsl(0 0% 0% / 0.13);
+  --shadow: 0px 0px 1px 0px hsl(0 0% 0% / 0.13), 0px 1px 2px -1px hsl(0 0% 0% / 0.13);
+  --shadow-md: 0px 0px 1px 0px hsl(0 0% 0% / 0.13), 0px 2px 4px -1px hsl(0 0% 0% / 0.13);
+  --shadow-lg: 0px 0px 1px 0px hsl(0 0% 0% / 0.13), 0px 4px 6px -1px hsl(0 0% 0% / 0.13);
+  --shadow-xl: 0px 0px 1px 0px hsl(0 0% 0% / 0.13), 0px 8px 10px -1px hsl(0 0% 0% / 0.13);
+  --shadow-2xl: 0px 0px 1px 0px hsl(0 0% 0% / 0.33);
 
   /* Script Element Highlighting Colors - Updated with new palette */
   --script-hook: oklch(0.72 0.15 65); /* Orange for hooks */
@@ -98,78 +93,67 @@
 }
 
 .dark {
-  /* Dark Mode - Invisible Design Color Palette */
-  /* Background: #0A0A0A */
-  --background: #0a0a0a;
-  --foreground: #e5e5e5; /* Text Primary Dark Mode */
+  /* Main backgrounds */
+  --background: oklch(0.25 0.02 30); /* #412722 - Dark brown */
+  --foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
 
-  /* Surface: #1A1A1A */
-  --card: #1a1a1a;
-  --card-foreground: #e5e5e5; /* Text Primary Dark Mode */
+  /* Card and surface colors */
+  --card: oklch(0.3 0.02 25); /* Slightly lighter brown */
+  --card-foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
 
   /* Popover colors */
-  --popover: #1a1a1a;
-  --popover-foreground: #e5e5e5; /* Text Primary Dark Mode */
+  --popover: oklch(0.3 0.02 25); /* Slightly lighter brown */
+  --popover-foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
 
-  /* Accent: #4A90E2 - same in dark mode */
-  --primary: #4a90e2;
-  --primary-foreground: #ffffff;
+  /* Primary colors */
+  --primary: oklch(0.58 0.08 220); /* #2d93ad - Teal blue */
+  --primary-foreground: oklch(0.25 0.02 30); /* #412722 - Dark brown */
 
-  /* Secondary uses surface colors */
-  --secondary: #1a1a1a; /* Surface */
-  --secondary-foreground: #e5e5e5; /* Text Primary Dark Mode */
+  /* Secondary colors */
+  --secondary: oklch(0.35 0.02 25); /* Darker brown for secondary */
+  --secondary-foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
 
-  /* Muted uses secondary text */
-  --muted: #1a1a1a; /* Surface */
-  --muted-foreground: #999999; /* Text Secondary Dark Mode */
+  /* Muted colors */
+  --muted: oklch(0.35 0.02 25); /* Darker brown for muted */
+  --muted-foreground: oklch(0.87 0.01 120); /* #d9dcd6 - Light gray-green */
 
-  /* Accent color */
-  --accent: #4a90e2;
-  --accent-foreground: #ffffff;
+  /* Accent colors */
+  --accent: oklch(0.87 0.01 120); /* #d9dcd6 - Light gray-green */
+  --accent-foreground: oklch(0.25 0.02 30); /* #412722 - Dark brown */
 
-  /* Danger: #DC3545 - same in dark mode */
-  --destructive: #dc3545;
-  --destructive-foreground: #ffffff;
+  /* Destructive colors */
+  --destructive: oklch(0.65 0.15 25); /* Red tone */
+  --destructive-foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
 
-  /* Border: #2A2A2A */
-  --border: #2a2a2a;
-  --border-subtle: #2a2a2a;
-  --input: #1a1a1a; /* Surface */
-  --ring: #4a90e2; /* Accent */
+  /* Border and input colors */
+  --border: oklch(0.35 0.02 25); /* Darker brown for borders */
+  --border-subtle: oklch(0.35 0.02 25 / 0.3); /* More subtle border for headers */
+  --input: oklch(0.995 0.002 100); /* #fefffa - Very light off-white */
+  --ring: oklch(0.58 0.08 220); /* #2d93ad - Teal blue */
 
-  /* Chart colors - simplified for invisible design */
-  --chart-1: #4a90e2; /* Accent */
-  --chart-2: #e5e5e5; /* Text Primary Dark Mode */
-  --chart-3: #999999; /* Text Secondary Dark Mode */
-  --chart-4: #2a2a2a; /* Border Dark Mode */
-  --chart-5: #1a1a1a; /* Surface Dark Mode */
+  /* Chart colors */
+  --chart-1: oklch(0.58 0.08 220); /* #2d93ad - Teal blue */
+  --chart-2: oklch(0.87 0.01 120); /* #d9dcd6 - Light gray-green */
+  --chart-3: oklch(0.35 0.02 25); /* Darker brown */
+  --chart-4: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
+  --chart-5: oklch(0.96 0.01 110); /* #f2f3ed - Light sage/cream */
 
   /* Sidebar colors */
-  --sidebar-background: #1a1a1a; /* Surface Dark Mode */
-  --sidebar-foreground: #e5e5e5; /* Text Primary Dark Mode */
-  --sidebar-primary: #4a90e2; /* Accent */
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #1a1a1a; /* Surface Dark Mode */
-  --sidebar-accent-foreground: #e5e5e5; /* Text Primary Dark Mode */
-  --sidebar-border: #2a2a2a; /* Border Dark Mode */
-  --sidebar-ring: #4a90e2; /* Accent */
+  --sidebar-background: oklch(0.28 0.02 28); /* Slightly lighter than main bg */
+  --sidebar-foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
+  --sidebar-primary: oklch(0.58 0.08 220); /* #2d93ad - Teal blue */
+  --sidebar-primary-foreground: oklch(0.25 0.02 30); /* #412722 - Dark brown */
+  --sidebar-accent: oklch(0.87 0.01 120); /* #d9dcd6 - Light gray-green */
+  --sidebar-accent-foreground: oklch(0.25 0.02 30); /* #412722 - Dark brown */
+  --sidebar-border: oklch(0.35 0.02 25); /* Darker brown for borders */
+  --sidebar-ring: oklch(0.58 0.08 220); /* #2d93ad - Teal blue */
 
-  /* Custom background colors - removed for invisible design */
-  --background-color-100: rgba(255, 255, 255, 0.05); /* Only transparency for hover states */
-  --background-color-300: rgba(255, 255, 255, 0.05); /* Only transparency for hover states */
-  --text-color-100: #e5e5e5; /* Text Primary Dark Mode */
+  /* Custom background colors */
+  --background-color-100: 0.28 0.02 28; /* Slightly lighter brown for shadows in dark mode */
+  --background-color-300: 0.32 0.02 28; /* Slightly lighter brown for active states in dark mode */
+  --text-color-100: 0.99 0.005 80; /* Light cream for text shadows in dark mode */
 
-  /* 8px Spacing Grid System */
-  --space-0: 0px;
-  --space-1: 8px;
-  --space-2: 16px;
-  --space-3: 24px;
-  --space-4: 32px;
-  --space-5: 40px;
-  --space-6: 48px;
-  --space-8: 64px;
-
-  --font-sans: Inter, sans-serif;
+  --font-sans: Poppins, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Geist Mono, monospace;
   --radius: 0.5rem;
@@ -194,54 +178,6 @@
   --script-golden-nugget-foreground: oklch(0.95 0.005 240);
   --script-wta: oklch(0.2 0 0); /* Dark gray for dark mode */
   --script-wta-foreground: oklch(0.95 0.005 240);
-}
-
-/* ChatGPT-style vertical scroll fade mask */
-.vertical-scroll-fade-mask {
-  --fade: 32px; /* height of the gradient */
-  --border-width: 1px;
-
-  /* Adjust mask to account for border and not interfere with border visibility */
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    black var(--fade),
-    black calc(100% - var(--fade)),
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    black var(--fade),
-    black calc(100% - var(--fade)),
-    transparent 100%
-  );
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-
-  /* Make sure mask doesn't interfere with border */
-  -webkit-mask-clip: padding-box;
-  mask-clip: padding-box;
-}
-
-/* Slim scrollbar styling for fade mask */
-.vertical-scroll-fade-mask {
-  scrollbar-width: thin; /* Firefox */
-}
-
-.vertical-scroll-fade-mask::-webkit-scrollbar {
-  width: 6px; /* Chrome / Edge */
-}
-
-.vertical-scroll-fade-mask::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground));
-  border-radius: 4px;
-}
-
-.vertical-scroll-fade-mask::-webkit-scrollbar-track {
-  background: transparent;
 }
 
 @theme inline {
@@ -288,16 +224,6 @@
   --color-script-golden-nugget-foreground: var(--script-golden-nugget-foreground);
   --color-script-wta: var(--script-wta);
   --color-script-wta-foreground: var(--script-wta-foreground);
-
-  /* 8px Spacing Grid System */
-  --space-0: var(--space-0);
-  --space-1: var(--space-1);
-  --space-2: var(--space-2);
-  --space-3: var(--space-3);
-  --space-4: var(--space-4);
-  --space-5: var(--space-5);
-  --space-6: var(--space-6);
-  --space-8: var(--space-8);
 
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);

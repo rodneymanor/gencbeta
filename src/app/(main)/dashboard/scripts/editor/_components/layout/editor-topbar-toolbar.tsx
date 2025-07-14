@@ -111,26 +111,38 @@ export function EditorTopBarToolbar({ script, onSave }: EditorTopBarToolbarProps
   };
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-[var(--space-1)]">
       {/* Save Button */}
-      <Button variant="ghost" size="sm" onClick={handleSave} disabled={isSaving || !script.trim()} className="h-8 px-3">
-        <Save className="mr-2 h-4 w-4" />
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={handleSave}
+        disabled={isSaving || !script.trim()}
+        className="h-10 px-[var(--space-3)]"
+      >
+        <Save className="mr-[var(--space-1)] h-4 w-4" />
         {isSaving ? "Saving..." : "Save"}
       </Button>
 
       {/* Download Button */}
-      <Button variant="ghost" size="sm" onClick={handleDownload} disabled={!script.trim()} className="h-8 px-3">
-        <Download className="mr-2 h-4 w-4" />
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={handleDownload}
+        disabled={!script.trim()}
+        className="h-10 px-[var(--space-3)]"
+      >
+        <Download className="mr-[var(--space-1)] h-4 w-4" />
         Export
       </Button>
 
-      <Separator orientation="vertical" className="mx-2 h-6" />
+      <Separator orientation="vertical" className="mx-[var(--space-1)] h-6" />
 
       {/* Voice Selection & Rewrite Dropdown */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" disabled={isRewriting} className="h-8 px-3">
-            <Mic className="mr-2 h-4 w-4" />
+          <Button variant="ghost" size="sm" disabled={isRewriting} className="h-10 px-[var(--space-3)]">
+            <Mic className="mr-[var(--space-1)] h-4 w-4" />
             {currentVoice}
           </Button>
         </DropdownMenuTrigger>
@@ -142,7 +154,7 @@ export function EditorTopBarToolbar({ script, onSave }: EditorTopBarToolbarProps
               onClick={() => handleChangeVoice(voice)}
               className={voice === currentVoice ? "bg-accent" : ""}
             >
-              <Mic className="mr-2 h-4 w-4" />
+              <Mic className="mr-[var(--space-1)] h-4 w-4" />
               {voice} Voice
               {voice === currentVoice && <span className="ml-auto">✓</span>}
             </DropdownMenuItem>
@@ -157,7 +169,7 @@ export function EditorTopBarToolbar({ script, onSave }: EditorTopBarToolbarProps
               onClick={() => handleRewriteWithVoice(voice)}
               disabled={!script.trim()}
             >
-              <RefreshCw className="mr-2 h-4 w-4" />
+              <RefreshCw className="mr-[var(--space-1)] h-4 w-4" />
               Rewrite as {voice}
             </DropdownMenuItem>
           ))}
@@ -167,8 +179,13 @@ export function EditorTopBarToolbar({ script, onSave }: EditorTopBarToolbarProps
       {/* AI Tools Dropdown */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" disabled={isRewriting || !script.trim()} className="h-8 px-3">
-            <Sparkles className="mr-2 h-4 w-4" />
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={isRewriting || !script.trim()}
+            className="h-10 px-[var(--space-3)]"
+          >
+            <Sparkles className="mr-[var(--space-1)] h-4 w-4" />
             AI Tools
           </Button>
         </DropdownMenuTrigger>
@@ -179,23 +196,23 @@ export function EditorTopBarToolbar({ script, onSave }: EditorTopBarToolbarProps
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => handleRewriteWithVoice("Hook")}>
-            <Sparkles className="mr-2 h-4 w-4" />
+            <Sparkles className="mr-[var(--space-1)] h-4 w-4" />
             Improve Hook
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleRewriteWithVoice("CTA")}>
-            <Sparkles className="mr-2 h-4 w-4" />
+            <Sparkles className="mr-[var(--space-1)] h-4 w-4" />
             Strengthen CTA
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleRewriteWithVoice("Flow")}>
-            <Sparkles className="mr-2 h-4 w-4" />
+            <Sparkles className="mr-[var(--space-1)] h-4 w-4" />
             Improve Flow
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
       {/* Keyboard Shortcuts Indicator */}
-      <div className="text-muted-foreground ml-3 flex items-center gap-1 text-xs">
-        <kbd className="bg-muted rounded px-1.5 py-0.5">⌘S</kbd>
+      <div className="text-muted-foreground ml-[var(--space-2)] flex items-center gap-[var(--space-1)] text-xs">
+        <kbd className="bg-muted rounded px-[var(--space-1)] py-[calc(var(--space-1)/2)]">⌘S</kbd>
       </div>
     </div>
   );

@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useMemo, useEffect } from "react";
 
-import { FileText, BarChart3, Lightbulb, Target } from "lucide-react";
+import { FileText, BarChart3, Lightbulb, Target, Clock } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -104,6 +104,29 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
     return stats;
   }, [detectedElements]);
 
+  // Calculate estimated speaking time
+  const estimatedTime = useMemo(() => {
+    const words = text.split(/\s+/).filter((word) => word.length > 0).length;
+    if (words === 0) return "0s";
+    
+    // Average speaking rate: 150-180 words per minute for content creation
+    // Using 160 wpm as a good middle ground for social media scripts
+    const wordsPerMinute = 160;
+    const totalSeconds = Math.round((words / wordsPerMinute) * 60);
+    
+    if (totalSeconds < 60) {
+      return `${totalSeconds}s`;
+    } else if (totalSeconds < 3600) {
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return seconds > 0 ? `${minutes}m ${seconds}s` : `${minutes}m`;
+    } else {
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+    }
+  }, [text]);
+
   const handleTextChange = useCallback(
     (newText: string) => {
       setText(newText);
@@ -193,7 +216,7 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
       {/* Main Content Area */}
       <div className="main-content flex h-full flex-col">
         {/* Editor */}
-        <div className="flex-1 p-6">
+        <div className="flex-1 p-[var(--space-3)]">
           <Card className="h-full">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2">
@@ -214,7 +237,7 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
                 )}
               </CardTitle>
             </CardHeader>
-            <CardContent className="h-full pb-6">
+            <CardContent className="h-full pb-[var(--space-3)]">
               <div className="relative h-full">
                 <Textarea
                   value={text}
@@ -230,16 +253,16 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
 
       {/* Right Sidebar - Statistics & Analysis */}
       <div className="right-sidebar bg-background/50 border-border/50 overflow-y-auto border-l backdrop-blur-sm">
-        <div className="space-y-4 p-4">
+        <div className="space-y-[var(--space-2)] p-[var(--space-3)]">
           {/* Statistics */}
           <Card>
-            <CardHeader className="pb-3">
+            <CardHeader className="pb-[var(--space-2)]">
               <CardTitle className="flex items-center gap-2 text-sm">
                 <BarChart3 className="h-4 w-4" />
                 Statistics
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-[var(--space-2)]">
               <div className="flex justify-between">
                 <span className="text-muted-foreground text-sm">Words</span>
                 <span className="text-sm font-medium">
@@ -255,6 +278,13 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
               <div className="flex justify-between">
                 <span className="text-muted-foreground text-sm">Characters</span>
                 <span className="text-sm font-medium">{text.length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground flex items-center gap-1 text-sm">
+                  <Clock className="h-3 w-3" />
+                  Estimated Time
+                </span>
+                <span className="text-sm font-medium">{estimatedTime}</span>
               </div>
 
               <Separator />
@@ -283,13 +313,13 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
           {/* Readability Analysis */}
           {readabilityAnalysis && (
             <Card>
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-[var(--space-2)]">
                 <CardTitle className="flex items-center gap-2 text-sm">
                   <Target className="h-4 w-4" />
                   Readability
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-[var(--space-2)]">
                 <div className="text-center">
                   <div className="text-2xl font-bold">{readabilityAnalysis.overall.score.toFixed(1)}</div>
                   <div className="text-muted-foreground text-sm">{readabilityAnalysis.overall.level.toUpperCase()}</div>
@@ -297,7 +327,7 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
 
                 <Separator />
 
-                <div className="space-y-2">
+                <div className="space-y-[var(--space-1)]">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground text-sm">Avg Words/Sentence</span>
                     <span className="text-sm font-medium">
@@ -317,12 +347,12 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
                 {readabilityAnalysis.overall.suggestions.length > 0 && (
                   <>
                     <Separator />
-                    <div className="space-y-2">
+                    <div className="space-y-[var(--space-1)]">
                       <h4 className="flex items-center gap-1 text-sm font-medium">
                         <Lightbulb className="h-3 w-3" />
                         Suggestions
                       </h4>
-                      <div className="space-y-1">
+                      <div className="space-y-[var(--space-1)]">
                         {readabilityAnalysis.overall.suggestions.slice(0, 3).map((suggestion, index) => (
                           <div key={index} className="text-muted-foreground text-xs">
                             • {suggestion}

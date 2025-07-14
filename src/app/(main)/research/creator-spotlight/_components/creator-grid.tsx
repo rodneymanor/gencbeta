@@ -1,9 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { ChevronDown, HelpCircle } from "lucide-react";
 import { SafeImage } from "@/components/ui/safe-image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EnhancedCreatorProfile, getOptimizedProfileImageUrl } from "@/lib/creator-spotlight-utils";
@@ -15,106 +14,141 @@ interface CreatorGridProps {
   onCreatorClick: (creator: EnhancedCreatorProfile) => void;
 }
 
+interface ExpandableBioProps {
+  bio: string;
+  maxLength?: number;
+}
+
+function ExpandableBio({ bio, maxLength = 80 }: ExpandableBioProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  if (bio.length <= maxLength) {
+    return <p className="text-foreground text-sm leading-normal font-normal">{bio}</p>;
+  }
+
+  const truncated = bio.slice(0, maxLength) + "...";
+
+  return (
+    <div className="space-y-[var(--space-1)]">
+      <p className="text-foreground text-sm leading-normal font-normal">{isExpanded ? bio : truncated}</p>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsExpanded(!isExpanded);
+        }}
+        className="text-primary md:hover:text-primary/90 flex items-center gap-[var(--space-1)] text-sm font-normal transition-colors duration-200"
+      >
+        <span>{isExpanded ? "Show less" : "Show more"}</span>
+        <ChevronDown className={cn("h-3 w-3 transition-transform duration-200", isExpanded && "rotate-180")} />
+      </button>
+    </div>
+  );
+}
+
+interface TooltipProps {
+  content: string;
+  children: React.ReactNode;
+}
+
+function Tooltip({ content, children }: TooltipProps) {
+  return (
+    <div className="group relative inline-block">
+      {children}
+      <div className="text-primary-foreground bg-card invisible absolute bottom-full left-1/2 z-10 mb-2 max-w-[200px] -translate-x-1/2 rounded-lg px-3 py-2 text-sm font-normal whitespace-nowrap opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100">
+        {content}
+        <div className="border-t-card absolute top-full left-1/2 h-0 w-0 -translate-x-1/2 border-t-4 border-r-4 border-l-4 border-transparent"></div>
+      </div>
+    </div>
+  );
+}
+
 export function CreatorGrid({ creators, loading, onCreatorClick }: CreatorGridProps) {
   if (loading) {
     return (
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-[var(--space-2)] md:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }, (_, i) => (
-          <Card key={i} className="overflow-hidden">
-            <CardContent className="p-0">
-              <div className="space-y-4 p-6">
-                <div className="flex items-center gap-4">
-                  <Skeleton className="h-16 w-16 rounded-full" />
-                  <div className="flex-1 space-y-2">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-3 w-32" />
-                  </div>
-                </div>
-                <Skeleton className="h-3 w-full" />
-                <Skeleton className="h-3 w-3/4" />
+          <div key={i} className="bg-muted space-y-[var(--space-1)] rounded-xl p-[var(--space-3)]">
+            <div className="flex items-center gap-4">
+              <Skeleton className="h-10 w-10 rounded-full" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-3 w-32" />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+            <Skeleton className="h-3 w-full" />
+            <Skeleton className="h-3 w-3/4" />
+          </div>
         ))}
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-[var(--space-2)] md:grid-cols-2 lg:grid-cols-3">
       {creators.map((creator, index) => (
-        <Card
+        <div
           key={creator.id}
-          className="cursor-pointer overflow-hidden transition-all duration-200 hover:scale-[1.02] hover:shadow-lg"
+          className="bg-muted focus:ring-ring cursor-pointer space-y-[var(--space-1)] rounded-xl p-[var(--space-3)] focus:ring-2 focus:ring-offset-2 focus:outline-none"
           onClick={() => onCreatorClick(creator)}
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onCreatorClick(creator);
+            }
+          }}
         >
-          <CardContent className="p-0">
-            <div className="space-y-4 p-6">
-              <div className="flex items-center gap-4">
-                <div className="relative">
-                  <SafeImage
-                    src={getOptimizedProfileImageUrl(creator)}
-                    alt={creator.displayName ?? creator.username}
-                    width={64}
-                    height={64}
-                    className="h-16 w-16 rounded-full"
-                    fallbackUsername={creator.username}
-                    fallbackPlatform={creator.platform}
-                    priority={index < 6}
-                  />
-                  <Badge
-                    variant="outline"
-                    className={cn(
-                      "absolute -right-1 -bottom-1 text-xs capitalize",
-                      creator.platform === "tiktok" && "border-[#FF0050] bg-[#FF0050] text-white",
-                      creator.platform === "instagram" && "border-[#E4405F] bg-[#E4405F] text-white",
-                    )}
-                  >
-                    {creator.platform}
-                  </Badge>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="truncate font-semibold">{creator.displayName ?? creator.username}</h3>
-                    {creator.isVerified && (
-                      <Badge variant="outline" className="text-xs">
-                        ✓
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-muted-foreground truncate text-sm">@{creator.username}</p>
-                </div>
-              </div>
-
-              {creator.bio && <p className="text-muted-foreground line-clamp-2 text-sm">{creator.bio}</p>}
-
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-4">
-                  <span className="text-muted-foreground">
-                    <span className="text-foreground font-semibold">
-                      {creator.followersCount >= 1000000
-                        ? `${(creator.followersCount / 1000000).toFixed(1)}M`
-                        : creator.followersCount >= 1000
-                          ? `${(creator.followersCount / 1000).toFixed(1)}K`
-                          : creator.followersCount}{" "}
-                      followers
-                    </span>
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="text-xs">
-                    {creator.videoCount ?? 0} videos
-                  </Badge>
-                  {creator.hasOptimizedMedia && (
-                    <Badge variant="outline" className="border-green-600 text-xs text-green-600">
-                      ⚡ Fast
-                    </Badge>
-                  )}
-                </div>
-              </div>
+          {/* Header with Avatar */}
+          <div className="flex items-center space-x-[var(--space-2)]">
+            <SafeImage
+              src={getOptimizedProfileImageUrl(creator)}
+              alt={creator.displayName ?? creator.username}
+              width={40}
+              height={40}
+              className="h-10 w-10 rounded-full"
+              fallbackUsername={creator.username}
+              fallbackPlatform={creator.platform}
+              priority={index < 6}
+            />
+            <div>
+              <h3 className="text-foreground flex items-center gap-[var(--space-1)] text-base font-medium">
+                {creator.displayName ?? creator.username}
+                {creator.isVerified && <span className="text-primary text-sm font-normal">✓</span>}
+              </h3>
+              <p className="text-muted-foreground text-sm font-normal">@{creator.username}</p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+
+          {/* Body */}
+          {creator.bio && <ExpandableBio bio={creator.bio} />}
+
+          {/* Metadata */}
+          <div className="text-muted-foreground flex flex-wrap items-center gap-[var(--space-1)] text-sm font-normal">
+            <span>
+              {creator.followersCount >= 1000000
+                ? `${(creator.followersCount / 1000000).toFixed(1)}M`
+                : creator.followersCount >= 1000
+                  ? `${(creator.followersCount / 1000).toFixed(1)}K`
+                  : creator.followersCount}{" "}
+              followers
+            </span>
+            <span>•</span>
+            <span>{creator.videoCount ?? 0} videos</span>
+            {creator.hasOptimizedMedia && (
+              <>
+                <span>•</span>
+                <Tooltip content="Content optimized for faster loading and better performance">
+                  <span className="flex cursor-help items-center gap-[var(--space-1)]">
+                    ⚡ Fast
+                    <HelpCircle className="h-3 w-3" />
+                  </span>
+                </Tooltip>
+              </>
+            )}
+            <span>•</span>
+            <span className="capitalize">{creator.platform}</span>
+          </div>
+        </div>
       ))}
     </div>
   );

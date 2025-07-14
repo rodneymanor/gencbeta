@@ -113,7 +113,7 @@ export default function ScriptsLibraryPage() {
   // Show loading state
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-7xl space-y-6 p-6">
+      <div className="mx-auto max-w-7xl space-y-[var(--space-4)] p-[var(--space-3)]">
         <TableLoading />
       </div>
     );
@@ -122,12 +122,12 @@ export default function ScriptsLibraryPage() {
   // Show error state
   if (error) {
     return (
-      <div className="mx-auto max-w-7xl space-y-6 p-6">
-        <Card className="border-destructive/20 bg-destructive/5">
-          <CardContent className="p-6">
+      <div className="mx-auto max-w-7xl space-y-[var(--space-4)] p-[var(--space-3)]">
+        <Card className="bg-destructive/5">
+          <CardContent className="p-[var(--space-3)]">
             <div className="text-center">
-              <h3 className="text-destructive text-lg font-semibold">Failed to load scripts</h3>
-              <p className="text-muted-foreground mt-2 text-sm">
+              <h3 className="text-destructive text-base font-medium">Failed to load scripts</h3>
+              <p className="text-muted-foreground mt-[var(--space-1)] text-sm">
                 {error instanceof Error ? error.message : "An unknown error occurred"}
               </p>
             </div>
@@ -138,7 +138,7 @@ export default function ScriptsLibraryPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6">
+    <div className="mx-auto max-w-7xl space-y-[var(--space-4)] p-[var(--space-3)]">
       {/* Header with Controls */}
       <ScriptsControls
         statusFilter={statusFilter}
@@ -152,15 +152,15 @@ export default function ScriptsLibraryPage() {
 
       {/* Bulk Actions */}
       {selectedScripts.length > 0 && (
-        <Card className="border-primary/20 bg-primary/5">
-          <CardContent className="p-4">
+        <Card className="bg-primary/5">
+          <CardContent className="p-[var(--space-2)]">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">
                 {selectedScripts.length} script{selectedScripts.length !== 1 ? "s" : ""} selected
               </span>
-              <div className="flex gap-2">
+              <div className="flex gap-[var(--space-1)]">
                 <Button variant="outline" size="sm">
-                  <Download className="mr-2 h-4 w-4" />
+                  <Download className="mr-[var(--space-1)] h-4 w-4" />
                   Export
                 </Button>
                 <Button
@@ -170,7 +170,7 @@ export default function ScriptsLibraryPage() {
                   onClick={handleDeleteSelected}
                   disabled={isDeleting}
                 >
-                  <Trash2 className="mr-2 h-4 w-4" />
+                  <Trash2 className="mr-[var(--space-1)] h-4 w-4" />
                   {isDeleting ? "Deleting..." : "Delete"}
                 </Button>
               </div>

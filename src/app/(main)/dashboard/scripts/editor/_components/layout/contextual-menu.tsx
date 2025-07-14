@@ -118,16 +118,16 @@ export function ContextualMenu({
       <Card className="w-64 shadow-lg" style={{ border: "1px solid var(--border)" }}>
         <CardContent className="p-0">
           {/* Header */}
-          <div className="border-b p-3">
-            <div className="flex items-center gap-2">
-              <div className={`rounded-md p-1.5 ${config.color}`}>
+          <div className="border-b p-[var(--space-2)]">
+            <div className="flex items-center gap-[var(--space-1)]">
+              <div className={`rounded-md p-[var(--space-1)] ${config.color}`}>
                 <IconComponent className="h-4 w-4 text-white" />
               </div>
               <div className="min-w-0 flex-1">
                 <Badge variant="secondary" className="text-xs">
                   {config.label}
                 </Badge>
-                <p className="text-muted-foreground mt-1 truncate text-xs">
+                <p className="text-muted-foreground mt-[calc(var(--space-1)/2)] truncate text-xs">
                   {elementText.length > 40 ? `${elementText.substring(0, 40)}...` : elementText}
                 </p>
               </div>
@@ -135,16 +135,16 @@ export function ContextualMenu({
           </div>
 
           {/* Actions */}
-          <div className="space-y-1 p-2">
+          <div className="space-y-[var(--space-1)] p-[var(--space-1)]">
             {config.actions.map((action) => (
               <Button
                 key={action.id}
                 variant="ghost"
                 size="sm"
-                className="hover:bg-accent h-auto w-full justify-start p-2"
+                className="hover:bg-accent h-auto w-full justify-start p-[var(--space-1)]"
                 onClick={() => handleAction(action.id)}
               >
-                <action.icon className="text-muted-foreground mr-2 h-4 w-4" />
+                <action.icon className="text-muted-foreground mr-[var(--space-1)] h-4 w-4" />
                 <div className="flex-1 text-left">
                   <div className="text-sm font-medium">{action.label}</div>
                   <div className="text-muted-foreground text-xs">{action.description}</div>
@@ -156,22 +156,32 @@ export function ContextualMenu({
           <Separator />
 
           {/* General Actions */}
-          <div className="space-y-1 p-2">
-            <Button variant="ghost" size="sm" className="h-8 w-full justify-start" onClick={() => handleAction("copy")}>
-              <Copy className="text-muted-foreground mr-2 h-4 w-4" />
+          <div className="space-y-[var(--space-1)] p-[var(--space-1)]">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-10 w-full justify-start"
+              onClick={() => handleAction("copy")}
+            >
+              <Copy className="text-muted-foreground mr-[var(--space-1)] h-4 w-4" />
               <span className="text-sm">Copy Text</span>
             </Button>
-            <Button variant="ghost" size="sm" className="h-8 w-full justify-start" onClick={() => handleAction("edit")}>
-              <Edit3 className="text-muted-foreground mr-2 h-4 w-4" />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-10 w-full justify-start"
+              onClick={() => handleAction("edit")}
+            >
+              <Edit3 className="text-muted-foreground mr-[var(--space-1)] h-4 w-4" />
               <span className="text-sm">Edit</span>
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700"
+              className="h-10 w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700"
               onClick={() => handleAction("delete")}
             >
-              <Trash2 className="mr-2 h-4 w-4" />
+              <Trash2 className="mr-[var(--space-1)] h-4 w-4" />
               <span className="text-sm">Delete</span>
             </Button>
           </div>

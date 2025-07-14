@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
+import { Inter } from "next/font/google";
 
 import { ThemeProvider } from "next-themes";
 
@@ -15,10 +15,10 @@ import { UsageProvider } from "@/contexts/usage-context";
 
 import "./globals.css";
 
-const poppins = Poppins({
+const inter = Inter({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-poppins",
+  weight: ["400", "500"],
+  variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en" className="light" suppressHydrationWarning>
-      <body className={`${poppins.className} min-h-screen antialiased`}>
+      <body className={`${inter.className} min-h-screen antialiased`}>
         <QueryProvider>
           <AuthProvider>
             <UsageProvider>
