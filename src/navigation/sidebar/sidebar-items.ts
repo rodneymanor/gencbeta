@@ -47,7 +47,8 @@ export const sidebarItems: NavGroup[] = [
         icon: FileText,
         subItems: [
           { title: "Scripts", url: "/dashboard/scripts", icon: FileText },
-          { title: "Notes", url: "/dashboard/capture/notes", icon: Pen },
+          { title: "Notes", url: "/dashboard/notes", icon: Pen },
+          { title: "Capture Notes", url: "/dashboard/capture/notes", icon: Pen },
         ],
       },
     ],

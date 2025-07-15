@@ -1,0 +1,131 @@
+"use client";
+
+import { useState } from "react";
+
+import { Download, Trash2, Search, Settings, Eye, EyeOff } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+
+interface ColumnVisibility {
+  title: boolean;
+  tags: boolean;
+  created: boolean;
+  updated: boolean;
+  starred: boolean;
+  content: boolean;
+}
+
+interface NotesControlsProps {
+  totalNotes: number;
+  selectedCount: number;
+  onSelectAll: () => void;
+  onDeleteSelected: () => void;
+  onExportSelected: () => void;
+  columnVisibility: ColumnVisibility;
+  onColumnVisibilityChange: (visibility: ColumnVisibility) => void;
+  onSearch: (query: string) => void;
+}
+
+export function NotesControls({
+  totalNotes,
+  selectedCount,
+  onSelectAll,
+  onDeleteSelected,
+  onExportSelected,
+  columnVisibility,
+  onColumnVisibilityChange,
+  onSearch,
+}: NotesControlsProps) {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    onSearch(value);
+  };
+
+  const handleColumnToggle = (column: keyof ColumnVisibility) => {
+    onColumnVisibilityChange({
+      ...columnVisibility,
+      [column]: !columnVisibility[column],
+    });
+  };
+
+  return (
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-1 items-center gap-4">
+        {/* Search */}
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search notes..."
+            value={searchQuery}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+
+        {/* Info */}
+        <div className="text-sm text-muted-foreground">
+          {totalNotes} notes
+          {selectedCount > 0 && ` • ${selectedCount} selected`}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2">
+        {/* Select All */}
+        <Button variant="outline" size="sm" onClick={onSelectAll}>
+          {selectedCount === totalNotes && totalNotes > 0 ? "Deselect All" : "Select All"}
+        </Button>
+
+        {/* Bulk Actions */}
+        {selectedCount > 0 && (
+          <>
+            <Button variant="outline" size="sm" onClick={onExportSelected}>
+              <Download className="mr-2 h-4 w-4" />
+              Export ({selectedCount})
+            </Button>
+            <Button variant="outline" size="sm" onClick={onDeleteSelected}>
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete ({selectedCount})
+            </Button>
+          </>
+        )}
+
+        {/* Column Visibility */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              <Settings className="mr-2 h-4 w-4" />
+              Columns
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuLabel>Toggle Columns</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {Object.entries(columnVisibility).map(([column, visible]) => (
+              <DropdownMenuItem
+                key={column}
+                className="flex items-center gap-2"
+                onClick={() => handleColumnToggle(column as keyof ColumnVisibility)}
+              >
+                <Checkbox checked={visible} />
+                <span className="capitalize">{column}</span>
+                {visible ? <Eye className="ml-auto h-4 w-4" /> : <EyeOff className="ml-auto h-4 w-4" />}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
+  );
+}
