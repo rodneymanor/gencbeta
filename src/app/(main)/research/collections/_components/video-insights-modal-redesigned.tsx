@@ -114,16 +114,8 @@ export function VideoInsightsModalRedesigned({
   };
 
   const getPlatformColor = (platform: string) => {
-    switch (platform.toLowerCase()) {
-      case "tiktok":
-        return "bg-black text-white";
-      case "instagram":
-        return "bg-gradient-to-r from-purple-500 to-pink-500 text-white";
-      case "youtube":
-        return "bg-red-600 text-white";
-      default:
-        return "bg-gray-500 text-white";
-    }
+    // Use minimal styling - just text, no decorative colors
+    return "bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100";
   };
 
   // Data extraction with fallbacks
@@ -182,56 +174,73 @@ export function VideoInsightsModalRedesigned({
     className?: string;
   }) => (
     <div className={`flex items-center gap-2 ${className}`}>
-      <div className="bg-muted rounded p-1">{icon}</div>
+      <div className="rounded bg-gray-50 p-1 dark:bg-gray-800">{icon}</div>
       <div>
-        <div className="text-foreground text-sm font-semibold">{value}</div>
-        <div className="text-muted-foreground text-xs">{label}</div>
+        <div className="text-base font-medium text-gray-900 dark:text-gray-100">{value}</div>
+        <div className="text-sm font-normal text-gray-600 dark:text-gray-400">{label}</div>
       </div>
     </div>
   );
 
   // Hook Remix Component
   const HookRemixCard = () => (
-    <Card className="border-primary/20 bg-primary/5">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base">Hook</CardTitle>
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={() => setIsHookExpanded(!isHookExpanded)}>
-              <Sparkles className="mr-1 h-3 w-3" />
-              Re-mix Hook
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => copyToClipboard(video.components?.hook ?? "", "Hook")}>
-              {copiedField === "Hook" ? <Check className="h-3 w-3" /> : <Save className="h-3 w-3" />}
-            </Button>
-          </div>
+    <div className="rounded-xl bg-gray-50 dark:bg-gray-800" style={{ padding: "24px" }}>
+      <div className="flex items-center justify-between" style={{ marginBottom: "16px" }}>
+        <h3 className="text-base font-medium text-gray-900 dark:text-gray-100">Hook</h3>
+        <div className="flex" style={{ gap: "8px" }}>
+          <button
+            onClick={() => setIsHookExpanded(!isHookExpanded)}
+            className="flex h-10 items-center gap-2 rounded-[20px] bg-gray-100 px-6 text-sm font-normal text-gray-900 transition-all duration-200 ease-in-out hover:bg-gray-200 active:scale-[0.98] dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600"
+          >
+            <Sparkles className="h-5 w-5" />
+            Re-mix Hook
+          </button>
+          <button
+            onClick={() => copyToClipboard(video.components?.hook ?? "", "Hook")}
+            className="flex h-10 w-10 items-center justify-center rounded-[20px] bg-transparent text-gray-600 transition-all duration-200 ease-in-out hover:bg-gray-50 hover:text-gray-900 active:scale-95 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+          >
+            {copiedField === "Hook" ? <Check className="h-5 w-5" /> : <Save className="h-5 w-5" />}
+          </button>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <p className="text-foreground text-sm leading-relaxed">{video.components?.hook ?? "No hook available"}</p>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+        <p className="text-sm font-normal text-gray-900 dark:text-gray-100" style={{ lineHeight: "1.5" }}>
+          {video.components?.hook ?? "No hook available"}
+        </p>
 
         {isHookExpanded && (
-          <div className="border-border space-y-3 border-t pt-3">
-            <div className="text-muted-foreground text-xs font-medium">Alternative Hooks:</div>
+          <div
+            style={{
+              paddingTop: "16px",
+              marginTop: "16px",
+              borderTop: "1px solid #E5E5E5",
+              display: "flex",
+              flexDirection: "column",
+              gap: "8px",
+            }}
+          >
+            <div className="text-sm font-normal text-gray-600 dark:text-gray-400">Alternative Hooks:</div>
             {remixHooks.map((hook, index) => (
-              <div key={index} className="bg-background rounded-lg border p-3">
-                <p className="text-foreground text-sm">{hook}</p>
-                <div className="mt-2 flex gap-2">
-                  <Button size="sm" variant="ghost" className="h-6 text-xs">
-                    <Copy className="mr-1 h-3 w-3" />
+              <div key={index} className="rounded-xl bg-white dark:bg-gray-900" style={{ padding: "24px" }}>
+                <p className="text-sm font-normal text-gray-900 dark:text-gray-100" style={{ lineHeight: "1.5" }}>
+                  {hook}
+                </p>
+                <div className="flex" style={{ marginTop: "8px", gap: "8px" }}>
+                  <button className="flex h-10 items-center gap-2 rounded-[20px] bg-transparent px-4 text-sm font-normal text-blue-600 transition-all duration-200 ease-in-out hover:bg-blue-50 active:scale-[0.98]">
+                    <Copy className="h-5 w-5" />
                     Copy
-                  </Button>
-                  <Button size="sm" variant="ghost" className="h-6 text-xs">
-                    <Save className="mr-1 h-3 w-3" />
+                  </button>
+                  <button className="flex h-10 items-center gap-2 rounded-[20px] bg-transparent px-4 text-sm font-normal text-blue-600 transition-all duration-200 ease-in-out hover:bg-blue-50 active:scale-[0.98]">
+                    <Save className="h-5 w-5" />
                     Save
-                  </Button>
+                  </button>
                 </div>
               </div>
             ))}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 
   // Keyboard navigation for up/down arrows
@@ -263,57 +272,60 @@ export function VideoInsightsModalRedesigned({
         </DialogTitle>
 
         {/* Top Bar with Creator Metadata and KPIs */}
-        <div className="border-border flex-shrink-0 border-b p-4">
+        <div className="border-border flex-shrink-0 border-b" style={{ padding: "24px" }}>
           <div className="flex items-center justify-between">
             {/* Creator Info */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center" style={{ gap: "16px" }}>
               <Avatar className="h-10 w-10">
                 <AvatarImage src={video.thumbnailUrl} alt={getAuthor()} />
                 <AvatarFallback>{getAuthor().charAt(0)}</AvatarFallback>
               </Avatar>
               <div>
-                <div className="text-foreground font-semibold">{getAuthor()}</div>
-                <div className="text-muted-foreground flex items-center gap-2 text-xs">
+                <div className="font-medium text-gray-900 dark:text-gray-100">{getAuthor()}</div>
+                <div className="flex items-center gap-2 text-sm font-normal text-gray-600 dark:text-gray-400">
                   <Calendar className="h-3 w-3" />
                   {formatDate(video.addedAt)}
-                  <Badge className={`text-xs ${getPlatformColor(video.platform)}`}>{video.platform}</Badge>
+                  <Badge className={`text-sm font-normal ${getPlatformColor(video.platform)}`}>{video.platform}</Badge>
                 </div>
               </div>
             </div>
 
             {/* KPIs */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center" style={{ gap: "32px" }}>
               <KPIMetric
-                icon={<Eye className="h-3 w-3 text-blue-500" />}
+                icon={<Eye className="h-3 w-3 text-gray-600 dark:text-gray-400" />}
                 value={formatNumber(getViews())}
                 label="Views"
               />
               <KPIMetric
-                icon={<Heart className="h-3 w-3 text-red-500" />}
+                icon={<Heart className="h-3 w-3 text-gray-600 dark:text-gray-400" />}
                 value={formatNumber(getLikes())}
                 label="Likes"
               />
               <KPIMetric
-                icon={<MessageCircle className="h-3 w-3 text-green-500" />}
+                icon={<MessageCircle className="h-3 w-3 text-gray-600 dark:text-gray-400" />}
                 value={formatNumber(getComments())}
                 label="Comments"
               />
               <KPIMetric
-                icon={<Share className="h-3 w-3 text-purple-500" />}
+                icon={<Share className="h-3 w-3 text-gray-600 dark:text-gray-400" />}
                 value={formatNumber(getShares())}
                 label="Shares"
               />
               <KPIMetric
-                icon={<TrendingUp className="h-3 w-3 text-indigo-500" />}
+                icon={<TrendingUp className="h-3 w-3 text-gray-600 dark:text-gray-400" />}
                 value={`${calculateCompletionRate()}%`}
                 label="Completion"
               />
             </div>
 
             {/* Close Button */}
-            <Button variant="ghost" size="sm" onClick={() => setOpen(false)} className="h-8 w-8 p-0">
-              <X className="h-4 w-4" />
-            </Button>
+            <button
+              onClick={() => setOpen(false)}
+              className="flex h-10 w-10 items-center justify-center rounded-[20px] bg-transparent text-gray-600 transition-all duration-200 ease-in-out hover:bg-gray-50 hover:text-gray-900 active:scale-95"
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
         </div>
 
@@ -334,38 +346,30 @@ export function VideoInsightsModalRedesigned({
 
               {/* Fullscreen Button for Mobile */}
               <div className="absolute top-2 right-2 sm:hidden">
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="h-8 w-8 bg-black/50 p-0 text-white backdrop-blur-sm hover:bg-black/70"
-                >
-                  <Maximize2 className="h-4 w-4" />
-                </Button>
+                <button className="flex h-10 w-10 items-center justify-center rounded-[20px] bg-gray-900/50 text-white backdrop-blur-sm transition-all duration-200 ease-in-out hover:bg-gray-900/70 active:scale-95">
+                  <Maximize2 className="h-5 w-5" />
+                </button>
               </div>
 
               {/* Mobile Navigation Controls */}
               <div className="absolute top-2 left-2 flex gap-1 md:hidden">
                 {hasPrevious && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
+                  <button
                     onClick={onNavigatePrevious}
-                    className="h-8 w-8 bg-black/50 p-0 text-white backdrop-blur-sm hover:bg-black/70"
+                    className="flex h-10 w-10 items-center justify-center rounded-[20px] bg-gray-900/50 text-white backdrop-blur-sm transition-all duration-200 ease-in-out hover:bg-gray-900/70 active:scale-95"
                     title="Previous video"
                   >
-                    <ChevronUp className="h-4 w-4" />
-                  </Button>
+                    <ChevronUp className="h-5 w-5" />
+                  </button>
                 )}
                 {hasNext && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
+                  <button
                     onClick={onNavigateNext}
-                    className="h-8 w-8 bg-black/50 p-0 text-white backdrop-blur-sm hover:bg-black/70"
+                    className="flex h-10 w-10 items-center justify-center rounded-[20px] bg-gray-900/50 text-white backdrop-blur-sm transition-all duration-200 ease-in-out hover:bg-gray-900/70 active:scale-95"
                     title="Next video"
                   >
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
+                    <ChevronDown className="h-5 w-5" />
+                  </button>
                 )}
               </div>
             </div>
@@ -375,42 +379,29 @@ export function VideoInsightsModalRedesigned({
               <div className="flex items-center justify-between">
                 {/* Primary Actions */}
                 <div className="flex items-center gap-2">
-                  <Button
-                    size="sm"
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground h-8 text-xs"
+                  <button
                     onClick={() => window.open(video.originalUrl ?? "#", "_blank")}
+                    className="flex h-10 items-center gap-2 rounded-[20px] bg-blue-600 px-6 text-sm font-medium text-white transition-all duration-200 ease-in-out hover:bg-blue-700 active:scale-[0.98]"
                   >
-                    <ExternalLink className="mr-1 h-3 w-3" />
+                    <ExternalLink className="h-5 w-5" />
                     View Original
-                  </Button>
+                  </button>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8 border-white/20 bg-white/10 text-white hover:bg-white/20"
-                  >
-                    <Bookmark className="h-3 w-3" />
-                  </Button>
+                  <button className="flex h-10 w-10 items-center justify-center rounded-[20px] bg-transparent text-gray-600 transition-all duration-200 ease-in-out hover:bg-gray-50 hover:text-gray-900 active:scale-95">
+                    <Bookmark className="h-5 w-5" />
+                  </button>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8 border-white/20 bg-white/10 text-white hover:bg-white/20"
-                  >
-                    <Share className="h-3 w-3" />
-                  </Button>
+                  <button className="flex h-10 w-10 items-center justify-center rounded-[20px] bg-transparent text-gray-600 transition-all duration-200 ease-in-out hover:bg-gray-50 hover:text-gray-900 active:scale-95">
+                    <Share className="h-5 w-5" />
+                  </button>
                 </div>
 
                 {/* Overflow Menu */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8 w-8 border-white/20 bg-white/10 text-white hover:bg-white/20"
-                    >
-                      <MoreHorizontal className="h-3 w-3" />
-                    </Button>
+                    <button className="flex h-10 w-10 items-center justify-center rounded-[20px] bg-transparent text-gray-600 transition-all duration-200 ease-in-out hover:bg-gray-50 hover:text-gray-900 active:scale-95">
+                      <MoreHorizontal className="h-5 w-5" />
+                    </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => copyToClipboard(video.originalUrl ?? "", "Video URL")}>
@@ -431,161 +422,194 @@ export function VideoInsightsModalRedesigned({
           <div className="bg-background border-border relative hidden w-12 flex-shrink-0 border-x md:block">
             <div className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 transform flex-col gap-2">
               {hasPrevious && (
-                <Button
-                  variant="ghost"
-                  size="sm"
+                <button
                   onClick={onNavigatePrevious}
-                  className="bg-background/80 border-border hover:bg-background h-10 w-10 rounded-full border p-0 shadow-sm backdrop-blur-sm"
+                  className="flex h-10 w-10 items-center justify-center rounded-[20px] border border-gray-200 bg-white/80 text-gray-600 shadow-sm backdrop-blur-sm transition-all duration-200 ease-in-out hover:bg-white hover:text-gray-900 active:scale-95 dark:border-gray-700 dark:bg-gray-900/80 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-gray-100"
                   title="Previous video"
                 >
                   <ChevronUp className="h-5 w-5" />
-                </Button>
+                </button>
               )}
               {hasNext && (
-                <Button
-                  variant="ghost"
-                  size="sm"
+                <button
                   onClick={onNavigateNext}
-                  className="bg-background/80 border-border hover:bg-background h-10 w-10 rounded-full border p-0 shadow-sm backdrop-blur-sm"
+                  className="flex h-10 w-10 items-center justify-center rounded-[20px] border border-gray-200 bg-white/80 text-gray-600 shadow-sm backdrop-blur-sm transition-all duration-200 ease-in-out hover:bg-white hover:text-gray-900 active:scale-95 dark:border-gray-700 dark:bg-gray-900/80 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-gray-100"
                   title="Next video"
                 >
                   <ChevronDown className="h-5 w-5" />
-                </Button>
+                </button>
               )}
             </div>
           </div>
 
           {/* Content Section - 2/3 width, Scrollable */}
           <div className="flex-1 overflow-y-auto" style={{ maxHeight: "calc(100vh - 120px)" }}>
-            <div className="space-y-6 p-6">
+            <div style={{ padding: "48px", display: "flex", flexDirection: "column", gap: "48px" }}>
               {/* Hook Card with Remix Functionality */}
               <HookRemixCard />
 
               {/* Tabs */}
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="grid h-10 w-full grid-cols-2">
-                  <TabsTrigger value="overview" className="text-sm">
+                  <TabsTrigger value="overview" className="text-base font-normal">
                     Overview
                   </TabsTrigger>
-                  <TabsTrigger value="analysis" className="text-sm">
+                  <TabsTrigger value="analysis" className="text-base font-normal">
                     Analysis
                   </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="overview" className="mt-6 space-y-6">
+                <TabsContent
+                  value="overview"
+                  style={{ marginTop: "48px", display: "flex", flexDirection: "column", gap: "48px" }}
+                >
                   {/* Performance Metrics - Collapsible */}
                   <Collapsible>
                     <CollapsibleTrigger asChild>
-                      <Card className="hover:bg-muted/50 cursor-pointer transition-colors">
-                        <CardHeader className="pb-3">
-                          <div className="flex items-center justify-between">
-                            <CardTitle className="text-lg">Performance Metrics</CardTitle>
-                            <ChevronDown className="text-muted-foreground h-4 w-4" />
-                          </div>
-                        </CardHeader>
-                      </Card>
+                      <div
+                        className="cursor-pointer rounded-xl bg-gray-50 transition-colors hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700"
+                        style={{ padding: "24px" }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-2xl leading-tight font-medium text-gray-900 dark:text-gray-100">
+                            Performance Metrics
+                          </h3>
+                          <ChevronDown className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                        </div>
+                      </div>
                     </CollapsibleTrigger>
                     <CollapsibleContent>
-                      <Card className="rounded-t-none border-t-0">
-                        <CardContent className="pt-0">
-                          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                            <div className="bg-muted/30 flex items-center gap-3 rounded-lg p-3">
-                              <div className="bg-background rounded-md p-2">
-                                <Heart className="h-4 w-4 text-red-500" />
-                              </div>
-                              <div>
-                                <div className="text-foreground font-semibold">{formatNumber(getLikes())}</div>
-                                <div className="text-muted-foreground text-xs">Likes</div>
-                              </div>
+                      <div
+                        className="rounded-xl bg-gray-50 dark:bg-gray-800"
+                        style={{ padding: "24px", marginTop: "8px" }}
+                      >
+                        <div className="grid grid-cols-2 sm:grid-cols-3" style={{ gap: "24px" }}>
+                          <div
+                            className="flex items-center rounded-lg bg-white dark:bg-gray-900"
+                            style={{ gap: "16px", padding: "24px" }}
+                          >
+                            <div className="rounded-md bg-gray-50 dark:bg-gray-800" style={{ padding: "16px" }}>
+                              <Heart className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                             </div>
-                            <div className="bg-muted/30 flex items-center gap-3 rounded-lg p-3">
-                              <div className="bg-background rounded-md p-2">
-                                <MessageCircle className="h-4 w-4 text-green-500" />
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-gray-100">
+                                {formatNumber(getLikes())}
                               </div>
-                              <div>
-                                <div className="text-foreground font-semibold">{formatNumber(getComments())}</div>
-                                <div className="text-muted-foreground text-xs">Comments</div>
-                              </div>
+                              <div className="text-sm font-normal text-gray-600 dark:text-gray-400">Likes</div>
                             </div>
-                            <div className="bg-muted/30 flex items-center gap-3 rounded-lg p-3">
-                              <div className="bg-background rounded-md p-2">
-                                <Share className="h-4 w-4 text-purple-500" />
-                              </div>
-                              <div>
-                                <div className="text-foreground font-semibold">{formatNumber(getShares())}</div>
-                                <div className="text-muted-foreground text-xs">Shares</div>
-                              </div>
+                          </div>
+                          <div
+                            className="flex items-center rounded-lg bg-white dark:bg-gray-900"
+                            style={{ gap: "16px", padding: "24px" }}
+                          >
+                            <div className="rounded-md bg-gray-50 dark:bg-gray-800" style={{ padding: "16px" }}>
+                              <MessageCircle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                             </div>
-                            <div className="bg-muted/30 flex items-center gap-3 rounded-lg p-3">
-                              <div className="bg-background rounded-md p-2">
-                                <Eye className="h-4 w-4 text-blue-500" />
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-gray-100">
+                                {formatNumber(getComments())}
                               </div>
-                              <div>
-                                <div className="text-foreground font-semibold">{formatNumber(getViews())}</div>
-                                <div className="text-muted-foreground text-xs">Views</div>
-                              </div>
+                              <div className="text-sm font-normal text-gray-600 dark:text-gray-400">Comments</div>
                             </div>
-                            <div className="bg-muted/30 flex items-center gap-3 rounded-lg p-3">
-                              <div className="bg-background rounded-md p-2">
-                                <Bookmark className="h-4 w-4 text-amber-500" />
-                              </div>
-                              <div>
-                                <div className="text-foreground font-semibold">{formatNumber(getSaves())}</div>
-                                <div className="text-muted-foreground text-xs">Saves</div>
-                              </div>
+                          </div>
+                          <div
+                            className="flex items-center rounded-lg bg-white dark:bg-gray-900"
+                            style={{ gap: "16px", padding: "24px" }}
+                          >
+                            <div className="rounded-md bg-gray-50 dark:bg-gray-800" style={{ padding: "16px" }}>
+                              <Share className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                             </div>
-                            <div className="bg-muted/30 flex items-center gap-3 rounded-lg p-3">
-                              <div className="bg-background rounded-md p-2">
-                                <TrendingUp className="h-4 w-4 text-indigo-500" />
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-gray-100">
+                                {formatNumber(getShares())}
                               </div>
-                              <div>
-                                <div className="text-foreground font-semibold">
-                                  {calculateEngagementRate().toFixed(1)}%
-                                </div>
-                                <div className="text-muted-foreground text-xs">Engagement Rate</div>
+                              <div className="text-sm font-normal text-gray-600 dark:text-gray-400">Shares</div>
+                            </div>
+                          </div>
+                          <div
+                            className="flex items-center rounded-lg bg-white dark:bg-gray-900"
+                            style={{ gap: "16px", padding: "24px" }}
+                          >
+                            <div className="rounded-md bg-gray-50 dark:bg-gray-800" style={{ padding: "16px" }}>
+                              <Eye className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                            </div>
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-gray-100">
+                                {formatNumber(getViews())}
+                              </div>
+                              <div className="text-sm font-normal text-gray-600 dark:text-gray-400">Views</div>
+                            </div>
+                          </div>
+                          <div
+                            className="flex items-center rounded-lg bg-white dark:bg-gray-900"
+                            style={{ gap: "16px", padding: "24px" }}
+                          >
+                            <div className="rounded-md bg-gray-50 dark:bg-gray-800" style={{ padding: "16px" }}>
+                              <Bookmark className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                            </div>
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-gray-100">
+                                {formatNumber(getSaves())}
+                              </div>
+                              <div className="text-sm font-normal text-gray-600 dark:text-gray-400">Saves</div>
+                            </div>
+                          </div>
+                          <div
+                            className="flex items-center rounded-lg bg-white dark:bg-gray-900"
+                            style={{ gap: "16px", padding: "24px" }}
+                          >
+                            <div className="rounded-md bg-gray-50 dark:bg-gray-800" style={{ padding: "16px" }}>
+                              <TrendingUp className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                            </div>
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-gray-100">
+                                {calculateEngagementRate().toFixed(1)}%
+                              </div>
+                              <div className="text-sm font-normal text-gray-600 dark:text-gray-400">
+                                Engagement Rate
                               </div>
                             </div>
                           </div>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
                     </CollapsibleContent>
                   </Collapsible>
 
                   {/* Caption - Collapsible */}
                   <Collapsible>
                     <CollapsibleTrigger asChild>
-                      <Card className="hover:bg-muted/50 cursor-pointer transition-colors">
-                        <CardHeader className="pb-3">
-                          <div className="flex items-center justify-between">
-                            <CardTitle className="text-lg">Caption</CardTitle>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  copyToClipboard(getDescription(), "Caption");
-                                }}
-                                className="h-8 w-8 p-0"
-                              >
-                                {copiedField === "Caption" ? (
-                                  <Check className="h-3 w-3" />
-                                ) : (
-                                  <Copy className="h-3 w-3" />
-                                )}
-                              </Button>
-                              <ChevronDown className="text-muted-foreground h-4 w-4" />
-                            </div>
+                      <div
+                        className="cursor-pointer rounded-xl bg-gray-50 transition-colors hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700"
+                        style={{ padding: "24px" }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-2xl leading-tight font-medium text-gray-900 dark:text-gray-100">
+                            Caption
+                          </h3>
+                          <div className="flex items-center" style={{ gap: "8px" }}>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                copyToClipboard(getDescription(), "Caption");
+                              }}
+                              className="flex h-10 w-10 items-center justify-center rounded-[20px] bg-transparent text-gray-600 transition-all duration-200 ease-in-out hover:bg-gray-50 hover:text-gray-900 active:scale-95 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+                            >
+                              {copiedField === "Caption" ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
+                            </button>
+                            <ChevronDown className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                           </div>
-                        </CardHeader>
-                      </Card>
+                        </div>
+                      </div>
                     </CollapsibleTrigger>
                     <CollapsibleContent>
-                      <Card className="rounded-t-none border-t-0">
-                        <CardContent className="pt-0">
-                          <p className="text-muted-foreground text-sm leading-relaxed">{getDescription()}</p>
-                        </CardContent>
-                      </Card>
+                      <div
+                        className="rounded-xl bg-gray-50 dark:bg-gray-800"
+                        style={{ padding: "24px", marginTop: "8px" }}
+                      >
+                        <p className="text-base leading-normal font-normal text-gray-900 dark:text-gray-100">
+                          {getDescription()}
+                        </p>
+                      </div>
                     </CollapsibleContent>
                   </Collapsible>
 
@@ -593,112 +617,156 @@ export function VideoInsightsModalRedesigned({
                   {getHashtags().length > 0 && (
                     <Collapsible>
                       <CollapsibleTrigger asChild>
-                        <Card className="hover:bg-muted/50 cursor-pointer transition-colors">
-                          <CardHeader className="pb-3">
-                            <div className="flex items-center justify-between">
-                              <CardTitle className="text-lg">Hashtags</CardTitle>
-                              <ChevronDown className="text-muted-foreground h-4 w-4" />
-                            </div>
-                          </CardHeader>
-                        </Card>
+                        <div
+                          className="cursor-pointer rounded-xl bg-gray-50 transition-colors hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700"
+                          style={{ padding: "24px" }}
+                        >
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-2xl leading-tight font-medium text-gray-900 dark:text-gray-100">
+                              Hashtags
+                            </h3>
+                            <ChevronDown className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                          </div>
+                        </div>
                       </CollapsibleTrigger>
                       <CollapsibleContent>
-                        <Card className="rounded-t-none border-t-0">
-                          <CardContent className="pt-0">
-                            <div className="flex flex-wrap gap-2">
-                              {getHashtags().map((hashtag: string, index: number) => (
-                                <Badge key={index} variant="secondary" className="text-xs">
-                                  {hashtag}
-                                </Badge>
-                              ))}
-                            </div>
-                          </CardContent>
-                        </Card>
+                        <div
+                          className="rounded-xl bg-gray-50 dark:bg-gray-800"
+                          style={{ padding: "24px", marginTop: "8px" }}
+                        >
+                          <div className="flex flex-wrap" style={{ gap: "8px" }}>
+                            {getHashtags().map((hashtag: string, index: number) => (
+                              <div
+                                key={index}
+                                className="rounded-lg bg-gray-100 text-sm font-normal text-gray-900 dark:bg-gray-700 dark:text-gray-100"
+                                style={{ padding: "8px 16px" }}
+                              >
+                                {hashtag}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       </CollapsibleContent>
                     </Collapsible>
                   )}
                 </TabsContent>
 
-                <TabsContent value="analysis" className="mt-6 space-y-6">
+                <TabsContent
+                  value="analysis"
+                  style={{ marginTop: "48px", display: "flex", flexDirection: "column", gap: "48px" }}
+                >
                   {/* Script Components - Collapsible */}
                   <Collapsible>
                     <CollapsibleTrigger asChild>
-                      <Card className="hover:bg-muted/50 cursor-pointer transition-colors">
-                        <CardHeader className="pb-3">
-                          <div className="flex items-center justify-between">
-                            <CardTitle className="text-lg">Script Components</CardTitle>
-                            <ChevronDown className="text-muted-foreground h-4 w-4" />
-                          </div>
-                        </CardHeader>
-                      </Card>
+                      <div
+                        className="cursor-pointer rounded-xl bg-gray-50 transition-colors hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700"
+                        style={{ padding: "24px" }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-2xl leading-tight font-medium text-gray-900 dark:text-gray-100">
+                            Script Components
+                          </h3>
+                          <ChevronDown className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                        </div>
+                      </div>
                     </CollapsibleTrigger>
                     <CollapsibleContent>
-                      <Card className="rounded-t-none border-t-0">
-                        <CardContent className="space-y-4 pt-0">
-                          {video.components?.bridge && (
-                            <div>
-                              <div className="text-muted-foreground mb-2 text-sm font-medium">Bridge</div>
-                              <p className="text-foreground text-sm leading-relaxed">{video.components.bridge}</p>
+                      <div
+                        className="rounded-xl bg-gray-50 dark:bg-gray-800"
+                        style={{
+                          padding: "24px",
+                          marginTop: "8px",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "24px",
+                        }}
+                      >
+                        {video.components?.bridge && (
+                          <div>
+                            <div
+                              className="text-sm font-medium text-gray-600 dark:text-gray-400"
+                              style={{ marginBottom: "8px" }}
+                            >
+                              Bridge
                             </div>
-                          )}
+                            <p className="text-base leading-normal font-normal text-gray-900 dark:text-gray-100">
+                              {video.components.bridge}
+                            </p>
+                          </div>
+                        )}
 
-                          {video.components?.nugget && (
-                            <div>
-                              <div className="text-muted-foreground mb-2 text-sm font-medium">Golden Nugget</div>
-                              <p className="text-foreground text-sm leading-relaxed">{video.components.nugget}</p>
+                        {video.components?.nugget && (
+                          <div>
+                            <div
+                              className="text-sm font-medium text-gray-600 dark:text-gray-400"
+                              style={{ marginBottom: "8px" }}
+                            >
+                              Golden Nugget
                             </div>
-                          )}
+                            <p className="text-base leading-normal font-normal text-gray-900 dark:text-gray-100">
+                              {video.components.nugget}
+                            </p>
+                          </div>
+                        )}
 
-                          {video.components?.wta && (
-                            <div>
-                              <div className="text-muted-foreground mb-2 text-sm font-medium">WTA (What To Action)</div>
-                              <p className="text-foreground text-sm leading-relaxed">{video.components.wta}</p>
+                        {video.components?.wta && (
+                          <div>
+                            <div
+                              className="text-sm font-medium text-gray-600 dark:text-gray-400"
+                              style={{ marginBottom: "8px" }}
+                            >
+                              WTA (What To Action)
                             </div>
-                          )}
-                        </CardContent>
-                      </Card>
+                            <p className="text-base leading-normal font-normal text-gray-900 dark:text-gray-100">
+                              {video.components.wta}
+                            </p>
+                          </div>
+                        )}
+                      </div>
                     </CollapsibleContent>
                   </Collapsible>
 
                   {/* Transcript - Collapsible */}
                   <Collapsible>
                     <CollapsibleTrigger asChild>
-                      <Card className="hover:bg-muted/50 cursor-pointer transition-colors">
-                        <CardHeader className="pb-3">
-                          <div className="flex items-center justify-between">
-                            <CardTitle className="text-lg">Transcript</CardTitle>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  copyToClipboard(video.transcript ?? "", "Transcript");
-                                }}
-                                className="h-8 w-8 p-0"
-                              >
-                                {copiedField === "Transcript" ? (
-                                  <Check className="h-3 w-3" />
-                                ) : (
-                                  <Copy className="h-3 w-3" />
-                                )}
-                              </Button>
-                              <ChevronDown className="text-muted-foreground h-4 w-4" />
-                            </div>
+                      <div
+                        className="cursor-pointer rounded-xl bg-gray-50 transition-colors hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700"
+                        style={{ padding: "24px" }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-2xl leading-tight font-medium text-gray-900 dark:text-gray-100">
+                            Transcript
+                          </h3>
+                          <div className="flex items-center" style={{ gap: "8px" }}>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                copyToClipboard(video.transcript ?? "", "Transcript");
+                              }}
+                              className="flex h-10 w-10 items-center justify-center rounded-[20px] bg-transparent text-gray-600 transition-all duration-200 ease-in-out hover:bg-gray-50 hover:text-gray-900 active:scale-95 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+                            >
+                              {copiedField === "Transcript" ? (
+                                <Check className="h-5 w-5" />
+                              ) : (
+                                <Copy className="h-5 w-5" />
+                              )}
+                            </button>
+                            <ChevronDown className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                           </div>
-                        </CardHeader>
-                      </Card>
+                        </div>
+                      </div>
                     </CollapsibleTrigger>
                     <CollapsibleContent>
-                      <Card className="rounded-t-none border-t-0">
-                        <CardContent className="pt-0">
-                          <div className="max-h-48 overflow-y-auto">
-                            <p className="text-muted-foreground text-sm leading-relaxed">
-                              {video.transcript ?? "No transcript available"}
-                            </p>
-                          </div>
-                        </CardContent>
-                      </Card>
+                      <div
+                        className="rounded-xl bg-gray-50 dark:bg-gray-800"
+                        style={{ padding: "24px", marginTop: "8px" }}
+                      >
+                        <div className="max-h-48 overflow-y-auto">
+                          <p className="text-base leading-normal font-normal text-gray-900 dark:text-gray-100">
+                            {video.transcript ?? "No transcript available"}
+                          </p>
+                        </div>
+                      </div>
                     </CollapsibleContent>
                   </Collapsible>
                 </TabsContent>

@@ -6,12 +6,7 @@
 import { createNegativeKeywordPromptInstruction } from "@/data/negative-keywords";
 
 import { NegativeKeywordsService } from "../negative-keywords-service";
-import {
-  createSpeedWriteVariables,
-  SpeedWriteResult,
-  executePrompt,
-  ensurePromptLibraryInitialized,
-} from "../prompts";
+import { createSpeedWriteVariables, SpeedWriteResult, executePrompt, ensurePromptLibraryInitialized } from "../prompts";
 
 // Input interfaces
 export interface ScriptGenerationInput {
@@ -72,13 +67,16 @@ export class ScriptGenerationService {
       // Get user's negative keywords
       const negativeKeywords = await NegativeKeywordsService.getEffectiveNegativeKeywordsForUser(input.userId);
       const fullNegativeKeywordInstruction = createNegativeKeywordPromptInstruction(negativeKeywords);
-      
+
       // Truncate if too long for prompt validation (max 500 chars)
-      const negativeKeywordInstruction = fullNegativeKeywordInstruction.length > 500 
-        ? fullNegativeKeywordInstruction.substring(0, 497) + "..."
-        : fullNegativeKeywordInstruction;
-        
-      console.log(`🔍 [ScriptGeneration] Negative keyword instruction length: ${fullNegativeKeywordInstruction.length} -> ${negativeKeywordInstruction.length}`);
+      const negativeKeywordInstruction =
+        fullNegativeKeywordInstruction.length > 500
+          ? fullNegativeKeywordInstruction.substring(0, 497) + "..."
+          : fullNegativeKeywordInstruction;
+
+      console.log(
+        `🔍 [ScriptGeneration] Negative keyword instruction length: ${fullNegativeKeywordInstruction.length} -> ${negativeKeywordInstruction.length}`,
+      );
 
       // Determine prompt variant
       const variant = this.getPromptVariant(input.type);
@@ -113,14 +111,14 @@ export class ScriptGenerationService {
       // Convert structured result to content string
       const elements = result.content!;
       console.log(`🔍 [ScriptGeneration] Raw elements from prompt:`, elements);
-      
+
       // Handle nested script structure
       const scriptElements = elements.script || elements;
       console.log(`🔍 [ScriptGeneration] Script elements for combining:`, scriptElements);
-      
+
       const content = this.combineScriptElements(scriptElements);
       const actualWords = this.countWords(content);
-      
+
       console.log(`🔍 [ScriptGeneration] Generated content:`, content);
       console.log(`🔍 [ScriptGeneration] Word count:`, actualWords);
 
@@ -233,42 +231,49 @@ export class ScriptGenerationService {
 
   private combineScriptElements(elements: SpeedWriteResult | string | any[]): string {
     console.log(`🔍 [ScriptGeneration] combineScriptElements input:`, elements);
-    
+
     // Handle case where elements is already a string (some prompts return formatted text)
-    if (typeof elements === 'string') {
+    if (typeof elements === "string") {
       // Remove the [HOOK], [BRIDGE], etc. prefixes and return clean content
       return elements
-        .replace(/\[HOOK\]\s*/g, '')
-        .replace(/\[BRIDGE\]\s*/g, '')
-        .replace(/\[GOLDEN NUGGET\]\s*/g, '')
-        .replace(/\[WTA\]\s*/g, '')
+        .replace(/\[HOOK\]\s*/g, "")
+        .replace(/\[BRIDGE\]\s*/g, "")
+        .replace(/\[GOLDEN NUGGET\]\s*/g, "")
+        .replace(/\[WTA\]\s*/g, "")
         .trim();
     }
-    
+
     // Handle array format (new prompt responses)
     if (Array.isArray(elements) && elements.length > 0) {
       const firstElement = elements[0];
-      
+
       // If the array contains an object with a 'script' property, use that
-      if (firstElement && typeof firstElement === 'object' && firstElement.script) {
+      if (firstElement && typeof firstElement === "object" && firstElement.script) {
         return firstElement.script;
       }
-      
+
       // If the array contains an object with hook, bridge, etc., use those
-      if (firstElement && typeof firstElement === 'object' && firstElement.hook) {
+      if (firstElement && typeof firstElement === "object" && firstElement.hook) {
         const { hook, bridge, goldenNugget, golden_nugget, wta } = firstElement;
         return [hook, bridge, goldenNugget || golden_nugget, wta].filter(Boolean).join("\n\n");
       }
-      
+
+      // If the array contains objects with segment and content properties, extract content
+      if (firstElement && typeof firstElement === "object" && firstElement.segment && firstElement.content) {
+        return elements
+          .map((element) => element.content)
+          .filter(Boolean)
+          .join("\n\n");
+      }
+
       // If it's just an array of strings, join them
       return elements.filter(Boolean).join("\n\n");
     }
-    
+
     // Handle normal object structure
-    if (elements && typeof elements === 'object') {
+    if (elements && typeof elements === "object" && !Array.isArray(elements)) {
       return [elements.hook, elements.bridge, elements.goldenNugget, elements.wta].filter(Boolean).join("\n\n");
     }
-    
     console.warn(`🔍 [ScriptGeneration] Unknown elements format:`, elements);
     return "";
   }

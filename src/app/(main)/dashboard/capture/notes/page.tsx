@@ -4,12 +4,8 @@ import { useState } from "react";
 
 import { Plus, Hash, X, Save } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-
+import { HemingwayEditor } from "../../scripts/editor/_components/hemingway-editor";
 import { NoteEditor } from "./_components/note-editor";
 import { NotesList } from "./_components/notes-list";
 import { SearchFilters } from "./_components/search-filters";
@@ -190,20 +186,23 @@ export default function NotesCapturePage() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6">
+    <div className="mx-auto max-w-7xl" style={{padding: '24px', display: 'flex', flexDirection: 'column', gap: '32px'}}>
       {/* Header */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between" style={{gap: '16px'}}>
         <div>
-          <h1 className="text-3xl font-bold">Notes Capture</h1>
-          <p className="text-muted-foreground">Organize your ideas with rich text editing and smart tagging</p>
+          <h1 className="text-2xl font-medium text-gray-900 dark:text-gray-100">Notes Capture</h1>
+          <p className="text-base font-normal text-gray-600 dark:text-gray-400">Organize your ideas with rich text editing and smart tagging</p>
         </div>
-        <Button className="gap-2" onClick={() => setSelectedNote(null)}>
+        <button 
+          onClick={() => setSelectedNote(null)}
+          className="h-10 px-6 rounded-[20px] bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 active:scale-[0.98] transition-all duration-200 ease-in-out flex items-center gap-2"
+        >
           <Plus className="h-4 w-4" />
           New Note
-        </Button>
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 lg:grid-cols-3" style={{gap: '32px'}}>
         {/* Notes List */}
         <div className="space-y-4 lg:col-span-1">
           {/* Search and Filters */}
@@ -243,14 +242,12 @@ export default function NotesCapturePage() {
           />
 
           {!selectedNote && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Plus className="h-5 w-5" />
-                  Create New Note
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl" style={{padding: '24px'}}>
+              <div className="flex items-center gap-2" style={{marginBottom: '24px'}}>
+                <Plus className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                <h2 className="text-2xl font-medium text-gray-900 dark:text-gray-100">Create New Note</h2>
+              </div>
+              <div style={{display: 'flex', flexDirection: 'column', gap: '24px'}}>
                 <Input
                   value={newNoteTitle}
                   onChange={(e) => setNewNoteTitle(e.target.value)}
@@ -258,21 +255,24 @@ export default function NotesCapturePage() {
                   className="text-lg font-semibold"
                 />
 
-                <Textarea
-                  value={newNoteContent}
-                  onChange={(e) => setNewNoteContent(e.target.value)}
-                  className="min-h-[300px]"
-                  placeholder="Start writing your note... You can use Markdown formatting."
-                />
+                <div className="min-h-[300px]">
+                  <HemingwayEditor
+                    value={newNoteContent}
+                    onChange={setNewNoteContent}
+                    placeholder="Start writing your note... Use the rich editor with readability analysis."
+                    minRows={8}
+                    maxRows={20}
+                  />
+                </div>
 
                 {/* Tag Input */}
-                <div className="space-y-2">
+                <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
                   <div className="flex items-center gap-2">
-                    <Hash className="h-4 w-4" />
-                    <span className="text-sm font-medium">Tags:</span>
+                    <Hash className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Tags:</span>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex" style={{gap: '8px'}}>
                     <Input
                       value={tagInput}
                       onChange={(e) => setTagInput(e.target.value)}
@@ -285,29 +285,37 @@ export default function NotesCapturePage() {
                         }
                       }}
                     />
-                    <Button variant="outline" onClick={() => addTag(tagInput)} disabled={!tagInput.trim()}>
+                    <button 
+                      onClick={() => addTag(tagInput)} 
+                      disabled={!tagInput.trim()}
+                      className="h-10 px-6 rounded-[20px] bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm font-normal hover:bg-gray-200 dark:hover:bg-gray-600 active:scale-[0.98] transition-all duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
                       Add
-                    </Button>
+                    </button>
                   </div>
 
                   {newNoteTags.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap" style={{gap: '8px'}}>
                       {newNoteTags.map((tag) => (
-                        <Badge key={tag} className={`text-xs ${getTagColor(tag)} text-white`}>
+                        <div key={tag} className={`text-xs ${getTagColor(tag)} text-white rounded-lg flex items-center gap-1`} style={{padding: '4px 8px'}}>
                           {tag}
-                          <X className="ml-1 h-3 w-3 cursor-pointer" onClick={() => removeTag(tag)} />
-                        </Badge>
+                          <X className="h-3 w-3 cursor-pointer" onClick={() => removeTag(tag)} />
+                        </div>
                       ))}
                     </div>
                   )}
                 </div>
 
-                <Button onClick={createNewNote} disabled={!newNoteTitle.trim()} className="gap-2">
+                <button 
+                  onClick={createNewNote} 
+                  disabled={!newNoteTitle.trim()}
+                  className="h-10 px-6 rounded-[20px] bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 active:scale-[0.98] transition-all duration-200 ease-in-out flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   <Save className="h-4 w-4" />
                   Create Note
-                </Button>
-              </CardContent>
-            </Card>
+                </button>
+              </div>
+            </div>
           )}
         </div>
       </div>

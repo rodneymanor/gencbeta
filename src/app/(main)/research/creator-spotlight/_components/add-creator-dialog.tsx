@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 
 import { Plus, Loader2, Check, AlertCircle, ChevronDown, HelpCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 interface AddCreatorDialogProps {
   children: React.ReactNode;

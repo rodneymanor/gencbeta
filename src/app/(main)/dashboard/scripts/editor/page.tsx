@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 
 import { useSearchParams } from "next/navigation";
 
+import { PartialBlock } from "@blocknote/core";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -11,10 +12,9 @@ import { toast } from "sonner";
 import { useTopBarConfig } from "@/hooks/use-route-topbar";
 import { useScriptSave } from "@/hooks/use-script-save";
 
-import { EditorTopBarToolbar } from "./_components/layout/editor-topbar-toolbar";
 import { HemingwayEditor } from "./_components/hemingway-editor";
+import { EditorTopBarToolbar } from "./_components/layout/editor-topbar-toolbar";
 import { ScriptOptions } from "./_components/script-options";
-import { PartialBlock } from "@blocknote/core";
 
 interface ScriptElements {
   hook: string;
@@ -47,7 +47,7 @@ export default function ScriptEditorPage() {
   const mode = searchParams.get("mode") ?? "notes";
   const scriptId = searchParams.get("scriptId");
   const hasSpeedWriteResults = searchParams.get("hasSpeedWriteResults") === "true";
-  
+
   console.log("📊 [EDITOR] Component mounted with params:", { mode, scriptId, hasSpeedWriteResults });
 
   // State
@@ -56,8 +56,8 @@ export default function ScriptEditorPage() {
   const [showScriptOptions, setShowScriptOptions] = useState(hasSpeedWriteResults);
   const [speedWriteData, setSpeedWriteData] = useState<SpeedWriteResponse | null>(null);
   const [blocks, setBlocks] = useState<PartialBlock[]>([]);
-  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
-  
+  const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+
   // Auto-save timer ref
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout>();
 
@@ -104,7 +104,7 @@ export default function ScriptEditorPage() {
     const loadSpeedWriteResults = () => {
       const storedResults = sessionStorage.getItem("speedWriteResults");
       console.log("📊 [EDITOR] Raw sessionStorage data:", storedResults);
-      
+
       if (!storedResults) {
         console.log("📊 [EDITOR] No speedWriteResults found in sessionStorage");
         return;
@@ -116,7 +116,7 @@ export default function ScriptEditorPage() {
         console.log("📊 [EDITOR] Option A:", data.optionA);
         console.log("📊 [EDITOR] Option B:", data.optionB);
         console.log("📊 [EDITOR] Success:", data.success);
-        
+
         setSpeedWriteData(data);
         setShowScriptOptions(true);
         sessionStorage.removeItem("speedWriteResults");
@@ -168,23 +168,23 @@ export default function ScriptEditorPage() {
   // Auto-save function
   const performAutoSave = async () => {
     if (!script.trim()) return;
-    
+
     try {
-      setAutoSaveStatus('saving');
+      setAutoSaveStatus("saving");
       await handleSave();
-      setAutoSaveStatus('saved');
-      
+      setAutoSaveStatus("saved");
+
       // Reset to idle after 2 seconds
       setTimeout(() => {
-        setAutoSaveStatus('idle');
+        setAutoSaveStatus("idle");
       }, 2000);
     } catch (error) {
-      setAutoSaveStatus('error');
-      console.error('Auto-save failed:', error);
-      
+      setAutoSaveStatus("error");
+      console.error("Auto-save failed:", error);
+
       // Reset to idle after 3 seconds
       setTimeout(() => {
-        setAutoSaveStatus('idle');
+        setAutoSaveStatus("idle");
       }, 3000);
     }
   };
@@ -225,14 +225,13 @@ export default function ScriptEditorPage() {
     );
   }
 
-
   if (showScriptOptions && speedWriteData && (speedWriteData.optionA || speedWriteData.optionB)) {
     console.log("📊 [EDITOR] Rendering ScriptOptions with:", {
       optionA: speedWriteData.optionA,
       optionB: speedWriteData.optionB,
       showScriptOptions,
     });
-    
+
     return (
       <ScriptOptions
         optionA={speedWriteData.optionA}

@@ -2,8 +2,8 @@
  * Centralized prompt management system
  */
 
-import { Prompt, PromptLibrary, PromptResult, PromptExecutionOptions } from "./types";
 import { BasePromptClass, createPrompt } from "./base-prompt";
+import { Prompt, PromptLibrary, PromptResult, PromptExecutionOptions } from "./types";
 
 export class PromptManager {
   private static instance: PromptManager;

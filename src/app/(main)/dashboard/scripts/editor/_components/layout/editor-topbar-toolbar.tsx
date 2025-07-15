@@ -19,10 +19,10 @@ import { useVoice, type VoiceType } from "@/contexts/voice-context";
 interface EditorTopBarToolbarProps {
   script: string;
   onSave?: () => void;
-  autoSaveStatus?: 'idle' | 'saving' | 'saved' | 'error';
+  autoSaveStatus?: "idle" | "saving" | "saved" | "error";
 }
 
-export function EditorTopBarToolbar({ script, onSave, autoSaveStatus = 'idle' }: EditorTopBarToolbarProps) {
+export function EditorTopBarToolbar({ script, onSave, autoSaveStatus = "idle" }: EditorTopBarToolbarProps) {
   const [isRewriting, setIsRewriting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const { currentVoice, setCurrentVoice, availableVoices } = useVoice();
@@ -112,128 +112,44 @@ export function EditorTopBarToolbar({ script, onSave, autoSaveStatus = 'idle' }:
   };
 
   return (
-    <div className="flex items-center gap-[var(--space-1)]">
-      {/* Save Button */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={handleSave}
-        disabled={isSaving || !script.trim()}
-        className="h-10 px-[var(--space-3)]"
-      >
-        <Save className="mr-[var(--space-1)] h-4 w-4" />
-        {isSaving ? "Saving..." : "Save"}
-      </Button>
+    <div className="flex w-full items-center justify-between">
+      {/* Empty space on the left */}
+      <div></div>
 
-      {/* Download Button */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={handleDownload}
-        disabled={!script.trim()}
-        className="h-10 px-[var(--space-3)]"
-      >
-        <Download className="mr-[var(--space-1)] h-4 w-4" />
-        Export
-      </Button>
+      {/* Auto-save Status and Export Button - moved to far right */}
+      <div className="flex items-center gap-[var(--space-3)]">
+        <div className="text-muted-foreground flex items-center gap-[var(--space-1)] text-xs">
+          {autoSaveStatus === "saving" && (
+            <>
+              <Loader2 className="h-3 w-3 animate-spin" />
+              <span>Saving...</span>
+            </>
+          )}
+          {autoSaveStatus === "saved" && (
+            <>
+              <CheckCircle className="h-3 w-3 text-green-500" />
+              <span>Saved</span>
+            </>
+          )}
+          {autoSaveStatus === "error" && (
+            <>
+              <AlertCircle className="h-3 w-3 text-red-500" />
+              <span>Save failed</span>
+            </>
+          )}
+          {autoSaveStatus === "idle" && <span className="text-muted-foreground">Auto-save enabled</span>}
+        </div>
 
-      <Separator orientation="vertical" className="mx-[var(--space-1)] h-6" />
-
-      {/* Voice Selection & Rewrite Dropdown */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" disabled={isRewriting} className="h-10 px-[var(--space-3)]">
-            <Mic className="mr-[var(--space-1)] h-4 w-4" />
-            {currentVoice}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          {/* Voice Selection */}
-          {availableVoices.map((voice) => (
-            <DropdownMenuItem
-              key={voice}
-              onClick={() => handleChangeVoice(voice)}
-              className={voice === currentVoice ? "bg-accent" : ""}
-            >
-              <Mic className="mr-[var(--space-1)] h-4 w-4" />
-              {voice} Voice
-              {voice === currentVoice && <span className="ml-auto">✓</span>}
-            </DropdownMenuItem>
-          ))}
-
-          <DropdownMenuSeparator />
-
-          {/* Rewrite with Voice Options */}
-          {availableVoices.map((voice) => (
-            <DropdownMenuItem
-              key={`rewrite-${voice}`}
-              onClick={() => handleRewriteWithVoice(voice)}
-              disabled={!script.trim()}
-            >
-              <RefreshCw className="mr-[var(--space-1)] h-4 w-4" />
-              Rewrite as {voice}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {/* AI Tools Dropdown */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            disabled={isRewriting || !script.trim()}
-            className="h-10 px-[var(--space-3)]"
-          >
-            <Sparkles className="mr-[var(--space-1)] h-4 w-4" />
-            AI Tools
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={handleRewriteScript}>
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Rewrite Script
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => handleRewriteWithVoice("Hook")}>
-            <Sparkles className="mr-[var(--space-1)] h-4 w-4" />
-            Improve Hook
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleRewriteWithVoice("CTA")}>
-            <Sparkles className="mr-[var(--space-1)] h-4 w-4" />
-            Strengthen CTA
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleRewriteWithVoice("Flow")}>
-            <Sparkles className="mr-[var(--space-1)] h-4 w-4" />
-            Improve Flow
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {/* Auto-save Status */}
-      <div className="text-muted-foreground ml-[var(--space-2)] flex items-center gap-[var(--space-1)] text-xs">
-        {autoSaveStatus === 'saving' && (
-          <>
-            <Loader2 className="h-3 w-3 animate-spin" />
-            <span>Saving...</span>
-          </>
-        )}
-        {autoSaveStatus === 'saved' && (
-          <>
-            <CheckCircle className="h-3 w-3 text-green-500" />
-            <span>Saved</span>
-          </>
-        )}
-        {autoSaveStatus === 'error' && (
-          <>
-            <AlertCircle className="h-3 w-3 text-red-500" />
-            <span>Save failed</span>
-          </>
-        )}
-        {autoSaveStatus === 'idle' && (
-          <kbd className="bg-muted rounded px-[var(--space-1)] py-[calc(var(--space-1)/2)]">⌘S</kbd>
-        )}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleDownload}
+          disabled={!script.trim()}
+          className="h-10 px-[var(--space-3)]"
+        >
+          <Download className="mr-[var(--space-1)] h-4 w-4" />
+          Export
+        </Button>
       </div>
     </div>
   );

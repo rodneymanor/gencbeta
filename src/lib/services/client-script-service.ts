@@ -18,12 +18,14 @@ export interface ScriptOption {
   content: string;
   estimatedDuration: string;
   approach: "speed-write" | "educational" | "viral";
-  elements?: {
-    hook: string;
-    bridge: string;
-    goldenNugget: string;
-    wta: string;
-  } | string;
+  elements?:
+    | {
+        hook: string;
+        bridge: string;
+        goldenNugget: string;
+        wta: string;
+      }
+    | string;
   metadata?: {
     targetWords: number;
     actualWords: number;
@@ -82,7 +84,7 @@ export class ClientScriptService {
       const processingTime = Date.now() - startTime;
 
       // Transform new API response to legacy format
-      console.log('🔍 [ClientScriptService] API response data:', data);
+      console.log("🔍 [ClientScriptService] API response data:", data);
 
       const result: SpeedWriteResponse = {
         success: data.success,
@@ -92,7 +94,7 @@ export class ClientScriptService {
         processingTime: data.processingTime || processingTime,
       };
 
-      console.log('🔍 [ClientScriptService] Transformed result:', result);
+      console.log("🔍 [ClientScriptService] Transformed result:", result);
 
       return result;
     } catch (error) {

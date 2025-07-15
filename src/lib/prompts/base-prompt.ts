@@ -2,8 +2,9 @@
  * Base prompt class with template processing and validation
  */
 
-import { Prompt, PromptVariables, PromptResult, PromptExecutionOptions, PromptValidation } from "./types";
 import { geminiService, GeminiRequestConfig } from "../services/gemini-service";
+
+import { Prompt, PromptVariables, PromptResult, PromptExecutionOptions, PromptValidation } from "./types";
 
 export class BasePromptClass {
   constructor(public definition: Prompt) {}

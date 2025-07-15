@@ -29,7 +29,7 @@ const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
 const SIDEBAR_WIDTH = "16rem"
 const SIDEBAR_WIDTH_MOBILE = "18rem"
-const SIDEBAR_WIDTH_ICON = "3.5rem"
+const SIDEBAR_WIDTH_ICON = "4rem"
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 
 type SidebarContextProps = {
@@ -368,6 +368,9 @@ function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
       className={cn(
         "bg-background dark:bg-backgroundDark relative flex w-full flex-1 flex-col",
         "md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-lg md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2",
+        "md:peer-data-[variant=inset]:border-borderMain/50 md:peer-data-[variant=inset]:ring-borderMain/50 md:peer-data-[variant=inset]:divide-borderMain/50",
+        "md:peer-data-[variant=inset]:dark:divide-borderMainDark/50 md:peer-data-[variant=inset]:dark:ring-borderMainDark/50 md:peer-data-[variant=inset]:dark:border-borderMainDark/50",
+        "md:peer-data-[variant=inset]:isolate md:peer-data-[variant=inset]:overflow-clip md:peer-data-[variant=inset]:bg-clip-border",
         className
       )}
       {...props}

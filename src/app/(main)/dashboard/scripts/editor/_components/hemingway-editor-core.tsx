@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 
-import { useCreateBlockNote } from "@blocknote/react";
-import { BlockNoteView } from "@blocknote/mantine";
 import { BlockNoteEditor, PartialBlock, BlockNoteSchema, defaultBlockSpecs } from "@blocknote/core";
+import { BlockNoteView } from "@blocknote/mantine";
+import { useCreateBlockNote } from "@blocknote/react";
 
 import {
   analyzeScriptElements,
@@ -68,18 +68,18 @@ export function HemingwayEditorCore({
   // Generate script title from first few words
   const generateScriptTitle = useCallback((text: string): string => {
     if (!text.trim()) return "Untitled Script";
-    
+
     const words = text.trim().split(/\s+/);
     const titleWords = words.slice(0, 6); // Take first 6 words
     let title = titleWords.join(" ");
-    
+
     // If the title is too long, truncate it
     if (title.length > 50) {
       title = title.substring(0, 47) + "...";
     } else if (words.length > 6) {
       title += "...";
     }
-    
+
     return title;
   }, []);
 
@@ -89,29 +89,38 @@ export function HemingwayEditorCore({
   });
 
   // Handle editor content changes
-  const handleEditorChange = useCallback((editor: BlockNoteEditor) => {
-    // Convert blocks to plain text for analysis
-    const plainText = editor.document.map((block) => {
-      if (block.type === "paragraph") {
-        return block.content?.map((item) => {
-          if (typeof item === "string") return item;
-          // Handle styled text content
-          if (item && typeof item === "object" && "text" in item) {
-            return item.text || "";
+  const handleEditorChange = useCallback(
+    (editor: BlockNoteEditor) => {
+      // Convert blocks to plain text for analysis
+      const plainText = editor.document
+        .map((block) => {
+          if (block.type === "paragraph") {
+            return (
+              block.content
+                ?.map((item) => {
+                  if (typeof item === "string") return item;
+                  // Handle styled text content
+                  if (item && typeof item === "object" && "text" in item) {
+                    return item.text || "";
+                  }
+                  return "";
+                })
+                .join("") || ""
+            );
           }
           return "";
-        }).join("") || "";
+        })
+        .join("\n");
+
+      onChange(plainText);
+
+      // Also provide blocks as JSON for external use
+      if (onBlocksChange) {
+        onBlocksChange(editor.document);
       }
-      return "";
-    }).join("\n");
-    
-    onChange(plainText);
-    
-    // Also provide blocks as JSON for external use
-    if (onBlocksChange) {
-      onBlocksChange(editor.document);
-    }
-  }, [onChange, onBlocksChange]);
+    },
+    [onChange, onBlocksChange],
+  );
 
   // Create analysis from structured elements
   const createAnalysisFromElements = useCallback((text: string, structuredElements: ScriptElements): ScriptAnalysis => {
@@ -230,8 +239,8 @@ export function HemingwayEditorCore({
   return (
     <div className="relative flex-1">
       {/* Script Title Header */}
-      <div className="border-b border-border/20 bg-background/50 px-6 py-4">
-        <h1 className="text-2xl font-semibold text-foreground">{scriptTitle}</h1>
+      <div className="border-border/20 bg-background/50 border-b px-6 py-4">
+        <h1 className="text-foreground text-2xl font-semibold">{scriptTitle}</h1>
       </div>
 
       {/* Editor Container */}

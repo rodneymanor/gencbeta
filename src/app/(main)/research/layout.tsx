@@ -20,7 +20,7 @@ export default function ResearchLayout({ children }: Readonly<{ children: ReactN
         <TopBarProvider>
           <VideoPlaybackProvider>
             <div className="flex h-screen w-full">
-              <AppSidebar variant="inset" collapsible="icon" />
+              <AppSidebar variant="inset" collapsible="icon" side="left" />
               <SidebarInset className="flex w-screen flex-1">
                 <Suspense fallback={<TopBar />}>
                   <RouteAwareTopBar />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 
 import { useSmartSidebarContext } from "@/components/providers/smart-sidebar-provider";
 import { GenCLogo } from "@/components/ui/gen-c-logo";
@@ -19,6 +19,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { useCollectionsSidebar } from "@/hooks/use-collections-sidebar";
 import { sidebarItems } from "@/navigation/sidebar/sidebar-items";
 
+import { ExpandableSidebarPanel, defaultSidebarSections, SidebarItemWithSubs } from "./expandable-sidebar-panel";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import { SidebarPinControl } from "./sidebar-pin-control";
@@ -26,18 +27,27 @@ import { SidebarPinControl } from "./sidebar-pin-control";
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { userProfile } = useAuth();
   const { sidebarItems: dynamicSidebarItems, refreshCollections } = useCollectionsSidebar(sidebarItems);
-  const { setOpen } = useSidebar();
 
-  // Use smart sidebar for proper manual/hover state management
+  // Use smart sidebar for expandable panel management only
   const smartSidebar = useSmartSidebarContext();
+  // State for tracking hovered sidebar item
+  const [hoveredItem, setHoveredItem] = useState<SidebarItemWithSubs | null>(null);
+  const [isHoveringSpecificItem, setIsHoveringSpecificItem] = useState(false);
+  const isHoveringSidebarArea = useRef(false);
+  const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  // Sync smart sidebar state with the main sidebar context
+  // Keep the main sidebar collapsed - don't sync with smart sidebar state
+  // The main sidebar should stay in icon-only mode
+
+  // Cleanup timeout on unmount
   useEffect(() => {
-    // Only sync after smart sidebar has finished loading to prevent race conditions
-    if (!smartSidebar.isLoading) {
-      setOpen(smartSidebar.isOpen);
-    }
-  }, [smartSidebar.isOpen, smartSidebar.isLoading, setOpen]);
+    return () => {
+      if (hoverTimeout.current) {
+        clearTimeout(hoverTimeout.current);
+        hoverTimeout.current = null;
+      }
+    };
+  }, []);
 
   // Filter sidebar items based on user role
   const filteredSidebarItems = dynamicSidebarItems
@@ -68,12 +78,78 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       return group;
     });
 
-  return (
+  const clearHoverTimeout = () => {
+    if (hoverTimeout.current) {
+      clearTimeout(hoverTimeout.current);
+      hoverTimeout.current = null;
+    }
+  };
+
+  const handleSidebarMouseEnter = () => {
+    // Clear any pending timeout
+    clearHoverTimeout();
+    // Expand the panel when sidebar is hovered
+    smartSidebar.setExpanded(true);
+    isHoveringSidebarArea.current = true;
+  };
+
+  const handleSidebarMouseLeave = () => {
+    // Don't immediately collapse - wait to see if user moves to expandable panel
+    isHoveringSidebarArea.current = false;
+    clearHoverTimeout();
+    hoverTimeout.current = setTimeout(() => {
+      if (!isHoveringSidebarArea.current && !smartSidebar.isPinned) {
+        smartSidebar.setExpanded(false);
+        setHoveredItem(null);
+        setIsHoveringSpecificItem(false);
+      }
+    }, 150);
+  };
+
+  const handleExpandablePanelMouseEnter = () => {
+    // Clear any pending timeout
+    clearHoverTimeout();
+    // Keep the panel expanded when hovering over it
+    smartSidebar.setExpanded(true);
+    isHoveringSidebarArea.current = true;
+  };
+
+  const handleExpandablePanelMouseLeave = () => {
+    // Don't immediately collapse - wait to see if user moves back to main sidebar
+    isHoveringSidebarArea.current = false;
+    clearHoverTimeout();
+    hoverTimeout.current = setTimeout(() => {
+      if (!isHoveringSidebarArea.current && !smartSidebar.isPinned) {
+        smartSidebar.setExpanded(false);
+        setHoveredItem(null);
+        setIsHoveringSpecificItem(false);
+      }
+    }, 150);
+  };
+
+  const handleItemMouseEnter = (item: SidebarItemWithSubs) => {
+    setHoveredItem(item);
+    setIsHoveringSpecificItem(true);
+    smartSidebar.setExpanded(true);
+  };
+
+  const handleItemMouseLeave = () => {
+    // Don't immediately hide sub-items - give user time to reach expandable panel
+    clearHoverTimeout();
+    hoverTimeout.current = setTimeout(() => {
+      if (!isHoveringSidebarArea.current && !smartSidebar.isPinned) {
+        setIsHoveringSpecificItem(false);
+        setHoveredItem(null);
+      }
+    }, 150);
+  };
+
+  const sidebarComponent = (
     <Sidebar
       {...props}
-      onMouseEnter={smartSidebar.handleMouseEnter}
-      onMouseLeave={smartSidebar.handleMouseLeave}
-      className={`transition-all duration-200 ${smartSidebar.visualState === "hover-open" ? "hover:shadow-lg" : ""}`}
+      className="transition-all duration-200"
+      onMouseEnter={handleSidebarMouseEnter}
+      onMouseLeave={handleSidebarMouseLeave}
     >
       <SidebarHeader>
         <SidebarMenu>
@@ -81,16 +157,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton asChild className="hover:bg-transparent active:bg-transparent">
               <a href="#" className="flex w-full items-center gap-2">
                 <GenCLogo iconSize="sm" textSize="sm" />
-                <SidebarPinControl className="ml-auto" />
+                <SidebarPinControl />
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={filteredSidebarItems} onCollectionCreated={refreshCollections} />
-        {/* <NavDocuments items={data.documents} /> */}
-        {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
+        <NavMain
+          items={filteredSidebarItems}
+          onCollectionCreated={refreshCollections}
+          onItemMouseEnter={handleItemMouseEnter}
+          onItemMouseLeave={handleItemMouseLeave}
+        />
       </SidebarContent>
       <SidebarFooter>
         <div className="space-y-2">
@@ -99,5 +178,29 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </div>
       </SidebarFooter>
     </Sidebar>
+  );
+
+  const expandablePanel = (
+    <ExpandableSidebarPanel
+      isExpanded={smartSidebar.isExpanded}
+      isPinned={smartSidebar.isPinned}
+      onTogglePin={smartSidebar.togglePin}
+      sections={defaultSidebarSections}
+      hoveredItem={hoveredItem}
+      isHoveringSpecificItem={isHoveringSpecificItem}
+      onPersonalize={() => {
+        // Handle personalization logic
+        console.log("Personalize clicked");
+      }}
+      onMouseEnter={handleExpandablePanelMouseEnter}
+      onMouseLeave={handleExpandablePanelMouseLeave}
+    />
+  );
+
+  return (
+    <>
+      {sidebarComponent}
+      {expandablePanel}
+    </>
   );
 }

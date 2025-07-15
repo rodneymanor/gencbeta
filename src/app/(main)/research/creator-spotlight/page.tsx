@@ -69,34 +69,40 @@ export default function CreatorSpotlightPage() {
   }
 
   return (
-    <div className="mx-auto max-w-screen-xl space-y-[var(--space-4)] px-[var(--space-3)] md:px-[var(--space-6)]">
+    <div
+      className="mx-auto max-w-screen-xl"
+      style={{ padding: "0 24px", gap: "32px", display: "flex", flexDirection: "column" }}
+      data-md-px="48px"
+    >
       {/* Header */}
-      <div className="space-y-[var(--space-2)]">
-        <div className="flex flex-col space-y-[var(--space-2)] md:flex-row md:items-center md:justify-between md:space-y-0">
+      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between" style={{ gap: "16px" }}>
           <div>
-            <h1 className="text-foreground text-2xl leading-tight font-medium">Creator Spotlight</h1>
-            <p className="text-muted-foreground text-base leading-normal font-normal">
+            <h1 className="text-2xl leading-tight font-medium text-gray-900 dark:text-gray-100">Creator Spotlight</h1>
+            <p className="text-base leading-normal font-normal text-gray-600 dark:text-gray-400">
               Discover and analyze top creators from TikTok and Instagram
             </p>
           </div>
           <AddCreatorDialog onCreatorAdded={loadCreators}>
-            <Button
+            <button
               disabled={loading}
-              className="bg-primary text-primary-foreground md:hover:bg-primary/90 focus:ring-ring disabled:bg-muted disabled:text-muted-foreground flex w-full items-center justify-center gap-2 focus:ring-2 focus:ring-offset-2 focus:outline-none active:scale-[0.98] disabled:cursor-not-allowed md:w-auto"
+              className="flex h-10 w-full items-center justify-center rounded-[20px] bg-blue-600 px-6 text-sm font-medium text-white transition-all duration-200 ease-in-out hover:bg-blue-700 focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 focus:outline-none active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400 md:w-auto"
+              style={{ gap: "8px" }}
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-5 w-5" />
               Add Creator
-            </Button>
+            </button>
           </AddCreatorDialog>
         </div>
 
         {/* Search and Filter */}
-        <div className="space-y-[var(--space-2)]">
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           {/* Mobile Filter Toggle */}
           <div className="md:hidden">
             <button
               onClick={() => setFiltersExpanded(!filtersExpanded)}
-              className="text-muted-foreground md:hover:text-foreground focus:ring-ring flex items-center gap-2 rounded-lg p-2 text-sm font-normal focus:ring-2 focus:ring-offset-2 focus:outline-none"
+              className="flex items-center rounded-lg text-base font-normal text-gray-600 transition-all duration-200 ease-in-out focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 focus:outline-none md:hover:text-gray-900 dark:text-gray-400 dark:md:hover:text-gray-100"
+              style={{ gap: "8px", padding: "16px" }}
             >
               <Filter className="h-4 w-4" />
               <span>Search & Filter</span>
@@ -107,59 +113,56 @@ export default function CreatorSpotlightPage() {
           </div>
 
           {/* Filter Content */}
-          <div className={`space-y-4 ${filtersExpanded ? "block" : "hidden md:block"} transition-all duration-200`}>
-            <div className="flex flex-col gap-4 md:flex-row">
+          <div
+            className={`${filtersExpanded ? "block" : "hidden md:block"} transition-all duration-200`}
+            style={{ display: "flex", flexDirection: "column", gap: "32px" }}
+          >
+            <div className="flex flex-col md:flex-row" style={{ gap: "32px" }}>
               <div className="relative flex-1">
-                <Search className="text-muted-foreground absolute top-1/2 left-0 h-4 w-4 -translate-y-1/2 transform" />
+                <Search className="absolute top-1/2 left-0 h-4 w-4 -translate-y-1/2 transform text-gray-600 dark:text-gray-400" />
                 <input
                   type="text"
                   placeholder="Search creators..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   disabled={loading}
-                  className="text-foreground border-border focus:border-primary focus:ring-ring disabled:border-muted disabled:text-muted-foreground placeholder:text-muted-foreground h-12 w-full border-0 border-b-2 bg-transparent pr-0 pl-6 text-base transition-colors duration-200 focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed"
+                  className="h-12 w-full border-0 border-b-2 border-gray-200 bg-transparent pr-0 pl-6 text-base text-gray-900 transition-colors duration-200 placeholder:text-gray-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:border-gray-100 disabled:text-gray-400 dark:border-gray-700 dark:text-gray-100 dark:placeholder:text-gray-400 dark:disabled:border-gray-800 dark:disabled:text-gray-600"
                 />
               </div>
-              <div className="grid grid-cols-3 gap-2 md:flex md:gap-2">
-                <Button
-                  variant={platformFilter === "all" ? "default" : "outline"}
-                  size="sm"
+              <div className="grid grid-cols-3 md:flex" style={{ gap: "16px" }}>
+                <button
                   onClick={() => setPlatformFilter("all")}
                   disabled={loading}
                   className={
                     platformFilter === "all"
-                      ? "bg-primary text-primary-foreground md:hover:bg-primary/90 focus:ring-ring disabled:bg-muted disabled:text-muted-foreground focus:ring-2 focus:ring-offset-2 focus:outline-none active:scale-[0.98] disabled:cursor-not-allowed"
-                      : "border-border text-foreground focus:ring-ring disabled:bg-muted disabled:text-muted-foreground focus:ring-2 focus:ring-offset-2 focus:outline-none active:scale-[0.98] disabled:cursor-not-allowed md:hover:bg-black/5 dark:md:hover:bg-white/5"
+                      ? "h-10 rounded-[20px] bg-blue-600 px-6 text-sm font-medium text-white transition-all duration-200 ease-in-out hover:bg-blue-700 focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 focus:outline-none active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
+                      : "h-10 rounded-[20px] bg-gray-100 px-6 text-sm font-normal text-gray-900 transition-all duration-200 ease-in-out hover:bg-gray-200 focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 focus:outline-none active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600"
                   }
                 >
                   All
-                </Button>
-                <Button
-                  variant={platformFilter === "tiktok" ? "default" : "outline"}
-                  size="sm"
+                </button>
+                <button
                   onClick={() => setPlatformFilter("tiktok")}
                   disabled={loading}
                   className={
                     platformFilter === "tiktok"
-                      ? "bg-primary text-primary-foreground md:hover:bg-primary/90 focus:ring-ring disabled:bg-muted disabled:text-muted-foreground focus:ring-2 focus:ring-offset-2 focus:outline-none active:scale-[0.98] disabled:cursor-not-allowed"
-                      : "border-border text-foreground focus:ring-ring disabled:bg-muted disabled:text-muted-foreground focus:ring-2 focus:ring-offset-2 focus:outline-none active:scale-[0.98] disabled:cursor-not-allowed md:hover:bg-black/5 dark:md:hover:bg-white/5"
+                      ? "h-10 rounded-[20px] bg-blue-600 px-6 text-sm font-medium text-white transition-all duration-200 ease-in-out hover:bg-blue-700 focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 focus:outline-none active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
+                      : "h-10 rounded-[20px] bg-gray-100 px-6 text-sm font-normal text-gray-900 transition-all duration-200 ease-in-out hover:bg-gray-200 focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 focus:outline-none active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600"
                   }
                 >
                   TikTok
-                </Button>
-                <Button
-                  variant={platformFilter === "instagram" ? "default" : "outline"}
-                  size="sm"
+                </button>
+                <button
                   onClick={() => setPlatformFilter("instagram")}
                   disabled={loading}
                   className={
                     platformFilter === "instagram"
-                      ? "bg-primary text-primary-foreground md:hover:bg-primary/90 focus:ring-ring disabled:bg-muted disabled:text-muted-foreground focus:ring-2 focus:ring-offset-2 focus:outline-none active:scale-[0.98] disabled:cursor-not-allowed"
-                      : "border-border text-foreground focus:ring-ring disabled:bg-muted disabled:text-muted-foreground focus:ring-2 focus:ring-offset-2 focus:outline-none active:scale-[0.98] disabled:cursor-not-allowed md:hover:bg-black/5 dark:md:hover:bg-white/5"
+                      ? "h-10 rounded-[20px] bg-blue-600 px-6 text-sm font-medium text-white transition-all duration-200 ease-in-out hover:bg-blue-700 focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 focus:outline-none active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
+                      : "h-10 rounded-[20px] bg-gray-100 px-6 text-sm font-normal text-gray-900 transition-all duration-200 ease-in-out hover:bg-gray-200 focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 focus:outline-none active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600"
                   }
                 >
                   Instagram
-                </Button>
+                </button>
               </div>
             </div>
           </div>
@@ -171,15 +174,15 @@ export default function CreatorSpotlightPage() {
 
       {!loading && filteredCreators.length === 0 && (
         <div className="py-16 text-center">
-          <div className="mx-auto max-w-md space-y-4">
+          <div className="mx-auto max-w-md" style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
             <div className="flex justify-center">
-              <Users className="text-muted-foreground h-12 w-12" />
+              <Users className="h-12 w-12 text-gray-600 dark:text-gray-400" />
             </div>
-            <div className="space-y-2">
-              <h3 className="text-foreground text-2xl leading-tight font-medium">
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              <h3 className="text-2xl leading-tight font-medium text-gray-900 dark:text-gray-100">
                 {searchTerm || platformFilter !== "all" ? "No creators found" : "No creators available yet"}
               </h3>
-              <p className="text-muted-foreground text-base leading-normal font-normal">
+              <p className="text-base leading-normal font-normal text-gray-600 dark:text-gray-400">
                 {searchTerm || platformFilter !== "all"
                   ? "Try adjusting your search or filter criteria."
                   : "Add your first creator to get started with content analysis."}
@@ -187,13 +190,14 @@ export default function CreatorSpotlightPage() {
             </div>
             {!searchTerm && platformFilter === "all" && (
               <AddCreatorDialog onCreatorAdded={loadCreators}>
-                <Button
+                <button
                   disabled={loading}
-                  className="bg-primary text-primary-foreground md:hover:bg-primary/90 focus:ring-ring disabled:bg-muted disabled:text-muted-foreground mt-6 w-full focus:ring-2 focus:ring-offset-2 focus:outline-none active:scale-[0.98] disabled:cursor-not-allowed md:w-auto"
+                  className="flex h-10 w-full items-center justify-center rounded-[20px] bg-blue-600 px-6 text-sm font-medium text-white transition-all duration-200 ease-in-out hover:bg-blue-700 focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 focus:outline-none active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400 md:w-auto"
+                  style={{ marginTop: "48px", gap: "8px" }}
                 >
-                  <Plus className="mr-2 h-4 w-4" />
+                  <Plus className="h-5 w-5" />
                   Add Your First Creator
-                </Button>
+                </button>
               </AddCreatorDialog>
             )}
           </div>

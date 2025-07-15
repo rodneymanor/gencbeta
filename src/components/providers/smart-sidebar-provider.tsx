@@ -13,6 +13,7 @@ interface SmartSidebarReturn {
   isManuallyOpen: boolean;
   isHoverOpen: boolean;
   isPinned: boolean;
+  isExpanded: boolean;
 
   // Manual actions (persisted)
   toggleManual: () => void;
@@ -21,6 +22,10 @@ interface SmartSidebarReturn {
   // Pin actions (persisted)
   togglePin: () => void;
   setPinned: (pinned: boolean) => void;
+
+  // Expanded panel actions (persisted)
+  toggleExpanded: () => void;
+  setExpanded: (expanded: boolean) => void;
 
   // Hover actions (temporary)
   handleMouseEnter: () => void;

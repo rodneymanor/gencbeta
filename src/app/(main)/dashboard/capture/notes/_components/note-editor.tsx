@@ -1,13 +1,12 @@
 import { Dispatch, SetStateAction } from "react";
 
-import { Edit3, FileText, Save, Copy, Trash2, Hash, Bold, Italic, List, Quote, Link } from "lucide-react";
+import { Edit3, FileText, Save, Copy, Trash2, Hash } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
+
+import { HemingwayEditor } from "../../../scripts/editor/_components/hemingway-editor";
 
 interface Note {
   id: number;
@@ -43,40 +42,52 @@ export function NoteEditor({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Edit3 className="h-5 w-5" />
+    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl" style={{padding: '24px'}}>
+      <div className="flex items-center justify-between" style={{marginBottom: '24px'}}>
+        <div className="flex items-center gap-2">
+          <Edit3 className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+          <h2 className="text-2xl font-medium text-gray-900 dark:text-gray-100">
             {isEditing ? "Editing Note" : selectedNote.title}
-          </CardTitle>
-          <div className="flex gap-2">
-            {!isEditing ? (
-              <>
-                <Button variant="outline" size="sm" onClick={() => setIsEditing(true)} className="gap-2">
-                  <Edit3 className="h-4 w-4" />
-                  Edit
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => convertToScript(selectedNote)} className="gap-2">
-                  <FileText className="h-4 w-4" />
-                  Convert to Script
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button variant="outline" size="sm" onClick={() => setIsEditing(false)}>
-                  Cancel
-                </Button>
-                <Button size="sm" onClick={saveNote} className="gap-2">
-                  <Save className="h-4 w-4" />
-                  Save
-                </Button>
-              </>
-            )}
-          </div>
+          </h2>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
+        <div className="flex" style={{gap: '8px'}}>
+          {!isEditing ? (
+            <>
+              <button 
+                onClick={() => setIsEditing(true)}
+                className="h-10 px-6 rounded-[20px] bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm font-normal hover:bg-gray-200 dark:hover:bg-gray-600 active:scale-[0.98] transition-all duration-200 ease-in-out flex items-center gap-2"
+              >
+                <Edit3 className="h-4 w-4" />
+                Edit
+              </button>
+              <button 
+                onClick={() => convertToScript(selectedNote)}
+                className="h-10 px-6 rounded-[20px] bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm font-normal hover:bg-gray-200 dark:hover:bg-gray-600 active:scale-[0.98] transition-all duration-200 ease-in-out flex items-center gap-2"
+              >
+                <FileText className="h-4 w-4" />
+                Convert to Script
+              </button>
+            </>
+          ) : (
+            <>
+              <button 
+                onClick={() => setIsEditing(false)}
+                className="h-10 px-6 rounded-[20px] bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm font-normal hover:bg-gray-200 dark:hover:bg-gray-600 active:scale-[0.98] transition-all duration-200 ease-in-out"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={saveNote}
+                className="h-10 px-6 rounded-[20px] bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 active:scale-[0.98] transition-all duration-200 ease-in-out flex items-center gap-2"
+              >
+                <Save className="h-4 w-4" />
+                Save
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+      <div style={{display: 'flex', flexDirection: 'column', gap: '24px'}}>
         {isEditing ? (
           <>
             <Input
@@ -86,31 +97,16 @@ export function NoteEditor({
               placeholder="Note title..."
             />
 
-            {/* Markdown Toolbar */}
-            <div className="flex gap-1 border-b pb-2">
-              <Button variant="ghost" size="sm">
-                <Bold className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm">
-                <Italic className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm">
-                <List className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm">
-                <Quote className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm">
-                <Link className="h-4 w-4" />
-              </Button>
+            <div className="min-h-[400px]">
+              <HemingwayEditor
+                value={selectedNote.content}
+                onChange={(value) => setSelectedNote((prev) => (prev ? { ...prev, content: value } : null))}
+                placeholder="Start writing your note... Use the rich editor with readability analysis."
+                minRows={10}
+                maxRows={30}
+                autoFocus={true}
+              />
             </div>
-
-            <Textarea
-              value={selectedNote.content}
-              onChange={(e) => setSelectedNote((prev) => (prev ? { ...prev, content: e.target.value } : null))}
-              className="min-h-[400px] font-mono text-sm"
-              placeholder="Start writing your note... You can use Markdown formatting."
-            />
           </>
         ) : (
           <div className="space-y-4">
@@ -138,21 +134,21 @@ export function NoteEditor({
         <Separator />
 
         {/* Actions */}
-        <div className="flex gap-2">
-          <Button className="gap-2">
+        <div className="flex" style={{gap: '8px'}}>
+          <button className="h-10 px-6 rounded-[20px] bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 active:scale-[0.98] transition-all duration-200 ease-in-out flex items-center gap-2">
             <FileText className="h-4 w-4" />
             Convert to Script
-          </Button>
-          <Button variant="outline" className="gap-2">
+          </button>
+          <button className="h-10 px-6 rounded-[20px] bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm font-normal hover:bg-gray-200 dark:hover:bg-gray-600 active:scale-[0.98] transition-all duration-200 ease-in-out flex items-center gap-2">
             <Copy className="h-4 w-4" />
             Duplicate
-          </Button>
-          <Button variant="outline" className="text-destructive gap-2">
+          </button>
+          <button className="h-10 px-6 rounded-[20px] bg-gray-100 dark:bg-gray-700 text-red-600 dark:text-red-400 text-sm font-normal hover:bg-red-50 dark:hover:bg-red-900/20 active:scale-[0.98] transition-all duration-200 ease-in-out flex items-center gap-2">
             <Trash2 className="h-4 w-4" />
             Delete
-          </Button>
+          </button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

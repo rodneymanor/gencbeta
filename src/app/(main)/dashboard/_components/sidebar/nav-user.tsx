@@ -48,7 +48,7 @@ function ProfileWithBadgeInline({
           <User className="text-muted-foreground h-5 w-5 transition-transform hover:scale-110" />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-sm font-medium text-muted-foreground">Not signed in</div>
+          <div className="text-muted-foreground text-sm font-medium">Not signed in</div>
           <div className="text-muted-foreground text-xs">Click to sign in</div>
         </div>
       </div>
@@ -74,7 +74,7 @@ function ProfileWithBadgeInline({
         </div>
       </div>
       <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-medium text-muted-foreground">{user.displayName ?? "User"}</div>
+        <div className="text-muted-foreground truncate text-sm font-medium">{user.displayName ?? "User"}</div>
         <div className="text-muted-foreground truncate text-xs">{user.email}</div>
       </div>
     </div>

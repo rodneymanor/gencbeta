@@ -4,6 +4,7 @@
  */
 
 import { PromptLibrary } from "../types";
+
 import {
   SPEED_WRITE_PROMPTS,
   speedWritePrompt,

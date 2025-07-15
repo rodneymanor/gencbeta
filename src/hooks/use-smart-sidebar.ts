@@ -6,6 +6,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_PINNED_COOKIE_NAME = "sidebar_pinned";
+const SIDEBAR_EXPANDED_COOKIE_NAME = "sidebar_expanded";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 const HOVER_DELAY_OPEN = 150; // ms delay before opening on hover
 const HOVER_DELAY_CLOSE = 300; // ms delay before closing on hover away
@@ -13,6 +14,7 @@ const HOVER_DELAY_CLOSE = 300; // ms delay before closing on hover away
 type ManualState = "open" | "closed";
 type HoverState = "hovering" | "idle";
 type PinState = "pinned" | "unpinned";
+type ExpandedState = "expanded" | "collapsed";
 type VisualState = "manual-open" | "hover-open" | "pinned-open" | "closed";
 
 interface SmartSidebarReturn {
@@ -22,6 +24,7 @@ interface SmartSidebarReturn {
   isManuallyOpen: boolean;
   isHoverOpen: boolean;
   isPinned: boolean;
+  isExpanded: boolean;
 
   // Manual actions (persisted)
   toggleManual: () => void;
@@ -30,6 +33,10 @@ interface SmartSidebarReturn {
   // Pin actions (persisted)
   togglePin: () => void;
   setPinned: (pinned: boolean) => void;
+
+  // Expanded panel actions (persisted)
+  toggleExpanded: () => void;
+  setExpanded: (expanded: boolean) => void;
 
   // Hover actions (temporary)
   handleMouseEnter: () => void;
@@ -57,6 +64,7 @@ export function useSmartSidebar(): SmartSidebarReturn {
   const [manualState, setManualState] = useState<ManualState>("closed");
   const [hoverState, setHoverState] = useState<HoverState>("idle");
   const [pinState, setPinState] = useState<PinState>("unpinned");
+  const [expandedState, setExpandedState] = useState<ExpandedState>("collapsed");
   const [isLoading, setIsLoading] = useState(true);
 
   // Refs for managing delays
@@ -85,6 +93,25 @@ export function useSmartSidebar(): SmartSidebarReturn {
       }
     } catch (error) {
       console.warn("Failed to persist sidebar pin state:", error);
+    }
+  }, []);
+
+  const persistExpandedState = useCallback((state: ExpandedState) => {
+    try {
+      const expanded = state === "expanded";
+
+      // Set cookie for SSR
+      if (typeof document !== "undefined") {
+        const isSecure = location.protocol === "https:";
+        document.cookie = `${SIDEBAR_EXPANDED_COOKIE_NAME}=${expanded}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}; SameSite=Lax; Secure=${isSecure}`;
+      }
+
+      // Set localStorage for client-side reliability
+      if (typeof window !== "undefined") {
+        localStorage.setItem(SIDEBAR_EXPANDED_COOKIE_NAME, String(expanded));
+      }
+    } catch (error) {
+      console.warn("Failed to persist sidebar expanded state:", error);
     }
   }, []);
 
@@ -117,8 +144,35 @@ export function useSmartSidebar(): SmartSidebarReturn {
       console.warn("Failed to read persisted sidebar pin state:", error);
     }
 
-    // Default to unpinned if no preference exists
+    // Force default to unpinned - sidebar should start collapsed
     return "unpinned";
+  }, []);
+
+  const getPersistedExpandedState = useCallback((): ExpandedState => {
+    try {
+      // Try localStorage first
+      if (typeof window !== "undefined") {
+        const stored = localStorage.getItem(SIDEBAR_EXPANDED_COOKIE_NAME);
+        if (stored !== null) {
+          return stored === "true" ? "expanded" : "collapsed";
+        }
+      }
+
+      // Fallback to cookie parsing
+      if (typeof document !== "undefined") {
+        const cookies = document.cookie.split(";");
+        const targetCookie = cookies.find((cookie) => cookie.trim().startsWith(`${SIDEBAR_EXPANDED_COOKIE_NAME}=`));
+        if (targetCookie) {
+          const cookieValue = targetCookie.split("=")[1]?.trim();
+          return cookieValue === "true" ? "expanded" : "collapsed";
+        }
+      }
+    } catch (error) {
+      console.warn("Failed to read persisted sidebar expanded state:", error);
+    }
+
+    // Force default to collapsed - panel should start hidden
+    return "collapsed";
   }, []);
 
   // Initialize from persistence on mount
@@ -126,12 +180,14 @@ export function useSmartSidebar(): SmartSidebarReturn {
     if (typeof window !== "undefined") {
       const persistedManualState = getPersistedManualState();
       const persistedPinState = getPersistedPinState();
+      const persistedExpandedState = getPersistedExpandedState();
 
       setManualState(persistedManualState);
       setPinState(persistedPinState);
+      setExpandedState(persistedExpandedState);
       setIsLoading(false);
     }
-  }, [getPersistedManualState, getPersistedPinState]);
+  }, [getPersistedManualState, getPersistedPinState, getPersistedExpandedState]);
 
   // Clear timeouts on unmount
   useEffect(() => {
@@ -194,21 +250,63 @@ export function useSmartSidebar(): SmartSidebarReturn {
     setPinned(pinState === "unpinned");
   }, [pinState, setPinned]);
 
-  // Hover actions (disabled - sidebar persists in collapsed state)
+  // Expanded panel actions (these get persisted)
+  const setExpanded = useCallback(
+    (expanded: boolean) => {
+      const newState: ExpandedState = expanded ? "expanded" : "collapsed";
+      setExpandedState(newState);
+      persistExpandedState(newState);
+    },
+    [persistExpandedState],
+  );
+
+  const toggleExpanded = useCallback(() => {
+    setExpanded(expandedState === "collapsed");
+  }, [expandedState, setExpanded]);
+
+  // Hover actions (temporary expansion)
   const handleMouseEnter = useCallback(() => {
-    // Hover expansion disabled - sidebar stays collapsed
-    // Only manual actions and pin state can open the sidebar
-  }, []);
+    // Skip hover on mobile devices
+    if (isMobile) return;
+
+    // Skip hover if already pinned or manually open
+    if (pinState === "pinned" || manualState === "open") return;
+
+    // Clear any pending close timeout
+    if (hoverCloseTimeoutRef.current) {
+      clearTimeout(hoverCloseTimeoutRef.current);
+      hoverCloseTimeoutRef.current = undefined;
+    }
+
+    // Set hover timeout to open
+    hoverOpenTimeoutRef.current = setTimeout(() => {
+      setHoverState("hovering");
+    }, HOVER_DELAY_OPEN);
+  }, [isMobile, pinState, manualState]);
 
   const handleMouseLeave = useCallback(() => {
-    // Hover expansion disabled - sidebar stays collapsed
-    // Only manual actions and pin state can open the sidebar
-  }, []);
+    // Skip hover on mobile devices
+    if (isMobile) return;
+
+    // Clear any pending open timeout
+    if (hoverOpenTimeoutRef.current) {
+      clearTimeout(hoverOpenTimeoutRef.current);
+      hoverOpenTimeoutRef.current = undefined;
+    }
+
+    // Set hover timeout to close
+    if (hoverState === "hovering") {
+      hoverCloseTimeoutRef.current = setTimeout(() => {
+        setHoverState("idle");
+      }, HOVER_DELAY_CLOSE);
+    }
+  }, [isMobile, hoverState]);
 
   // Computed states
   const isManuallyOpen = manualState === "open";
   const isHoverOpen = hoverState === "hovering" && manualState === "closed";
   const isPinned = pinState === "pinned";
+  const isExpanded = expandedState === "expanded";
   const isOpen = isPinned || isManuallyOpen || isHoverOpen;
 
   // Visual state for styling
@@ -227,6 +325,7 @@ export function useSmartSidebar(): SmartSidebarReturn {
     isManuallyOpen,
     isHoverOpen,
     isPinned,
+    isExpanded,
 
     // Manual actions
     toggleManual,
@@ -235,6 +334,10 @@ export function useSmartSidebar(): SmartSidebarReturn {
     // Pin actions
     togglePin,
     setPinned,
+
+    // Expanded panel actions
+    toggleExpanded,
+    setExpanded,
 
     // Hover actions
     handleMouseEnter,

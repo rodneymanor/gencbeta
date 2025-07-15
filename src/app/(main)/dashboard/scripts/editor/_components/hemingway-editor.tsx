@@ -2,16 +2,28 @@
 
 import { useState, useEffect } from "react";
 
-import { BarChart3, Clock, FileText, Target, Lightbulb } from "lucide-react";
+import { PartialBlock } from "@blocknote/core";
+import { BarChart3, Clock, FileText, Target, Lightbulb, RefreshCw, Sparkles, Mic, ChevronDown } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
+import {
+  EnhancedReadabilityService,
+  defaultReadabilitySettings,
+  type ReadabilityAnalysis,
+} from "@/lib/enhanced-readability-service";
 import { type HighlightConfig, type ScriptAnalysis } from "@/lib/script-analysis";
 
 import { HemingwayEditorCore } from "./hemingway-editor-core";
-import { PartialBlock } from "@blocknote/core";
-import { EnhancedReadabilityService, defaultReadabilitySettings, type ReadabilityAnalysis } from "@/lib/enhanced-readability-service";
 
 interface ScriptElements {
   hook: string;
@@ -49,13 +61,55 @@ function EditorFooter({
   stats,
   showAnalysis,
   readabilityAnalysis,
+  script,
 }: {
   stats: AnalysisStats;
   showAnalysis: boolean;
   readabilityAnalysis: ReadabilityAnalysis | null;
+  script: string;
 }) {
+  const [isRewriting, setIsRewriting] = useState(false);
+  const [currentVoice, setCurrentVoice] = useState("Professional");
+
+  const availableVoices = ["Professional", "Casual", "Expert", "Friendly", "Authoritative"];
+
+  const handleRewriteScript = async () => {
+    if (!script.trim()) return;
+
+    setIsRewriting(true);
+    try {
+      // TODO: Implement actual AI rewrite functionality
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      console.log("Script rewritten!");
+    } catch (error) {
+      console.error("Failed to rewrite script:", error);
+    } finally {
+      setIsRewriting(false);
+    }
+  };
+
+  const handleRewriteWithVoice = async (voiceType: string) => {
+    if (!script.trim()) return;
+
+    setIsRewriting(true);
+    try {
+      setCurrentVoice(voiceType);
+      // TODO: Implement actual AI rewrite functionality
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      console.log(`Script rewritten with ${voiceType} voice!`);
+    } catch (error) {
+      console.error("Failed to rewrite script:", error);
+    } finally {
+      setIsRewriting(false);
+    }
+  };
+
+  const handleChangeVoice = (voiceType: string) => {
+    setCurrentVoice(voiceType);
+  };
+
   return (
-    <div className="bg-background/50 text-muted-foreground border-border/30 border-t text-sm">
+    <div className="bg-background/95 text-muted-foreground border-border/30 sticky bottom-0 z-10 border-t text-sm backdrop-blur-sm">
       {/* Word count and stats */}
       <div className="flex items-center justify-between px-6 py-3">
         <div className="flex items-center gap-4">
@@ -73,12 +127,12 @@ function EditorFooter({
           {readabilityAnalysis && (
             <>
               <span>•</span>
-              <Badge 
+              <Badge
                 variant={
-                  readabilityAnalysis.overall.level === "easy" 
-                    ? "default" 
-                    : readabilityAnalysis.overall.level === "medium" 
-                      ? "secondary" 
+                  readabilityAnalysis.overall.level === "easy"
+                    ? "default"
+                    : readabilityAnalysis.overall.level === "medium"
+                      ? "secondary"
                       : "destructive"
                 }
                 className="text-xs"
@@ -86,33 +140,71 @@ function EditorFooter({
               >
                 {readabilityAnalysis.overall.level.toUpperCase()} ({readabilityAnalysis.overall.score.toFixed(1)})
               </Badge>
-              <span className="text-xs text-muted-foreground">{readabilityAnalysis.overall.gradeLevel}</span>
+              <span className="text-muted-foreground text-xs">{readabilityAnalysis.overall.gradeLevel}</span>
             </>
           )}
         </div>
 
-        {showAnalysis && stats.total > 0 && (
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="border-border/50 text-xs">
-              {stats.hooks} hooks
-            </Badge>
-            <Badge variant="outline" className="border-border/50 text-xs">
-              {stats.bridges} bridges
-            </Badge>
-            <Badge variant="outline" className="border-border/50 text-xs">
-              {stats.goldenNuggets} nuggets
-            </Badge>
-            <Badge variant="outline" className="border-border/50 text-xs">
-              {stats.wtas} CTAs
-            </Badge>
-          </div>
-        )}
-      </div>
+        {/* AI Tools and Voice Selection */}
+        <div className="flex items-center gap-2">
+          {/* Voice Selection Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 px-3 text-xs">
+                <Mic className="mr-1 h-3 w-3" />
+                {currentVoice}
+                <ChevronDown className="ml-1 h-3 w-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {availableVoices.map((voice) => (
+                <DropdownMenuItem
+                  key={voice}
+                  onClick={() => handleChangeVoice(voice)}
+                  className={voice === currentVoice ? "bg-accent" : ""}
+                >
+                  <Mic className="mr-2 h-3 w-3" />
+                  {voice}
+                  {voice === currentVoice && <span className="ml-auto">✓</span>}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
+          {/* AI Rewrite Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" disabled={isRewriting || !script.trim()} className="h-8 px-3 text-xs">
+                <Sparkles className="mr-1 h-3 w-3" />
+                AI Rewrite
+                <ChevronDown className="ml-1 h-3 w-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleRewriteScript}>
+                <RefreshCw className="mr-2 h-3 w-3" />
+                Rewrite Script
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => handleRewriteWithVoice("Hook")}>
+                <Sparkles className="mr-2 h-3 w-3" />
+                Improve Hook
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleRewriteWithVoice("CTA")}>
+                <Sparkles className="mr-2 h-3 w-3" />
+                Strengthen CTA
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleRewriteWithVoice("Flow")}>
+                <Sparkles className="mr-2 h-3 w-3" />
+                Improve Flow
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
     </div>
   );
 }
-
 
 export function HemingwayEditor({
   value,
@@ -230,6 +322,7 @@ export function HemingwayEditor({
           stats={stats}
           showAnalysis={showAnalysis}
           readabilityAnalysis={readabilityAnalysis}
+          script={value}
         />
       </div>
 
@@ -266,7 +359,6 @@ export function HemingwayEditor({
                 </span>
                 <span className="text-sm font-medium">{stats.estimatedTime}</span>
               </div>
-
             </CardContent>
           </Card>
 
@@ -283,7 +375,7 @@ export function HemingwayEditor({
                 <div className="text-center">
                   <div className="text-2xl font-bold">{readabilityAnalysis.overall.score.toFixed(1)}</div>
                   <div className="text-muted-foreground text-sm">{readabilityAnalysis.overall.level.toUpperCase()}</div>
-                  <div className="text-xs text-muted-foreground mt-1">{readabilityAnalysis.overall.gradeLevel}</div>
+                  <div className="text-muted-foreground mt-1 text-xs">{readabilityAnalysis.overall.gradeLevel}</div>
                 </div>
 
                 <Separator />
