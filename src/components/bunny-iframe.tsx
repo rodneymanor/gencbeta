@@ -102,7 +102,7 @@ export default function BunnyIframe({ src, className = "", iframeKey, videoId }:
     return () => {
       try {
         if (playerInstance) {
-          playerInstance.destroy && playerInstance.destroy();
+          playerInstance.destroy?.();
         }
       } catch {
         /* ignored */
