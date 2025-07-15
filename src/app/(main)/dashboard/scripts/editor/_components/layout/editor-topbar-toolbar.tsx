@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 
-import { Download, Save, Mic, RefreshCw, Sparkles } from "lucide-react";
+import { Download, Save, Mic, RefreshCw, Sparkles, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -19,9 +19,10 @@ import { useVoice, type VoiceType } from "@/contexts/voice-context";
 interface EditorTopBarToolbarProps {
   script: string;
   onSave?: () => void;
+  autoSaveStatus?: 'idle' | 'saving' | 'saved' | 'error';
 }
 
-export function EditorTopBarToolbar({ script, onSave }: EditorTopBarToolbarProps) {
+export function EditorTopBarToolbar({ script, onSave, autoSaveStatus = 'idle' }: EditorTopBarToolbarProps) {
   const [isRewriting, setIsRewriting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const { currentVoice, setCurrentVoice, availableVoices } = useVoice();
@@ -210,9 +211,29 @@ export function EditorTopBarToolbar({ script, onSave }: EditorTopBarToolbarProps
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Keyboard Shortcuts Indicator */}
+      {/* Auto-save Status */}
       <div className="text-muted-foreground ml-[var(--space-2)] flex items-center gap-[var(--space-1)] text-xs">
-        <kbd className="bg-muted rounded px-[var(--space-1)] py-[calc(var(--space-1)/2)]">⌘S</kbd>
+        {autoSaveStatus === 'saving' && (
+          <>
+            <Loader2 className="h-3 w-3 animate-spin" />
+            <span>Saving...</span>
+          </>
+        )}
+        {autoSaveStatus === 'saved' && (
+          <>
+            <CheckCircle className="h-3 w-3 text-green-500" />
+            <span>Saved</span>
+          </>
+        )}
+        {autoSaveStatus === 'error' && (
+          <>
+            <AlertCircle className="h-3 w-3 text-red-500" />
+            <span>Save failed</span>
+          </>
+        )}
+        {autoSaveStatus === 'idle' && (
+          <kbd className="bg-muted rounded px-[var(--space-1)] py-[calc(var(--space-1)/2)]">⌘S</kbd>
+        )}
       </div>
     </div>
   );

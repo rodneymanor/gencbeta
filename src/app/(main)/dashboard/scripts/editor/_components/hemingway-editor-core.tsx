@@ -2,7 +2,9 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 
-import TextareaAutosize from "react-textarea-autosize";
+import { useCreateBlockNote } from "@blocknote/react";
+import { BlockNoteView } from "@blocknote/mantine";
+import { BlockNoteEditor, PartialBlock, BlockNoteSchema, defaultBlockSpecs } from "@blocknote/core";
 
 import {
   analyzeScriptElements,
@@ -13,7 +15,8 @@ import {
 } from "@/lib/script-analysis";
 
 import { ContextualActionMenu } from "./contextual-action-menu";
-import { TextHighlightOverlay } from "./text-highlight-overlay";
+import "@blocknote/core/fonts/inter.css";
+import "@blocknote/mantine/style.css";
 
 interface ScriptElements {
   hook: string;
@@ -33,6 +36,7 @@ interface HemingwayEditorCoreProps {
   highlightConfig: HighlightConfig;
   elements?: ScriptElements; // New prop for structured elements
   onAnalysisChange?: (analysis: ScriptAnalysis) => void;
+  onBlocksChange?: (blocks: PartialBlock[]) => void; // New prop for JSON blocks
 }
 
 export function HemingwayEditorCore({
@@ -46,6 +50,7 @@ export function HemingwayEditorCore({
   highlightConfig,
   elements,
   onAnalysisChange,
+  onBlocksChange,
 }: HemingwayEditorCoreProps) {
   const [analysis, setAnalysis] = useState<ScriptAnalysis>({
     hooks: [],
@@ -57,9 +62,56 @@ export function HemingwayEditorCore({
   const [selectedElement, setSelectedElement] = useState<ScriptElement | null>(null);
   const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number } | null>(null);
 
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
   const analysisTimeoutRef = useRef<NodeJS.Timeout>();
+
+  // Generate script title from first few words
+  const generateScriptTitle = useCallback((text: string): string => {
+    if (!text.trim()) return "Untitled Script";
+    
+    const words = text.trim().split(/\s+/);
+    const titleWords = words.slice(0, 6); // Take first 6 words
+    let title = titleWords.join(" ");
+    
+    // If the title is too long, truncate it
+    if (title.length > 50) {
+      title = title.substring(0, 47) + "...";
+    } else if (words.length > 6) {
+      title += "...";
+    }
+    
+    return title;
+  }, []);
+
+  // Initialize BlockNote editor
+  const editor = useCreateBlockNote({
+    initialContent: value ? [{ type: "paragraph", content: value }] : undefined,
+  });
+
+  // Handle editor content changes
+  const handleEditorChange = useCallback((editor: BlockNoteEditor) => {
+    // Convert blocks to plain text for analysis
+    const plainText = editor.document.map((block) => {
+      if (block.type === "paragraph") {
+        return block.content?.map((item) => {
+          if (typeof item === "string") return item;
+          // Handle styled text content
+          if (item && typeof item === "object" && "text" in item) {
+            return item.text || "";
+          }
+          return "";
+        }).join("") || "";
+      }
+      return "";
+    }).join("\n");
+    
+    onChange(plainText);
+    
+    // Also provide blocks as JSON for external use
+    if (onBlocksChange) {
+      onBlocksChange(editor.document);
+    }
+  }, [onChange, onBlocksChange]);
 
   // Create analysis from structured elements
   const createAnalysisFromElements = useCallback((text: string, structuredElements: ScriptElements): ScriptAnalysis => {
@@ -150,13 +202,13 @@ export function HemingwayEditorCore({
     };
   }, [value, analyzeText]);
 
-  // Handle element click from overlay
-  const handleElementClick = useCallback((element: ScriptElement, event?: React.MouseEvent) => {
-    if (event) {
-      setContextMenuPosition({ x: event.clientX, y: event.clientY });
-      setSelectedElement(element);
-    }
-  }, []);
+  // Handle element click from overlay (disabled for now until highlighting is implemented)
+  // const handleElementClick = useCallback((element: ScriptElement, event?: React.MouseEvent) => {
+  //   if (event) {
+  //     setContextMenuPosition({ x: event.clientX, y: event.clientY });
+  //     setSelectedElement(element);
+  //   }
+  // }, []);
 
   // Handle context menu action
   const handleContextAction = useCallback((action: ContextualAction, element: ScriptElement) => {
@@ -173,21 +225,22 @@ export function HemingwayEditorCore({
     setSelectedElement(null);
   }, []);
 
+  const scriptTitle = generateScriptTitle(value);
+
   return (
     <div className="relative flex-1">
+      {/* Script Title Header */}
+      <div className="border-b border-border/20 bg-background/50 px-6 py-4">
+        <h1 className="text-2xl font-semibold text-foreground">{scriptTitle}</h1>
+      </div>
+
+      {/* Editor Container */}
       <div ref={editorRef} className="relative h-full">
-        <TextareaAutosize
-          ref={textareaRef}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          minRows={minRows}
-          maxRows={maxRows}
-          readOnly={readOnly}
-          autoFocus={autoFocus}
-          className={`h-full w-full resize-none border-0 bg-transparent px-8 py-8 text-base leading-relaxed focus:ring-0 focus:outline-none ${
-            readOnly ? "cursor-default" : ""
-          }`}
+        <BlockNoteView
+          editor={editor}
+          theme="light"
+          className="h-full w-full"
+          onChange={handleEditorChange}
           style={{
             fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
             fontSize: "16px",
@@ -195,14 +248,8 @@ export function HemingwayEditorCore({
           }}
         />
 
-        {/* Text Highlight Overlay */}
-        <TextHighlightOverlay
-          text={value}
-          analysis={analysis}
-          textareaRef={textareaRef}
-          highlightConfig={highlightConfig}
-          onElementClick={handleElementClick}
-        />
+        {/* TODO: Implement BlockNote-compatible highlighting overlay */}
+        {/* The TextHighlightOverlay needs to be adapted for BlockNote */}
       </div>
 
       {/* Context Menu */}

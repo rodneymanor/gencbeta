@@ -95,7 +95,10 @@ export function InputModeToggle({
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && !finalSubmitDisabled) {
+      console.log("⌨️ [InputModeToggle] Keyboard shortcut triggered!");
+      console.log("⌨️ [InputModeToggle] onSubmit function:", typeof onSubmit);
       e.preventDefault();
+      e.stopPropagation();
       onSubmit();
     }
   };
@@ -130,7 +133,10 @@ export function InputModeToggle({
       </div>
 
       {/* Input Content */}
-      <div ref={containerRef} className="border-border/50 space-y-[var(--space-2)] rounded-2xl border px-[var(--space-3)]">
+      <div
+        ref={containerRef}
+        className="border-border/50 space-y-[var(--space-2)] rounded-2xl border px-[var(--space-3)]"
+      >
         {/* Simplified Textarea */}
         <Textarea
           ref={textareaRef}
@@ -233,7 +239,21 @@ export function InputModeToggle({
           </div>
 
           {/* Submit Button */}
-          <Button onClick={onSubmit} disabled={finalSubmitDisabled} size="sm" className="h-8 w-8 p-0 shadow-sm">
+          <Button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log("🎯 [InputModeToggle] Submit button clicked!");
+              console.log("🎯 [InputModeToggle] onSubmit function:", typeof onSubmit);
+              console.log("🎯 [InputModeToggle] disabled:", finalSubmitDisabled);
+              console.log("🎯 [InputModeToggle] textValue:", textValue);
+              onSubmit();
+            }}
+            disabled={finalSubmitDisabled}
+            size="sm"
+            className="h-8 w-8 p-0 shadow-sm"
+          >
             <ArrowUp className="h-4 w-4" />
           </Button>
         </div>

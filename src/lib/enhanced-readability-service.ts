@@ -3,6 +3,7 @@ export interface ReadabilityScore {
   level: "easy" | "medium" | "hard";
   description: string;
   suggestions: string[];
+  gradeLevel: string;
 }
 
 export interface ReadabilityAnalysis {
@@ -238,12 +239,14 @@ class EnhancedReadabilityService {
     const level = this.determineLevel(score);
     const description = this.getScoreDescription(score, this.settings.algorithm);
     const suggestions = this.generateSuggestions(statistics, level);
+    const gradeLevel = this.calculateGradeLevel(score, this.settings.algorithm);
 
     return {
       score,
       level,
       description,
       suggestions,
+      gradeLevel,
     };
   }
 
@@ -290,6 +293,55 @@ class EnhancedReadabilityService {
       case "hard":
         return `${algorithmName} score: ${score.toFixed(1)} - Difficult to read`;
     }
+  }
+
+  private calculateGradeLevel(score: number, algorithm: string): string {
+    switch (algorithm) {
+      case "flesch":
+        return this.fleschToGradeLevel(score);
+      case "gunning-fog":
+        return this.gunningFogToGradeLevel(score);
+      case "coleman-liau":
+        return this.colemanLiauToGradeLevel(score);
+      case "automated":
+        return this.automatedToGradeLevel(score);
+      default:
+        return this.fleschToGradeLevel(score);
+    }
+  }
+
+  private fleschToGradeLevel(score: number): string {
+    if (score >= 90) return "5th Grade";
+    if (score >= 80) return "6th Grade";
+    if (score >= 70) return "7th Grade";
+    if (score >= 60) return "8th-9th Grade";
+    if (score >= 50) return "10th-12th Grade";
+    if (score >= 30) return "College Level";
+    return "Graduate Level";
+  }
+
+  private gunningFogToGradeLevel(score: number): string {
+    if (score <= 6) return "Elementary";
+    if (score <= 9) return "6th-9th Grade";
+    if (score <= 13) return "High School";
+    if (score <= 17) return "College Level";
+    return "Graduate Level";
+  }
+
+  private colemanLiauToGradeLevel(score: number): string {
+    if (score <= 6) return "Elementary";
+    if (score <= 9) return "6th-9th Grade";
+    if (score <= 13) return "High School";
+    if (score <= 17) return "College Level";
+    return "Graduate Level";
+  }
+
+  private automatedToGradeLevel(score: number): string {
+    if (score <= 6) return "Elementary";
+    if (score <= 9) return "6th-9th Grade";
+    if (score <= 13) return "High School";
+    if (score <= 17) return "College Level";
+    return "Graduate Level";
   }
 
   private generateSuggestions(stats: any, level: "easy" | "medium" | "hard"): string[] {

@@ -3,10 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { Zap, ChevronRight, FolderPlus } from "lucide-react";
+import { Zap, ChevronRight, FolderPlus, Plus, FileText, Pen, FolderOpen, Video } from "lucide-react";
 
 import { CreateCollectionDialog } from "@/app/(main)/research/collections/_components/create-collection-dialog";
 import { CustomTooltip } from "@/components/ui/custom-tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import {
   SidebarGroup,
@@ -51,37 +57,31 @@ const NavItem = ({
             {hasSubItems ? (
               <div className="group cursor-pointer">
                 <div
-                  className="bg-background-color-300 flex h-8 w-8 items-center justify-center rounded-md px-2 py-2 transition-all duration-200 hover:bg-[oklch(var(--background-color-300)/0.8)]"
-                  style={
-                    active
-                      ? {
-                          backgroundColor: "oklch(var(--background-color-300)/0.8)",
-                        }
-                      : undefined
-                  }
+                  className={`flex h-8 w-8 items-center justify-center rounded-md px-2 py-2 transition-all duration-200 ${
+                    active 
+                      ? 'bg-border hover:bg-border/80' 
+                      : 'hover:bg-border/50'
+                  }`}
                 >
-                  {item.icon && <item.icon className="h-5 w-5" />}
+                  {item.icon && <item.icon className="h-5 w-5 text-muted-foreground" />}
                 </div>
               </div>
             ) : (
               <Link href={item.url} className="group">
                 <div
-                  className="bg-background-color-300 flex h-8 w-8 items-center justify-center rounded-md px-2 py-2 transition-all duration-200 hover:bg-[oklch(var(--background-color-300)/0.8)]"
-                  style={
-                    active
-                      ? {
-                          backgroundColor: "oklch(var(--background-color-300)/0.8)",
-                        }
-                      : undefined
-                  }
+                  className={`flex h-8 w-8 items-center justify-center rounded-md px-2 py-2 transition-all duration-200 ${
+                    active 
+                      ? 'bg-border hover:bg-border/80' 
+                      : 'hover:bg-border/50'
+                  }`}
                 >
-                  {item.icon && <item.icon className="h-5 w-5" />}
+                  {item.icon && <item.icon className="h-5 w-5 text-muted-foreground" />}
                 </div>
               </Link>
             )}
 
             {/* Label outside the background container */}
-            <span className="text-secondary-foreground text-center text-xs font-medium whitespace-nowrap">
+            <span className="text-muted-foreground text-center text-xs font-medium whitespace-nowrap">
               {item.title}
             </span>
           </div>
@@ -136,28 +136,55 @@ export function NavMain({ items, onCollectionCreated }: NavMainProps) {
               <HoverCard openDelay={150}>
                 <HoverCardTrigger asChild>
                   <div className="gap-.5 flex flex-col items-center">
-                    {/* Icon container with background */}
-                    <Link href="/dashboard/scripts/new" className="group">
-                      <div
-                        className="bg-background-color-300 flex h-8 w-8 items-center justify-center rounded-md px-2 py-2 transition-all duration-200 hover:bg-[oklch(var(--background-color-300)/0.8)]"
-                        style={{
-                          backgroundColor: "oklch(var(--background-color-300)/0.8)",
-                        }}
-                      >
-                        <Zap className="h-5 w-5 transition-transform hover:scale-110" />
-                      </div>
-                    </Link>
+                    {/* New Plus Button with Dropdown */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <div className="group cursor-pointer">
+                          <div
+                            className="bg-border hover:bg-border/80 flex h-8 w-8 items-center justify-center rounded-lg px-2 py-2 transition-all duration-200 hover:scale-105"
+                          >
+                            <Plus className="h-5 w-5 text-muted-foreground transition-transform" />
+                          </div>
+                        </div>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent side="right" align="start" className="w-48">
+                        <DropdownMenuItem asChild>
+                          <Link href="/dashboard/scripts/new" className="flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            <span>New Script</span>
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/dashboard/capture/notes" className="flex items-center gap-2">
+                            <Pen className="h-4 w-4" />
+                            <span>New Note</span>
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/research/collections" className="flex items-center gap-2">
+                            <FolderOpen className="h-4 w-4" />
+                            <span>New Collection</span>
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/research/collections" className="flex items-center gap-2">
+                            <Video className="h-4 w-4" />
+                            <span>Add Video to Collection</span>
+                          </Link>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
 
                     {/* Label outside the background container */}
                     {/* <span className="text-secondary-foreground text-center text-xs font-medium whitespace-nowrap">
-                      Write Script
+                      Create
                     </span> */}
                   </div>
                 </HoverCardTrigger>
                 <HoverCardContent side="right" className="w-32 p-2">
                   <div className="flex items-center gap-2">
-                    <Zap className="h-4 w-4" />
-                    <span className="text-sm font-medium">New Script</span>
+                    <Plus className="h-4 w-4" />
+                    <span className="text-sm font-medium">Create</span>
                   </div>
                 </HoverCardContent>
               </HoverCard>

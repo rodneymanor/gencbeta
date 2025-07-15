@@ -108,12 +108,12 @@ export function EnhancedEditor({ initialText = "", onTextChange, onSave }: Enhan
   const estimatedTime = useMemo(() => {
     const words = text.split(/\s+/).filter((word) => word.length > 0).length;
     if (words === 0) return "0s";
-    
+
     // Average speaking rate: 150-180 words per minute for content creation
     // Using 160 wpm as a good middle ground for social media scripts
     const wordsPerMinute = 160;
     const totalSeconds = Math.round((words / wordsPerMinute) * 60);
-    
+
     if (totalSeconds < 60) {
       return `${totalSeconds}s`;
     } else if (totalSeconds < 3600) {

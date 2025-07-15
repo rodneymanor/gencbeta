@@ -13,24 +13,9 @@ import { Card } from "@/components/ui/card";
 import { useAuth } from "@/contexts/auth-context";
 import { useUsage } from "@/contexts/usage-context";
 import { useVoice } from "@/contexts/voice-context";
+import { ClientScriptService, SpeedWriteResponse } from "@/lib/services/client-script-service";
 
 import { InputModeToggle, InputMode } from "./_components/input-mode-toggle";
-
-interface ScriptOption {
-  id: string;
-  title: string;
-  content: string;
-  estimatedDuration: string;
-  approach: "speed-write" | "educational";
-}
-
-interface SpeedWriteResponse {
-  success: boolean;
-  optionA: ScriptOption | null;
-  optionB: ScriptOption | null;
-  error?: string;
-  processingTime?: number;
-}
 
 export default function NewScriptPage() {
   const router = useRouter();
@@ -88,47 +73,13 @@ export default function NewScriptPage() {
   }, [searchParams]);
 
   const callSpeedWriteAPI = async (idea: string): Promise<SpeedWriteResponse> => {
-    // Get Firebase Auth token
-    const { auth } = await import("@/lib/firebase");
-    if (!auth?.currentUser) {
-      throw new Error("User not authenticated");
-    }
-
-    const token = await auth.currentUser.getIdToken();
-
-    const response = await fetch("/api/script/speed-write", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        idea,
-        length: scriptLength,
-        userId: userProfile?.uid ?? "anonymous",
-      }),
+    const result = await ClientScriptService.generateSpeedWrite({
+      idea,
+      length: scriptLength as "20" | "60" | "90",
+      userId: userProfile?.uid,
     });
 
-    const data: SpeedWriteResponse = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error ?? "Failed to generate scripts");
-    }
-
-    return data;
-  };
-
-  const navigateToEditor = (idea: string, data: SpeedWriteResponse) => {
-    const params = new URLSearchParams({
-      idea: encodeURIComponent(idea),
-      mode: "speed-write",
-      length: scriptLength,
-      inputType: "text",
-      hasSpeedWriteResults: "true",
-    });
-
-    sessionStorage.setItem("speedWriteResults", JSON.stringify(data));
-    router.push(`/dashboard/scripts/editor?${params.toString()}`);
+    return result;
   };
 
   const handleSpeedWrite = async (idea: string) => {
@@ -138,26 +89,34 @@ export default function NewScriptPage() {
     setSpeedWriteResponse(null);
 
     try {
-      console.log("🚀 Calling Speed Write API...");
+      // Wait for API to complete first
       const data = await callSpeedWriteAPI(idea);
-
-      console.log("✅ Speed Write API response:", data);
-      setSpeedWriteResponse(data);
 
       if (data.success && (data.optionA || data.optionB)) {
         // Trigger usage stats update after successful script generation
-        console.log("💳 [Scripts] Triggering usage stats update after script generation");
         triggerUsageUpdate();
-
-        navigateToEditor(idea, data);
       }
+
+      // Store results and navigate to editor
+      sessionStorage.setItem("speedWriteResults", JSON.stringify(data));
+
+      const params = new URLSearchParams({
+        idea: encodeURIComponent(idea),
+        mode: "speed-write",
+        length: scriptLength,
+        inputType: "text",
+        hasSpeedWriteResults: "true",
+      });
+
+      const editorUrl = `/dashboard/scripts/editor?${params.toString()}`;
+      router.push(editorUrl);
     } catch (error) {
-      console.error("❌ Speed Write API error:", error);
+      console.error("Script generation error:", error);
       setSpeedWriteResponse({
         success: false,
         optionA: null,
         optionB: null,
-        error: error instanceof Error ? error.message : "An unexpected error occurred",
+        error: error instanceof Error ? error.message : "Failed to generate scripts",
       });
     } finally {
       setIsGenerating(false);
@@ -165,7 +124,9 @@ export default function NewScriptPage() {
   };
 
   const handleSubmit = async () => {
-    if (!scriptIdea.trim()) return;
+    if (!scriptIdea.trim()) {
+      return;
+    }
 
     if (inputMode === "script-writer") {
       // Use the existing speed write workflow for script writer
@@ -182,6 +143,30 @@ export default function NewScriptPage() {
       router.push(`/dashboard/scripts/editor?${params.toString()}`);
     }
   };
+
+  // Show loading state while generating scripts
+  if (isGenerating) {
+    return (
+      <div className="hide-scrollbar flex min-h-[calc(100vh-6rem)] flex-col overflow-y-auto">
+        <div className="flex flex-1 items-center justify-center py-[var(--space-4)] pt-[var(--space-8)]">
+          <div className="flex w-full flex-col items-center justify-center">
+            <div className="mb-[var(--space-4)] text-center">
+              <div className="mb-[var(--space-2)] flex items-center justify-center gap-3">
+                <div className="border-primary h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"></div>
+                <h1 className="text-foreground font-inter text-3xl font-bold">Generating Your A/B Script Options</h1>
+              </div>
+              <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
+                Our AI is crafting two different script variations for you to choose from
+              </p>
+              <p className="text-muted-foreground mx-auto mt-2 max-w-2xl text-sm">
+                This usually takes 10-15 seconds...
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="hide-scrollbar flex min-h-[calc(100vh-6rem)] flex-col overflow-y-auto">
@@ -231,7 +216,6 @@ export default function NewScriptPage() {
               onTextChange={setScriptIdea}
               onSubmit={handleSubmit}
               disabled={isGenerating}
-              showIdeaInbox={true}
             />
 
             {/* Controls Row - Simplified */}

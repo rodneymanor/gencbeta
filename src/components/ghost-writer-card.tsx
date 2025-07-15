@@ -61,7 +61,7 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
   return (
     <div
       className={cn(
-        "bg-card text-card-foreground divide-border/50 focus-visible:ring-primary/50 focus-visible:ring-offset-background flex w-full max-w-lg cursor-pointer flex-col gap-3 divide-y overflow-hidden rounded-xl p-4 shadow-md transition-all duration-200 ease-in-out hover:scale-[1.02] hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+        "bg-background text-foreground divide-border/50 focus-visible:ring-primary/50 focus-visible:ring-offset-background flex w-full max-w-lg cursor-pointer flex-col gap-3 divide-y overflow-hidden rounded-xl p-4 shadow-md transition-all duration-200 ease-in-out hover:scale-[1.02] hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
         className,
       )}
       onClick={handleUse}
