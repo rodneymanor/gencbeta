@@ -145,39 +145,45 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   };
 
   const sidebarComponent = (
-    <Sidebar
-      {...props}
-      className="transition-all duration-200"
-      onMouseEnter={handleSidebarMouseEnter}
-      onMouseLeave={handleSidebarMouseLeave}
-    >
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild className="hover:bg-transparent active:bg-transparent">
-              <a href="#" className="flex w-full items-center gap-2">
-                <GenCLogo iconSize="sm" textSize="sm" />
-                <SidebarPinControl />
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-      <SidebarContent>
-        <NavMain
-          items={filteredSidebarItems}
-          onCollectionCreated={refreshCollections}
-          onItemMouseEnter={handleItemMouseEnter}
-          onItemMouseLeave={handleItemMouseLeave}
-        />
-      </SidebarContent>
-      <SidebarFooter>
-        <div className="space-y-2">
-          <UsageTracker />
-          <NavUser />
-        </div>
-      </SidebarFooter>
-    </Sidebar>
+    <div className="relative">
+      {/* Hover target that only covers the collapsed sidebar area */}
+      <div 
+        className="absolute inset-y-0 left-0 w-16 z-20 pointer-events-auto"
+        onMouseEnter={handleSidebarMouseEnter}
+        onMouseLeave={handleSidebarMouseLeave}
+      />
+      <Sidebar
+        {...props}
+        className="transition-all duration-200"
+      >
+        <SidebarHeader>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild className="hover:bg-transparent active:bg-transparent">
+                <a href="#" className="flex w-full items-center gap-2">
+                  <GenCLogo iconSize="sm" textSize="sm" />
+                  <SidebarPinControl />
+                </a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarHeader>
+        <SidebarContent>
+          <NavMain
+            items={filteredSidebarItems}
+            onCollectionCreated={refreshCollections}
+            onItemMouseEnter={handleItemMouseEnter}
+            onItemMouseLeave={handleItemMouseLeave}
+          />
+        </SidebarContent>
+        <SidebarFooter>
+          <div className="space-y-2">
+            <UsageTracker />
+            <NavUser />
+          </div>
+        </SidebarFooter>
+      </Sidebar>
+    </div>
   );
 
   const expandablePanel = (

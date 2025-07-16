@@ -211,7 +211,11 @@ export function ExpandableSidebarPanel({
     return pathSegments[0].charAt(0).toUpperCase() + pathSegments[0].slice(1);
   };
 
-  if (!isExpanded) return null;
+  // Check if an item is currently active
+  const isItemActive = (href: string) => {
+    return pathname === href || pathname.startsWith(href + "/");
+  };
+
 
   // Show sub-items when hovering over a specific sidebar item
   const showSubItems = isHoveringSpecificItem && hoveredItem && hoveredItem.subItems && hoveredItem.subItems.length > 0;
@@ -219,31 +223,32 @@ export function ExpandableSidebarPanel({
   return (
     <div
       className={cn(
-        "pointer-events-auto fixed top-0 z-[100] flex h-full flex-col",
-        "border-r shadow-lg duration-200 ease-out",
-        "bg-sidebar border-sidebar-border",
+        "pointer-events-auto fixed top-0 flex h-full flex-col",
+        "border-r shadow-xl",
+        "bg-sidebar border-sidebar-border backdrop-blur-sm",
         "group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-lg",
+        "transition-all duration-300 ease-out",
+        isExpanded ? "translate-x-0 opacity-100 z-[100]" : "translate-x-0 opacity-0 z-[90]",
         className,
       )}
       style={{
-        left: "80px", // Position it right after the collapsed sidebar
+        left: isExpanded ? "80px" : "60px", // Slide from behind (20px overlap) to full position
         width: "220px",
         paddingLeft: "8px", // Small padding for content
+        transform: isExpanded ? "translateX(0)" : "translateX(-20px)", // Additional slide effect
       }}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      {/* Invisible overlay area */}
-      <div className="absolute inset-y-0 -right-6 left-0" />
 
       {/* Header */}
-      <div className="group/sidebar-menu-header border-border/50 relative mb-3 flex min-h-0 items-center justify-between border-b py-3">
+      <div className="group/sidebar-menu-header border-sidebar-border/30 relative mb-3 flex min-h-0 items-center justify-between border-b px-2 py-3">
         <span>
-          <div className="group relative cursor-pointer text-sm leading-[1.125rem] font-medium text-gray-700 select-none dark:text-gray-300">
-            <span className="bg-sidebar-accent absolute -inset-x-2 -inset-y-1 rounded-md opacity-0 duration-100 group-hover:opacity-100"></span>
+          <div className="group text-sidebar-foreground relative cursor-pointer text-sm leading-[1.125rem] font-medium transition-colors duration-200 select-none">
+            <span className="bg-sidebar-accent absolute -inset-x-2 -inset-y-1 rounded-md opacity-0 duration-200 group-hover:opacity-50"></span>
             <span className="relative flex items-center gap-1">
               {showSubItems ? hoveredItem?.title : getPageName()}
-              <ChevronDown className="size-4 text-gray-400 opacity-0 duration-100 group-hover:text-gray-600 group-hover/sidebar-menu-header:opacity-100 dark:group-hover:text-gray-200" />
+              <ChevronDown className="text-sidebar-foreground/40 group-hover:text-sidebar-foreground/60 size-4 opacity-0 transition-all duration-200 group-hover:rotate-180 group-hover/sidebar-menu-header:opacity-100" />
             </span>
           </div>
         </span>
@@ -254,12 +259,14 @@ export function ExpandableSidebarPanel({
             size="sm"
             onClick={onTogglePin}
             className={cn(
-              "h-6 w-6 p-0 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200",
-              "transition duration-300 ease-out",
+              "h-7 w-7 p-0 transition-all duration-200 ease-out",
               "group/button relative items-center justify-center text-center select-none",
-              "cursor-pointer rounded-lg active:scale-[0.97] active:duration-150",
-              isPinned &&
-                "text-gray-800 dark:text-gray-200",
+              "hover:bg-sidebar-accent/50 cursor-pointer rounded-lg",
+              "focus:ring-primary/20 focus:ring-2 focus:outline-none",
+              "active:scale-[0.95] active:duration-100",
+              isPinned
+                ? "text-primary bg-primary/10 hover:bg-primary/15"
+                : "text-sidebar-foreground/50 hover:text-sidebar-foreground/70",
             )}
             aria-label={isPinned ? "Unpin Sidebar" : "Pin Sidebar"}
             data-testid="sidebar-pin-sidebar"
@@ -268,8 +275,8 @@ export function ExpandableSidebarPanel({
               <div className="flex size-3.5 shrink-0 items-center justify-center">
                 <Pin
                   className={cn(
-                    "h-3.5 w-3.5 transition-transform duration-200", 
-                    isPinned ? "rotate-0 fill-gray-800 dark:fill-gray-200" : "rotate-45"
+                    "h-3.5 w-3.5 transition-all duration-200",
+                    isPinned ? "rotate-0 fill-current" : "rotate-45 group-hover/button:rotate-12",
                   )}
                 />
               </div>
@@ -285,96 +292,73 @@ export function ExpandableSidebarPanel({
             /* Show sub-items when hovering over a specific sidebar item */
             <div className="relative flex w-full min-w-0 flex-col p-2">
               {/* Sub-items header */}
-              <div className="flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-gray-500 dark:text-gray-400">
+              <div className="text-sidebar-foreground/60 flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-semibold tracking-wider uppercase">
                 {hoveredItem?.title}
               </div>
 
               {/* Sub-items */}
               <div className="flex w-full min-w-0 flex-col gap-1">
-                {hoveredItem?.subItems?.map((subItem) => (
-                  <div key={subItem.id} className="group/menu-item relative">
-                    <a href={subItem.href} className="group relative block">
-                      <div className="group relative block">
-                        <div className="bg-sidebar-accent absolute -inset-x-2 -inset-y-1 rounded-md opacity-0 duration-200 group-hover:opacity-100" />
-                        <div className="relative flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                          <div className="flex size-4 shrink-0 items-center justify-center text-gray-500 dark:text-gray-400">
-                            {subItem.icon}
-                          </div>
-                          <span
-                            className="w-full overflow-hidden whitespace-nowrap"
-                            style={{
-                              maskImage: "linear-gradient(to right, black 85%, transparent 97%)",
-                            }}
-                          >
-                            {subItem.title}
-                          </span>
-                          <span
-                            className="bg-sidebar-accent absolute top-1/2 -right-1 -translate-y-1/2 pl-2 opacity-0 duration-200 group-hover:opacity-100"
-                            style={{
-                              maskImage: "linear-gradient(to left, black 60%, transparent)",
-                            }}
-                          >
-                            <div className="hover:bg-sidebar-accent/50 rounded p-1 duration-150">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="14"
-                                height="14"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="3"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                className="text-gray-400 duration-150 hover:text-gray-600 dark:hover:text-gray-200"
-                              >
-                                <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-                                <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-                                <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-                              </svg>
-                            </div>
-                          </span>
-                        </div>
-                      </div>
-                    </a>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            /* Show regular sections when not hovering over a specific item */
-            sections.map((section, sectionIndex) => (
-              <div key={section.title} className="relative flex w-full min-w-0 flex-col p-2">
-                {/* Section header */}
-                <div className="flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-gray-500 dark:text-gray-400">
-                  {section.title}
-                </div>
-
-                {/* Section items */}
-                <div className="flex w-full min-w-0 flex-col gap-1">
-                  {section.items.map((item) => (
-                    <div key={item.id} className="group/menu-item relative">
-                      <a href={item.href} className="group relative block">
+                {hoveredItem?.subItems?.map((subItem) => {
+                  const isActive = isItemActive(subItem.href);
+                  return (
+                    <div key={subItem.id} className="group/menu-item relative">
+                      <a
+                        href={subItem.href}
+                        className={cn(
+                          "group relative block rounded-lg px-2 py-1.5 transition-all duration-200",
+                          "focus:ring-primary/20 focus:ring-2 focus:outline-none",
+                          "active:scale-[0.98] active:duration-75",
+                        )}
+                      >
                         <div className="group relative block">
-                          <div className="bg-sidebar-accent absolute -inset-x-2 -inset-y-1 rounded-md opacity-0 duration-200 group-hover:opacity-100" />
-                          <div className="relative flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                            <div className="flex size-4 shrink-0 items-center justify-center text-gray-500 dark:text-gray-400">
-                              {item.icon}
+                          {/* Background states */}
+                          <div
+                            className={cn(
+                              "absolute -inset-x-2 -inset-y-1 rounded-md transition-all duration-200",
+                              isActive
+                                ? "bg-primary/10 opacity-100"
+                                : "bg-sidebar-accent opacity-0 group-hover:opacity-100 group-focus:opacity-50",
+                            )}
+                          />
+
+                          <div
+                            className={cn(
+                              "relative flex items-center gap-2 text-sm transition-colors duration-200",
+                              isActive
+                                ? "text-primary font-medium"
+                                : "text-sidebar-foreground/70 group-hover:text-sidebar-foreground group-focus:text-sidebar-foreground",
+                            )}
+                          >
+                            <div
+                              className={cn(
+                                "flex size-4 shrink-0 items-center justify-center transition-colors duration-200",
+                                isActive
+                                  ? "text-primary"
+                                  : "text-sidebar-foreground/50 group-hover:text-sidebar-foreground/70",
+                              )}
+                            >
+                              {subItem.icon}
                             </div>
                             <span
-                              className="w-full overflow-hidden whitespace-nowrap"
+                              className="w-full overflow-hidden whitespace-nowrap transition-transform duration-200 group-hover:translate-x-0.5"
                               style={{
                                 maskImage: "linear-gradient(to right, black 85%, transparent 97%)",
                               }}
                             >
-                              {item.title}
+                              {subItem.title}
                             </span>
+
+                            {/* Action button */}
                             <span
-                              className="bg-sidebar-accent absolute top-1/2 -right-1 -translate-y-1/2 pl-2 opacity-0 duration-200 group-hover:opacity-100"
+                              className={cn(
+                                "absolute top-1/2 -right-1 -translate-y-1/2 pl-2 transition-all duration-200",
+                                "opacity-0 group-hover:opacity-100 group-focus:opacity-70",
+                              )}
                               style={{
                                 maskImage: "linear-gradient(to left, black 60%, transparent)",
                               }}
                             >
-                              <div className="hover:bg-sidebar-accent/50 rounded p-1 duration-150">
+                              <div className="hover:bg-sidebar-accent/50 rounded p-1 transition-all duration-150 hover:scale-110">
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
                                   width="14"
@@ -385,7 +369,7 @@ export function ExpandableSidebarPanel({
                                   strokeWidth="3"
                                   strokeLinecap="round"
                                   strokeLinejoin="round"
-                                  className="text-gray-400 duration-150 hover:text-gray-600 dark:hover:text-gray-200"
+                                  className="text-sidebar-foreground/40 hover:text-sidebar-foreground/70 transition-colors duration-150"
                                 >
                                   <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
                                   <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
@@ -397,7 +381,106 @@ export function ExpandableSidebarPanel({
                         </div>
                       </a>
                     </div>
-                  ))}
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            /* Show regular sections when not hovering over a specific item */
+            sections.map((section, sectionIndex) => (
+              <div key={section.title} className="relative flex w-full min-w-0 flex-col p-2">
+                {/* Section header */}
+                <div className="text-sidebar-foreground/60 flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-semibold tracking-wider uppercase">
+                  {section.title}
+                </div>
+
+                {/* Section items */}
+                <div className="flex w-full min-w-0 flex-col gap-1">
+                  {section.items.map((item) => {
+                    const isActive = isItemActive(item.href);
+                    return (
+                      <div key={item.id} className="group/menu-item relative">
+                        <a
+                          href={item.href}
+                          className={cn(
+                            "group relative block rounded-lg px-2 py-1.5 transition-all duration-200",
+                            "focus:ring-primary/20 focus:ring-2 focus:outline-none",
+                            "active:scale-[0.98] active:duration-75",
+                          )}
+                        >
+                          <div className="group relative block">
+                            {/* Background states */}
+                            <div
+                              className={cn(
+                                "absolute -inset-x-2 -inset-y-1 rounded-md transition-all duration-200",
+                                isActive
+                                  ? "bg-primary/10 opacity-100"
+                                  : "bg-sidebar-accent opacity-0 group-hover:opacity-100 group-focus:opacity-50",
+                              )}
+                            />
+
+                            <div
+                              className={cn(
+                                "relative flex items-center gap-2 text-sm transition-colors duration-200",
+                                isActive
+                                  ? "text-primary font-medium"
+                                  : "text-sidebar-foreground/70 group-hover:text-sidebar-foreground group-focus:text-sidebar-foreground",
+                              )}
+                            >
+                              <div
+                                className={cn(
+                                  "flex size-4 shrink-0 items-center justify-center transition-colors duration-200",
+                                  isActive
+                                    ? "text-primary"
+                                    : "text-sidebar-foreground/50 group-hover:text-sidebar-foreground/70",
+                                )}
+                              >
+                                {item.icon}
+                              </div>
+                              <span
+                                className="w-full overflow-hidden whitespace-nowrap transition-transform duration-200 group-hover:translate-x-0.5"
+                                style={{
+                                  maskImage: "linear-gradient(to right, black 85%, transparent 97%)",
+                                }}
+                              >
+                                {item.title}
+                              </span>
+
+                              {/* Action button */}
+                              <span
+                                className={cn(
+                                  "absolute top-1/2 -right-1 -translate-y-1/2 pl-2 transition-all duration-200",
+                                  "opacity-0 group-hover:opacity-100 group-focus:opacity-70",
+                                )}
+                                style={{
+                                  maskImage: "linear-gradient(to left, black 60%, transparent)",
+                                }}
+                              >
+                                <div className="hover:bg-sidebar-accent/50 rounded p-1 transition-all duration-150 hover:scale-110">
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="14"
+                                    height="14"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="3"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className="text-sidebar-foreground/40 hover:text-sidebar-foreground/70 transition-colors duration-150"
+                                  >
+                                    <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                    <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                    <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                  </svg>
+                                </div>
+                              </span>
+                            </div>
+                          </div>
+                        </a>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             ))

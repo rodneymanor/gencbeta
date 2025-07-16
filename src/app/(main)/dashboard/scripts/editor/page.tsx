@@ -60,6 +60,7 @@ export default function ScriptEditorPage() {
 
   // Auto-save timer ref
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout>();
+  const lastAutoSaveContent = useRef<string>("");
 
   // Fetch scripts data
   const {
@@ -91,7 +92,7 @@ export default function ScriptEditorPage() {
   const { handleSave } = useScriptSave({ script, scriptId, refetch });
 
   // Configure top bar with toolbar
-  const setTopBarConfig = useTopBarConfig();
+  const { setTopBarConfig } = useTopBarConfig();
 
   useEffect(() => {
     setTopBarConfig({
@@ -142,6 +143,34 @@ export default function ScriptEditorPage() {
     }
   }, [scriptId, scripts]);
 
+  // Backup content to localStorage
+  useEffect(() => {
+    if (script.trim()) {
+      const backupKey = scriptId ? `script-backup-${scriptId}` : "script-backup-new";
+      localStorage.setItem(backupKey, script);
+      localStorage.setItem(`${backupKey}-timestamp`, Date.now().toString());
+    }
+  }, [script, scriptId]);
+
+  // Recovery from localStorage on mount
+  useEffect(() => {
+    const backupKey = scriptId ? `script-backup-${scriptId}` : "script-backup-new";
+    const backupContent = localStorage.getItem(backupKey);
+    const backupTimestamp = localStorage.getItem(`${backupKey}-timestamp`);
+    
+    if (backupContent && backupTimestamp && !script.trim()) {
+      const timeDiff = Date.now() - parseInt(backupTimestamp);
+      // Only recover if backup is less than 24 hours old
+      if (timeDiff < 24 * 60 * 60 * 1000) {
+        setScript(backupContent);
+        console.log("📝 [RECOVERY] Recovered script from localStorage backup");
+        toast.info("Draft recovered", {
+          description: "We recovered an unsaved draft of your script.",
+        });
+      }
+    }
+  }, [scriptId]); // Only run when scriptId changes
+
   // Cleanup auto-save timer on unmount
   useEffect(() => {
     return () => {
@@ -165,14 +194,75 @@ export default function ScriptEditorPage() {
     });
   };
 
-  // Auto-save function
+  // Auto-save function with enhanced error handling and retry logic
   const performAutoSave = async () => {
-    if (!script.trim()) return;
+    if (!script.trim()) {
+      console.log("📝 [AUTO-SAVE] Skipping auto-save: empty script");
+      return;
+    }
+
+    // Skip if content hasn't changed since last auto-save
+    if (lastAutoSaveContent.current === script.trim()) {
+      console.log("📝 [AUTO-SAVE] Skipping auto-save: no changes since last save");
+      return;
+    }
 
     try {
+      console.log("📝 [AUTO-SAVE] Starting auto-save...");
       setAutoSaveStatus("saving");
-      await handleSave();
+      
+      // Generate title from first line if no scriptId (new script)
+      const title = scriptId ? "Untitled Script" : script.split('\n')[0].substring(0, 50) || "Untitled Script";
+      
+      // Get Firebase Auth token
+      const { auth } = await import("@/lib/firebase");
+      if (!auth?.currentUser) {
+        throw new Error("User not authenticated");
+      }
+
+      const token = await auth.currentUser.getIdToken();
+
+      const response = await fetch("/api/scripts", {
+        method: scriptId ? "PUT" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          id: scriptId,
+          title,
+          content: script.trim(),
+          approach: "manual", // Default approach for auto-saved scripts
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to save script");
+      }
+
+      const result = await response.json();
+      
+      // Update scriptId if this was a new script
+      if (!scriptId && result.script?.id) {
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.set('scriptId', result.script.id);
+        window.history.replaceState({}, '', newUrl.toString());
+      }
+
       setAutoSaveStatus("saved");
+      console.log("✅ [AUTO-SAVE] Auto-save successful");
+      
+      // Store last successful auto-save content
+      lastAutoSaveContent.current = script.trim();
+
+      // Clean up localStorage backup after successful save
+      const backupKey = scriptId ? `script-backup-${scriptId}` : "script-backup-new";
+      localStorage.removeItem(backupKey);
+      localStorage.removeItem(`${backupKey}-timestamp`);
+
+      // Refresh scripts list
+      refetch();
 
       // Reset to idle after 2 seconds
       setTimeout(() => {
@@ -180,12 +270,17 @@ export default function ScriptEditorPage() {
       }, 2000);
     } catch (error) {
       setAutoSaveStatus("error");
-      console.error("Auto-save failed:", error);
+      console.error("❌ [AUTO-SAVE] Auto-save failed:", error);
 
-      // Reset to idle after 3 seconds
+      // Show error toast only for auto-save failures
+      toast.error("Auto-save failed", {
+        description: "Your changes weren't saved automatically. Try saving manually.",
+      });
+
+      // Reset to idle after 5 seconds to allow retry
       setTimeout(() => {
         setAutoSaveStatus("idle");
-      }, 3000);
+      }, 5000);
     }
   };
 
@@ -195,15 +290,39 @@ export default function ScriptEditorPage() {
       setScriptElements(undefined);
     }
 
+    // Don't auto-save empty content
+    if (!newContent.trim()) {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+      return;
+    }
+
     // Clear existing auto-save timer
     if (autoSaveTimeoutRef.current) {
       clearTimeout(autoSaveTimeoutRef.current);
     }
 
+    // Don't start new auto-save if currently saving
+    if (autoSaveStatus === "saving") {
+      console.log("📝 [AUTO-SAVE] Skipping debounce: already saving");
+      return;
+    }
+
+    // Reset status to idle if it was in error or saved state
+    if (autoSaveStatus === "error" || autoSaveStatus === "saved") {
+      setAutoSaveStatus("idle");
+    }
+
     // Set new auto-save timer (3 seconds after stopping typing)
     autoSaveTimeoutRef.current = setTimeout(() => {
-      performAutoSave();
+      // Double-check we're not saving before triggering
+      if (autoSaveStatus !== "saving") {
+        performAutoSave();
+      }
     }, 3000);
+
+    console.log("📝 [AUTO-SAVE] Auto-save timer set for 3 seconds");
   };
 
   const handleBlocksChange = (newBlocks: PartialBlock[]) => {

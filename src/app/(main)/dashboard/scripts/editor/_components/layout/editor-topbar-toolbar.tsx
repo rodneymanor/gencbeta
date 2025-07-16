@@ -141,6 +141,21 @@ export function EditorTopBarToolbar({ script, onSave, autoSaveStatus = "idle" }:
         </div>
 
         <Button
+          variant="outline"
+          size="sm"
+          onClick={handleSave}
+          disabled={!script.trim() || isSaving}
+          className="h-10 px-[var(--space-3)]"
+        >
+          {isSaving ? (
+            <Loader2 className="mr-[var(--space-1)] h-4 w-4 animate-spin" />
+          ) : (
+            <Save className="mr-[var(--space-1)] h-4 w-4" />
+          )}
+          Save
+        </Button>
+
+        <Button
           variant="ghost"
           size="sm"
           onClick={handleDownload}

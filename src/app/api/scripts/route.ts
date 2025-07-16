@@ -205,3 +205,106 @@ export async function POST(request: NextRequest): Promise<NextResponse<ScriptRes
     );
   }
 }
+
+// PUT: Update an existing script
+export async function PUT(request: NextRequest): Promise<NextResponse<ScriptResponse>> {
+  try {
+    console.log("📝 [Scripts API] PUT request received");
+
+    // Authenticate API key
+    const authResult = await authenticateApiKey(request);
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+
+    const userId = authResult.user.uid;
+    const body: CreateScriptRequest & { id: string } = await request.json();
+
+    // Validate required fields
+    if (!body.id || !body.title || !body.content) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Script ID, title and content are required",
+        },
+        { status: 400 },
+      );
+    }
+
+    console.log("💾 [Scripts API] Updating script:", body.id);
+
+    // Verify script ownership
+    const existingScriptDoc = await adminDb.collection("scripts").doc(body.id).get();
+    if (!existingScriptDoc.exists) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Script not found",
+        },
+        { status: 404 },
+      );
+    }
+
+    const existingScript = existingScriptDoc.data() as Script;
+    if (existingScript.userId !== userId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unauthorized to update this script",
+        },
+        { status: 403 },
+      );
+    }
+
+    // Calculate derived fields
+    const wordCount = body.content.trim().split(/\s+/).length;
+    const duration = calculateDuration(body.content);
+    const summary = body.summary ?? generateSummary(body.content);
+    const category = body.category ?? inferCategory(body.content, body.approach || "general");
+
+    // Update script document
+    const updateData: Partial<Script> = {
+      title: body.title,
+      content: body.content,
+      status: body.status || existingScript.status || "draft",
+      category,
+      updatedAt: new Date().toISOString(),
+      duration,
+      summary,
+      wordCount,
+      approach: body.approach || existingScript.approach,
+      voice: body.voice || existingScript.voice,
+      originalIdea: body.originalIdea || existingScript.originalIdea,
+      targetLength: body.targetLength || existingScript.targetLength,
+      tags: body.tags || existingScript.tags || [],
+    };
+
+    // Remove undefined fields for Firestore compatibility
+    const cleanUpdateData = removeUndefinedFields(updateData);
+
+    // Update in Firestore
+    await adminDb.collection("scripts").doc(body.id).update(cleanUpdateData);
+
+    const updatedScript: Script = {
+      ...existingScript,
+      ...cleanUpdateData,
+      id: body.id,
+    };
+
+    console.log("✅ [Scripts API] Script updated successfully:", body.id);
+
+    return NextResponse.json({
+      success: true,
+      script: updatedScript,
+    });
+  } catch (error) {
+    console.error("❌ [Scripts API] PUT error:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Failed to update script",
+      },
+      { status: 500 },
+    );
+  }
+}

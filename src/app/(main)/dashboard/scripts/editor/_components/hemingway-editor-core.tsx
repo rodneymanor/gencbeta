@@ -11,10 +11,10 @@ import {
   type ScriptAnalysis,
   type ScriptElement,
   type HighlightConfig,
-  type ContextualAction,
 } from "@/lib/script-analysis";
 
-import { ContextualActionMenu } from "./contextual-action-menu";
+import { AIMenuBar } from "./ai-menu-bar";
+import { ScriptHighlightOverlay } from "./script-highlight-overlay";
 import "@blocknote/core/fonts/inter.css";
 import "@blocknote/mantine/style.css";
 
@@ -211,22 +211,51 @@ export function HemingwayEditorCore({
     };
   }, [value, analyzeText]);
 
-  // Handle element click from overlay (disabled for now until highlighting is implemented)
-  // const handleElementClick = useCallback((element: ScriptElement, event?: React.MouseEvent) => {
-  //   if (event) {
-  //     setContextMenuPosition({ x: event.clientX, y: event.clientY });
-  //     setSelectedElement(element);
-  //   }
-  // }, []);
+  // Handle element click from overlay
+  const handleElementClick = useCallback((element: ScriptElement, event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setContextMenuPosition({ x: event.clientX, y: event.clientY });
+    setSelectedElement(element);
+  }, []);
 
-  // Handle context menu action
-  const handleContextAction = useCallback((action: ContextualAction, element: ScriptElement) => {
+  // Handle AI menu action
+  const handleAIAction = useCallback((actionType: string, customPrompt?: string, option?: string) => {
     setContextMenuPosition(null);
     setSelectedElement(null);
 
-    // Here you would implement the actual action logic
-    console.log("Context action:", action, "on element:", element);
-  }, []);
+    console.log("AI Action:", actionType, "Custom prompt:", customPrompt, "Option:", option);
+    
+    // TODO: Implement AI service calls for each action type
+    switch (actionType) {
+      case "custom_prompt":
+        console.log("Custom prompt:", customPrompt, "for element:", selectedElement?.text);
+        break;
+      case "humanize":
+        console.log("Humanizing text:", selectedElement?.text);
+        break;
+      case "shorten":
+        console.log("Shortening text:", selectedElement?.text);
+        break;
+      case "change_tone":
+        console.log("Changing tone to:", option, "for text:", selectedElement?.text);
+        break;
+      case "change_style":
+        console.log("Changing style to:", option, "for text:", selectedElement?.text);
+        break;
+      case "enhance_value":
+        console.log("Enhancing value for:", selectedElement?.text);
+        break;
+      case "add_evidence":
+        console.log("Adding evidence for:", selectedElement?.text);
+        break;
+      case "clarify_benefit":
+        console.log("Clarifying benefit for:", selectedElement?.text);
+        break;
+      default:
+        console.log("Unknown action:", actionType);
+    }
+  }, [selectedElement]);
 
   // Close context menu
   const closeContextMenu = useCallback(() => {
@@ -257,16 +286,20 @@ export function HemingwayEditorCore({
           }}
         />
 
-        {/* TODO: Implement BlockNote-compatible highlighting overlay */}
-        {/* The TextHighlightOverlay needs to be adapted for BlockNote */}
+        {/* Script Component Highlighting Overlay */}
+        <ScriptHighlightOverlay
+          analysis={analysis}
+          onElementClick={handleElementClick}
+          editorRef={editorRef}
+        />
       </div>
 
-      {/* Context Menu */}
+      {/* AI Menu Bar */}
       {contextMenuPosition && selectedElement && (
-        <ContextualActionMenu
+        <AIMenuBar
           element={selectedElement}
           position={contextMenuPosition}
-          onAction={handleContextAction}
+          onAction={handleAIAction}
           onClose={closeContextMenu}
         />
       )}
