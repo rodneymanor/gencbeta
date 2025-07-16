@@ -503,3 +503,18 @@
 [data-radix-popper-content-wrapper]:has([data-slot="tooltip-content"]) {
   display: none !important;
 }
+
+/* BlockNote Editor Transparency */
+.bn-container {
+  background-color: transparent !important;
+}
+
+.bn-mantine {
+  background-color: transparent !important;
+}
+
+/* Ensure BlockNote editor content area is transparent */
+.bn-container .bn-editor,
+.bn-container .ProseMirror {
+  background-color: transparent !important;
+}

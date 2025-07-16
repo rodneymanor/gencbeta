@@ -9,11 +9,19 @@ import { useState, useEffect, useCallback, useMemo, useTransition, useRef, memo,
 import { useSearchParams, useRouter } from "next/navigation";
 
 import { motion } from "framer-motion";
-import { Edit3, Loader2, Check, Bookmark, Menu } from "lucide-react";
+import { Edit3, Loader2, Check, Menu, MoreHorizontal, Settings, FolderOpen, Star, StarOff, Trash2, CheckSquare, X } from "lucide-react";
+import { IconBookmark } from "@tabler/icons-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { InstagramVideoGrid } from "@/components/ui/instagram-video-grid";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -31,7 +39,7 @@ import { badgeVariants } from "./_components/collections-animations";
 import { type VideoWithPlayer, createVideoSelectionHandlers } from "./_components/collections-helpers";
 import { CollectionsTabNav } from "./_components/collections-tab-nav";
 import { CreateCollectionDialog } from "./_components/create-collection-dialog";
-import { ManageModeHeader } from "./_components/manage-mode-header";
+import { ManageCollectionsModal } from "./_components/manage-collections-modal";
 import { VideoGrid } from "./_components/video-grid";
 
 // Simplified cache for better performance
@@ -109,7 +117,7 @@ const CollectionBadge = memo(
           } min-h-[36px] rounded-md border-0 px-4 py-2.5 text-sm shadow-xs hover:shadow-sm`}
           onClick={isTransitioning ? undefined : onClick}
         >
-          {collection?.favorite && <Bookmark className="mr-1 h-4 w-4 text-yellow-400" />}
+          {collection?.favorite && <IconBookmark className="mr-1 h-4 w-4 text-yellow-400" />}
           {collection
             ? `${collection.title.length > 30 ? collection.title.slice(0, 27) + "…" : collection.title} (${collection.videoCount})`
             : `All Videos (${videoCount})`}
@@ -258,6 +266,9 @@ function CollectionsPageContent() {
   // Dialog refs for programmatic triggering
   const createCollectionDialogRef = useRef<HTMLButtonElement>(null);
   const addVideoDialogRef = useRef<HTMLButtonElement>(null);
+  
+  // Modal states
+  const [manageCollectionsOpen, setManageCollectionsOpen] = useState(false);
 
   // Sentinel ref for infinite scrolling in Instagram grid
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
@@ -704,22 +715,90 @@ function CollectionsPageContent() {
 
   // Configure top bar with action buttons
   useEffect(() => {
+    const isAdmin = userProfile?.role === "coach" || userProfile?.role === "super_admin";
+    const ownedCollections = user ? collections.filter((c) => c.userId === user.uid) : [];
+    
     setTopBarConfig({
       title: "Collections",
       showTitle: true,
       titlePosition: "left",
       actions: (
         <div className="flex items-center gap-2">
-          <Button onClick={handleAddCollection} className="gap-2" variant="outline" size="sm">
-            📁 Add Collection
-          </Button>
+          {isAdmin && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-muted-foreground hover:text-foreground h-8 w-8"
+                  aria-label="More options"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => setManageMode(!manageMode)} className="cursor-pointer">
+                  <Settings className="mr-3 h-4 w-4" />
+                  <span>Manage Videos</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setManageCollectionsOpen(true)} className="cursor-pointer">
+                  <FolderOpen className="mr-3 h-4 w-4" />
+                  <span>Manage Collections</span>
+                </DropdownMenuItem>
+                {selectedCollection && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      onClick={async () => {
+                        if (!user || !selectedCollection?.id) return;
+                        await CollectionsService.setFavorite(user.uid, selectedCollection.id, !selectedCollection.favorite);
+                        handleCollectionUpdated();
+                      }}
+                      className="cursor-pointer"
+                    >
+                      {selectedCollection.favorite ? <StarOff className="mr-3 h-4 w-4" /> : <Star className="mr-3 h-4 w-4" />}
+                      <span>{selectedCollection.favorite ? "Remove Favorite" : "Add to Favorites"}</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer">
+                      <Edit3 className="mr-3 h-4 w-4" />
+                      <span>Edit Collection</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-destructive focus:text-destructive cursor-pointer">
+                      <Trash2 className="mr-3 h-4 w-4" />
+                      <span>Delete Collection</span>
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          {selectedCollection && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={async () => {
+                if (!user || !selectedCollection?.id) return;
+                await CollectionsService.setFavorite(user.uid, selectedCollection.id, !selectedCollection.favorite);
+                handleCollectionUpdated();
+              }}
+              className={`h-8 w-8 transition-colors ${
+                selectedCollection?.favorite
+                  ? "text-yellow-500 hover:text-yellow-600"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              aria-label={selectedCollection?.favorite ? "Remove from favorites" : "Add to favorites"}
+            >
+              <IconBookmark className={`h-4 w-4 ${selectedCollection?.favorite ? "fill-current" : ""}`} />
+            </Button>
+          )}
           <Button onClick={handleAddVideo} className="gap-2" variant="default" size="sm">
-            📹 Add Video to Collection
+            + Add
           </Button>
         </div>
       ),
     });
-  }, [setTopBarConfig, handleAddCollection, handleAddVideo]);
+  }, [setTopBarConfig, handleAddVideo, selectedCollection, user, userProfile, manageMode, handleCollectionUpdated, collections]);
 
   // Video favoriting handler
   const handleVideoFavorite = useCallback(
@@ -789,7 +868,7 @@ function CollectionsPageContent() {
 
           {/* Video grid skeleton */}
           <main className="flex-1">
-            <div className="mx-auto w-[935px]">
+            <div className="mx-auto w-full max-w-[880px]">
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {Array.from({ length: 12 }).map((_, i) => (
                   <div key={i} className="animate-pulse space-y-3">
@@ -816,10 +895,10 @@ function CollectionsPageContent() {
   }
 
   return (
-    <div className="mx-auto flex h-full max-w-7xl gap-6 p-4 md:p-6">
+    <div className="mx-auto flex h-full max-w-7xl gap-4 p-4 md:p-6">
       {/* Left side: Main content (Video Grid) */}
-      <div className="flex-1 space-y-4">
-        <header className="mb-1 space-y-4">
+      <div className="flex-1 space-y-4 min-w-0">
+        <header className="mb-6 space-y-4">
           {/* Primary Content Area */}
           <div className="flex items-start justify-between gap-4">
             {/* Title and Description */}
@@ -844,19 +923,13 @@ function CollectionsPageContent() {
                       className="inline-block max-w-[240px] truncate"
                     />
                   ) : (
-                    pageTitle
+                    <span className="group relative inline-block max-w-[240px] truncate">
+                      <span className="inline-flex items-center gap-1 rounded px-1">
+                        <span>{pageTitle}</span>
+                      </span>
+                    </span>
                   )}
                 </h1>
-                {selectedCollection && (
-                  <div className="flex items-center gap-2">
-                    <CollectionBadgeMenu
-                      collection={selectedCollection}
-                      onCollectionDeleted={handleCollectionDeleted}
-                      onCollectionUpdated={handleCollectionUpdated}
-                      className="transition-opacity duration-200"
-                    />
-                  </div>
-                )}
               </div>
               <p
                 className="text-muted-foreground mx-auto min-h-[24px] max-w-[500px] truncate"
@@ -886,62 +959,71 @@ function CollectionsPageContent() {
               </p>
             </div>
 
-            {/* Action Buttons - Right Side */}
-            <div className="flex flex-shrink-0 items-center gap-2">
-              {/* Favorite Button - Larger touch target */}
-              <Button
-                variant="ghost"
-                size="icon"
-                disabled={!selectedCollection}
-                onClick={async () => {
-                  if (!user || !selectedCollection?.id) return;
-                  await CollectionsService.setFavorite(user.uid, selectedCollection.id, !selectedCollection.favorite);
-                  handleCollectionUpdated();
-                }}
-                className={`h-11 w-11 transition-colors ${
-                  selectedCollection?.favorite
-                    ? "text-yellow-500 hover:text-yellow-600"
-                    : "text-muted-foreground hover:text-foreground"
-                } ${!selectedCollection ? "pointer-events-none opacity-0" : ""}`}
-                aria-label={selectedCollection?.favorite ? "Remove from favorites" : "Add to favorites"}
-              >
-                <Bookmark className={`h-5 w-5 ${selectedCollection?.favorite ? "fill-current" : ""}`} />
-              </Button>
-
-              {/* Admin Controls */}
-              <ManageModeHeader
-                manageMode={manageMode}
-                selectedVideos={selectedVideos}
-                collections={collections}
-                selectedCollectionId={selectedCollectionId}
-                onManageModeToggle={() => setManageMode(!manageMode)}
-                onExitManageMode={handleExitManageMode}
-                onBulkDelete={handleBulkDelete}
-                onClearSelection={clearSelection}
-                onSelectAll={selectAllVideos}
-                onVideoAdded={handleVideoAdded}
-              />
-            </div>
           </div>
         </header>
 
-        {/* Collections Tab Navigation */}
-        {(() => {
-          const favoriteVideosCount = videos.filter((v) => v.favorite).length;
-          return (
-            <CollectionsTabNav
-              collections={collections}
-              activeId={selectedCollectionId}
-              onSelect={handleCollectionChange}
-              allVideosCount={videos.length}
-              favoriteVideosCount={favoriteVideosCount}
-            />
-          );
-        })()}
+        {/* Manage Mode Controls */}
+        {manageMode && (
+          <div className="mb-4 flex items-center gap-4">
+            {/* Selection Counter */}
+            <div className="bg-secondary/40 border-border/60 flex items-center gap-3 rounded-lg border px-4 py-3 text-sm font-medium shadow-xs">
+              <span className="text-muted-foreground">Selected:</span>
+              <Badge variant="secondary" className="bg-primary text-primary-foreground px-2 py-1 text-sm shadow-sm">
+                {selectedVideos.size}
+              </Badge>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="default"
+                onClick={selectAllVideos}
+                className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 h-10 px-4 shadow-xs transition-all duration-200 hover:shadow-sm"
+              >
+                <CheckSquare className="mr-2 h-4 w-4" />
+                Select All
+              </Button>
+              <Button
+                variant="outline"
+                size="default"
+                onClick={clearSelection}
+                className="border-border/60 hover:border-border bg-background hover:bg-secondary/60 h-10 px-4 shadow-xs transition-all duration-200 hover:shadow-sm"
+              >
+                <X className="mr-2 h-4 w-4" />
+                Clear
+              </Button>
+              {selectedVideos.size > 0 && (
+                <Button
+                  variant="destructive"
+                  size="default"
+                  onClick={handleBulkDelete}
+                  className="h-10 px-4 shadow-xs transition-all duration-200 hover:shadow-sm"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete ({selectedVideos.size})
+                </Button>
+              )}
+            </div>
+
+            {/* Exit Button */}
+            <div className="border-border/40 ml-2 border-l pl-4">
+              <Button
+                variant="ghost"
+                size="default"
+                onClick={handleExitManageMode}
+                className="text-muted-foreground hover:text-foreground hover:bg-secondary/50 h-10 px-4 transition-all duration-200"
+              >
+                <X className="mr-2 h-4 w-4" />
+                Exit Manage Mode
+              </Button>
+            </div>
+          </div>
+        )}
 
         <main className="flex-1">
           {!manageMode ? (
-            <div className="mx-auto w-[935px]">
+            <div className="mx-auto w-full max-w-[880px]">
               <InstagramVideoGrid
                 videos={videos}
                 onVideoClick={handleThumbnailClick}
@@ -981,7 +1063,7 @@ function CollectionsPageContent() {
       </div>
 
       {/* Right sidebar: Category Chooser */}
-      <div className="w-80 flex-shrink-0">
+      <div className="flex-shrink-0" style={{ width: '200px' }}>
         <CategoryChooser
           items={[
             { id: "all", name: "All Videos", description: "Browse all your videos" },
@@ -1019,6 +1101,13 @@ function CollectionsPageContent() {
       >
         <button ref={addVideoDialogRef} style={{ display: "none" }} />
       </AddVideoDialog>
+      
+      <ManageCollectionsModal
+        open={manageCollectionsOpen}
+        onOpenChange={setManageCollectionsOpen}
+        collections={user ? collections.filter((c) => c.userId === user.uid) : []}
+        onCollectionDeleted={handleVideoAdded}
+      />
     </div>
   );
 }

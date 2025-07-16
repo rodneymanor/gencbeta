@@ -184,7 +184,7 @@ export function VideoInsightsModalRedesigned({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 backdrop-blur-sm">
       {/* Navigation Arrow Above */}
       {onNavigatePrevious && hasPrevious && (
         <div className="mb-4 flex justify-center">

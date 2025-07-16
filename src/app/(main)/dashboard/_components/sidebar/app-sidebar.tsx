@@ -128,8 +128,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   };
 
   const handleItemMouseEnter = (item: SidebarItemWithSubs) => {
-    setHoveredItem(item);
-    setIsHoveringSpecificItem(true);
+    // For Home icon, don't show its subItems, just show the default sidebar sections
+    if (item.title === "Home") {
+      setHoveredItem(null);
+      setIsHoveringSpecificItem(false);
+    } else {
+      setHoveredItem(item);
+      setIsHoveringSpecificItem(true);
+    }
     smartSidebar.setExpanded(true);
   };
 
@@ -148,7 +154,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <>
       {/* Hover target that only covers the collapsed sidebar area */}
       <div
-        className="fixed inset-y-0 left-0 z-[95] w-16"
+        className="fixed inset-y-0 left-0 z-[95] w-[70px]"
         onMouseEnter={handleSidebarMouseEnter}
         onMouseLeave={handleSidebarMouseLeave}
       />

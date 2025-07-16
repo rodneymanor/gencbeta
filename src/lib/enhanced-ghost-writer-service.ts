@@ -106,6 +106,8 @@ export class EnhancedGhostWriterService {
 
   /**
    * Convert concepts to hooks using hook generation with diverse styles
+   * Now uses 25+ different hook templates with random selection each generation
+   * to ensure maximum variety and prevent repetitive patterns
    */
   private static async convertConceptsToHooks(
     concepts: Array<{ concept: string; peqCategory: "problem" | "excuse" | "question"; sourceText: string }>,
@@ -116,18 +118,51 @@ export class EnhancedGhostWriterService {
     console.log("🎣 [EnhancedGhostWriter] Step 3: Converting concepts to hooks with diverse styles");
     const ideas: EnhancedContentIdea[] = [];
 
-    // Define hook style categories to ensure variety (9 styles for 9 ideas)
-    const hookStyleCategories = [
+    // Define comprehensive hook style categories to ensure maximum variety
+    const allHookStyleCategories = [
+      // Conditional hooks
       "IF-AND-THEN",
+      "IF-BUT-ONE",
+      "IF-HERE IS WHAT I'D DO",
+      "BEFORE",
+      "WHENEVER",
+      
+      // Audience-focused hooks
+      "YOU-YOUR",
       "YOU KNOW WHEN YOU",
-      "ME-YOU",
-      "STOP",
-      "SECRET",
-      "WHY/REASON",
+      "YOU KNOW THOSE",
       "HAVE YOU EVER",
-      "THIS IS HOW",
+      
+      // Personal story hooks
+      "ME-YOU",
+      "I-YOU",
+      "I-EVEN THOUGH I AM NOT",
+      "HATE",
+      
+      // Action & list hooks
+      "SHOULD/MUST",
+      "DO",
+      "STOP",
+      "STEAL",
+      "TOP 3",
+      "THIS",
+      "THIS IS HOW/WHAT",
+      
+      // Reveal & insight hooks
       "SIGNS/TRAITS",
+      "SECRET",
+      "HAVE IN COMMON",
+      "SCARY",
+      "WHY/REASON",
     ];
+
+    // Shuffle the hook styles to ensure different patterns each generation
+    const shuffledHookStyles = [...allHookStyleCategories].sort(() => Math.random() - 0.5);
+    
+    // Select the first 9 unique hook styles for this generation
+    const hookStyleCategories = shuffledHookStyles.slice(0, Math.min(9, concepts.length));
+    
+    console.log("🎭 [EnhancedGhostWriter] Selected hook styles for this generation:", hookStyleCategories);
 
     for (let i = 0; i < concepts.length; i++) {
       const concept = concepts[i];
@@ -533,22 +568,49 @@ FINAL REMINDER: Your response must be PURE JSON starting with { and ending with 
    * Select a diverse hook from available options to avoid repetition
    */
   private static selectDiverseHook(hooks: GeneratedHook[]): GeneratedHook {
-    // Define priority order for hook template diversity
+    // Define comprehensive template priority for maximum diversity
     const templatePriority = [
+      // Conditional hooks
       "IF-AND-THEN",
+      "IF-BUT-ONE", 
+      "IF-HERE IS WHAT I'D DO",
+      "BEFORE",
+      "WHENEVER",
+      
+      // Audience-focused hooks
+      "YOU-YOUR",
       "YOU KNOW WHEN YOU",
-      "ME-YOU",
-      "STOP",
-      "SECRET",
-      "WHY/REASON",
+      "YOU KNOW THOSE",
       "HAVE YOU EVER",
-      "THIS IS HOW",
-      "SIGNS/TRAITS",
+      
+      // Personal story hooks
+      "ME-YOU",
+      "I-YOU",
+      "I-EVEN THOUGH I AM NOT",
+      "HATE",
+      
+      // Action & list hooks
+      "SHOULD/MUST",
+      "DO",
+      "STOP",
+      "STEAL",
       "TOP 3",
+      "THIS",
+      "THIS IS HOW/WHAT",
+      
+      // Reveal & insight hooks
+      "SIGNS/TRAITS",
+      "SECRET",
+      "HAVE IN COMMON",
+      "SCARY",
+      "WHY/REASON",
     ];
 
-    // Try to find a hook that matches our priority templates
-    for (const priority of templatePriority) {
+    // Shuffle the priority list to ensure random selection order
+    const shuffledPriority = [...templatePriority].sort(() => Math.random() - 0.5);
+
+    // Try to find a hook that matches our shuffled priority templates
+    for (const priority of shuffledPriority) {
       const matchingHook = hooks.find(
         (hook) => hook.template.includes(priority) || hook.template.toLowerCase().includes(priority.toLowerCase()),
       );

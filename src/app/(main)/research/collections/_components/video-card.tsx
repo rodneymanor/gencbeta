@@ -160,20 +160,6 @@ export const VideoCard = memo<VideoCardProps>(
               />
             )}
 
-            {/* Hover Actions - Only show when NOT in manage mode */}
-            {!isManageMode && (
-              <div
-                className={`pointer-events-auto absolute top-3 left-3 z-30 transition-opacity duration-200 ${
-                  showActions ? "opacity-100" : "pointer-events-none opacity-0"
-                }`}
-              >
-                <VideoActionsDropdown
-                  onDelete={currentCollectionId ? onDelete : undefined}
-                  onMoveVideo={collections.length > 0 ? () => setShowMoveDialog(true) : undefined}
-                  onCopyVideo={collections.length > 0 ? () => setShowCopyDialog(true) : undefined}
-                />
-              </div>
-            )}
           </div>
 
           {/* Action Buttons */}

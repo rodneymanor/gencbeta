@@ -55,13 +55,13 @@ const NavItem = ({
       id: navItem.title.toLowerCase().replace(/ /g, "-"),
       title: navItem.title,
       href: navItem.url,
-      icon: navItem.icon ? <navItem.icon className="h-4 w-4" /> : undefined,
+      icon: navItem.icon ? <navItem.icon className="h-6 w-6" /> : undefined,
       subItems:
         navItem.subItems?.map((subItem) => ({
           id: subItem.title.toLowerCase().replace(/ /g, "-"),
           title: subItem.title,
           href: subItem.url,
-          icon: subItem.icon ? <subItem.icon className="h-4 w-4" /> : undefined,
+          icon: subItem.icon ? <subItem.icon className="h-6 w-6" /> : undefined,
         })) || undefined,
     };
   };
@@ -85,21 +85,21 @@ const NavItem = ({
         {hasSubItems ? (
           <div className="group cursor-pointer" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
             <div
-              className={`flex h-8 w-8 items-center justify-center rounded-md px-2 py-2 transition-all duration-200 ${
+              className={`flex h-9 w-9 items-center justify-center rounded-md px-2 py-2 transition-all duration-200 ${
                 active ? "bg-[#e6e8e1] hover:bg-[#e6e8e1]/80" : "hover:bg-[#e6e8e1]/50"
               }`}
             >
-              {item.icon && <item.icon className="text-muted-foreground h-5 w-5" />}
+              {item.icon && <item.icon className="text-muted-foreground h-6 w-6" />}
             </div>
           </div>
         ) : (
           <Link href={item.url} className="group">
             <div
-              className={`flex h-8 w-8 items-center justify-center rounded-md px-2 py-2 transition-all duration-200 ${
+              className={`flex h-9 w-9 items-center justify-center rounded-md px-2 py-2 transition-all duration-200 ${
                 active ? "bg-[#e6e8e1] hover:bg-[#e6e8e1]/80" : "hover:bg-[#e6e8e1]/50"
               }`}
             >
-              {item.icon && <item.icon className="text-muted-foreground h-5 w-5" />}
+              {item.icon && <item.icon className="text-muted-foreground h-6 w-6" />}
             </div>
           </Link>
         )}
@@ -173,7 +173,7 @@ export function NavMain({
               key={item.title}
               href={item.url}
               className={cn(
-                "flex h-12 w-12 items-center justify-center rounded-lg transition-colors",
+                "flex h-9 w-9 items-center justify-center rounded-lg transition-colors",
                 "hover:bg-accent hover:text-accent-foreground",
                 isItemActive(item.url, item.subItems) ? "bg-accent text-accent-foreground" : "text-muted-foreground",
               )}
@@ -196,7 +196,7 @@ export function NavMain({
                 {/* Plus Button - Direct Link to Scripts New */}
                 <Link href="/dashboard/scripts/new">
                   <div className="group cursor-pointer">
-                    <div className="bg-[#e6e8e1] hover:bg-[#e6e8e1]/80 flex h-10 w-10 items-center justify-center rounded-lg px-2 py-2 transition-all duration-200 hover:scale-105">
+                    <div className="bg-[#e6e8e1] hover:bg-[#e6e8e1]/80 flex h-9 w-9 items-center justify-center rounded-lg px-2 py-2 transition-all duration-200 hover:scale-105">
                       <Plus className="text-muted-foreground h-6 w-6 transition-transform" />
                     </div>
                   </div>

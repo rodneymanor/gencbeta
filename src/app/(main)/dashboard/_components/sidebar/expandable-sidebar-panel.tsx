@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 
-import { Pin, Settings, ChevronDown } from "lucide-react";
+import { Pin, Settings, ChevronDown, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -175,6 +175,61 @@ const sampleIcons = {
       <path d="M16 3l-4 4l-4 -4"></path>
     </svg>
   ),
+  script: (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M14 3v4a1 1 0 0 0 1 1h4"></path>
+      <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"></path>
+      <path d="M9 9l1 0"></path>
+      <path d="M9 13l6 0"></path>
+      <path d="M9 17l6 0"></path>
+    </svg>
+  ),
+  collection: (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M14 3v4a1 1 0 0 0 1 1h4"></path>
+      <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"></path>
+      <path d="M12 11v6"></path>
+      <path d="M9 14h6"></path>
+    </svg>
+  ),
+  note: (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 3m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z"></path>
+      <path d="M8 7h8"></path>
+      <path d="M8 11h8"></path>
+      <path d="M8 15h5"></path>
+    </svg>
+  ),
 };
 
 export function ExpandableSidebarPanel({
@@ -231,8 +286,8 @@ export function ExpandableSidebarPanel({
         className,
       )}
       style={{
-        left: isExpanded ? "80px" : "60px", // Slide from behind (20px overlap) to full position
-        width: "220px",
+        left: isExpanded ? "70px" : "50px", // Slide from behind (20px overlap) to full position
+        width: "200px",
         paddingLeft: "8px", // Small padding for content
         transform: isExpanded ? "translateX(0)" : "translateX(-20px)", // Additional slide effect
       }}
@@ -388,9 +443,27 @@ export function ExpandableSidebarPanel({
             sections.map((section, sectionIndex) => (
               <div key={section.title} className="relative flex w-full min-w-0 flex-col p-2">
                 {/* Section header */}
-                <div className="text-sidebar-foreground/60 flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-semibold tracking-wider uppercase">
-                  {section.title}
-                </div>
+                {section.title === "Latest Scripts" ? (
+                  <a
+                    href="/dashboard/scripts"
+                    className="text-sidebar-foreground/60 hover:text-sidebar-foreground flex h-8 shrink-0 items-center justify-between rounded-md px-2 text-xs font-semibold tracking-wider uppercase transition-colors duration-200 cursor-pointer hover:bg-sidebar-accent/50"
+                  >
+                    <span>{section.title}</span>
+                    <ChevronRight className="h-3 w-3 opacity-50 transition-opacity hover:opacity-100" />
+                  </a>
+                ) : section.title === "Latest Notes" ? (
+                  <a
+                    href="/dashboard/capture/notes"
+                    className="text-sidebar-foreground/60 hover:text-sidebar-foreground flex h-8 shrink-0 items-center justify-between rounded-md px-2 text-xs font-semibold tracking-wider uppercase transition-colors duration-200 cursor-pointer hover:bg-sidebar-accent/50"
+                  >
+                    <span>{section.title}</span>
+                    <ChevronRight className="h-3 w-3 opacity-50 transition-opacity hover:opacity-100" />
+                  </a>
+                ) : (
+                  <div className="text-sidebar-foreground/60 flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-semibold tracking-wider uppercase">
+                    {section.title}
+                  </div>
+                )}
 
                 {/* Section items */}
                 <div className="flex w-full min-w-0 flex-col gap-1">
@@ -495,50 +568,79 @@ export const defaultSidebarSections: NavigationSection[] = [
     title: "Quick Actions",
     items: [
       {
-        id: "new-script",
-        title: "New Script",
+        id: "add-script",
+        title: "Add Script",
         href: "/dashboard/scripts/new",
-        icon: sampleIcons.star,
+        icon: sampleIcons.script,
       },
       {
-        id: "new-collection",
-        title: "New Collection",
-        href: "/research/collections/new",
-        icon: sampleIcons.spaces,
+        id: "add-to-collections",
+        title: "Add to Collections",
+        href: "/research/collections",
+        icon: sampleIcons.collection,
       },
       {
-        id: "upload-video",
-        title: "Upload Video",
-        href: "/research/upload",
-        icon: sampleIcons.cpu,
+        id: "add-note",
+        title: "Add Note",
+        href: "/dashboard/capture/notes",
+        icon: sampleIcons.note,
       },
     ],
   },
   {
-    title: "Library",
+    title: "Latest Scripts",
     items: [
       {
-        id: "recent-scripts",
-        title: "Recent Scripts",
+        id: "script-1",
+        title: "Marketing Campaign Script",
+        href: "/dashboard/scripts/1",
+        icon: sampleIcons.script,
+      },
+      {
+        id: "script-2", 
+        title: "Product Launch Video",
+        href: "/dashboard/scripts/2",
+        icon: sampleIcons.script,
+      },
+      {
+        id: "script-3",
+        title: "Tutorial Content",
+        href: "/dashboard/scripts/3", 
+        icon: sampleIcons.script,
+      },
+      {
+        id: "all-scripts",
+        title: "View All Scripts",
         href: "/dashboard/scripts",
         icon: sampleIcons.star,
       },
+    ],
+  },
+  {
+    title: "Latest Notes",
+    items: [
       {
-        id: "saved-collections",
-        title: "Saved Collections",
-        href: "/research/collections",
-        icon: sampleIcons.spaces,
+        id: "note-1",
+        title: "Meeting Notes - Q4 Review",
+        href: "/dashboard/capture/notes/1",
+        icon: sampleIcons.note,
       },
       {
-        id: "favorites",
-        title: "Favorites",
-        href: "/dashboard/favorites",
-        icon: sampleIcons.dollar,
+        id: "note-2",
+        title: "Content Ideas Brainstorm",
+        href: "/dashboard/capture/notes/2",
+        icon: sampleIcons.note,
       },
       {
-        id: "notes",
-        title: "Notes",
-        href: "/dashboard/notes",
+        id: "note-3",
+        title: "Project Requirements",
+        href: "/dashboard/capture/notes/3",
+        icon: sampleIcons.note,
+      },
+      {
+        id: "all-notes",
+        title: "View All Notes",
+        href: "/dashboard/capture/notes",
         icon: sampleIcons.palette,
       },
     ],
