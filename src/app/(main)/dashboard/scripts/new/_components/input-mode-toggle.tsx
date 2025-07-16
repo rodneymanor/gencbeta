@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 
 import { ArrowUp, Zap, Lightbulb, Plus, ChevronDown, Check } from "lucide-react";
 
@@ -20,6 +20,8 @@ export interface InputModeToggleProps {
   onTextChange: (value: string) => void;
   onSubmit: () => void;
   disabled?: boolean;
+  duration?: string;
+  onDurationChange?: (duration: string) => void;
 }
 
 interface TabProps {
@@ -64,11 +66,14 @@ const sampleIdeas = [
   "Time management techniques for entrepreneurs",
 ];
 
-// Duration options in seconds
+// Duration options
 const durationOptions = [
+  { value: "15", label: "15 seconds" },
   { value: "20", label: "20 seconds" },
   { value: "30", label: "30 seconds" },
+  { value: "45", label: "45 seconds" },
   { value: "60", label: "60 seconds" },
+  { value: "90", label: "90 seconds" },
 ];
 
 export function InputModeToggle({
@@ -78,12 +83,21 @@ export function InputModeToggle({
   onTextChange,
   onSubmit,
   disabled = false,
+  duration: externalDuration,
+  onDurationChange,
 }: InputModeToggleProps) {
   const [isIdeaComboboxOpen, setIsIdeaComboboxOpen] = useState(false);
-  const [duration, setDuration] = useState("30");
+  const [internalDuration, setInternalDuration] = useState("30");
+
+  // Use external duration if provided, otherwise use internal state
+  const duration = externalDuration ?? internalDuration;
+  const setDuration = onDurationChange ?? setInternalDuration;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const finalSubmitDisabled = disabled || !textValue.trim();
+  // Calculate submit disabled state reactively
+  const finalSubmitDisabled = useMemo(() => {
+    return disabled || !textValue.trim() || textValue.length > 1000;
+  }, [disabled, textValue]);
 
   // Initialize textarea height on mount
   useEffect(() => {
@@ -135,7 +149,7 @@ export function InputModeToggle({
       {/* Input Content */}
       <div
         ref={containerRef}
-        className="border-border/50 space-y-[var(--space-2)] rounded-2xl border px-[var(--space-3)]"
+        className="border-border/50 space-y-[var(--space-2)] rounded-2xl border px-[var(--space-3)] pb-[10px]"
       >
         {/* Simplified Textarea */}
         <Textarea
@@ -154,7 +168,6 @@ export function InputModeToggle({
             {
               fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
               minHeight: "70px",
-              paddingBottom: "64px",
             } as React.CSSProperties & { fieldSizing?: string }
           }
           onInput={(e) => {
@@ -183,6 +196,19 @@ export function InputModeToggle({
         {/* Bottom Controls - Positioned below textarea */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-[var(--space-1)]">
+            {/* Character Counter */}
+            <div
+              className={`text-xs ${
+                textValue.length > 1000
+                  ? "text-destructive font-medium"
+                  : textValue.length > 850
+                    ? "text-orange-500"
+                    : "text-muted-foreground"
+              }`}
+            >
+              {textValue.length}/1000
+            </div>
+
             {/* Plus Button for Idea Inbox */}
             <Popover open={isIdeaComboboxOpen} onOpenChange={setIsIdeaComboboxOpen}>
               <PopoverTrigger asChild>
@@ -223,19 +249,21 @@ export function InputModeToggle({
               </PopoverContent>
             </Popover>
 
-            {/* Duration Dropdown */}
-            <Select value={duration} onValueChange={setDuration} disabled={disabled}>
-              <SelectTrigger className="text-muted-foreground hover:text-foreground focus:ring-primary h-8 w-auto min-w-[100px] border-0 bg-transparent focus:ring-1">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {durationOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {/* Duration Dropdown - Only show for script writer mode */}
+            {inputMode === "script-writer" && (
+              <Select value={duration} onValueChange={setDuration} disabled={disabled}>
+                <SelectTrigger className="text-muted-foreground hover:text-foreground focus:ring-primary h-8 w-auto min-w-[120px] border-0 bg-transparent focus:ring-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {durationOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
 
           {/* Submit Button */}

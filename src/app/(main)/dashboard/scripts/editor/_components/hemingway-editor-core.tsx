@@ -13,8 +13,8 @@ import {
   type HighlightConfig,
 } from "@/lib/script-analysis";
 
-import { AIMenuBar } from "./ai-menu-bar";
-import { ScriptHighlightOverlay } from "./script-highlight-overlay";
+import { AIInputPanel } from "./ai-input-panel";
+import { ScriptBlocksOverlay } from "./script-blocks-overlay";
 import "@blocknote/core/fonts/inter.css";
 import "@blocknote/mantine/style.css";
 
@@ -59,7 +59,7 @@ export function HemingwayEditorCore({
     wtas: [],
   });
 
-  const [selectedElement, setSelectedElement] = useState<ScriptElement | null>(null);
+  const [selectedElement, setSelectedElement] = useState<ScriptElement | any | null>(null);
   const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number } | null>(null);
 
   const editorRef = useRef<HTMLDivElement>(null);
@@ -83,9 +83,41 @@ export function HemingwayEditorCore({
     return title;
   }, []);
 
+  // Create script blocks from structured elements - ALWAYS create exactly 4 blocks
+  const createScriptBlocks = useCallback((scriptElements: ScriptElements): PartialBlock[] => {
+    const blocks: PartialBlock[] = [];
+
+    // Always create exactly 4 blocks, even if some are empty
+    blocks.push({
+      type: "paragraph",
+      content: scriptElements.hook?.trim() || "[Hook - Add your opening here]",
+    });
+
+    blocks.push({
+      type: "paragraph",
+      content: scriptElements.bridge?.trim() || "[Bridge - Add your transition here]",
+    });
+
+    blocks.push({
+      type: "paragraph",
+      content: scriptElements.goldenNugget?.trim() || "[Golden Nugget - Add your main point here]",
+    });
+
+    blocks.push({
+      type: "paragraph",
+      content: scriptElements.wta?.trim() || "[WTA - Add your call-to-action here]",
+    });
+
+    return blocks;
+  }, []);
+
   // Initialize BlockNote editor
   const editor = useCreateBlockNote({
-    initialContent: value ? [{ type: "paragraph", content: value }] : undefined,
+    initialContent: elements
+      ? createScriptBlocks(elements) // Always use structured blocks if elements are provided
+      : value
+        ? [{ type: "paragraph", content: value }]
+        : undefined,
   });
 
   // Handle editor content changes
@@ -110,7 +142,7 @@ export function HemingwayEditorCore({
           }
           return "";
         })
-        .join("\n");
+        .join("\n\n"); // Use double newlines to separate blocks
 
       onChange(plainText);
 
@@ -211,8 +243,8 @@ export function HemingwayEditorCore({
     };
   }, [value, analyzeText]);
 
-  // Handle element click from overlay
-  const handleElementClick = useCallback((element: ScriptElement, event: React.MouseEvent) => {
+  // Handle element click from overlay (supports both ScriptElement and ScriptBlock)
+  const handleElementClick = useCallback((element: any, event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
     setContextMenuPosition({ x: event.clientX, y: event.clientY });
@@ -220,48 +252,88 @@ export function HemingwayEditorCore({
   }, []);
 
   // Handle AI menu action
-  const handleAIAction = useCallback((actionType: string, customPrompt?: string, option?: string) => {
-    setContextMenuPosition(null);
-    setSelectedElement(null);
+  const handleAIAction = useCallback(
+    (actionType: string, customPrompt?: string, option?: string) => {
+      setContextMenuPosition(null);
+      setSelectedElement(null);
 
-    console.log("AI Action:", actionType, "Custom prompt:", customPrompt, "Option:", option);
-    
-    // TODO: Implement AI service calls for each action type
-    switch (actionType) {
-      case "custom_prompt":
-        console.log("Custom prompt:", customPrompt, "for element:", selectedElement?.text);
-        break;
-      case "humanize":
-        console.log("Humanizing text:", selectedElement?.text);
-        break;
-      case "shorten":
-        console.log("Shortening text:", selectedElement?.text);
-        break;
-      case "change_tone":
-        console.log("Changing tone to:", option, "for text:", selectedElement?.text);
-        break;
-      case "change_style":
-        console.log("Changing style to:", option, "for text:", selectedElement?.text);
-        break;
-      case "enhance_value":
-        console.log("Enhancing value for:", selectedElement?.text);
-        break;
-      case "add_evidence":
-        console.log("Adding evidence for:", selectedElement?.text);
-        break;
-      case "clarify_benefit":
-        console.log("Clarifying benefit for:", selectedElement?.text);
-        break;
-      default:
-        console.log("Unknown action:", actionType);
-    }
-  }, [selectedElement]);
+      console.log("AI Action:", actionType, "Custom prompt:", customPrompt, "Option:", option);
+
+      // TODO: Implement AI service calls for each action type
+      switch (actionType) {
+        case "custom_prompt":
+          console.log("Custom prompt:", customPrompt, "for element:", selectedElement?.text);
+          break;
+        case "humanize":
+          console.log("Humanizing text:", selectedElement?.text);
+          break;
+        case "shorten":
+          console.log("Shortening text:", selectedElement?.text);
+          break;
+        case "change_tone":
+          console.log("Changing tone to:", option, "for text:", selectedElement?.text);
+          break;
+        case "change_style":
+          console.log("Changing style to:", option, "for text:", selectedElement?.text);
+          break;
+        case "enhance_value":
+          console.log("Enhancing value for:", selectedElement?.text);
+          break;
+        case "add_evidence":
+          console.log("Adding evidence for:", selectedElement?.text);
+          break;
+        case "clarify_benefit":
+          console.log("Clarifying benefit for:", selectedElement?.text);
+          break;
+        default:
+          console.log("Unknown action:", actionType);
+      }
+    },
+    [selectedElement],
+  );
 
   // Close context menu
   const closeContextMenu = useCallback(() => {
     setContextMenuPosition(null);
     setSelectedElement(null);
   }, []);
+
+  // Handle text update from AI actions (like humanize)
+  const handleTextUpdate = useCallback(
+    (newText: string) => {
+      if (!selectedElement) return;
+
+      // Find the block containing the selected text and update it
+      const blocks = [...editor.document];
+      let blockFound = false;
+
+      for (let i = 0; i < blocks.length; i++) {
+        const block = blocks[i];
+        if (block.type === "paragraph" && block.content) {
+          const blockText = Array.isArray(block.content)
+            ? block.content.map((item) => (typeof item === "string" ? item : (item as any)?.text || "")).join("")
+            : String(block.content);
+
+          if (blockText.includes(selectedElement.text)) {
+            // Update the block with the new text
+            const updatedBlockText = blockText.replace(selectedElement.text, newText);
+            blocks[i] = { ...block, content: updatedBlockText };
+            blockFound = true;
+            break;
+          }
+        }
+      }
+
+      if (blockFound) {
+        // Replace all blocks in the editor
+        editor.replaceBlocks(editor.document, blocks);
+      }
+
+      // Close the context menu
+      closeContextMenu();
+    },
+    [selectedElement, editor, closeContextMenu],
+  );
 
   const scriptTitle = generateScriptTitle(value);
 
@@ -286,20 +358,17 @@ export function HemingwayEditorCore({
           }}
         />
 
-        {/* Script Component Highlighting Overlay */}
-        <ScriptHighlightOverlay
-          analysis={analysis}
-          onElementClick={handleElementClick}
-          editorRef={editorRef}
-        />
+        {/* Script Blocks Overlay */}
+        <ScriptBlocksOverlay blocks={editor.document} onBlockClick={handleElementClick} editorRef={editorRef} />
       </div>
 
-      {/* AI Menu Bar */}
+      {/* AI Input Panel */}
       {contextMenuPosition && selectedElement && (
-        <AIMenuBar
+        <AIInputPanel
           element={selectedElement}
           position={contextMenuPosition}
           onAction={handleAIAction}
+          onTextUpdate={handleTextUpdate}
           onClose={closeContextMenu}
         />
       )}

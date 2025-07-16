@@ -14,6 +14,15 @@ interface SpeedWriteRequest {
   idea: string;
   length: "20" | "60" | "90";
   type?: "speed" | "educational" | "voice";
+  ideaContext?: {
+    selectedNotes: Array<{
+      id: string;
+      title: string;
+      content: string;
+      tags: string[];
+    }>;
+    contextMode: "inspiration" | "reference" | "template" | "comprehensive";
+  };
 }
 
 interface ScriptOption {
@@ -172,6 +181,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
         idea: body.idea,
         length: body.length,
         userId: user.uid,
+        ideaContext: body.ideaContext,
       });
 
       result = {
@@ -184,6 +194,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
         idea: body.idea,
         length: body.length,
         userId: user.uid,
+        ideaContext: body.ideaContext,
       });
 
       try {
@@ -191,6 +202,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
           idea: body.idea,
           length: body.length,
           userId: user.uid,
+          ideaContext: body.ideaContext,
         });
 
         console.log(`🔍 [SCRIPT] Raw result from ScriptService.generateOptions:`, {
@@ -286,6 +298,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
 
     const processingTime = Date.now() - startTime;
 
+    // Determine if generation was successful before tracking
+    const hasValidOptions = (result?.optionA && result.optionA.success) || (result?.optionB && result.optionB.success);
+
     // Track usage
     await trackApiUsageAdmin(
       user.uid,
@@ -293,7 +308,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
       "speed-write-a",
       {
         responseTime: processingTime,
-        success: true,
+        success: hasValidOptions,
       },
       {
         scriptLength: body.length,
@@ -301,7 +316,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
       },
     );
 
-    console.log("✅ [SCRIPT] Script generation completed successfully");
+    if (hasValidOptions) {
+      console.log("✅ [SCRIPT] Script generation completed successfully");
+    } else {
+      console.log("❌ [SCRIPT] Script generation failed - no valid options generated");
+    }
 
     console.log("🔍 [SCRIPT] About to transform results:");
     console.log("🔍 [SCRIPT] result.optionA exists:", !!result.optionA);
@@ -327,11 +346,17 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
     console.log("🔍 [SCRIPT] transformedResult.optionA:", transformedResult.optionA ? "SUCCESS" : "NULL");
     console.log("🔍 [SCRIPT] transformedResult.optionB:", transformedResult.optionB ? "SUCCESS" : "NULL");
 
+    // Get error message if no valid options
+    const errorMessage = !hasValidOptions
+      ? result?.optionA?.error || result?.optionB?.error || "No scripts were generated"
+      : undefined;
+
     const finalResponse = {
-      success: true,
+      success: hasValidOptions,
       optionA: transformedResult.optionA,
       optionB: transformedResult.optionB,
       processingTime,
+      ...(errorMessage && { error: errorMessage }),
     };
 
     console.log("🔍 [SCRIPT] Final JSON response structure:");

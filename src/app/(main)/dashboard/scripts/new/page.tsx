@@ -14,6 +14,8 @@ import { useAuth } from "@/contexts/auth-context";
 import { useUsage } from "@/contexts/usage-context";
 import { useVoice } from "@/contexts/voice-context";
 import { ClientScriptService, SpeedWriteResponse } from "@/lib/services/client-script-service";
+import { ClientHookService } from "@/lib/services/client-hook-service";
+import { type HookGenerationResponse } from "@/lib/prompts/hook-generation";
 
 import { InputModeToggle, InputMode } from "./_components/input-mode-toggle";
 
@@ -32,6 +34,7 @@ export default function NewScriptPage() {
   const [scriptLength, setScriptLength] = useState("20");
   const [isGenerating, setIsGenerating] = useState(false);
   const [speedWriteResponse, setSpeedWriteResponse] = useState<SpeedWriteResponse | null>(null);
+  const [hookResponse, setHookResponse] = useState<HookGenerationResponse | null>(null);
 
   // Handle URL parameters from Ghost Writer
   useEffect(() => {
@@ -72,6 +75,27 @@ export default function NewScriptPage() {
     }
   }, [searchParams]);
 
+  // Handle GhostWriter same-page idea injection
+  useEffect(() => {
+    const handleGhostWriterIdea = (event: CustomEvent) => {
+      const { ideaText, duration } = event.detail;
+      console.log("🎯 [Scripts/New] Received GhostWriter idea:", ideaText);
+
+      setScriptIdea(ideaText);
+
+      if (duration) {
+        setScriptLength(duration);
+      }
+    };
+
+    // Listen for custom event from GhostWriter
+    window.addEventListener("ghostwriter-idea-selected", handleGhostWriterIdea as EventListener);
+
+    return () => {
+      window.removeEventListener("ghostwriter-idea-selected", handleGhostWriterIdea as EventListener);
+    };
+  }, []);
+
   const callSpeedWriteAPI = async (idea: string): Promise<SpeedWriteResponse> => {
     const result = await ClientScriptService.generateSpeedWrite({
       idea,
@@ -95,21 +119,29 @@ export default function NewScriptPage() {
       if (data.success && (data.optionA || data.optionB)) {
         // Trigger usage stats update after successful script generation
         triggerUsageUpdate();
+
+        // Store results and navigate to editor
+        sessionStorage.setItem("speedWriteResults", JSON.stringify(data));
+
+        const params = new URLSearchParams({
+          idea: encodeURIComponent(idea),
+          mode: "speed-write",
+          length: scriptLength,
+          inputType: "text",
+          hasSpeedWriteResults: "true",
+        });
+
+        const editorUrl = `/dashboard/scripts/editor?${params.toString()}`;
+        router.push(editorUrl);
+      } else {
+        // Handle failed generation
+        setSpeedWriteResponse({
+          success: false,
+          optionA: null,
+          optionB: null,
+          error: data.error || "Failed to generate scripts",
+        });
       }
-
-      // Store results and navigate to editor
-      sessionStorage.setItem("speedWriteResults", JSON.stringify(data));
-
-      const params = new URLSearchParams({
-        idea: encodeURIComponent(idea),
-        mode: "speed-write",
-        length: scriptLength,
-        inputType: "text",
-        hasSpeedWriteResults: "true",
-      });
-
-      const editorUrl = `/dashboard/scripts/editor?${params.toString()}`;
-      router.push(editorUrl);
     } catch (error) {
       console.error("Script generation error:", error);
       setSpeedWriteResponse({
@@ -117,6 +149,49 @@ export default function NewScriptPage() {
         optionA: null,
         optionB: null,
         error: error instanceof Error ? error.message : "Failed to generate scripts",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleHookGeneration = async (idea: string) => {
+    if (!idea.trim()) return;
+
+    setIsGenerating(true);
+    setHookResponse(null);
+
+    try {
+      // Call hook generation service
+      const data = await ClientHookService.generateHooks(idea);
+
+      if (data.hooks && data.hooks.length > 0) {
+        // Trigger usage stats update after successful hook generation
+        triggerUsageUpdate();
+
+        // Store results and navigate to editor
+        sessionStorage.setItem("hookGenerationResults", JSON.stringify(data));
+
+        const params = new URLSearchParams({
+          idea: encodeURIComponent(idea),
+          mode: "hook-generator",
+          hasHookResults: "true",
+        });
+
+        const editorUrl = `/dashboard/scripts/editor?${params.toString()}`;
+        router.push(editorUrl);
+      }
+    } catch (error) {
+      console.error("Hook generation error:", error);
+      setHookResponse({
+        hooks: [],
+      });
+      // Show error in UI
+      setSpeedWriteResponse({
+        success: false,
+        optionA: null,
+        optionB: null,
+        error: error instanceof Error ? error.message : "Failed to generate hooks",
       });
     } finally {
       setIsGenerating(false);
@@ -132,20 +207,14 @@ export default function NewScriptPage() {
       // Use the existing speed write workflow for script writer
       await handleSpeedWrite(scriptIdea);
     } else if (inputMode === "hook-generator") {
-      // For hook generator, navigate to Hemingway editor with hook generation mode
-      const params = new URLSearchParams({
-        idea: encodeURIComponent(scriptIdea),
-        mode: "hook-generator",
-        length: scriptLength,
-        inputType: "text",
-      });
-
-      router.push(`/dashboard/scripts/editor?${params.toString()}`);
+      // Generate hooks using Gemini
+      await handleHookGeneration(scriptIdea);
     }
   };
 
-  // Show loading state while generating scripts
+  // Show loading state while generating
   if (isGenerating) {
+    const isHookMode = inputMode === "hook-generator";
     return (
       <div className="hide-scrollbar flex min-h-[calc(100vh-6rem)] flex-col overflow-y-auto">
         <div className="flex flex-1 items-center justify-center py-[var(--space-4)] pt-[var(--space-8)]">
@@ -153,10 +222,14 @@ export default function NewScriptPage() {
             <div className="mb-[var(--space-4)] text-center">
               <div className="mb-[var(--space-2)] flex items-center justify-center gap-3">
                 <div className="border-primary h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"></div>
-                <h1 className="text-foreground font-inter text-3xl font-bold">Generating Your A/B Script Options</h1>
+                <h1 className="text-foreground font-inter text-3xl font-bold">
+                  {isHookMode ? "Generating Viral Hooks" : "Generating Your A/B Script Options"}
+                </h1>
               </div>
               <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
-                Our AI is crafting two different script variations for you to choose from
+                {isHookMode
+                  ? "Our AI is crafting multiple hook variations to capture attention"
+                  : "Our AI is crafting two different script variations for you to choose from"}
               </p>
               <p className="text-muted-foreground mx-auto mt-2 max-w-2xl text-sm">
                 This usually takes 10-15 seconds...
@@ -202,7 +275,7 @@ export default function NewScriptPage() {
             <div className="mb-[var(--space-2)] flex justify-center">
               <Badge
                 variant="outline"
-                className="border-primary/30 text-primary bg-primary/10 px-[var(--space-2)] py-[var(--space-1)] text-sm"
+                className="rounded-xl border border-primary/20 text-primary bg-primary/10 px-[var(--space-2)] py-[var(--space-1)] text-sm"
               >
                 <Mic className="mr-[var(--space-1)] h-3 w-3" />
                 {currentVoice} Voice
@@ -216,6 +289,8 @@ export default function NewScriptPage() {
               onTextChange={setScriptIdea}
               onSubmit={handleSubmit}
               disabled={isGenerating}
+              duration={scriptLength}
+              onDurationChange={setScriptLength}
             />
 
             {/* Controls Row - Simplified */}

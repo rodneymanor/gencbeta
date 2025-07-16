@@ -1,14 +1,16 @@
 import { adminDb } from "@/lib/firebase-admin";
 import { GeminiService } from "@/lib/gemini";
 import { PEQExtractionService, PEQData } from "@/lib/peq-extraction-service";
-import { VoiceTemplateProcessor } from "@/lib/voice-template-processor";
+import { createHookGenerationPrompt, type GeneratedHook } from "@/lib/prompts/hook-generation";
 import { AIVoice } from "@/types/ai-voices";
 import { BrandProfile } from "@/types/brand-profile";
 
 export interface EnhancedContentIdea {
   id: string;
   concept: string;
-  script: string;
+  hook: string;
+  hookTemplate: string;
+  hookStrength: string;
   peqCategory: "problem" | "excuse" | "question";
   sourceText: string;
   targetAudience: string;
@@ -16,7 +18,6 @@ export interface EnhancedContentIdea {
   createdAt: string;
   userId: string;
   cycleId: string;
-  voiceTemplateId?: string;
   wordCount: number;
 }
 
@@ -27,7 +28,7 @@ export interface IdeaGenerationResult {
   metadata?: {
     peqData: PEQData;
     conceptsGenerated: number;
-    scriptsGenerated: number;
+    hooksGenerated: number;
     processingTime: number;
   };
 }
@@ -48,7 +49,7 @@ export class EnhancedGhostWriterService {
     GHOST_WRITER_CYCLES: "ghost_writer_cycles",
   } as const;
 
-  private static readonly IDEAS_PER_CYCLE = 6;
+  private static readonly IDEAS_PER_CYCLE = 9;
 
   /**
    * Generate enhanced content ideas using PEQ framework (two-step process)
@@ -57,107 +58,18 @@ export class EnhancedGhostWriterService {
     userId: string,
     brandProfile: BrandProfile,
     cycleId: string,
-    activeVoice?: AIVoice | null,
+    _activeVoice?: AIVoice | null,
   ): Promise<IdeaGenerationResult> {
     const startTime = Date.now();
 
     try {
       console.log("🎯 [EnhancedGhostWriter] Starting two-step idea generation");
       console.log("👤 [EnhancedGhostWriter] User:", userId);
-      console.log("🎤 [EnhancedGhostWriter] Active voice:", activeVoice ? activeVoice.name : "None");
 
-      // Step 1: Extract PEQ data from brand profile
-      console.log("📊 [EnhancedGhostWriter] Step 1: Extracting PEQ data");
-      const peqResult = await PEQExtractionService.extractPEQ(brandProfile.questionnaire);
-
-      if (!peqResult.success || !peqResult.data) {
-        throw new Error(`Failed to extract PEQ data: ${peqResult.error}`);
-      }
-
-      console.log("✅ [EnhancedGhostWriter] PEQ extraction successful");
-      const peqData = peqResult.data;
-
-      // Step 2: Generate content concepts based on PEQ
-      console.log("💡 [EnhancedGhostWriter] Step 2: Generating content concepts");
+      const peqData = await this.extractPEQData(brandProfile);
       const conceptsResult = await this.generateContentConcepts(peqData, brandProfile);
-
-      if (!conceptsResult.success || !conceptsResult.concepts) {
-        throw new Error(`Failed to generate concepts: ${conceptsResult.error}`);
-      }
-
-      console.log(`✅ [EnhancedGhostWriter] Generated ${conceptsResult.concepts.length} concepts`);
-
-      // Step 3: Convert concepts to scripts using voice templates
-      console.log("📝 [EnhancedGhostWriter] Step 3: Converting concepts to scripts");
-      const ideas: EnhancedContentIdea[] = [];
-
-      for (const concept of conceptsResult.concepts) {
-        try {
-          let script = concept.concept; // Fallback if no voice processing
-          let voiceTemplateId: string | undefined;
-          let wordCount = concept.concept.split(/\s+/).length;
-
-          // If voice is available, process through voice template
-          if (activeVoice && activeVoice.templates && activeVoice.templates.length > 0) {
-            const selectedTemplate = VoiceTemplateProcessor.selectRandomTemplate(activeVoice);
-
-            if (selectedTemplate) {
-              const targetWordCount = VoiceTemplateProcessor.calculateTargetWordCount(selectedTemplate, 60);
-
-              const processingResult = await VoiceTemplateProcessor.processContent({
-                sourceContent: concept.concept,
-                voiceTemplate: selectedTemplate,
-                targetWordCount,
-              });
-
-              if (processingResult.success && processingResult.script) {
-                script = processingResult.script;
-                voiceTemplateId = selectedTemplate.id;
-                wordCount = processingResult.metadata?.wordCount || wordCount;
-                console.log(`✅ [EnhancedGhostWriter] Processed concept through voice template: ${voiceTemplateId}`);
-              } else {
-                console.warn(
-                  `⚠️ [EnhancedGhostWriter] Voice processing failed, using concept as-is: ${processingResult.error}`,
-                );
-              }
-            }
-          }
-
-          const idea: EnhancedContentIdea = {
-            id: `${cycleId}_${concept.peqCategory}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            concept: concept.concept,
-            script,
-            peqCategory: concept.peqCategory,
-            sourceText: concept.sourceText,
-            targetAudience: this.getTargetAudience(brandProfile),
-            estimatedDuration: "60",
-            createdAt: new Date().toISOString(),
-            userId,
-            cycleId,
-            voiceTemplateId,
-            wordCount,
-          };
-
-          ideas.push(idea);
-        } catch (error) {
-          console.error("❌ [EnhancedGhostWriter] Failed to process concept:", error);
-          // Continue with other concepts
-        }
-      }
-
-      // Save ideas to database
-      if (ideas.length > 0) {
-        console.log("💾 [EnhancedGhostWriter] Saving ideas to database");
-        const batch = adminDb.batch();
-
-        for (const idea of ideas) {
-          const docRef = adminDb.collection(this.COLLECTIONS.ENHANCED_CONTENT_IDEAS).doc();
-          batch.set(docRef, { ...idea, id: docRef.id });
-        }
-
-        await batch.commit();
-        console.log(`✅ [EnhancedGhostWriter] Saved ${ideas.length} ideas to database`);
-      }
+      const ideas = await this.convertConceptsToHooks(conceptsResult.concepts ?? [], userId, cycleId, brandProfile);
+      await this.saveIdeasToDatabase(ideas);
 
       const processingTime = Date.now() - startTime;
       console.log(`🎉 [EnhancedGhostWriter] Generation complete: ${ideas.length} ideas in ${processingTime}ms`);
@@ -167,26 +79,154 @@ export class EnhancedGhostWriterService {
         ideas,
         metadata: {
           peqData,
-          conceptsGenerated: conceptsResult.concepts.length,
-          scriptsGenerated: ideas.length,
+          conceptsGenerated: conceptsResult.concepts?.length ?? 0,
+          hooksGenerated: ideas.length,
           processingTime,
         },
       };
     } catch (error) {
-      const processingTime = Date.now() - startTime;
-      console.error("❌ [EnhancedGhostWriter] Failed to generate enhanced ideas:", error);
+      return this.handleGenerationError(error, Date.now() - startTime);
+    }
+  }
+
+  /**
+   * Extract PEQ data from brand profile
+   */
+  private static async extractPEQData(brandProfile: BrandProfile): Promise<PEQData> {
+    console.log("📊 [EnhancedGhostWriter] Step 1: Extracting PEQ data");
+    const peqResult = await PEQExtractionService.extractPEQ(brandProfile.questionnaire);
+
+    if (!peqResult.success || !peqResult.data) {
+      throw new Error(`Failed to extract PEQ data: ${peqResult.error}`);
+    }
+
+    console.log("✅ [EnhancedGhostWriter] PEQ extraction successful");
+    return peqResult.data;
+  }
+
+  /**
+   * Convert concepts to hooks using hook generation with diverse styles
+   */
+  private static async convertConceptsToHooks(
+    concepts: Array<{ concept: string; peqCategory: "problem" | "excuse" | "question"; sourceText: string }>,
+    userId: string,
+    cycleId: string,
+    brandProfile: BrandProfile,
+  ): Promise<EnhancedContentIdea[]> {
+    console.log("🎣 [EnhancedGhostWriter] Step 3: Converting concepts to hooks with diverse styles");
+    const ideas: EnhancedContentIdea[] = [];
+
+    // Define hook style categories to ensure variety (9 styles for 9 ideas)
+    const hookStyleCategories = [
+      "IF-AND-THEN",
+      "YOU KNOW WHEN YOU",
+      "ME-YOU",
+      "STOP",
+      "SECRET",
+      "WHY/REASON",
+      "HAVE YOU EVER",
+      "THIS IS HOW",
+      "SIGNS/TRAITS",
+    ];
+
+    for (let i = 0; i < concepts.length; i++) {
+      const concept = concepts[i];
+      const preferredStyle = hookStyleCategories[i % hookStyleCategories.length];
+
+      const idea = await this.createIdeaFromConcept(concept, userId, cycleId, brandProfile, preferredStyle);
+      if (idea) {
+        ideas.push(idea);
+      }
+    }
+
+    return ideas;
+  }
+
+  /**
+   * Create an idea from a concept
+   */
+  private static async createIdeaFromConcept(
+    concept: { concept: string; peqCategory: "problem" | "excuse" | "question"; sourceText: string },
+    userId: string,
+    cycleId: string,
+    brandProfile: BrandProfile,
+    preferredStyle?: string,
+  ): Promise<EnhancedContentIdea | null> {
+    try {
+      const hookResult = await this.generateHookForConcept(concept.concept, preferredStyle);
+
+      let hook = concept.concept;
+      let hookTemplate = "Concept";
+      let hookStrength = "curiosity";
+      let wordCount = concept.concept.split(/\s+/).length;
+
+      if (hookResult.success && hookResult.hook) {
+        hook = hookResult.hook.hook;
+        hookTemplate = hookResult.hook.template;
+        hookStrength = hookResult.hook.strength;
+        wordCount = hook.split(/\s+/).length;
+        console.log(
+          `✅ [EnhancedGhostWriter] Generated hook using template: ${hookTemplate} (preferred: ${preferredStyle})`,
+        );
+      } else {
+        console.warn(`⚠️ [EnhancedGhostWriter] Hook generation failed, using concept as-is: ${hookResult.error}`);
+      }
 
       return {
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-        metadata: {
-          peqData: { problems: [], excuses: [], questions: [] },
-          conceptsGenerated: 0,
-          scriptsGenerated: 0,
-          processingTime,
-        },
+        id: `${cycleId}_${concept.peqCategory}_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
+        concept: concept.concept,
+        hook,
+        hookTemplate,
+        hookStrength,
+        peqCategory: concept.peqCategory,
+        sourceText: concept.sourceText,
+        targetAudience: this.getTargetAudience(brandProfile),
+        estimatedDuration: "60",
+        createdAt: new Date().toISOString(),
+        userId,
+        cycleId,
+        wordCount,
       };
+    } catch (error) {
+      console.error("❌ [EnhancedGhostWriter] Failed to process concept:", error);
+      return null;
     }
+  }
+
+  /**
+   * Save ideas to database
+   */
+  private static async saveIdeasToDatabase(ideas: EnhancedContentIdea[]): Promise<void> {
+    if (ideas.length === 0) return;
+
+    console.log("💾 [EnhancedGhostWriter] Saving ideas to database");
+    const batch = adminDb.batch();
+
+    for (const idea of ideas) {
+      const docRef = adminDb.collection(this.COLLECTIONS.ENHANCED_CONTENT_IDEAS).doc();
+      batch.set(docRef, { ...idea, id: docRef.id });
+    }
+
+    await batch.commit();
+    console.log(`✅ [EnhancedGhostWriter] Saved ${ideas.length} ideas to database`);
+  }
+
+  /**
+   * Handle generation errors
+   */
+  private static handleGenerationError(error: unknown, processingTime: number): IdeaGenerationResult {
+    console.error("❌ [EnhancedGhostWriter] Failed to generate enhanced ideas:", error);
+
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+      metadata: {
+        peqData: { problems: [], excuses: [], questions: [] },
+        conceptsGenerated: 0,
+        hooksGenerated: 0,
+        processingTime,
+      },
+    };
   }
 
   /**
@@ -235,33 +275,33 @@ export class EnhancedGhostWriterService {
 
       // Process problems
       if (parsedConcepts.problem_concepts) {
-        parsedConcepts.problem_concepts.forEach((item: any, index: number) => {
+        parsedConcepts.problem_concepts.forEach((item: { concept: string }, index: number) => {
           concepts.push({
             concept: item.concept,
             peqCategory: "problem",
-            sourceText: peqData.problems[index] || "Problem-based content",
+            sourceText: peqData.problems[index] ?? "Problem-based content",
           });
         });
       }
 
       // Process excuses
       if (parsedConcepts.excuse_concepts) {
-        parsedConcepts.excuse_concepts.forEach((item: any, index: number) => {
+        parsedConcepts.excuse_concepts.forEach((item: { concept: string }, index: number) => {
           concepts.push({
             concept: item.concept,
             peqCategory: "excuse",
-            sourceText: peqData.excuses[index] || "Excuse-based content",
+            sourceText: peqData.excuses[index] ?? "Excuse-based content",
           });
         });
       }
 
       // Process questions
       if (parsedConcepts.question_concepts) {
-        parsedConcepts.question_concepts.forEach((item: any, index: number) => {
+        parsedConcepts.question_concepts.forEach((item: { concept: string }, index: number) => {
           concepts.push({
             concept: item.concept,
             peqCategory: "question",
-            sourceText: peqData.questions[index] || "Question-based content",
+            sourceText: peqData.questions[index] ?? "Question-based content",
           });
         });
       }
@@ -305,7 +345,7 @@ QUESTIONS:
 ${peqData.questions.map((q, i) => `${i + 1}. ${q}`).join("\n")}
 
 TASK:
-Generate 2 content concepts for each PEQ category (6 total). Each concept should be a complete content idea that addresses the specific PEQ item and provides value to the audience.
+Generate 3 content concepts for each PEQ category (9 total). Each concept should be a complete content idea that addresses the specific PEQ item and provides value to the audience.
 
 CRITICAL OUTPUT REQUIREMENT: 
 Your response must start IMMEDIATELY with the opening brace { and contain NOTHING else except the JSON object.
@@ -320,6 +360,10 @@ Expected JSON format:
     {
       "concept": "Complete content idea addressing problem 2", 
       "target_problem": "The specific problem being addressed"
+    },
+    {
+      "concept": "Complete content idea addressing problem 3",
+      "target_problem": "The specific problem being addressed"
     }
   ],
   "excuse_concepts": [
@@ -330,6 +374,10 @@ Expected JSON format:
     {
       "concept": "Complete content idea addressing excuse 2",
       "target_excuse": "The specific excuse being addressed"
+    },
+    {
+      "concept": "Complete content idea addressing excuse 3",
+      "target_excuse": "The specific excuse being addressed"
     }
   ],
   "question_concepts": [
@@ -339,6 +387,10 @@ Expected JSON format:
     },
     {
       "concept": "Complete content idea addressing question 2",
+      "target_question": "The specific question being addressed"
+    },
+    {
+      "concept": "Complete content idea addressing question 3",
       "target_question": "The specific question being addressed"
     }
   ]
@@ -401,7 +453,114 @@ FINAL REMINDER: Your response must be PURE JSON starting with { and ending with 
     const profession = brandProfile.questionnaire.profession;
     const problem = brandProfile.questionnaire.universalProblem;
 
-    return `People in ${profession} struggling with ${problem}`;
+    return `People in ${profession} struggling with ${problem ?? "content creation"}`;
+  }
+
+  /**
+   * Generate a hook for a specific concept with preferred style
+   */
+  private static async generateHookForConcept(
+    concept: string,
+    preferredStyle?: string,
+  ): Promise<{ success: boolean; hook?: GeneratedHook; error?: string }> {
+    try {
+      const prompt = createHookGenerationPrompt(concept);
+
+      const result = await GeminiService.generateContent({
+        prompt,
+        maxTokens: 1000,
+        temperature: 0.8,
+      });
+
+      if (!result.success || !result.content) {
+        throw new Error(result.error ?? "Failed to generate hook");
+      }
+
+      // Parse the JSON response
+      let parsedHooks;
+      try {
+        const jsonMatch = result.content.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+          throw new Error("No JSON found in response");
+        }
+
+        parsedHooks = JSON.parse(jsonMatch[0]);
+      } catch (parseError) {
+        console.error("❌ [EnhancedGhostWriter] Failed to parse hooks:", parseError);
+        throw new Error("Failed to parse hook generation response");
+      }
+
+      if (parsedHooks.hooks && parsedHooks.hooks.length > 0) {
+        const hooks = parsedHooks.hooks;
+
+        // If we have a preferred style, try to find a hook that matches
+        if (preferredStyle) {
+          const matchingHook = hooks.find(
+            (hook: GeneratedHook) =>
+              hook.template.includes(preferredStyle) ||
+              hook.template.toLowerCase().includes(preferredStyle.toLowerCase()),
+          );
+
+          if (matchingHook) {
+            console.log(`🎯 [EnhancedGhostWriter] Found matching hook for preferred style: ${preferredStyle}`);
+            return {
+              success: true,
+              hook: matchingHook,
+            };
+          }
+        }
+
+        // If no preferred style match found, use smart selection to avoid repetition
+        const selectedHook = this.selectDiverseHook(hooks);
+
+        return {
+          success: true,
+          hook: selectedHook,
+        };
+      } else {
+        throw new Error("No hooks found in response");
+      }
+    } catch (error) {
+      console.error("❌ [EnhancedGhostWriter] Failed to generate hook:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  }
+
+  /**
+   * Select a diverse hook from available options to avoid repetition
+   */
+  private static selectDiverseHook(hooks: GeneratedHook[]): GeneratedHook {
+    // Define priority order for hook template diversity
+    const templatePriority = [
+      "IF-AND-THEN",
+      "YOU KNOW WHEN YOU",
+      "ME-YOU",
+      "STOP",
+      "SECRET",
+      "WHY/REASON",
+      "HAVE YOU EVER",
+      "THIS IS HOW",
+      "SIGNS/TRAITS",
+      "TOP 3",
+    ];
+
+    // Try to find a hook that matches our priority templates
+    for (const priority of templatePriority) {
+      const matchingHook = hooks.find(
+        (hook) => hook.template.includes(priority) || hook.template.toLowerCase().includes(priority.toLowerCase()),
+      );
+
+      if (matchingHook) {
+        return matchingHook;
+      }
+    }
+
+    // If no priority match found, return a random hook to ensure variety
+    const randomIndex = Math.floor(Math.random() * hooks.length);
+    return hooks[randomIndex];
   }
 
   /**
@@ -427,5 +586,47 @@ FINAL REMINDER: Your response must be PURE JSON starting with { and ending with 
       (a: EnhancedContentIdea, b: EnhancedContentIdea) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
+  }
+
+  /**
+   * Save ideas to the ghost writer library
+   */
+  static async saveIdeasToLibrary(userId: string, ideas: EnhancedContentIdea[]): Promise<void> {
+    if (ideas.length === 0) return;
+
+    console.log(`📚 [EnhancedGhostWriter] Saving ${ideas.length} ideas to library for user: ${userId}`);
+    const batch = adminDb.batch();
+    const libraryCollection = adminDb.collection("ghost_writer_library");
+
+    for (const idea of ideas) {
+      const libraryDoc = libraryCollection.doc();
+      const libraryItem = {
+        id: libraryDoc.id,
+        userId,
+        originalIdeaId: idea.id,
+        concept: idea.concept,
+        hook: idea.hook,
+        hookTemplate: idea.hookTemplate,
+        hookStrength: idea.hookStrength,
+        peqCategory: idea.peqCategory,
+        sourceText: idea.sourceText,
+        targetAudience: idea.targetAudience,
+        estimatedDuration: idea.estimatedDuration,
+        wordCount: idea.wordCount,
+        originalCycleId: idea.cycleId,
+        savedToLibraryAt: new Date().toISOString(),
+      };
+
+      batch.set(libraryDoc, libraryItem);
+    }
+
+    // Delete the original ideas from the current cycle
+    for (const idea of ideas) {
+      const originalDoc = adminDb.collection(this.COLLECTIONS.ENHANCED_CONTENT_IDEAS).doc(idea.id);
+      batch.delete(originalDoc);
+    }
+
+    await batch.commit();
+    console.log(`✅ [EnhancedGhostWriter] Successfully saved ${ideas.length} ideas to library`);
   }
 }

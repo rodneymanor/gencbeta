@@ -1,15 +1,21 @@
 export interface ContentIdea {
   id: string;
-  title: string;
-  description: string;
-  pillar: ContentPillar;
+  title?: string;
+  description?: string;
+  pillar?: ContentPillar;
   hook: string;
-  scriptOutline: string;
+  scriptOutline?: string;
+  concept?: string;
+  hookTemplate?: string;
+  hookStrength?: string;
+  peqCategory?: "problem" | "excuse" | "question";
+  sourceText?: string;
   targetAudience: string;
-  callToAction: string;
+  callToAction?: string;
   estimatedDuration: "20" | "60" | "90";
-  tags: string[];
-  difficulty: "beginner" | "intermediate" | "advanced";
+  tags?: string[];
+  difficulty?: "beginner" | "intermediate" | "advanced";
+  wordCount?: number;
   createdAt: string;
   userId: string;
   cycleId: string;

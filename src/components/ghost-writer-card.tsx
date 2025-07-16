@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Bookmark, BookmarkCheck, X, Heart, MessageCircle, Share, Star } from "lucide-react";
+import { Heart, MessageCircle, Share } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -18,21 +18,19 @@ interface GhostWriterCardProps {
 }
 
 export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = false, className }: GhostWriterCardProps) {
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleSaveToggle = async () => {
-    if (isLoading || !onSave) return;
-    setIsLoading(true);
-    try {
-      await onSave(idea.id, isSaved ? "dismiss" : "save");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const handleUse = () => {
     if (onUse) {
-      onUse(idea);
+      setIsNavigating(true);
+      // Add a small delay to show the animation before action
+      setTimeout(() => {
+        onUse(idea);
+        // Reset animation state after action completes
+        setTimeout(() => {
+          setIsNavigating(false);
+        }, 1000);
+      }, 200);
     }
   };
 
@@ -60,15 +58,18 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
 
   return (
     <div
+      data-idea-id={idea.id}
       className={cn(
-        "bg-background text-foreground divide-border/50 focus-visible:ring-primary/50 focus-visible:ring-offset-background flex w-full max-w-lg cursor-pointer flex-col gap-3 divide-y overflow-hidden rounded-xl p-4 shadow-md transition-all duration-200 ease-in-out hover:scale-[1.02] hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+        "bg-background text-foreground relative flex w-full max-w-lg flex-col overflow-hidden rounded-xl border border-border/50 shadow-md transition-all duration-300 ease-out",
+        isNavigating
+          ? "-translate-y-8 scale-90 transform-gpu opacity-30 shadow-2xl"
+          : "translate-y-0 scale-100 transform-gpu opacity-100 hover:shadow-lg",
         className,
       )}
-      onClick={handleUse}
       tabIndex={0}
     >
       {/* Header with profile and actions */}
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between p-4 pb-3">
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2">
             <span className="bg-gradient-to-r from-[#2d93ad] to-[#412722] bg-clip-text font-semibold text-transparent">
@@ -77,42 +78,56 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
             <span className="text-muted-foreground text-sm">suggests</span>
           </div>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center">
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
-            className={cn("text-muted-foreground hover:text-primary h-8 w-8 p-0", isSaved && "text-primary")}
+            className="h-7 px-2 text-xs font-medium"
             onClick={(e) => {
               e.stopPropagation();
-              handleSaveToggle();
+              handleUse();
             }}
-            disabled={isLoading}
           >
-            {isSaved ? <Star fill="currentColor" className="h-4 w-4" /> : <Star className="h-4 w-4" />}
+            Use this idea
           </Button>
         </div>
       </div>
 
-      {/* Script content */}
-      <div className="py-3">
+      {/* Hook content - flexible area that pushes footer to bottom */}
+      <div className="flex-1 px-4 pb-3">
         <div className="text-foreground line-clamp-6 text-sm leading-relaxed whitespace-pre-wrap">
-          {cleanContent((idea as ContentIdea & { script?: string }).script ?? idea.hook)}
+          {cleanContent(idea.hook)}
         </div>
+        {/* Hook template and strength indicators */}
+        {idea.hookTemplate && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            <span className="bg-primary/10 text-primary rounded-full px-2 py-1 text-xs font-medium">
+              {idea.hookTemplate}
+            </span>
+            {idea.hookStrength && (
+              <span className="bg-secondary/10 text-secondary-foreground rounded-full px-2 py-1 text-xs">
+                {idea.hookStrength}
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Placeholder engagement metrics */}
-      <div className="text-muted-foreground flex items-center justify-between pt-2 text-xs">
-        <div className="flex items-center gap-1">
-          <Heart className="h-3 w-3" />
-          <span>{engagement.likes.toLocaleString()}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <MessageCircle className="h-3 w-3" />
-          <span>{engagement.comments.toLocaleString()}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <Share className="h-3 w-3" />
-          <span>{engagement.shares.toLocaleString()}</span>
+      {/* Sticky footer with engagement metrics */}
+      <div className="border-t border-border/50 bg-background px-4 py-3 mt-auto">
+        <div className="text-muted-foreground flex items-center justify-between text-xs">
+          <div className="flex items-center gap-1">
+            <Heart className="h-3 w-3" />
+            <span>{engagement.likes.toLocaleString()}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <MessageCircle className="h-3 w-3" />
+            <span>{engagement.comments.toLocaleString()}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Share className="h-3 w-3" />
+            <span>{engagement.shares.toLocaleString()}</span>
+          </div>
         </div>
       </div>
     </div>

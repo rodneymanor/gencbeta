@@ -48,7 +48,7 @@ const UNIVERSAL_ACTIONS: AIAction[] = [
   },
   {
     key: "shorten",
-    label: "Shorten", 
+    label: "Shorten",
     description: "Reduce length while maintaining core message",
     icon: "✂️",
   },
@@ -248,16 +248,14 @@ export function AIMenuBar({ element, position, onAction, onClose }: AIMenuBarPro
           </div>
 
           <div className="text-muted-foreground max-w-full text-sm">
-            <div className="bg-muted max-h-16 overflow-y-auto rounded p-2 text-xs break-words">
-              "{element.text}"
-            </div>
+            <div className="bg-muted max-h-16 overflow-y-auto rounded p-2 text-xs break-words">"{element.text}"</div>
           </div>
         </CardHeader>
 
-        <CardContent className="pt-0 space-y-4">
+        <CardContent className="space-y-4 pt-0">
           {/* Custom Prompt Input */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Custom AI Instruction</label>
+            <label className="text-foreground text-sm font-medium">Custom AI Instruction</label>
             <div className="flex gap-2">
               <Textarea
                 value={customPrompt}
@@ -271,25 +269,18 @@ export function AIMenuBar({ element, position, onAction, onClose }: AIMenuBarPro
                   }
                 }}
               />
-              <Button
-                onClick={handleCustomPromptSubmit}
-                disabled={!customPrompt.trim()}
-                className="shrink-0"
-                size="sm"
-              >
+              <Button onClick={handleCustomPromptSubmit} disabled={!customPrompt.trim()} className="shrink-0" size="sm">
                 <Send className="h-4 w-4" />
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Press Cmd+Enter (Mac) or Ctrl+Enter (Windows) to submit
-            </p>
+            <p className="text-muted-foreground text-xs">Press Cmd+Enter (Mac) or Ctrl+Enter (Windows) to submit</p>
           </div>
 
           <Separator />
 
           {/* AI Actions Dropdown */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Quick Actions</label>
+            <label className="text-foreground text-sm font-medium">Quick Actions</label>
             <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="w-full justify-between">
@@ -299,9 +290,7 @@ export function AIMenuBar({ element, position, onAction, onClose }: AIMenuBarPro
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-80" align="start">
                 {/* Universal Actions */}
-                <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
-                  Universal Actions
-                </div>
+                <div className="text-muted-foreground px-2 py-1.5 text-xs font-medium">Universal Actions</div>
                 {UNIVERSAL_ACTIONS.map((action) => (
                   <div key={action.key}>
                     {action.hasSubmenu ? (
@@ -310,7 +299,7 @@ export function AIMenuBar({ element, position, onAction, onClose }: AIMenuBarPro
                           <span className="mr-2">{action.icon}</span>
                           <div className="flex flex-col items-start">
                             <span className="text-sm">{action.label}</span>
-                            <span className="text-xs text-muted-foreground">{action.description}</span>
+                            <span className="text-muted-foreground text-xs">{action.description}</span>
                           </div>
                         </DropdownMenuSubTrigger>
                         <DropdownMenuSubContent>
@@ -321,7 +310,7 @@ export function AIMenuBar({ element, position, onAction, onClose }: AIMenuBarPro
                             >
                               <div className="flex flex-col">
                                 <span className="text-sm">{option.label}</span>
-                                <span className="text-xs text-muted-foreground">{option.description}</span>
+                                <span className="text-muted-foreground text-xs">{option.description}</span>
                               </div>
                             </DropdownMenuItem>
                           ))}
@@ -332,7 +321,7 @@ export function AIMenuBar({ element, position, onAction, onClose }: AIMenuBarPro
                         <span className="mr-2">{action.icon}</span>
                         <div className="flex flex-col items-start">
                           <span className="text-sm">{action.label}</span>
-                          <span className="text-xs text-muted-foreground">{action.description}</span>
+                          <span className="text-muted-foreground text-xs">{action.description}</span>
                         </div>
                       </DropdownMenuItem>
                     )}
@@ -343,7 +332,7 @@ export function AIMenuBar({ element, position, onAction, onClose }: AIMenuBarPro
                 {componentActions.length > 0 && (
                   <>
                     <DropdownMenuSeparator />
-                    <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+                    <div className="text-muted-foreground px-2 py-1.5 text-xs font-medium">
                       {getElementTypeLabel(element.type)} Actions
                     </div>
                     {componentActions.map((action) => (
@@ -354,7 +343,7 @@ export function AIMenuBar({ element, position, onAction, onClose }: AIMenuBarPro
                               <span className="mr-2">{action.icon}</span>
                               <div className="flex flex-col items-start">
                                 <span className="text-sm">{action.label}</span>
-                                <span className="text-xs text-muted-foreground">{action.description}</span>
+                                <span className="text-muted-foreground text-xs">{action.description}</span>
                               </div>
                             </DropdownMenuSubTrigger>
                             <DropdownMenuSubContent>
@@ -365,7 +354,7 @@ export function AIMenuBar({ element, position, onAction, onClose }: AIMenuBarPro
                                 >
                                   <div className="flex flex-col">
                                     <span className="text-sm">{option.label}</span>
-                                    <span className="text-xs text-muted-foreground">{option.description}</span>
+                                    <span className="text-muted-foreground text-xs">{option.description}</span>
                                   </div>
                                 </DropdownMenuItem>
                               ))}
@@ -376,7 +365,7 @@ export function AIMenuBar({ element, position, onAction, onClose }: AIMenuBarPro
                             <span className="mr-2">{action.icon}</span>
                             <div className="flex flex-col items-start">
                               <span className="text-sm">{action.label}</span>
-                              <span className="text-xs text-muted-foreground">{action.description}</span>
+                              <span className="text-muted-foreground text-xs">{action.description}</span>
                             </div>
                           </DropdownMenuItem>
                         )}

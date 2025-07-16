@@ -144,17 +144,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }, 150);
   };
 
-  const sidebarComponent = (
-    <div className="relative">
+  return (
+    <>
       {/* Hover target that only covers the collapsed sidebar area */}
-      <div 
-        className="absolute inset-y-0 left-0 w-16 z-20 pointer-events-auto"
+      <div
+        className="fixed inset-y-0 left-0 z-[95] w-16"
         onMouseEnter={handleSidebarMouseEnter}
         onMouseLeave={handleSidebarMouseLeave}
       />
       <Sidebar
         {...props}
-        className="transition-all duration-200"
+        className="relative z-[100] transition-all duration-200"
       >
         <SidebarHeader>
           <SidebarMenu>
@@ -183,30 +183,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </div>
         </SidebarFooter>
       </Sidebar>
-    </div>
-  );
-
-  const expandablePanel = (
-    <ExpandableSidebarPanel
-      isExpanded={smartSidebar.isExpanded}
-      isPinned={smartSidebar.isPinned}
-      onTogglePin={smartSidebar.togglePin}
-      sections={defaultSidebarSections}
-      hoveredItem={hoveredItem}
-      isHoveringSpecificItem={isHoveringSpecificItem}
-      onPersonalize={() => {
-        // Handle personalization logic
-        console.log("Personalize clicked");
-      }}
-      onMouseEnter={handleExpandablePanelMouseEnter}
-      onMouseLeave={handleExpandablePanelMouseLeave}
-    />
-  );
-
-  return (
-    <>
-      {sidebarComponent}
-      {expandablePanel}
+      <ExpandableSidebarPanel
+        isExpanded={smartSidebar.isExpanded}
+        isPinned={smartSidebar.isPinned}
+        onTogglePin={smartSidebar.togglePin}
+        sections={defaultSidebarSections}
+        hoveredItem={hoveredItem}
+        isHoveringSpecificItem={isHoveringSpecificItem}
+        onPersonalize={() => {
+          // Handle personalization logic
+          console.log("Personalize clicked");
+        }}
+        onMouseEnter={handleExpandablePanelMouseEnter}
+        onMouseLeave={handleExpandablePanelMouseLeave}
+      />
     </>
   );
 }

@@ -7,15 +7,35 @@ import { createNegativeKeywordPromptInstruction } from "@/data/negative-keywords
 
 import { NegativeKeywordsService } from "../negative-keywords-service";
 import { createSpeedWriteVariables, SpeedWriteResult, executePrompt, ensurePromptLibraryInitialized } from "../prompts";
+import {
+  createDurationOptimizedVariables,
+  validateDurationOptimizedInput,
+  type DurationOptimizedScriptInput,
+} from "../prompts/integrations/duration-integration";
+import {
+  createIdeaContextVariables,
+  validateIdeaContext,
+  type IdeaContextConfig,
+} from "../prompts/modifiers/idea-context";
+import { parseInlineLabels } from "../script-analysis";
 
 // Input interfaces
 export interface ScriptGenerationInput {
   idea: string;
-  length: "20" | "60" | "90";
+  length: "15" | "20" | "30" | "45" | "60" | "90";
   userId: string;
   type?: "speed" | "educational" | "viral";
   tone?: "casual" | "professional" | "energetic" | "educational";
   platform?: "tiktok" | "instagram" | "youtube" | "general";
+  ideaContext?: {
+    selectedNotes: Array<{
+      id: string;
+      title: string;
+      content: string;
+      tags: string[];
+    }>;
+    contextMode: "inspiration" | "reference" | "template" | "comprehensive";
+  };
 }
 
 // Output interfaces
@@ -82,12 +102,49 @@ export class ScriptGenerationService {
       const variant = this.getPromptVariant(input.type);
       const promptId = variant === "standard" ? "speed-write-v2" : `speed-write-${variant}`;
 
-      // Create variables
-      const variables = createSpeedWriteVariables(input.idea, input.length, {
-        negativeKeywordInstruction,
-        tone: input.tone,
-        platform: input.platform,
-      });
+      // Create duration-optimized variables
+      let variables = createDurationOptimizedVariables(
+        {
+          ...input,
+          enableDurationOptimization: true,
+        },
+        {
+          negativeKeywordInstruction,
+        },
+      );
+
+      // Add idea context if provided
+      if (input.ideaContext && input.ideaContext.selectedNotes.length > 0) {
+        const ideaContextConfig: IdeaContextConfig = {
+          selectedNotes: input.ideaContext.selectedNotes.map((note) => ({
+            id: note.id,
+            userId: input.userId, // Add required userId field
+            title: note.title,
+            content: note.content,
+            tags: note.tags,
+            type: "text" as const,
+            source: "manual" as const,
+            starred: false,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          })),
+          contextMode: input.ideaContext.contextMode,
+          maxContextLength: 2000,
+          includeMetadata: true,
+        };
+
+        // Validate idea context
+        const validation = validateIdeaContext(ideaContextConfig);
+        if (validation.isValid) {
+          const ideaContextVars = createIdeaContextVariables(ideaContextConfig);
+          variables = { ...variables, ...ideaContextVars };
+          console.log(
+            `🎯 [ScriptGeneration] Added idea context with ${ideaContextConfig.selectedNotes.length} notes in ${ideaContextConfig.contextMode} mode`,
+          );
+        } else {
+          console.warn(`⚠️ [ScriptGeneration] Invalid idea context:`, validation.errors);
+        }
+      }
 
       // Execute prompt
       console.log(`🔍 [ScriptGeneration] Executing prompt ${promptId} with variables:`, variables);
@@ -122,10 +179,18 @@ export class ScriptGenerationService {
       console.log(`🔍 [ScriptGeneration] Generated content:`, content);
       console.log(`🔍 [ScriptGeneration] Word count:`, actualWords);
 
+      // Parse elements if they contain inline labels
+      let parsedElements = scriptElements;
+      if (typeof scriptElements === "string" && (scriptElements.includes("(Hook)") || scriptElements.includes("(Bridge)") || scriptElements.includes("(Golden Nugget)") || scriptElements.includes("(CTA)"))) {
+        console.log(`🔍 [ScriptGeneration] Parsing inline labels for editor`);
+        parsedElements = parseInlineLabels(scriptElements);
+        console.log(`🔍 [ScriptGeneration] Parsed structured elements:`, parsedElements);
+      }
+
       return {
         success: true,
         content,
-        elements: scriptElements,
+        elements: parsedElements,
         metadata: {
           promptId,
           model: "gemini-2.0-flash", // Default from service
@@ -234,13 +299,32 @@ export class ScriptGenerationService {
 
     // Handle case where elements is already a string (some prompts return formatted text)
     if (typeof elements === "string") {
-      // Remove the [HOOK], [BRIDGE], etc. prefixes and return clean content
-      return elements
+      // First, remove the [HOOK], [BRIDGE], etc. prefixes
+      let cleanContent = elements
         .replace(/\[HOOK\]\s*/g, "")
         .replace(/\[BRIDGE\]\s*/g, "")
         .replace(/\[GOLDEN NUGGET\]\s*/g, "")
         .replace(/\[WTA\]\s*/g, "")
         .trim();
+
+      // Check if content contains inline labels like "(Hook)", "(Bridge)", etc.
+      if (cleanContent.includes("(Hook)") || cleanContent.includes("(Bridge)") || cleanContent.includes("(Golden Nugget)") || cleanContent.includes("(CTA)")) {
+        console.log(`🔍 [ScriptGeneration] Detected inline labels, parsing elements`);
+        const parsedElements = parseInlineLabels(cleanContent);
+        console.log(`🔍 [ScriptGeneration] Parsed elements:`, parsedElements);
+        
+        // Combine parsed elements back into a single string
+        const combinedContent = [
+          parsedElements.hook,
+          parsedElements.bridge, 
+          parsedElements.goldenNugget,
+          parsedElements.wta
+        ].filter(Boolean).join("\n\n");
+        
+        return combinedContent;
+      }
+
+      return cleanContent;
     }
 
     // Handle array format (new prompt responses)

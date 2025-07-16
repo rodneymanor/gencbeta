@@ -31,7 +31,6 @@ import { badgeVariants } from "./_components/collections-animations";
 import { type VideoWithPlayer, createVideoSelectionHandlers } from "./_components/collections-helpers";
 import { CollectionsTabNav } from "./_components/collections-tab-nav";
 import { CreateCollectionDialog } from "./_components/create-collection-dialog";
-import { FabAction } from "./_components/fab-action";
 import { ManageModeHeader } from "./_components/manage-mode-header";
 import { VideoGrid } from "./_components/video-grid";
 
@@ -273,7 +272,7 @@ function CollectionsPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const selectedCollectionId = searchParams.get("collection");
-  const setTopBarConfig = useTopBarConfig();
+  const { setTopBarConfig } = useTopBarConfig();
 
   const { toggleVideoSelection, selectAllVideos, clearSelection } = useMemo(
     () => createVideoSelectionHandlers(setSelectedVideos, videos),
@@ -695,14 +694,11 @@ function CollectionsPageContent() {
   }, [selectedCollectionId, collections]);
   const isOwner = Boolean(user && selectedCollection && selectedCollection.userId === user?.uid);
 
-  // FAB handlers
   const handleAddCollection = useCallback(() => {
-    console.log("🎯 [FAB] Add Collection clicked");
     createCollectionDialogRef.current?.click();
   }, []);
 
   const handleAddVideo = useCallback(() => {
-    console.log("🎯 [FAB] Add Video clicked");
     addVideoDialogRef.current?.click();
   }, []);
 
@@ -822,8 +818,8 @@ function CollectionsPageContent() {
   return (
     <div className="mx-auto flex h-full max-w-7xl gap-6 p-4 md:p-6">
       {/* Left side: Main content (Video Grid) */}
-      <div className="flex-1 space-y-6">
-        <header className="mb-2 space-y-4">
+      <div className="flex-1 space-y-4">
+        <header className="mb-1 space-y-4">
           {/* Primary Content Area */}
           <div className="flex items-start justify-between gap-4">
             {/* Title and Description */}
@@ -1011,8 +1007,7 @@ function CollectionsPageContent() {
         onChangeIndex={setCurrentVideoIndex}
       />
 
-      {/* FAB and Dialogs */}
-      <FabAction onAddCollection={handleAddCollection} onAddVideo={handleAddVideo} />
+      {/* Dialogs */}
 
       <CreateCollectionDialog onCollectionCreated={handleCollectionUpdated}>
         <button ref={createCollectionDialogRef} style={{ display: "none" }} />

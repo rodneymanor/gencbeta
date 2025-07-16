@@ -3,15 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { Zap, ChevronRight, FolderPlus, Plus, FileText, Pen, FolderOpen, Video } from "lucide-react";
+import { Zap, ChevronRight, FolderPlus, Plus } from "lucide-react";
 
 import { CreateCollectionDialog } from "@/app/(main)/research/collections/_components/create-collection-dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -92,7 +86,7 @@ const NavItem = ({
           <div className="group cursor-pointer" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
             <div
               className={`flex h-8 w-8 items-center justify-center rounded-md px-2 py-2 transition-all duration-200 ${
-                active ? "bg-border hover:bg-border/80" : "hover:bg-border/50"
+                active ? "bg-[#e6e8e1] hover:bg-[#e6e8e1]/80" : "hover:bg-[#e6e8e1]/50"
               }`}
             >
               {item.icon && <item.icon className="text-muted-foreground h-5 w-5" />}
@@ -102,7 +96,7 @@ const NavItem = ({
           <Link href={item.url} className="group">
             <div
               className={`flex h-8 w-8 items-center justify-center rounded-md px-2 py-2 transition-all duration-200 ${
-                active ? "bg-border hover:bg-border/80" : "hover:bg-border/50"
+                active ? "bg-[#e6e8e1] hover:bg-[#e6e8e1]/80" : "hover:bg-[#e6e8e1]/50"
               }`}
             >
               {item.icon && <item.icon className="text-muted-foreground h-5 w-5" />}
@@ -127,10 +121,46 @@ export function NavMain({
   const path = usePathname();
 
   const isItemActive = (url: string, subItems?: NavMainItem["subItems"]) => {
-    if (subItems?.length) {
-      return subItems.some((sub) => path.startsWith(sub.url));
+    // Determine which item should be active based on path prioritization
+    const allItems = items.flatMap((group) => group.items);
+
+    // Find the item with the most specific match for the current path
+    const activeItem = allItems.find((item) => {
+      // Exact match with main URL has highest priority
+      if (path === item.url) {
+        return true;
+      }
+
+      // Check if path starts with item URL (for nested paths)
+      if (path.startsWith(item.url + "/")) {
+        return true;
+      }
+
+      return false;
+    });
+
+    // If we found an active item based on main URL, use that
+    if (activeItem) {
+      return activeItem.url === url;
     }
-    return path === url;
+
+    // Otherwise, check subItems but only for the item with the best match
+    const itemsWithSubMatches = allItems.filter((item) => item.subItems?.some((sub) => path === sub.url));
+
+    if (itemsWithSubMatches.length > 0) {
+      // Prioritize items based on URL specificity
+      const bestMatch = itemsWithSubMatches.reduce((best, current) => {
+        // Prefer items with more specific (longer) main URLs
+        if (current.url.length > best.url.length) {
+          return current;
+        }
+        return best;
+      });
+
+      return bestMatch.url === url;
+    }
+
+    return false;
   };
 
   // Icon-only mode for the static sidebar
@@ -163,42 +193,14 @@ export function NavMain({
           <SidebarMenu>
             <SidebarMenuItem className="mt-8">
               <div className="gap-.5 flex flex-col items-center">
-                {/* New Plus Button with Dropdown */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <div className="group cursor-pointer">
-                      <div className="bg-border hover:bg-border/80 flex h-8 w-8 items-center justify-center rounded-lg px-2 py-2 transition-all duration-200 hover:scale-105">
-                        <Plus className="text-muted-foreground h-5 w-5 transition-transform" />
-                      </div>
+                {/* Plus Button - Direct Link to Scripts New */}
+                <Link href="/dashboard/scripts/new">
+                  <div className="group cursor-pointer">
+                    <div className="bg-[#e6e8e1] hover:bg-[#e6e8e1]/80 flex h-10 w-10 items-center justify-center rounded-lg px-2 py-2 transition-all duration-200 hover:scale-105">
+                      <Plus className="text-muted-foreground h-6 w-6 transition-transform" />
                     </div>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent side="right" align="start" className="w-48">
-                    <DropdownMenuItem asChild>
-                      <Link href="/dashboard/scripts/new" className="flex items-center gap-2">
-                        <FileText className="h-4 w-4" />
-                        <span>New Script</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/dashboard/capture/notes" className="flex items-center gap-2">
-                        <Pen className="h-4 w-4" />
-                        <span>New Note</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/research/collections" className="flex items-center gap-2">
-                        <FolderOpen className="h-4 w-4" />
-                        <span>New Collection</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/research/collections" className="flex items-center gap-2">
-                        <Video className="h-4 w-4" />
-                        <span>Add Video to Collection</span>
-                      </Link>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                  </div>
+                </Link>
 
                 {/* Label outside the background container */}
                 {/* <span className="text-secondary-foreground text-center text-xs font-medium whitespace-nowrap">

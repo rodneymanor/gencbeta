@@ -21,12 +21,76 @@ export interface HighlightConfig {
   wtas: boolean;
 }
 
+export interface DropdownOption {
+  id: string;
+  label: string;
+  description: string;
+  icon: string;
+}
+
 export interface ContextualAction {
   id: string;
-  type: "improve_hook" | "make_question" | "strengthen_bridge" | "enhance_wta" | "custom";
+  type:
+    | "improve_hook"
+    | "make_question"
+    | "strengthen_bridge"
+    | "enhance_wta"
+    | "custom"
+    | "edit"
+    | "humanize"
+    | "rewrite_hook";
   label: string;
   icon: string;
   description: string;
+  hasDropdown?: boolean;
+  dropdownOptions?: DropdownOption[];
+}
+
+export interface ScriptElements {
+  hook: string;
+  bridge: string;
+  goldenNugget: string;
+  wta: string;
+}
+
+/**
+ * Parse script elements from content with inline labels
+ * Handles formats like "(Hook)", "(Bridge)", "(Golden Nugget)", "(CTA)"
+ */
+export function parseInlineLabels(content: string): ScriptElements {
+  const result: ScriptElements = {
+    hook: "",
+    bridge: "",
+    goldenNugget: "",
+    wta: "",
+  };
+
+  // Define label patterns with case-insensitive matching
+  const labelPatterns = [
+    { key: "hook", pattern: /\(Hook\)\s*/i },
+    { key: "bridge", pattern: /\(Bridge\)\s*/i },
+    { key: "goldenNugget", pattern: /\(Golden Nugget\)\s*/i },
+    { key: "wta", pattern: /\(CTA\)\s*/i },
+  ];
+
+  // Split content by paragraphs and process each section
+  const paragraphs = content.split(/\n\s*\n/).filter(p => p.trim());
+  
+  for (const paragraph of paragraphs) {
+    const trimmedParagraph = paragraph.trim();
+    
+    // Check which label this paragraph starts with
+    for (const { key, pattern } of labelPatterns) {
+      if (pattern.test(trimmedParagraph)) {
+        // Remove the label and extract the content
+        const cleanContent = trimmedParagraph.replace(pattern, '').trim();
+        result[key as keyof ScriptElements] = cleanContent;
+        break;
+      }
+    }
+  }
+
+  return result;
 }
 
 // Helper function to process hooks
@@ -237,38 +301,42 @@ const generateWtaSuggestions = (): string[] => {
   return ["Make it more compelling", "Add urgency", "Be more specific", "Include a benefit"];
 };
 
+// Hook types for rewrite dropdown
+export const HOOK_TYPES = [
+  { id: "question", label: "Question Hook", description: "Transform into an engaging question" },
+  { id: "statistic", label: "Statistic Hook", description: "Lead with a compelling statistic" },
+  { id: "story", label: "Story Hook", description: "Start with a personal story" },
+  { id: "contrarian", label: "Contrarian Hook", description: "Challenge common beliefs" },
+  { id: "cliffhanger", label: "Cliffhanger Hook", description: "Create suspense and curiosity" },
+  { id: "direct", label: "Direct Hook", description: "Get straight to the point" },
+  { id: "metaphor", label: "Metaphor Hook", description: "Use a powerful comparison" },
+  { id: "emotional", label: "Emotional Hook", description: "Appeal to emotions" },
+] as const;
+
+// Import the new action provider
+import { ScriptActionProvider, type ScriptElement as NewScriptElement } from "./contextual-actions";
+
 // Generate contextual actions for an element
 export const generateContextualActions = (element: ScriptElement): ContextualAction[] => {
-  const actions: ContextualAction[] = [];
+  // Convert to new format and use ScriptActionProvider
+  const newElement: NewScriptElement = {
+    ...element,
+    confidence: element.confidence,
+  };
 
-  // Add common action
-  actions.push({
-    id: "custom",
-    type: "custom",
-    label: "Custom Edit",
-    icon: "✏️",
-    description: "Make a custom edit to this text",
-  });
+  const provider = new ScriptActionProvider();
+  return provider.getActions(newElement);
 
-  // Add element-specific actions
+  // Add element-specific legacy actions for backward compatibility
   switch (element.type) {
     case "hook":
-      actions.push(
-        {
-          id: "improve_hook",
-          type: "improve_hook",
-          label: "Improve Hook",
-          icon: "🪝",
-          description: "Make this hook more engaging and attention-grabbing",
-        },
-        {
-          id: "make_question",
-          type: "make_question",
-          label: "Make Question",
-          icon: "❓",
-          description: "Transform this into a compelling question",
-        },
-      );
+      actions.push({
+        id: "improve_hook",
+        type: "improve_hook",
+        label: "Improve Hook",
+        icon: "🪝",
+        description: "Make this hook more engaging and attention-grabbing",
+      });
       break;
 
     case "bridge":
@@ -284,7 +352,7 @@ export const generateContextualActions = (element: ScriptElement): ContextualAct
     case "golden-nugget":
       actions.push({
         id: "enhance_nugget",
-        type: "custom",
+        type: "enhance_nugget",
         label: "Enhance Value",
         icon: "💎",
         description: "Make this insight more valuable and actionable",

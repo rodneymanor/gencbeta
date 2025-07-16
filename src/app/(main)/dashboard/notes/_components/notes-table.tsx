@@ -5,14 +5,7 @@ import { ArrowUpDown, Star, StarOff, Edit3, Calendar, Hash } from "lucide-react"
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
 interface Note {
@@ -38,7 +31,7 @@ interface NotesTableProps {
   notes: Note[];
   selectedNotes: Set<number>;
   sortBy: string;
-  sortOrder: "asc" | "desc";
+  sortOrder?: "asc" | "desc";
   columnVisibility: ColumnVisibility;
   onSort: (column: string) => void;
   onSelectNote: (noteId: number) => void;
@@ -67,18 +60,154 @@ const availableTags = [
   { name: "strategy", color: "bg-amber-500" },
 ];
 
+function SortableHeader({
+  column,
+  children,
+  onSort,
+  sortBy,
+}: {
+  column: string;
+  children: React.ReactNode;
+  onSort: (column: string) => void;
+  sortBy: string;
+}) {
+  return (
+    <Button variant="ghost" onClick={() => onSort(column)} className="h-auto p-0 font-semibold hover:bg-transparent">
+      <span className="flex items-center gap-1">
+        {children}
+        <ArrowUpDown
+          className={cn(
+            "h-4 w-4 transition-all",
+            sortBy === column ? "text-foreground" : "text-muted-foreground opacity-50",
+          )}
+        />
+      </span>
+    </Button>
+  );
+}
+
+function NoteTableRow({
+  note,
+  columnVisibility,
+  selectedNotes,
+  onSelectNote,
+  onToggleStar,
+  onEdit,
+  getTagColor,
+  formatDate,
+  truncateContent,
+}: {
+  note: Note;
+  columnVisibility: ColumnVisibility;
+  selectedNotes: Set<number>;
+  onSelectNote: (noteId: number) => void;
+  onToggleStar: (noteId: number) => void;
+  onEdit: (noteId: number) => void;
+  getTagColor: (tagName: string) => string;
+  formatDate: (dateString: string) => string;
+  truncateContent: (content: string, maxLength?: number) => string;
+}) {
+  const renderStarredCell = () => (
+    <TableCell>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleStar(note.id);
+        }}
+        className="h-8 w-8 p-0"
+      >
+        {note.starred ? <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" /> : <StarOff className="h-4 w-4" />}
+      </Button>
+    </TableCell>
+  );
+
+  const renderTagsCell = () => (
+    <TableCell>
+      <div className="flex flex-wrap gap-1">
+        {note.tags.slice(0, 3).map((tag) => (
+          <Badge key={tag} variant="secondary" className={cn("text-xs text-white", getTagColor(tag))}>
+            {tag}
+          </Badge>
+        ))}
+        {note.tags.length > 3 && (
+          <Badge variant="outline" className="text-xs">
+            +{note.tags.length - 3}
+          </Badge>
+        )}
+      </div>
+    </TableCell>
+  );
+
+  return (
+    <TableRow
+      className={cn("cursor-pointer", selectedNotes.has(note.id) && "bg-muted/50")}
+      onClick={() => onSelectNote(note.id)}
+    >
+      <TableCell>
+        <Checkbox
+          checked={selectedNotes.has(note.id)}
+          onClick={(e) => e.stopPropagation()}
+          onCheckedChange={() => onSelectNote(note.id)}
+        />
+      </TableCell>
+
+      {columnVisibility.starred && renderStarredCell()}
+
+      {columnVisibility.title && (
+        <TableCell>
+          <div className="flex items-center gap-2">
+            <span className="font-medium">{note.title}</span>
+            {note.starred && <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />}
+          </div>
+        </TableCell>
+      )}
+
+      {columnVisibility.tags && renderTagsCell()}
+
+      {columnVisibility.content && (
+        <TableCell>
+          <div className="text-muted-foreground max-w-md text-sm">{truncateContent(note.content)}</div>
+        </TableCell>
+      )}
+
+      {columnVisibility.created && (
+        <TableCell className="text-muted-foreground text-sm">{formatDate(note.createdAt)}</TableCell>
+      )}
+
+      {columnVisibility.updated && (
+        <TableCell className="text-muted-foreground text-sm">{formatDate(note.updatedAt)}</TableCell>
+      )}
+
+      <TableCell>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit(note.id);
+          }}
+          className="h-8 w-8 p-0"
+        >
+          <Edit3 className="h-4 w-4" />
+        </Button>
+      </TableCell>
+    </TableRow>
+  );
+}
+
 export function NotesTable({
   notes,
   selectedNotes,
   sortBy,
-  sortOrder,
   columnVisibility,
   onSort,
   onSelectNote,
   onSelectAll,
   onToggleStar,
   onEdit,
-}: NotesTableProps) {
+}: Omit<NotesTableProps, "sortOrder">) {
   const getTagColor = (tagName: string) => {
     const tag = availableTags.find((t) => t.name === tagName);
     return tag?.color ?? "bg-gray-500";
@@ -98,26 +227,6 @@ export function NotesTable({
     return plainText.length > maxLength ? plainText.slice(0, maxLength) + "..." : plainText;
   };
 
-  const SortableHeader = ({ column, children }: { column: string; children: React.ReactNode }) => (
-    <Button
-      variant="ghost"
-      onClick={() => onSort(column)}
-      className="h-auto p-0 font-semibold hover:bg-transparent"
-    >
-      <span className="flex items-center gap-1">
-        {children}
-        <ArrowUpDown
-          className={cn(
-            "h-4 w-4 transition-all",
-            sortBy === column
-              ? "text-foreground"
-              : "text-muted-foreground opacity-50"
-          )}
-        />
-      </span>
-    </Button>
-  );
-
   const allSelected = notes.length > 0 && selectedNotes.size === notes.length;
   const someSelected = selectedNotes.size > 0 && selectedNotes.size < notes.length;
 
@@ -135,19 +244,21 @@ export function NotesTable({
                 onCheckedChange={onSelectAll}
               />
             </TableHead>
-            
+
             {columnVisibility.starred && (
               <TableHead className="w-12">
                 <Star className="h-4 w-4" />
               </TableHead>
             )}
-            
+
             {columnVisibility.title && (
               <TableHead>
-                <SortableHeader column="title">Title</SortableHeader>
+                <SortableHeader column="title" onSort={onSort} sortBy={sortBy}>
+                  Title
+                </SortableHeader>
               </TableHead>
             )}
-            
+
             {columnVisibility.tags && (
               <TableHead>
                 <div className="flex items-center gap-1">
@@ -156,29 +267,27 @@ export function NotesTable({
                 </div>
               </TableHead>
             )}
-            
-            {columnVisibility.content && (
-              <TableHead>Content Preview</TableHead>
-            )}
-            
+
+            {columnVisibility.content && <TableHead>Content Preview</TableHead>}
+
             {columnVisibility.created && (
               <TableHead>
-                <SortableHeader column="created">
+                <SortableHeader column="created" onSort={onSort} sortBy={sortBy}>
                   <Calendar className="h-4 w-4" />
                   Created
                 </SortableHeader>
               </TableHead>
             )}
-            
+
             {columnVisibility.updated && (
               <TableHead>
-                <SortableHeader column="updated">
+                <SortableHeader column="updated" onSort={onSort} sortBy={sortBy}>
                   <Calendar className="h-4 w-4" />
                   Updated
                 </SortableHeader>
               </TableHead>
             )}
-            
+
             <TableHead className="w-24">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -191,111 +300,18 @@ export function NotesTable({
             </TableRow>
           ) : (
             notes.map((note) => (
-              <TableRow
+              <NoteTableRow
                 key={note.id}
-                className={cn(
-                  "cursor-pointer",
-                  selectedNotes.has(note.id) && "bg-muted/50"
-                )}
-                onClick={() => onSelectNote(note.id)}
-              >
-                <TableCell>
-                  <Checkbox
-                    checked={selectedNotes.has(note.id)}
-                    onClick={(e) => e.stopPropagation()}
-                    onCheckedChange={() => onSelectNote(note.id)}
-                  />
-                </TableCell>
-                
-                {columnVisibility.starred && (
-                  <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onToggleStar(note.id);
-                      }}
-                      className="h-8 w-8 p-0"
-                    >
-                      {note.starred ? (
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      ) : (
-                        <StarOff className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </TableCell>
-                )}
-                
-                {columnVisibility.title && (
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{note.title}</span>
-                      {note.starred && (
-                        <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                      )}
-                    </div>
-                  </TableCell>
-                )}
-                
-                {columnVisibility.tags && (
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {note.tags.slice(0, 3).map((tag) => (
-                        <Badge
-                          key={tag}
-                          variant="secondary"
-                          className={cn(
-                            "text-xs text-white",
-                            getTagColor(tag)
-                          )}
-                        >
-                          {tag}
-                        </Badge>
-                      ))}
-                      {note.tags.length > 3 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{note.tags.length - 3}
-                        </Badge>
-                      )}
-                    </div>
-                  </TableCell>
-                )}
-                
-                {columnVisibility.content && (
-                  <TableCell>
-                    <div className="max-w-md text-sm text-muted-foreground">
-                      {truncateContent(note.content)}
-                    </div>
-                  </TableCell>
-                )}
-                
-                {columnVisibility.created && (
-                  <TableCell className="text-sm text-muted-foreground">
-                    {formatDate(note.createdAt)}
-                  </TableCell>
-                )}
-                
-                {columnVisibility.updated && (
-                  <TableCell className="text-sm text-muted-foreground">
-                    {formatDate(note.updatedAt)}
-                  </TableCell>
-                )}
-                
-                <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEdit(note.id);
-                    }}
-                    className="h-8 w-8 p-0"
-                  >
-                    <Edit3 className="h-4 w-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
+                note={note}
+                columnVisibility={columnVisibility}
+                selectedNotes={selectedNotes}
+                onSelectNote={onSelectNote}
+                onToggleStar={onToggleStar}
+                onEdit={onEdit}
+                getTagColor={getTagColor}
+                formatDate={formatDate}
+                truncateContent={truncateContent}
+              />
             ))
           )}
         </TableBody>

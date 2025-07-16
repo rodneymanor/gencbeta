@@ -1,25 +1,31 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { X, Lightbulb, Zap } from "lucide-react";
+import { X, Lightbulb, Zap, ChevronDown, ChevronRight } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { generateContextualActions, type ScriptElement, type ContextualAction } from "@/lib/script-analysis";
+import {
+  generateContextualActions,
+  type ScriptElement,
+  type ContextualAction,
+  type DropdownOption,
+} from "@/lib/script-analysis";
 
 interface ContextualActionMenuProps {
   element: ScriptElement;
   position: { x: number; y: number };
-  onAction: (action: ContextualAction, element: ScriptElement) => void;
+  onAction: (action: ContextualAction, element: ScriptElement, dropdownOption?: DropdownOption) => void;
   onClose: () => void;
 }
 
 export function ContextualActionMenu({ element, position, onAction, onClose }: ContextualActionMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const actions = generateContextualActions(element);
+  const [expandedDropdown, setExpandedDropdown] = useState<string | null>(null);
 
   // Handle click outside
   useEffect(() => {
@@ -146,25 +152,68 @@ export function ContextualActionMenu({ element, position, onAction, onClose }: C
           <div className="space-y-2">
             <div className="mb-2 flex items-center gap-1">
               <Zap className="h-4 w-4 text-blue-500" />
-              <span className="text-sm font-medium">Quick Actions</span>
+              <span className="text-sm font-medium">AI Actions</span>
             </div>
 
             {actions.map((action) => (
-              <Button
-                key={action.id}
-                variant="ghost"
-                size="sm"
-                onClick={() => onAction(action, element)}
-                className="h-auto w-full justify-start p-2 text-left"
-              >
-                <div className="flex items-start gap-2">
-                  <span className="text-sm">{action.icon}</span>
-                  <div className="min-w-0 flex-1">
-                    <div className="text-sm font-medium">{action.label}</div>
-                    <div className="text-muted-foreground text-xs">{action.description}</div>
+              <div key={action.id} className="space-y-1">
+                {/* Main Action Button */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    if (action.hasDropdown) {
+                      setExpandedDropdown(expandedDropdown === action.id ? null : action.id);
+                    } else {
+                      onAction(action, element);
+                    }
+                  }}
+                  className="h-auto w-full justify-start p-2 text-left"
+                >
+                  <div className="flex w-full items-start gap-2">
+                    <span className="text-sm">{action.icon}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-medium">{action.label}</div>
+                      <div className="text-muted-foreground text-xs">{action.description}</div>
+                    </div>
+                    {action.hasDropdown && (
+                      <div className="ml-auto">
+                        {expandedDropdown === action.id ? (
+                          <ChevronDown className="text-muted-foreground h-3 w-3" />
+                        ) : (
+                          <ChevronRight className="text-muted-foreground h-3 w-3" />
+                        )}
+                      </div>
+                    )}
                   </div>
-                </div>
-              </Button>
+                </Button>
+
+                {/* Dropdown Options */}
+                {action.hasDropdown && expandedDropdown === action.id && action.dropdownOptions && (
+                  <div className="border-border ml-6 space-y-1 border-l pl-3">
+                    {action.dropdownOptions.map((option) => (
+                      <Button
+                        key={option.id}
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          onAction(action, element, option);
+                          setExpandedDropdown(null);
+                        }}
+                        className="h-auto w-full justify-start p-2 text-left"
+                      >
+                        <div className="flex items-start gap-2">
+                          <span className="text-xs">{option.icon}</span>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-xs font-medium">{option.label}</div>
+                            <div className="text-muted-foreground text-xs">{option.description}</div>
+                          </div>
+                        </div>
+                      </Button>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </CardContent>

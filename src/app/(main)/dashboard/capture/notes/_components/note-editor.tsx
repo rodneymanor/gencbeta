@@ -42,27 +42,27 @@ export function NoteEditor({
   }
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl" style={{padding: '24px'}}>
-      <div className="flex items-center justify-between" style={{marginBottom: '24px'}}>
+    <div className="rounded-xl bg-gray-50 dark:bg-gray-800" style={{ padding: "24px" }}>
+      <div className="flex items-center justify-between" style={{ marginBottom: "24px" }}>
         <div className="flex items-center gap-2">
           <Edit3 className="h-5 w-5 text-gray-600 dark:text-gray-400" />
           <h2 className="text-2xl font-medium text-gray-900 dark:text-gray-100">
             {isEditing ? "Editing Note" : selectedNote.title}
           </h2>
         </div>
-        <div className="flex" style={{gap: '8px'}}>
+        <div className="flex" style={{ gap: "8px" }}>
           {!isEditing ? (
             <>
-              <button 
+              <button
                 onClick={() => setIsEditing(true)}
-                className="h-10 px-6 rounded-[20px] bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm font-normal hover:bg-gray-200 dark:hover:bg-gray-600 active:scale-[0.98] transition-all duration-200 ease-in-out flex items-center gap-2"
+                className="flex h-10 items-center gap-2 rounded-[20px] bg-gray-100 px-6 text-sm font-normal text-gray-900 transition-all duration-200 ease-in-out hover:bg-gray-200 active:scale-[0.98] dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600"
               >
                 <Edit3 className="h-4 w-4" />
                 Edit
               </button>
-              <button 
+              <button
                 onClick={() => convertToScript(selectedNote)}
-                className="h-10 px-6 rounded-[20px] bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm font-normal hover:bg-gray-200 dark:hover:bg-gray-600 active:scale-[0.98] transition-all duration-200 ease-in-out flex items-center gap-2"
+                className="flex h-10 items-center gap-2 rounded-[20px] bg-gray-100 px-6 text-sm font-normal text-gray-900 transition-all duration-200 ease-in-out hover:bg-gray-200 active:scale-[0.98] dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600"
               >
                 <FileText className="h-4 w-4" />
                 Convert to Script
@@ -70,15 +70,15 @@ export function NoteEditor({
             </>
           ) : (
             <>
-              <button 
+              <button
                 onClick={() => setIsEditing(false)}
-                className="h-10 px-6 rounded-[20px] bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm font-normal hover:bg-gray-200 dark:hover:bg-gray-600 active:scale-[0.98] transition-all duration-200 ease-in-out"
+                className="h-10 rounded-[20px] bg-gray-100 px-6 text-sm font-normal text-gray-900 transition-all duration-200 ease-in-out hover:bg-gray-200 active:scale-[0.98] dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600"
               >
                 Cancel
               </button>
-              <button 
+              <button
                 onClick={saveNote}
-                className="h-10 px-6 rounded-[20px] bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 active:scale-[0.98] transition-all duration-200 ease-in-out flex items-center gap-2"
+                className="flex h-10 items-center gap-2 rounded-[20px] bg-blue-600 px-6 text-sm font-medium text-white transition-all duration-200 ease-in-out hover:bg-blue-700 active:scale-[0.98]"
               >
                 <Save className="h-4 w-4" />
                 Save
@@ -87,7 +87,7 @@ export function NoteEditor({
           )}
         </div>
       </div>
-      <div style={{display: 'flex', flexDirection: 'column', gap: '24px'}}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
         {isEditing ? (
           <>
             <Input
@@ -134,16 +134,16 @@ export function NoteEditor({
         <Separator />
 
         {/* Actions */}
-        <div className="flex" style={{gap: '8px'}}>
-          <button className="h-10 px-6 rounded-[20px] bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 active:scale-[0.98] transition-all duration-200 ease-in-out flex items-center gap-2">
+        <div className="flex" style={{ gap: "8px" }}>
+          <button className="flex h-10 items-center gap-2 rounded-[20px] bg-blue-600 px-6 text-sm font-medium text-white transition-all duration-200 ease-in-out hover:bg-blue-700 active:scale-[0.98]">
             <FileText className="h-4 w-4" />
             Convert to Script
           </button>
-          <button className="h-10 px-6 rounded-[20px] bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm font-normal hover:bg-gray-200 dark:hover:bg-gray-600 active:scale-[0.98] transition-all duration-200 ease-in-out flex items-center gap-2">
+          <button className="flex h-10 items-center gap-2 rounded-[20px] bg-gray-100 px-6 text-sm font-normal text-gray-900 transition-all duration-200 ease-in-out hover:bg-gray-200 active:scale-[0.98] dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600">
             <Copy className="h-4 w-4" />
             Duplicate
           </button>
-          <button className="h-10 px-6 rounded-[20px] bg-gray-100 dark:bg-gray-700 text-red-600 dark:text-red-400 text-sm font-normal hover:bg-red-50 dark:hover:bg-red-900/20 active:scale-[0.98] transition-all duration-200 ease-in-out flex items-center gap-2">
+          <button className="flex h-10 items-center gap-2 rounded-[20px] bg-gray-100 px-6 text-sm font-normal text-red-600 transition-all duration-200 ease-in-out hover:bg-red-50 active:scale-[0.98] dark:bg-gray-700 dark:text-red-400 dark:hover:bg-red-900/20">
             <Trash2 className="h-4 w-4" />
             Delete
           </button>

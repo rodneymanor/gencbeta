@@ -19,7 +19,7 @@ export class GhostWriterService {
   } as const;
 
   private static readonly CYCLE_DURATION_HOURS = 12;
-  private static readonly IDEAS_PER_CYCLE = 6;
+  private static readonly IDEAS_PER_CYCLE = 9;
 
   /**
    * Get the current global cycle or create a new one if expired

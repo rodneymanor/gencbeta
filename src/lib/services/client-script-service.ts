@@ -36,9 +36,18 @@ export interface ScriptOption {
 
 export interface ScriptGenerationRequest {
   idea: string;
-  length: "20" | "60" | "90";
+  length: "15" | "20" | "30" | "45" | "60" | "90";
   userId?: string;
   type?: "speed" | "educational" | "voice";
+  ideaContext?: {
+    selectedNotes: Array<{
+      id: string;
+      title: string;
+      content: string;
+      tags: string[];
+    }>;
+    contextMode: "inspiration" | "reference" | "template" | "comprehensive";
+  };
 }
 
 /**
@@ -72,6 +81,7 @@ export class ClientScriptService {
           idea: request.idea,
           length: request.length,
           type: request.type,
+          ideaContext: request.ideaContext,
         }),
       });
 
@@ -178,8 +188,8 @@ export class ClientScriptService {
       errors.push("Idea must be less than 1000 characters");
     }
 
-    if (!request.length || !["20", "60", "90"].includes(request.length)) {
-      errors.push("Length must be 20, 60, or 90 seconds");
+    if (!request.length || !["15", "20", "30", "45", "60", "90"].includes(request.length)) {
+      errors.push("Length must be 15, 20, 30, 45, 60, or 90 seconds");
     }
 
     if (request.type && !["speed", "educational", "voice"].includes(request.type)) {
@@ -222,7 +232,7 @@ export class ClientScriptService {
 // Export convenience functions for easy migration
 export async function callSpeedWriteAPI(
   idea: string,
-  length: "20" | "60" | "90",
+  length: "15" | "20" | "30" | "45" | "60" | "90",
   userId?: string,
 ): Promise<SpeedWriteResponse> {
   return ClientScriptService.generateSpeedWrite({
@@ -234,7 +244,7 @@ export async function callSpeedWriteAPI(
 
 export async function generateSingleScript(
   idea: string,
-  length: "20" | "60" | "90",
+  length: "15" | "20" | "30" | "45" | "60" | "90",
   type?: "speed" | "educational" | "voice",
 ): Promise<{ success: boolean; script?: ScriptOption; error?: string }> {
   return ClientScriptService.generateSingle({

@@ -216,19 +216,18 @@ export function ExpandableSidebarPanel({
     return pathname === href || pathname.startsWith(href + "/");
   };
 
-
   // Show sub-items when hovering over a specific sidebar item
   const showSubItems = isHoveringSpecificItem && hoveredItem && hoveredItem.subItems && hoveredItem.subItems.length > 0;
 
   return (
     <div
       className={cn(
-        "pointer-events-auto fixed top-0 flex h-full flex-col",
+        "fixed top-0 flex h-full flex-col",
         "border-r shadow-xl",
         "bg-sidebar border-sidebar-border backdrop-blur-sm",
         "group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-lg",
         "transition-all duration-300 ease-out",
-        isExpanded ? "translate-x-0 opacity-100 z-[100]" : "translate-x-0 opacity-0 z-[90]",
+        isExpanded ? "z-[90] translate-x-0 opacity-100 pointer-events-auto" : "z-[80] translate-x-0 opacity-0 pointer-events-none",
         className,
       )}
       style={{
@@ -240,7 +239,6 @@ export function ExpandableSidebarPanel({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-
       {/* Header */}
       <div className="group/sidebar-menu-header border-sidebar-border/30 relative mb-3 flex min-h-0 items-center justify-between border-b px-2 py-3">
         <span>
@@ -316,7 +314,7 @@ export function ExpandableSidebarPanel({
                             className={cn(
                               "absolute -inset-x-2 -inset-y-1 rounded-md transition-all duration-200",
                               isActive
-                                ? "bg-primary/10 opacity-100"
+                                ? "bg-primary/5 opacity-100"
                                 : "bg-sidebar-accent opacity-0 group-hover:opacity-100 group-focus:opacity-50",
                             )}
                           />
@@ -414,7 +412,7 @@ export function ExpandableSidebarPanel({
                               className={cn(
                                 "absolute -inset-x-2 -inset-y-1 rounded-md transition-all duration-200",
                                 isActive
-                                  ? "bg-primary/10 opacity-100"
+                                  ? "bg-primary/5 opacity-100"
                                   : "bg-sidebar-accent opacity-0 group-hover:opacity-100 group-focus:opacity-50",
                               )}
                             />

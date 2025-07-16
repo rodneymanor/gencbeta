@@ -23,7 +23,7 @@ interface EnhancedGhostWriterResponse {
     peqEnabled: boolean;
     voiceActive: boolean;
     conceptsGenerated: number;
-    scriptsGenerated: number;
+    hooksGenerated: number;
     processingTime: number;
   };
 }
@@ -49,7 +49,7 @@ const createLegacyFallbackResponse = async (
       ideas: legacyData.ideas?.map((idea: any) => ({
         ...idea,
         concept: idea.description ?? idea.hook,
-        script: idea.scriptOutline ?? idea.description,
+        hook: idea.hook ?? idea.description,
         peqCategory: "problem" as const,
         sourceText: "Legacy content",
         wordCount: (idea.scriptOutline ?? idea.description ?? "").split(/\s+/).length,
@@ -61,7 +61,7 @@ const createLegacyFallbackResponse = async (
         peqEnabled: false,
         voiceActive: false,
         conceptsGenerated: legacyData.ideas?.length ?? 0,
-        scriptsGenerated: legacyData.ideas?.length ?? 0,
+        hooksGenerated: legacyData.ideas?.length ?? 0,
         processingTime: 0,
       },
     });
@@ -125,8 +125,14 @@ export async function GET(request: NextRequest): Promise<NextResponse<EnhancedGh
     // Generate new ideas if none exist, if generateMore is requested, or if refresh is requested
     if (existingIdeas.length === 0 || generateMore || refresh) {
       console.log(
-        `💡 [EnhancedGhostWriter] Generating ${refresh ? "refreshed" : generateMore ? "additional" : "new"} ideas`,
+        `💡 [EnhancedGhostWriter] Generating ${refresh ? "refreshed" : generateMore ? "replacement" : "new"} ideas`,
       );
+
+      // If generateMore is requested, save current ideas to library first
+      if (generateMore && existingIdeas.length > 0) {
+        await EnhancedGhostWriterService.saveIdeasToLibrary(userId, existingIdeas);
+        console.log(`📚 [EnhancedGhostWriter] Saved ${existingIdeas.length} existing ideas to library`);
+      }
 
       const generationResult = await EnhancedGhostWriterService.generateEnhancedIdeas(
         userId,
@@ -140,8 +146,8 @@ export async function GET(request: NextRequest): Promise<NextResponse<EnhancedGh
           // Replace all existing ideas with new ones
           ideas = generationResult.ideas;
         } else if (generateMore) {
-          // Combine existing and new ideas
-          ideas = [...existingIdeas, ...generationResult.ideas];
+          // Replace existing ideas with new ones (old ones are saved to library)
+          ideas = generationResult.ideas;
         } else {
           ideas = generationResult.ideas;
         }
@@ -185,7 +191,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<EnhancedGh
         peqEnabled: true,
         voiceActive: !!activeVoice,
         conceptsGenerated: ideas.length,
-        scriptsGenerated: ideas.filter((idea) => idea.voiceTemplateId).length,
+        hooksGenerated: ideas.filter((idea) => idea.hookTemplate !== "Concept").length,
         processingTime: 0,
       },
     });
@@ -208,7 +214,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<EnhancedGh
           peqEnabled: false,
           voiceActive: false,
           conceptsGenerated: 0,
-          scriptsGenerated: 0,
+          hooksGenerated: 0,
           processingTime: 0,
         },
       },

@@ -8,11 +8,16 @@ import { Prompt } from "../types";
 // Speed Write specific interfaces
 export interface SpeedWriteVariables {
   idea: string;
-  length: "20" | "60" | "90";
+  length: "15" | "20" | "30" | "45" | "60" | "90";
   targetWords: number;
+  durationSubPrompt?: string;
   negativeKeywordInstruction?: string;
   tone?: "casual" | "professional" | "energetic" | "educational";
   platform?: "tiktok" | "instagram" | "youtube" | "general";
+  ideaContext?: string;
+  hasIdeaContext?: boolean;
+  ideaContextMode?: string;
+  selectedNotesCount?: number;
   [key: string]: string | number | boolean | string[] | undefined;
 }
 
@@ -87,6 +92,10 @@ TOPIC: {{idea}}
 {{#if platform}}PLATFORM: {{platform}}{{/if}}
 {{#if negativeKeywordInstruction}}{{negativeKeywordInstruction}}{{/if}}
 
+{{#if hasIdeaContext}}{{ideaContext}}{{/if}}
+
+{{#if durationSubPrompt}}{{durationSubPrompt}}{{/if}}
+
 ${SPEED_WRITE_SUB_PROMPTS.hookGuidelines}
 
 ${SPEED_WRITE_SUB_PROMPTS.bridgeGuidelines}
@@ -157,7 +166,7 @@ You understand pacing, retention, and what makes content shareable. Write script
         negativeKeywordInstruction: 500,
       },
       pattern: {
-        length: /^(20|60|90)$/,
+        length: /^(15|20|30|45|60|90)$/,
       },
     },
 
@@ -240,20 +249,35 @@ export function calculateTargetWords(length: "20" | "60" | "90"): number {
   return Math.round(lengthNumber * 2.2); // ~2.2 words per second speaking rate
 }
 
-// Helper function to create Speed Write variables
+// Helper function to create Speed Write variables with duration optimization
 export function createSpeedWriteVariables(
   idea: string,
-  length: "20" | "60" | "90",
+  length: "15" | "20" | "30" | "45" | "60" | "90",
   options?: {
     negativeKeywordInstruction?: string;
     tone?: SpeedWriteVariables["tone"];
     platform?: SpeedWriteVariables["platform"];
+    includeDurationOptimization?: boolean;
   },
 ): SpeedWriteVariables {
+  const shouldOptimize = options?.includeDurationOptimization !== false; // Default to true
+  let durationSubPrompt: string | undefined;
+
+  if (shouldOptimize) {
+    try {
+      // Import duration optimizer dynamically to avoid circular dependencies
+      const { createDurationSubPrompt } = require("../modifiers/duration-optimizer");
+      durationSubPrompt = createDurationSubPrompt(length);
+    } catch (error) {
+      console.warn("Failed to load duration optimizer, falling back to standard prompt:", error);
+    }
+  }
+
   return {
     idea,
     length,
     targetWords: calculateTargetWords(length),
+    durationSubPrompt,
     negativeKeywordInstruction: options?.negativeKeywordInstruction,
     tone: options?.tone,
     platform: options?.platform,

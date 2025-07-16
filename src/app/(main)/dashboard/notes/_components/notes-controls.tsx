@@ -54,18 +54,18 @@ export function NotesControls({
   };
 
   const handleColumnToggle = (column: keyof ColumnVisibility) => {
-    onColumnVisibilityChange({
-      ...columnVisibility,
-      [column]: !columnVisibility[column],
-    });
+    const newVisibility = { ...columnVisibility };
+    // eslint-disable-next-line security/detect-object-injection
+    newVisibility[column] = !newVisibility[column];
+    onColumnVisibilityChange(newVisibility);
   };
 
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex flex-1 items-center gap-4">
         {/* Search */}
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <div className="relative max-w-md flex-1">
+          <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
           <Input
             placeholder="Search notes..."
             value={searchQuery}
@@ -75,7 +75,7 @@ export function NotesControls({
         </div>
 
         {/* Info */}
-        <div className="text-sm text-muted-foreground">
+        <div className="text-muted-foreground text-sm">
           {totalNotes} notes
           {selectedCount > 0 && ` • ${selectedCount} selected`}
         </div>

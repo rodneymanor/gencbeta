@@ -32,7 +32,7 @@ export function useCollectionsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const selectedCollectionId = searchParams.get("collection");
-  const setTopBarConfig = useTopBarConfig();
+  const { setTopBarConfig } = useTopBarConfig();
 
   const { toggleVideoSelection, selectAllVideos, clearSelection } = useMemo(
     () => createVideoSelectionHandlers(setSelectedVideos, videos),

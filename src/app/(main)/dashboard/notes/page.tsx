@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-import { Download, Trash2, Edit3, Plus, Star, StarOff } from "lucide-react";
+import { Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -37,7 +37,8 @@ const mockNotes: Note[] = [
   {
     id: 1,
     title: "Morning Routine Ideas",
-    content: "# Morning Routine Strategy\n\nKey insights for content:\n- Most people focus on what they do, not when they do it\n- First 10 minutes are crucial for setting intention\n- **Three-step framework:**\n  1. Hydrate before caffeinate\n  2. Set one clear intention\n  3. Move your body (even 2 minutes)\n\n> This could work as a TikTok series - one video per step\n\n**Potential hooks:**\n- \"What if I told you 90% of people do morning routines wrong?\"\n- \"The first 10 minutes of your day determine everything\"",
+    content:
+      '# Morning Routine Strategy\n\nKey insights for content:\n- Most people focus on what they do, not when they do it\n- First 10 minutes are crucial for setting intention\n- **Three-step framework:**\n  1. Hydrate before caffeinate\n  2. Set one clear intention\n  3. Move your body (even 2 minutes)\n\n> This could work as a TikTok series - one video per step\n\n**Potential hooks:**\n- "What if I told you 90% of people do morning routines wrong?"\n- "The first 10 minutes of your day determine everything"',
     tags: ["morning", "routine", "productivity", "tiktok"],
     createdAt: "2024-01-20",
     updatedAt: "2024-01-20",
@@ -46,7 +47,8 @@ const mockNotes: Note[] = [
   {
     id: 2,
     title: "Content Ideas - Tech Reviews",
-    content: "## Tech Review Framework\n\n**Structure:**\n1. Hook with personal story\n2. Show the product in action\n3. Honest pros and cons\n4. Who it's perfect for\n5. Call to action\n\n**Upcoming reviews:**\n- New iPhone features for creators\n- Budget microphone comparison\n- Editing apps for beginners\n\n*Note: Focus on creator-specific use cases*",
+    content:
+      "## Tech Review Framework\n\n**Structure:**\n1. Hook with personal story\n2. Show the product in action\n3. Honest pros and cons\n4. Who it's perfect for\n5. Call to action\n\n**Upcoming reviews:**\n- New iPhone features for creators\n- Budget microphone comparison\n- Editing apps for beginners\n\n*Note: Focus on creator-specific use cases*",
     tags: ["tech", "reviews", "content", "structure"],
     createdAt: "2024-01-18",
     updatedAt: "2024-01-19",
@@ -55,7 +57,8 @@ const mockNotes: Note[] = [
   {
     id: 3,
     title: "Storytelling Techniques",
-    content: "Personal storytelling for social media:\n\n**The 3-Act Structure:**\n- Setup: Where I was\n- Conflict: What went wrong\n- Resolution: How I changed\n\n**Emotional hooks:**\n- Start with the end result\n- Use specific details\n- Include vulnerable moments\n- End with actionable advice\n\nRemember: People connect with struggle, not success.",
+    content:
+      "Personal storytelling for social media:\n\n**The 3-Act Structure:**\n- Setup: Where I was\n- Conflict: What went wrong\n- Resolution: How I changed\n\n**Emotional hooks:**\n- Start with the end result\n- Use specific details\n- Include vulnerable moments\n- End with actionable advice\n\nRemember: People connect with struggle, not success.",
     tags: ["storytelling", "social media", "engagement"],
     createdAt: "2024-01-15",
     updatedAt: "2024-01-16",
@@ -64,7 +67,8 @@ const mockNotes: Note[] = [
   {
     id: 4,
     title: "Video Production Tips",
-    content: "Essential tips for better video content:\n\n**Technical basics:**\n- Good lighting is more important than expensive cameras\n- Audio quality can make or break your content\n- Stable shots using tripods or phone gimbals\n\n**Content tips:**\n- Hook viewers in the first 3 seconds\n- Keep energy high throughout\n- End with clear call-to-action\n\n**Post-production:**\n- Quick cuts maintain attention\n- Add captions for accessibility\n- Consistent branding across videos",
+    content:
+      "Essential tips for better video content:\n\n**Technical basics:**\n- Good lighting is more important than expensive cameras\n- Audio quality can make or break your content\n- Stable shots using tripods or phone gimbals\n\n**Content tips:**\n- Hook viewers in the first 3 seconds\n- Keep energy high throughout\n- End with clear call-to-action\n\n**Post-production:**\n- Quick cuts maintain attention\n- Add captions for accessibility\n- Consistent branding across videos",
     tags: ["video", "production", "tips", "technical"],
     createdAt: "2024-01-12",
     updatedAt: "2024-01-14",
@@ -73,7 +77,8 @@ const mockNotes: Note[] = [
   {
     id: 5,
     title: "Social Media Trends 2024",
-    content: "Key trends to watch this year:\n\n**Platform trends:**\n- Short-form video continues to dominate\n- Live streaming becoming more interactive\n- AI-generated content gaining traction\n\n**Content trends:**\n- Authentic behind-the-scenes content\n- Educational micro-learning\n- Community-driven challenges\n\n**Monetization trends:**\n- Creator funds expanding\n- Direct fan support features\n- Product placement evolution",
+    content:
+      "Key trends to watch this year:\n\n**Platform trends:**\n- Short-form video continues to dominate\n- Live streaming becoming more interactive\n- AI-generated content gaining traction\n\n**Content trends:**\n- Authentic behind-the-scenes content\n- Educational micro-learning\n- Community-driven challenges\n\n**Monetization trends:**\n- Creator funds expanding\n- Direct fan support features\n- Product placement evolution",
     tags: ["trends", "social media", "2024", "strategy"],
     createdAt: "2024-01-10",
     updatedAt: "2024-01-11",
@@ -83,14 +88,11 @@ const mockNotes: Note[] = [
 
 // Helper functions
 const getSortValue = (note: Note, sortBy: string): string | number => {
-  const sortMap: Record<string, string | number> = {
-    title: note.title,
-    created: new Date(note.createdAt).getTime(),
-    updated: new Date(note.updatedAt).getTime(),
-    starred: note.starred ? 1 : 0,
-  };
-
-  return sortMap[sortBy] ?? note.title;
+  if (sortBy === "title") return note.title;
+  if (sortBy === "created") return new Date(note.createdAt).getTime();
+  if (sortBy === "updated") return new Date(note.updatedAt).getTime();
+  if (sortBy === "starred") return note.starred ? 1 : 0;
+  return note.title;
 };
 
 const sortNotes = (notes: Note[], sortBy: string, sortOrder: "asc" | "desc"): Note[] => {
@@ -126,10 +128,10 @@ export default function NotesPage() {
   const { setTopBarConfig } = useTopBarConfig();
 
   const handleCreateNote = () => {
-    window.location.href = "/dashboard/capture/notes";
+    window.location.href = "/dashboard/capture/new";
   };
 
-  useState(() => {
+  useEffect(() => {
     setTopBarConfig({
       title: "Notes",
       showTitle: true,
@@ -143,7 +145,7 @@ export default function NotesPage() {
         </div>
       ),
     });
-  });
+  }, [setTopBarConfig]);
 
   const handleSort = (column: string) => {
     if (sortBy === column) {
@@ -181,14 +183,14 @@ export default function NotesPage() {
     try {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      
+
       const updatedNotes = notes.filter((note) => !selectedNotes.has(note.id));
       setNotes(updatedNotes);
       setFilteredNotes(updatedNotes);
       setSelectedNotes(new Set());
-      
+
       toast.success(`Deleted ${selectedNotes.size} note(s)`);
-    } catch (error) {
+    } catch {
       toast.error("Failed to delete notes");
     } finally {
       setIsLoading(false);
@@ -196,12 +198,10 @@ export default function NotesPage() {
   };
 
   const handleToggleStar = async (noteId: number) => {
-    const updatedNotes = notes.map((note) =>
-      note.id === noteId ? { ...note, starred: !note.starred } : note
-    );
+    const updatedNotes = notes.map((note) => (note.id === noteId ? { ...note, starred: !note.starred } : note));
     setNotes(updatedNotes);
     setFilteredNotes(updatedNotes);
-    
+
     const note = updatedNotes.find((n) => n.id === noteId);
     toast.success(note?.starred ? "Note starred" : "Note unstarred");
   };
@@ -254,55 +254,64 @@ export default function NotesPage() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-7xl p-4 md:p-6">
-        <Card>
-          <CardContent className="p-6">
-            <TableLoading />
-          </CardContent>
-        </Card>
+      <div className="hide-scrollbar flex min-h-[calc(100vh-6rem)] flex-col overflow-y-auto">
+        <div className="flex flex-1 items-start justify-center py-[var(--space-4)] pt-[var(--space-8)]">
+          <div className="w-full max-w-7xl">
+            <Card>
+              <CardContent className="p-6">
+                <TableLoading />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-6">
-      {/* Controls */}
-      <NotesControls
-        totalNotes={notes.length}
-        selectedCount={selectedNotes.size}
-        onSelectAll={handleSelectAll}
-        onDeleteSelected={handleDeleteSelected}
-        onExportSelected={handleExportSelected}
-        columnVisibility={columnVisibility}
-        onColumnVisibilityChange={setColumnVisibility}
-        onSearch={(query) => {
-          const filtered = notes.filter(
-            (note) =>
-              note.title.toLowerCase().includes(query.toLowerCase()) ||
-              note.content.toLowerCase().includes(query.toLowerCase()) ||
-              note.tags.some((tag) => tag.toLowerCase().includes(query.toLowerCase()))
-          );
-          setFilteredNotes(filtered);
-        }}
-      />
-
-      {/* Table */}
-      <Card>
-        <CardContent className="p-0">
-          <NotesTable
-            notes={sortedNotes}
-            selectedNotes={selectedNotes}
-            sortBy={sortBy}
-            sortOrder={sortOrder}
-            columnVisibility={columnVisibility}
-            onSort={handleSort}
-            onSelectNote={handleSelectNote}
+    <div className="hide-scrollbar flex min-h-[calc(100vh-6rem)] flex-col overflow-y-auto">
+      {/* Main Content - Centered and Clean */}
+      <div className="flex flex-1 items-start justify-center py-[var(--space-4)] pt-[var(--space-8)]">
+        <div className="w-full max-w-7xl space-y-6">
+          {/* Controls */}
+          <NotesControls
+            totalNotes={notes.length}
+            selectedCount={selectedNotes.size}
             onSelectAll={handleSelectAll}
-            onToggleStar={handleToggleStar}
-            onEdit={handleEditNote}
+            onDeleteSelected={handleDeleteSelected}
+            onExportSelected={handleExportSelected}
+            columnVisibility={columnVisibility}
+            onColumnVisibilityChange={setColumnVisibility}
+            onSearch={(query) => {
+              const filtered = notes.filter(
+                (note) =>
+                  note.title.toLowerCase().includes(query.toLowerCase()) ||
+                  note.content.toLowerCase().includes(query.toLowerCase()) ||
+                  note.tags.some((tag) => tag.toLowerCase().includes(query.toLowerCase())),
+              );
+              setFilteredNotes(filtered);
+            }}
           />
-        </CardContent>
-      </Card>
+
+          {/* Table */}
+          <Card>
+            <CardContent className="p-0">
+              <NotesTable
+                notes={sortedNotes}
+                selectedNotes={selectedNotes}
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                columnVisibility={columnVisibility}
+                onSort={handleSort}
+                onSelectNote={handleSelectNote}
+                onSelectAll={handleSelectAll}
+                onToggleStar={handleToggleStar}
+                onEdit={handleEditNote}
+              />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

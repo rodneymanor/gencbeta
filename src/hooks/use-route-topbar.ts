@@ -35,5 +35,5 @@ export function useRouteTopBar() {
 // Alternative hook for manual configuration
 export function useTopBarConfig() {
   const { setConfig } = useTopBar();
-  return setConfig;
+  return { setTopBarConfig: setConfig };
 }

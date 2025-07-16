@@ -73,7 +73,7 @@ interface PageProps {
 export default function CollectionDetailPage({ params }: PageProps) {
   const [collectionId, setCollectionId] = useState<string>("");
   const [items] = useState(mockItems);
-  const setTopBarConfig = useTopBarConfig();
+  const { setTopBarConfig } = useTopBarConfig();
 
   useEffect(() => {
     params.then(({ collectionId }) => {

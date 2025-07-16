@@ -123,11 +123,56 @@ export function GhostWriter() {
     }
   };
 
-  const handleUseIdea = (idea: ContentIdea) => {
-    const queryParams = createScriptQueryParams(
-      idea as ContentIdea & { concept?: string; script?: string; peqCategory?: string },
-    );
-    router.push(`/dashboard/scripts/new?${queryParams.toString()}`);
+  const handleUseIdea = async (idea: ContentIdea) => {
+    if (!user) return;
+
+    try {
+      // Generate script directly from the idea
+      const token = await user.getIdToken();
+      console.log("🔄 [GhostWriter] Generating script for idea:", idea.hook);
+      
+      const response = await fetch("/api/script/speed-write", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          idea: idea.hook,
+          length: idea.estimatedDuration || "60",
+          type: "speed",
+        }),
+      });
+
+      console.log("🔄 [GhostWriter] Script generation response status:", response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("🔄 [GhostWriter] Script generation failed:", errorText);
+        throw new Error(`Failed to generate script: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("🔄 [GhostWriter] Script generation successful:", result);
+      
+      // Store the result in sessionStorage instead of URL params to avoid length issues
+      sessionStorage.setItem("speedWriteResults", JSON.stringify(result));
+      
+      // Navigate to the editor with the generated script
+      const queryParams = new URLSearchParams({
+        mode: "speed-write",
+        hasSpeedWriteResults: "true",
+        ideaId: idea.id,
+      });
+      
+      console.log("🔄 [GhostWriter] Navigating to editor with script data in sessionStorage");
+      router.push(`/dashboard/scripts/editor?${queryParams.toString()}`);
+    } catch (error) {
+      console.error("🔄 [GhostWriter] Script generation error:", error);
+      // Fallback to the original behavior if generation fails
+      const queryParams = createScriptQueryParams(idea);
+      router.push(`/dashboard/scripts/new?${queryParams.toString()}`);
+    }
   };
 
   const handleWriteMore = async () => {
@@ -275,7 +320,7 @@ export function GhostWriter() {
       </div>
       <div>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {data.ideas.map((idea) => (
+          {data.ideas.slice(0, 6).map((idea) => (
             <GhostWriterCard
               key={idea.id}
               idea={idea}
@@ -293,7 +338,7 @@ export function GhostWriter() {
             ) : (
               <RefreshCw className="mr-2 h-4 w-4" />
             )}
-            Write More
+            Load More
           </Button>
         </div>
       </div>
