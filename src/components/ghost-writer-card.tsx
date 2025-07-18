@@ -60,7 +60,7 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
     <div
       data-idea-id={idea.id}
       className={cn(
-        "bg-background text-foreground relative flex w-full max-w-lg flex-col overflow-hidden rounded-xl border border-border/50 shadow-md transition-all duration-300 ease-out",
+        "bg-background text-foreground border-border/50 relative flex w-full max-w-lg flex-col overflow-hidden rounded-xl border shadow-md transition-all duration-300 ease-out",
         isNavigating
           ? "-translate-y-8 scale-90 transform-gpu opacity-30 shadow-2xl"
           : "translate-y-0 scale-100 transform-gpu opacity-100 hover:shadow-lg",
@@ -114,7 +114,7 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
       </div>
 
       {/* Sticky footer with engagement metrics */}
-      <div className="border-t border-border/50 bg-background px-4 py-3 mt-auto">
+      <div className="border-border/50 bg-background mt-auto border-t px-4 py-3">
         <div className="text-muted-foreground flex items-center justify-between text-xs">
           <div className="flex items-center gap-1">
             <Heart className="h-3 w-3" />

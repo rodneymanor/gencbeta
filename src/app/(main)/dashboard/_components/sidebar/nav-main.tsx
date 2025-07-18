@@ -196,7 +196,7 @@ export function NavMain({
                 {/* Plus Button - Direct Link to Scripts New */}
                 <Link href="/dashboard/scripts/new">
                   <div className="group cursor-pointer">
-                    <div className="bg-[#e6e8e1] hover:bg-[#e6e8e1]/80 flex h-9 w-9 items-center justify-center rounded-lg px-2 py-2 transition-all duration-200 hover:scale-105">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#e6e8e1] px-2 py-2 transition-all duration-200 hover:scale-105 hover:bg-[#e6e8e1]/80">
                       <Plus className="text-muted-foreground h-6 w-6 transition-transform" />
                     </div>
                   </div>

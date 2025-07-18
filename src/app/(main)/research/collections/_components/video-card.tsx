@@ -159,7 +159,6 @@ export const VideoCard = memo<VideoCardProps>(
                 videoTitle={video.title}
               />
             )}
-
           </div>
 
           {/* Action Buttons */}

@@ -285,11 +285,11 @@ Generate ideas using the "Problems, Excuses, Questions" (PEQ) framework, address
 
 Organize into these 5 content pillars, with 1-2 ideas per pillar:
 
-1. **hyper_focused_value**: In-depth, actionable how-to guidance
-2. **quick_hit_value**: Quick, high-impact tips for immediate wins  
-3. **major_perspective**: Industry insights that shift perspectives
-4. **the_trend**: Current events connected to expertise
-5. **inspiration_bomb**: Powerful content that inspires action
+1. HYPER_FOCUSED_VALUE: In-depth, actionable how-to guidance
+2. QUICK_HIT_VALUE: Quick, high-impact tips for immediate wins  
+3. MAJOR_PERSPECTIVE: Industry insights that shift perspectives
+4. THE_TREND: Current events connected to expertise
+5. INSPIRATION_BOMB: Powerful content that inspires action
 
 REQUIRED JSON FORMAT:
 {
@@ -315,6 +315,12 @@ ${
     ? `IMPORTANT: Each hook must be designed to work with the ${activeVoice.name} voice templates. The script_outline should follow the Hook→Bridge→Golden Nugget→WTA structure that matches the voice template patterns.`
     : `Make each idea specific to the brand voice (${brandProfile.brandVoice}) and directly address the problems/excuses/questions from the brand profile.`
 }
+
+CRITICAL FORMATTING RULES:
+- DO NOT use asterisks (*) or double asterisks (**) anywhere in your response
+- Write all text in plain format without markdown formatting
+- Use clean, readable text without special characters for emphasis
+- Keep all content natural and conversational
 
 Ensure variety in difficulty and duration.`;
   }

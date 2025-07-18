@@ -126,19 +126,19 @@ export class EnhancedGhostWriterService {
       "IF-HERE IS WHAT I'D DO",
       "BEFORE",
       "WHENEVER",
-      
+
       // Audience-focused hooks
       "YOU-YOUR",
       "YOU KNOW WHEN YOU",
       "YOU KNOW THOSE",
       "HAVE YOU EVER",
-      
+
       // Personal story hooks
       "ME-YOU",
       "I-YOU",
       "I-EVEN THOUGH I AM NOT",
       "HATE",
-      
+
       // Action & list hooks
       "SHOULD/MUST",
       "DO",
@@ -147,7 +147,7 @@ export class EnhancedGhostWriterService {
       "TOP 3",
       "THIS",
       "THIS IS HOW/WHAT",
-      
+
       // Reveal & insight hooks
       "SIGNS/TRAITS",
       "SECRET",
@@ -158,10 +158,10 @@ export class EnhancedGhostWriterService {
 
     // Shuffle the hook styles to ensure different patterns each generation
     const shuffledHookStyles = [...allHookStyleCategories].sort(() => Math.random() - 0.5);
-    
+
     // Select the first 9 unique hook styles for this generation
     const hookStyleCategories = shuffledHookStyles.slice(0, Math.min(9, concepts.length));
-    
+
     console.log("🎭 [EnhancedGhostWriter] Selected hook styles for this generation:", hookStyleCategories);
 
     for (let i = 0; i < concepts.length; i++) {
@@ -438,6 +438,12 @@ GUIDELINES:
 - Focus on transformation and results
 - Use the brand personality to inform tone and style
 
+CRITICAL FORMATTING RULES:
+- DO NOT use asterisks (*) or double asterisks (**) anywhere in your response
+- Write all text in plain format without markdown formatting
+- Use clean, readable text without special characters for emphasis
+- Keep all content natural and conversational
+
 FINAL REMINDER: Your response must be PURE JSON starting with { and ending with }. No other text whatsoever.`;
   }
 
@@ -572,23 +578,23 @@ FINAL REMINDER: Your response must be PURE JSON starting with { and ending with 
     const templatePriority = [
       // Conditional hooks
       "IF-AND-THEN",
-      "IF-BUT-ONE", 
+      "IF-BUT-ONE",
       "IF-HERE IS WHAT I'D DO",
       "BEFORE",
       "WHENEVER",
-      
+
       // Audience-focused hooks
       "YOU-YOUR",
       "YOU KNOW WHEN YOU",
       "YOU KNOW THOSE",
       "HAVE YOU EVER",
-      
+
       // Personal story hooks
       "ME-YOU",
       "I-YOU",
       "I-EVEN THOUGH I AM NOT",
       "HATE",
-      
+
       // Action & list hooks
       "SHOULD/MUST",
       "DO",
@@ -597,7 +603,7 @@ FINAL REMINDER: Your response must be PURE JSON starting with { and ending with 
       "TOP 3",
       "THIS",
       "THIS IS HOW/WHAT",
-      
+
       // Reveal & insight hooks
       "SIGNS/TRAITS",
       "SECRET",
@@ -666,16 +672,16 @@ FINAL REMINDER: Your response must be PURE JSON starting with { and ending with 
         id: libraryDoc.id,
         userId,
         originalIdeaId: idea.id,
-        concept: idea.concept,
-        hook: idea.hook,
-        hookTemplate: idea.hookTemplate,
-        hookStrength: idea.hookStrength,
-        peqCategory: idea.peqCategory,
-        sourceText: idea.sourceText,
-        targetAudience: idea.targetAudience,
-        estimatedDuration: idea.estimatedDuration,
-        wordCount: idea.wordCount,
-        originalCycleId: idea.cycleId,
+        concept: idea.concept || "",
+        hook: idea.hook || idea.concept || "", // Fallback to concept if hook is undefined
+        hookTemplate: idea.hookTemplate || "Concept",
+        hookStrength: idea.hookStrength || 0,
+        peqCategory: idea.peqCategory || "problem",
+        sourceText: idea.sourceText || "",
+        targetAudience: idea.targetAudience || "",
+        estimatedDuration: idea.estimatedDuration || "60",
+        wordCount: idea.wordCount || 0,
+        originalCycleId: idea.cycleId || "",
         savedToLibraryAt: new Date().toISOString(),
       };
 

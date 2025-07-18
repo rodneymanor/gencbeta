@@ -158,10 +158,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         onMouseEnter={handleSidebarMouseEnter}
         onMouseLeave={handleSidebarMouseLeave}
       />
-      <Sidebar
-        {...props}
-        className="relative z-[100] transition-all duration-200"
-      >
+      <Sidebar {...props} className="relative z-[100] transition-all duration-200">
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>

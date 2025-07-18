@@ -4,6 +4,7 @@ import { authenticateApiKey } from "@/lib/api-key-auth";
 import { CreditsService } from "@/lib/credits-service";
 import { ScriptService } from "@/lib/services/script-generation-service";
 import { trackApiUsageAdmin } from "@/lib/usage-tracker-admin";
+import { FeatureFlagService } from "@/lib/feature-flags";
 
 // Validate environment setup
 if (!process.env.GEMINI_API_KEY) {
@@ -51,6 +52,8 @@ interface SpeedWriteResponse {
   optionB?: ScriptOption | null;
   error?: string;
   processingTime?: number;
+  generationMethod?: "v1" | "v2";
+  featureFlagEnabled?: boolean;
 }
 
 // Helper functions for transformation
@@ -126,6 +129,54 @@ function transformToScriptOption(
   return transformed;
 }
 
+/**
+ * Handle V2 generation by forwarding to V2 endpoint
+ */
+async function handleV2Generation(request: NextRequest): Promise<NextResponse<SpeedWriteResponse>> {
+  try {
+    // Clone the request to forward to V2 endpoint
+    const body = await request.json();
+    
+    // Create a new request for the V2 endpoint
+    const v2Request = new Request(
+      new URL('/api/script/speed-write/v2', request.url),
+      {
+        method: 'POST',
+        headers: request.headers,
+        body: JSON.stringify(body),
+      }
+    );
+
+    // Import V2 POST handler dynamically to avoid circular imports
+    const { POST: V2POST } = await import('./v2/route');
+    
+    // Call V2 endpoint
+    const v2Response = await V2POST(v2Request as NextRequest);
+    
+    // Get response data
+    const v2Data = await v2Response.json();
+    
+    // Add V2 indicators to response
+    return NextResponse.json({
+      ...v2Data,
+      generationMethod: "v2",
+      featureFlagEnabled: true,
+    }, { status: v2Response.status });
+    
+  } catch (error) {
+    console.error('❌ [V2 FORWARD] Error forwarding to V2:', error);
+    
+    // Fallback to V1 if V2 forwarding fails
+    console.log('🔄 [V2 FALLBACK] V2 forwarding failed, continuing with V1');
+    return NextResponse.json({
+      success: false,
+      error: 'V2 generation failed, please try again',
+      generationMethod: "v1",
+      featureFlagEnabled: true,
+    }, { status: 500 });
+  }
+}
+
 export async function POST(request: NextRequest): Promise<NextResponse<SpeedWriteResponse>> {
   const startTime = Date.now();
 
@@ -139,6 +190,15 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
     }
 
     const { user } = authResult;
+
+    // Check V2 feature flag
+    const useV2 = await FeatureFlagService.isEnabled(user.uid, 'v2_script_generation');
+    
+    if (useV2) {
+      console.log('🚀 [V1->V2 REDIRECT] User enabled for V2, redirecting to V2 endpoint');
+      // Forward request to V2 endpoint
+      return await handleV2Generation(request);
+    }
 
     const body: SpeedWriteRequest = await request.json();
 
@@ -356,6 +416,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
       optionA: transformedResult.optionA,
       optionB: transformedResult.optionB,
       processingTime,
+      generationMethod: "v1" as const,
+      featureFlagEnabled: false,
       ...(errorMessage && { error: errorMessage }),
     };
 

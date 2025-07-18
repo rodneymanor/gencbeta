@@ -41,6 +41,7 @@ export function createDurationOptimizedVariables(
     tone: input.tone,
     platform: input.platform,
     includeDurationOptimization: input.enableDurationOptimization !== false,
+    scriptType: input.type, // Pass script type for hook guidelines
   });
 }
 

@@ -159,10 +159,36 @@ export class BasePromptClass {
         this.definition.config.responseType === "json"
       ) {
         try {
+          // Check if we got raw prompt template instead of JSON (common Gemini issue)
+          if (
+            typeof response.content === "string" &&
+            response.content.length > 1000 &&
+            response.content.includes("HOOK GUIDELINES") &&
+            response.content.includes("BRIDGE GUIDELINES") &&
+            response.content.includes("GOLDEN NUGGET GUIDELINES")
+          ) {
+            console.error(
+              `❌ [Prompt] AI returned raw prompt template instead of JSON for prompt ${this.definition.id}`,
+            );
+            return {
+              success: false,
+              error: "AI model returned invalid response format. Please try again.",
+              variables: options.variables,
+              prompt,
+              responseTime: response.responseTime,
+            };
+          }
+
           // Additional JSON validation could be added here
           content = typeof response.content === "string" ? JSON.parse(response.content) : response.content;
         } catch (parseError) {
           console.warn(`⚠️ [Prompt] JSON parsing failed for prompt ${this.definition.id}:`, parseError);
+          console.warn(`⚠️ [Prompt] Raw content type:`, typeof response.content);
+          console.warn(`⚠️ [Prompt] Raw content length:`, response.content?.length);
+          console.warn(
+            `⚠️ [Prompt] Raw content sample:`,
+            typeof response.content === "string" ? response.content.substring(0, 200) : response.content,
+          );
           // Continue with raw content
         }
       }

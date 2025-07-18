@@ -249,6 +249,12 @@ Generate 10 diverse, high-performing hooks using different templates from above.
 4. Target viral potential for short-form video
 5. Create immediate curiosity and value promise
 
+CRITICAL FORMATTING RULES:
+- DO NOT use asterisks (*) or double asterisks (**) anywhere in your response
+- Write all hook text in plain format without markdown formatting
+- Use clean, readable text without special characters for emphasis
+- Keep all content natural and conversational
+
 Format your response as a JSON array with the following structure:
 {
   "hooks": [

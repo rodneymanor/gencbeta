@@ -10,6 +10,7 @@ import {
   Chrome,
   Wrench,
   Pen,
+  FlaskConical,
   type LucideIcon,
 } from "lucide-react";
 
@@ -54,6 +55,7 @@ export const sidebarItems: NavGroup[] = [
           { title: "Creators", url: "/dashboard/creators", icon: Users },
           { title: "Settings", url: "/dashboard/settings", icon: Wrench },
           { title: "Chrome Extension", url: "/dashboard/tools/chrome-extension", icon: Chrome },
+          { title: "Script Test (V2)", url: "/dashboard/test/script-generation", icon: FlaskConical },
           { title: "Admin", url: "/dashboard/admin", icon: Settings },
         ],
       },
@@ -81,11 +83,7 @@ export const sidebarItems: NavGroup[] = [
         title: "Research",
         url: "/research/collections",
         icon: ResearchIcon,
-        subItems: [
-          { title: "Collections", url: "/research/collections", icon: FolderOpen },
-          { title: "Creator Spotlight", url: "/research/creator-spotlight", icon: Users },
-          { title: "AI Ideas", url: "/research/aideas", icon: Sparkles },
-        ],
+        subItems: [{ title: "Collections", url: "/research/collections", icon: FolderOpen }],
       },
     ],
   },

@@ -65,6 +65,94 @@ export function parseInlineLabels(content: string): ScriptElements {
     wta: "",
   };
 
+  // First try to split by inline labels that appear within the text
+  // Example: "Want unlimited income? (Hook) It's now possible... (Bridge) Content... (Golden Nugget) Share this! (CTA)"
+  if (
+    content.includes("(Hook)") ||
+    content.includes("(Bridge)") ||
+    content.includes("(Golden Nugget)") ||
+    content.includes("(CTA)")
+  ) {
+    console.log(`🔍 [parseInlineLabels] Parsing mid-text inline labels`);
+
+    // Split the content by the labels and extract components
+    const parts = content.split(/\s*\((Hook|Bridge|Golden Nugget|CTA|WTA)\)\s*/i);
+
+    if (parts.length >= 2) {
+      // parts[0] is before first label, parts[1] is first label, parts[2] is between first and second label, etc.
+      let currentComponent = "";
+
+      for (let i = 0; i < parts.length; i++) {
+        if (i % 2 === 0) {
+          // Even indices are content
+          currentComponent += parts[i];
+        } else {
+          // Odd indices are labels - assign the accumulated content to the component
+          const label = parts[i].toLowerCase();
+          const content = currentComponent.trim();
+
+          if (label === "hook") {
+            result.hook = content;
+          } else if (label === "bridge") {
+            result.bridge = content;
+          } else if (label === "golden nugget") {
+            result.goldenNugget = content;
+          } else if (label === "cta" || label === "wta") {
+            result.wta = content;
+          }
+
+          currentComponent = "";
+        }
+      }
+
+      // If there's remaining content, it goes to WTA
+      if (currentComponent.trim() && !result.wta) {
+        result.wta = currentComponent.trim();
+      }
+
+      console.log(`🔍 [parseInlineLabels] Split parsing result:`, result);
+
+      // If we got at least some components, return
+      if (result.hook || result.bridge || result.goldenNugget || result.wta) {
+        return result;
+      }
+    }
+  }
+
+  // Try to parse labels at the end of lines (V2 format)
+  // Example: "Is AI about to take over your job? (Hook)"
+  const endLabelPattern = /^(.+?)\s*\((Hook|Bridge|Golden Nugget|CTA|WTA)\)\s*$/i;
+  const lines = content
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+
+  let foundEndLabels = false;
+  for (const line of lines) {
+    const match = line.match(endLabelPattern);
+    if (match) {
+      foundEndLabels = true;
+      const [, text, label] = match;
+      const labelLower = label.toLowerCase();
+
+      if (labelLower === "hook") {
+        result.hook = text.trim();
+      } else if (labelLower === "bridge") {
+        result.bridge = text.trim();
+      } else if (labelLower === "golden nugget") {
+        result.goldenNugget = text.trim();
+      } else if (labelLower === "cta" || labelLower === "wta") {
+        result.wta = text.trim();
+      }
+    }
+  }
+
+  // If we found end labels and have at least hook and wta (minimum required), return
+  if (foundEndLabels && result.hook && result.wta) {
+    return result;
+  }
+
+  // Otherwise, try the original format with labels at the beginning
   // Define label patterns with case-insensitive matching
   const labelPatterns = [
     { key: "hook", pattern: /\(Hook\)\s*/i },
@@ -74,16 +162,16 @@ export function parseInlineLabels(content: string): ScriptElements {
   ];
 
   // Split content by paragraphs and process each section
-  const paragraphs = content.split(/\n\s*\n/).filter(p => p.trim());
-  
+  const paragraphs = content.split(/\n\s*\n/).filter((p) => p.trim());
+
   for (const paragraph of paragraphs) {
     const trimmedParagraph = paragraph.trim();
-    
+
     // Check which label this paragraph starts with
     for (const { key, pattern } of labelPatterns) {
       if (pattern.test(trimmedParagraph)) {
         // Remove the label and extract the content
-        const cleanContent = trimmedParagraph.replace(pattern, '').trim();
+        const cleanContent = trimmedParagraph.replace(pattern, "").trim();
         result[key as keyof ScriptElements] = cleanContent;
         break;
       }

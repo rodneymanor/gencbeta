@@ -282,7 +282,9 @@ export function ExpandableSidebarPanel({
         "bg-sidebar border-sidebar-border backdrop-blur-sm",
         "group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-lg",
         "transition-all duration-300 ease-out",
-        isExpanded ? "z-[90] translate-x-0 opacity-100 pointer-events-auto" : "z-[80] translate-x-0 opacity-0 pointer-events-none",
+        isExpanded
+          ? "pointer-events-auto z-[90] translate-x-0 opacity-100"
+          : "pointer-events-none z-[80] translate-x-0 opacity-0",
         className,
       )}
       style={{
@@ -446,7 +448,7 @@ export function ExpandableSidebarPanel({
                 {section.title === "Latest Scripts" ? (
                   <a
                     href="/dashboard/scripts"
-                    className="text-sidebar-foreground/60 hover:text-sidebar-foreground flex h-8 shrink-0 items-center justify-between rounded-md px-2 text-xs font-semibold tracking-wider uppercase transition-colors duration-200 cursor-pointer hover:bg-sidebar-accent/50"
+                    className="text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 flex h-8 shrink-0 cursor-pointer items-center justify-between rounded-md px-2 text-xs font-semibold tracking-wider uppercase transition-colors duration-200"
                   >
                     <span>{section.title}</span>
                     <ChevronRight className="h-3 w-3 opacity-50 transition-opacity hover:opacity-100" />
@@ -454,7 +456,7 @@ export function ExpandableSidebarPanel({
                 ) : section.title === "Latest Notes" ? (
                   <a
                     href="/dashboard/capture/notes"
-                    className="text-sidebar-foreground/60 hover:text-sidebar-foreground flex h-8 shrink-0 items-center justify-between rounded-md px-2 text-xs font-semibold tracking-wider uppercase transition-colors duration-200 cursor-pointer hover:bg-sidebar-accent/50"
+                    className="text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 flex h-8 shrink-0 cursor-pointer items-center justify-between rounded-md px-2 text-xs font-semibold tracking-wider uppercase transition-colors duration-200"
                   >
                     <span>{section.title}</span>
                     <ChevronRight className="h-3 w-3 opacity-50 transition-opacity hover:opacity-100" />
@@ -597,7 +599,7 @@ export const defaultSidebarSections: NavigationSection[] = [
         icon: sampleIcons.script,
       },
       {
-        id: "script-2", 
+        id: "script-2",
         title: "Product Launch Video",
         href: "/dashboard/scripts/2",
         icon: sampleIcons.script,
@@ -605,7 +607,7 @@ export const defaultSidebarSections: NavigationSection[] = [
       {
         id: "script-3",
         title: "Tutorial Content",
-        href: "/dashboard/scripts/3", 
+        href: "/dashboard/scripts/3",
         icon: sampleIcons.script,
       },
       {

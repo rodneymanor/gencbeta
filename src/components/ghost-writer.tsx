@@ -130,7 +130,7 @@ export function GhostWriter() {
       // Generate script directly from the idea
       const token = await user.getIdToken();
       console.log("🔄 [GhostWriter] Generating script for idea:", idea.hook);
-      
+
       const response = await fetch("/api/script/speed-write", {
         method: "POST",
         headers: {
@@ -154,17 +154,17 @@ export function GhostWriter() {
 
       const result = await response.json();
       console.log("🔄 [GhostWriter] Script generation successful:", result);
-      
+
       // Store the result in sessionStorage instead of URL params to avoid length issues
       sessionStorage.setItem("speedWriteResults", JSON.stringify(result));
-      
+
       // Navigate to the editor with the generated script
       const queryParams = new URLSearchParams({
         mode: "speed-write",
         hasSpeedWriteResults: "true",
         ideaId: idea.id,
       });
-      
+
       console.log("🔄 [GhostWriter] Navigating to editor with script data in sessionStorage");
       router.push(`/dashboard/scripts/editor?${queryParams.toString()}`);
     } catch (error) {

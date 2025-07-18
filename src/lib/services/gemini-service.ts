@@ -20,6 +20,7 @@ export interface GeminiRequestConfig {
   topP?: number;
   topK?: number;
   responseType?: "text" | "json";
+  jsonSchema?: any; // JSON schema for structured responses
   systemInstruction?: string;
   timeout?: number;
   retries?: number;
@@ -92,6 +93,12 @@ export class GeminiService {
       // Add JSON response type if requested
       if (config.responseType === "json") {
         generationConfig.responseMimeType = "application/json";
+
+        // Add JSON schema if provided
+        // NOTE: Temporarily disabled due to compatibility issues
+        // if (config.jsonSchema) {
+        //   generationConfig.responseSchema = config.jsonSchema;
+        // }
       }
 
       const modelInstance = genAI.getGenerativeModel({
@@ -118,6 +125,7 @@ export class GeminiService {
     for (let attempt = 0; attempt <= config.retries; attempt++) {
       try {
         console.log(`🤖 [Gemini] Attempt ${attempt + 1}/${config.retries + 1} with model ${config.model}`);
+        console.log(`🤖 [Gemini] Response type: ${config.responseType}, Has JSON schema: ${!!config.jsonSchema}`);
 
         const model = this.getModel(config.model, config);
         const result = await this.withTimeout(model.generateContent(request.prompt), config.timeout);

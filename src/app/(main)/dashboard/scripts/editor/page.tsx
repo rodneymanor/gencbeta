@@ -49,7 +49,12 @@ export default function ScriptEditorPage() {
   const hasSpeedWriteResults = searchParams.get("hasSpeedWriteResults") === "true";
   const scriptData = searchParams.get("scriptData");
 
-  console.log("📊 [EDITOR] Component mounted with params:", { mode, scriptId, hasSpeedWriteResults, scriptData: scriptData ? "present" : "not present" });
+  console.log("📊 [EDITOR] Component mounted with params:", {
+    mode,
+    scriptId,
+    hasSpeedWriteResults,
+    scriptData: scriptData ? "present" : "not present",
+  });
 
   // State
   const [script, setScript] = useState("");
@@ -138,7 +143,7 @@ export default function ScriptEditorPage() {
   useEffect(() => {
     if (scriptData) {
       console.log("📊 [EDITOR] Processing scriptData from URL parameter");
-      
+
       try {
         const data: SpeedWriteResponse = JSON.parse(decodeURIComponent(scriptData));
         console.log("📊 [EDITOR] Parsed script data:", data);
@@ -148,12 +153,11 @@ export default function ScriptEditorPage() {
 
         setSpeedWriteData(data);
         setShowScriptOptions(true);
-        
+
         // Clean up URL parameter by replacing current history entry
         const url = new URL(window.location.href);
-        url.searchParams.delete('scriptData');
-        window.history.replaceState({}, '', url.toString());
-        
+        url.searchParams.delete("scriptData");
+        window.history.replaceState({}, "", url.toString());
       } catch (error) {
         console.error("Failed to parse script data from URL:", error);
         toast.error("Failed to load script options");

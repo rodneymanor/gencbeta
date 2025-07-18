@@ -9,6 +9,11 @@ import { adminDb } from "./firebase-admin";
 
 export class NegativeKeywordsService {
   private static readonly COLLECTION_NAME = "user_negative_keywords";
+  
+  // In-memory cache for negative keywords with TTL
+  private static keywordCache = new Map<string, { keywords: string[], timestamp: number }>();
+  private static readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+  private static readonly DEBUG = process.env.NODE_ENV === 'development';
 
   /**
    * Get user's negative keyword settings
@@ -75,6 +80,12 @@ export class NegativeKeywordsService {
 
       await adminDb.collection(this.COLLECTION_NAME).doc(existingSettings.id!).update(updatedData);
 
+      // Invalidate cache for this user
+      this.keywordCache.delete(userId);
+      if (this.DEBUG) {
+        console.log("🗑️ [NegativeKeywords] Cache invalidated for user:", userId);
+      }
+
       console.log("✅ [NegativeKeywords] Settings updated successfully");
 
       return {
@@ -89,11 +100,40 @@ export class NegativeKeywordsService {
 
   /**
    * Get effective negative keywords for a user (for use in AI prompts)
+   * Implements caching to avoid database hits on every script generation
    */
   static async getEffectiveNegativeKeywordsForUser(userId: string): Promise<string[]> {
     try {
+      // Check cache first
+      const cacheKey = userId;
+      const cached = this.keywordCache.get(cacheKey);
+      
+      if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
+        if (this.DEBUG) {
+          console.log("🎯 [NegativeKeywords] Cache hit for user:", userId);
+        }
+        return cached.keywords;
+      }
+      
+      // Cache miss - fetch from database
+      if (this.DEBUG) {
+        console.log("🔍 [NegativeKeywords] Cache miss, fetching from database for user:", userId);
+      }
+      
       const userSettings = await this.getUserNegativeKeywords(userId);
-      return getEffectiveNegativeKeywords(userSettings.settings);
+      const keywords = getEffectiveNegativeKeywords(userSettings.settings);
+      
+      // Store in cache
+      this.keywordCache.set(cacheKey, { 
+        keywords, 
+        timestamp: Date.now() 
+      });
+      
+      if (this.DEBUG) {
+        console.log(`✅ [NegativeKeywords] Cached ${keywords.length} keywords for user:`, userId);
+      }
+      
+      return keywords;
     } catch (error) {
       console.error("❌ [NegativeKeywords] Error getting effective keywords:", error);
       // Return empty array as fallback to not break script generation
@@ -203,6 +243,47 @@ export class NegativeKeywordsService {
     } catch (error) {
       console.error("❌ [NegativeKeywords] Error resetting to default:", error);
       throw error;
+    }
+  }
+
+  /**
+   * Clear expired cache entries (optional cleanup method)
+   */
+  static clearExpiredCache(): void {
+    const now = Date.now();
+    const expiredKeys: string[] = [];
+    
+    this.keywordCache.forEach((cache, userId) => {
+      if (now - cache.timestamp >= this.CACHE_TTL) {
+        expiredKeys.push(userId);
+      }
+    });
+    
+    expiredKeys.forEach(userId => {
+      this.keywordCache.delete(userId);
+      if (this.DEBUG) {
+        console.log("🧹 [NegativeKeywords] Expired cache entry removed for user:", userId);
+      }
+    });
+  }
+
+  /**
+   * Get cache statistics (for monitoring)
+   */
+  static getCacheStats(): { size: number; hitRate?: number } {
+    return {
+      size: this.keywordCache.size,
+      // Hit rate would require tracking hits/misses - implement if needed for monitoring
+    };
+  }
+
+  /**
+   * Clear entire cache (for testing or emergency cleanup)
+   */
+  static clearCache(): void {
+    this.keywordCache.clear();
+    if (this.DEBUG) {
+      console.log("🧹 [NegativeKeywords] All cache entries cleared");
     }
   }
 }

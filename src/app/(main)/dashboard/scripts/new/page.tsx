@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Mic } from "lucide-react";
 
 import { GhostWriter } from "@/components/ghost-writer";
+import { OnboardingPulseTrigger } from "@/components/onboarding/onboarding-pulse-trigger";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -241,8 +242,58 @@ export default function NewScriptPage() {
     );
   }
 
+  const handleOnboardingComplete = async (data: { description: string; speaksAbout: string; instructions: string }) => {
+    try {
+      // TODO: Save onboarding data to backend
+      console.log("Onboarding completed:", data);
+
+      // Here you would typically save to your backend
+      // await fetch("/api/user/onboarding", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify(data),
+      // });
+    } catch (error) {
+      console.error("Failed to save onboarding data:", error);
+      throw error;
+    }
+  };
+
+  const handleGenerateTopics = async (description: string): Promise<string> => {
+    try {
+      // TODO: Implement AI topic generation
+      console.log("Generating topics for:", description);
+
+      // Mock topic generation - replace with actual API call
+      const mockTopics = [
+        "Content creation strategies",
+        "AI-powered writing techniques",
+        "Social media optimization",
+        "Personal branding tips",
+        "Audience engagement methods",
+      ].join(", ");
+
+      // Simulate API delay
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      return mockTopics;
+    } catch (error) {
+      console.error("Failed to generate topics:", error);
+      throw error;
+    }
+  };
+
   return (
     <div className="hide-scrollbar flex min-h-[calc(100vh-6rem)] flex-col overflow-y-auto">
+      {/* Onboarding Pulse Trigger */}
+      <OnboardingPulseTrigger
+        position="bottom-right"
+        tooltip="Get AI-powered content ideas ✨"
+        onComplete={handleOnboardingComplete}
+        onGenerateTopics={handleGenerateTopics}
+        onboardingImageSrc="/img/ai_hand.png"
+      />
+
       {/* Hero Section - Vertically Centered */}
       <div className="flex flex-1 items-center justify-center py-[var(--space-4)] pt-[var(--space-8)]">
         <div className="flex w-full flex-col items-center justify-center">
@@ -275,7 +326,7 @@ export default function NewScriptPage() {
             <div className="mb-[var(--space-2)] flex justify-center">
               <Badge
                 variant="outline"
-                className="rounded-xl border border-primary/20 text-primary bg-primary/10 px-[var(--space-2)] py-[var(--space-1)] text-sm"
+                className="border-primary/20 text-primary bg-primary/10 rounded-xl border px-[var(--space-2)] py-[var(--space-1)] text-sm"
               >
                 <Mic className="mr-[var(--space-1)] h-3 w-3" />
                 {currentVoice} Voice

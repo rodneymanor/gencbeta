@@ -9,7 +9,20 @@ import { useState, useEffect, useCallback, useMemo, useTransition, useRef, memo,
 import { useSearchParams, useRouter } from "next/navigation";
 
 import { motion } from "framer-motion";
-import { Edit3, Loader2, Check, Menu, MoreHorizontal, Settings, FolderOpen, Star, StarOff, Trash2, CheckSquare, X } from "lucide-react";
+import {
+  Edit3,
+  Loader2,
+  Check,
+  Menu,
+  MoreHorizontal,
+  Settings,
+  FolderOpen,
+  Star,
+  StarOff,
+  Trash2,
+  CheckSquare,
+  X,
+} from "lucide-react";
 import { IconBookmark } from "@tabler/icons-react";
 import { toast } from "sonner";
 
@@ -266,7 +279,7 @@ function CollectionsPageContent() {
   // Dialog refs for programmatic triggering
   const createCollectionDialogRef = useRef<HTMLButtonElement>(null);
   const addVideoDialogRef = useRef<HTMLButtonElement>(null);
-  
+
   // Modal states
   const [manageCollectionsOpen, setManageCollectionsOpen] = useState(false);
 
@@ -717,7 +730,7 @@ function CollectionsPageContent() {
   useEffect(() => {
     const isAdmin = userProfile?.role === "coach" || userProfile?.role === "super_admin";
     const ownedCollections = user ? collections.filter((c) => c.userId === user.uid) : [];
-    
+
     setTopBarConfig({
       title: "Collections",
       showTitle: true,
@@ -748,15 +761,23 @@ function CollectionsPageContent() {
                 {selectedCollection && (
                   <>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem 
+                    <DropdownMenuItem
                       onClick={async () => {
                         if (!user || !selectedCollection?.id) return;
-                        await CollectionsService.setFavorite(user.uid, selectedCollection.id, !selectedCollection.favorite);
+                        await CollectionsService.setFavorite(
+                          user.uid,
+                          selectedCollection.id,
+                          !selectedCollection.favorite,
+                        );
                         handleCollectionUpdated();
                       }}
                       className="cursor-pointer"
                     >
-                      {selectedCollection.favorite ? <StarOff className="mr-3 h-4 w-4" /> : <Star className="mr-3 h-4 w-4" />}
+                      {selectedCollection.favorite ? (
+                        <StarOff className="mr-3 h-4 w-4" />
+                      ) : (
+                        <Star className="mr-3 h-4 w-4" />
+                      )}
                       <span>{selectedCollection.favorite ? "Remove Favorite" : "Add to Favorites"}</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem className="cursor-pointer">
@@ -798,7 +819,16 @@ function CollectionsPageContent() {
         </div>
       ),
     });
-  }, [setTopBarConfig, handleAddVideo, selectedCollection, user, userProfile, manageMode, handleCollectionUpdated, collections]);
+  }, [
+    setTopBarConfig,
+    handleAddVideo,
+    selectedCollection,
+    user,
+    userProfile,
+    manageMode,
+    handleCollectionUpdated,
+    collections,
+  ]);
 
   // Video favoriting handler
   const handleVideoFavorite = useCallback(
@@ -897,7 +927,7 @@ function CollectionsPageContent() {
   return (
     <div className="mx-auto flex h-full max-w-7xl gap-4 p-4 md:p-6">
       {/* Left side: Main content (Video Grid) */}
-      <div className="flex-1 space-y-4 min-w-0">
+      <div className="min-w-0 flex-1 space-y-4">
         <header className="mb-6 space-y-4">
           {/* Primary Content Area */}
           <div className="flex items-start justify-between gap-4">
@@ -958,7 +988,6 @@ function CollectionsPageContent() {
                 )}
               </p>
             </div>
-
           </div>
         </header>
 
@@ -1063,7 +1092,7 @@ function CollectionsPageContent() {
       </div>
 
       {/* Right sidebar: Category Chooser */}
-      <div className="flex-shrink-0" style={{ width: '200px' }}>
+      <div className="flex-shrink-0" style={{ width: "200px" }}>
         <CategoryChooser
           items={[
             { id: "all", name: "All Videos", description: "Browse all your videos" },
@@ -1101,7 +1130,7 @@ function CollectionsPageContent() {
       >
         <button ref={addVideoDialogRef} style={{ display: "none" }} />
       </AddVideoDialog>
-      
+
       <ManageCollectionsModal
         open={manageCollectionsOpen}
         onOpenChange={setManageCollectionsOpen}
