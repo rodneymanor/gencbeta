@@ -19,6 +19,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { useCollectionsSidebar } from "@/hooks/use-collections-sidebar";
 import { sidebarItems } from "@/navigation/sidebar/sidebar-items";
 
+import { useDynamicSidebarSections } from "./dynamic-sidebar-sections";
 import { ExpandableSidebarPanel, defaultSidebarSections, SidebarItemWithSubs } from "./expandable-sidebar-panel";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
@@ -27,6 +28,7 @@ import { SidebarPinControl } from "./sidebar-pin-control";
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { userProfile } = useAuth();
   const { sidebarItems: dynamicSidebarItems, refreshCollections } = useCollectionsSidebar(sidebarItems);
+  const dynamicSections = useDynamicSidebarSections();
 
   // Use smart sidebar for expandable panel management only
   const smartSidebar = useSmartSidebarContext();
@@ -85,6 +87,28 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
   };
 
+  // Add click outside handler for better UX
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (smartSidebar.isPinned) return;
+
+      const target = event.target as HTMLElement;
+      const isClickingOnSidebar = target.closest('[data-sidebar="sidebar"]');
+      const isClickingOnExpandablePanel = target.closest(".expandable-sidebar-panel");
+
+      if (!isClickingOnSidebar && !isClickingOnExpandablePanel) {
+        smartSidebar.setExpanded(false);
+        setHoveredItem(null);
+        setIsHoveringSpecificItem(false);
+        isHoveringSidebarArea.current = false;
+        clearHoverTimeout();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [smartSidebar]);
+
   const handleSidebarMouseEnter = () => {
     // Clear any pending timeout
     clearHoverTimeout();
@@ -94,16 +118,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   };
 
   const handleSidebarMouseLeave = () => {
-    // Don't immediately collapse - wait to see if user moves to expandable panel
+    // Set flag but don't immediately collapse - let other hover events take precedence
     isHoveringSidebarArea.current = false;
     clearHoverTimeout();
+
+    // Only collapse if user moves completely away from sidebar area
     hoverTimeout.current = setTimeout(() => {
       if (!isHoveringSidebarArea.current && !smartSidebar.isPinned) {
         smartSidebar.setExpanded(false);
         setHoveredItem(null);
         setIsHoveringSpecificItem(false);
       }
-    }, 150);
+    }, 500); // Increased timeout for better UX
   };
 
   const handleExpandablePanelMouseEnter = () => {
@@ -115,7 +141,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   };
 
   const handleExpandablePanelMouseLeave = () => {
-    // Don't immediately collapse - wait to see if user moves back to main sidebar
+    // Only collapse if user leaves the entire sidebar area, not just this panel
     isHoveringSidebarArea.current = false;
     clearHoverTimeout();
     hoverTimeout.current = setTimeout(() => {
@@ -124,46 +150,53 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         setHoveredItem(null);
         setIsHoveringSpecificItem(false);
       }
-    }, 150);
+    }, 500); // Increased timeout for smoother experience
   };
 
   const handleItemMouseEnter = (item: SidebarItemWithSubs) => {
-    // For Home icon, don't show its subItems, just show the default sidebar sections
+    // Clear any pending timeouts
+    clearHoverTimeout();
+
+    // Always expand the sidebar when hovering an item
+    smartSidebar.setExpanded(true);
+    isHoveringSidebarArea.current = true;
+
+    // Set the specific item state
     if (item.title === "Home") {
+      // For Home icon, show default sidebar sections
       setHoveredItem(null);
       setIsHoveringSpecificItem(false);
     } else {
+      // For other items, show their specific content
       setHoveredItem(item);
       setIsHoveringSpecificItem(true);
     }
-    smartSidebar.setExpanded(true);
   };
 
   const handleItemMouseLeave = () => {
-    // Don't immediately hide sub-items - give user time to reach expandable panel
-    clearHoverTimeout();
-    hoverTimeout.current = setTimeout(() => {
-      if (!isHoveringSidebarArea.current && !smartSidebar.isPinned) {
-        setIsHoveringSpecificItem(false);
-        setHoveredItem(null);
-      }
-    }, 150);
+    // Don't immediately change state - let the expanded panel persist
+    // The item state will only change when:
+    // 1. Another item is hovered
+    // 2. User leaves the entire sidebar area
+    // 3. Sidebar is explicitly closed
+    // This eliminates dead spots and provides smoother transitions
   };
 
   return (
     <>
-      {/* Hover target that only covers the collapsed sidebar area */}
+      {/* Extended hover detection area to eliminate dead spots */}
       <div
-        className="fixed inset-y-0 left-0 z-[95] w-[70px]"
+        className="fixed inset-y-0 left-0 z-[1] w-[270px]"
         onMouseEnter={handleSidebarMouseEnter}
         onMouseLeave={handleSidebarMouseLeave}
+        style={{ pointerEvents: "none" }}
       />
-      <Sidebar {...props} className="relative z-[100] transition-all duration-200">
+      <Sidebar {...props} className="relative transition-all duration-200">
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild className="hover:bg-transparent active:bg-transparent">
-                <a href="#" className="flex w-full items-center gap-2">
+                <a href="/dashboard/scripts/new" className="flex w-full items-center gap-2">
                   <GenCLogo iconSize="sm" textSize="sm" />
                   <SidebarPinControl />
                 </a>
@@ -190,7 +223,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         isExpanded={smartSidebar.isExpanded}
         isPinned={smartSidebar.isPinned}
         onTogglePin={smartSidebar.togglePin}
-        sections={defaultSidebarSections}
+        sections={dynamicSections}
         hoveredItem={hoveredItem}
         isHoveringSpecificItem={isHoveringSpecificItem}
         onPersonalize={() => {

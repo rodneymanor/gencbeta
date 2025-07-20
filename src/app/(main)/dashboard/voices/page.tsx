@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 
+import { FeatureFlagWrapper } from "@/components/feature-flags/feature-flag-wrapper";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AIVoicesClient } from "@/lib/ai-voices-client";
 import { AIVoice, VoiceActivationResponse, OriginalScript } from "@/types/ai-voices";
@@ -107,81 +108,83 @@ function VoicesPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6 p-6">
-      {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">AI Voice Studio</h1>
-        <p className="text-muted-foreground">
-          Choose from our library of ready-made voices or create your own custom voice. Generate content that sounds
-          exactly how you want it to.
-        </p>
+    <FeatureFlagWrapper flagName="voice_library">
+      <div className="flex flex-col gap-6 p-6">
+        {/* Header */}
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight">AI Voice Studio</h1>
+          <p className="text-muted-foreground">
+            Choose from our library of ready-made voices or create your own custom voice. Generate content that sounds
+            exactly how you want it to.
+          </p>
+        </div>
+
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full max-w-2xl grid-cols-4">
+            <TabsTrigger value="custom">My Custom Voices</TabsTrigger>
+            <TabsTrigger value="library">Voice Library</TabsTrigger>
+            <TabsTrigger value="create">Create from Profile</TabsTrigger>
+            <TabsTrigger value="keywords">Negative Keywords</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="library" className="mt-6">
+            <VoiceLibraryTab
+              voices={voicesData?.sharedVoices ?? []}
+              isLoading={voicesLoading}
+              onUseVoice={handleUseVoice}
+              onShowExamples={handleShowExamples}
+            />
+          </TabsContent>
+
+          <TabsContent value="custom" className="mt-6">
+            <CustomVoicesTab
+              voices={voicesData?.customVoices ?? []}
+              voiceLimit={voiceLimit}
+              isLoading={voicesLoading}
+              onCreateVoice={handleCreateVoice}
+              onUseVoice={handleUseVoice}
+              onShowExamples={handleShowExamples}
+              onDeleteVoice={handleDeleteVoice}
+            />
+          </TabsContent>
+
+          <TabsContent value="create" className="mt-6">
+            <CreateVoiceFromProfile
+              onVoiceCreated={handleVoiceCreated}
+              onCollectionCreated={(collectionId) => {
+                toast.success("Collection created! Videos are being processed.");
+              }}
+            />
+          </TabsContent>
+
+          <TabsContent value="keywords" className="mt-6">
+            <NegativeKeywordsTab />
+          </TabsContent>
+        </Tabs>
+
+        {/* Modals */}
+        <VoiceActivatedModal
+          open={showActivatedModal}
+          onOpenChange={setShowActivatedModal}
+          activationResponse={activationResponse}
+        />
+
+        <ExampleScriptsModal
+          open={showExamplesModal}
+          onOpenChange={setShowExamplesModal}
+          voiceName={selectedVoiceExamples?.voiceName ?? ""}
+          examples={selectedVoiceExamples?.examples ?? []}
+        />
+
+        <CreateVoiceModal
+          open={showCreateModal}
+          onOpenChange={setShowCreateModal}
+          onVoiceCreated={handleVoiceCreated}
+          remainingVoices={voiceLimit?.remaining ?? 0}
+        />
       </div>
-
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full max-w-2xl grid-cols-4">
-          <TabsTrigger value="custom">My Custom Voices</TabsTrigger>
-          <TabsTrigger value="library">Voice Library</TabsTrigger>
-          <TabsTrigger value="create">Create from Profile</TabsTrigger>
-          <TabsTrigger value="keywords">Negative Keywords</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="library" className="mt-6">
-          <VoiceLibraryTab
-            voices={voicesData?.sharedVoices ?? []}
-            isLoading={voicesLoading}
-            onUseVoice={handleUseVoice}
-            onShowExamples={handleShowExamples}
-          />
-        </TabsContent>
-
-        <TabsContent value="custom" className="mt-6">
-          <CustomVoicesTab
-            voices={voicesData?.customVoices ?? []}
-            voiceLimit={voiceLimit}
-            isLoading={voicesLoading}
-            onCreateVoice={handleCreateVoice}
-            onUseVoice={handleUseVoice}
-            onShowExamples={handleShowExamples}
-            onDeleteVoice={handleDeleteVoice}
-          />
-        </TabsContent>
-
-        <TabsContent value="create" className="mt-6">
-          <CreateVoiceFromProfile
-            onVoiceCreated={handleVoiceCreated}
-            onCollectionCreated={(collectionId) => {
-              toast.success("Collection created! Videos are being processed.");
-            }}
-          />
-        </TabsContent>
-
-        <TabsContent value="keywords" className="mt-6">
-          <NegativeKeywordsTab />
-        </TabsContent>
-      </Tabs>
-
-      {/* Modals */}
-      <VoiceActivatedModal
-        open={showActivatedModal}
-        onOpenChange={setShowActivatedModal}
-        activationResponse={activationResponse}
-      />
-
-      <ExampleScriptsModal
-        open={showExamplesModal}
-        onOpenChange={setShowExamplesModal}
-        voiceName={selectedVoiceExamples?.voiceName ?? ""}
-        examples={selectedVoiceExamples?.examples ?? []}
-      />
-
-      <CreateVoiceModal
-        open={showCreateModal}
-        onOpenChange={setShowCreateModal}
-        onVoiceCreated={handleVoiceCreated}
-        remainingVoices={voiceLimit?.remaining ?? 0}
-      />
-    </div>
+    </FeatureFlagWrapper>
   );
 }
 

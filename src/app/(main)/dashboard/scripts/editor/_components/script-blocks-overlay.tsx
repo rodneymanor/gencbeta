@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+
 import { type PartialBlock } from "@blocknote/core";
+
 import { type ScriptElement } from "@/lib/script-analysis";
 
 interface ScriptBlock {

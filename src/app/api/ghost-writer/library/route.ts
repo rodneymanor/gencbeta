@@ -33,21 +33,105 @@ export async function GET(request: NextRequest): Promise<NextResponse<LibraryRes
 
     console.log(`👤 [GhostWriter Library] Fetching library for user: ${userId}`);
 
-    // Fetch all historical ideas for the user
-    const ideasSnapshot = await adminDb
-      .collection("enhanced_content_ideas")
-      .where("userId", "==", userId)
-      .orderBy("createdAt", "desc")
-      .limit(1000) // Limit to prevent overwhelming the UI
-      .get();
+    // Fetch ideas from both collections with error handling
+    let currentIdeasSnapshot;
+    let libraryIdeasSnapshot;
 
-    const ideas: EnhancedContentIdea[] = ideasSnapshot.docs.map(
-      (doc: FirebaseFirestore.QueryDocumentSnapshot) =>
-        ({
+    try {
+      // 1. Fetch from enhanced_content_ideas (current cycle ideas)
+      currentIdeasSnapshot = await adminDb
+        .collection("enhanced_content_ideas")
+        .where("userId", "==", userId)
+        .orderBy("createdAt", "desc")
+        .limit(500)
+        .get();
+    } catch (error) {
+      console.warn("⚠️ [GhostWriter Library] Could not fetch from enhanced_content_ideas:", error);
+      currentIdeasSnapshot = { docs: [] } as any;
+    }
+
+    try {
+      // 2. Fetch from ghost_writer_library (saved historical ideas)
+      libraryIdeasSnapshot = await adminDb
+        .collection("ghost_writer_library")
+        .where("userId", "==", userId)
+        .orderBy("savedAt", "desc")
+        .limit(500)
+        .get();
+    } catch (error) {
+      console.warn("⚠️ [GhostWriter Library] Could not fetch from ghost_writer_library:", error);
+      libraryIdeasSnapshot = { docs: [] } as any;
+    }
+
+    // Combine ideas from both sources with safe mapping
+    const currentIdeas: EnhancedContentIdea[] = (currentIdeasSnapshot?.docs || []).map(
+      (doc: FirebaseFirestore.QueryDocumentSnapshot) => {
+        const data = doc.data();
+        return {
           id: doc.id,
-          ...doc.data(),
-        }) as EnhancedContentIdea,
+          hook: data.hook || "",
+          concept: data.concept || "",
+          hookTemplate: data.hookTemplate || "",
+          hookStrength: data.hookStrength || "",
+          peqCategory: data.peqCategory || "problem",
+          sourceText: data.sourceText || "",
+          targetAudience: data.targetAudience || "",
+          estimatedDuration: data.estimatedDuration || "60",
+          createdAt: data.createdAt || new Date().toISOString(),
+          userId: data.userId || userId,
+          cycleId: data.cycleId || "unknown",
+          wordCount: data.wordCount || 0,
+          generatedScripts: data.generatedScripts || [],
+          lastUsedAt: data.lastUsedAt,
+          ...data,
+        } as EnhancedContentIdea;
+      },
     );
+
+    const libraryIdeas: EnhancedContentIdea[] = (libraryIdeasSnapshot?.docs || []).map(
+      (doc: FirebaseFirestore.QueryDocumentSnapshot) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          concept: data.concept || "",
+          hook: data.hook || "",
+          hookTemplate: data.hookTemplate || "",
+          hookStrength: data.hookStrength || "",
+          peqCategory: data.peqCategory || "problem",
+          sourceText: data.sourceText || "",
+          targetAudience: data.targetAudience || "",
+          estimatedDuration: data.estimatedDuration || "60",
+          createdAt: data.createdAt || data.savedAt || new Date().toISOString(),
+          userId: data.userId || userId,
+          cycleId: data.cycleId || "library",
+          wordCount: data.wordCount || 0,
+          savedAt: data.savedAt,
+          savedFrom: data.savedFrom,
+          generatedScripts: data.generatedScripts || [],
+          lastUsedAt: data.lastUsedAt,
+        } as EnhancedContentIdea;
+      },
+    );
+
+    // Merge and deduplicate ideas (prefer library version if duplicate)
+    const ideaMap = new Map<string, EnhancedContentIdea>();
+
+    // Add current ideas first
+    currentIdeas.forEach((idea) => {
+      ideaMap.set(idea.id, idea);
+    });
+
+    // Add library ideas (will override if same ID exists)
+    libraryIdeas.forEach((idea) => {
+      const key = idea.originalIdeaId || idea.id;
+      ideaMap.set(key, idea);
+    });
+
+    const ideas = Array.from(ideaMap.values()).sort((a, b) => {
+      const dateA = new Date(a.savedAt || a.createdAt).getTime();
+      const dateB = new Date(b.savedAt || b.createdAt).getTime();
+      return dateB - dateA; // Sort by most recent first
+    });
 
     console.log(`📊 [GhostWriter Library] Found ${ideas.length} historical ideas`);
 
@@ -144,20 +228,30 @@ export async function DELETE(request: NextRequest): Promise<NextResponse<{ succe
 
     console.log(`🗑️ [GhostWriter Library] Deleting idea ${ideaId} for user ${userId}`);
 
-    // Verify the idea belongs to the user and delete it
+    // Try to find and delete from either collection
+    let deleted = false;
+
+    // First try enhanced_content_ideas collection
     const ideaDoc = await adminDb.collection("enhanced_content_ideas").doc(ideaId).get();
 
-    if (!ideaDoc.exists) {
+    if (ideaDoc.exists && ideaDoc.data()?.userId === userId) {
+      await adminDb.collection("enhanced_content_ideas").doc(ideaId).delete();
+      deleted = true;
+      console.log(`✅ [GhostWriter Library] Deleted idea from enhanced_content_ideas`);
+    }
+
+    // Also try ghost_writer_library collection
+    const libraryDoc = await adminDb.collection("ghost_writer_library").doc(ideaId).get();
+
+    if (libraryDoc.exists && libraryDoc.data()?.userId === userId) {
+      await adminDb.collection("ghost_writer_library").doc(ideaId).delete();
+      deleted = true;
+      console.log(`✅ [GhostWriter Library] Deleted idea from ghost_writer_library`);
+    }
+
+    if (!deleted) {
       return NextResponse.json({ success: false, error: "Idea not found" }, { status: 404 });
     }
-
-    const ideaData = ideaDoc.data();
-    if (ideaData?.userId !== userId) {
-      return NextResponse.json({ success: false, error: "Unauthorized to delete this idea" }, { status: 403 });
-    }
-
-    // Delete the idea
-    await adminDb.collection("enhanced_content_ideas").doc(ideaId).delete();
 
     console.log(`✅ [GhostWriter Library] Successfully deleted idea ${ideaId}`);
 

@@ -19,8 +19,8 @@ import {
   FirestoreError,
 } from "firebase/firestore";
 
-import { adminDb } from "@/lib/firebase-admin";
 import { db } from "@/lib/firebase";
+import { adminDb } from "@/lib/firebase-admin";
 
 export interface Note {
   id: string;

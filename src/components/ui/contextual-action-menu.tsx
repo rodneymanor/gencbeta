@@ -138,7 +138,7 @@ export function ContextualActionMenu({
   };
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-50" style={{ pointerEvents: "none" }}>
+    <div className="pointer-events-none fixed inset-0 z-[10000]" style={{ pointerEvents: "none" }}>
       <Card
         ref={menuRef}
         className="pointer-events-auto absolute w-80 shadow-lg"

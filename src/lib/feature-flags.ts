@@ -4,6 +4,7 @@
  */
 
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+
 import { db } from "./firebase";
 
 export interface FeatureFlags {
@@ -12,6 +13,8 @@ export interface FeatureFlags {
   v2_template_hooks: boolean;
   v2_smart_bridges: boolean;
   v2_performance_monitoring: boolean;
+  voice_library: boolean;
+  creator_spotlight: boolean;
 }
 
 export interface FeatureFlagConfig {
@@ -75,6 +78,24 @@ const DEFAULT_FLAGS: FeatureFlagState = {
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
+  voice_library: {
+    enabled: false, // Disabled by default - feature not implemented
+    rollout_percentage: 0,
+    whitelist_users: [],
+    blacklist_users: [],
+    admin_override: false,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  creator_spotlight: {
+    enabled: false, // Disabled by default - feature not implemented
+    rollout_percentage: 0,
+    whitelist_users: [],
+    blacklist_users: [],
+    admin_override: false,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
 };
 
 export class FeatureFlagService {
@@ -87,7 +108,7 @@ export class FeatureFlagService {
   private static async getFeatureFlagState(): Promise<FeatureFlagState> {
     const cacheKey = "feature_flags";
     const cached = this.cache.get(cacheKey);
-    
+
     if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
       return cached.data;
     }
@@ -95,7 +116,7 @@ export class FeatureFlagService {
     try {
       const docRef = doc(db, "system_config", "feature_flags");
       const docSnap = await getDoc(docRef);
-      
+
       if (docSnap.exists()) {
         const data = docSnap.data() as FeatureFlagState;
         this.cache.set(cacheKey, { data, timestamp: Date.now() });
@@ -121,12 +142,12 @@ export class FeatureFlagService {
       // Check environment variable first for quick override
       const envEnabled = getFeatureFlagFromEnv(flagName);
       const envPercentage = getRolloutPercentageFromEnv(flagName);
-      
+
       if (envEnabled && envPercentage === 100) {
         console.log(`🚀 [FEATURE FLAG] ${flagName} enabled for all users via environment variable`);
         return true;
       }
-      
+
       if (envEnabled && envPercentage > 0) {
         console.log(`🎯 [FEATURE FLAG] ${flagName} using env rollout ${envPercentage}% for user ${userId}`);
         return this.isUserInRollout(userId, envPercentage);
@@ -134,7 +155,7 @@ export class FeatureFlagService {
 
       const flags = await this.getFeatureFlagState();
       const flagConfig = flags[flagName];
-      
+
       if (!flagConfig) {
         console.warn(`Feature flag '${flagName}' not found, checking environment fallback`);
         return envEnabled;
@@ -164,16 +185,16 @@ export class FeatureFlagService {
       return this.isUserInRollout(userId, flagConfig.rollout_percentage);
     } catch (error) {
       console.error(`Error checking feature flag '${flagName}' for user ${userId}:`, error);
-      
+
       // Fallback to environment variables on error
       const envEnabled = getFeatureFlagFromEnv(flagName);
       const envPercentage = getRolloutPercentageFromEnv(flagName);
-      
+
       if (envEnabled && envPercentage > 0) {
         console.log(`🔄 [FEATURE FLAG FALLBACK] Using env config for ${flagName}: ${envPercentage}%`);
         return this.isUserInRollout(userId, envPercentage);
       }
-      
+
       return false;
     }
   }
@@ -184,11 +205,11 @@ export class FeatureFlagService {
   static async getUserFlags(userId: string): Promise<FeatureFlags> {
     const flags = await this.getFeatureFlagState();
     const userFlags: FeatureFlags = {} as FeatureFlags;
-    
+
     for (const [flagName, _] of Object.entries(flags)) {
       userFlags[flagName as keyof FeatureFlags] = await this.isEnabled(userId, flagName as keyof FeatureFlags);
     }
-    
+
     return userFlags;
   }
 
@@ -198,11 +219,11 @@ export class FeatureFlagService {
   private static isUserInRollout(userId: string, percentage: number): boolean {
     if (percentage >= 100) return true;
     if (percentage <= 0) return false;
-    
+
     // Use consistent hashing based on user ID
     const hash = this.simpleHash(userId);
     const userPercentile = hash % 100;
-    
+
     return userPercentile < percentage;
   }
 
@@ -213,7 +234,7 @@ export class FeatureFlagService {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash);
@@ -222,10 +243,7 @@ export class FeatureFlagService {
   /**
    * Update feature flag configuration (admin only)
    */
-  static async updateFeatureFlag(
-    flagName: keyof FeatureFlags,
-    config: Partial<FeatureFlagConfig>
-  ): Promise<void> {
+  static async updateFeatureFlag(flagName: keyof FeatureFlags, config: Partial<FeatureFlagConfig>): Promise<void> {
     try {
       const docRef = doc(db, "system_config", "feature_flags");
       const updateData = {
@@ -234,12 +252,12 @@ export class FeatureFlagService {
           updated_at: new Date().toISOString(),
         },
       };
-      
+
       await updateDoc(docRef, updateData);
-      
+
       // Clear cache
       this.cache.clear();
-      
+
       console.log(`Feature flag '${flagName}' updated successfully`);
     } catch (error) {
       console.error(`Error updating feature flag '${flagName}':`, error);
@@ -261,13 +279,13 @@ export class FeatureFlagService {
   static async increaseRollout(flagName: keyof FeatureFlags, newPercentage: number): Promise<void> {
     const flags = await this.getFeatureFlagState();
     const currentConfig = flags[flagName];
-    
+
     if (currentConfig && newPercentage > currentConfig.rollout_percentage) {
       await this.updateFeatureFlag(flagName, {
         ...currentConfig,
         rollout_percentage: Math.min(newPercentage, 100),
       });
-      
+
       console.log(`Increased rollout for '${flagName}' to ${newPercentage}%`);
     }
   }
@@ -281,7 +299,7 @@ export class FeatureFlagService {
       rollout_percentage: 0,
       admin_override: false,
     });
-    
+
     console.log(`Emergency rollback executed for '${flagName}'`);
   }
 

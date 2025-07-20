@@ -2,9 +2,10 @@
  * Feature Flag Admin Service - Management functions for administrators
  */
 
-import { FeatureFlagService, FeatureFlags, FeatureFlagConfig } from './feature-flags';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from './firebase';
+import { doc, getDoc, setDoc } from "firebase/firestore";
+
+import { FeatureFlagService, FeatureFlags, FeatureFlagConfig } from "./feature-flags";
+import { db } from "./firebase";
 
 export interface RolloutPlan {
   phase: number;
@@ -28,7 +29,6 @@ export interface FeatureFlagMetrics {
 }
 
 export class FeatureFlagAdmin {
-  
   /**
    * V2 Script Generation Rollout Plan
    */
@@ -79,11 +79,11 @@ export class FeatureFlagAdmin {
    * Initialize V2 rollout with phase 1
    */
   static async startV2Rollout(): Promise<void> {
-    console.log('🚀 Starting V2 Script Generation Rollout - Phase 1');
-    
+    console.log("🚀 Starting V2 Script Generation Rollout - Phase 1");
+
     const phase1 = this.V2_ROLLOUT_PLAN[0];
-    
-    await FeatureFlagService.updateFeatureFlag('v2_script_generation', {
+
+    await FeatureFlagService.updateFeatureFlag("v2_script_generation", {
       enabled: true,
       rollout_percentage: phase1.percentage,
       whitelist_users: [],
@@ -101,30 +101,30 @@ export class FeatureFlagAdmin {
    * Progress to next rollout phase
    */
   static async progressToNextPhase(): Promise<boolean> {
-    const currentPercentage = await FeatureFlagService.getRolloutPercentage('v2_script_generation');
-    const currentPhase = this.V2_ROLLOUT_PLAN.findIndex(p => p.percentage === currentPercentage);
-    
+    const currentPercentage = await FeatureFlagService.getRolloutPercentage("v2_script_generation");
+    const currentPhase = this.V2_ROLLOUT_PLAN.findIndex((p) => p.percentage === currentPercentage);
+
     if (currentPhase === -1 || currentPhase >= this.V2_ROLLOUT_PLAN.length - 1) {
-      console.log('✅ V2 Rollout complete - 100% deployed');
+      console.log("✅ V2 Rollout complete - 100% deployed");
       return false;
     }
 
     const nextPhase = this.V2_ROLLOUT_PLAN[currentPhase + 1];
-    
+
     // Check success criteria before progressing
-    const metrics = await this.getFeatureFlagMetrics('v2_script_generation');
+    const metrics = await this.getFeatureFlagMetrics("v2_script_generation");
     const currentPhasePlan = this.V2_ROLLOUT_PLAN[currentPhase];
-    
+
     if (!this.validateSuccessCriteria(metrics, currentPhasePlan.success_criteria)) {
-      console.warn('❌ Success criteria not met, halting rollout progression');
+      console.warn("❌ Success criteria not met, halting rollout progression");
       return false;
     }
 
     console.log(`🔄 Progressing V2 rollout to Phase ${nextPhase.phase} (${nextPhase.percentage}%)`);
-    
-    await FeatureFlagService.increaseRollout('v2_script_generation', nextPhase.percentage);
+
+    await FeatureFlagService.increaseRollout("v2_script_generation", nextPhase.percentage);
     await this.schedulePhaseProgression(nextPhase.phase);
-    
+
     return true;
   }
 
@@ -133,7 +133,7 @@ export class FeatureFlagAdmin {
    */
   private static validateSuccessCriteria(
     metrics: FeatureFlagMetrics,
-    criteria: RolloutPlan['success_criteria']
+    criteria: RolloutPlan["success_criteria"],
   ): boolean {
     return (
       metrics.error_rate <= criteria.error_rate_threshold &&
@@ -147,18 +147,18 @@ export class FeatureFlagAdmin {
    */
   private static async schedulePhaseProgression(currentPhase: number): Promise<void> {
     const phaseConfig = this.V2_ROLLOUT_PLAN[currentPhase - 1];
-    
+
     if (phaseConfig.duration_hours > 0) {
       const progressionTime = new Date(Date.now() + phaseConfig.duration_hours * 60 * 60 * 1000);
-      
+
       // Store progression schedule in Firestore
-      await setDoc(doc(db, 'system_config', 'rollout_schedule'), {
+      await setDoc(doc(db, "system_config", "rollout_schedule"), {
         next_phase: currentPhase + 1,
         scheduled_time: progressionTime.toISOString(),
-        feature_flag: 'v2_script_generation',
+        feature_flag: "v2_script_generation",
         created_at: new Date().toISOString(),
       });
-      
+
       console.log(`📅 Next phase scheduled for: ${progressionTime.toISOString()}`);
     }
   }
@@ -168,13 +168,13 @@ export class FeatureFlagAdmin {
    */
   static async getFeatureFlagMetrics(flagName: keyof FeatureFlags): Promise<FeatureFlagMetrics> {
     try {
-      const docRef = doc(db, 'system_metrics', `feature_flag_${flagName}`);
+      const docRef = doc(db, "system_metrics", `feature_flag_${flagName}`);
       const docSnap = await getDoc(docRef);
-      
+
       if (docSnap.exists()) {
         return docSnap.data() as FeatureFlagMetrics;
       }
-      
+
       // Return default metrics if not found
       return {
         total_users: 0,
@@ -196,15 +196,15 @@ export class FeatureFlagAdmin {
    */
   static async updateFeatureFlagMetrics(
     flagName: keyof FeatureFlags,
-    metrics: Partial<FeatureFlagMetrics>
+    metrics: Partial<FeatureFlagMetrics>,
   ): Promise<void> {
     try {
-      const docRef = doc(db, 'system_metrics', `feature_flag_${flagName}`);
+      const docRef = doc(db, "system_metrics", `feature_flag_${flagName}`);
       const updateData = {
         ...metrics,
         last_updated: new Date().toISOString(),
       };
-      
+
       await setDoc(docRef, updateData, { merge: true });
     } catch (error) {
       console.error(`Error updating metrics for ${flagName}:`, error);
@@ -215,32 +215,28 @@ export class FeatureFlagAdmin {
   /**
    * Emergency rollback with detailed logging
    */
-  static async emergencyRollback(
-    flagName: keyof FeatureFlags,
-    reason: string,
-    adminUserId: string
-  ): Promise<void> {
+  static async emergencyRollback(flagName: keyof FeatureFlags, reason: string, adminUserId: string): Promise<void> {
     console.error(`🚨 EMERGENCY ROLLBACK: ${flagName} - Reason: ${reason}`);
-    
+
     // Perform rollback
     await FeatureFlagService.emergencyRollback(flagName);
-    
+
     // Log rollback event
-    await setDoc(doc(db, 'system_events', `rollback_${Date.now()}`), {
-      event_type: 'emergency_rollback',
+    await setDoc(doc(db, "system_events", `rollback_${Date.now()}`), {
+      event_type: "emergency_rollback",
       feature_flag: flagName,
       reason,
       admin_user_id: adminUserId,
       timestamp: new Date().toISOString(),
       rollback_time: new Date().toISOString(),
     });
-    
+
     // Update metrics
     const currentMetrics = await this.getFeatureFlagMetrics(flagName);
     await this.updateFeatureFlagMetrics(flagName, {
       rollback_count: currentMetrics.rollback_count + 1,
     });
-    
+
     console.log(`✅ Emergency rollback completed for ${flagName}`);
   }
 
@@ -254,25 +250,27 @@ export class FeatureFlagAdmin {
     metrics: FeatureFlagMetrics;
     can_progress: boolean;
   }> {
-    const currentPercentage = await FeatureFlagService.getRolloutPercentage('v2_script_generation');
-    const currentPhase = this.V2_ROLLOUT_PLAN.findIndex(p => p.percentage === currentPercentage);
-    const metrics = await this.getFeatureFlagMetrics('v2_script_generation');
-    
+    const currentPercentage = await FeatureFlagService.getRolloutPercentage("v2_script_generation");
+    const currentPhase = this.V2_ROLLOUT_PLAN.findIndex((p) => p.percentage === currentPercentage);
+    const metrics = await this.getFeatureFlagMetrics("v2_script_generation");
+
     // Check if we can progress to next phase
-    const canProgress = currentPhase >= 0 && currentPhase < this.V2_ROLLOUT_PLAN.length - 1 &&
+    const canProgress =
+      currentPhase >= 0 &&
+      currentPhase < this.V2_ROLLOUT_PLAN.length - 1 &&
       this.validateSuccessCriteria(metrics, this.V2_ROLLOUT_PLAN[currentPhase].success_criteria);
-    
+
     // Get next phase schedule
     let nextPhaseScheduled = null;
     try {
-      const scheduleDoc = await getDoc(doc(db, 'system_config', 'rollout_schedule'));
+      const scheduleDoc = await getDoc(doc(db, "system_config", "rollout_schedule"));
       if (scheduleDoc.exists()) {
         nextPhaseScheduled = scheduleDoc.data().scheduled_time;
       }
     } catch (error) {
-      console.warn('Could not fetch rollout schedule:', error);
+      console.warn("Could not fetch rollout schedule:", error);
     }
-    
+
     return {
       current_phase: currentPhase + 1,
       current_percentage: currentPercentage,
@@ -314,7 +312,7 @@ export class FeatureFlagAdmin {
     };
   }> {
     const rolloutStatus = await this.getRolloutStatus();
-    
+
     // This would be expanded with actual implementations
     return {
       rollout_status: rolloutStatus,
@@ -349,7 +347,7 @@ export const rolloutOperations = {
    * Emergency stop
    */
   async emergency_stop(reason: string, adminId: string): Promise<void> {
-    await FeatureFlagAdmin.emergencyRollback('v2_script_generation', reason, adminId);
+    await FeatureFlagAdmin.emergencyRollback("v2_script_generation", reason, adminId);
   },
 
   /**

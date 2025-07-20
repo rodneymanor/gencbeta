@@ -3,11 +3,11 @@
  * Combines the adapter, context provider, and configuration for a clean interface
  */
 
-import { InputValidator, ContextEnricher, RuleEngine } from "./preprocessors";
-import { UnifiedScriptInput, GeneratedScript, ScriptDuration } from "./types";
 import { ScriptGenerationAdapter } from "./adapter";
 import { ScriptContextProvider } from "./context-provider";
 import { DurationConfig } from "./duration-config";
+import { InputValidator, ContextEnricher, RuleEngine } from "./preprocessors";
+import { UnifiedScriptInput, GeneratedScript, ScriptDuration } from "./types";
 
 export class UnifiedScriptService {
   private adapter: ScriptGenerationAdapter;

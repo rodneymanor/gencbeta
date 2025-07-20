@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { authenticateWithFirebaseToken } from "@/lib/firebase-auth-helpers";
-import { GeminiService } from "@/lib/services/gemini-service";
 import { createHookGenerationPrompt, type HookGenerationResponse } from "@/lib/prompts/hook-generation";
+import { GeminiService } from "@/lib/services/gemini-service";
 import { trackUsage } from "@/lib/usage-tracker";
 
 export async function POST(request: NextRequest) {

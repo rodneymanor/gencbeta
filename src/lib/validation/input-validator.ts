@@ -32,11 +32,11 @@ export interface ScriptGenerationRequest {
  */
 export function validateScriptGenerationInput(input: any): ValidationResult {
   // Type guard: Check if input is an object
-  if (!input || typeof input !== 'object') {
+  if (!input || typeof input !== "object") {
     return {
       isValid: false,
       error: "Request body must be a valid JSON object",
-      field: "body"
+      field: "body",
     };
   }
 
@@ -46,16 +46,16 @@ export function validateScriptGenerationInput(input: any): ValidationResult {
       isValid: false,
       error: "Idea is required",
       field: "idea",
-      suggestions: ["Provide a topic or concept for the script"]
+      suggestions: ["Provide a topic or concept for the script"],
     };
   }
 
   // Type validation: idea must be string
-  if (typeof input.idea !== 'string') {
+  if (typeof input.idea !== "string") {
     return {
       isValid: false,
       error: "Idea must be a string",
-      field: "idea"
+      field: "idea",
     };
   }
 
@@ -66,7 +66,7 @@ export function validateScriptGenerationInput(input: any): ValidationResult {
       isValid: false,
       error: "Idea must be at least 10 characters long",
       field: "idea",
-      suggestions: ["Provide more detail about your script topic"]
+      suggestions: ["Provide more detail about your script topic"],
     };
   }
 
@@ -75,7 +75,7 @@ export function validateScriptGenerationInput(input: any): ValidationResult {
       isValid: false,
       error: "Idea must be less than 1000 characters",
       field: "idea",
-      suggestions: ["Keep your idea concise and focused"]
+      suggestions: ["Keep your idea concise and focused"],
     };
   }
 
@@ -85,80 +85,80 @@ export function validateScriptGenerationInput(input: any): ValidationResult {
       isValid: false,
       error: "Length is required",
       field: "length",
-      suggestions: ["Specify script duration: 15, 20, 30, 45, 60, or 90 seconds"]
+      suggestions: ["Specify script duration: 15, 20, 30, 45, 60, or 90 seconds"],
     };
   }
 
   // Type validation: length must be string or number
-  if (typeof input.length !== 'string' && typeof input.length !== 'number') {
+  if (typeof input.length !== "string" && typeof input.length !== "number") {
     return {
       isValid: false,
       error: "Length must be a string or number",
-      field: "length"
+      field: "length",
     };
   }
 
   // Enum validation: length values
-  const validLengths = ['15', '20', '30', '45', '60', '90'];
+  const validLengths = ["15", "20", "30", "45", "60", "90"];
   const lengthStr = String(input.length);
   if (!validLengths.includes(lengthStr)) {
     return {
       isValid: false,
       error: "Length must be one of: 15, 20, 30, 45, 60, 90 seconds",
       field: "length",
-      suggestions: [`Valid options: ${validLengths.join(', ')}`]
+      suggestions: [`Valid options: ${validLengths.join(", ")}`],
     };
   }
 
   // Optional field validation: type
   if (input.type !== undefined) {
-    if (typeof input.type !== 'string') {
+    if (typeof input.type !== "string") {
       return {
         isValid: false,
         error: "Type must be a string",
-        field: "type"
+        field: "type",
       };
     }
 
-    const validTypes = ['speed', 'educational', 'viral'];
+    const validTypes = ["speed", "educational", "viral"];
     if (!validTypes.includes(input.type)) {
       return {
         isValid: false,
         error: "Type must be one of: speed, educational, viral",
         field: "type",
-        suggestions: [`Valid options: ${validTypes.join(', ')}`]
+        suggestions: [`Valid options: ${validTypes.join(", ")}`],
       };
     }
   }
 
   // Optional field validation: tone
   if (input.tone !== undefined) {
-    if (typeof input.tone !== 'string') {
+    if (typeof input.tone !== "string") {
       return {
         isValid: false,
         error: "Tone must be a string",
-        field: "tone"
+        field: "tone",
       };
     }
 
-    const validTones = ['casual', 'professional', 'energetic', 'educational'];
+    const validTones = ["casual", "professional", "energetic", "educational"];
     if (!validTones.includes(input.tone)) {
       return {
         isValid: false,
         error: "Tone must be one of: casual, professional, energetic, educational",
         field: "tone",
-        suggestions: [`Valid options: ${validTones.join(', ')}`]
+        suggestions: [`Valid options: ${validTones.join(", ")}`],
       };
     }
   }
 
   // Complex field validation: ideaContext
   if (input.ideaContext !== undefined) {
-    if (typeof input.ideaContext !== 'object' || input.ideaContext === null) {
+    if (typeof input.ideaContext !== "object" || input.ideaContext === null) {
       return {
         isValid: false,
         error: "IdeaContext must be an object",
-        field: "ideaContext"
+        field: "ideaContext",
       };
     }
 
@@ -168,29 +168,29 @@ export function validateScriptGenerationInput(input: any): ValidationResult {
         return {
           isValid: false,
           error: "SelectedNotes must be an array",
-          field: "ideaContext.selectedNotes"
+          field: "ideaContext.selectedNotes",
         };
       }
 
       // Validate each note in the array
       for (let i = 0; i < input.ideaContext.selectedNotes.length; i++) {
         const note = input.ideaContext.selectedNotes[i];
-        if (!note || typeof note !== 'object') {
+        if (!note || typeof note !== "object") {
           return {
             isValid: false,
             error: `Note at index ${i} must be an object`,
-            field: `ideaContext.selectedNotes[${i}]`
+            field: `ideaContext.selectedNotes[${i}]`,
           };
         }
 
         // Required note fields
-        const requiredNoteFields = ['id', 'title', 'content'];
+        const requiredNoteFields = ["id", "title", "content"];
         for (const field of requiredNoteFields) {
-          if (!note[field] || typeof note[field] !== 'string') {
+          if (!note[field] || typeof note[field] !== "string") {
             return {
               isValid: false,
               error: `Note ${field} is required and must be a string`,
-              field: `ideaContext.selectedNotes[${i}].${field}`
+              field: `ideaContext.selectedNotes[${i}].${field}`,
             };
           }
         }
@@ -200,7 +200,7 @@ export function validateScriptGenerationInput(input: any): ValidationResult {
           return {
             isValid: false,
             error: `Note tags must be an array`,
-            field: `ideaContext.selectedNotes[${i}].tags`
+            field: `ideaContext.selectedNotes[${i}].tags`,
           };
         }
       }
@@ -208,34 +208,28 @@ export function validateScriptGenerationInput(input: any): ValidationResult {
 
     // Validate contextMode
     if (input.ideaContext.contextMode !== undefined) {
-      if (typeof input.ideaContext.contextMode !== 'string') {
+      if (typeof input.ideaContext.contextMode !== "string") {
         return {
           isValid: false,
           error: "ContextMode must be a string",
-          field: "ideaContext.contextMode"
+          field: "ideaContext.contextMode",
         };
       }
 
-      const validContextModes = ['inspiration', 'reference', 'template', 'comprehensive'];
+      const validContextModes = ["inspiration", "reference", "template", "comprehensive"];
       if (!validContextModes.includes(input.ideaContext.contextMode)) {
         return {
           isValid: false,
           error: "ContextMode must be one of: inspiration, reference, template, comprehensive",
           field: "ideaContext.contextMode",
-          suggestions: [`Valid options: ${validContextModes.join(', ')}`]
+          suggestions: [`Valid options: ${validContextModes.join(", ")}`],
         };
       }
     }
   }
 
   // Content quality checks (early warnings for better UX)
-  const suspiciousPatterns = [
-    /^test\s*$/i,
-    /^hello\s*$/i,
-    /^hi\s*$/i,
-    /^\d+$/,
-    /^[a-z]$/i
-  ];
+  const suspiciousPatterns = [/^test\s*$/i, /^hello\s*$/i, /^hi\s*$/i, /^\d+$/, /^[a-z]$/i];
 
   for (const pattern of suspiciousPatterns) {
     if (pattern.test(trimmedIdea)) {
@@ -245,15 +239,15 @@ export function validateScriptGenerationInput(input: any): ValidationResult {
         field: "idea",
         suggestions: [
           "Describe a specific topic, problem, or concept",
-          "Example: 'How to improve productivity using time-blocking'"
-        ]
+          "Example: 'How to improve productivity using time-blocking'",
+        ],
       };
     }
   }
 
   // All validations passed
   return {
-    isValid: true
+    isValid: true,
   };
 }
 
@@ -264,11 +258,11 @@ export function validateScriptGenerationInput(input: any): ValidationResult {
 export function hasRequiredFields(input: any): input is ScriptGenerationRequest {
   return (
     input &&
-    typeof input === 'object' &&
-    typeof input.idea === 'string' &&
+    typeof input === "object" &&
+    typeof input.idea === "string" &&
     input.idea.trim().length >= 10 &&
-    (typeof input.length === 'string' || typeof input.length === 'number') &&
-    ['15', '20', '30', '45', '60', '90'].includes(String(input.length))
+    (typeof input.length === "string" || typeof input.length === "number") &&
+    ["15", "20", "30", "45", "60", "90"].includes(String(input.length))
   );
 }
 
@@ -280,16 +274,60 @@ export function isContentSafe(idea: string): boolean {
     /porn|sex|nude|naked/i,
     /hate|racist|terrorism/i,
     /kill|murder|violence/i,
-    /drug|cocaine|heroin/i
+    /drug|cocaine|heroin/i,
   ];
 
-  return !unsafePatterns.some(pattern => pattern.test(idea));
+  return !unsafePatterns.some((pattern) => pattern.test(idea));
+}
+
+/**
+ * Sanitize content to avoid Gemini safety triggers while preserving meaning
+ * Replaces problematic phrases that trigger commercial content filters
+ */
+export function sanitizeForGemini(idea: string): string {
+  const sanitizePatterns = [
+    // AI solution patterns that trigger commercial content filters
+    {
+      pattern: /\bAI solution\b/gi,
+      replacement: "new tool",
+    },
+    {
+      pattern: /\bAI (tool|software|platform|app)\b/gi,
+      replacement: "digital $1",
+    },
+    // Exaggerated productivity claims
+    {
+      pattern: /completely changed my workflow/gi,
+      replacement: "improved my process",
+    },
+    {
+      pattern: /revolutionized my (work|productivity|business)/gi,
+      replacement: "helped my $1",
+    },
+    {
+      pattern: /game-changing (AI|tool|solution)/gi,
+      replacement: "helpful $1",
+    },
+    // Generic promotional language that triggers filters
+    {
+      pattern: /this (amazing|incredible|revolutionary) (AI|tool)/gi,
+      replacement: "this useful $2",
+    },
+  ];
+
+  let sanitized = idea;
+
+  for (const { pattern, replacement } of sanitizePatterns) {
+    sanitized = sanitized.replace(pattern, replacement);
+  }
+
+  return sanitized;
 }
 
 /**
  * Estimate processing complexity to help with early resource planning
  */
-export function estimateComplexity(input: ScriptGenerationRequest): 'low' | 'medium' | 'high' {
+export function estimateComplexity(input: ScriptGenerationRequest): "low" | "medium" | "high" {
   let complexity = 0;
 
   // Base complexity
@@ -297,8 +335,8 @@ export function estimateComplexity(input: ScriptGenerationRequest): 'low' | 'med
   if (input.idea.length > 300) complexity += 1;
 
   // Type complexity
-  if (input.type === 'educational') complexity += 1;
-  if (input.type === 'viral') complexity += 2;
+  if (input.type === "educational") complexity += 1;
+  if (input.type === "viral") complexity += 2;
 
   // Context complexity
   if (input.ideaContext?.selectedNotes) {
@@ -310,7 +348,7 @@ export function estimateComplexity(input: ScriptGenerationRequest): 'low' | 'med
   if (duration >= 60) complexity += 1;
   if (duration >= 90) complexity += 1;
 
-  if (complexity <= 2) return 'low';
-  if (complexity <= 5) return 'medium';
-  return 'high';
+  if (complexity <= 2) return "low";
+  if (complexity <= 5) return "medium";
+  return "high";
 }

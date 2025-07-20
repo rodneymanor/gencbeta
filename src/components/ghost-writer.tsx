@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 import { useRouter } from "next/navigation";
 
@@ -10,6 +10,8 @@ import { GhostWriterCard } from "@/components/ghost-writer-card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { GhostWriterRefreshTimelineModal } from "@/components/ui/ghost-writer-refresh-timeline-modal";
+import { GhostWriterTimelineModal } from "@/components/ui/ghost-writer-timeline-modal";
 import { useAuth } from "@/contexts/auth-context";
 import { formatTimeUntilRefresh, createScriptQueryParams } from "@/lib/ghost-writer-helpers";
 import { ContentIdea, GhostWriterCycle } from "@/types/ghost-writer";
@@ -31,11 +33,25 @@ export function GhostWriter() {
   const [error, setError] = useState<string | null>(null);
   const [needsBrandProfile, setNeedsBrandProfile] = useState(false);
   const [generatingMore, setGeneratingMore] = useState(false);
+  const [showTimeline, setShowTimeline] = useState(false);
+  const [currentIdea, setCurrentIdea] = useState<ContentIdea | null>(null);
+  const [showRefreshTimeline, setShowRefreshTimeline] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Ref to track if a request is in progress to prevent concurrent calls
+  const fetchingRef = useRef(false);
 
   const fetchIdeas = useCallback(async () => {
     if (!user) return;
 
+    // Prevent concurrent requests
+    if (fetchingRef.current) {
+      console.log("🔄 [GhostWriter] Request already in progress, skipping");
+      return;
+    }
+
     try {
+      fetchingRef.current = true;
       setError(null);
       const token = await user.getIdToken();
       const apiKey = process.env.NEXT_PUBLIC_GHOST_API_KEY;
@@ -79,6 +95,7 @@ export function GhostWriter() {
       setError(err instanceof Error ? err.message : "Failed to fetch ideas");
     } finally {
       setLoading(false);
+      fetchingRef.current = false;
     }
   }, [user]);
 
@@ -126,57 +143,95 @@ export function GhostWriter() {
   const handleUseIdea = async (idea: ContentIdea) => {
     if (!user) return;
 
+    // Show timeline modal
+    setCurrentIdea(idea);
+    setShowTimeline(true);
+  };
+
+  const handleTimelineComplete = async (result: any) => {
+    if (!currentIdea) return;
+
     try {
-      // Generate script directly from the idea
-      const token = await user.getIdToken();
-      console.log("🔄 [GhostWriter] Generating script for idea:", idea.hook);
+      // Check if auto-selection occurred
+      if (result.autoSelect && result.selectedOption) {
+        console.log("🔄 [GhostWriter] Auto-selection detected, navigating directly to Hemingway editor");
 
-      const response = await fetch("/api/script/speed-write", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          idea: idea.hook,
-          length: idea.estimatedDuration || "60",
-          type: "speed",
-        }),
-      });
+        // Store the auto-selected script data
+        sessionStorage.setItem(
+          "speedWriteResults",
+          JSON.stringify({
+            ...result,
+            autoSelectComplete: true,
+          }),
+        );
 
-      console.log("🔄 [GhostWriter] Script generation response status:", response.status);
+        // Navigate to the editor with auto-selection flag
+        const queryParams = new URLSearchParams({
+          mode: "speed-write",
+          hasSpeedWriteResults: "true",
+          autoSelect: "true",
+          ideaId: currentIdea.id,
+        });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("🔄 [GhostWriter] Script generation failed:", errorText);
-        throw new Error(`Failed to generate script: ${response.status}`);
+        console.log("🔄 [GhostWriter] Navigating to editor with auto-selected script");
+        router.push(`/dashboard/scripts/editor?${queryParams.toString()}`);
+      } else {
+        // Store the result in sessionStorage instead of URL params to avoid length issues
+        sessionStorage.setItem("speedWriteResults", JSON.stringify(result));
+
+        // Navigate to the editor with the generated script options
+        const queryParams = new URLSearchParams({
+          mode: "speed-write",
+          hasSpeedWriteResults: "true",
+          ideaId: currentIdea.id,
+        });
+
+        console.log("🔄 [GhostWriter] Navigating to editor with script options for selection");
+        router.push(`/dashboard/scripts/editor?${queryParams.toString()}`);
       }
 
-      const result = await response.json();
-      console.log("🔄 [GhostWriter] Script generation successful:", result);
-
-      // Store the result in sessionStorage instead of URL params to avoid length issues
-      sessionStorage.setItem("speedWriteResults", JSON.stringify(result));
-
-      // Navigate to the editor with the generated script
-      const queryParams = new URLSearchParams({
-        mode: "speed-write",
-        hasSpeedWriteResults: "true",
-        ideaId: idea.id,
-      });
-
-      console.log("🔄 [GhostWriter] Navigating to editor with script data in sessionStorage");
-      router.push(`/dashboard/scripts/editor?${queryParams.toString()}`);
+      // Keep modal open during navigation to prevent flashing
+      // Close modal after navigation starts
+      setTimeout(() => {
+        setShowTimeline(false);
+        setCurrentIdea(null);
+      }, 500);
     } catch (error) {
-      console.error("🔄 [GhostWriter] Script generation error:", error);
-      // Fallback to the original behavior if generation fails
-      const queryParams = createScriptQueryParams(idea);
+      console.error("🔄 [GhostWriter] Navigation error:", error);
+      // Fallback to the original behavior if navigation fails
+      const queryParams = createScriptQueryParams(currentIdea);
+      router.push(`/dashboard/scripts/new?${queryParams.toString()}`);
+
+      // Close modal after delay even on error
+      setTimeout(() => {
+        setShowTimeline(false);
+        setCurrentIdea(null);
+      }, 500);
+    }
+  };
+
+  const handleTimelineError = (error: string) => {
+    console.error("🔄 [GhostWriter] Timeline error:", error);
+
+    // Fallback to the original behavior if generation fails
+    if (currentIdea) {
+      const queryParams = createScriptQueryParams(currentIdea);
       router.push(`/dashboard/scripts/new?${queryParams.toString()}`);
     }
+
+    // Reset timeline state
+    setShowTimeline(false);
+    setCurrentIdea(null);
   };
 
   const handleWriteMore = async () => {
     if (!user) return;
+
+    // Prevent concurrent requests
+    if (generatingMore) {
+      console.log("🔄 [GhostWriter] Write more already in progress, skipping");
+      return;
+    }
 
     setGeneratingMore(true);
     try {
@@ -198,7 +253,21 @@ export function GhostWriter() {
   const handleRefresh = async () => {
     if (!user) return;
 
-    setLoading(true);
+    // Prevent concurrent requests
+    if (isRefreshing || fetchingRef.current) {
+      console.log("🔄 [GhostWriter] Refresh already in progress, skipping");
+      return;
+    }
+
+    // Show the timeline modal
+    setShowRefreshTimeline(true);
+    setIsRefreshing(true);
+    fetchingRef.current = true;
+  };
+
+  const handleRefreshComplete = async () => {
+    if (!user) return;
+
     try {
       const response = await fetch("/api/ghost-writer/enhanced?refresh=true", {
         headers: { Authorization: `Bearer ${await user.getIdToken()}` },
@@ -212,7 +281,9 @@ export function GhostWriter() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to refresh ideas");
     } finally {
-      setLoading(false);
+      setShowRefreshTimeline(false);
+      setIsRefreshing(false);
+      fetchingRef.current = false;
     }
   };
 
@@ -309,13 +380,53 @@ export function GhostWriter() {
 
   return (
     <div>
-      <div className="mb-8 text-center">
-        <h2 className="bg-gradient-to-r from-[#2d93ad] to-[#412722] bg-clip-text text-4xl font-bold text-transparent">
-          Ghost Writer
-        </h2>
-        <p className="text-muted-foreground mt-2 text-base">AI-powered content ideas based on your brand profile</p>
-        <div className="border-muted/20 bg-muted/10 text-muted-foreground mt-4 inline-flex items-center rounded-full border px-2 py-0.5 font-sans text-xs transition duration-300 ease-out">
-          New posts coming in: <span className="font-mono"> {formatTimeUntilRefresh(data.cycle.expiresAt)}</span>
+      {/* Timeline Modal */}
+      <GhostWriterTimelineModal
+        isOpen={showTimeline}
+        idea={currentIdea}
+        onComplete={handleTimelineComplete}
+        onError={handleTimelineError}
+        onCancel={() => {
+          setShowTimeline(false);
+          setCurrentIdea(null);
+        }}
+      />
+
+      {/* Refresh Timeline Modal */}
+      <GhostWriterRefreshTimelineModal
+        isOpen={showRefreshTimeline}
+        onComplete={handleRefreshComplete}
+        onCancel={() => {
+          setShowRefreshTimeline(false);
+          setIsRefreshing(false);
+          fetchingRef.current = false;
+        }}
+      />
+
+      <div className="relative mb-8">
+        {/* Refresh Ideas Button - Upper Right */}
+        <div className="absolute top-0 right-0">
+          <Button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            variant="secondary"
+            size="sm"
+            className="border border-gray-200 bg-white text-gray-700 shadow-sm hover:bg-gray-50"
+          >
+            {isRefreshing ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : <RefreshCw className="mr-2 h-3 w-3" />}
+            Refresh Ideas
+          </Button>
+        </div>
+
+        {/* Header Content - Centered */}
+        <div className="text-center">
+          <h2 className="bg-gradient-to-r from-[#2d93ad] to-[#412722] bg-clip-text text-4xl font-bold text-transparent">
+            Ghost Writer
+          </h2>
+          <p className="text-muted-foreground mt-2 text-base">AI-powered content ideas based on your brand profile</p>
+          <div className="border-muted/20 bg-muted/10 text-muted-foreground mt-4 inline-flex items-center rounded-full border px-2 py-0.5 font-sans text-xs transition duration-300 ease-out">
+            New posts coming in: <span className="font-mono"> {formatTimeUntilRefresh(data.cycle.expiresAt)}</span>
+          </div>
         </div>
       </div>
       <div>
@@ -329,17 +440,6 @@ export function GhostWriter() {
               isSaved={data.userData?.savedIdeas.includes(idea.id)}
             />
           ))}
-        </div>
-
-        <div className="mt-8 flex justify-center">
-          <Button onClick={handleWriteMore} disabled={generatingMore}>
-            {generatingMore ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <RefreshCw className="mr-2 h-4 w-4" />
-            )}
-            Load More
-          </Button>
         </div>
       </div>
     </div>

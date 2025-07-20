@@ -8,6 +8,7 @@ import { useState, useEffect, useCallback, useMemo, useTransition, useRef, memo,
 
 import { useSearchParams, useRouter } from "next/navigation";
 
+import { IconBookmark } from "@tabler/icons-react";
 import { motion } from "framer-motion";
 import {
   Edit3,
@@ -23,7 +24,6 @@ import {
   CheckSquare,
   X,
 } from "lucide-react";
-import { IconBookmark } from "@tabler/icons-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -750,6 +750,11 @@ function CollectionsPageContent() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={handleAddCollection} className="cursor-pointer">
+                  <FolderOpen className="mr-3 h-4 w-4" />
+                  <span>New Collection</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setManageMode(!manageMode)} className="cursor-pointer">
                   <Settings className="mr-3 h-4 w-4" />
                   <span>Manage Videos</span>

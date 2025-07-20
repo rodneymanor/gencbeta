@@ -1,17 +1,33 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { format } from "date-fns";
-import { Search, Filter, Calendar, Hash, Tag, Loader2, RefreshCw, Trash2 } from "lucide-react";
 
+import { format } from "date-fns";
+import {
+  Search,
+  Filter,
+  Calendar,
+  Hash,
+  Tag,
+  Loader2,
+  RefreshCw,
+  Trash2,
+  Grid3X3,
+  List,
+  Sparkles,
+  ArrowRight,
+} from "lucide-react";
+import { toast } from "sonner";
+
+import { GhostWriterCard } from "@/components/ghost-writer-card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { GhostWriterCryptoTable, type GhostWriterCryptoData } from "@/components/ui/ghost-writer-crypto-table";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/auth-context";
-import { GhostWriterCard } from "@/components/ghost-writer-card";
 import { cn } from "@/lib/utils";
 import { ContentIdea } from "@/types/ghost-writer";
 
@@ -36,6 +52,9 @@ export default function GhostWriterLibraryPage() {
   const [stats, setStats] = useState<LibraryStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
+  const [sortBy, setSortBy] = useState("createdAt");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [filters, setFilters] = useState<LibraryFilters>({
     search: "",
     peqCategory: "all",
@@ -95,7 +114,27 @@ export default function GhostWriterLibraryPage() {
     }
   };
 
-  const handleUseIdea = (idea: ContentIdea) => {
+  const handleUseIdea = async (idea: ContentIdea) => {
+    // Track usage in the database
+    if (user) {
+      try {
+        const token = await user.getIdToken();
+        await fetch("/api/ghost-writer/track-usage", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            ideaId: idea.id,
+            action: "script_generation",
+          }),
+        });
+      } catch (error) {
+        console.error("Failed to track usage:", error);
+      }
+    }
+
     // Navigate to script creation with the idea
     const queryParams = new URLSearchParams({
       hook: idea.hook,
@@ -106,6 +145,36 @@ export default function GhostWriterLibraryPage() {
 
     window.open(`/dashboard/scripts/new?${queryParams.toString()}`, "_blank");
   };
+
+  const handleSort = (column: string) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(column);
+      setSortOrder("desc");
+    }
+  };
+
+  // Apply sorting to filtered ideas
+  const sortedIdeas = [...filteredIdeas].sort((a, b) => {
+    let aValue: any = a[sortBy as keyof ContentIdea];
+    let bValue: any = b[sortBy as keyof ContentIdea];
+
+    // Handle special sorting cases
+    if (sortBy === "createdAt") {
+      aValue = new Date(aValue).getTime();
+      bValue = new Date(bValue).getTime();
+    } else if (typeof aValue === "string" && typeof bValue === "string") {
+      aValue = aValue.toLowerCase();
+      bValue = bValue.toLowerCase();
+    }
+
+    if (sortOrder === "asc") {
+      return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+    } else {
+      return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+    }
+  });
 
   const applyFilters = useCallback(() => {
     let filtered = [...ideas];
@@ -215,174 +284,200 @@ export default function GhostWriterLibraryPage() {
   }
 
   return (
-    <div className="container mx-auto space-y-6 p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="container mx-auto p-6">
+      {/* Compact Header with Actions */}
+      <div className="mb-6 flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Ghost Writer Library</h1>
-          <p className="text-muted-foreground">Browse and manage your historical Ghost Writer generations</p>
+          <h1 className="text-2xl font-bold tracking-tight">Ghost Writer Library</h1>
+          <p className="text-muted-foreground text-sm">Browse and manage your historical Ghost Writer generations</p>
         </div>
-        <Button onClick={fetchLibraryData} variant="outline">
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Refresh
-        </Button>
+        <div className="flex items-center gap-3">
+          {/* Quick Stats - Inline */}
+          {stats && (
+            <div className="text-muted-foreground hidden items-center gap-4 text-sm md:flex">
+              <div className="flex items-center gap-1">
+                <Hash className="h-4 w-4" />
+                <span className="font-medium">{stats.totalIdeas}</span>
+                <span>ideas</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Tag className="h-4 w-4" />
+                <span className="font-medium">{stats.hookTemplatesUsed.length}</span>
+                <span>templates</span>
+              </div>
+            </div>
+          )}
+          <Button onClick={fetchLibraryData} variant="outline" size="sm">
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Refresh
+          </Button>
+        </div>
       </div>
 
-      {/* Stats Cards */}
-      {stats && (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Ideas</CardTitle>
-              <Hash className="text-muted-foreground h-4 w-4" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalIdeas}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Generation Cycles</CardTitle>
-              <Calendar className="text-muted-foreground h-4 w-4" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalCycles}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Hook Templates</CardTitle>
-              <Tag className="text-muted-foreground h-4 w-4" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.hookTemplatesUsed.length}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">This Week</CardTitle>
-              <Calendar className="text-muted-foreground h-4 w-4" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {
-                  ideas.filter((idea) => {
-                    const weekAgo = new Date();
-                    weekAgo.setDate(weekAgo.getDate() - 7);
-                    return new Date(idea.createdAt) >= weekAgo;
-                  }).length
-                }
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      {/* Toolbar with Filters and View Toggle */}
+      <div className="mb-4 space-y-4">
+        {/* Top Row: Search, Quick Filters, View Toggle */}
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          {/* Search and Quick Filters */}
+          <div className="flex flex-1 items-center gap-3">
+            {/* Search */}
+            <div className="relative w-full max-w-xs">
+              <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+              <Input
+                placeholder="Search ideas..."
+                value={filters.search}
+                onChange={(e) => handleFilterChange("search", e.target.value)}
+                className="h-9 pl-10"
+              />
+            </div>
 
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
-            Filters
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Search</label>
-              <div className="relative">
-                <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-                <Input
-                  placeholder="Search hooks, concepts..."
-                  value={filters.search}
-                  onChange={(e) => handleFilterChange("search", e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Category</label>
-              <Select value={filters.peqCategory} onValueChange={(value) => handleFilterChange("peqCategory", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All categories" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="problem">Problems</SelectItem>
-                  <SelectItem value="excuse">Excuses</SelectItem>
-                  <SelectItem value="question">Questions</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Hook Template</label>
-              <Select value={filters.hookTemplate} onValueChange={(value) => handleFilterChange("hookTemplate", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All templates" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Templates</SelectItem>
-                  {getUniqueHookTemplates().map((template) => (
-                    <SelectItem key={template} value={template}>
-                      {template}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Date Range</label>
-              <Select value={filters.dateRange} onValueChange={(value) => handleFilterChange("dateRange", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All time" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Time</SelectItem>
-                  <SelectItem value="today">Today</SelectItem>
-                  <SelectItem value="week">Last Week</SelectItem>
-                  <SelectItem value="month">Last Month</SelectItem>
-                  <SelectItem value="3months">Last 3 Months</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div className="mt-4 flex items-center justify-between">
-            <div className="flex flex-wrap gap-2">
-              {filters.search && <Badge variant="secondary">Search: {filters.search}</Badge>}
-              {filters.peqCategory !== "all" && <Badge variant="secondary">Category: {filters.peqCategory}</Badge>}
-              {filters.hookTemplate !== "all" && <Badge variant="secondary">Template: {filters.hookTemplate}</Badge>}
-              {filters.dateRange !== "all" && <Badge variant="secondary">Date: {filters.dateRange}</Badge>}
-            </div>
-            {(filters.search ||
-              filters.peqCategory !== "all" ||
-              filters.hookTemplate !== "all" ||
-              filters.dateRange !== "all") && (
+            {/* Quick Filter Dropdowns */}
+            <Select value={filters.peqCategory} onValueChange={(value) => handleFilterChange("peqCategory", value)}>
+              <SelectTrigger className="h-9 w-32">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="problem">Problems</SelectItem>
+                <SelectItem value="excuse">Excuses</SelectItem>
+                <SelectItem value="question">Questions</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={filters.dateRange} onValueChange={(value) => handleFilterChange("dateRange", value)}>
+              <SelectTrigger className="h-9 w-32">
+                <SelectValue placeholder="Date" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Time</SelectItem>
+                <SelectItem value="today">Today</SelectItem>
+                <SelectItem value="week">Last Week</SelectItem>
+                <SelectItem value="month">Last Month</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Clear filters if any active */}
+            {(filters.search || filters.peqCategory !== "all" || filters.dateRange !== "all") && (
               <Button variant="ghost" size="sm" onClick={clearFilters}>
-                <Trash2 className="mr-2 h-4 w-4" />
-                Clear Filters
+                <Trash2 className="h-4 w-4" />
               </Button>
             )}
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Results */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">
-            {filteredIdeas.length} {filteredIdeas.length === 1 ? "idea" : "ideas"} found
-          </h2>
+          {/* View Toggle and Results Count */}
+          <div className="flex items-center gap-4">
+            <span className="text-muted-foreground text-sm">
+              {filteredIdeas.length} {filteredIdeas.length === 1 ? "idea" : "ideas"}
+            </span>
+            <div className="bg-muted/20 rounded-lg border border-gray-200 p-1">
+              <Button
+                variant={viewMode === "cards" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("cards")}
+                className="h-7 px-2"
+              >
+                <Grid3X3 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === "table" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("table")}
+                className="h-7 px-2"
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         </div>
 
-        {filteredIdeas.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <p className="text-muted-foreground">No ideas found matching your filters.</p>
+        {/* Active Filters Row */}
+        {(filters.search ||
+          filters.peqCategory !== "all" ||
+          filters.hookTemplate !== "all" ||
+          filters.dateRange !== "all") && (
+          <div className="flex flex-wrap gap-2">
+            {filters.search && (
+              <Badge variant="secondary" className="text-xs">
+                Search: {filters.search}
+              </Badge>
+            )}
+            {filters.peqCategory !== "all" && (
+              <Badge variant="secondary" className="text-xs">
+                Category: {filters.peqCategory}
+              </Badge>
+            )}
+            {filters.hookTemplate !== "all" && (
+              <Badge variant="secondary" className="text-xs">
+                Template: {filters.hookTemplate}
+              </Badge>
+            )}
+            {filters.dateRange !== "all" && (
+              <Badge variant="secondary" className="text-xs">
+                Date: {filters.dateRange}
+              </Badge>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Main Content */}
+      <div>
+        {ideas.length === 0 ? (
+          // Empty state - no Ghost Writer ideas generated yet
+          <Card className="rounded-xl border border-gray-200">
+            <CardContent className="py-16 text-center">
+              <div className="mx-auto max-w-md">
+                <div className="mb-6">
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-[#2d93ad]/10 to-[#412722]/10">
+                    <Sparkles className="h-8 w-8 text-[#2d93ad]" />
+                  </div>
+                  <h3 className="text-foreground text-xl font-semibold">Start Using Ghost Writer</h3>
+                  <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+                    Generate AI-powered content ideas and track your script creation history. generations will appear
+                    here.
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  <Button onClick={() => (window.location.href = "/dashboard/scripts/new")} className="gap-2">
+                    <Sparkles className="h-4 w-4" />
+                    Generate Your First Ideas
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                  <p className="text-muted-foreground text-xs">
+                    Visit the Scripts page to get started with Ghost Writer
+                  </p>
+                </div>
+              </div>
             </CardContent>
           </Card>
+        ) : filteredIdeas.length === 0 ? (
+          // Filtered state - ideas exist but none match current filters
+          <Card className="rounded-xl border border-gray-200">
+            <CardContent className="py-12 text-center">
+              <div className="mx-auto max-w-md">
+                <p className="text-muted-foreground mb-4">No ideas found matching your current filters.</p>
+                <Button variant="outline" onClick={clearFilters}>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Clear All Filters
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : viewMode === "table" ? (
+          <GhostWriterCryptoTable
+            data={sortedIdeas}
+            onUseIdea={handleUseIdea}
+            onViewUsage={(idea) => {
+              console.log("View usage details for", idea.id);
+              toast.info("Usage details coming soon");
+            }}
+            onRowClick={(idea) => {
+              console.log("Clicked on idea", idea.id);
+            }}
+          />
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredIdeas.map((idea) => (
+            {sortedIdeas.map((idea) => (
               <div key={idea.id} className="relative">
                 <GhostWriterCard idea={idea} onSave={handleIdeaAction} onUse={handleUseIdea} className="h-full" />
                 <div className="absolute top-2 right-2 space-y-1">

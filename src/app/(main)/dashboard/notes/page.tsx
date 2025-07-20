@@ -128,7 +128,7 @@ export default function NotesPage() {
   const { setTopBarConfig } = useTopBarConfig();
 
   const handleCreateNote = () => {
-    window.location.href = "/dashboard/capture/new";
+    window.location.href = "/dashboard/capture/notes/new";
   };
 
   useEffect(() => {
@@ -207,7 +207,7 @@ export default function NotesPage() {
   };
 
   const handleEditNote = (noteId: number) => {
-    window.location.href = `/dashboard/capture/notes?noteId=${noteId}`;
+    window.location.href = `/dashboard/capture/notes/new?noteId=${noteId}`;
   };
 
   const handleExportSelected = () => {
@@ -294,7 +294,7 @@ export default function NotesPage() {
           />
 
           {/* Table */}
-          <Card>
+          <Card className="overflow-hidden rounded-xl border border-gray-200">
             <CardContent className="p-0">
               <NotesTable
                 notes={sortedNotes}

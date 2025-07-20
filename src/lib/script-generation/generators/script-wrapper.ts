@@ -4,9 +4,10 @@
  * Phase 1: Zero-risk migration that maintains 100% compatibility
  */
 
-import { BaseGenerator, GeneratorResult } from "./base-generator";
-import { EnrichedInput, GenerationRules } from "../preprocessors";
 import { ScriptGenerationService } from "../../services/script-generation-service";
+import { EnrichedInput, GenerationRules } from "../preprocessors";
+
+import { BaseGenerator, GeneratorResult } from "./base-generator";
 
 export class ScriptWrapper extends BaseGenerator {
   private scriptService: ScriptGenerationService;

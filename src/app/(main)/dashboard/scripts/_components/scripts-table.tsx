@@ -1,6 +1,8 @@
 "use client";
 
-import { MoreHorizontal, Eye, Edit, Trash2, Copy, Clock, ArrowUpDown } from "lucide-react";
+import { useState } from "react";
+
+import { MoreHorizontal, Eye, Edit, Trash2, Copy, Clock, ArrowUpDown, Check, X } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Script } from "@/types/script";
 
@@ -33,6 +36,7 @@ interface ScriptsTableProps {
   onSelectScript: (scriptId: string) => void;
   onSelectAll: () => void;
   onSort: (column: string) => void;
+  onTitleEdit?: (scriptId: string, newTitle: string) => void;
 }
 
 // eslint-disable-next-line complexity
@@ -44,9 +48,42 @@ export function ScriptsTable({
   onSelectScript,
   onSelectAll,
   onSort,
+  onTitleEdit,
 }: ScriptsTableProps) {
+  const [editingScriptId, setEditingScriptId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+
+  const handleTitleEdit = (scriptId: string, currentTitle: string) => {
+    if (onTitleEdit) {
+      setEditingScriptId(scriptId);
+      setEditTitle(currentTitle);
+    }
+  };
+
+  const handleTitleSave = () => {
+    if (onTitleEdit && editingScriptId && editTitle.trim()) {
+      onTitleEdit(editingScriptId, editTitle.trim());
+    }
+    setEditingScriptId(null);
+    setEditTitle("");
+  };
+
+  const handleTitleCancel = () => {
+    setEditingScriptId(null);
+    setEditTitle("");
+  };
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleTitleSave();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      handleTitleCancel();
+    }
+  };
   return (
-    <Card>
+    <Card className="overflow-hidden rounded-xl border border-gray-200">
       <CardContent className="p-0">
         <Table>
           <TableHeader>
@@ -110,7 +147,53 @@ export function ScriptsTable({
                 {columnVisibility.title && (
                   <TableCell>
                     <div className="space-y-1">
-                      <h4 className="font-medium">{script.title}</h4>
+                      <div className="flex items-center gap-2">
+                        {editingScriptId === script.id ? (
+                          <div className="flex flex-1 items-center gap-1">
+                            <Input
+                              value={editTitle}
+                              onChange={(e) => setEditTitle(e.target.value)}
+                              onKeyDown={handleTitleKeyDown}
+                              className="h-8 text-sm font-medium"
+                              autoFocus
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleTitleSave();
+                              }}
+                              className="h-8 w-8 p-0 text-green-600 hover:bg-green-50 hover:text-green-700"
+                            >
+                              <Check className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleTitleCancel();
+                              }}
+                              className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <h4
+                            className="cursor-pointer font-medium transition-colors hover:text-blue-600"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleTitleEdit(script.id, script.title);
+                            }}
+                            title="Click to edit title"
+                          >
+                            {script.title}
+                          </h4>
+                        )}
+                      </div>
                       <div className="text-muted-foreground flex items-center gap-2 text-xs">
                         <Clock className="h-3 w-3" />
                         {script.duration}

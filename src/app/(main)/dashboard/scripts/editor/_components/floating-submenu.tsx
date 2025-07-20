@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+
 import { Card } from "@/components/ui/card";
 
 interface SubmenuOption {
@@ -59,7 +60,7 @@ export function FloatingSubmenu({
   };
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-50">
+    <div className="pointer-events-none fixed inset-0 z-[10000]">
       <Card
         ref={submenuRef}
         className="border-border pointer-events-auto absolute w-64 border shadow-lg"

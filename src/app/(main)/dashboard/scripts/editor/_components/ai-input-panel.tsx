@@ -1,15 +1,20 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+
 import { Send, Wand2, ChevronRight } from "lucide-react";
-import { Input } from "@/components/ui/input";
+
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
 import { type ScriptElement } from "@/lib/script-analysis";
-import { HumanizePopup } from "./humanize-popup";
-import { ShortenPopup } from "./shorten-popup";
-import { FloatingSubmenu } from "./floating-submenu";
 
 interface ScriptBlock {
   type: "hook" | "bridge" | "golden-nugget" | "wta";
@@ -82,6 +87,8 @@ const COMPONENT_ACTIONS: Record<ScriptElement["type"] | ScriptBlock["type"], AIA
         { key: "statistic", label: "Statistic-driven", description: "Open with compelling data" },
         { key: "story", label: "Story-driven", description: "Begin with narrative" },
         { key: "provocative", label: "Provocative", description: "Bold controversial statement" },
+        { key: "direct", label: "Direct Statement", description: "Get straight to the point" },
+        { key: "contrarian", label: "Contrarian", description: "Challenge common beliefs" },
       ],
     },
   ],
@@ -132,12 +139,65 @@ const COMPONENT_ACTIONS: Record<ScriptElement["type"] | ScriptBlock["type"], AIA
 
 export function AIInputPanel({ element, position, onAction, onTextUpdate, onClose }: AIInputPanelProps) {
   const [customPrompt, setCustomPrompt] = useState("");
-  const [showHumanizePopup, setShowHumanizePopup] = useState(false);
-  const [showShortenPopup, setShowShortenPopup] = useState(false);
-  const [showFloatingSubmenu, setShowFloatingSubmenu] = useState(false);
-  const [activeSubmenuAction, setActiveSubmenuAction] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const triggerRef = useRef<HTMLDivElement>(null);
+
+  // Execute AI action with API call
+  const executeAIAction = async (actionType: string, option?: string, customPrompt?: string) => {
+    setIsLoading(true);
+    try {
+      let response;
+
+      if (actionType === "humanize") {
+        response = await fetch("/api/humanize", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: element.text }),
+        });
+      } else if (actionType === "shorten") {
+        response = await fetch("/api/shorten", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: element.text }),
+        });
+      } else {
+        // Use the general AI action endpoint
+        response = await fetch("/api/ai-action", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text: element.text,
+            actionType,
+            option,
+            customPrompt,
+          }),
+        });
+      }
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        const newText = data.humanizedText || data.shortenedText || data.modifiedText;
+        if (newText && onTextUpdate) {
+          onTextUpdate(newText);
+        }
+        onClose();
+      } else {
+        throw new Error(data.error || "Action failed");
+      }
+    } catch (error) {
+      console.error("AI action failed:", error);
+      // You could add toast notification here
+      alert(`Action failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Close panel when isOpen changes
   useEffect(() => {
@@ -159,33 +219,16 @@ export function AIInputPanel({ element, position, onAction, onTextUpdate, onClos
     }
   }, [position]);
 
-  const handleCustomPromptSubmit = () => {
+  const handleCustomPromptSubmit = async () => {
     if (!customPrompt.trim()) return;
-    onAction("custom_prompt", customPrompt);
+    await executeAIAction("custom_prompt", undefined, customPrompt);
     setCustomPrompt("");
-    onClose();
   };
 
-  const handleActionSelect = (
-    actionKey: string,
-    option?: string,
-    hasSubmenu?: boolean,
-    actionElement?: HTMLElement,
-  ) => {
-    if (hasSubmenu && !option) {
-      setActiveSubmenuAction(actionKey);
-      setShowFloatingSubmenu(true);
-    } else if (actionKey === "humanize") {
-      setShowHumanizePopup(true);
-      setIsOpen(false); // Close the main panel
-    } else if (actionKey === "shorten") {
-      setShowShortenPopup(true);
-      setIsOpen(false); // Close the main panel
-    } else {
-      // Execute action and close
-      onAction(actionKey, undefined, option);
-      setIsOpen(false);
-    }
+  const handleActionSelect = async (actionKey: string, option?: string) => {
+    // Execute action with API call
+    await executeAIAction(actionKey, option);
+    setIsOpen(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -195,54 +238,7 @@ export function AIInputPanel({ element, position, onAction, onTextUpdate, onClos
     }
   };
 
-  const handleHumanizeAccept = (humanizedText: string) => {
-    if (onTextUpdate) {
-      onTextUpdate(humanizedText);
-    }
-    setShowHumanizePopup(false);
-    onClose();
-  };
-
-  const handleHumanizeReject = () => {
-    setShowHumanizePopup(false);
-    setIsOpen(true); // Reopen the main panel
-  };
-
-  const handleShortenAccept = (shortenedText: string) => {
-    if (onTextUpdate) {
-      onTextUpdate(shortenedText);
-    }
-    setShowShortenPopup(false);
-    onClose();
-  };
-
-  const handleShortenReject = () => {
-    setShowShortenPopup(false);
-    setIsOpen(true); // Reopen the main panel
-  };
-
-  const handleSubmenuOptionSelect = (optionKey: string) => {
-    if (activeSubmenuAction) {
-      onAction(activeSubmenuAction, undefined, optionKey);
-      setShowFloatingSubmenu(false);
-      setActiveSubmenuAction(null);
-      setIsOpen(false);
-    }
-  };
-
-  const handleSubmenuClose = () => {
-    setShowFloatingSubmenu(false);
-    setActiveSubmenuAction(null);
-    setIsOpen(true); // Reopen the main panel
-  };
-
   const componentActions = COMPONENT_ACTIONS[element.type] || [];
-  const allActions = [...UNIVERSAL_ACTIONS, ...componentActions];
-
-  // Get the current submenu action and its data
-  const currentSubmenuAction = activeSubmenuAction
-    ? allActions.find((action) => action.key === activeSubmenuAction)
-    : null;
 
   return (
     <>
@@ -255,7 +251,7 @@ export function AIInputPanel({ element, position, onAction, onTextUpdate, onClos
           <div ref={triggerRef} className="pointer-events-none fixed" />
         </PopoverTrigger>
         <PopoverContent
-          className="w-80 p-0 shadow-lg"
+          className="w-64 p-0 shadow-lg"
           side="bottom"
           align="start"
           avoidCollisions={true}
@@ -275,12 +271,14 @@ export function AIInputPanel({ element, position, onAction, onTextUpdate, onClos
                 placeholder="Ask AI to do something..."
                 className="pr-10 pl-10"
                 autoFocus
+                disabled={isLoading}
               />
               {customPrompt.trim() && (
                 <Button
                   onClick={handleCustomPromptSubmit}
                   size="sm"
                   className="absolute top-1/2 right-2 h-8 w-8 -translate-y-1/2 p-0"
+                  disabled={isLoading}
                 >
                   <Send className="h-3 w-3" />
                 </Button>
@@ -288,22 +286,64 @@ export function AIInputPanel({ element, position, onAction, onTextUpdate, onClos
             </div>
           </div>
 
+          {/* Loading Indicator */}
+          {isLoading && (
+            <div className="border-border border-b p-3">
+              <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+                Processing...
+              </div>
+            </div>
+          )}
+
           {/* AI Actions Section */}
           <div className="max-h-80 space-y-1 overflow-y-auto p-3">
             {/* Universal Actions */}
             <div className="text-muted-foreground px-2 py-1.5 text-xs font-medium">Universal Actions</div>
             {UNIVERSAL_ACTIONS.map((action) => (
-              <button
-                key={action.key}
-                onClick={(e) => handleActionSelect(action.key, undefined, action.hasSubmenu, e.currentTarget)}
-                className="hover:bg-accent/20 hover:text-accent-foreground flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors duration-150"
-              >
-                <span className="text-sm">{action.icon}</span>
-                <div className="flex min-w-0 flex-1 items-center justify-between">
-                  <span className="text-sm font-medium">{action.label}</span>
-                  {action.hasSubmenu && <ChevronRight className="text-muted-foreground h-3 w-3" />}
-                </div>
-              </button>
+              <div key={action.key}>
+                {action.hasSubmenu ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        className="hover:bg-accent/50 hover:text-accent-foreground flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50"
+                        disabled={isLoading}
+                      >
+                        <span className="text-sm">{action.icon}</span>
+                        <div className="flex min-w-0 flex-1 items-center justify-between">
+                          <span className="text-sm font-medium">{action.label}</span>
+                          <ChevronRight className="text-muted-foreground h-3 w-3" />
+                        </div>
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48" avoidCollisions={true} collisionPadding={20}>
+                      {action.options?.map((option) => (
+                        <DropdownMenuItem
+                          key={option.key}
+                          onClick={() => handleActionSelect(action.key, option.key)}
+                          className="cursor-pointer"
+                        >
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium">{option.label}</span>
+                            <span className="text-muted-foreground text-xs">{option.description}</span>
+                          </div>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <button
+                    onClick={() => handleActionSelect(action.key)}
+                    className="hover:bg-accent/50 hover:text-accent-foreground flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={isLoading}
+                  >
+                    <span className="text-sm">{action.icon}</span>
+                    <div className="flex min-w-0 flex-1 items-center justify-between">
+                      <span className="text-sm font-medium">{action.label}</span>
+                    </div>
+                  </button>
+                )}
+              </div>
             ))}
 
             {/* Component-Specific Actions */}
@@ -314,85 +354,55 @@ export function AIInputPanel({ element, position, onAction, onTextUpdate, onClos
                   {element.type.charAt(0).toUpperCase() + element.type.slice(1)} Actions
                 </div>
                 {componentActions.map((action) => (
-                  <button
-                    key={action.key}
-                    onClick={(e) => handleActionSelect(action.key, undefined, action.hasSubmenu, e.currentTarget)}
-                    className="hover:bg-accent/20 hover:text-accent-foreground flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors duration-150"
-                  >
-                    <span className="text-sm">{action.icon}</span>
-                    <div className="flex min-w-0 flex-1 items-center justify-between">
-                      <span className="text-sm font-medium">{action.label}</span>
-                      {action.hasSubmenu && <ChevronRight className="text-muted-foreground h-3 w-3" />}
-                    </div>
-                  </button>
+                  <div key={action.key}>
+                    {action.hasSubmenu ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            className="hover:bg-accent/50 hover:text-accent-foreground flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50"
+                            disabled={isLoading}
+                          >
+                            <span className="text-sm">{action.icon}</span>
+                            <div className="flex min-w-0 flex-1 items-center justify-between">
+                              <span className="text-sm font-medium">{action.label}</span>
+                              <ChevronRight className="text-muted-foreground h-3 w-3" />
+                            </div>
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48" avoidCollisions={true} collisionPadding={20}>
+                          {action.options?.map((option) => (
+                            <DropdownMenuItem
+                              key={option.key}
+                              onClick={() => handleActionSelect(action.key, option.key)}
+                              className="cursor-pointer"
+                            >
+                              <div className="flex flex-col">
+                                <span className="text-sm font-medium">{option.label}</span>
+                                <span className="text-muted-foreground text-xs">{option.description}</span>
+                              </div>
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : (
+                      <button
+                        onClick={() => handleActionSelect(action.key)}
+                        className="hover:bg-accent/50 hover:text-accent-foreground flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50"
+                        disabled={isLoading}
+                      >
+                        <span className="text-sm">{action.icon}</span>
+                        <div className="flex min-w-0 flex-1 items-center justify-between">
+                          <span className="text-sm font-medium">{action.label}</span>
+                        </div>
+                      </button>
+                    )}
+                  </div>
                 ))}
               </>
             )}
           </div>
         </PopoverContent>
       </Popover>
-
-      {/* Humanize Popup with improved positioning */}
-      {showHumanizePopup && (
-        <Popover open={showHumanizePopup} onOpenChange={setShowHumanizePopup}>
-          <PopoverTrigger asChild>
-            <div ref={triggerRef} className="pointer-events-none fixed" />
-          </PopoverTrigger>
-          <PopoverContent
-            className="w-80 p-0 shadow-lg"
-            side="right"
-            align="start"
-            avoidCollisions={true}
-            collisionPadding={20}
-            sideOffset={10}
-          >
-            <HumanizePopup
-              originalText={element.text}
-              onAccept={handleHumanizeAccept}
-              onReject={handleHumanizeReject}
-              onRefresh={() => {}} // Handled internally
-              embedded={true}
-            />
-          </PopoverContent>
-        </Popover>
-      )}
-
-      {/* Shorten Popup with improved positioning */}
-      {showShortenPopup && (
-        <Popover open={showShortenPopup} onOpenChange={setShowShortenPopup}>
-          <PopoverTrigger asChild>
-            <div ref={triggerRef} className="pointer-events-none fixed" />
-          </PopoverTrigger>
-          <PopoverContent
-            className="w-80 p-0 shadow-lg"
-            side="right"
-            align="start"
-            avoidCollisions={true}
-            collisionPadding={20}
-            sideOffset={10}
-          >
-            <ShortenPopup
-              originalText={element.text}
-              onAccept={handleShortenAccept}
-              onReject={handleShortenReject}
-              onRefresh={() => {}} // Handled internally
-              embedded={true}
-            />
-          </PopoverContent>
-        </Popover>
-      )}
-
-      {/* Floating Submenu */}
-      {showFloatingSubmenu && currentSubmenuAction && currentSubmenuAction.options && (
-        <FloatingSubmenu
-          options={currentSubmenuAction.options}
-          position={{ x: position.x + 300, y: position.y }}
-          onOptionSelect={handleSubmenuOptionSelect}
-          onClose={handleSubmenuClose}
-          actionLabel={currentSubmenuAction.label}
-          actionIcon={currentSubmenuAction.icon}
-        />
-      )}
     </>
   );
 }

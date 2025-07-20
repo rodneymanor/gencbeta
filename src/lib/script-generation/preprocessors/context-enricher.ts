@@ -3,8 +3,8 @@
  * Merges all contextual information needed for script generation
  */
 
-import { UnifiedScriptInput, ScriptContext } from "../types";
 import { DurationConfig } from "../duration-config";
+import { UnifiedScriptInput, ScriptContext } from "../types";
 
 export interface EnrichedInput {
   input: UnifiedScriptInput;
@@ -76,7 +76,7 @@ export class ContextEnricher {
     const profile = context.profile;
 
     // Default guidelines
-    let guidelines = {
+    const guidelines = {
       tone: input.tone,
       style: "conversational",
       vocabulary: [] as string[],

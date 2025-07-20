@@ -101,10 +101,31 @@ export class GeminiService {
         // }
       }
 
+      // Safety settings to allow more content types
+      const safetySettings = [
+        {
+          category: "HARM_CATEGORY_HARASSMENT",
+          threshold: "BLOCK_NONE",
+        },
+        {
+          category: "HARM_CATEGORY_HATE_SPEECH",
+          threshold: "BLOCK_NONE",
+        },
+        {
+          category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+          threshold: "BLOCK_NONE",
+        },
+        {
+          category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+          threshold: "BLOCK_NONE",
+        },
+      ];
+
       const modelInstance = genAI.getGenerativeModel({
         model: modelName,
         generationConfig,
         systemInstruction: config.systemInstruction,
+        safetySettings,
       });
 
       this.models.set(cacheKey, modelInstance);

@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { VideoInsightsModalNew } from "@/app/(main)/research/collections/_components/video-insights-modal-new";
+import { Button } from "@/components/ui/button";
 
 // Mock video data for testing
 const mockVideo = {

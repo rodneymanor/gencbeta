@@ -14,7 +14,7 @@ import {
   updateProfile,
 } from "firebase/auth";
 
-import { getAuthCache, setAuthCache, clearAuthCache, type AccountLevel } from "@/lib/auth-cache";
+import { getAuthCache, setAuthCache, clearAuthCache, isCacheStale, type AccountLevel } from "@/lib/auth-cache";
 import { auth } from "@/lib/firebase";
 import { UserManagementService, type UserProfile, type UserRole } from "@/lib/user-management";
 
@@ -24,6 +24,8 @@ interface AuthContextType {
   loading: boolean;
   initializing: boolean;
   accountLevel: AccountLevel;
+  hasValidCache: boolean;
+  isBackgroundVerifying: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, displayName?: string, role?: UserRole, coachId?: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
@@ -85,14 +87,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(false);
   const [initializing, setInitializing] = useState(true);
   const [accountLevel, setAccountLevel] = useState<AccountLevel>("free");
+  const [hasValidCache, setHasValidCache] = useState(false);
+  const [isBackgroundVerifying, setIsBackgroundVerifying] = useState(false);
 
-  // Initialize from cache immediately
+  // Initialize from cache immediately and set up optimized loading states
   useEffect(() => {
     const cachedAuth = getAuthCache();
     if (cachedAuth) {
       console.log("🔍 [AUTH] Loading from cache:", cachedAuth);
       setUserProfile(cachedAuth.userProfile);
       setAccountLevel(cachedAuth.accountLevel);
+      setHasValidCache(true);
+      // Reduce initializing time when we have valid cache
+      setInitializing(false);
+      setIsBackgroundVerifying(true);
     }
   }, []);
 
@@ -131,6 +139,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!auth) {
       setInitializing(false);
+      setIsBackgroundVerifying(false);
       return;
     }
 
@@ -141,32 +150,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (firebaseUser) {
         await UserManagementService.updateLastLogin(firebaseUser.uid);
 
-        try {
-          const profile = await UserManagementService.getUserProfile(firebaseUser.uid);
-          setUserProfile(profile);
+        // Only fetch profile if we don't have valid cache, if profile differs, or if cache is stale
+        const cachedAuth = getAuthCache();
+        const shouldFetchProfile =
+          !hasValidCache || !cachedAuth || cachedAuth.userProfile?.uid !== firebaseUser.uid || isCacheStale();
 
-          const newAccountLevel: AccountLevel =
-            profile?.role === "super_admin" || profile?.role === "coach" ? "pro" : "free";
-          setAccountLevel(newAccountLevel);
+        if (shouldFetchProfile) {
+          try {
+            const profile = await UserManagementService.getUserProfile(firebaseUser.uid);
+            setUserProfile(profile);
 
-          updateAuthCache(firebaseUser, profile, newAccountLevel);
-        } catch (error) {
-          console.error("Error fetching user profile:", error);
-          setUserProfile(null);
-          setAccountLevel("free");
-          updateAuthCache(firebaseUser, null, "free");
+            const newAccountLevel: AccountLevel =
+              profile?.role === "super_admin" || profile?.role === "coach" ? "pro" : "free";
+            setAccountLevel(newAccountLevel);
+
+            updateAuthCache(firebaseUser, profile, newAccountLevel);
+          } catch (error) {
+            console.error("Error fetching user profile:", error);
+            // Only clear profile if we don't have valid cache fallback
+            if (!hasValidCache) {
+              setUserProfile(null);
+              setAccountLevel("free");
+            }
+            updateAuthCache(firebaseUser, null, hasValidCache ? accountLevel : "free");
+          }
+        } else {
+          console.log("🚀 [AUTH] Using cached profile data - background verification complete");
         }
+
+        setHasValidCache(true);
       } else {
         setUserProfile(null);
         setAccountLevel("free");
+        setHasValidCache(false);
         clearAuthCache();
       }
 
       setInitializing(false);
+      setIsBackgroundVerifying(false);
     });
 
     return unsubscribe;
-  }, [updateAuthCache]);
+  }, [updateAuthCache, hasValidCache, accountLevel]);
 
   const signIn = async (email: string, password: string) => {
     if (!auth) {
@@ -285,6 +310,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       loading,
       initializing,
       accountLevel,
+      hasValidCache,
+      isBackgroundVerifying,
       signIn,
       signUp,
       signInWithGoogle,
@@ -293,7 +320,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       upgradeAccount,
       refreshUserProfile,
     }),
-    [user, userProfile, loading, initializing, accountLevel, upgradeAccount, refreshUserProfile],
+    [
+      user,
+      userProfile,
+      loading,
+      initializing,
+      accountLevel,
+      hasValidCache,
+      isBackgroundVerifying,
+      upgradeAccount,
+      refreshUserProfile,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

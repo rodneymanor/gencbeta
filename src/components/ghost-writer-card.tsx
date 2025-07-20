@@ -93,13 +93,16 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
         </div>
       </div>
 
-      {/* Hook content - flexible area that pushes footer to bottom */}
+      {/* Hook content - flexible area */}
       <div className="flex-1 px-4 pb-3">
         <div className="text-foreground line-clamp-6 text-sm leading-relaxed whitespace-pre-wrap">
           {cleanContent(idea.hook)}
         </div>
-        {/* Hook template and strength indicators */}
-        {idea.hookTemplate && (
+      </div>
+
+      {/* Hook template and strength indicators - sticky above footer */}
+      {idea.hookTemplate && (
+        <div className="px-4 pb-3">
           <div className="mt-2 flex flex-wrap gap-2">
             <span className="bg-primary/10 text-primary rounded-full px-2 py-1 text-xs font-medium">
               {idea.hookTemplate}
@@ -110,8 +113,8 @@ export function GhostWriterCard({ idea, onSave, onDismiss, onUse, isSaved = fals
               </span>
             )}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Sticky footer with engagement metrics */}
       <div className="border-border/50 bg-background mt-auto border-t px-4 py-3">

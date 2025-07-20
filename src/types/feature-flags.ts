@@ -8,6 +8,8 @@ export interface FeatureFlags {
   v2_template_hooks: boolean;
   v2_smart_bridges: boolean;
   v2_performance_monitoring: boolean;
+  voice_library: boolean;
+  creator_spotlight: boolean;
 }
 
 export interface FeatureFlagConfig {
@@ -54,7 +56,7 @@ export interface RolloutStatus {
 }
 
 export interface FeatureFlagEvent {
-  event_type: 'rollout_started' | 'phase_progression' | 'emergency_rollback' | 'flag_updated';
+  event_type: "rollout_started" | "phase_progression" | "emergency_rollback" | "flag_updated";
   feature_flag: keyof FeatureFlags;
   admin_user_id: string;
   timestamp: string;
@@ -100,6 +102,8 @@ export interface FeatureFlagEnvVars {
   FEATURE_V2_TEMPLATE_HOOKS_ENABLED?: string;
   FEATURE_V2_SMART_BRIDGES_ENABLED?: string;
   FEATURE_V2_PERFORMANCE_MONITORING_ENABLED?: string;
+  FEATURE_VOICE_LIBRARY_ENABLED?: string;
+  FEATURE_CREATOR_SPOTLIGHT_ENABLED?: string;
 }
 
 // API response types
@@ -133,11 +137,13 @@ export interface FeatureFlagValidation {
 
 // Constants
 export const FEATURE_FLAG_NAMES: Record<string, FeatureFlagName> = {
-  V2_SCRIPT_GENERATION: 'v2_script_generation',
-  V2_ENHANCED_PROMPTS: 'v2_enhanced_prompts',
-  V2_TEMPLATE_HOOKS: 'v2_template_hooks',
-  V2_SMART_BRIDGES: 'v2_smart_bridges',
-  V2_PERFORMANCE_MONITORING: 'v2_performance_monitoring',
+  V2_SCRIPT_GENERATION: "v2_script_generation",
+  V2_ENHANCED_PROMPTS: "v2_enhanced_prompts",
+  V2_TEMPLATE_HOOKS: "v2_template_hooks",
+  V2_SMART_BRIDGES: "v2_smart_bridges",
+  V2_PERFORMANCE_MONITORING: "v2_performance_monitoring",
+  VOICE_LIBRARY: "voice_library",
+  CREATOR_SPOTLIGHT: "creator_spotlight",
 } as const;
 
 export const ROLLOUT_PHASES = [

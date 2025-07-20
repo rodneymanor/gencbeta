@@ -6,6 +6,9 @@ import { adminDb } from "@/lib/firebase-admin";
 import { GhostWriterService } from "@/lib/ghost-writer-service";
 import { BrandProfile } from "@/types/brand-profile";
 
+// In-memory cache to prevent concurrent requests
+const activeRequests = new Map<string, Promise<NextResponse<EnhancedGhostWriterResponse>>>();
+
 interface EnhancedGhostWriterResponse {
   success: boolean;
   ideas?: EnhancedContentIdea[];
@@ -71,18 +74,49 @@ const createLegacyFallbackResponse = async (
 };
 
 export async function GET(request: NextRequest): Promise<NextResponse<EnhancedGhostWriterResponse>> {
+  // Authenticate user first to get userId for deduplication
+  const authResult = await authenticateApiKey(request);
+  if (authResult instanceof NextResponse) {
+    return authResult as NextResponse<EnhancedGhostWriterResponse>;
+  }
+
+  const { user } = authResult;
+  const userId = user.uid;
+
+  // Create request key for deduplication
+  const url = new URL(request.url);
+  const generateMore = url.searchParams.get("generateMore") === "true";
+  const refresh = url.searchParams.get("refresh") === "true";
+  const requestKey = `${userId}-${generateMore ? "generateMore" : refresh ? "refresh" : "default"}`;
+
+  // Check if there's already an active request for this user/type
+  if (activeRequests.has(requestKey)) {
+    console.log(`🔄 [EnhancedGhostWriter] Deduplicating request for user: ${userId}, type: ${requestKey}`);
+    return await activeRequests.get(requestKey)!;
+  }
+
+  // Create the actual request handler
+  const requestPromise = handleGhostWriterRequest(request, userId, generateMore, refresh);
+
+  // Store the promise in the cache
+  activeRequests.set(requestKey, requestPromise);
+
+  // Clean up cache after request completes (success or failure)
+  requestPromise.finally(() => {
+    activeRequests.delete(requestKey);
+  });
+
+  return await requestPromise;
+}
+
+async function handleGhostWriterRequest(
+  request: NextRequest,
+  userId: string,
+  generateMore: boolean,
+  refresh: boolean,
+): Promise<NextResponse<EnhancedGhostWriterResponse>> {
   try {
     console.log("🚀 [EnhancedGhostWriter] API request received");
-
-    // Authenticate user
-    const authResult = await authenticateApiKey(request);
-    if (authResult instanceof NextResponse) {
-      return authResult as NextResponse<EnhancedGhostWriterResponse>;
-    }
-
-    const { user } = authResult;
-    const userId = user.uid;
-
     console.log(`👤 [EnhancedGhostWriter] Processing request for user: ${userId}`);
 
     // Get current global cycle
@@ -115,10 +149,6 @@ export async function GET(request: NextRequest): Promise<NextResponse<EnhancedGh
 
     // Check if user already has ideas for this cycle
     const existingIdeas = await EnhancedGhostWriterService.getEnhancedIdeasForUser(userId, currentCycle.id);
-
-    const url = new URL(request.url);
-    const generateMore = url.searchParams.get("generateMore") === "true";
-    const refresh = url.searchParams.get("refresh") === "true";
 
     let ideas: EnhancedContentIdea[] = existingIdeas;
 

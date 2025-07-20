@@ -17,7 +17,8 @@ export interface AuthCache {
 
 // Auth cache keys for localStorage
 const AUTH_CACHE_KEY = "gen_c_auth_cache";
-const AUTH_CACHE_EXPIRY = 1000 * 60 * 60 * 24; // 24 hours
+const AUTH_CACHE_EXPIRY = 1000 * 60 * 60 * 24 * 7; // 7 days (extended for better UX)
+const AUTH_CACHE_STALE_TIME = 1000 * 60 * 60 * 2; // 2 hours (when to refresh in background)
 
 export function getAuthCache(): AuthCache | null {
   if (typeof window === "undefined") return null;
@@ -77,4 +78,11 @@ export function clearAuthCache() {
   } catch (error) {
     console.warn("Error clearing auth cache:", error);
   }
+}
+
+export function isCacheStale(): boolean {
+  const cache = getAuthCache();
+  if (!cache) return true;
+
+  return Date.now() - cache.timestamp > AUTH_CACHE_STALE_TIME;
 }

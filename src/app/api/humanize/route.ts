@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { generateContent } from "@/lib/services/gemini-service";
 
 export async function POST(request: NextRequest) {

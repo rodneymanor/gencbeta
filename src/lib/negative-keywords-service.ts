@@ -9,11 +9,11 @@ import { adminDb } from "./firebase-admin";
 
 export class NegativeKeywordsService {
   private static readonly COLLECTION_NAME = "user_negative_keywords";
-  
+
   // In-memory cache for negative keywords with TTL
-  private static keywordCache = new Map<string, { keywords: string[], timestamp: number }>();
+  private static keywordCache = new Map<string, { keywords: string[]; timestamp: number }>();
   private static readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-  private static readonly DEBUG = process.env.NODE_ENV === 'development';
+  private static readonly DEBUG = process.env.NODE_ENV === "development";
 
   /**
    * Get user's negative keyword settings
@@ -107,32 +107,32 @@ export class NegativeKeywordsService {
       // Check cache first
       const cacheKey = userId;
       const cached = this.keywordCache.get(cacheKey);
-      
+
       if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
         if (this.DEBUG) {
           console.log("🎯 [NegativeKeywords] Cache hit for user:", userId);
         }
         return cached.keywords;
       }
-      
+
       // Cache miss - fetch from database
       if (this.DEBUG) {
         console.log("🔍 [NegativeKeywords] Cache miss, fetching from database for user:", userId);
       }
-      
+
       const userSettings = await this.getUserNegativeKeywords(userId);
       const keywords = getEffectiveNegativeKeywords(userSettings.settings);
-      
+
       // Store in cache
-      this.keywordCache.set(cacheKey, { 
-        keywords, 
-        timestamp: Date.now() 
+      this.keywordCache.set(cacheKey, {
+        keywords,
+        timestamp: Date.now(),
       });
-      
+
       if (this.DEBUG) {
         console.log(`✅ [NegativeKeywords] Cached ${keywords.length} keywords for user:`, userId);
       }
-      
+
       return keywords;
     } catch (error) {
       console.error("❌ [NegativeKeywords] Error getting effective keywords:", error);
@@ -252,14 +252,14 @@ export class NegativeKeywordsService {
   static clearExpiredCache(): void {
     const now = Date.now();
     const expiredKeys: string[] = [];
-    
+
     this.keywordCache.forEach((cache, userId) => {
       if (now - cache.timestamp >= this.CACHE_TTL) {
         expiredKeys.push(userId);
       }
     });
-    
-    expiredKeys.forEach(userId => {
+
+    expiredKeys.forEach((userId) => {
       this.keywordCache.delete(userId);
       if (this.DEBUG) {
         console.log("🧹 [NegativeKeywords] Expired cache entry removed for user:", userId);

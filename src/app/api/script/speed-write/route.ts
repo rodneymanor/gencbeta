@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { authenticateApiKey } from "@/lib/api-key-auth";
 import { CreditsService } from "@/lib/credits-service";
+import { FeatureFlagService } from "@/lib/feature-flags";
+import { adminDb } from "@/lib/firebase-admin";
 import { ScriptService } from "@/lib/services/script-generation-service";
 import { trackApiUsageAdmin } from "@/lib/usage-tracker-admin";
-import { FeatureFlagService } from "@/lib/feature-flags";
 
 // Validate environment setup
 if (!process.env.GEMINI_API_KEY) {
@@ -15,6 +16,14 @@ interface SpeedWriteRequest {
   idea: string;
   length: "20" | "60" | "90";
   type?: "speed" | "educational" | "voice";
+  ideaId?: string;
+  ideaData?: {
+    concept: string;
+    hookTemplate: string;
+    peqCategory: "problem" | "excuse" | "question";
+    sourceText: string;
+    targetAudience: string;
+  };
   ideaContext?: {
     selectedNotes: Array<{
       id: string;
@@ -136,44 +145,46 @@ async function handleV2Generation(request: NextRequest): Promise<NextResponse<Sp
   try {
     // Clone the request to forward to V2 endpoint
     const body = await request.json();
-    
+
     // Create a new request for the V2 endpoint
-    const v2Request = new Request(
-      new URL('/api/script/speed-write/v2', request.url),
-      {
-        method: 'POST',
-        headers: request.headers,
-        body: JSON.stringify(body),
-      }
-    );
+    const v2Request = new Request(new URL("/api/script/speed-write/v2", request.url), {
+      method: "POST",
+      headers: request.headers,
+      body: JSON.stringify(body),
+    });
 
     // Import V2 POST handler dynamically to avoid circular imports
-    const { POST: V2POST } = await import('./v2/route');
-    
+    const { POST: V2POST } = await import("./v2/route");
+
     // Call V2 endpoint
     const v2Response = await V2POST(v2Request as NextRequest);
-    
+
     // Get response data
     const v2Data = await v2Response.json();
-    
+
     // Add V2 indicators to response
-    return NextResponse.json({
-      ...v2Data,
-      generationMethod: "v2",
-      featureFlagEnabled: true,
-    }, { status: v2Response.status });
-    
+    return NextResponse.json(
+      {
+        ...v2Data,
+        generationMethod: "v2",
+        featureFlagEnabled: true,
+      },
+      { status: v2Response.status },
+    );
   } catch (error) {
-    console.error('❌ [V2 FORWARD] Error forwarding to V2:', error);
-    
+    console.error("❌ [V2 FORWARD] Error forwarding to V2:", error);
+
     // Fallback to V1 if V2 forwarding fails
-    console.log('🔄 [V2 FALLBACK] V2 forwarding failed, continuing with V1');
-    return NextResponse.json({
-      success: false,
-      error: 'V2 generation failed, please try again',
-      generationMethod: "v1",
-      featureFlagEnabled: true,
-    }, { status: 500 });
+    console.log("🔄 [V2 FALLBACK] V2 forwarding failed, continuing with V1");
+    return NextResponse.json(
+      {
+        success: false,
+        error: "V2 generation failed, please try again",
+        generationMethod: "v1",
+        featureFlagEnabled: true,
+      },
+      { status: 500 },
+    );
   }
 }
 
@@ -192,10 +203,10 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
     const { user } = authResult;
 
     // Check V2 feature flag
-    const useV2 = await FeatureFlagService.isEnabled(user.uid, 'v2_script_generation');
-    
+    const useV2 = await FeatureFlagService.isEnabled(user.uid, "v2_script_generation");
+
     if (useV2) {
-      console.log('🚀 [V1->V2 REDIRECT] User enabled for V2, redirecting to V2 endpoint');
+      console.log("🚀 [V1->V2 REDIRECT] User enabled for V2, redirecting to V2 endpoint");
       // Forward request to V2 endpoint
       return await handleV2Generation(request);
     }
@@ -428,6 +439,53 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
     console.log("🔍 [SCRIPT] - optionA is null:", finalResponse.optionA === null);
     console.log("🔍 [SCRIPT] - optionB is null:", finalResponse.optionB === null);
     console.log("🔍 [SCRIPT] - processingTime:", finalResponse.processingTime);
+
+    // Save the Ghost Writer idea to library if script generation was successful
+    if (hasValidOptions && body.ideaId && body.ideaData) {
+      try {
+        console.log("📚 [SCRIPT] Saving Ghost Writer idea to library:", body.ideaId);
+
+        const libraryDoc = adminDb.collection("ghost_writer_library").doc();
+        await libraryDoc.set({
+          id: libraryDoc.id,
+          userId: user.uid,
+          originalIdeaId: body.ideaId,
+          concept: body.ideaData.concept || "",
+          hook: body.idea || body.ideaData.concept || "",
+          hookTemplate: body.ideaData.hookTemplate || "Concept",
+          peqCategory: body.ideaData.peqCategory || "problem",
+          sourceText: body.ideaData.sourceText || "",
+          targetAudience: body.ideaData.targetAudience || "",
+          estimatedDuration: body.length || "60",
+          wordCount: body.idea.split(/\s+/).length,
+          createdAt: new Date().toISOString(),
+          savedAt: new Date().toISOString(),
+          savedFrom: "script_generation",
+          generatedScripts: [
+            {
+              generatedAt: new Date().toISOString(),
+              optionA: transformedResult.optionA
+                ? {
+                    content: transformedResult.optionA.content,
+                    estimatedDuration: transformedResult.optionA.estimatedDuration,
+                  }
+                : null,
+              optionB: transformedResult.optionB
+                ? {
+                    content: transformedResult.optionB.content,
+                    estimatedDuration: transformedResult.optionB.estimatedDuration,
+                  }
+                : null,
+            },
+          ],
+        });
+
+        console.log("✅ [SCRIPT] Ghost Writer idea saved to library successfully");
+      } catch (error) {
+        console.error("⚠️ [SCRIPT] Failed to save Ghost Writer idea to library:", error);
+        // Don't fail the script generation if saving to library fails
+      }
+    }
 
     return NextResponse.json(finalResponse);
   } catch (error) {

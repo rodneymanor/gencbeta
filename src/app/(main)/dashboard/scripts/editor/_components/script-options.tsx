@@ -1,8 +1,11 @@
 "use client";
 
+import { useState, useEffect } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ContentLoading } from "@/components/ui/loading-animations";
+import { ScriptLoadingTimelineModal } from "@/components/ui/script-loading-timeline-modal";
 
 import { ScriptOption } from "./types";
 
@@ -14,6 +17,22 @@ interface ScriptOptionsProps {
 }
 
 export function ScriptOptions({ optionA, optionB, onSelect, isGenerating }: ScriptOptionsProps) {
+  const [showTimeline, setShowTimeline] = useState(false);
+  const [selectedOption, setSelectedOption] = useState<ScriptOption | null>(null);
+
+  const handleSelect = (option: ScriptOption) => {
+    setSelectedOption(option);
+    setShowTimeline(true);
+  };
+
+  const handleTimelineComplete = () => {
+    if (selectedOption) {
+      onSelect(selectedOption);
+      setShowTimeline(false);
+      setSelectedOption(null);
+    }
+  };
+
   if (isGenerating) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -35,6 +54,16 @@ export function ScriptOptions({ optionA, optionB, onSelect, isGenerating }: Scri
 
   return (
     <div className="bg-background min-h-screen p-[var(--space-3)]">
+      {/* Timeline Modal */}
+      <ScriptLoadingTimelineModal
+        isOpen={showTimeline}
+        onComplete={handleTimelineComplete}
+        onCancel={() => {
+          setShowTimeline(false);
+          setSelectedOption(null);
+        }}
+      />
+
       <div className="mx-auto max-w-6xl">
         {/* Header */}
         <div className="mb-[var(--space-4)] text-center">
@@ -50,7 +79,7 @@ export function ScriptOptions({ optionA, optionB, onSelect, isGenerating }: Scri
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-[var(--space-2)]">
                 <CardTitle className="text-xl font-semibold">Option A</CardTitle>
                 <Button
-                  onClick={() => onSelect(optionA)}
+                  onClick={() => handleSelect(optionA)}
                   className="bg-primary text-primary-foreground hover:bg-primary/85 ml-[var(--space-2)] h-10 rounded-[20px] border-none px-[var(--space-3)] text-sm font-medium transition-all duration-200 active:scale-[0.98]"
                 >
                   Select This Script
@@ -76,7 +105,7 @@ export function ScriptOptions({ optionA, optionB, onSelect, isGenerating }: Scri
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-[var(--space-2)]">
                 <CardTitle className="text-xl font-semibold">Option B</CardTitle>
                 <Button
-                  onClick={() => onSelect(optionB)}
+                  onClick={() => handleSelect(optionB)}
                   className="bg-primary text-primary-foreground hover:bg-primary/85 ml-[var(--space-2)] h-10 rounded-[20px] border-none px-[var(--space-3)] text-sm font-medium transition-all duration-200 active:scale-[0.98]"
                 >
                   Select This Script

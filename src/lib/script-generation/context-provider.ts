@@ -3,9 +3,10 @@
  * Loads user profile, voice settings, and negative keywords once per session
  */
 
-import { ScriptContext } from "./types";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { UserManagementService } from "@/lib/user-management-server";
+
+import { ScriptContext } from "./types";
 
 interface CacheEntry<T> {
   data: T;

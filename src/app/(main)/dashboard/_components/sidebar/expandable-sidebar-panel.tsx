@@ -7,14 +7,14 @@ import { Pin, Settings, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-interface NavigationItem {
+export interface NavigationItem {
   id: string;
   title: string;
   href: string;
   icon: React.ReactNode;
 }
 
-interface NavigationSection {
+export interface NavigationSection {
   title: string;
   items: NavigationItem[];
 }
@@ -282,16 +282,13 @@ export function ExpandableSidebarPanel({
         "bg-sidebar border-sidebar-border backdrop-blur-sm",
         "group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-lg",
         "transition-all duration-300 ease-out",
-        isExpanded
-          ? "pointer-events-auto z-[90] translate-x-0 opacity-100"
-          : "pointer-events-none z-[80] translate-x-0 opacity-0",
+        isExpanded ? "pointer-events-auto z-[4] opacity-100" : "pointer-events-none z-[2] opacity-0",
         className,
       )}
       style={{
-        left: isExpanded ? "70px" : "50px", // Slide from behind (20px overlap) to full position
+        left: isExpanded ? "70px" : "30px", // Slide from behind (40px overlap) to full position
         width: "200px",
         paddingLeft: "8px", // Small padding for content
-        transform: isExpanded ? "translateX(0)" : "translateX(-20px)", // Additional slide effect
       }}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}

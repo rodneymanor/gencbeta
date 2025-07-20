@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 
-import { HemingwayEditor } from "../../scripts/editor/_components/hemingway-editor";
 import { useTopBarConfig } from "@/hooks/use-route-topbar";
+
+import { HemingwayEditor } from "../../scripts/editor/_components/hemingway-editor";
 
 export default function NewCapturePage() {
   const [content, setContent] = useState("");

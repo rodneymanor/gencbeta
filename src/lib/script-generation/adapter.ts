@@ -3,12 +3,13 @@
  * This allows us to use the new interface while keeping the existing service working
  */
 
-import { UnifiedScriptInput, GeneratedScript, ScriptContext } from "./types";
 import { ScriptGenerationService } from "../services/script-generation-service";
+
 import { DurationConfig } from "./duration-config";
-import { ScriptParser } from "./script-parser";
-import { EnrichedInput, GenerationRules } from "./preprocessors";
 import { ScriptWrapper } from "./generators/script-wrapper";
+import { EnrichedInput, GenerationRules } from "./preprocessors";
+import { ScriptParser } from "./script-parser";
+import { UnifiedScriptInput, GeneratedScript, ScriptContext } from "./types";
 
 export class ScriptGenerationAdapter {
   private scriptService: ScriptGenerationService;

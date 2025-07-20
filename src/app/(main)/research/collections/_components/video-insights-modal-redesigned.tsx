@@ -20,9 +20,9 @@ import {
   ArrowUp,
   ArrowDown,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import { StatisticBar } from "@/components/statistic-bar";
-import { toast } from "sonner";
 
 import type { VideoWithPlayer } from "./collections-helpers";
 
@@ -184,7 +184,7 @@ export function VideoInsightsModalRedesigned({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm">
       {/* Navigation Arrow Above */}
       {onNavigatePrevious && hasPrevious && (
         <div className="mb-4 flex justify-center">

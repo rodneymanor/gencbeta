@@ -4,19 +4,35 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+
 import { authenticateApiKey } from "@/lib/api-key-auth";
 import { CreditsService } from "@/lib/credits-service";
-import { UnifiedScriptService } from "@/lib/script-generation/unified-service";
+import { adminDb } from "@/lib/firebase-admin";
 import { UnifiedScriptInput } from "@/lib/script-generation/types";
-import { trackApiUsageAdmin } from "@/lib/usage-tracker-admin";
-import { validateScriptGenerationInput, hasRequiredFields, isContentSafe, estimateComplexity } from "@/lib/validation/input-validator";
+import { UnifiedScriptService } from "@/lib/script-generation/unified-service";
 import { ScriptService } from "@/lib/services/script-generation-service";
+import { trackApiUsageAdmin } from "@/lib/usage-tracker-admin";
+import {
+  validateScriptGenerationInput,
+  hasRequiredFields,
+  isContentSafe,
+  sanitizeForGemini,
+  estimateComplexity,
+} from "@/lib/validation/input-validator";
 
 interface SpeedWriteRequest {
   idea: string;
   length: "15" | "20" | "30" | "45" | "60" | "90";
   type?: "speed" | "educational" | "viral";
   tone?: "casual" | "professional" | "energetic" | "educational";
+  ideaId?: string;
+  ideaData?: {
+    concept: string;
+    hookTemplate: string;
+    peqCategory: "problem" | "excuse" | "question";
+    sourceText: string;
+    targetAudience: string;
+  };
   ideaContext?: {
     selectedNotes: Array<{
       id: string;
@@ -82,7 +98,10 @@ interface SpeedWriteResponse {
  * V1 Fallback - generates scripts using the legacy ScriptService
  * Used when V2 UnifiedScriptService fails
  */
-async function generateWithV1Fallback(body: SpeedWriteRequest, userId: string): Promise<{
+async function generateWithV1Fallback(
+  body: SpeedWriteRequest,
+  userId: string,
+): Promise<{
   optionA: ScriptOption | null;
   optionB: ScriptOption | null;
   fallbackUsed: boolean;
@@ -99,7 +118,7 @@ async function generateWithV1Fallback(body: SpeedWriteRequest, userId: string): 
     };
 
     let result;
-    
+
     if (body.type) {
       // Single script generation
       const scriptResult = await ScriptService.generate(v1Request.type || "speed", {
@@ -109,25 +128,27 @@ async function generateWithV1Fallback(body: SpeedWriteRequest, userId: string): 
         ideaContext: v1Request.ideaContext,
       });
 
-      const scriptOption = scriptResult?.success ? {
-        id: "option-a",
-        title: getScriptTitle(body.type),
-        content: scriptResult.content || "",
-        estimatedDuration: `${body.length} seconds`,
-        approach: (body.type === "viral" ? "viral" : body.type === "educational" ? "educational" : "speed-write") as "speed-write" | "educational" | "viral",
-        elements: scriptResult.elements || {
-          hook: "",
-          bridge: "",
-          goldenNugget: "",
-          wta: "",
-        },
-        metadata: {
-          targetWords: scriptResult.metadata?.targetWords || 0,
-          actualWords: scriptResult.metadata?.actualWords || 0,
-          responseTime: scriptResult.metadata?.responseTime || 0,
-          generationMethod: "v1-fallback",
-        },
-      } : null;
+      const scriptOption = scriptResult?.success
+        ? {
+            id: "option-a",
+            title: getScriptTitle(body.type),
+            content: scriptResult.content || "",
+            estimatedDuration: `${body.length} seconds`,
+            approach: body.type === "viral" ? "viral" : body.type === "educational" ? "educational" : "speed-write",
+            elements: scriptResult.elements || {
+              hook: "",
+              bridge: "",
+              goldenNugget: "",
+              wta: "",
+            },
+            metadata: {
+              targetWords: scriptResult.metadata?.targetWords || 0,
+              actualWords: scriptResult.metadata?.actualWords || 0,
+              responseTime: scriptResult.metadata?.responseTime || 0,
+              generationMethod: "v1-fallback",
+            },
+          }
+        : null;
 
       result = {
         optionA: scriptOption,
@@ -142,7 +163,11 @@ async function generateWithV1Fallback(body: SpeedWriteRequest, userId: string): 
         ideaContext: v1Request.ideaContext,
       });
 
-      const transformToV2Format = (v1Result: any, optionId: string, approach: "speed-write" | "viral"): ScriptOption | null => {
+      const transformToV2Format = (
+        v1Result: any,
+        optionId: string,
+        approach: "speed-write" | "viral",
+      ): ScriptOption | null => {
         if (!v1Result?.success) return null;
 
         return {
@@ -198,7 +223,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
     }
 
     const { user } = authResult;
-    
+
     // Parse request body
     let body: SpeedWriteRequest;
     try {
@@ -272,9 +297,14 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
       );
     }
 
+    // Sanitize the idea to avoid Gemini safety triggers while preserving meaning
+    const sanitizedIdea = sanitizeForGemini(body.idea);
+    console.log(`🔧 [SANITIZATION] Original: "${body.idea}"`);
+    console.log(`🔧 [SANITIZATION] Sanitized: "${sanitizedIdea}"`);
+
     // Prepare unified input
     const unifiedInput: UnifiedScriptInput = {
-      idea: body.idea,
+      idea: sanitizedIdea,
       duration: body.length,
       type: body.type || "speed",
       tone: body.tone || "casual",
@@ -296,7 +326,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
       try {
         // Attempt V2 generation
         console.log("🚀 [V2 GENERATION] Attempting V2 unified service generation...");
-        
+
         if (body.type) {
           // Single script generation
           let script;
@@ -361,7 +391,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
               goldenNugget: (speedScript.goldenNugget || speedScript.golden_nugget || "")
                 .replace(/\s*\((Golden Nugget|GOLDEN NUGGET)\)\s*$/i, "")
                 .trim(),
-              wta: (speedScript.wta || speedScript.cta || "").replace(/\s*\((CTA|WTA|Call to Action)\)\s*$/i, "").trim(),
+              wta: (speedScript.wta || speedScript.cta || "")
+                .replace(/\s*\((CTA|WTA|Call to Action)\)\s*$/i, "")
+                .trim(),
             },
             metadata: {
               targetWords: speedScript.metadata.wordCount,
@@ -394,7 +426,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
               goldenNugget: (viralScript.goldenNugget || viralScript.golden_nugget || "")
                 .replace(/\s*\((Golden Nugget|GOLDEN NUGGET)\)\s*$/i, "")
                 .trim(),
-              wta: (viralScript.wta || viralScript.cta || "").replace(/\s*\((CTA|WTA|Call to Action)\)\s*$/i, "").trim(),
+              wta: (viralScript.wta || viralScript.cta || "")
+                .replace(/\s*\((CTA|WTA|Call to Action)\)\s*$/i, "")
+                .trim(),
             },
             metadata: {
               targetWords: viralScript.metadata.wordCount,
@@ -408,13 +442,12 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
         }
 
         console.log("✅ [V2 GENERATION] V2 generation completed successfully");
-        
       } catch (v2Error) {
         console.error("❌ [V2 GENERATION] V2 generation failed, attempting V1 fallback:", v2Error);
-        
+
         // Check if V2 generated empty/invalid results
         const hasValidV2Results = optionA || optionB;
-        
+
         if (!hasValidV2Results) {
           // Attempt V1 fallback
           const fallbackResult = await generateWithV1Fallback(body, user.uid);
@@ -422,7 +455,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
           optionB = fallbackResult.optionB;
           fallbackUsed = fallbackResult.fallbackUsed;
           generationMethod = "v1-fallback";
-          
+
           // If V1 fallback also failed, throw error
           if (!optionA && !optionB) {
             throw new Error("Both V2 and V1 generation failed");
@@ -455,6 +488,53 @@ export async function POST(request: NextRequest): Promise<NextResponse<SpeedWrit
         length: body.length,
         type: body.type || "speed",
       });
+
+      // Save the Ghost Writer idea to library if script generation was successful
+      if ((optionA || optionB) && body.ideaId && body.ideaData) {
+        try {
+          console.log("📚 [SCRIPT V2] Saving Ghost Writer idea to library:", body.ideaId);
+
+          const libraryDoc = adminDb.collection("ghost_writer_library").doc();
+          await libraryDoc.set({
+            id: libraryDoc.id,
+            userId: user.uid,
+            originalIdeaId: body.ideaId,
+            concept: body.ideaData.concept || "",
+            hook: body.idea || body.ideaData.concept || "",
+            hookTemplate: body.ideaData.hookTemplate || "Concept",
+            peqCategory: body.ideaData.peqCategory || "problem",
+            sourceText: body.ideaData.sourceText || "",
+            targetAudience: body.ideaData.targetAudience || "",
+            estimatedDuration: body.length || "60",
+            wordCount: body.idea.split(/\s+/).length,
+            createdAt: new Date().toISOString(),
+            savedAt: new Date().toISOString(),
+            savedFrom: "script_generation_v2",
+            generatedScripts: [
+              {
+                generatedAt: new Date().toISOString(),
+                optionA: optionA
+                  ? {
+                      content: optionA.content,
+                      estimatedDuration: optionA.estimatedDuration,
+                    }
+                  : null,
+                optionB: optionB
+                  ? {
+                      content: optionB.content,
+                      estimatedDuration: optionB.estimatedDuration,
+                    }
+                  : null,
+              },
+            ],
+          });
+
+          console.log("✅ [SCRIPT V2] Ghost Writer idea saved to library successfully");
+        } catch (error) {
+          console.error("⚠️ [SCRIPT V2] Failed to save Ghost Writer idea to library:", error);
+          // Don't fail the script generation if saving to library fails
+        }
+      }
 
       return NextResponse.json({
         success: true,

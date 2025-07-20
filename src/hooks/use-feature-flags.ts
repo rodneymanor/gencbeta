@@ -3,9 +3,11 @@
  * Provides client-side feature flag checking with caching
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { FeatureFlags, FeatureFlagService } from '@/lib/feature-flags';
-import { useAuth } from '@/contexts/AuthContext';
+import { useState, useEffect, useCallback } from "react";
+
+import { FeatureFlags, FeatureFlagService } from "@/lib/feature-flags";
+
+import { useAuth } from "@/contexts/AuthContext";
 
 interface FeatureFlagHook {
   flags: FeatureFlags;
@@ -42,12 +44,12 @@ export const useFeatureFlags = (): FeatureFlagHook => {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       const userFlags = await FeatureFlagService.getUserFlags(user.uid);
       setFlags(userFlags);
     } catch (err) {
-      console.error('Error fetching feature flags:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch feature flags');
+      console.error("Error fetching feature flags:", err);
+      setError(err instanceof Error ? err.message : "Failed to fetch feature flags");
       setFlags(DEFAULT_FLAGS); // Fallback to defaults
     } finally {
       setIsLoading(false);
@@ -58,9 +60,12 @@ export const useFeatureFlags = (): FeatureFlagHook => {
     fetchFlags();
   }, [fetchFlags]);
 
-  const isEnabled = useCallback((flagName: keyof FeatureFlags): boolean => {
-    return flags[flagName] || false;
-  }, [flags]);
+  const isEnabled = useCallback(
+    (flagName: keyof FeatureFlags): boolean => {
+      return flags[flagName] || false;
+    },
+    [flags],
+  );
 
   const refresh = useCallback(async () => {
     await fetchFlags();
@@ -78,13 +83,15 @@ export const useFeatureFlags = (): FeatureFlagHook => {
 /**
  * Hook to check a specific feature flag
  */
-export const useFeatureFlag = (flagName: keyof FeatureFlags): {
+export const useFeatureFlag = (
+  flagName: keyof FeatureFlags,
+): {
   isEnabled: boolean;
   isLoading: boolean;
   error: string | null;
 } => {
   const { flags, isLoading, error } = useFeatureFlags();
-  
+
   return {
     isEnabled: flags[flagName] || false,
     isLoading,
@@ -101,8 +108,8 @@ export const useV2ScriptGeneration = (): {
   error: string | null;
   canUseV2: boolean;
 } => {
-  const { isEnabled, isLoading, error } = useFeatureFlag('v2_script_generation');
-  
+  const { isEnabled, isLoading, error } = useFeatureFlag("v2_script_generation");
+
   return {
     isEnabled,
     isLoading,
@@ -114,10 +121,7 @@ export const useV2ScriptGeneration = (): {
 /**
  * Server-side feature flag checking for API routes
  */
-export const checkFeatureFlagServer = async (
-  userId: string,
-  flagName: keyof FeatureFlags
-): Promise<boolean> => {
+export const checkFeatureFlagServer = async (userId: string, flagName: keyof FeatureFlags): Promise<boolean> => {
   try {
     return await FeatureFlagService.isEnabled(userId, flagName);
   } catch (error) {
@@ -148,11 +152,7 @@ export interface FeatureFlagContextData extends FeatureFlagHook {
 /**
  * Helper function to create feature flag variants
  */
-export const createFeatureFlagVariant = <T>(
-  flagName: keyof FeatureFlags,
-  enabledVariant: T,
-  disabledVariant: T
-) => {
+export const createFeatureFlagVariant = <T>(flagName: keyof FeatureFlags, enabledVariant: T, disabledVariant: T) => {
   return (flags: FeatureFlags): T => {
     return flags[flagName] ? enabledVariant : disabledVariant;
   };
@@ -162,24 +162,24 @@ export const createFeatureFlagVariant = <T>(
  * Environment-based feature flag checking (for development)
  */
 export const getFeatureFlagFromEnv = (flagName: string): boolean => {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     // Client-side: check localStorage for development overrides
     const envOverride = localStorage.getItem(`feature_flag_${flagName}`);
     if (envOverride !== null) {
-      return envOverride === 'true';
+      return envOverride === "true";
     }
   }
-  
+
   // Server-side: check environment variables
   const envVar = `NEXT_PUBLIC_FEATURE_${flagName.toUpperCase()}_ENABLED`;
-  return process.env[envVar] === 'true';
+  return process.env[envVar] === "true";
 };
 
 /**
  * Development utility to override feature flags locally
  */
 export const setLocalFeatureFlag = (flagName: string, enabled: boolean): void => {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     localStorage.setItem(`feature_flag_${flagName}`, enabled.toString());
   }
 };
@@ -188,8 +188,8 @@ export const setLocalFeatureFlag = (flagName: string, enabled: boolean): void =>
  * Clear all local feature flag overrides
  */
 export const clearLocalFeatureFlags = (): void => {
-  if (typeof window !== 'undefined') {
-    const keys = Object.keys(localStorage).filter(key => key.startsWith('feature_flag_'));
-    keys.forEach(key => localStorage.removeItem(key));
+  if (typeof window !== "undefined") {
+    const keys = Object.keys(localStorage).filter((key) => key.startsWith("feature_flag_"));
+    keys.forEach((key) => localStorage.removeItem(key));
   }
 };

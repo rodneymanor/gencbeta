@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+
 import {
   Edit3,
   Sliders,
@@ -24,8 +25,8 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-import { WTATemplatesModal } from "./wta-templates-modal";
 import { type WTATemplate } from "./wta-templates-data";
+import { WTATemplatesModal } from "./wta-templates-modal";
 
 export interface AIActionOption {
   id: string;
@@ -326,7 +327,7 @@ export default function AIActionCombobox({
 
       {/* Dropdown */}
       <div
-        className={`bg-background border-border absolute bottom-full left-0 z-50 mb-2 w-80 origin-bottom transform overflow-hidden rounded-lg border shadow-xl transition-all duration-200 ${
+        className={`bg-background border-border absolute bottom-full left-0 z-[10000] mb-2 w-80 origin-bottom transform overflow-hidden rounded-lg border shadow-xl transition-all duration-200 ${
           isOpen ? "translate-y-0 scale-100 opacity-100" : "pointer-events-none translate-y-2 scale-95 opacity-0"
         }`}
       >

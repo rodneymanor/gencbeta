@@ -1,7 +1,9 @@
 "use client";
 
 import React from "react";
+
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
+
 import { AIGhostwriterSetup } from "./ai-ghostwriter-setup";
 
 interface AIGhostwriterOnboardingModalProps {

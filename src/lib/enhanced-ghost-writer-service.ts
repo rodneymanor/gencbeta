@@ -164,15 +164,23 @@ export class EnhancedGhostWriterService {
 
     console.log("🎭 [EnhancedGhostWriter] Selected hook styles for this generation:", hookStyleCategories);
 
-    for (let i = 0; i < concepts.length; i++) {
-      const concept = concepts[i];
+    // Generate ideas in parallel for better performance
+    console.log("🚀 [EnhancedGhostWriter] Starting parallel idea generation");
+    const ideaPromises = concepts.map((concept, i) => {
       const preferredStyle = hookStyleCategories[i % hookStyleCategories.length];
+      return this.createIdeaFromConcept(concept, userId, cycleId, brandProfile, preferredStyle);
+    });
 
-      const idea = await this.createIdeaFromConcept(concept, userId, cycleId, brandProfile, preferredStyle);
-      if (idea) {
-        ideas.push(idea);
-      }
-    }
+    // Wait for all ideas to complete
+    const ideaResults = await Promise.all(ideaPromises);
+    const generatedIdeas = ideaResults.filter((idea): idea is EnhancedContentIdea => idea !== null);
+
+    console.log(
+      `✅ [EnhancedGhostWriter] Parallel generation complete: ${generatedIdeas.length}/${concepts.length} ideas generated`,
+    );
+
+    // Add to the existing ideas array
+    ideas.push(...generatedIdeas);
 
     return ideas;
   }
@@ -520,15 +528,42 @@ FINAL REMINDER: Your response must be PURE JSON starting with { and ending with 
       // Parse the JSON response
       let parsedHooks;
       try {
-        const jsonMatch = result.content.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) {
-          throw new Error("No JSON found in response");
+        // Try to find valid JSON by looking for code blocks first
+        const codeBlockMatch = result.content.match(/```json\s*([\s\S]*?)\s*```/);
+        let jsonText = "";
+
+        if (codeBlockMatch) {
+          jsonText = codeBlockMatch[1].trim();
+        } else {
+          // Fallback to finding JSON object
+          const jsonMatch = result.content.match(/\{[\s\S]*?\}\s*(?=\n|$)/);
+          if (!jsonMatch) {
+            console.warn("⚠️ [EnhancedGhostWriter] No JSON found in response, using concept as-is");
+            return {
+              success: false,
+              error: "No JSON found in hook generation response",
+            };
+          }
+          jsonText = jsonMatch[0];
         }
 
-        parsedHooks = JSON.parse(jsonMatch[0]);
+        // Clean up common JSON formatting issues
+        jsonText = jsonText
+          .replace(/,\s*}/g, "}") // Remove trailing commas
+          .replace(/,\s*]/g, "]") // Remove trailing commas in arrays
+          .replace(/\n/g, " ") // Replace newlines with spaces
+          .trim();
+
+        parsedHooks = JSON.parse(jsonText);
       } catch (parseError) {
         console.error("❌ [EnhancedGhostWriter] Failed to parse hooks:", parseError);
-        throw new Error("Failed to parse hook generation response");
+        console.error("❌ [EnhancedGhostWriter] Raw response:", result.content);
+
+        // Return a fallback instead of throwing
+        return {
+          success: false,
+          error: "Failed to parse hook generation response",
+        };
       }
 
       if (parsedHooks.hooks && parsedHooks.hooks.length > 0) {

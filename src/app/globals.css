@@ -85,6 +85,10 @@
   --destructive: oklch(0.55 0.15 25); /* Red tone */
   --destructive-foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
 
+  /* Warning colors */
+  --warning: oklch(0.75 0.15 65); /* Orange tone */
+  --warning-foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
+
   /* Border and input colors */
   --border: oklch(0.87 0.01 120); /* #d9dcd6 - Light gray-green */
   --border-subtle: oklch(0.87 0.01 120 / 0.3); /* More subtle border for headers */
@@ -184,6 +188,10 @@
   /* Destructive colors */
   --destructive: oklch(0.65 0.15 25); /* Red tone */
   --destructive-foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
+
+  /* Warning colors */
+  --warning: oklch(0.7 0.12 65); /* Orange tone for dark mode */
+  --warning-foreground: oklch(0.99 0.005 80); /* #fcfdf8 - Very light cream/white */
 
   /* Border and input colors */
   --border: oklch(0.35 0.02 25); /* Darker brown for borders */
@@ -315,6 +323,8 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
   --color-border: var(--border);
   --color-border-subtle: var(--border-subtle);
   --color-input: var(--input);
@@ -526,18 +536,245 @@
 /* Hemingway Editor App Shell Layout */
 .app-shell {
   display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: 24px; /* matches their generous gutters */
+  grid-template-columns: 1fr 280px; /* Reduced sidebar width from 320px to 280px */
+  gap: 0;
   height: 100vh;
+  transition: grid-template-columns 0.3s ease;
+}
+
+.app-shell.sidebar-collapsed {
+  grid-template-columns: 1fr 0px;
 }
 
 .right-sidebar {
-  width: 320px;
-  min-width: 320px;
+  width: 280px; /* Reduced from 320px to 280px */
+  min-width: 280px;
+  transition: all 0.3s ease;
+  overflow: hidden; /* Prevent content overflow during collapse animation */
 }
 
 .main-content {
   min-width: 0; /* Allows flex item to shrink below content size */
+  padding-right: 24px; /* Add padding when sidebar is visible */
+  max-width: none; /* Remove any max-width constraints */
+}
+
+.sidebar-collapsed .main-content {
+  padding-right: 0; /* Remove padding when sidebar is collapsed */
+}
+
+/* Improved editor spacing for better focus */
+.main-content .bn-container {
+  max-width: none !important; /* Remove BlockNote's default max-width */
+  padding: 2rem 3rem; /* Generous padding for better reading experience */
+}
+
+/* Enhanced visual hierarchy for Hemingway editor */
+.hemingway-card {
+  border: 1px solid hsl(var(--border) / 0.3);
+  background: hsl(var(--card) / 0.7);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-sm);
+}
+
+.hemingway-card:hover {
+  border-color: hsl(var(--border) / 0.5);
+  box-shadow: var(--shadow-md);
+  transition: all 0.2s ease;
+}
+
+.hemingway-sidebar-header {
+  border-bottom: 1px solid hsl(var(--border) / 0.2);
+  background: hsl(var(--muted) / 0.3);
+}
+
+.hemingway-stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.hemingway-stat-item {
+  text-align: center;
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+  background: hsl(var(--muted) / 0.2);
+  border: 1px solid hsl(var(--border) / 0.2);
+}
+
+.hemingway-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: hsl(var(--primary));
+  line-height: 1.2;
+}
+
+.hemingway-stat-label {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+/* Improved suggestion styling */
+.readability-suggestion {
+  background: hsl(var(--warning) / 0.1);
+  border: 1px solid hsl(var(--warning) / 0.2);
+  border-left: 3px solid hsl(var(--warning));
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  margin: 0.5rem 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.readability-suggestion:hover {
+  background: hsl(var(--warning) / 0.15);
+  transition: background-color 0.2s ease;
+}
+
+/* Focus mode styles */
+.distraction-free-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: hsl(var(--background));
+  z-index: 50;
+  padding: 2rem;
+}
+
+.distraction-free-editor {
+  max-width: 800px;
+  margin: 0 auto;
+  height: 100%;
+}
+
+/* Improved button spacing and hierarchy */
+.editor-footer-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.75rem;
+}
+
+.editor-footer-section:not(:last-child) {
+  border-right: 1px solid hsl(var(--border) / 0.3);
+}
+
+/* Better responsive sidebar behavior */
+.sidebar-content {
+  padding: 1rem;
+  overflow-y: auto;
+  height: 100%;
+}
+
+/* Enhanced details/summary styling */
+details summary {
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+}
+
+details summary::-webkit-details-marker {
+  display: none;
+}
+
+details summary .lucide {
+  transition: transform 0.2s ease;
+}
+
+details[open] summary .lucide {
+  transform: rotate(180deg);
+}
+
+details summary:hover {
+  color: hsl(var(--foreground));
+}
+
+/* Improved card styling */
+.hemingway-card .details {
+  border-top: 1px solid hsl(var(--border) / 0.2);
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+
+/* Better responsive behavior */
+@media (max-width: 1200px) {
+  .app-shell {
+    grid-template-columns: 1fr 260px; /* Slightly smaller sidebar on smaller screens */
+  }
+
+  .right-sidebar {
+    width: 260px;
+    min-width: 260px;
+  }
+}
+
+@media (max-width: 968px) {
+  .app-shell:not(.sidebar-collapsed) {
+    grid-template-columns: 1fr 240px; /* Even smaller sidebar on tablets */
+  }
+
+  .right-sidebar {
+    width: 240px;
+    min-width: 240px;
+  }
+
+  .main-content .bn-container {
+    padding: 1.5rem 2rem; /* Reduce padding on smaller screens */
+  }
+}
+
+/* Floating Toolbar Enhancements */
+.floating-toolbar-glass {
+  background: rgba(var(--background), 0.95);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(var(--border), 0.2);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.floating-toolbar-glass:hover {
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.15),
+    0 2px 4px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Responsive floating toolbar */
+@media (max-width: 768px) {
+  .floating-toolbar-responsive {
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+    transform: none;
+    max-width: none;
+  }
+
+  .floating-toolbar-responsive .toolbar-text {
+    display: none;
+  }
+
+  .floating-toolbar-responsive .toolbar-secondary {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .floating-toolbar-responsive {
+    padding: 0.5rem;
+    gap: 0.25rem;
+  }
+
+  .floating-toolbar-responsive .toolbar-stats {
+    flex-direction: column;
+    gap: 0.25rem;
+    align-items: start;
+  }
 }
 
 /* Hide Next.js Dev Tools badge */

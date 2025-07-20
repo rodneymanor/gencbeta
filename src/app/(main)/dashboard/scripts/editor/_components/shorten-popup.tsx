@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+
 import { Check, RefreshCw, X } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -141,7 +143,7 @@ export function ShortenPopup({
   };
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-50">
+    <div className="pointer-events-none fixed inset-0 z-[10000]">
       <Card
         ref={popupRef}
         className="border-border pointer-events-auto absolute w-80 border shadow-lg"

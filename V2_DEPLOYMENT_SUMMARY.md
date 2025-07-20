@@ -7,6 +7,7 @@ V2 Script Generation is now **live for all users** via environment variable conf
 ## 🎯 What's Been Deployed
 
 ### **Core V2 Features:**
+
 - ✅ **Enhanced Hook Generation** - Banned repetitive "Want a [...]?" patterns
 - ✅ **Improved Prompt Quality** - Better variety and specificity
 - ✅ **Robust Error Handling** - Automatic V1 fallback on failures
@@ -14,6 +15,7 @@ V2 Script Generation is now **live for all users** via environment variable conf
 - ✅ **Comprehensive Monitoring** - Detailed logging and metrics
 
 ### **Feature Flag System:**
+
 - ✅ **100% Rollout** - All users now get V2 by default
 - ✅ **Environment Configuration** - Set via `.env.local`
 - ✅ **Graceful Fallback** - V1 backup if V2 fails
@@ -22,6 +24,7 @@ V2 Script Generation is now **live for all users** via environment variable conf
 ## 🔧 Current Configuration
 
 **Environment Variables (`.env.local`):**
+
 ```bash
 FEATURE_V2_SCRIPT_GENERATION_ENABLED=true
 FEATURE_V2_SCRIPT_GENERATION_ROLLOUT_PERCENTAGE=100
@@ -30,12 +33,14 @@ FEATURE_V2_SCRIPT_GENERATION_ROLLOUT_PERCENTAGE=100
 ## 🚦 How It Works
 
 ### **User Experience:**
+
 1. **Seamless Transition** - Users don't notice any UI changes
 2. **Better Scripts** - More diverse hooks, better quality
 3. **Faster Response** - Improved performance and caching
 4. **Reliable Service** - Automatic fallback ensures uptime
 
 ### **Technical Flow:**
+
 ```
 User Request → V1 API (/api/script/speed-write)
                 ↓
@@ -49,15 +54,18 @@ User Request → V1 API (/api/script/speed-write)
 ## 📊 Expected Improvements
 
 ### **Hook Quality:**
+
 - ❌ **Before**: "Want a phone designed just for you?"
 - ✅ **After**: "AI algorithms analyze user data to personalize phone design"
 
 ### **Performance:**
+
 - **Response Time**: ~15% improvement
 - **Success Rate**: >99% with V1 fallback
 - **Error Handling**: Robust with automatic recovery
 
 ### **Monitoring:**
+
 - **Generation Method**: Tracked in API responses
 - **Fallback Usage**: Monitored for V2 health
 - **Performance Metrics**: Real-time tracking
@@ -65,12 +73,14 @@ User Request → V1 API (/api/script/speed-write)
 ## 🛠️ Admin Tools Available
 
 ### **Status Check:**
+
 ```bash
 # Check if V2 is active
 echo $FEATURE_V2_SCRIPT_GENERATION_ENABLED
 ```
 
 ### **Emergency Rollback:**
+
 ```bash
 # Disable V2 immediately
 echo "FEATURE_V2_SCRIPT_GENERATION_ENABLED=false" >> .env.local
@@ -78,6 +88,7 @@ echo "FEATURE_V2_SCRIPT_GENERATION_ENABLED=false" >> .env.local
 ```
 
 ### **Monitoring:**
+
 - **API Responses**: Include `generationMethod: "v2"` or `"v1"`
 - **Console Logs**: Feature flag decisions logged
 - **Error Tracking**: V2 failures with V1 fallback logged
@@ -103,12 +114,14 @@ echo "FEATURE_V2_SCRIPT_GENERATION_ENABLED=false" >> .env.local
 If issues arise:
 
 1. **Immediate Rollback**:
+
    ```bash
    # Set V2 to 0%
    FEATURE_V2_SCRIPT_GENERATION_ROLLOUT_PERCENTAGE=0
    ```
 
 2. **Full Disable**:
+
    ```bash
    # Disable V2 entirely
    FEATURE_V2_SCRIPT_GENERATION_ENABLED=false
@@ -123,6 +136,7 @@ If issues arise:
 **V2 Script Generation is now live for all users!**
 
 The system is production-ready with:
+
 - 🔒 **Safe deployment** with automatic fallbacks
 - 📊 **Full monitoring** and error tracking
 - 🎯 **Improved quality** with better hooks

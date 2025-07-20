@@ -56,7 +56,27 @@ async function analyzeScriptComponents(transcript: string): Promise<ScriptCompon
   try {
     console.log("🤖 [SCRIPT_ANALYSIS] Analyzing script components with AI...");
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash-exp",
+      safetySettings: [
+        {
+          category: "HARM_CATEGORY_HARASSMENT",
+          threshold: "BLOCK_NONE",
+        },
+        {
+          category: "HARM_CATEGORY_HATE_SPEECH",
+          threshold: "BLOCK_NONE",
+        },
+        {
+          category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+          threshold: "BLOCK_NONE",
+        },
+        {
+          category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+          threshold: "BLOCK_NONE",
+        },
+      ],
+    });
 
     const prompt = `Analyze this video transcript and break it down into these four essential script components:
 

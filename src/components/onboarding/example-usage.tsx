@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+
 import { Button } from "@/components/ui/button";
+
 import { AIGhostwriterOnboardingModal } from "./ai-ghostwriter-onboarding-modal";
 
 // Example usage component
@@ -78,7 +80,7 @@ export function OnboardingExample() {
         <h1 className="mb-4 text-3xl font-bold text-gray-900">AI Ghostwriter Onboarding Demo</h1>
         <p className="mb-8 text-gray-600">Click the button below to open the onboarding modal</p>
 
-        <Button onClick={() => setIsOnboardingOpen(true)} className="bg-indigo-600 text-white hover:bg-indigo-700">
+        <Button onClick={() => setIsOnboardingOpen(true)} className="bg-indigo-600 text-white hover:bg-indigo-600/50">
           Start Onboarding
         </Button>
       </div>

@@ -14,9 +14,9 @@ import { Card } from "@/components/ui/card";
 import { useAuth } from "@/contexts/auth-context";
 import { useUsage } from "@/contexts/usage-context";
 import { useVoice } from "@/contexts/voice-context";
-import { ClientScriptService, SpeedWriteResponse } from "@/lib/services/client-script-service";
-import { ClientHookService } from "@/lib/services/client-hook-service";
 import { type HookGenerationResponse } from "@/lib/prompts/hook-generation";
+import { ClientHookService } from "@/lib/services/client-hook-service";
+import { ClientScriptService, SpeedWriteResponse } from "@/lib/services/client-script-service";
 
 import { InputModeToggle, InputMode } from "./_components/input-mode-toggle";
 
@@ -326,9 +326,9 @@ export default function NewScriptPage() {
             <div className="mb-[var(--space-2)] flex justify-center">
               <Badge
                 variant="outline"
-                className="border-primary/20 text-primary bg-primary/10 rounded-xl border px-[var(--space-2)] py-[var(--space-1)] text-sm"
+                className="border-primary/20 text-primary bg-primary/10 rounded-lg border px-2 py-0.5 text-xs"
               >
-                <Mic className="mr-[var(--space-1)] h-3 w-3" />
+                <Mic className="mr-1 h-2.5 w-2.5" />
                 {currentVoice} Voice
               </Badge>
             </div>

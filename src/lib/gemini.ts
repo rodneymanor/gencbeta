@@ -49,10 +49,31 @@ export class GeminiService {
         generationConfig.responseMimeType = "application/json";
       }
 
+      // Safety settings to allow more content types
+      const safetySettings = [
+        {
+          category: "HARM_CATEGORY_HARASSMENT",
+          threshold: "BLOCK_NONE",
+        },
+        {
+          category: "HARM_CATEGORY_HATE_SPEECH",
+          threshold: "BLOCK_NONE",
+        },
+        {
+          category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+          threshold: "BLOCK_NONE",
+        },
+        {
+          category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+          threshold: "BLOCK_NONE",
+        },
+      ];
+
       const model = genAI.getGenerativeModel({
         model: modelName,
         generationConfig,
         systemInstruction: request.systemPrompt,
+        safetySettings,
       });
 
       const result = await GeminiService.withTimeout(model.generateContent(request.prompt), GeminiService.TIMEOUT_MS);
@@ -88,8 +109,29 @@ export class GeminiService {
     try {
       console.log("🎤 [Gemini] Starting audio transcription...");
 
+      // Safety settings to allow more content types
+      const safetySettings = [
+        {
+          category: "HARM_CATEGORY_HARASSMENT",
+          threshold: "BLOCK_NONE",
+        },
+        {
+          category: "HARM_CATEGORY_HATE_SPEECH",
+          threshold: "BLOCK_NONE",
+        },
+        {
+          category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+          threshold: "BLOCK_NONE",
+        },
+        {
+          category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+          threshold: "BLOCK_NONE",
+        },
+      ];
+
       const model = genAI.getGenerativeModel({
         model: "gemini-2.0-flash",
+        safetySettings,
       });
 
       const result = await GeminiService.withTimeout(

@@ -4,6 +4,7 @@ import { ReactNode, Suspense } from "react";
 
 import { AppSidebar } from "@/app/(main)/dashboard/_components/sidebar/app-sidebar";
 import { SmartSidebarProvider } from "@/components/providers/smart-sidebar-provider";
+import { BackgroundSyncIndicator } from "@/components/ui/background-sync-indicator";
 import { RouteAwareTopBar } from "@/components/ui/route-aware-topbar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { TopBarProvider } from "@/contexts/topbar-context";
@@ -29,6 +30,8 @@ export default function Layout({ children }: Readonly<{ children: ReactNode }>) 
                 </DashboardClientLayout>
               </SidebarInset>
             </div>
+            {/* Background sync indicator */}
+            <BackgroundSyncIndicator />
           </TopBarProvider>
         </VoiceProvider>
       </SmartSidebarProvider>

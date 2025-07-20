@@ -3,43 +3,24 @@
 import { useState, useEffect, useRef } from "react";
 
 import { PartialBlock } from "@blocknote/core";
-import {
-  BarChart3,
-  Clock,
-  FileText,
-  Target,
-  Lightbulb,
-  RefreshCw,
-  Sparkles,
-  Mic,
-  MicOff,
-  ChevronDown,
-  Loader2,
-} from "lucide-react";
+import { BarChart3, Target, Lightbulb, ChevronDown, Check, X, Edit2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   EnhancedReadabilityService,
   defaultReadabilitySettings,
   type ReadabilityAnalysis,
 } from "@/lib/enhanced-readability-service";
+import { auth } from "@/lib/firebase";
 import { type HighlightConfig, type ScriptAnalysis } from "@/lib/script-analysis";
 
+import { FloatingToolbar } from "./floating-toolbar";
 import { HemingwayEditorCore } from "./hemingway-editor-core";
-import AIActionCombobox, { type AIAction } from "./ai-action-combobox";
-import { type WTATemplate } from "./wta-templates-data";
-import { auth } from "@/lib/firebase";
 
 interface ScriptElements {
   hook: string;
@@ -59,6 +40,9 @@ interface HemingwayEditorProps {
   autoFocus?: boolean;
   elements?: ScriptElements; // New prop for structured elements
   onBlocksChange?: (blocks: PartialBlock[]) => void; // New prop for JSON blocks
+  title?: string;
+  onTitleChange?: (title: string) => void;
+  showTitleEditor?: boolean;
 }
 
 interface AnalysisStats {
@@ -72,30 +56,97 @@ interface AnalysisStats {
   estimatedTime: string;
 }
 
-// Footer stats component
-function EditorFooter({
-  stats,
-  showAnalysis,
-  readabilityAnalysis,
-  script,
-  onScriptChange,
-}: {
-  stats: AnalysisStats;
-  showAnalysis: boolean;
-  readabilityAnalysis: ReadabilityAnalysis | null;
-  script: string;
-  onScriptChange: (value: string) => void;
-}) {
-  const [isRewriting, setIsRewriting] = useState(false);
-  const [currentVoice, setCurrentVoice] = useState("Professional");
+export function HemingwayEditor({
+  value,
+  onChange,
+  placeholder = "Start writing your script...",
+  minRows = 10,
+  maxRows = 50,
+  readOnly = false,
+  autoFocus = false,
+  elements,
+  onBlocksChange,
+  title = "",
+  onTitleChange,
+  showTitleEditor = false,
+}: HemingwayEditorProps) {
+  const [highlightConfig] = useState<HighlightConfig>({
+    hooks: true,
+    bridges: true,
+    goldenNuggets: true,
+    wtas: true,
+  });
+
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [distractionFreeMode, setDistractionFreeMode] = useState(false);
+  const [activeTab, setActiveTab] = useState("readability");
+
+  // Title editing state
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editTitle, setEditTitle] = useState(title);
+
+  // Update editTitle when title prop changes
+  useEffect(() => {
+    setEditTitle(title);
+  }, [title]);
+
+  const handleTitleEdit = () => {
+    if (onTitleChange) {
+      setIsEditingTitle(true);
+      setEditTitle(title);
+    }
+  };
+
+  const handleTitleSave = () => {
+    if (onTitleChange && editTitle.trim() !== title) {
+      onTitleChange(editTitle.trim());
+    }
+    setIsEditingTitle(false);
+  };
+
+  const handleTitleCancel = () => {
+    setEditTitle(title);
+    setIsEditingTitle(false);
+  };
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleTitleSave();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      handleTitleCancel();
+    }
+  };
+
+  // Undo/Redo state
+  const [history, setHistory] = useState<string[]>([value]);
+  const [historyIndex, setHistoryIndex] = useState(0);
+
+  // Update history when value changes (debounced)
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (value !== history[historyIndex]) {
+        const newHistory = history.slice(0, historyIndex + 1);
+        newHistory.push(value);
+        // Limit history to 50 entries
+        if (newHistory.length > 50) {
+          newHistory.shift();
+        } else {
+          setHistoryIndex(historyIndex + 1);
+        }
+        setHistory(newHistory);
+      }
+    }, 1000); // 1 second debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [value, history, historyIndex]);
+
+  // Voice recording state
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-
-  // Audio recording refs
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-
-  const availableVoices = ["Professional", "Casual", "Expert", "Friendly", "Authoritative"];
 
   // Cleanup on unmount
   useEffect(() => {
@@ -105,6 +156,33 @@ function EditorFooter({
       }
     };
   }, []);
+
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && !event.shiftKey && event.key === "z") {
+        event.preventDefault();
+        if (historyIndex > 0) {
+          const newIndex = historyIndex - 1;
+          setHistoryIndex(newIndex);
+          onChange(history[newIndex]);
+        }
+      } else if (
+        ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key === "z") ||
+        ((event.metaKey || event.ctrlKey) && event.key === "y")
+      ) {
+        event.preventDefault();
+        if (historyIndex < history.length - 1) {
+          const newIndex = historyIndex + 1;
+          setHistoryIndex(newIndex);
+          onChange(history[newIndex]);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [historyIndex, history, onChange]);
 
   const setupMediaRecorder = (stream: MediaStream) => {
     const options = { mimeType: "audio/webm" };
@@ -178,7 +256,7 @@ function EditorFooter({
       if (data.success && data.transcription) {
         // Add transcribed text to content
         const transcribedText = data.transcription;
-        onScriptChange(script + (script.trim() ? "\n\n" : "") + transcribedText);
+        onChange(value + (value.trim() ? "\n\n" : "") + transcribedText);
 
         toast.success("Transcription completed successfully!");
       } else {
@@ -238,7 +316,7 @@ function EditorFooter({
     }
   };
 
-  const handleRecordingToggle = () => {
+  const handleToggleRecording = () => {
     if (isRecording) {
       handleStopRecording();
     } else {
@@ -246,225 +324,99 @@ function EditorFooter({
     }
   };
 
-  const handleRewriteScript = async () => {
-    if (!script.trim()) return;
-
-    setIsRewriting(true);
-    try {
-      // TODO: Implement actual AI rewrite functionality
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      console.log("Script rewritten!");
-    } catch (error) {
-      console.error("Failed to rewrite script:", error);
-    } finally {
-      setIsRewriting(false);
+  const handleAIAction = async (actionType: string, option?: string) => {
+    if (!value.trim()) {
+      toast.error("No content to process");
+      return;
     }
-  };
 
-  const handleRewriteWithVoice = async (voiceType: string) => {
-    if (!script.trim()) return;
-
-    setIsRewriting(true);
     try {
-      setCurrentVoice(voiceType);
-      // TODO: Implement actual AI rewrite functionality
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      console.log(`Script rewritten with ${voiceType} voice!`);
-    } catch (error) {
-      console.error("Failed to rewrite script:", error);
-    } finally {
-      setIsRewriting(false);
-    }
-  };
+      let response;
 
-  const handleChangeVoice = (voiceType: string) => {
-    setCurrentVoice(voiceType);
-  };
-
-  const handleAIAction = async (action: AIAction, customInstruction?: string, submenuOption?: any) => {
-    if (!script.trim()) return;
-
-    setIsRewriting(true);
-    try {
-      // TODO: Implement actual AI action functionality
-      console.log("AI Action:", action.id, customInstruction || action.label, submenuOption?.label);
-
-      switch (action.id) {
-        case "edit-text":
-          console.log("Editing text with AI...");
-          // TODO: Open inline editor or AI refinement dialog
-          break;
-        case "edit-tone":
-          console.log("Adjusting tone with AI...", submenuOption ? `to ${submenuOption.label}` : "");
-          // TODO: Implement tone adjustment with AI using submenuOption
-          break;
-        case "remix":
-          console.log("Remixing content with AI...");
-          // TODO: Generate creative variations
-          break;
-        case "humanize":
-          console.log("Humanizing text with AI...");
-          // TODO: Make text more natural and conversational
-          break;
-        case "improve-hook":
-          console.log("Improving hook with AI...");
-          // TODO: Enhance opening with AI
-          break;
-        case "strengthen-cta":
-          console.log("Strengthening CTA with AI...");
-          // TODO: Enhance call-to-action
-          break;
-        case "save-template":
-          console.log("Saving as template...");
-          // TODO: Save current script as reusable template
-          break;
-        case "custom":
-          console.log("Custom instruction:", customInstruction);
-          // TODO: Execute custom AI instruction
-          break;
-        default:
-          console.log("Unknown action:", action.id);
+      if (actionType === "humanize") {
+        response = await fetch("/api/humanize", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: value }),
+        });
+      } else if (actionType === "shorten") {
+        response = await fetch("/api/shorten", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: value }),
+        });
+      } else {
+        // Use the general AI action endpoint
+        response = await fetch("/api/ai-action", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text: value,
+            actionType,
+            option,
+          }),
+        });
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      console.log(`AI action "${action.label}" completed!`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        const newText = data.humanizedText || data.shortenedText || data.modifiedText;
+        if (newText) {
+          onChange(newText);
+          toast.success(
+            `Script ${actionType === "humanize" ? "humanized" : actionType === "shorten" ? "shortened" : "updated"} successfully!`,
+          );
+        }
+      } else {
+        throw new Error(data.error || "Action failed");
+      }
     } catch (error) {
-      console.error("Failed to execute AI action:", error);
-    } finally {
-      setIsRewriting(false);
+      console.error("AI action failed:", error);
+      toast.error(`Failed to ${actionType} script: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
   };
 
-  const handleTemplateSelect = (template: WTATemplate) => {
-    // Insert the template text at the end of the script
-    const newScript = script + (script.trim() ? "\n\n" : "") + template.text;
-    onScriptChange(newScript);
-
-    // Show success notification
-    toast.success(`WTA template "${template.text.substring(0, 50)}..." added to script`);
+  const handleSave = async () => {
+    // TODO: Implement save functionality
+    console.log("Save script:", value);
+    toast.success("Script saved successfully!");
   };
 
-  return (
-    <div className="bg-background/95 text-muted-foreground border-border/30 sticky bottom-0 z-10 border-t text-sm backdrop-blur-sm">
-      {/* Word count and stats */}
-      <div className="flex items-center justify-between px-6 py-3">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1">
-            <BarChart3 className="h-4 w-4" />
-            <span>{stats.words} words</span>
-          </div>
-          <span>•</span>
-          <span>{stats.characters} characters</span>
-          <span>•</span>
-          <div className="flex items-center gap-1">
-            <Clock className="h-4 w-4" />
-            <span>{stats.estimatedTime}</span>
-          </div>
-          {readabilityAnalysis && (
-            <>
-              <span>•</span>
-              <Badge
-                variant={
-                  readabilityAnalysis.overall.level === "easy"
-                    ? "default"
-                    : readabilityAnalysis.overall.level === "medium"
-                      ? "secondary"
-                      : "destructive"
-                }
-                className="text-xs"
-                title={`Grade Level: ${readabilityAnalysis.overall.gradeLevel}`}
-              >
-                {readabilityAnalysis.overall.level.toUpperCase()} ({readabilityAnalysis.overall.score.toFixed(1)})
-              </Badge>
-              <span className="text-muted-foreground text-xs">{readabilityAnalysis.overall.gradeLevel}</span>
-            </>
-          )}
-        </div>
+  const handleExport = () => {
+    // Create a downloadable text file
+    const blob = new Blob([value], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "script.txt";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success("Script exported successfully!");
+  };
 
-        {/* AI Tools and Voice Selection */}
-        <div className="flex items-center gap-2">
-          {/* Recording Button */}
-          <Button
-            variant={isRecording ? "destructive" : "ghost"}
-            size="sm"
-            className="h-8 px-3 text-xs"
-            onClick={handleRecordingToggle}
-            disabled={isProcessing}
-          >
-            {isProcessing ? (
-              <>
-                <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                Transcribing...
-              </>
-            ) : isRecording ? (
-              <>
-                <MicOff className="mr-1 h-3 w-3" />
-                Stop Recording
-              </>
-            ) : (
-              <>
-                <Mic className="mr-1 h-3 w-3" />
-                Record
-              </>
-            )}
-          </Button>
+  const handleUndo = () => {
+    if (historyIndex > 0) {
+      const newIndex = historyIndex - 1;
+      setHistoryIndex(newIndex);
+      onChange(history[newIndex]);
+    }
+  };
 
-          {/* Voice Selection Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 px-3 text-xs">
-                <Mic className="mr-1 h-3 w-3" />
-                {currentVoice}
-                <ChevronDown className="ml-1 h-3 w-3" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {availableVoices.map((voice) => (
-                <DropdownMenuItem
-                  key={voice}
-                  onClick={() => handleChangeVoice(voice)}
-                  className={voice === currentVoice ? "bg-accent" : ""}
-                >
-                  <Mic className="mr-2 h-3 w-3" />
-                  {voice}
-                  {voice === currentVoice && <span className="ml-auto">✓</span>}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+  const handleRedo = () => {
+    if (historyIndex < history.length - 1) {
+      const newIndex = historyIndex + 1;
+      setHistoryIndex(newIndex);
+      onChange(history[newIndex]);
+    }
+  };
 
-          {/* NotionAI-style Action Combobox */}
-          <AIActionCombobox
-            onActionSelect={handleAIAction}
-            onTemplateSelect={handleTemplateSelect}
-            disabled={isRewriting}
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function HemingwayEditor({
-  value,
-  onChange,
-  placeholder = "Start writing your script...",
-  className = "",
-  minRows = 10,
-  maxRows = 50,
-  readOnly = false,
-  autoFocus = false,
-  elements,
-  onBlocksChange,
-}: HemingwayEditorProps) {
-  const [highlightConfig, setHighlightConfig] = useState<HighlightConfig>({
-    hooks: true,
-    bridges: true,
-    goldenNuggets: true,
-    wtas: true,
-  });
-
-  const [showAnalysis] = useState(true);
   const [currentAnalysis, setCurrentAnalysis] = useState<ScriptAnalysis>({
     hooks: [],
     bridges: [],
@@ -535,10 +487,97 @@ export function HemingwayEditor({
 
   const stats = getAnalysisStats();
 
+  if (distractionFreeMode) {
+    return (
+      <div className="relative h-full">
+        <HemingwayEditorCore
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          minRows={minRows}
+          maxRows={maxRows}
+          readOnly={readOnly}
+          autoFocus={autoFocus}
+          highlightConfig={highlightConfig}
+          elements={elements}
+          onAnalysisChange={setCurrentAnalysis}
+          onBlocksChange={onBlocksChange}
+        />
+        <Button
+          variant="ghost"
+          size="sm"
+          className="absolute top-4 right-4 h-8 px-3 text-xs"
+          onClick={() => setDistractionFreeMode(false)}
+        >
+          Exit Focus Mode
+        </Button>
+      </div>
+    );
+  }
+
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}>
+      {/* Floating Expand Button when sidebar is collapsed */}
+      {sidebarCollapsed && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="fixed top-4 right-4 z-50 h-8 px-3 text-xs shadow-md"
+          onClick={() => setSidebarCollapsed(false)}
+          title="Show sidebar"
+        >
+          <BarChart3 className="mr-1 h-3 w-3" />
+          Stats
+        </Button>
+      )}
+
       {/* Main Content Area */}
       <div className="main-content flex h-full flex-col">
+        {/* Title Editor */}
+        {showTitleEditor && (
+          <div className="border-b p-4">
+            {isEditingTitle ? (
+              <div className="flex items-center gap-2">
+                <Input
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  onKeyDown={handleTitleKeyDown}
+                  className="border-none px-0 text-2xl font-bold shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                  placeholder="Enter title..."
+                  autoFocus
+                />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleTitleSave}
+                  className="h-8 w-8 p-0 text-green-600 hover:bg-green-50 hover:text-green-700"
+                >
+                  <Check className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleTitleCancel}
+                  className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <div
+                className="group flex cursor-pointer items-center gap-2 py-2"
+                onClick={handleTitleEdit}
+                title="Click to edit title"
+              >
+                <h1 className="text-2xl font-bold transition-colors group-hover:text-blue-600">
+                  {title || "Untitled"}
+                </h1>
+                <Edit2 className="h-4 w-4 text-gray-400 opacity-0 transition-opacity group-hover:opacity-100" />
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Editor */}
         <div className="flex-1">
           <HemingwayEditorCore
@@ -556,110 +595,179 @@ export function HemingwayEditor({
           />
         </div>
 
-        {/* Footer */}
-        <EditorFooter
-          stats={stats}
-          showAnalysis={showAnalysis}
-          readabilityAnalysis={readabilityAnalysis}
-          script={value}
-          onScriptChange={onChange}
-        />
+        {/* Floating Toolbar replaces footer */}
+        {!distractionFreeMode && (
+          <FloatingToolbar
+            text={value}
+            isRecording={isRecording}
+            isProcessing={isProcessing}
+            onToggleRecording={handleToggleRecording}
+            onToggleFocusMode={() => setDistractionFreeMode(true)}
+            onAIAction={handleAIAction}
+            onSave={handleSave}
+            onExport={handleExport}
+            onUndo={handleUndo}
+            onRedo={handleRedo}
+            canUndo={historyIndex > 0}
+            canRedo={historyIndex < history.length - 1}
+            disabled={readOnly}
+          />
+        )}
       </div>
 
       {/* Right Sidebar - Statistics & Analysis */}
-      <div className="right-sidebar bg-background/50 border-border/50 overflow-y-auto border-l backdrop-blur-sm">
-        <div className="space-y-[var(--space-2)] p-[var(--space-3)]">
-          {/* Statistics */}
-          <Card>
-            <CardHeader className="pb-[var(--space-2)]">
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <BarChart3 className="h-4 w-4" />
-                Statistics
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-[var(--space-2)]">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground text-sm">Words</span>
-                <span className="text-sm font-medium">{stats.words}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground text-sm">Sentences</span>
-                <span className="text-sm font-medium">
-                  {value.split(/[.!?]+/).filter((s) => s.trim().length > 0).length}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground text-sm">Characters</span>
-                <span className="text-sm font-medium">{stats.characters}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground flex items-center gap-1 text-sm">
-                  <Clock className="h-3 w-3" />
-                  Estimated Time
-                </span>
-                <span className="text-sm font-medium">{stats.estimatedTime}</span>
-              </div>
-            </CardContent>
-          </Card>
+      {!sidebarCollapsed && (
+        <div className="right-sidebar bg-background/50 border-border/50 overflow-y-auto border-l backdrop-blur-sm">
+          <div className="sidebar-content">
+            {/* Sidebar Header */}
+            <div className="hemingway-sidebar-header -m-4 mb-4 flex items-center justify-between p-3">
+              <h3 className="flex items-center gap-2 text-sm font-semibold">Analysis</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSidebarCollapsed(true)}
+                className="h-8 w-8 p-0"
+                title="Collapse sidebar"
+              >
+                <ChevronDown className="h-4 w-4 rotate-90" />
+              </Button>
+            </div>
 
-          {/* Readability Analysis */}
-          {readabilityAnalysis && (
-            <Card>
-              <CardHeader className="pb-[var(--space-2)]">
-                <CardTitle className="flex items-center gap-2 text-sm">
-                  <Target className="h-4 w-4" />
+            {/* Tabbed Interface */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid h-auto w-full grid-cols-2 gap-0 rounded-none border-0 bg-transparent p-0">
+                <TabsTrigger
+                  value="readability"
+                  className="text-muted-foreground hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground flex items-center justify-center gap-1 rounded-none border-0 border-b-2 border-transparent bg-transparent px-3 py-2 text-sm font-medium transition-all data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+                >
+                  <Target className="h-3 w-3" />
                   Readability
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-[var(--space-2)]">
-                <div className="text-center">
-                  <div className="text-2xl font-bold">{readabilityAnalysis.overall.score.toFixed(1)}</div>
-                  <div className="text-muted-foreground text-sm">{readabilityAnalysis.overall.level.toUpperCase()}</div>
-                  <div className="text-muted-foreground mt-1 text-xs">{readabilityAnalysis.overall.gradeLevel}</div>
-                </div>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="writing"
+                  className="text-muted-foreground hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground flex items-center justify-center gap-1 rounded-none border-0 border-b-2 border-transparent bg-transparent px-3 py-2 text-sm font-medium transition-all data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+                >
+                  <BarChart3 className="h-3 w-3" />
+                  Writing
+                </TabsTrigger>
+              </TabsList>
 
-                <Separator />
-
-                <div className="space-y-[var(--space-1)]">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground text-sm">Avg Words/Sentence</span>
-                    <span className="text-sm font-medium">
-                      {readabilityAnalysis.statistics.averageWordsPerSentence.toFixed(1)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground text-sm">Complex Words</span>
-                    <span className="text-sm font-medium">{readabilityAnalysis.statistics.complexWords}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground text-sm">Passive Voice</span>
-                    <span className="text-sm font-medium">{readabilityAnalysis.statistics.passiveVoiceCount}</span>
-                  </div>
-                </div>
-
-                {readabilityAnalysis.overall.suggestions.length > 0 && (
-                  <>
-                    <Separator />
-                    <div className="space-y-[var(--space-1)]">
-                      <h4 className="flex items-center gap-1 text-sm font-medium">
-                        <Lightbulb className="h-3 w-3" />
-                        Suggestions
-                      </h4>
-                      <div className="space-y-[var(--space-1)]">
-                        {readabilityAnalysis.overall.suggestions.slice(0, 3).map((suggestion, index) => (
-                          <div key={index} className="text-muted-foreground text-xs">
-                            • {suggestion}
-                          </div>
-                        ))}
+              {/* Readability Tab Content */}
+              <TabsContent value="readability" className="mt-4 space-y-4">
+                {readabilityAnalysis && (
+                  <Card className="hemingway-card">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center gap-2 text-sm">
+                        <Target className="h-4 w-4" />
+                        Readability Score
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="bg-muted/10 mb-4 rounded-lg p-3 text-center">
+                        <div className="text-primary mb-2 text-3xl font-bold">
+                          {readabilityAnalysis.overall.score.toFixed(1)}
+                        </div>
+                        <Badge
+                          variant={
+                            readabilityAnalysis.overall.level === "easy"
+                              ? "default"
+                              : readabilityAnalysis.overall.level === "medium"
+                                ? "secondary"
+                                : "destructive"
+                          }
+                          className="mb-1"
+                        >
+                          {readabilityAnalysis.overall.level.toUpperCase()}
+                        </Badge>
+                        <div className="text-muted-foreground text-xs">{readabilityAnalysis.overall.gradeLevel}</div>
                       </div>
-                    </div>
-                  </>
+
+                      {/* Show only actionable suggestions */}
+                      {readabilityAnalysis.overall.suggestions.length > 0 && (
+                        <div className="space-y-3">
+                          <h4 className="flex items-center gap-1 text-sm font-medium text-orange-600">
+                            <Lightbulb className="h-3 w-3" />
+                            Quick Improvements
+                          </h4>
+                          <div className="space-y-2">
+                            {readabilityAnalysis.overall.suggestions.slice(0, 2).map((suggestion, index) => (
+                              <div key={index} className="readability-suggestion">
+                                {suggestion}
+                              </div>
+                            ))}
+                          </div>
+                          {readabilityAnalysis.overall.suggestions.length > 2 && (
+                            <details>
+                              <summary className="text-muted-foreground hover:text-foreground flex cursor-pointer items-center gap-1 text-xs transition-colors">
+                                <ChevronDown className="h-3 w-3 transition-transform" />
+                                Show {readabilityAnalysis.overall.suggestions.length - 2} more suggestions
+                              </summary>
+                              <div className="mt-2 space-y-2">
+                                {readabilityAnalysis.overall.suggestions.slice(2).map((suggestion, index) => (
+                                  <div key={index + 2} className="readability-suggestion">
+                                    {suggestion}
+                                  </div>
+                                ))}
+                              </div>
+                            </details>
+                          )}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
                 )}
-              </CardContent>
-            </Card>
-          )}
+              </TabsContent>
+
+              {/* Writing Stats Tab Content */}
+              <TabsContent value="writing" className="mt-4 space-y-4">
+                {/* Essential Statistics Only */}
+                <Card className="hemingway-card">
+                  <CardContent className="pt-4">
+                    {/* Primary Stat - Reading Time */}
+                    <div className="mb-4 text-center">
+                      <div className="text-primary mb-1 text-4xl font-bold">{stats.estimatedTime}</div>
+                      <div className="text-muted-foreground text-sm font-medium">Reading Time</div>
+                    </div>
+
+                    {/* Expandable Details */}
+                    <details className="mt-4">
+                      <summary className="text-muted-foreground hover:text-foreground flex cursor-pointer items-center gap-1 text-xs transition-colors">
+                        <ChevronDown className="h-3 w-3 transition-transform" />
+                        View detailed statistics
+                      </summary>
+                      <div className="mt-3 space-y-3 border-t pt-3">
+                        {/* Words in details */}
+                        <div className="bg-primary/10 rounded p-3 text-center">
+                          <div className="text-primary text-lg font-semibold">{stats.words}</div>
+                          <div className="text-muted-foreground text-xs font-medium">Words</div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="bg-muted/20 rounded p-2 text-center">
+                            <div className="font-medium">{stats.characters}</div>
+                            <div className="text-muted-foreground text-xs">Characters</div>
+                          </div>
+                          <div className="bg-muted/20 rounded p-2 text-center">
+                            <div className="font-medium">
+                              {value.split(/[.!?]+/).filter((s) => s.trim().length > 0).length}
+                            </div>
+                            <div className="text-muted-foreground text-xs">Sentences</div>
+                          </div>
+                        </div>
+                        <div className="bg-muted/20 rounded p-2 text-center">
+                          <div className="font-medium">
+                            {value.split(/\n\s*\n/).filter((p) => p.trim().length > 0).length}
+                          </div>
+                          <div className="text-muted-foreground text-xs">Paragraphs</div>
+                        </div>
+                      </div>
+                    </details>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+
 import { X, Send, ChevronDown, Wand2 } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +17,8 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 import { type ScriptElement } from "@/lib/script-analysis";
 
 interface AIMenuBarProps {
@@ -222,7 +224,7 @@ export function AIMenuBar({ element, position, onAction, onClose }: AIMenuBarPro
   const allActions = [...UNIVERSAL_ACTIONS, ...componentActions];
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-50" style={{ pointerEvents: "none" }}>
+    <div className="pointer-events-none fixed inset-0 z-[10000]" style={{ pointerEvents: "none" }}>
       <Card
         ref={menuRef}
         className="pointer-events-auto absolute w-96 shadow-lg"

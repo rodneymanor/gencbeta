@@ -2,56 +2,56 @@
 // Run this in browser console on the test page after logging in
 
 async function validateInputTest() {
-  console.log('🔧 Testing input validation with authentication...');
-  
+  console.log("🔧 Testing input validation with authentication...");
+
   // Get auth token if available
   let authToken = null;
   try {
     // Try to get Firebase auth token
-    if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+    if (typeof firebase !== "undefined" && firebase.auth && firebase.auth().currentUser) {
       authToken = await firebase.auth().currentUser.getIdToken();
-      console.log('✅ Got Firebase auth token');
+      console.log("✅ Got Firebase auth token");
     }
   } catch (e) {
-    console.log('⚠️ No Firebase auth available, testing without auth');
+    console.log("⚠️ No Firebase auth available, testing without auth");
   }
 
   const testCases = [
     {
       name: "Valid input",
       input: { idea: "How to improve productivity using time management", length: "30" },
-      shouldPass: true
+      shouldPass: true,
     },
     {
       name: "Idea too short",
       input: { idea: "test", length: "30" },
       shouldPass: false,
-      expectedError: "at least 10 characters"
+      expectedError: "at least 10 characters",
     },
     {
       name: "Invalid length",
       input: { idea: "How to improve productivity", length: "25" },
       shouldPass: false,
-      expectedError: "Length must be one of"
+      expectedError: "Length must be one of",
     },
     {
       name: "Missing idea",
       input: { length: "30" },
       shouldPass: false,
-      expectedError: "required"
+      expectedError: "required",
     },
     {
       name: "Invalid type",
       input: { idea: "How to improve productivity", length: "30", type: "invalid" },
       shouldPass: false,
-      expectedError: "Type must be one of"
+      expectedError: "Type must be one of",
     },
     {
       name: "Empty object",
       input: {},
       shouldPass: false,
-      expectedError: "required"
-    }
+      expectedError: "required",
+    },
   ];
 
   let passed = 0;
@@ -59,24 +59,24 @@ async function validateInputTest() {
 
   for (const test of testCases) {
     console.log(`\n🧪 Testing: ${test.name}`);
-    
+
     try {
       const headers = {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       };
-      
+
       if (authToken) {
-        headers['Authorization'] = `Bearer ${authToken}`;
+        headers["Authorization"] = `Bearer ${authToken}`;
       }
 
-      const response = await fetch('/api/script/speed-write/v2', {
-        method: 'POST',
+      const response = await fetch("/api/script/speed-write/v2", {
+        method: "POST",
         headers,
-        body: JSON.stringify(test.input)
+        body: JSON.stringify(test.input),
       });
 
       const result = await response.json();
-      
+
       if (test.shouldPass) {
         // For valid inputs, we expect either success or auth failure (if no token)
         if (response.status === 200 || (response.status === 401 && !authToken)) {
@@ -88,7 +88,7 @@ async function validateInputTest() {
         }
       } else {
         // For invalid inputs, we expect 400 validation error
-        if (response.status === 400 && result.error.includes(test.expectedError || 'validation')) {
+        if (response.status === 400 && result.error.includes(test.expectedError || "validation")) {
           console.log(`✅ PASS: Invalid input rejected - ${result.error}`);
           passed++;
         } else {
@@ -100,19 +100,19 @@ async function validateInputTest() {
       console.log(`❌ FAIL: Network error - ${error.message}`);
       failed++;
     }
-    
+
     // Small delay between requests
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
 
   console.log(`\n📊 Validation Test Results:`);
   console.log(`✅ Passed: ${passed}/${testCases.length}`);
   console.log(`❌ Failed: ${failed}/${testCases.length}`);
-  
+
   if (failed === 0) {
-    console.log('🎉 All validation tests passed!');
+    console.log("🎉 All validation tests passed!");
   } else {
-    console.log('⚠️ Some validation tests failed - check the implementation');
+    console.log("⚠️ Some validation tests failed - check the implementation");
   }
 
   return { passed, failed, total: testCases.length };

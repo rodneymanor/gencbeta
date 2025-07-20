@@ -354,7 +354,7 @@ export class ScriptGenerationService {
     // Handle case where elements is already a string (some prompts return formatted text)
     if (typeof elements === "string") {
       // First, remove the [HOOK], [BRIDGE], etc. prefixes
-      let cleanContent = elements
+      const cleanContent = elements
         .replace(/\[HOOK\]\s*/g, "")
         .replace(/\[BRIDGE\]\s*/g, "")
         .replace(/\[GOLDEN NUGGET\]\s*/g, "")
@@ -407,7 +407,7 @@ export class ScriptGenerationService {
 
       if (hasHook || hasBridge || hasGoldenNugget || hasCta) {
         console.log(`🔍 [ScriptGeneration] Detected array with separate script components`);
-        let combinedParts = {
+        const combinedParts = {
           hook: "",
           bridge: "",
           goldenNugget: "",

@@ -134,7 +134,7 @@ export function useScripts() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Fetch all scripts
+  // Fetch all scripts only when we have a user
   const {
     data: scripts = [],
     isLoading,
@@ -144,6 +144,14 @@ export function useScripts() {
     queryKey: ["scripts"],
     queryFn: fetchScripts,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: true, // Let the auth check happen inside fetchScripts
+    retry: (failureCount, error) => {
+      // Don't retry if it's an auth error
+      if (error?.message?.includes("authentication") || error?.message?.includes("Unauthorized")) {
+        return false;
+      }
+      return failureCount < 2;
+    },
   });
 
   // Create script mutation

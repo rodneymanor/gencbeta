@@ -3,15 +3,16 @@
 import { useState } from "react";
 
 import { Download, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { TableLoading } from "@/components/ui/loading-animations";
+import { ScriptsCryptoTable, type ScriptCryptoData } from "@/components/ui/scripts-crypto-table";
 import { useScripts } from "@/hooks/use-scripts";
 import { Script } from "@/types/script";
 
 import { ScriptsControls } from "./_components/scripts-controls";
-import { ScriptsTable } from "./_components/scripts-table";
 
 interface ColumnVisibility {
   title: boolean;
@@ -110,6 +111,13 @@ export default function ScriptsLibraryPage() {
     setSelectedScripts([]);
   };
 
+  const handleTitleEdit = async (scriptId: string, newTitle: string) => {
+    // For now, just show a success message since we don't have an update script function
+    // In a real implementation, this would call an API to update the script title
+    toast.success("Script title updated");
+    console.log(`Update script ${scriptId} title to: ${newTitle}`);
+  };
+
   // Show loading state
   if (isLoading) {
     return (
@@ -180,14 +188,23 @@ export default function ScriptsLibraryPage() {
       )}
 
       {/* Scripts Table */}
-      <ScriptsTable
-        scripts={sortedScripts}
+      <ScriptsCryptoTable
+        data={sortedScripts}
         selectedScripts={selectedScripts}
-        columnVisibility={columnVisibility}
-        sortBy={sortBy}
-        onSelectScript={handleSelectScript}
-        onSelectAll={handleSelectAll}
-        onSort={handleSort}
+        onRowClick={(script) => window.open(`/dashboard/scripts/editor?scriptId=${script.id}`, "_blank")}
+        onTitleEdit={handleTitleEdit}
+        onView={(scriptId) => window.open(`/dashboard/scripts/editor?scriptId=${scriptId}`, "_blank")}
+        onEdit={(scriptId) => window.open(`/dashboard/scripts/editor?scriptId=${scriptId}`, "_blank")}
+        onDuplicate={(scriptId) => {
+          toast.info("Duplicate feature coming soon");
+        }}
+        onDelete={(scriptId) => {
+          const script = sortedScripts.find((s) => s.id === scriptId);
+          if (script) {
+            handleSelectScript(scriptId);
+            handleDeleteSelected();
+          }
+        }}
       />
     </div>
   );

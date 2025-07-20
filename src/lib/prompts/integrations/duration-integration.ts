@@ -4,7 +4,6 @@
  */
 
 import { ScriptGenerationInput } from "../../services/script-generation-service";
-import { createSpeedWriteVariables, SpeedWriteVariables } from "../script-generation/speed-write";
 import {
   createDurationSubPrompt,
   calculateTargetWordsForDuration,
@@ -12,6 +11,7 @@ import {
   isSupportedDuration,
   DURATION_CONFIGS,
 } from "../modifiers/duration-optimizer";
+import { createSpeedWriteVariables, SpeedWriteVariables } from "../script-generation/speed-write";
 
 /**
  * Enhanced script generation input with duration optimization

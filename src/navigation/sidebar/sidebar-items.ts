@@ -43,13 +43,12 @@ export const sidebarItems: NavGroup[] = [
     items: [
       {
         title: "Home",
-        url: "/dashboard",
+        url: "/dashboard/scripts/new",
         icon: HomeIcon,
         subItems: [
           { title: "Dashboard", url: "/dashboard", icon: HomeIcon },
           { title: "Scripts", url: "/dashboard/scripts", icon: FileText },
-          { title: "Notes", url: "/dashboard/notes", icon: Pen },
-          { title: "Capture Notes", url: "/dashboard/capture/notes", icon: Pen },
+          { title: "Notes", url: "/dashboard/capture/notes", icon: Pen },
           { title: "Voices", url: "/dashboard/voices", icon: Mic },
           { title: "My Brand", url: "/dashboard/my-brand", icon: Sparkles },
           { title: "Creators", url: "/dashboard/creators", icon: Users },
@@ -71,7 +70,7 @@ export const sidebarItems: NavGroup[] = [
         subItems: [
           { title: "Ghost Writer Library", url: "/dashboard/ghost-writer/library", icon: LibraryIcon },
           { title: "Script Templates", url: "/dashboard/scripts", icon: FileText },
-          { title: "Voice Library", url: "/dashboard/voices", icon: Mic },
+          { title: "Notes", url: "/dashboard/notes", icon: Pen },
         ],
       },
     ],

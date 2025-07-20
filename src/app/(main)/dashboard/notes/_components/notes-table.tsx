@@ -1,10 +1,13 @@
 "use client";
 
-import { ArrowUpDown, Star, StarOff, Edit3, Calendar, Hash } from "lucide-react";
+import { useState } from "react";
+
+import { ArrowUpDown, Star, StarOff, Edit3, Calendar, Hash, Check, X } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +41,7 @@ interface NotesTableProps {
   onSelectAll: () => void;
   onToggleStar: (noteId: number) => void;
   onEdit: (noteId: number) => void;
+  onTitleEdit?: (noteId: number, newTitle: string) => void;
 }
 
 const availableTags = [
@@ -93,6 +97,7 @@ function NoteTableRow({
   onSelectNote,
   onToggleStar,
   onEdit,
+  onTitleEdit,
   getTagColor,
   formatDate,
   truncateContent,
@@ -103,10 +108,42 @@ function NoteTableRow({
   onSelectNote: (noteId: number) => void;
   onToggleStar: (noteId: number) => void;
   onEdit: (noteId: number) => void;
+  onTitleEdit?: (noteId: number, newTitle: string) => void;
   getTagColor: (tagName: string) => string;
   formatDate: (dateString: string) => string;
   truncateContent: (content: string, maxLength?: number) => string;
 }) {
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editTitle, setEditTitle] = useState(note.title);
+
+  const handleTitleEdit = () => {
+    if (onTitleEdit) {
+      setIsEditingTitle(true);
+      setEditTitle(note.title);
+    }
+  };
+
+  const handleTitleSave = () => {
+    if (onTitleEdit && editTitle.trim() !== note.title) {
+      onTitleEdit(note.id, editTitle.trim());
+    }
+    setIsEditingTitle(false);
+  };
+
+  const handleTitleCancel = () => {
+    setEditTitle(note.title);
+    setIsEditingTitle(false);
+  };
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleTitleSave();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      handleTitleCancel();
+    }
+  };
   const renderStarredCell = () => (
     <TableCell>
       <Button
@@ -158,8 +195,54 @@ function NoteTableRow({
       {columnVisibility.title && (
         <TableCell>
           <div className="flex items-center gap-2">
-            <span className="font-medium">{note.title}</span>
-            {note.starred && <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />}
+            {isEditingTitle ? (
+              <div className="flex flex-1 items-center gap-1">
+                <Input
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  onKeyDown={handleTitleKeyDown}
+                  className="h-8 text-sm font-medium"
+                  autoFocus
+                  onClick={(e) => e.stopPropagation()}
+                />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleTitleSave();
+                  }}
+                  className="h-8 w-8 p-0 text-green-600 hover:bg-green-50 hover:text-green-700"
+                >
+                  <Check className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleTitleCancel();
+                  }}
+                  className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <>
+                <span
+                  className="cursor-pointer font-medium transition-colors hover:text-blue-600"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleTitleEdit();
+                  }}
+                  title="Click to edit title"
+                >
+                  {note.title}
+                </span>
+                {note.starred && <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />}
+              </>
+            )}
           </div>
         </TableCell>
       )}
@@ -207,6 +290,7 @@ export function NotesTable({
   onSelectAll,
   onToggleStar,
   onEdit,
+  onTitleEdit,
 }: Omit<NotesTableProps, "sortOrder">) {
   const getTagColor = (tagName: string) => {
     const tag = availableTags.find((t) => t.name === tagName);
@@ -231,7 +315,7 @@ export function NotesTable({
   const someSelected = selectedNotes.size > 0 && selectedNotes.size < notes.length;
 
   return (
-    <div className="rounded-md border">
+    <div className="overflow-hidden rounded-xl border border-gray-200">
       <Table>
         <TableHeader>
           <TableRow>
@@ -308,6 +392,7 @@ export function NotesTable({
                 onSelectNote={onSelectNote}
                 onToggleStar={onToggleStar}
                 onEdit={onEdit}
+                onTitleEdit={onTitleEdit}
                 getTagColor={getTagColor}
                 formatDate={formatDate}
                 truncateContent={truncateContent}

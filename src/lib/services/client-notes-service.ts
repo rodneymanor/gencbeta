@@ -4,6 +4,7 @@
  */
 
 import { auth } from "@/lib/firebase";
+
 import { Note, CreateNoteData, UpdateNoteData, NotesFilter } from "./notes-service";
 
 interface NotesResponse {

@@ -47,12 +47,14 @@ export default function ScriptEditorPage() {
   const mode = searchParams.get("mode") ?? "notes";
   const scriptId = searchParams.get("scriptId");
   const hasSpeedWriteResults = searchParams.get("hasSpeedWriteResults") === "true";
+  const autoSelect = searchParams.get("autoSelect") === "true";
   const scriptData = searchParams.get("scriptData");
 
   console.log("📊 [EDITOR] Component mounted with params:", {
     mode,
     scriptId,
     hasSpeedWriteResults,
+    autoSelect,
     scriptData: scriptData ? "present" : "not present",
   });
 
@@ -102,9 +104,9 @@ export default function ScriptEditorPage() {
 
   useEffect(() => {
     setTopBarConfig({
-      customContent: <EditorTopBarToolbar script={script} onSave={handleSave} autoSaveStatus={autoSaveStatus} />,
+      customContent: <EditorTopBarToolbar script={script} autoSaveStatus={autoSaveStatus} />,
     });
-  }, [script, handleSave, setTopBarConfig, autoSaveStatus]);
+  }, [script, setTopBarConfig, autoSaveStatus]);
 
   // Handle speed-write workflow on component mount
   useEffect(() => {
@@ -118,15 +120,28 @@ export default function ScriptEditorPage() {
       }
 
       try {
-        const data: SpeedWriteResponse = JSON.parse(storedResults);
+        const data: SpeedWriteResponse & { autoSelect?: boolean; selectedOption?: any; autoSelectComplete?: boolean } =
+          JSON.parse(storedResults);
         console.log("📊 [EDITOR] Parsed speed-write data:", data);
         console.log("📊 [EDITOR] Option A:", data.optionA);
         console.log("📊 [EDITOR] Option B:", data.optionB);
         console.log("📊 [EDITOR] Success:", data.success);
+        console.log("📊 [EDITOR] Auto-select:", data.autoSelect);
+        console.log("📊 [EDITOR] Selected option:", data.selectedOption);
 
-        setSpeedWriteData(data);
-        setShowScriptOptions(true);
-        sessionStorage.removeItem("speedWriteResults");
+        // Handle auto-selection - skip script options and go directly to editor
+        if (autoSelect && data.autoSelect && data.selectedOption) {
+          console.log("📊 [EDITOR] Auto-selection detected, loading script directly into Hemingway editor");
+          setScript(data.selectedOption.content);
+          setScriptElements(data.selectedOption.elements);
+          setShowScriptOptions(false);
+          sessionStorage.removeItem("speedWriteResults");
+        } else {
+          // Normal flow - show script options for manual selection
+          setSpeedWriteData(data);
+          setShowScriptOptions(true);
+          sessionStorage.removeItem("speedWriteResults");
+        }
       } catch (error) {
         console.error("Failed to parse speed-write results:", error);
         toast.error("Failed to load script options");
@@ -137,7 +152,7 @@ export default function ScriptEditorPage() {
       console.log("📊 [EDITOR] Loading speed-write results...");
       loadSpeedWriteResults();
     }
-  }, [mode, hasSpeedWriteResults]);
+  }, [mode, hasSpeedWriteResults, autoSelect]);
 
   // Handle scriptData URL parameter from ghost-writer
   useEffect(() => {
@@ -196,9 +211,6 @@ export default function ScriptEditorPage() {
       if (timeDiff < 24 * 60 * 60 * 1000) {
         setScript(backupContent);
         console.log("📝 [RECOVERY] Recovered script from localStorage backup");
-        toast.info("Draft recovered", {
-          description: "We recovered an unsaved draft of your script.",
-        });
       }
     }
   }, [scriptId]); // Only run when scriptId changes

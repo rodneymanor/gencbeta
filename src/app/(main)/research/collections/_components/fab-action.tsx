@@ -54,7 +54,7 @@ export function FabAction({ onAddCollection, onAddVideo, className, disabled = f
   ];
 
   return (
-    <div className="fixed right-4 bottom-4 z-50">
+    <div className="fixed right-4 bottom-4 z-[10000]">
       {/* Dropdown Menu */}
       <div
         onMouseEnter={handleOpen}
@@ -75,7 +75,7 @@ export function FabAction({ onAddCollection, onAddVideo, className, disabled = f
             <button
               key={index}
               onClick={item.onClick}
-              className="flex w-full items-center gap-3 rounded-md px-4 py-3 text-left text-gray-700 transition-colors duration-200 hover:bg-[var(--sidebar-background)] hover:text-gray-900"
+              className="hover:bg-muted/50 flex w-full items-center gap-3 rounded-md px-4 py-3 text-left text-gray-700 transition-colors duration-200 hover:text-gray-900"
             >
               <span className="text-gray-500">{item.icon}</span>
               <span className="text-sm font-medium">{item.label}</span>
@@ -101,7 +101,7 @@ export function FabAction({ onAddCollection, onAddVideo, className, disabled = f
           // Border styles
           "border border-gray-200/50 md:hover:border-gray-300",
           // Hover effects - button raises slightly
-          "hover:bg-gray-50 md:hover:text-gray-900",
+          "hover:bg-muted/50 md:hover:text-gray-900",
           "hover:scale-105 hover:shadow-xl",
           // Transitions
           "transition-all duration-300 ease-out",

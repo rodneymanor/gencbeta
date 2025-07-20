@@ -3,8 +3,9 @@
  * Determines which generators to use and how to configure them
  */
 
-import { EnrichedInput } from "./context-enricher";
 import { ScriptType, ScriptTone } from "../types";
+
+import { EnrichedInput } from "./context-enricher";
 
 export interface GenerationRules {
   generators: {

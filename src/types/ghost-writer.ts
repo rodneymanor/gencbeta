@@ -19,6 +19,27 @@ export interface ContentIdea {
   createdAt: string;
   userId: string;
   cycleId: string;
+  // Additional fields for library items
+  savedAt?: string;
+  savedFrom?: "script_generation" | "script_generation_v2" | "manual";
+  originalIdeaId?: string;
+
+  // Usage tracking
+  generatedScripts?: Array<{
+    generatedAt: string;
+    optionA: {
+      content: string;
+      estimatedDuration: string;
+    } | null;
+    optionB: {
+      content: string;
+      estimatedDuration: string;
+    } | null;
+  }>;
+  lastUsedAt?: string;
+  lastViewAt?: string;
+  lastSaveAt?: string;
+  lastDismissAt?: string;
 }
 
 export type ContentPillar =
