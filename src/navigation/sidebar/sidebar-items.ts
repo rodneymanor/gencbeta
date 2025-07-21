@@ -68,9 +68,9 @@ export const sidebarItems: NavGroup[] = [
         url: "/dashboard/ghost-writer/library",
         icon: LibraryIcon,
         subItems: [
-          { title: "Ghost Writer Library", url: "/dashboard/ghost-writer/library", icon: LibraryIcon },
-          { title: "Script Templates", url: "/dashboard/scripts", icon: FileText },
+          { title: "Scripts", url: "/dashboard/scripts", icon: FileText },
           { title: "Notes", url: "/dashboard/notes", icon: Pen },
+          { title: "Ghost Writer Library", url: "/dashboard/ghost-writer/library", icon: LibraryIcon },
         ],
       },
     ],
