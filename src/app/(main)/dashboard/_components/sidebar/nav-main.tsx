@@ -81,19 +81,9 @@ const NavItem = ({
   return (
     <SidebarMenuItem className={className}>
       <div className="gap-.5 flex flex-col items-center">
-        {/* Icon container with background */}
-        {hasSubItems ? (
-          <div className="group cursor-pointer" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-            <div
-              className={`flex h-9 w-9 items-center justify-center rounded-md px-2 py-2 transition-all duration-200 ${
-                active ? "bg-[#e6e8e1] hover:bg-[#e6e8e1]/80" : "hover:bg-[#e6e8e1]/50"
-              }`}
-            >
-              {item.icon && <item.icon className="text-muted-foreground h-6 w-6" />}
-            </div>
-          </div>
-        ) : (
-          <Link href={item.url} className="group">
+        {/* Icon container with background - Always clickable, but also hoverable if has subItems */}
+        <div className="group cursor-pointer" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+          <Link href={item.url}>
             <div
               className={`flex h-9 w-9 items-center justify-center rounded-md px-2 py-2 transition-all duration-200 ${
                 active ? "bg-[#e6e8e1] hover:bg-[#e6e8e1]/80" : "hover:bg-[#e6e8e1]/50"
@@ -102,7 +92,7 @@ const NavItem = ({
               {item.icon && <item.icon className="text-muted-foreground h-6 w-6" />}
             </div>
           </Link>
-        )}
+        </div>
 
         {/* Label outside the background container */}
         <span className="text-muted-foreground text-center text-xs font-medium whitespace-nowrap">{item.title}</span>
