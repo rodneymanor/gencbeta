@@ -188,15 +188,28 @@ async function addVideoToCollection(collectionId: string, videoData: any) {
   }
 }
 
-function startBackgroundTranscription(videoData: any, videoId: string, collectionId: string, platform: string) {
+function startBackgroundTranscription(
+  videoData: any,
+  videoId: string,
+  collectionId: string,
+  platform: string,
+  apiKey?: string,
+) {
   // Start background transcription process (non-blocking)
   setTimeout(async () => {
     try {
       console.log("🎙️ [Add Video API] Starting background transcription for video:", videoId);
 
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+
+      // Add authentication header if API key is provided
+      if (apiKey) {
+        headers["x-api-key"] = apiKey;
+      }
+
       const response = await fetch(buildInternalUrl("/api/video/transcribe"), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           videoData,
           videoId,
@@ -261,12 +274,14 @@ async function storeVideoInDatabase(collectionId: string, videoPayload: any, req
 }
 
 export async function POST(request: NextRequest) {
-  const startTime = Date.now();
   const requestId = Math.random().toString(36).substring(7);
 
   console.log(`🚀 [${requestId}] Starting video processing workflow at ${new Date().toISOString()}`);
 
   try {
+    // Extract API key for background transcription
+    const apiKey = ApiKeyAuthService.extractApiKey(request);
+
     // Step 1: Authentication
     const authResult = await authenticateApiKey(request);
     if (authResult instanceof NextResponse) return authResult;
@@ -303,7 +318,7 @@ export async function POST(request: NextRequest) {
 
     // Start backend processing (non-blocking)
     setTimeout(() => {
-      processVideoInBackground(requestId, videoUrl, collectionId, title, userId, request);
+      processVideoInBackground(requestId, videoUrl, collectionId, title, userId, apiKey);
     }, 0);
 
     // Return immediate success response
@@ -325,7 +340,7 @@ async function processVideoInBackground(
   collectionId: string,
   title: string | undefined,
   userId: string,
-  request: NextRequest,
+  apiKey: string | null,
 ) {
   const backgroundStartTime = Date.now();
   try {
@@ -366,6 +381,7 @@ async function processVideoInBackground(
       dbResult.videoId,
       collectionId,
       downloadResult.data.platform,
+      apiKey || undefined,
     );
 
     console.log(`🎉 [${requestId}] PROCESSING COMPLETED SUCCESSFULLY in ${Date.now() - backgroundStartTime}ms`);

@@ -3,23 +3,8 @@
  * Provides CRUD operations and integration with idea inbox
  */
 
-import {
-  collection,
-  doc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  getDocs,
-  getDoc,
-  query,
-  where,
-  orderBy,
-  limit,
-  Timestamp,
-  FirestoreError,
-} from "firebase/firestore";
+import { FieldValue } from "firebase-admin/firestore";
 
-import { db } from "@/lib/firebase";
 import { adminDb } from "@/lib/firebase-admin";
 
 export interface Note {
@@ -33,6 +18,16 @@ export interface Note {
   starred: boolean;
   audioUrl?: string;
   duration?: number;
+  metadata?: {
+    videoId?: string;
+    channelName?: string;
+    channelId?: string;
+    videoUrl?: string;
+    thumbnailUrl?: string;
+    duration?: number;
+    viewCount?: number;
+    publishedAt?: string;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -46,6 +41,16 @@ export interface CreateNoteData {
   starred?: boolean;
   audioUrl?: string;
   duration?: number;
+  metadata?: {
+    videoId?: string;
+    channelName?: string;
+    channelId?: string;
+    videoUrl?: string;
+    thumbnailUrl?: string;
+    duration?: number;
+    viewCount?: number;
+    publishedAt?: string;
+  };
 }
 
 export interface UpdateNoteData {
@@ -73,27 +78,20 @@ class NotesService {
    */
   async getUserNotes(userId: string, filter: NotesFilter = {}): Promise<Note[]> {
     try {
-      const notesRef = collection(adminDb, this.collectionName);
-      let q = query(notesRef, where("userId", "==", userId));
+      let query = adminDb.collection(this.collectionName).where("userId", "==", userId);
 
       // Apply filters
       if (filter.type) {
-        q = query(q, where("type", "==", filter.type));
+        query = query.where("type", "==", filter.type);
       }
       if (filter.starred !== undefined) {
-        q = query(q, where("starred", "==", filter.starred));
+        query = query.where("starred", "==", filter.starred);
       }
       if (filter.source) {
-        q = query(q, where("source", "==", filter.source));
+        query = query.where("source", "==", filter.source);
       }
 
-      // Add ordering and limit
-      q = query(q, orderBy("updatedAt", "desc"));
-      if (filter.limit) {
-        q = query(q, limit(filter.limit));
-      }
-
-      const snapshot = await getDocs(q);
+      const snapshot = await query.get();
       const notes: Note[] = [];
 
       snapshot.forEach((doc) => {
@@ -109,17 +107,27 @@ class NotesService {
           starred: data.starred || false,
           audioUrl: data.audioUrl,
           duration: data.duration,
+          metadata: data.metadata,
           createdAt: data.createdAt?.toDate() || new Date(),
           updatedAt: data.updatedAt?.toDate() || new Date(),
         });
       });
 
       // Filter by tags if specified (Firestore doesn't support array-contains-any with other filters)
+      let filteredNotes = notes;
       if (filter.tags && filter.tags.length > 0) {
-        return notes.filter((note) => filter.tags!.some((tag) => note.tags.includes(tag)));
+        filteredNotes = notes.filter((note) => filter.tags!.some((tag) => note.tags.includes(tag)));
       }
 
-      return notes;
+      // Sort by updatedAt in memory (descending - newest first)
+      filteredNotes.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
+
+      // Apply limit after sorting
+      if (filter.limit) {
+        filteredNotes = filteredNotes.slice(0, filter.limit);
+      }
+
+      return filteredNotes;
     } catch (error) {
       console.error("Error fetching user notes:", error);
       throw new Error("Failed to fetch notes");
@@ -131,10 +139,10 @@ class NotesService {
    */
   async getNote(noteId: string, userId: string): Promise<Note | null> {
     try {
-      const noteRef = doc(adminDb, this.collectionName, noteId);
-      const snapshot = await getDoc(noteRef);
+      const noteRef = adminDb.collection(this.collectionName).doc(noteId);
+      const snapshot = await noteRef.get();
 
-      if (!snapshot.exists()) {
+      if (!snapshot.exists) {
         return null;
       }
 
@@ -156,6 +164,7 @@ class NotesService {
         starred: data.starred || false,
         audioUrl: data.audioUrl,
         duration: data.duration,
+        metadata: data.metadata,
         createdAt: data.createdAt?.toDate() || new Date(),
         updatedAt: data.updatedAt?.toDate() || new Date(),
       };
@@ -170,8 +179,8 @@ class NotesService {
    */
   async createNote(userId: string, noteData: CreateNoteData): Promise<string> {
     try {
-      const now = Timestamp.now();
-      const noteDoc = {
+      const now = FieldValue.serverTimestamp();
+      const noteDoc: any = {
         userId,
         title: noteData.title,
         content: noteData.content,
@@ -179,13 +188,22 @@ class NotesService {
         type: noteData.type || "text",
         source: noteData.source || "manual",
         starred: noteData.starred || false,
-        audioUrl: noteData.audioUrl,
-        duration: noteData.duration,
         createdAt: now,
         updatedAt: now,
       };
 
-      const docRef = await addDoc(collection(adminDb, this.collectionName), noteDoc);
+      // Only add optional fields if they have values (avoid undefined)
+      if (noteData.audioUrl) {
+        noteDoc.audioUrl = noteData.audioUrl;
+      }
+      if (noteData.duration !== undefined) {
+        noteDoc.duration = noteData.duration;
+      }
+      if (noteData.metadata) {
+        noteDoc.metadata = noteData.metadata;
+      }
+
+      const docRef = await adminDb.collection(this.collectionName).add(noteDoc);
       return docRef.id;
     } catch (error) {
       console.error("Error creating note:", error);
@@ -198,7 +216,7 @@ class NotesService {
    */
   async updateNote(noteId: string, userId: string, updates: UpdateNoteData): Promise<void> {
     try {
-      const noteRef = doc(adminDb, this.collectionName, noteId);
+      const noteRef = adminDb.collection(this.collectionName).doc(noteId);
 
       // Verify the note exists and belongs to the user
       const existingNote = await this.getNote(noteId, userId);
@@ -208,10 +226,10 @@ class NotesService {
 
       const updateData = {
         ...updates,
-        updatedAt: Timestamp.now(),
+        updatedAt: FieldValue.serverTimestamp(),
       };
 
-      await updateDoc(noteRef, updateData);
+      await noteRef.update(updateData);
     } catch (error) {
       console.error("Error updating note:", error);
       throw new Error("Failed to update note");
@@ -229,8 +247,8 @@ class NotesService {
         throw new Error("Note not found or unauthorized");
       }
 
-      const noteRef = doc(adminDb, this.collectionName, noteId);
-      await deleteDoc(noteRef);
+      const noteRef = adminDb.collection(this.collectionName).doc(noteId);
+      await noteRef.delete();
     } catch (error) {
       console.error("Error deleting note:", error);
       throw new Error("Failed to delete note");

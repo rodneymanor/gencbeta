@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 // No external library imports needed - using RapidAPI directly
 
 import { authenticateApiKey } from "@/lib/api-key-auth";
-import { adminDb } from "@/lib/firebase-admin";
+import { notesService } from "@/lib/services/notes-service";
 
 interface TranscriptSegment {
   text: string;
@@ -15,6 +15,7 @@ interface YouTubeMetadata {
   videoId: string;
   title?: string;
   channelName?: string;
+  channelId?: string;
   duration?: number;
   publishedAt?: string;
   description?: string;
@@ -274,34 +275,58 @@ export async function POST(request: NextRequest): Promise<NextResponse<Transcrip
     if (saveAsNote) {
       try {
         const noteTitle = metadata.title || `YouTube Video Transcript - ${videoId}`;
-        const noteContent = `# ${noteTitle}\n\n**Channel:** ${metadata.channelName || "Unknown"}\n**URL:** ${url}\n\n## Transcript\n\n${transcript}`;
 
-        const now = new Date().toISOString();
-        const noteData = {
+        // Store only the transcript in the content field
+        // Clean up any HTML entities in the transcript
+        const cleanTranscript = transcript
+          .replace(/&#39;/g, "'")
+          .replace(/&quot;/g, '"')
+          .replace(/&amp;/g, "&")
+          .replace(/&lt;/g, "<")
+          .replace(/&gt;/g, ">");
+
+        const noteId = await notesService.createNote(userId, {
           title: noteTitle,
-          content: noteContent,
-          url: url.trim(),
-          type: "youtube" as const,
+          content: cleanTranscript, // Only the transcript, no metadata
           tags: ["youtube", "transcript", "video"],
+          type: "text", // Use the standard note type
+          source: "import", // Mark as imported from external source
+          starred: false,
           metadata: {
-            ...metadata,
-            domain: "youtube.com",
-            transcriptLength: transcript.length,
-            segmentCount: segments.length,
+            videoId: metadata.videoId,
+            channelName: metadata.channelName,
+            channelId: metadata.channelId,
+            videoUrl: url,
+            thumbnailUrl: metadata.thumbnailUrl,
+            duration: metadata.duration,
+            viewCount: metadata.viewCount,
+            publishedAt: metadata.publishedAt,
           },
-          createdAt: now,
-          updatedAt: now,
-          userId,
-        };
+        });
 
-        const docRef = await adminDb.collection("chrome_extension_notes").add(noteData);
+        // Get the created note to return
+        const createdNote = await notesService.getNote(noteId, userId);
 
-        savedNote = {
-          id: docRef.id,
-          ...noteData,
-        };
+        if (createdNote) {
+          savedNote = {
+            id: createdNote.id,
+            title: createdNote.title,
+            content: createdNote.content,
+            url: url.trim(),
+            type: "youtube" as const,
+            metadata: {
+              ...metadata,
+              domain: "youtube.com",
+              transcriptLength: transcript.length,
+              segmentCount: segments.length,
+            },
+            createdAt: createdNote.createdAt.toISOString(),
+            updatedAt: createdNote.updatedAt.toISOString(),
+            userId,
+          };
+        }
 
-        console.log(`✅ [YouTube Transcript] Note saved successfully: ${docRef.id}`);
+        console.log(`✅ [YouTube Transcript] Note saved successfully: ${noteId}`);
       } catch (saveError) {
         console.error("❌ [YouTube Transcript] Error saving note:", saveError);
         // Continue without failing the entire request
@@ -355,7 +380,6 @@ export async function GET(request: NextRequest): Promise<NextResponse<Transcript
     const { searchParams } = new URL(request.url);
     const url = searchParams.get("url");
     const includeTimestamps = searchParams.get("includeTimestamps") === "true";
-    const language = searchParams.get("language") || "en";
 
     if (!url?.trim()) {
       return NextResponse.json(

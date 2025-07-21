@@ -466,7 +466,7 @@ export function ExpandableSidebarPanel({
                   </Link>
                 ) : section.title === "Latest Notes" ? (
                   <Link
-                    href="/dashboard/capture/notes"
+                    href="/dashboard/notes"
                     className="text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 flex h-8 shrink-0 cursor-pointer items-center justify-between rounded-md px-2 text-xs font-semibold tracking-wider uppercase transition-colors duration-200"
                   >
                     <span>{section.title}</span>
@@ -599,7 +599,7 @@ export const defaultSidebarSections: NavigationSection[] = [
       {
         id: "add-note",
         title: "Add Note",
-        href: "/dashboard/capture/notes",
+        href: "/dashboard/capture/notes/new",
         icon: sampleIcons.note,
       },
     ],
@@ -657,7 +657,7 @@ export const defaultSidebarSections: NavigationSection[] = [
       {
         id: "all-notes",
         title: "View All Notes",
-        href: "/dashboard/capture/notes",
+        href: "/dashboard/notes",
         icon: sampleIcons.palette,
       },
     ],

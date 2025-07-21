@@ -1,6 +1,6 @@
 # Video Collection API Documentation
 
-This API allows you to programmatically add videos to collections in your video management system.
+This API allows you to programmatically add videos to collections and create video transcripts as notes in your video management system.
 
 ## Authentication
 
@@ -277,6 +277,105 @@ if (result.error) {
 } else {
   console.log("Success:", result.message);
   // Process successful response
+}
+```
+
+### POST /api/video-transcript-to-notes
+
+Processes Instagram or TikTok videos, creates transcriptions, and saves them as two separate notes: one with the video iframe and another with the transcript.
+
+**Headers:**
+
+- `Content-Type: application/json`
+- `x-api-key: your-secret-api-key`
+
+**Request Body:**
+
+```json
+{
+  "videoUrl": "https://www.instagram.com/reels/ABC123/",
+  "title": "My Custom Video Title",
+  "includeTimestamps": false
+}
+```
+
+**Required Fields:**
+
+- `videoUrl`: Instagram or TikTok video URL
+
+**Optional Fields:**
+
+- `title`: Custom title for the notes (defaults to auto-generated title based on platform and author)
+- `includeTimestamps`: Include timestamps in transcript (default: false)
+
+**Success Response (200):**
+
+```json
+{
+  "success": true,
+  "noteId": "transcript-note-id-here",
+  "videoData": {
+    "iframeUrl": "https://iframe.mediadelivery.net/embed/459811/video-guid",
+    "platform": "instagram",
+    "metadata": {
+      "shortcode": "ABC123",
+      "author": "username",
+      "likes": 1500,
+      "views": 25000
+    }
+  },
+  "transcriptData": {
+    "transcript": "Full transcript text here...",
+    "components": {
+      "hook": "Opening hook component",
+      "bridge": "Transition component",
+      "nugget": "Main content component",
+      "wta": "Call-to-action component"
+    },
+    "metadata": {
+      "platform": "instagram",
+      "author": "username",
+      "description": "Video description"
+    }
+  }
+}
+```
+
+**What this API creates:**
+
+1. **Video Note**: Contains an HTML iframe embed of the video from the CDN
+2. **Transcript Note**: Contains the full transcript text with structured components (hook, bridge, nugget, WTA)
+
+Both notes are linked through metadata and can be used separately:
+- The video note for visual reference and playback
+- The transcript note for text-based operations (editing, script conversion, etc.)
+
+**Error Responses:**
+
+- `400 Bad Request`: Invalid video URL or unsupported platform
+- `401 Unauthorized`: Invalid or missing API key
+- `500 Internal Server Error`: Video processing, transcription, or note creation failed
+
+**Example Usage:**
+
+```javascript
+const response = await fetch('/api/video-transcript-to-notes', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-api-key': 'your-secret-api-key'
+  },
+  body: JSON.stringify({
+    videoUrl: 'https://www.instagram.com/reels/ABC123/',
+    title: 'Marketing Video Analysis'
+  })
+});
+
+const result = await response.json();
+if (result.success) {
+  console.log('Transcript Note ID:', result.noteId);
+  console.log('Video CDN URL:', result.videoData.iframeUrl);
+  console.log('Transcript:', result.transcriptData.transcript);
 }
 ```
 
