@@ -16,7 +16,6 @@ import {
   Check,
   Menu,
   MoreHorizontal,
-  Settings,
   FolderOpen,
   Star,
   StarOff,
@@ -24,6 +23,7 @@ import {
   CheckSquare,
   X,
 } from "lucide-react";
+import { IconSettings } from "@tabler/icons-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -756,7 +756,7 @@ function CollectionsPageContent() {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setManageMode(!manageMode)} className="cursor-pointer">
-                  <Settings className="mr-3 h-4 w-4" />
+                  <IconSettings className="mr-3 h-4 w-4" size={16} />
                   <span>Manage Videos</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setManageCollectionsOpen(true)} className="cursor-pointer">

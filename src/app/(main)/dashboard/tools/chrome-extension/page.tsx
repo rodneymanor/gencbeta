@@ -5,7 +5,6 @@ import { useState } from "react";
 import {
   Chrome,
   Download,
-  Settings,
   Key,
   Play,
   CheckCircle,
@@ -17,6 +16,7 @@ import {
   ArrowRight,
   Zap,
 } from "lucide-react";
+import { IconSettings } from "@tabler/icons-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -229,7 +229,7 @@ export default function ChromeExtensionPage() {
 
                 <div className="bg-muted/50 space-y-3 rounded-lg p-4">
                   <div className="flex items-center gap-2 text-sm font-medium">
-                    <Settings className="h-4 w-4" />
+                    <IconSettings className="h-4 w-4" size={16} />
                     Navigate to Settings
                   </div>
                   <ol className="text-muted-foreground ml-6 list-inside list-decimal space-y-2 text-sm">
@@ -249,7 +249,7 @@ export default function ChromeExtensionPage() {
 
                   <Button asChild variant="outline" className="gap-2">
                     <a href="/dashboard/settings">
-                      <Settings className="h-4 w-4" />
+                      <IconSettings className="h-4 w-4" size={16} />
                       Go to Settings
                       <ExternalLink className="h-4 w-4" />
                     </a>

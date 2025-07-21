@@ -11,13 +11,13 @@ import { TableLoading } from "@/components/ui/loading-animations";
 import { useTopBarConfig } from "@/hooks/use-route-topbar";
 
 import { NotesControls } from "./_components/notes-controls";
-import { NotesTable } from "./_components/notes-table";
+import { NotesCryptoTable } from "@/components/ui/notes-crypto-table";
 
 interface Note {
   id: number;
   title: string;
   content: string;
-  tags: string[];
+  type: string; // Note type instead of tags
   createdAt: string;
   updatedAt: string;
   starred: boolean;
@@ -32,14 +32,14 @@ interface ColumnVisibility {
   content: boolean;
 }
 
-// Mock notes data - same as capture page
+// Mock notes data with note types instead of tags
 const mockNotes: Note[] = [
   {
     id: 1,
     title: "Morning Routine Ideas",
     content:
       '# Morning Routine Strategy\n\nKey insights for content:\n- Most people focus on what they do, not when they do it\n- First 10 minutes are crucial for setting intention\n- **Three-step framework:**\n  1. Hydrate before caffeinate\n  2. Set one clear intention\n  3. Move your body (even 2 minutes)\n\n> This could work as a TikTok series - one video per step\n\n**Potential hooks:**\n- "What if I told you 90% of people do morning routines wrong?"\n- "The first 10 minutes of your day determine everything"',
-    tags: ["morning", "routine", "productivity", "tiktok"],
+    type: "text",
     createdAt: "2024-01-20",
     updatedAt: "2024-01-20",
     starred: true,
@@ -49,7 +49,7 @@ const mockNotes: Note[] = [
     title: "Content Ideas - Tech Reviews",
     content:
       "## Tech Review Framework\n\n**Structure:**\n1. Hook with personal story\n2. Show the product in action\n3. Honest pros and cons\n4. Who it's perfect for\n5. Call to action\n\n**Upcoming reviews:**\n- New iPhone features for creators\n- Budget microphone comparison\n- Editing apps for beginners\n\n*Note: Focus on creator-specific use cases*",
-    tags: ["tech", "reviews", "content", "structure"],
+    type: "youtube",
     createdAt: "2024-01-18",
     updatedAt: "2024-01-19",
     starred: false,
@@ -59,7 +59,7 @@ const mockNotes: Note[] = [
     title: "Storytelling Techniques",
     content:
       "Personal storytelling for social media:\n\n**The 3-Act Structure:**\n- Setup: Where I was\n- Conflict: What went wrong\n- Resolution: How I changed\n\n**Emotional hooks:**\n- Start with the end result\n- Use specific details\n- Include vulnerable moments\n- End with actionable advice\n\nRemember: People connect with struggle, not success.",
-    tags: ["storytelling", "social media", "engagement"],
+    type: "voice",
     createdAt: "2024-01-15",
     updatedAt: "2024-01-16",
     starred: true,
@@ -69,7 +69,7 @@ const mockNotes: Note[] = [
     title: "Video Production Tips",
     content:
       "Essential tips for better video content:\n\n**Technical basics:**\n- Good lighting is more important than expensive cameras\n- Audio quality can make or break your content\n- Stable shots using tripods or phone gimbals\n\n**Content tips:**\n- Hook viewers in the first 3 seconds\n- Keep energy high throughout\n- End with clear call-to-action\n\n**Post-production:**\n- Quick cuts maintain attention\n- Add captions for accessibility\n- Consistent branding across videos",
-    tags: ["video", "production", "tips", "technical"],
+    type: "webpage",
     createdAt: "2024-01-12",
     updatedAt: "2024-01-14",
     starred: false,
@@ -79,9 +79,29 @@ const mockNotes: Note[] = [
     title: "Social Media Trends 2024",
     content:
       "Key trends to watch this year:\n\n**Platform trends:**\n- Short-form video continues to dominate\n- Live streaming becoming more interactive\n- AI-generated content gaining traction\n\n**Content trends:**\n- Authentic behind-the-scenes content\n- Educational micro-learning\n- Community-driven challenges\n\n**Monetization trends:**\n- Creator funds expanding\n- Direct fan support features\n- Product placement evolution",
-    tags: ["trends", "social media", "2024", "strategy"],
+    type: "chrome-extension",
     createdAt: "2024-01-10",
     updatedAt: "2024-01-11",
+    starred: true,
+  },
+  {
+    id: 6,
+    title: "Instagram Story Ideas",
+    content:
+      "Behind-the-scenes content for Instagram stories:\n\n**Daily routine shares:**\n- Morning coffee setup\n- Workspace organization\n- Evening wind-down routine\n\n**Process reveals:**\n- Content planning sessions\n- Editing workflow\n- Brainstorming techniques\n\n**Interactive elements:**\n- Poll questions\n- This or that choices\n- Ask me anything sessions",
+    type: "instagram",
+    createdAt: "2024-01-08",
+    updatedAt: "2024-01-09",
+    starred: false,
+  },
+  {
+    id: 7,
+    title: "TikTok Dance Trend Analysis",
+    content:
+      "Current TikTok dance trends and how to adapt them:\n\n**Popular moves:**\n- Hand gestures that match lyrics\n- Simple 8-count routines\n- Transition effects\n\n**Adaptation strategies:**\n- Add your own twist\n- Use trending audio\n- Film in good lighting\n- Keep movements crisp\n\n**Timing tips:**\n- Post during peak hours\n- Use relevant hashtags\n- Engage with comments quickly",
+    type: "tiktok",
+    createdAt: "2024-01-05",
+    updatedAt: "2024-01-06",
     starred: true,
   },
 ];
@@ -115,7 +135,7 @@ export default function NotesPage() {
   const [sortBy, setSortBy] = useState("updated");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [isLoading, setIsLoading] = useState(false);
-  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>({
+  const [columnVisibility] = useState<ColumnVisibility>({
     title: true,
     tags: true,
     created: true,
@@ -217,18 +237,18 @@ export default function NotesPage() {
     const exportData = selectedNotesData.map((note) => ({
       title: note.title,
       content: note.content,
-      tags: note.tags.join(", "),
+      type: note.type,
       created: note.createdAt,
       updated: note.updatedAt,
       starred: note.starred,
     }));
 
     const csvContent = [
-      ["Title", "Content", "Tags", "Created", "Updated", "Starred"],
+      ["Title", "Content", "Type", "Created", "Updated", "Starred"],
       ...exportData.map((note) => [
         note.title,
         note.content.replace(/\n/g, " "),
-        note.tags,
+        note.type,
         note.created,
         note.updated,
         note.starred.toString(),
@@ -281,35 +301,32 @@ export default function NotesPage() {
             onDeleteSelected={handleDeleteSelected}
             onExportSelected={handleExportSelected}
             columnVisibility={columnVisibility}
-            onColumnVisibilityChange={setColumnVisibility}
+            onColumnVisibilityChange={() => {}} // Disabled for crypto table
             onSearch={(query) => {
               const filtered = notes.filter(
                 (note) =>
                   note.title.toLowerCase().includes(query.toLowerCase()) ||
                   note.content.toLowerCase().includes(query.toLowerCase()) ||
-                  note.tags.some((tag) => tag.toLowerCase().includes(query.toLowerCase())),
+                  note.type.toLowerCase().includes(query.toLowerCase()),
               );
               setFilteredNotes(filtered);
             }}
           />
 
           {/* Table */}
-          <Card className="overflow-hidden rounded-xl border border-gray-200">
-            <CardContent className="p-0">
-              <NotesTable
-                notes={sortedNotes}
-                selectedNotes={selectedNotes}
-                sortBy={sortBy}
-                sortOrder={sortOrder}
-                columnVisibility={columnVisibility}
-                onSort={handleSort}
-                onSelectNote={handleSelectNote}
-                onSelectAll={handleSelectAll}
-                onToggleStar={handleToggleStar}
-                onEdit={handleEditNote}
-              />
-            </CardContent>
-          </Card>
+          <NotesCryptoTable
+            data={sortedNotes}
+            selectedNotes={selectedNotes}
+            onRowClick={(note) => handleEditNote(note.id)}
+            onToggleStar={handleToggleStar}
+            onTitleEdit={(noteId: number, newTitle: string) => {
+              const updatedNotes = notes.map((note) => 
+                note.id === noteId ? { ...note, title: newTitle } : note
+              );
+              setNotes(updatedNotes);
+              setFilteredNotes(updatedNotes);
+            }}
+          />
         </div>
       </div>
     </div>

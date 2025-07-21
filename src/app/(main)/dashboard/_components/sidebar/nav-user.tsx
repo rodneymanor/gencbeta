@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 
-import { CircleUser, Crown, CreditCard, MessageSquareDot, LogOut, User, Settings } from "lucide-react";
+import { CircleUser, Crown, CreditCard, MessageSquareDot, LogOut, User } from "lucide-react";
+import { IconSettings } from "@tabler/icons-react";
 
 import {
   DropdownMenu,
@@ -107,7 +108,7 @@ function SignedInMenu({ handleLogout }: { handleLogout: () => void }) {
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
         <DropdownMenuItem onClick={handleSettingsClick}>
-          <Settings className="transition-transform hover:scale-110" />
+          <IconSettings className="transition-transform hover:scale-110" size={16} />
           Settings
         </DropdownMenuItem>
       </DropdownMenuGroup>

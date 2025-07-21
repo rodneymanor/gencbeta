@@ -1,8 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { Pin, Settings, ChevronDown, ChevronRight } from "lucide-react";
+import { Pin, ChevronDown, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -46,6 +47,8 @@ interface ExpandableSidebarPanelProps {
   currentPage?: string;
   hoveredItem?: SidebarItemWithSubs | null;
   isHoveringSpecificItem?: boolean;
+  onMouseDown?: () => void;
+  onMouseUp?: () => void;
 }
 
 const sampleIcons = {
@@ -244,6 +247,8 @@ export function ExpandableSidebarPanel({
   currentPage,
   hoveredItem,
   isHoveringSpecificItem,
+  onMouseDown,
+  onMouseUp,
 }: ExpandableSidebarPanelProps) {
   const pathname = usePathname();
 
@@ -274,24 +279,29 @@ export function ExpandableSidebarPanel({
   // Show sub-items when hovering over a specific sidebar item
   const showSubItems = isHoveringSpecificItem && hoveredItem && hoveredItem.subItems && hoveredItem.subItems.length > 0;
 
+  // Debug logging - removed for production
+
   return (
     <div
       className={cn(
         "fixed top-0 flex h-full flex-col",
-        "border-r shadow-xl",
+        "border-r",
         "bg-sidebar border-sidebar-border backdrop-blur-sm",
-        "group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-lg",
         "transition-all duration-300 ease-out",
         isExpanded ? "pointer-events-auto z-[4] opacity-100" : "pointer-events-none z-[2] opacity-0",
+        "expandable-sidebar-panel", // Add class for detection
         className,
       )}
+      data-expanded={isExpanded}
       style={{
-        left: isExpanded ? "70px" : "30px", // Slide from behind (40px overlap) to full position
-        width: "200px",
-        paddingLeft: "8px", // Small padding for content
+        left: isExpanded ? "70px" : "0px", // Fully hidden behind main sidebar when collapsed
+        width: "240px", // Wider panel for better usability
+        paddingLeft: isExpanded ? "8px" : "70px", // Adjust padding based on state
       }}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
+      onMouseDown={onMouseDown}
+      onMouseUp={onMouseUp}
     >
       {/* Header */}
       <div className="group/sidebar-menu-header border-sidebar-border/30 relative mb-3 flex min-h-0 items-center justify-between border-b px-2 py-3">
@@ -354,8 +364,12 @@ export function ExpandableSidebarPanel({
                   const isActive = isItemActive(subItem.href);
                   return (
                     <div key={subItem.id} className="group/menu-item relative">
-                      <a
+                      <Link
                         href={subItem.href}
+                        data-submenu-item="true"
+                        onClick={() => {
+                          // Navigation will be handled by Next.js Link
+                        }}
                         className={cn(
                           "group relative block rounded-lg px-2 py-1.5 transition-all duration-200",
                           "focus:ring-primary/20 focus:ring-2 focus:outline-none",
@@ -431,7 +445,7 @@ export function ExpandableSidebarPanel({
                             </span>
                           </div>
                         </div>
-                      </a>
+                      </Link>
                     </div>
                   );
                 })}
@@ -443,21 +457,21 @@ export function ExpandableSidebarPanel({
               <div key={section.title} className="relative flex w-full min-w-0 flex-col p-2">
                 {/* Section header */}
                 {section.title === "Latest Scripts" ? (
-                  <a
+                  <Link
                     href="/dashboard/scripts"
                     className="text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 flex h-8 shrink-0 cursor-pointer items-center justify-between rounded-md px-2 text-xs font-semibold tracking-wider uppercase transition-colors duration-200"
                   >
                     <span>{section.title}</span>
                     <ChevronRight className="h-3 w-3 opacity-50 transition-opacity hover:opacity-100" />
-                  </a>
+                  </Link>
                 ) : section.title === "Latest Notes" ? (
-                  <a
+                  <Link
                     href="/dashboard/capture/notes"
                     className="text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 flex h-8 shrink-0 cursor-pointer items-center justify-between rounded-md px-2 text-xs font-semibold tracking-wider uppercase transition-colors duration-200"
                   >
                     <span>{section.title}</span>
                     <ChevronRight className="h-3 w-3 opacity-50 transition-opacity hover:opacity-100" />
-                  </a>
+                  </Link>
                 ) : (
                   <div className="text-sidebar-foreground/60 flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-semibold tracking-wider uppercase">
                     {section.title}
@@ -470,8 +484,12 @@ export function ExpandableSidebarPanel({
                     const isActive = isItemActive(item.href);
                     return (
                       <div key={item.id} className="group/menu-item relative">
-                        <a
+                        <Link
                           href={item.href}
+                          data-submenu-item="true"
+                          onClick={() => {
+                            // Navigation will be handled by Next.js Link
+                          }}
                           className={cn(
                             "group relative block rounded-lg px-2 py-1.5 transition-all duration-200",
                             "focus:ring-primary/20 focus:ring-2 focus:outline-none",
@@ -547,7 +565,7 @@ export function ExpandableSidebarPanel({
                               </span>
                             </div>
                           </div>
-                        </a>
+                        </Link>
                       </div>
                     );
                   })}

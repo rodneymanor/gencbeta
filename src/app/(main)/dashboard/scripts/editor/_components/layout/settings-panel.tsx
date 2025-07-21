@@ -3,7 +3,6 @@
 import { useState } from "react";
 
 import {
-  Settings,
   ChevronDown,
   ChevronUp,
   Palette,
@@ -15,6 +14,7 @@ import {
   RotateCcw,
   Sliders,
 } from "lucide-react";
+import { IconSettings } from "@tabler/icons-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -237,7 +237,7 @@ export function SettingsPanel({ settings, onSettingsChange, isOpen, onToggle }: 
       <CollapsibleTrigger asChild>
         <Button variant="outline" size="sm" className="w-full justify-between">
           <div className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
+            <IconSettings className="h-4 w-4" size={16} />
             <span>Editor Settings</span>
           </div>
           {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}

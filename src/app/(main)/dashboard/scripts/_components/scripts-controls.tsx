@@ -1,6 +1,7 @@
 "use client";
 
-import { Plus, Settings, ArrowUpDown, Filter } from "lucide-react";
+import { Plus, ArrowUpDown, Filter } from "lucide-react";
+import { IconSettings } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -49,7 +50,7 @@ export function ScriptsControls({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="gap-2">
-              <Settings className="h-4 w-4" />
+              <IconSettings className="h-4 w-4" size={16} />
               View settings
             </Button>
           </DropdownMenuTrigger>

@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 
-import { Settings, Trash2, Plus, CheckSquare, X, MoreVertical, MoveRight, FolderOpen } from "lucide-react";
+import { Trash2, Plus, CheckSquare, X, MoreVertical, MoveRight, FolderOpen } from "lucide-react";
+import { IconSettings } from "@tabler/icons-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -156,7 +157,7 @@ const AdminControls = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuItem onClick={onManageModeToggle} className="cursor-pointer">
-            <Settings className="mr-3 h-4 w-4" />
+            <IconSettings className="mr-3 h-4 w-4" size={16} />
             <span>Manage Videos</span>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setManageCollectionsOpen(true)} className="cursor-pointer">

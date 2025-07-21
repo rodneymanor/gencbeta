@@ -1,6 +1,6 @@
 "use client";
 
-import { Settings } from "lucide-react";
+import { IconSettings } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -24,7 +24,7 @@ export function LayoutControls({ variant, collapsible, contentLayout }: LayoutCo
     <Popover>
       <PopoverTrigger asChild>
         <Button size="icon">
-          <Settings />
+          <IconSettings size={16} />
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end">

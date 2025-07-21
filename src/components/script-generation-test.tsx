@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 
-import { AlertCircle, Clock, Copy, Loader2, Zap, Settings } from "lucide-react";
+import { AlertCircle, Clock, Copy, Loader2, Zap } from "lucide-react";
+import { IconSettings } from "@tabler/icons-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -411,7 +412,7 @@ export function ScriptGenerationTest() {
             <TabsContent value="features" className="space-y-4">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Settings className="mr-2 h-5 w-5 text-blue-600" />
+                  <IconSettings className="mr-2 h-5 w-5 text-blue-600" size={20} />
                   <h3 className="text-lg font-semibold">Phase 2 Features</h3>
                   <Badge variant="outline">Beta</Badge>
                 </div>

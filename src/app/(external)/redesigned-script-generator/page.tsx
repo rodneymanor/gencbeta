@@ -8,7 +8,6 @@ import {
   Users,
   Zap,
   ChevronDown,
-  Settings,
   CreditCard,
   History,
   Bookmark,
@@ -18,6 +17,7 @@ import {
   MessageSquare,
   TrendingUp,
 } from "lucide-react";
+import { IconSettings } from "@tabler/icons-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -121,7 +121,7 @@ export default function RedesignedScriptGenerator() {
                 onClick={() => setShowSecondary(!showSecondary)}
                 className="text-gray-600 dark:text-gray-400"
               >
-                <Settings className="mr-2 h-4 w-4" />
+                <IconSettings className="mr-2 h-4 w-4" size={16} />
                 Tools
                 <ChevronDown className={`ml-1 h-4 w-4 transition-transform ${showSecondary ? "rotate-180" : ""}`} />
               </Button>

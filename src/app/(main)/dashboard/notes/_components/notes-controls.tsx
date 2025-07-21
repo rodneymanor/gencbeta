@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 
-import { Download, Trash2, Search, Settings, Eye, EyeOff } from "lucide-react";
+import { Download, Trash2, Search, Eye, EyeOff } from "lucide-react";
+import { IconSettings } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -105,7 +106,7 @@ export function NotesControls({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm">
-              <Settings className="mr-2 h-4 w-4" />
+              <IconSettings className="mr-2 h-4 w-4" size={16} />
               Columns
             </Button>
           </DropdownMenuTrigger>

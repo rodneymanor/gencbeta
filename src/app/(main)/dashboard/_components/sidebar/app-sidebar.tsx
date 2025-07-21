@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
+import Link from "next/link";
 
 import { useSmartSidebarContext } from "@/components/providers/smart-sidebar-provider";
 import { GenCLogo } from "@/components/ui/gen-c-logo";
@@ -37,16 +38,43 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [isHoveringSpecificItem, setIsHoveringSpecificItem] = useState(false);
   const isHoveringSidebarArea = useRef(false);
   const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
+  
+  // CRITICAL FIX: Add click state management
+  const [isClicking, setIsClicking] = useState(false);
+  const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // NEW: Click state handlers
+  const handleMouseDown = useCallback(() => {
+    setIsClicking(true);
+    if (clickTimeoutRef.current) {
+      clearTimeout(clickTimeoutRef.current);
+      clickTimeoutRef.current = null;
+    }
+  }, []);
+
+  const handleMouseUp = useCallback(() => {
+    // Keep clicking state for a short time to prevent premature closure
+    if (clickTimeoutRef.current) {
+      clearTimeout(clickTimeoutRef.current);
+    }
+    clickTimeoutRef.current = setTimeout(() => {
+      setIsClicking(false);
+    }, 150); // Give enough time for navigation to complete
+  }, []);
 
   // Keep the main sidebar collapsed - don't sync with smart sidebar state
   // The main sidebar should stay in icon-only mode
 
-  // Cleanup timeout on unmount
+  // Enhanced cleanup
   useEffect(() => {
     return () => {
       if (hoverTimeout.current) {
         clearTimeout(hoverTimeout.current);
         hoverTimeout.current = null;
+      }
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current);
+        clickTimeoutRef.current = null;
       }
     };
   }, []);
@@ -87,16 +115,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
   };
 
-  // Add click outside handler for better UX
+  // FIXED: Click outside handler with better detection
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (smartSidebar.isPinned) return;
-
+      if (smartSidebar.isPinned || isClicking) return;
+      
       const target = event.target as HTMLElement;
       const isClickingOnSidebar = target.closest('[data-sidebar="sidebar"]');
       const isClickingOnExpandablePanel = target.closest(".expandable-sidebar-panel");
+      const isClickingOnSubmenuItem = target.closest("[data-submenu-item]");
 
-      if (!isClickingOnSidebar && !isClickingOnExpandablePanel) {
+      if (!isClickingOnSidebar && !isClickingOnExpandablePanel && !isClickingOnSubmenuItem) {
         smartSidebar.setExpanded(false);
         setHoveredItem(null);
         setIsHoveringSpecificItem(false);
@@ -107,7 +136,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [smartSidebar]);
+  }, [smartSidebar, isClicking]);
 
   const handleSidebarMouseEnter = () => {
     // Clear any pending timeout
@@ -144,13 +173,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     // Only collapse if user leaves the entire sidebar area, not just this panel
     isHoveringSidebarArea.current = false;
     clearHoverTimeout();
+    
+    // CRITICAL FIX: Respect clicking state and increase timeout
     hoverTimeout.current = setTimeout(() => {
-      if (!isHoveringSidebarArea.current && !smartSidebar.isPinned) {
+      if (!isHoveringSidebarArea.current && !smartSidebar.isPinned && !isClicking) {
         smartSidebar.setExpanded(false);
         setHoveredItem(null);
         setIsHoveringSpecificItem(false);
       }
-    }, 500); // Increased timeout for smoother experience
+    }, 1000); // Increased timeout for better sub-menu interaction
   };
 
   const handleItemMouseEnter = (item: SidebarItemWithSubs) => {
@@ -186,7 +217,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <>
       {/* Extended hover detection area to eliminate dead spots */}
       <div
-        className="fixed inset-y-0 left-0 z-[1] w-[270px]"
+        className="fixed inset-y-0 left-0 z-[1] w-[300px]"
         onMouseEnter={handleSidebarMouseEnter}
         onMouseLeave={handleSidebarMouseLeave}
         style={{ pointerEvents: "none" }}
@@ -196,10 +227,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild className="hover:bg-transparent active:bg-transparent">
-                <a href="/dashboard/scripts/new" className="flex w-full items-center gap-2">
+                <Link href="/dashboard/scripts/new" className="flex w-full items-center gap-2">
                   <GenCLogo iconSize="sm" textSize="sm" />
                   <SidebarPinControl />
-                </a>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -232,6 +263,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         }}
         onMouseEnter={handleExpandablePanelMouseEnter}
         onMouseLeave={handleExpandablePanelMouseLeave}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
       />
     </>
   );

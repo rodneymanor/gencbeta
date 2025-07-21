@@ -2,6 +2,16 @@
 
 import React, { useState } from "react";
 import { Star, StarOff, Edit3, Check, X, Calendar, Hash } from "lucide-react";
+import { 
+  IconVideo, 
+  IconMicrophone, 
+  IconFileText, 
+  IconPuzzle, 
+  IconBrowser, 
+  IconCamera, 
+  IconCameraSelfie, 
+  IconMusic 
+} from "@tabler/icons-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,7 +23,7 @@ export interface NoteCryptoData {
   id: number;
   title: string;
   content: string;
-  tags: string[];
+  type: string; // Note type: 'youtube', 'voice', 'text', 'chrome-extension', 'webpage', etc.
   createdAt: string;
   updatedAt: string;
   starred: boolean;
@@ -54,29 +64,73 @@ function SortableHeader({ children, active = false, onClick }: SortableHeaderPro
   );
 }
 
-const availableTags = [
-  { name: "morning", color: "bg-blue-500" },
-  { name: "routine", color: "bg-green-500" },
-  { name: "productivity", color: "bg-purple-500" },
-  { name: "tiktok", color: "bg-pink-500" },
-  { name: "tech", color: "bg-[#2d93ad]" },
-  { name: "reviews", color: "bg-[#412722]" },
-  { name: "content", color: "bg-indigo-500" },
-  { name: "structure", color: "bg-emerald-500" },
-  { name: "storytelling", color: "bg-red-500" },
-  { name: "social media", color: "bg-yellow-500" },
-  { name: "engagement", color: "bg-violet-500" },
-  { name: "video", color: "bg-orange-500" },
-  { name: "production", color: "bg-cyan-500" },
-  { name: "tips", color: "bg-teal-500" },
-  { name: "technical", color: "bg-slate-500" },
-  { name: "trends", color: "bg-rose-500" },
-  { name: "strategy", color: "bg-amber-500" },
-];
+const noteTypeConfig = {
+  "youtube": { 
+    label: "YouTube", 
+    bgColor: "bg-red-500/10", 
+    textColor: "text-red-600",
+    borderColor: "border-red-500/20",
+    icon: <IconVideo className="mr-1 h-2.5 w-2.5" />
+  },
+  "voice": { 
+    label: "Voice", 
+    bgColor: "bg-purple-500/10", 
+    textColor: "text-purple-600",
+    borderColor: "border-purple-500/20",
+    icon: <IconMicrophone className="mr-1 h-2.5 w-2.5" />
+  },
+  "text": { 
+    label: "Text", 
+    bgColor: "bg-slate-500/10", 
+    textColor: "text-slate-600",
+    borderColor: "border-slate-500/20",
+    icon: <IconFileText className="mr-1 h-2.5 w-2.5" />
+  },
+  "chrome-extension": { 
+    label: "Extension", 
+    bgColor: "bg-blue-500/10", 
+    textColor: "text-blue-600",
+    borderColor: "border-blue-500/20",
+    icon: <IconPuzzle className="mr-1 h-2.5 w-2.5" />
+  },
+  "webpage": { 
+    label: "Web Page", 
+    bgColor: "bg-green-500/10", 
+    textColor: "text-green-600",
+    borderColor: "border-green-500/20",
+    icon: <IconBrowser className="mr-1 h-2.5 w-2.5" />
+  },
+  "video": { 
+    label: "Video", 
+    bgColor: "bg-orange-500/10", 
+    textColor: "text-orange-600",
+    borderColor: "border-orange-500/20",
+    icon: <IconCamera className="mr-1 h-2.5 w-2.5" />
+  },
+  "instagram": { 
+    label: "Instagram", 
+    bgColor: "bg-pink-500/10", 
+    textColor: "text-pink-600",
+    borderColor: "border-pink-500/20",
+    icon: <IconCameraSelfie className="mr-1 h-2.5 w-2.5" />
+  },
+  "tiktok": { 
+    label: "TikTok", 
+    bgColor: "bg-slate-900/10", 
+    textColor: "text-slate-700",
+    borderColor: "border-slate-900/20",
+    icon: <IconMusic className="mr-1 h-2.5 w-2.5" />
+  }
+};
 
-function getTagColor(tagName: string): string {
-  const tag = availableTags.find((t) => t.name === tagName);
-  return tag?.color ?? "bg-gray-500";
+function getNoteTypeConfig(noteType: string) {
+  return noteTypeConfig[noteType as keyof typeof noteTypeConfig] || {
+    label: noteType.charAt(0).toUpperCase() + noteType.slice(1),
+    bgColor: "bg-gray-500/10",
+    textColor: "text-gray-600",
+    borderColor: "border-gray-500/20",
+    icon: <IconFileText className="mr-1 h-2.5 w-2.5" />
+  };
 }
 
 function formatDate(dateString: string): string {
@@ -228,7 +282,7 @@ export function NotesCryptoTable({
             <tr>
               <th className="p-0"></th>
               <th className="py-1 text-center leading-4">
-                <SortableHeader active>Tags</SortableHeader>
+                <SortableHeader active>Type</SortableHeader>
               </th>
               <th className="py-1 text-center leading-4">
                 <SortableHeader>Created</SortableHeader>
@@ -260,23 +314,26 @@ export function NotesCryptoTable({
                   <EditableTitleCell note={note} onTitleEdit={onTitleEdit} />
                 </td>
                 
-                {/* Tags */}
+                {/* Note Type */}
                 <td className="border border-gray-200 bg-gray-100/30">
-                  <div className="flex flex-wrap gap-1 justify-center py-1">
-                    {note.tags.slice(0, 2).map((tag) => (
-                      <Badge 
-                        key={tag} 
-                        variant="secondary" 
-                        className={cn("text-xs text-white h-4 px-1", getTagColor(tag))}
-                      >
-                        {tag}
-                      </Badge>
-                    ))}
-                    {note.tags.length > 2 && (
-                      <Badge variant="outline" className="text-xs h-4 px-1">
-                        +{note.tags.length - 2}
-                      </Badge>
-                    )}
+                  <div className="flex justify-center py-1">
+                    {(() => {
+                      const typeConfig = getNoteTypeConfig(note.type);
+                      return (
+                        <span 
+                          data-slot="badge" 
+                          className={cn(
+                            "inline-flex items-center justify-center font-normal w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-[var(--space-1)] [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden rounded-lg border px-2 py-0.5 text-xs",
+                            typeConfig.bgColor, 
+                            typeConfig.textColor,
+                            typeConfig.borderColor
+                          )}
+                        >
+                          {typeConfig.icon}
+                          {typeConfig.label}
+                        </span>
+                      );
+                    })()}
                   </div>
                 </td>
                 
