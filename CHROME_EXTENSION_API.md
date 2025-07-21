@@ -7,10 +7,11 @@ This document provides comprehensive information about the API endpoints designe
 1. [Authentication](#authentication)
 2. [Notes API](#notes-api)
 3. [YouTube Transcript API](#youtube-transcript-api)
-4. [Existing Collections API](#existing-collections-api)
-5. [Error Handling](#error-handling)
-6. [Rate Limits](#rate-limits)
-7. [Chrome Extension Integration Examples](#chrome-extension-integration-examples)
+4. [Website Content API](#website-content-api)
+5. [Existing Collections API](#existing-collections-api)
+6. [Error Handling](#error-handling)
+7. [Rate Limits](#rate-limits)
+8. [Chrome Extension Integration Examples](#chrome-extension-integration-examples)
 
 ## Authentication
 
@@ -340,6 +341,123 @@ const response = await fetch(
 - `https://youtu.be/VIDEO_ID`
 - `https://www.youtube.com/embed/VIDEO_ID`
 
+## Website Content API
+
+Extract and convert webpage content to markdown using Mozilla's Readability.js for article extraction and TurndownJS for markdown conversion.
+
+### Base URL
+
+```
+https://gencapp.pro/api/chrome-extension/website-content
+```
+
+### Endpoints
+
+#### POST /api/chrome-extension/website-content
+
+Extract readable content from any webpage and optionally save as a note.
+
+**Request Body:**
+
+```json
+{
+  "url": "https://example.com/article",
+  "title": "Custom Title", // optional
+  "html": "<html>...</html>", // optional - if not provided, will fetch from URL
+  "content": "Raw content", // optional - fallback if extraction fails
+  "selectedText": "User highlighted text", // optional
+  "saveAsNote": true, // optional, default: false
+  "extractSummary": true, // optional, default: false
+  "tags": ["article", "research"], // optional
+  "metadata": { // optional
+    "source": "chrome-extension",
+    "category": "research"
+  }
+}
+```
+
+**Example Request:**
+
+```javascript
+const response = await fetch("/api/chrome-extension/website-content", {
+  method: "POST",
+  headers: {
+    "x-api-key": "gencbeta_your_api_key_here",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    url: "https://techcrunch.com/2024/01/15/ai-breakthrough",
+    saveAsNote: true,
+    tags: ["ai", "tech-news"],
+    selectedText: "Key insights about the AI breakthrough...",
+  }),
+});
+```
+
+**Example Response:**
+
+```json
+{
+  "success": true,
+  "extractedContent": {
+    "title": "Major AI Breakthrough Announced",
+    "markdown": "# Major AI Breakthrough Announced\n\nResearchers at...",
+    "textContent": "Major AI Breakthrough Announced Researchers at...",
+    "excerpt": "A brief summary of the breakthrough...",
+    "byline": "By John Doe",
+    "length": 2500,
+    "siteName": "TechCrunch",
+    "publishedTime": "2024-01-15T10:00:00Z"
+  },
+  "metadata": {
+    "url": "https://techcrunch.com/2024/01/15/ai-breakthrough",
+    "domain": "techcrunch.com",
+    "extractedAt": "2024-01-15T15:30:00Z",
+    "hasSelectedText": true
+  },
+  "noteId": "note_abc123", // if saveAsNote: true
+  "editUrl": "/dashboard/capture/notes/new?noteId=note_abc123" // if saveAsNote: true
+}
+```
+
+#### GET /api/chrome-extension/website-content
+
+Quick content extraction without saving.
+
+**Query Parameters:**
+
+- `url` (required): Website URL to extract content from
+
+**Example Request:**
+
+```javascript
+const response = await fetch(
+  "/api/chrome-extension/website-content?url=https://example.com/article",
+  {
+    headers: {
+      "x-api-key": "gencbeta_your_api_key_here",
+    },
+  },
+);
+```
+
+### Features
+
+- **Smart Content Extraction**: Uses Mozilla's Readability.js to extract main article content
+- **Markdown Conversion**: Converts HTML to clean markdown using TurndownJS
+- **Metadata Extraction**: Extracts author, publish date, site name, and more
+- **Fallback Support**: Uses provided content if extraction fails
+- **Selected Text Support**: Prioritizes user-selected text over full article
+- **Automatic Tagging**: Adds relevant tags for organization
+
+### Use Cases
+
+- Save articles for later reading
+- Extract content from news sites, blogs, documentation
+- Convert web content to markdown for note-taking
+- Research collection and organization
+- Content archival with metadata preservation
+
 ## Existing Collections API
 
 These endpoints allow Chrome extensions to work with video collections.
@@ -547,6 +665,39 @@ class GenCExtension {
     }
   }
 
+  async extractWebsiteContent(url, options = {}) {
+    try {
+      const requestBody = {
+        url,
+        saveAsNote: options.saveAsNote || false,
+        selectedText: options.selectedText,
+        tags: options.tags || ["webpage"],
+        metadata: options.metadata || {},
+        ...options,
+      };
+
+      const response = await fetch(`${this.baseUrl}/website-content`, {
+        method: "POST",
+        headers: {
+          "x-api-key": this.apiKey,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        console.log("Website content extracted:", result.extractedContent.length, "characters");
+        return result;
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error) {
+      console.error("Failed to extract website content:", error);
+      throw error;
+    }
+  }
+
   async getNotes(filters = {}) {
     try {
       const params = new URLSearchParams(filters);
@@ -582,6 +733,17 @@ genC.createNote(document.title, window.getSelection().toString() || "Saved page"
 if (window.location.hostname.includes("youtube.com")) {
   genC.extractYouTubeTranscript(window.location.href, true);
 }
+
+// Extract article content from any webpage
+genC.extractWebsiteContent(window.location.href, {
+  saveAsNote: true,
+  selectedText: window.getSelection().toString(),
+  tags: ["article", "research"],
+  metadata: {
+    source: "chrome-extension",
+    capturedAt: new Date().toISOString(),
+  },
+});
 
 // Example: Create voice note with Gemini transcription
 async function createVoiceNoteFromAudio(audioBlob, title = "Voice Note") {
@@ -621,6 +783,12 @@ chrome.runtime.onInstalled.addListener(() => {
     contexts: ["page"],
     documentUrlPatterns: ["*://*.youtube.com/*"],
   });
+
+  chrome.contextMenus.create({
+    id: "extractArticle",
+    title: "Extract Article Content",
+    contexts: ["page", "selection"],
+  });
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
@@ -636,6 +804,18 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       if (tab.url.includes("youtube.com")) {
         await genC.extractYouTubeTranscript(tab.url, true);
       }
+      break;
+
+    case "extractArticle":
+      await genC.extractWebsiteContent(tab.url, {
+        saveAsNote: true,
+        selectedText: info.selectionText,
+        tags: ["article", "context-menu"],
+        metadata: {
+          source: "chrome-extension-context-menu",
+          domain: new URL(tab.url).hostname,
+        },
+      });
       break;
   }
 });
