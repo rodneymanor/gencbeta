@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { authenticateApiKey } from "@/lib/api-key-auth";
 import { adminDb } from "@/lib/firebase-admin";
+import { EnhancedGhostWriterService } from "@/lib/enhanced-ghost-writer-service";
 
 interface TrackUsageRequest {
   ideaId: string;
@@ -69,6 +70,23 @@ export async function POST(request: NextRequest) {
       });
 
       console.log(`✅ [GhostWriter Usage] Script generation tracked for idea ${ideaId}`);
+
+      // Save the idea to library since it was used for script generation
+      try {
+        const ideaForLibrary = {
+          id: ideaId,
+          ...ideaData,
+          generatedScripts: [...currentScripts, newScriptEntry],
+          lastUsedAt: now,
+          updatedAt: now,
+        };
+        
+        await EnhancedGhostWriterService.saveIdeasToLibrary(user.uid, [ideaForLibrary as any], "script_generation");
+        console.log(`📚 [GhostWriter Usage] Saved idea ${ideaId} to library after script generation`);
+      } catch (libraryError) {
+        console.warn(`⚠️ [GhostWriter Usage] Failed to save idea to library: ${libraryError}`);
+        // Don't fail the whole request if library saving fails
+      }
     } else {
       // Track other actions (view, save, dismiss)
       const updateData: any = {
@@ -79,6 +97,24 @@ export async function POST(request: NextRequest) {
       await ideaRef.update(updateData);
 
       console.log(`✅ [GhostWriter Usage] ${action} tracked for idea ${ideaId}`);
+
+      // If user explicitly saved the idea, also save it to the library
+      if (action === "save") {
+        try {
+          const ideaForLibrary = {
+            id: ideaId,
+            ...ideaData,
+            [`last${action.charAt(0).toUpperCase() + action.slice(1)}At`]: now,
+            updatedAt: now,
+          };
+          
+          await EnhancedGhostWriterService.saveIdeasToLibrary(user.uid, [ideaForLibrary as any], "user_save");
+          console.log(`📚 [GhostWriter Usage] Saved idea ${ideaId} to library after user save action`);
+        } catch (libraryError) {
+          console.warn(`⚠️ [GhostWriter Usage] Failed to save idea to library after save: ${libraryError}`);
+          // Don't fail the whole request if library saving fails
+        }
+      }
     }
 
     // Update user stats

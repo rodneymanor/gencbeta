@@ -150,6 +150,16 @@ async function handleGhostWriterRequest(
     // Check if user already has ideas for this cycle
     const existingIdeas = await EnhancedGhostWriterService.getEnhancedIdeasForUser(userId, currentCycle.id);
 
+    // Also check if user has ideas from previous cycles that should be archived
+    const allUserIdeas = await EnhancedGhostWriterService.getAllUserIdeas(userId);
+    const previousCycleIdeas = allUserIdeas.filter(idea => idea.cycleId !== currentCycle.id);
+    
+    // Save any previous cycle ideas to library
+    if (previousCycleIdeas.length > 0) {
+      await EnhancedGhostWriterService.saveIdeasToLibrary(userId, previousCycleIdeas, "cycle_expiry");
+      console.log(`📚 [EnhancedGhostWriter] Archived ${previousCycleIdeas.length} ideas from previous cycles to library`);
+    }
+
     let ideas: EnhancedContentIdea[] = existingIdeas;
 
     // Generate new ideas if none exist, if generateMore is requested, or if refresh is requested
@@ -160,7 +170,7 @@ async function handleGhostWriterRequest(
 
       // If generateMore is requested, save current ideas to library first
       if (generateMore && existingIdeas.length > 0) {
-        await EnhancedGhostWriterService.saveIdeasToLibrary(userId, existingIdeas);
+        await EnhancedGhostWriterService.saveIdeasToLibrary(userId, existingIdeas, "generate_more");
         console.log(`📚 [EnhancedGhostWriter] Saved ${existingIdeas.length} existing ideas to library`);
       }
 
