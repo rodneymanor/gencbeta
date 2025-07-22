@@ -125,7 +125,7 @@ Please provide only the enhanced text with evidence in your response, no explana
 
     const response = await generateContent({
       prompt,
-      model: "gemini-2.0-flash",
+      model: "gemini-1.5-flash",
       temperature: 0.7,
       maxTokens: 1000,
     });

@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.GeminiClient = void 0;
 class GeminiClient {
   static API_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models";
-  static DEFAULT_MODEL = "gemini-2.0-flash";
+  static DEFAULT_MODEL = "gemini-1.5-flash";
   static REQUEST_TIMEOUT = 30000; // 30 seconds
   static RATE_LIMIT_DELAY = 500; // 500ms between requests
   apiKey;

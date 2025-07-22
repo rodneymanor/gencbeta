@@ -272,12 +272,21 @@ export function hasRequiredFields(input: any): input is ScriptGenerationRequest 
 export function isContentSafe(idea: string): boolean {
   const unsafePatterns = [
     /porn|sex|nude|naked/i,
-    /hate|racist|terrorism/i,
+    /\bhate\s+(speech|crime|group)/i, // Only hate speech, not general "hate"
+    /racist|terrorism/i,
     /kill|murder|violence/i,
     /drug|cocaine|heroin/i,
   ];
 
-  return !unsafePatterns.some((pattern) => pattern.test(idea));
+  const matchedPattern = unsafePatterns.find((pattern) => pattern.test(idea));
+
+  if (matchedPattern) {
+    console.log(`🚨 [SAFETY] Content blocked by pattern: ${matchedPattern} in "${idea.substring(0, 100)}"`);
+    return false;
+  }
+
+  console.log(`✅ [SAFETY] Content passed safety check: "${idea.substring(0, 50)}"`);
+  return true;
 }
 
 /**

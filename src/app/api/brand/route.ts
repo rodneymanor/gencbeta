@@ -177,7 +177,7 @@ async function generateProfileWithGemini(questionnaire: BrandQuestionnaire): Pro
   const geminiResponse = await geminiService.generateContent({
     prompt: userPrompt,
     systemPrompt: SYSTEM_PROMPT,
-    model: "gemini-2.0-flash-exp",
+    model: "gemini-1.5-flash",
   });
 
   try {

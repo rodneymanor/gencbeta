@@ -13,6 +13,16 @@ import {
 import { db } from "./firebase";
 import { formatTimestamp, getAllCoaches, getCoachCreators, getAllUsers } from "./user-management-helpers";
 
+/**
+ * Helper function to ensure db is available
+ */
+function getDb() {
+  if (!db) {
+    throw new Error("Firebase is not initialized. Please check your configuration.");
+  }
+  return db;
+}
+
 export type UserRole = "super_admin" | "coach" | "creator";
 
 export interface UserProfile {
@@ -81,7 +91,7 @@ export class UserManagementService {
       console.log("🔍 [USER_PROFILE] Profile data prepared:", profileData);
       console.log("🔍 [USER_PROFILE] Using collection path:", this.USERS_PATH);
 
-      const docRef = await addDoc(collection(db, this.USERS_PATH), {
+      const docRef = await addDoc(collection(getDb(), this.USERS_PATH), {
         ...profileData,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
@@ -100,7 +110,7 @@ export class UserManagementService {
             isActive: true,
           };
 
-          await addDoc(collection(db, this.RELATIONSHIPS_PATH), {
+          await addDoc(collection(getDb(), this.RELATIONSHIPS_PATH), {
             ...relationshipData,
             assignedAt: serverTimestamp(),
           });
@@ -129,7 +139,7 @@ export class UserManagementService {
    */
   static async getUserProfile(uid: string): Promise<UserProfile | null> {
     try {
-      const q = query(collection(db, this.USERS_PATH), where("uid", "==", uid), where("isActive", "==", true));
+      const q = query(collection(getDb(), this.USERS_PATH), where("uid", "==", uid), where("isActive", "==", true));
 
       const querySnapshot = await getDocs(q);
 
@@ -161,7 +171,7 @@ export class UserManagementService {
         throw new Error("User profile not found");
       }
 
-      const docRef = doc(db, this.USERS_PATH, profile.id!);
+      const docRef = doc(getDb(), this.USERS_PATH, profile.id!);
       await updateDoc(docRef, {
         ...updates,
         updatedAt: serverTimestamp(),
@@ -236,7 +246,7 @@ export class UserManagementService {
         isActive: true,
       };
 
-      await addDoc(collection(db, this.RELATIONSHIPS_PATH), {
+      await addDoc(collection(getDb(), this.RELATIONSHIPS_PATH), {
         ...relationshipData,
         assignedAt: serverTimestamp(),
       });
@@ -261,13 +271,13 @@ export class UserManagementService {
 
       // Deactivate relationship records
       const q = query(
-        collection(db, this.RELATIONSHIPS_PATH),
+        collection(getDb(), this.RELATIONSHIPS_PATH),
         where("creatorId", "==", creatorUid),
         where("isActive", "==", true),
       );
 
       const querySnapshot = await getDocs(q);
-      const batch = writeBatch(db);
+      const batch = writeBatch(getDb());
 
       querySnapshot.docs.forEach((doc) => {
         batch.update(doc.ref, { isActive: false });

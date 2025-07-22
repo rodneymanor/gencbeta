@@ -31,12 +31,25 @@ export class ScriptGenerationAdapter {
         type: input.type,
         tone: input.tone,
         platform: "general" as const, // Default since we don't need platform-specific
-        ideaContext: input.context?.notes,
-        ideaContextMode: input.context?.referenceMode,
+        ideaContext:
+          input.context?.referenceMode && input.context?.notes
+            ? {
+                selectedNotes: [
+                  {
+                    id: "enriched-context",
+                    title: "Context Notes",
+                    content: input.context.notes,
+                    tags: [],
+                  },
+                ],
+                contextMode: input.context.referenceMode,
+              }
+            : undefined,
+        userId: context.userId,
       };
 
       // Call existing service
-      const result = await this.scriptService.generateScript(oldFormatInput, context.userId);
+      const result = await this.scriptService.generateScript(oldFormatInput);
 
       // Parse the script elements
       let scriptElements;

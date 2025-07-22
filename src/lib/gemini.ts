@@ -27,7 +27,7 @@ export interface AudioData {
 
 // Gemini service with production error handling
 export class GeminiService {
-  private static readonly DEFAULT_MODEL = "gemini-2.0-flash";
+  private static readonly DEFAULT_MODEL = "gemini-1.5-flash";
   private static readonly TIMEOUT_MS = 30000; // 30 seconds
   private static readonly MAX_RETRIES = 2;
 
@@ -130,7 +130,7 @@ export class GeminiService {
       ];
 
       const model = genAI.getGenerativeModel({
-        model: "gemini-2.0-flash",
+        model: "gemini-1.5-flash",
         safetySettings,
       });
 

@@ -195,13 +195,16 @@ export async function downloadYouTubeVideo(url: string): Promise<DownloadResult 
  * @param videoData - Video data to upload
  * @returns CdnResult with upload status and URLs
  */
-export async function uploadToCDN(videoData: VideoData): Promise<CdnResult | null> {
+export async function uploadToCDN(videoData: VideoData): Promise<CdnResult> {
   try {
     console.log("🐰 [DOWNLOADER] Uploading to CDN...");
 
     if (videoData.buffer.byteLength === 0) {
       console.error("❌ [DOWNLOADER] No video buffer data available");
-      return null;
+      return {
+        success: false,
+        error: "No video buffer data available",
+      };
     }
 
     const buffer = Buffer.from(videoData.buffer);
@@ -209,14 +212,26 @@ export async function uploadToCDN(videoData: VideoData): Promise<CdnResult | nul
 
     if (result) {
       console.log("✅ [DOWNLOADER] CDN upload successful");
+      // Transform the bunny stream result into CdnResult format
+      return {
+        success: true,
+        iframeUrl: result.cdnUrl,
+        directUrl: result.cdnUrl, // For now, use the same URL
+        guid: result.filename, // The filename is actually the GUID from Bunny
+      };
     } else {
       console.error("❌ [DOWNLOADER] CDN upload failed");
+      return {
+        success: false,
+        error: "Failed to upload to Bunny Stream",
+      };
     }
-
-    return result;
   } catch (error) {
     console.error("❌ [DOWNLOADER] CDN upload error:", error);
-    return null;
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown upload error",
+    };
   }
 }
 
@@ -227,7 +242,7 @@ export async function uploadToCDN(videoData: VideoData): Promise<CdnResult | nul
  */
 export async function downloadAndUploadToCDN(url: string): Promise<{
   downloadResult: DownloadResult;
-  cdnResult: CdnResult | null;
+  cdnResult: CdnResult;
 }> {
   const downloadResult = await downloadVideo(url);
   if (!downloadResult) {

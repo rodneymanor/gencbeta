@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     const geminiService = new GeminiService();
     const response = await geminiService.generateContent({
       prompt,
-      model: "gemini-2.0-flash",
+      model: "gemini-1.5-flash",
       temperature: 0.8,
       maxTokens: 2000,
       responseType: "json",

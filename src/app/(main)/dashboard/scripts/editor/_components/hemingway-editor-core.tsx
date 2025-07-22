@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 
-import { BlockNoteEditor, PartialBlock, BlockNoteSchema, defaultBlockSpecs } from "@blocknote/core";
+import { BlockNoteEditor, PartialBlock } from "@blocknote/core";
 import { BlockNoteView } from "@blocknote/mantine";
 import { useCreateBlockNote } from "@blocknote/react";
 
@@ -14,6 +14,8 @@ import {
 } from "@/lib/script-analysis";
 
 import { AIInputPanel } from "./ai-input-panel";
+import { customBlockSchema, type CustomBlockSchema } from "./custom-schema";
+import { CustomSlashMenuController } from "./custom-slash-menu";
 import { ScriptBlocksOverlay } from "./script-blocks-overlay";
 import "@blocknote/core/fonts/inter.css";
 import "@blocknote/mantine/style.css";
@@ -111,14 +113,116 @@ export function HemingwayEditorCore({
     return blocks;
   }, []);
 
-  // Initialize BlockNote editor
+  // Helper to parse structured content
+  const parseStructuredContent = useCallback((content: string) => {
+    try {
+      const parsed = JSON.parse(content);
+      // Check if it's an array of blocks (our structured format)
+      if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].type) {
+        return parsed;
+      }
+    } catch (e) {
+      // Not JSON, return null to fall back to plain text
+    }
+    return null;
+  }, []);
+
+  // Initialize BlockNote editor with custom schema
   const editor = useCreateBlockNote({
+    schema: customBlockSchema,
     initialContent: elements
       ? createScriptBlocks(elements) // Always use structured blocks if elements are provided
       : value
-        ? [{ type: "paragraph", content: value }]
+        ? (() => {
+            // Try to parse as structured content first
+            const structuredContent = parseStructuredContent(value);
+            if (structuredContent) {
+              return structuredContent;
+            }
+            // Fall back to plain text paragraph
+            return [{ type: "paragraph", content: value }];
+          })()
         : undefined,
   });
+
+  // Update editor content when value prop changes
+  useEffect(() => {
+    if (!editor || !value) return;
+
+    // Try to parse as structured content first
+    const structuredContent = parseStructuredContent(value);
+
+    if (structuredContent) {
+      // Handle structured content (JSON array of blocks)
+      console.log("📝 [HemingwayEditorCore] Loading structured content with", structuredContent.length, "blocks");
+
+      setTimeout(() => {
+        editor.replaceBlocks(editor.document, structuredContent);
+      }, 0);
+      return;
+    }
+
+    // Fall back to original plain text handling
+    const currentContent = editor.document
+      .map((block) => {
+        if (block.type === "paragraph" && block.content) {
+          return block.content
+            .map((item) => {
+              if (typeof item === "string") return item;
+              if (item && typeof item === "object" && "text" in item) {
+                return item.text || "";
+              }
+              return "";
+            })
+            .join("");
+        }
+        return "";
+      })
+      .join("\n\n");
+
+    // If the content is different, update the editor
+    if (currentContent !== value && value.trim()) {
+      console.log("📝 [HemingwayEditorCore] Updating editor content, new length:", value.length);
+
+      // Use setTimeout to avoid flushSync during render
+      setTimeout(() => {
+        // Check if content contains Bunny.net iframe
+        const bunnyIframeMatch = value.match(/https:\/\/iframe\.mediadelivery\.net\/embed\/(\d+)\/([a-f0-9-]+)/);
+
+        if (bunnyIframeMatch) {
+          const libraryId = bunnyIframeMatch[1];
+          const videoId = bunnyIframeMatch[2];
+
+          // Create a video block instead of plain text
+          editor.replaceBlocks(editor.document, [
+            {
+              type: "bunnyVideo",
+              props: {
+                libraryId,
+                videoId,
+                autoplay: false,
+                muted: false,
+                loop: false,
+                preload: true,
+                responsive: true,
+                caption: "",
+              },
+            },
+          ]);
+        } else if (value.includes("<iframe") || value.includes("<video") || value.includes("<embed")) {
+          // For other HTML content, create a paragraph with the raw HTML
+          editor.replaceBlocks(editor.document, [
+            {
+              type: "paragraph",
+              content: [{ type: "text", text: value, styles: {} }],
+            },
+          ]);
+        } else {
+          editor.replaceBlocks(editor.document, [{ type: "paragraph", content: value }]);
+        }
+      }, 0);
+    }
+  }, [value, editor, parseStructuredContent]);
 
   // Handle editor content changes
   const handleEditorChange = useCallback(
@@ -351,12 +455,15 @@ export function HemingwayEditorCore({
           theme="light"
           className="h-full w-full"
           onChange={handleEditorChange}
+          slashMenu={false}
           style={{
             fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
             fontSize: "16px",
             lineHeight: "1.7",
           }}
-        />
+        >
+          <CustomSlashMenuController editor={editor} />
+        </BlockNoteView>
 
         {/* Script Blocks Overlay */}
         <ScriptBlocksOverlay blocks={editor.document} onBlockClick={handleElementClick} editorRef={editorRef} />

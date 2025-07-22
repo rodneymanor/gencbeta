@@ -10,6 +10,53 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Icon1 } from "./icon1";
 
+// Script source configuration for indicators and colors
+const scriptSourceConfig = {
+  "ghostwriter": { 
+    indicator: "G", 
+    bgColor: "bg-purple-100", 
+    textColor: "text-purple-600",
+    label: "Ghost Writer"
+  },
+  "ideas": { 
+    indicator: "I", 
+    bgColor: "bg-blue-100", 
+    textColor: "text-blue-600",
+    label: "Ideas/Notes"
+  },
+  "scripting": { 
+    indicator: "S", 
+    bgColor: "bg-green-100", 
+    textColor: "text-green-600",
+    label: "Manual Scripting"
+  },
+  "hooks": { 
+    indicator: "H", 
+    bgColor: "bg-orange-100", 
+    textColor: "text-orange-600",
+    label: "Hooks"
+  },
+  "collections": { 
+    indicator: "C", 
+    bgColor: "bg-teal-100", 
+    textColor: "text-teal-600",
+    label: "Collections"
+  }
+};
+
+function getSourceIndicator(source?: string): { indicator: string; bgColor: string; textColor: string; label: string } {
+  if (source && source in scriptSourceConfig) {
+    return scriptSourceConfig[source as keyof typeof scriptSourceConfig];
+  }
+  // Default fallback (for legacy scripts without source)
+  return {
+    indicator: "S",
+    bgColor: "bg-gray-100",
+    textColor: "text-gray-600",
+    label: "Unknown"
+  };
+}
+
 export interface ScriptCryptoData {
   id: string;
   title: string;
@@ -20,6 +67,7 @@ export interface ScriptCryptoData {
   summary: string;
   duration: string;
   tags: string[];
+  source?: "ghostwriter" | "ideas" | "scripting" | "hooks" | "collections";
 }
 
 interface ScriptsCryptoTableProps {
@@ -150,9 +198,9 @@ function EditableTitleCell({ script, onTitleEdit }: EditableTitleCellProps) {
   return (
     <div className="flex w-full items-center gap-2 overflow-hidden pr-1">
       <div className="flex h-8 w-8 shrink-0 items-center justify-center p-1">
-        <div className="flex h-6 w-6 items-center justify-center rounded bg-purple-100">
-          <span className="text-xs font-medium text-purple-600">
-            {script.title.charAt(0).toUpperCase()}
+        <div className={`flex h-6 w-6 items-center justify-center rounded ${getSourceIndicator(script.source).bgColor}`}>
+          <span className={`text-xs font-medium ${getSourceIndicator(script.source).textColor}`}>
+            {getSourceIndicator(script.source).indicator}
           </span>
         </div>
       </div>

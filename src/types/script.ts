@@ -23,6 +23,7 @@ export interface Script {
   originalIdea?: string;
   targetLength?: string;
   wordCount?: number;
+  source?: "ghostwriter" | "ideas" | "scripting" | "hooks" | "collections";
 }
 
 export interface CreateScriptRequest {
@@ -39,6 +40,7 @@ export interface CreateScriptRequest {
   };
   originalIdea?: string;
   targetLength?: string;
+  source?: "ghostwriter" | "ideas" | "scripting" | "hooks" | "collections";
 }
 
 export interface UpdateScriptRequest {

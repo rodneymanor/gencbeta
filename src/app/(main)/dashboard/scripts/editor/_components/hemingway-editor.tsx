@@ -382,9 +382,60 @@ export function HemingwayEditor({
   };
 
   const handleSave = async () => {
-    // TODO: Implement save functionality
-    console.log("Save script:", value);
-    toast.success("Script saved successfully!");
+    try {
+      if (!value.trim()) {
+        toast.error("Please provide content for your note");
+        return;
+      }
+
+      if (!auth?.currentUser) {
+        toast.error("Please sign in to save notes");
+        return;
+      }
+
+      const token = await auth.currentUser.getIdToken();
+
+      // Auto-generate title from content if no title is provided
+      const autoTitle = title.trim() || value.trim().split("\n")[0].substring(0, 50).trim() || "Untitled Note";
+
+      // Create note data
+      const noteData = {
+        title: autoTitle,
+        content: value.trim(),
+        type: "text",
+        tags: [], // Default empty tags for now
+        starred: false,
+      };
+
+      console.log("📝 [HemingwayEditor] Saving note:", noteData);
+
+      const response = await fetch("/api/notes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(noteData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to save note");
+      }
+
+      const data = await response.json();
+      console.log("✅ [HemingwayEditor] Note saved:", data);
+
+      toast.success("Note saved successfully!");
+
+      // Redirect to notes page to see the saved note
+      setTimeout(() => {
+        window.location.href = "/dashboard/notes";
+      }, 1000);
+    } catch (error) {
+      console.error("❌ [HemingwayEditor] Save failed:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to save note");
+    }
   };
 
   const handleExport = () => {

@@ -54,7 +54,7 @@ export default function ChromeExtensionPage() {
         {/* Download Button */}
         <div className="flex flex-col items-center justify-center gap-4 pt-4 sm:flex-row">
           <Button size="lg" className="gap-2" asChild>
-            <a href="https://gencdl.b-cdn.net/Gen.C%20Chrome%20Extension.zip" download>
+            <a href="https://gencstorage.b-cdn.net/genc%20chrome%20extension.zip" download>
               <Download className="h-5 w-5" />
               Download Extension
             </a>
@@ -139,7 +139,7 @@ export default function ChromeExtensionPage() {
                       Remember this location - you'll need it for installation.
                     </p>
                     <Button variant="outline" size="sm" className="gap-2" asChild>
-                      <a href="https://gencdl.b-cdn.net/Gen.C%20Chrome%20Extension.zip" download>
+                      <a href="https://gencstorage.b-cdn.net/genc%20chrome%20extension.zip" download>
                         <Download className="h-4 w-4" />
                         Download ZIP File
                       </a>

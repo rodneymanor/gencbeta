@@ -35,6 +35,7 @@ interface NotesCryptoTableProps {
   onRowClick?: (note: NoteCryptoData) => void;
   onToggleStar?: (noteId: number) => void;
   onTitleEdit?: (noteId: number, newTitle: string) => void;
+  onTitleClick?: (note: NoteCryptoData) => void;
   className?: string;
 }
 
@@ -125,7 +126,7 @@ const noteTypeConfig = {
 
 function getNoteTypeConfig(noteType: string) {
   return noteTypeConfig[noteType as keyof typeof noteTypeConfig] || {
-    label: noteType.charAt(0).toUpperCase() + noteType.slice(1),
+    label: noteType ? noteType.charAt(0).toUpperCase() + noteType.slice(1) : "Unknown",
     bgColor: "bg-gray-500/10",
     textColor: "text-gray-600",
     borderColor: "border-gray-500/20",
@@ -150,16 +151,26 @@ function truncateContent(content: string, maxLength: number = 60): string {
 interface EditableTitleCellProps {
   note: NoteCryptoData;
   onTitleEdit?: (noteId: number, newTitle: string) => void;
+  onTitleClick?: (note: NoteCryptoData) => void;
 }
 
-function EditableTitleCell({ note, onTitleEdit }: EditableTitleCellProps) {
+function EditableTitleCell({ note, onTitleEdit, onTitleClick }: EditableTitleCellProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(note.title);
+  const [isHovered, setIsHovered] = useState(false);
 
-  const handleEdit = () => {
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (onTitleEdit) {
       setIsEditing(true);
       setEditTitle(note.title);
+    }
+  };
+
+  const handleTitleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onTitleClick) {
+      onTitleClick(note);
     }
   };
 
@@ -223,7 +234,11 @@ function EditableTitleCell({ note, onTitleEdit }: EditableTitleCellProps) {
   }
 
   return (
-    <div className="flex w-full items-center gap-2 overflow-hidden pr-1">
+    <div 
+      className="flex w-full items-center gap-2 overflow-hidden pr-1 group"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <div className="flex h-8 w-8 shrink-0 items-center justify-center p-1">
         <div className="flex h-6 w-6 items-center justify-center rounded bg-blue-100">
           <span className="text-xs font-medium text-blue-600">
@@ -231,16 +246,28 @@ function EditableTitleCell({ note, onTitleEdit }: EditableTitleCellProps) {
           </span>
         </div>
       </div>
-      <div className="flex min-w-0 flex-col bg-transparent py-1">
-        <div 
-          className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium leading-[18px] text-slate-700 cursor-pointer hover:text-blue-600 transition-colors"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleEdit();
-          }}
-          title="Click to edit title"
-        >
-          {note.title}
+      <div className="flex min-w-0 flex-col bg-transparent py-1 flex-1">
+        <div className="flex items-center gap-1 overflow-hidden">
+          <div 
+            className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium leading-[18px] text-slate-700 cursor-pointer hover:text-blue-600 transition-colors flex-1"
+            onClick={handleTitleClick}
+            title="Click to open note"
+          >
+            {note.title}
+          </div>
+          {onTitleEdit && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleEdit}
+              className={`h-4 w-4 p-0 text-slate-400 hover:text-slate-600 transition-all duration-200 ${
+                isHovered ? 'opacity-100' : 'opacity-0'
+              }`}
+              title="Edit title"
+            >
+              <Edit3 className="h-3 w-3" />
+            </Button>
+          )}
         </div>
         <div className="whitespace-nowrap text-xs leading-4 text-slate-500">
           {truncateContent(note.content)}
@@ -257,6 +284,7 @@ export function NotesCryptoTable({
   onRowClick,
   onToggleStar,
   onTitleEdit,
+  onTitleClick,
   className = ""
 }: NotesCryptoTableProps) {
   const handleRowClick = (note: NoteCryptoData) => {
@@ -305,13 +333,13 @@ export function NotesCryptoTable({
                 key={note.id}
                 onClick={() => handleRowClick(note)}
                 className={cn(
-                  "cursor-pointer border-t border-gray-200 hover:bg-gray-100",
+                  "cursor-pointer border-t border-gray-200 hover:bg-gray-100 h-[50px] max-h-[50px]",
                   selectedNotes?.has(note.id) && "bg-blue-50"
                 )}
               >
                 {/* Note Info Cell */}
                 <td className="overflow-hidden text-ellipsis whitespace-nowrap border-r border-gray-200 p-1">
-                  <EditableTitleCell note={note} onTitleEdit={onTitleEdit} />
+                  <EditableTitleCell note={note} onTitleEdit={onTitleEdit} onTitleClick={onTitleClick} />
                 </td>
                 
                 {/* Note Type */}
@@ -388,6 +416,18 @@ export function NotesCryptoTable({
                     </Button>
                   </div>
                 </td>
+              </tr>
+            ))}
+            
+            {/* Add placeholder rows to ensure proper row height distribution */}
+            {Array.from({ length: Math.max(0, 10 - data.length) }, (_, index) => (
+              <tr key={`placeholder-${index}`} className="border-t border-gray-200 h-[50px] max-h-[50px]">
+                <td className="border-r border-gray-200 p-1">&nbsp;</td>
+                <td className="border border-gray-200 bg-gray-100/30">&nbsp;</td>
+                <td className="border border-gray-200">&nbsp;</td>
+                <td className="border border-gray-200">&nbsp;</td>
+                <td className="border border-gray-200">&nbsp;</td>
+                <td className="border-l border-t border-gray-200">&nbsp;</td>
               </tr>
             ))}
           </tbody>

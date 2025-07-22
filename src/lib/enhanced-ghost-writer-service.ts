@@ -733,7 +733,11 @@ FINAL REMINDER: Your response must be PURE JSON starting with { and ending with 
   /**
    * Save ideas to the ghost writer library
    */
-  static async saveIdeasToLibrary(userId: string, ideas: EnhancedContentIdea[], saveSource: string = "auto_archive"): Promise<void> {
+  static async saveIdeasToLibrary(
+    userId: string,
+    ideas: EnhancedContentIdea[],
+    saveSource: string = "auto_archive",
+  ): Promise<void> {
     if (ideas.length === 0) return;
 
     console.log(`📚 [EnhancedGhostWriter] Saving ${ideas.length} ideas to library for user: ${userId}`);
@@ -761,10 +765,10 @@ FINAL REMINDER: Your response must be PURE JSON starting with { and ending with 
         savedFrom: saveSource, // Track how this was saved
         // Preserve usage tracking data
         generatedScripts: (idea as any).generatedScripts || [],
-        lastUsedAt: (idea as any).lastUsedAt,
-        lastViewAt: (idea as any).lastViewAt,
-        lastSaveAt: (idea as any).lastSaveAt,
-        lastDismissAt: (idea as any).lastDismissAt,
+        ...((idea as any).lastUsedAt && { lastUsedAt: (idea as any).lastUsedAt }),
+        ...((idea as any).lastViewAt && { lastViewAt: (idea as any).lastViewAt }),
+        ...((idea as any).lastSaveAt && { lastSaveAt: (idea as any).lastSaveAt }),
+        ...((idea as any).lastDismissAt && { lastDismissAt: (idea as any).lastDismissAt }),
         savedToLibraryAt: new Date().toISOString(),
       };
 

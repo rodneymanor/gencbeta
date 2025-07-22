@@ -2,7 +2,7 @@ import { GeminiResponse } from "./types";
 
 export class GeminiClient {
   private static readonly API_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models";
-  private static readonly DEFAULT_MODEL = "gemini-2.0-flash";
+  private static readonly DEFAULT_MODEL = "gemini-1.5-flash";
   private static readonly REQUEST_TIMEOUT = 30000; // 30 seconds
   private static readonly RATE_LIMIT_DELAY = 500; // 500ms between requests
 

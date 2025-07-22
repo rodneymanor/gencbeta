@@ -48,7 +48,7 @@ export const sidebarItems: NavGroup[] = [
         subItems: [
           { title: "Dashboard", url: "/dashboard", icon: HomeIcon },
           { title: "Scripts", url: "/dashboard/scripts", icon: FileText },
-          { title: "Notes", url: "/dashboard/capture/notes", icon: Pen },
+          { title: "Notes", url: "/dashboard/notes/", icon: Pen },
           { title: "Voices", url: "/dashboard/voices", icon: Mic },
           { title: "My Brand", url: "/dashboard/my-brand", icon: Sparkles },
           { title: "Creators", url: "/dashboard/creators", icon: Users },

@@ -152,7 +152,7 @@ export function useDynamicSidebarSections(): NavigationSection[] {
         {
           id: "all-notes",
           title: "View All Notes",
-          href: "/dashboard/capture/notes",
+          href: "/dashboard/notes",
           icon: sampleIcons.palette,
         },
       ],

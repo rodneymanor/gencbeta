@@ -57,7 +57,7 @@ async function analyzeScriptComponents(transcript: string): Promise<ScriptCompon
     console.log("🤖 [SCRIPT_ANALYSIS] Analyzing script components with AI...");
 
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-1.5-flash-exp",
       safetySettings: [
         {
           category: "HARM_CATEGORY_HARASSMENT",

@@ -4,6 +4,16 @@ import { db } from "./firebase";
 import { type UserProfile } from "./user-management";
 
 /**
+ * Helper function to ensure db is available
+ */
+function getDb() {
+  if (!db) {
+    throw new Error("Firebase is not initialized. Please check your configuration.");
+  }
+  return db;
+}
+
+/**
  * Format timestamp helper
  */
 export function formatTimestamp(timestamp: unknown): string {
@@ -26,7 +36,7 @@ export function formatTimestamp(timestamp: unknown): string {
 export async function getAllCoaches(): Promise<UserProfile[]> {
   try {
     // Use simple query to avoid composite index requirement
-    const q = query(collection(db, "user_profiles"), where("role", "==", "coach"), where("isActive", "==", true));
+    const q = query(collection(getDb(), "user_profiles"), where("role", "==", "coach"), where("isActive", "==", true));
 
     const querySnapshot = await getDocs(q);
     const coaches = querySnapshot.docs.map((doc) => ({
@@ -52,7 +62,7 @@ export async function getCoachCreators(coachId: string): Promise<UserProfile[]> 
   try {
     // Use simple query to avoid composite index requirement
     const q = query(
-      collection(db, "user_profiles"),
+      collection(getDb(), "user_profiles"),
       where("role", "==", "creator"),
       where("coachId", "==", coachId),
       where("isActive", "==", true),
@@ -81,7 +91,7 @@ export async function getCoachCreators(coachId: string): Promise<UserProfile[]> 
 export async function getAllUsers(): Promise<UserProfile[]> {
   try {
     // Use simple query to avoid composite index requirement
-    const q = query(collection(db, "user_profiles"), where("isActive", "==", true));
+    const q = query(collection(getDb(), "user_profiles"), where("isActive", "==", true));
 
     const querySnapshot = await getDocs(q);
     const users = querySnapshot.docs.map((doc) => ({

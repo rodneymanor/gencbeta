@@ -40,13 +40,26 @@ export class ScriptWrapper extends BaseGenerator {
       type: input.type,
       tone: input.tone,
       platform: "general" as const,
-      ideaContext: input.context?.notes,
-      ideaContextMode: input.context?.referenceMode,
+      ideaContext:
+        input.context?.referenceMode && input.context?.notes
+          ? {
+              selectedNotes: [
+                {
+                  id: "enriched-context",
+                  title: "Context Notes",
+                  content: input.context.notes,
+                  tags: [],
+                },
+              ],
+              contextMode: input.context.referenceMode,
+            }
+          : undefined,
+      userId: context.userId,
     };
 
     try {
       // Use existing service
-      const result = await this.scriptService.generateScript(oldFormatInput, context.userId);
+      const result = await this.scriptService.generateScript(oldFormatInput);
 
       if (!result.success) {
         throw new Error(result.error || "Script generation failed");

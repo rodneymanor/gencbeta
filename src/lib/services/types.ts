@@ -8,7 +8,7 @@
 // =============================================================================
 
 export const GEMINI_MODELS = {
-  FLASH: "gemini-2.0-flash",
+  FLASH: "gemini-1.5-flash",
   PRO: "gemini-1.5-pro",
   FLASH_8B: "gemini-1.5-flash-8b",
 } as const;

@@ -63,7 +63,7 @@ ${text}`;
 
     const response = await generateContent({
       prompt,
-      model: "gemini-2.0-flash",
+      model: "gemini-1.5-flash",
       temperature: 0.3,
       maxTokens: 1000,
     });

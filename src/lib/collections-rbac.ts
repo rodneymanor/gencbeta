@@ -1,6 +1,9 @@
 import { collection, query, where, orderBy, getDocs, limit, startAfter, DocumentSnapshot } from "firebase/firestore";
 
 import { type Collection, type Video } from "./collections";
+
+// Re-export types for external use
+export type { Video, Collection } from "./collections";
 import { formatTimestamp } from "./collections-helpers";
 import { db } from "./firebase";
 import { UserManagementService } from "./user-management";

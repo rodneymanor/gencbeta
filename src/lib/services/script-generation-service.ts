@@ -247,7 +247,7 @@ export class ScriptGenerationService {
         elements: parsedElements,
         metadata: {
           promptId,
-          model: "gemini-2.0-flash", // Default from service
+          model: "gemini-1.5-flash", // Default from service
           tokensUsed: result.tokensUsed,
           responseTime: result.responseTime,
           targetWords: variables.targetWords,
