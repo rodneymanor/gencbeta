@@ -1,9 +1,8 @@
 "use client";
 
-import { BlockNoteEditor } from "@blocknote/core";
-import { filterSuggestionItems } from "@blocknote/core";
+import { BlockNoteEditor, filterSuggestionItems } from "@blocknote/core";
 import { getDefaultReactSlashMenuItems, SuggestionMenuController } from "@blocknote/react";
-import { Zap, ArrowRight, Lightbulb, Target, Video, Play } from "lucide-react";
+import { Zap, ArrowRight, Lightbulb, Target, Video } from "lucide-react";
 
 // Create custom slash menu items for our blocks
 export const createCustomSlashMenuItems = (editor: BlockNoteEditor<any, any, any>) => [
